@@ -2,7 +2,7 @@
 % Please edit documentation in R/resample_mnirs.R
 \name{resample_mnirs}
 \alias{resample_mnirs}
-\title{Re-sample a Data Frame}
+\title{Re-sample a data frame}
 \usage{
 resample_mnirs(
   data,

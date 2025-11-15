@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.mnirs.R
 \name{palette_mnirs}
 \alias{palette_mnirs}
-\title{Custom mNIRS colour palette}
+\title{Custom \emph{{mnirs}} colour palette}
 \usage{
 palette_mnirs(n = NULL)
 }
@@ -14,7 +14,7 @@ number in order of colours to return.}
 Named or unnamed character vector of hex colours.
 }
 \description{
-Custom mNIRS colour palette
+Custom \emph{{mnirs}} colour palette
 }
 \examples{
 \dontrun{

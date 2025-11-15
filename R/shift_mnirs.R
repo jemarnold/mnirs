@@ -1,4 +1,4 @@
-#' Shift Data Range
+#' Shift data range
 #'
 #' Move the range of data channels in a data frame up or down, while preserving
 #' the absolute amplitude/dynamic range of each channel, and the relative

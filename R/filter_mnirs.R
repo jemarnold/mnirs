@@ -1,6 +1,7 @@
-#' Filter Data
+#' Filter a data frame
 #'
-#' Apply signal filtering to vector data with either:
+#' Apply digital filtering/smoothing to numeric vector data within a data frame
+#' using either:
 #'   1. A cubic smoothing spline.
 #'   2. A Butterworth digital filter.
 #'   3. A simple moving average.
@@ -371,7 +372,7 @@ filter_mnirs.moving_average <- function(
 
 
 
-#' Apply a Moving Average Filter
+#' Apply a moving average filter
 #'
 #' Apply a simple moving average smoothing filter to vector data
 #'
@@ -436,7 +437,7 @@ filter_moving_average <- function(
 
 
 
-#' Apply a Butterworth Digital Filter
+#' Apply a Butterworth digital filter
 #'
 #' Apply a Butterworth digital filter to vector data with [signal::butter()]
 #' and [signal::filtfilt()] which handles 'edges' better at the start and end

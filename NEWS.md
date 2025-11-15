@@ -2,7 +2,8 @@
 
 * Fix formatting error in README.Rmd.
 * Remove obsolete code in `resample_mnirs.R`.
-* Add some missing `test_that()` for `replace_mnirs()` and `resample_mnirs()`.
+* Add missing tests for `replace_mnirs()`, `resample_mnirs()`, and `plot.mnirs()`.
+* Update documentation formatting and examples.
 
 # mnirs 0.1.0 initial release
 

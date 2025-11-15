@@ -5,7 +5,7 @@
 \alias{filter_mnirs.smooth_spline}
 \alias{filter_mnirs.butterworth}
 \alias{filter_mnirs.moving_average}
-\title{Filter Data}
+\title{Filter a data frame}
 \usage{
 \method{filter_mnirs}{smooth_spline}(
   data,
@@ -132,7 +132,8 @@ A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
 available with \code{attributes()}.
 }
 \description{
-Apply signal filtering to vector data with either:
+Apply digital filtering/smoothing to numeric vector data within a data frame
+using either:
 \enumerate{
 \item A cubic smoothing spline.
 \item A Butterworth digital filter.

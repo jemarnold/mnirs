@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_mnirs.R
 \name{filter_moving_average}
 \alias{filter_moving_average}
-\title{Apply a Moving Average Filter}
+\title{Apply a moving average filter}
 \usage{
 filter_moving_average(
   x,

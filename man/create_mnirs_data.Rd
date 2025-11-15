@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_mnirs.R
 \name{create_mnirs_data}
 \alias{create_mnirs_data}
-\title{Create an mNIRS data frame with Metadata}
+\title{Create an \emph{{mnirs}} data frame with metadata}
 \usage{
 create_mnirs_data(data, ...)
 }

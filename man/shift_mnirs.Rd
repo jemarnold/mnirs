@@ -2,7 +2,7 @@
 % Please edit documentation in R/shift_mnirs.R
 \name{shift_mnirs}
 \alias{shift_mnirs}
-\title{Shift Data Range}
+\title{Shift data range}
 \usage{
 shift_mnirs(
   data,

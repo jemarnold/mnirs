@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.mnirs.R
 \name{theme_mnirs}
 \alias{theme_mnirs}
-\title{Custom mNIRS ggplot2 theme}
+\title{Custom \emph{{mnirs}} ggplot2 theme}
 \usage{
 theme_mnirs(
   base_size = 14,

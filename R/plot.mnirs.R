@@ -1,4 +1,4 @@
-#' Plot mnirs objects
+#' Plot *{mnirs}* objects
 #'
 #' Create a simple plot for objects returned from [create_mnirs_data()].
 #'
@@ -19,7 +19,8 @@
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
 #' @examples
-#' ## call an example mNIRS data file
+#' \dontrun{
+#' ## call an example *{mnirs}* data file
 #' file_path <- example_mnirs("moxy_ramp")
 #'
 #' data_table <- read_mnirs(
@@ -32,6 +33,7 @@
 #'
 #' ## note the hidden plot option to display time values as `hh:mm:ss`
 #' plot(data_table, label_time = TRUE)
+#' }
 #'
 #' @export
 plot.mnirs <- function(x, ...) {
@@ -124,7 +126,7 @@ plot.mnirs <- function(x, ...) {
 
 
 
-#' Custom mNIRS ggplot2 theme
+#' Custom *{mnirs}* ggplot2 theme
 #'
 #' A `[ggplot2][ggplot2::ggplot2-package]` theme for display.
 #'
@@ -232,7 +234,7 @@ theme_mnirs <- function(
 
 
 
-#' Custom mNIRS colour palette
+#' Custom *{mnirs}* colour palette
 #'
 #' @param n A character or numeric vector specifying either the name or the
 #'   number in order of colours to return.
@@ -282,7 +284,7 @@ palette_mnirs <- function(n = NULL) {
 
 
 
-#' Scales for custom mNIRS palette
+#' Scales for custom *{mnirs}* palette
 #'
 #' @param ... Arguments passed to `ggplot2::discrete_scale()`.
 #' @param aesthetics A character vector with aesthetic(s) passed to
@@ -343,7 +345,7 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 
 
 
-#' Breaks for Timespan Data
+#' Breaks for timespan data
 #'
 #' Pretty timespan breaks for plotting in units of 5, 15, 30, 60 sec, etc.
 #' Modified from [scales::breaks_timespan()].
@@ -417,7 +419,7 @@ breaks_timespan <- function(
 
 
 
-#' Format Timespan Data as h:mm:ss
+#' Format timespan data as h:mm:ss
 #'
 #' Convert numeric timespan data to `h:mm:ss` format for pretty plotting.
 #' Inspired by [ggplot2::scale_x_time()].

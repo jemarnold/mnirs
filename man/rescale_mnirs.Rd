@@ -2,7 +2,7 @@
 % Please edit documentation in R/rescale_mnirs.R
 \name{rescale_mnirs}
 \alias{rescale_mnirs}
-\title{Re-scale Data Range}
+\title{Re-scale data range}
 \usage{
 rescale_mnirs(data, nirs_channels = list(), range, verbose = TRUE)
 }

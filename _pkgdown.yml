@@ -1,7 +1,7 @@
 url: https://jemarnold.github.io/mnirs/
 template:
   bootstrap: 5
-  light-switch: true
+  light-switch: false
   opengraph:
     twitter:
       creator: '@jem_arnold'
@@ -47,6 +47,7 @@ reference:
   contents:
   - starts_with("replace")
   - resample_mnirs
+  - filter_mnirs
   - starts_with("filter")
   - shift_mnirs
   - rescale_mnirs

@@ -2,7 +2,7 @@
 % Please edit documentation in R/filter_mnirs.R
 \name{filter_butter}
 \alias{filter_butter}
-\title{Apply a Butterworth Digital Filter}
+\title{Apply a Butterworth digital filter}
 \usage{
 filter_butter(
   x,

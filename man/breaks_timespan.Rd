@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.mnirs.R
 \name{breaks_timespan}
 \alias{breaks_timespan}
-\title{Breaks for Timespan Data}
+\title{Breaks for timespan data}
 \usage{
 breaks_timespan(unit = c("secs", "mins", "hours", "days", "weeks"), n = 5)
 }

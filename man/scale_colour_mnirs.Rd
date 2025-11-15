@@ -4,7 +4,7 @@
 \alias{scale_colour_mnirs}
 \alias{scale_color_mnirs}
 \alias{scale_fill_mnirs}
-\title{Scales for custom mNIRS palette}
+\title{Scales for custom \emph{{mnirs}} palette}
 \usage{
 scale_colour_mnirs(..., aesthetics = "colour")
 
@@ -22,7 +22,7 @@ scale_fill_mnirs(..., aesthetics = "fill")
 A \link[ggplot2:ggplot]{ggplot2} scale object.
 }
 \description{
-Scales for custom mNIRS palette
+Scales for custom \emph{{mnirs}} palette
 }
 \examples{
 \dontrun{

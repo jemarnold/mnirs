@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_mnirs.R
 \name{read_mnirs}
 \alias{read_mnirs}
-\title{Read mNIRS Data From File}
+\title{Read \emph{{mnirs}} data from file}
 \usage{
 read_mnirs(
   file_path,

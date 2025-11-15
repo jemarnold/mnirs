@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.mnirs.R
 \name{format_hmmss}
 \alias{format_hmmss}
-\title{Format Timespan Data as h:mm:ss}
+\title{Format timespan data as h:mm:ss}
 \usage{
 format_hmmss(x)
 }

@@ -1,4 +1,4 @@
-#' Read mNIRS Data From File
+#' Read *{mnirs}* data from file
 #'
 #' Read files exported from most commercially available mNIRS devices and
 #' return a data frame of class *"mnirs"* with recorded time series data
@@ -207,7 +207,7 @@ read_mnirs <- function(
 
 
 
-#' Create an mNIRS data frame with Metadata
+#' Create an *{mnirs}* data frame with metadata
 #'
 #' Manually add class *"mnirs"* and metadata to an existing data frame.
 #'

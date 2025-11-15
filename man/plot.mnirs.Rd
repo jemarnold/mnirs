@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.mnirs.R
 \name{plot.mnirs}
 \alias{plot.mnirs}
-\title{Plot mnirs objects}
+\title{Plot \emph{{mnirs}} objects}
 \usage{
 \method{plot}{mnirs}(x, ...)
 }
@@ -29,7 +29,8 @@ A \link[ggplot2:ggplot]{ggplot2} object.
 Create a simple plot for objects returned from \code{\link[=create_mnirs_data]{create_mnirs_data()}}.
 }
 \examples{
-## call an example mNIRS data file
+\dontrun{
+## call an example *{mnirs}* data file
 file_path <- example_mnirs("moxy_ramp")
 
 data_table <- read_mnirs(
@@ -42,5 +43,6 @@ data_table <- read_mnirs(
 
 ## note the hidden plot option to display time values as `hh:mm:ss`
 plot(data_table, label_time = TRUE)
+}
 
 }
