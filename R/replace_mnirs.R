@@ -141,7 +141,7 @@ replace_mnirs <- function(
             ))
         }
 
-        return(data) ## TODO verify has metadata
+        return(data)
     }
 
     time_channel <- validate_time_channel(data, time_channel)
@@ -325,15 +325,6 @@ replace_outliers <- function(
     }
     method <- match.arg(method) == "median" ## into logical
 
-    ## handle NAs ==================================================
-    ## TODO obsolete functionality?
-    handle_na <- FALSE #any(is.na(x))
-    if (handle_na) {
-        na_info <- preserve_na(x)
-        x <- na_info$x_valid
-        t <- t[!na_info$na_idx]
-    }
-
     ## process =====================================================
     window_idx <- compute_local_windows(
         t, width = width, span = span, verbose = verbose
@@ -348,12 +339,7 @@ replace_outliers <- function(
     } else {
         NA_real_
     }
-    ## return y to original x length with NAs if handled
-    if (handle_na) {
-        return(restore_na(y, na_info))
-    } else {
-        return(y)
-    }
+    return(y)
 }
 
 
@@ -406,11 +392,6 @@ replace_missing <- function(
             same length."
         )
     }
-    ## passthrough if no `NA`
-    ## TODO can't use this if want to use for resampling with no NAs?
-    # if (!any(is.na(x))) {
-    #     return(x)
-    # }
     method <- match.arg(method)
     if (method == "locf") {
         method <- "constant" ## swap for approx method arg

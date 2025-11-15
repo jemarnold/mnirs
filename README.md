@@ -58,17 +58,13 @@ library(mnirs)
 
 ## {mnirs} includes sample files from a few mNIRS devices
 example_mnirs()
-
-     [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
-
-     [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
+#> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
+#> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
 
 ## partial matching will error if matches multiple
 try(example_mnirs("moxy"))
-
-     Error in example_mnirs("moxy") : ✖ Multiple files match "moxy":
-
-     ℹ Matching files: "moxy_intervals.csv" and "moxy_ramp.xlsx"
+#> Error in example_mnirs("moxy") : ✖ Multiple files match "moxy":
+#> ℹ Matching files: "moxy_intervals.csv" and "moxy_ramp.xlsx"
 
 ## call an example mNIRS data file
 file_path <- example_mnirs("moxy_ramp") 
@@ -87,49 +83,30 @@ data_table <- read_mnirs(
     keep_all = FALSE,                    ## return only the specified data channels
     verbose = TRUE                       ## show warnings & messages
 )
-
-     ! Estimated `sample_rate` = 2 Hz.
-
-     ℹ Overwrite this with `sample_rate` = <numeric>.
-
-     Warning: ! `time_channel` has duplicated or irregular samples. Consider re-sampling with
-
-       `mnirs::resample_mnirs()`.
-
-     ℹ Investigate at `time` = 211.99, 211.99, and 1184.
+#> ! Estimated `sample_rate` = 2 Hz.
+#> ℹ Overwrite this with `sample_rate` = <numeric>.
+#> Warning: ! `time_channel` has duplicated or irregular samples. Consider re-sampling with
+#>   `mnirs::resample_mnirs()`.
+#> ℹ Investigate at `time` = 211.99, 211.99, and 1184.
 
 ## ignore the warning about repeated samples for now ☝
 ## Note that sample_rate was estimated correctly at 2 Hz
 
 data_table
-
-     # A tibble: 2,203 × 3
-
-         time smo2_right smo2_left
-
-        <dbl>      <dbl>     <dbl>
-
-      1  0            54        68
-
-      2  0.4          54        68
-
-      3  0.96         54        68
-
-      4  1.51         54        66
-
-      5  2.06         54        66
-
-      6  2.61         54        66
-
-      7  3.16         54        66
-
-      8  3.71         57        67
-
-      9  4.26         57        67
-
-     10  4.81         57        67
-
-     # ℹ 2,193 more rows
+#> # A tibble: 2,203 × 3
+#>     time smo2_right smo2_left
+#>    <dbl>      <dbl>     <dbl>
+#>  1  0            54        68
+#>  2  0.4          54        68
+#>  3  0.96         54        68
+#>  4  1.51         54        66
+#>  5  2.06         54        66
+#>  6  2.61         54        66
+#>  7  3.16         54        66
+#>  8  3.71         57        67
+#>  9  4.26         57        67
+#> 10  4.81         57        67
+#> # ℹ 2,193 more rows
 
 ## note the hidden plot option to display timestamp values as `hh:mm:ss`
 plot(data_table, label_time = TRUE)
@@ -142,54 +119,35 @@ plot(data_table, label_time = TRUE)
 ``` r
 ## view metadata, omitting item two (a list of row numbers)
 attributes(data_table)[-2]
-
-     $class
-
-     [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
-
-     
-
-     $names
-
-     [1] "time"       "smo2_right" "smo2_left" 
-
-     
-
-     $nirs_channels
-
-     [1] "smo2_right" "smo2_left" 
-
-     
-
-     $time_channel
-
-     [1] "time"
-
-     
-
-     $sample_rate
-
-     [1] 2
-
-     
-
-     $verbose
-
-     [1] TRUE
+#> $class
+#> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
+#> 
+#> $names
+#> [1] "time"       "smo2_right" "smo2_left" 
+#> 
+#> $nirs_channels
+#> [1] "smo2_right" "smo2_left" 
+#> 
+#> $time_channel
+#> [1] "time"
+#> 
+#> $sample_rate
+#> [1] 2
+#> 
+#> $verbose
+#> [1] TRUE
 
 ## define nirs_channels externally for later use
 nirs_channels <- attr(data_table, "nirs_channels")
 nirs_channels
-
-     [1] "smo2_right" "smo2_left"
+#> [1] "smo2_right" "smo2_left"
 
 ## add nirs device to metadata
 data_table <- create_mnirs_data(data_table, nirs_device = "Moxy")
 
 ## check that the added metadata is now present
 attr(data_table, "nirs_device")
-
-     [1] "Moxy"
+#> [1] "Moxy"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
@@ -221,39 +179,24 @@ data_resampled <- resample_mnirs(
     method = "linear",            ## default linear interpolation across any new samples
     verbose = TRUE                ## will confirm the output sample rate
 )
-
-     ℹ Output is resampled at 2 Hz.
+#> ℹ Output is resampled at 2 Hz.
 
 ## note the altered "time" values 👇
 data_resampled
-
-     # A tibble: 2,419 × 3
-
-         time smo2_right smo2_left
-
-        <dbl>      <dbl>     <dbl>
-
-      1   0         54        68  
-
-      2   0.5       54        68  
-
-      3   1         54        67.9
-
-      4   1.5       54        66.0
-
-      5   2         54        66  
-
-      6   2.5       54        66  
-
-      7   3         54        66  
-
-      8   3.5       55.9      66.6
-
-      9   4         57        67  
-
-     10   4.5       57        67  
-
-     # ℹ 2,409 more rows
+#> # A tibble: 2,419 × 3
+#>     time smo2_right smo2_left
+#>    <dbl>      <dbl>     <dbl>
+#>  1   0         54        68  
+#>  2   0.5       54        68  
+#>  3   1         54        67.9
+#>  4   1.5       54        66.0
+#>  5   2         54        66  
+#>  6   2.5       54        66  
+#>  7   3         54        66  
+#>  8   3.5       55.9      66.6
+#>  9   4         57        67  
+#> 10   4.5       57        67  
+#> # ℹ 2,409 more rows
 ```
 
 ### `filter_mnirs()`: Digital filtering
@@ -289,21 +232,15 @@ plot(data_filtered, label_time = TRUE) +
 ``` r
 ## our default *mnirs* nirs_channel will be grouped together
 nirs_channels
-
-     [1] "smo2_right" "smo2_left"
+#> [1] "smo2_right" "smo2_left"
 
 ## to shift each nirs_channel separately, the channels should be un-grouped
 as.list(nirs_channels)
-
-     [[1]]
-
-     [1] "smo2_right"
-
-     
-
-     [[2]]
-
-     [1] "smo2_left"
+#> [[1]]
+#> [1] "smo2_right"
+#> 
+#> [[2]]
+#> [1] "smo2_left"
 
 data_shifted <- shift_mnirs(
     data_filtered,
@@ -337,23 +274,16 @@ plot(data_rescaled, label_time = TRUE) +
 ``` r
 ## un-group `nirs_channels` to shift each channel separately
 as.list(nirs_channels)
-
-     [[1]]
-
-     [1] "smo2_right"
-
-     
-
-     [[2]]
-
-     [1] "smo2_left"
+#> [[1]]
+#> [1] "smo2_right"
+#> 
+#> [[2]]
+#> [1] "smo2_left"
 
 ## then group `nirs_channels` to rescale together 
 list(nirs_channels)
-
-     [[1]]
-
-     [1] "smo2_right" "smo2_left"
+#> [[1]]
+#> [1] "smo2_right" "smo2_left"
 
 ## pipe (base R `|>` or {magrittr} `%>%`) from one function to the next
 data_rescaled <- data_filtered |> 

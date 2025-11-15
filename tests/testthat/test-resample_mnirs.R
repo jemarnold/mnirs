@@ -80,6 +80,47 @@ test_that("resample_mnirs handles resample_rate == sample_rate", {
     expect_equal(result$value, data$value)
 })
 
+test_that("resample_mnirs handles resample_time", {
+    data <- data.frame(time = 1:3, value = seq(10, 30, 10))
+    result <- resample_mnirs(
+        data,
+        time_channel = "time",
+        sample_rate = 1,
+        resample_rate = NULL,
+        resample_time = 0.5,
+        verbose = FALSE
+    )
+    expect_setequal(result$time, seq(1, 3, 0.5))
+    expect_setequal(result$value, seq(10, 30, 5))
+
+    expect_warning(
+        result <- resample_mnirs(
+            data,
+            time_channel = "time",
+            sample_rate = 1,
+            resample_rate = 3,
+            resample_time = 0.5,
+            verbose = TRUE
+        ),
+        "not both"
+    ) |>
+        expect_message("resampled at.*3")
+
+    expect_setequal(result$time, seq(1, 3, 1/3))
+    expect_setequal(round(result$value, 4), round(seq(10, 30, 10/3), 4))
+
+    ## explicit is.null(c(resample_rate, resample_time))
+    result <- resample_mnirs(
+        data,
+        time_channel = "time",
+        sample_rate = 1,
+        resample_rate = NULL,
+        resample_time = NULL,
+        verbose = FALSE
+    )
+    expect_equal(result, data, ignore_attr = TRUE)
+})
+
 test_that("resample_mnirs handles repeated samples", {
     data <- data.frame(
         time = c(1:2, 2, 3:9, 9, 10:17, 17, 18:21)/10+0.1,

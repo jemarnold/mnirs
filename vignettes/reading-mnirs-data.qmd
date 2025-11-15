@@ -32,13 +32,11 @@ In this vignette we will demonstrate how to:
 
 * 🔍 Retrieve metadata stored with data frames of class *`"mnirs"`*.
 
-* 🧹 Detect and replace local outliers and invalid values.
+* 🧹 Detect and replace local outliers, invalid values, and interpolate across missing data.
 
 * ⏱️ Re-sample (up- or down-sample) to match the sample rate of other recording devices.
 
-* 📈 Interpolate and fill across missing data.
-
-* 〰️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.
+* 📈️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.
 
 * ⚖️ Shift and rescale across multiple NIRS channels, to normalise signal dynamic range with absolute or relative scaling between muscle sites and NIRS channels.
 
@@ -48,7 +46,7 @@ In this vignette we will demonstrate how to:
 *`mnirs`* is designed to process mNIRS data, but there is no reason why it can't be used to read, clean, and filter other time series datasets, which require many of the same processing steps. Enjoy!
 :::
 
-# Read Data From File
+# 📂 Read Data From File
 
 We will read an example data file with two NIRS channels from an incremental ramp cycling assessment recorded with *Moxy* muscle oxygen monitor.
 
@@ -153,7 +151,7 @@ data_table
 ```
 
 
-# Plot *`mnirs`* data
+# 📊 Plot *`mnirs`* data
 
 *`mnirs`* data can be easily visualised by calling `plot()`. This generic plot function uses the package `{ggplot2}` and will work on data frames generated or read by *`mnirs`* functions where the metadata contain `class = "mnirs"`.
 
@@ -165,7 +163,7 @@ plot(data_table, label_time = TRUE)
 *`mnirs`* includes a custom `{ggplot2}` theme and colour palette available with `theme_mnirs()` and `palette_mnirs()`. See those documentation references for more details.
 
 
-# Metadata stored in `mnirs` data frames
+# 🔍 Metadata stored in `mnirs` data frames
 
 Data frames generated or read by *`mnirs`* functions will return `class = "mnirs"` and contain metadata, which can be retrieved with `attributes(data)`. 
 
@@ -196,7 +194,7 @@ attr(data_table, "nirs_device")
 ```
 
 
-# Replace local outliers, invalid values, and missing values
+# 🧹 Replace local outliers, invalid values, and missing values
 
 We can see some data issues in the plot above, so let's clean those with a single data wrangling function `replace_mnirs()`, to prepare it for digital filtering and smoothing.
 
@@ -259,7 +257,7 @@ plot(data_cleaned, label_time = TRUE)
 That cleaned up all the obvious data issues.
 
 
-# Resample Data
+# ⏱️ Resample Data
 
 Say we have NIRS data recorded at 25 Hz, but we are only interested in exercise responses over a time span of 5-minutes, and our other heart rate data are only recorded at 1 Hz anyway. It may be easier and faster to work with our NIRS data down-sampled from 25 to 1 Hz.
 
@@ -306,7 +304,7 @@ If you are getting a warning from `read_mnirs()` about duplicated or irregular s
 :::
 
 
-# Digital Filtering
+# 📈 Digital Filtering
 
 If we want to improve our signal-to-noise ratio in our dataset without losing information, we should apply digital filtering to smooth the data.
 
@@ -413,7 +411,7 @@ plot(data_filtered, label_time = TRUE) +
 ```
 
 
-# Shift and Rescale Data
+# ⚖️ Shift and Rescale Data
 
 NIRS values are not measured on an absolute scale (even saturation %). Therefore, we may need to adjust or calibrate our data to normalise NIRS signal values between muscle sites, individuals, trials, etc. 
 
@@ -553,7 +551,7 @@ plot(data_rescaled, label_time = TRUE) +
 Our interpretation might now be that assuming the same starting baseline condition in both tissues, *smo2_right* deoxygenates less during exercise and recovers faster to a greater hyperaemic reperfusion, compared to *smo2_left*.
 
 
-# Signal Preparation
+# ✅ Signal Preparation
 
 After the NIRS signal has been cleaned and filtered, it should be ready for further processing and analysis. 
 

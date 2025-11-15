@@ -193,6 +193,6 @@ test_that("plot.mnirs moxy.perfpro works", {
         verbose = FALSE)
 
     ## visual check
-    plot <- plot(df)
+    plot <- plot(df, na.omit = TRUE, label_time = TRUE, n = 8)
     expect_s3_class(plot, "ggplot")
 })

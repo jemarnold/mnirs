@@ -185,6 +185,13 @@ test_that("replace_outliers() validates inputs correctly", {
     expect_error(replace_outliers(x, span = 3), "x.*?numeric") ## x is all NA
 })
 
+test_that("replace_outliers() errors when x and t have different lengths", {
+    expect_error(
+        replace_outliers(c(1, 2, 3), t = c(1, 2), outlier_cutoff = 3, span = 1),
+        "same length"
+    )
+})
+
 ## replace_invalid() ==================================================
 test_that("replace_invalid() returns expected structure", {
     x <- c(1, 999, 3, 4, 999, 6)
@@ -468,7 +475,103 @@ test_that("replace_missing() handles all NAs", {
 
 
 ## replace_mnirs() =================================================
-## TODO add systematic tests
+test_that("replace_mnirs outlier removal skipped when outlier_cutoff = NULL", {
+    data <- data.frame(
+        time = 1:5,
+        ch1 = c(50, 51, 200, 53, 54)
+    )
+    class(data) <- c("mnirs", "data.frame")
+    attr(data, "nirs_channels") <- "ch1"
+    attr(data, "time_channel") <- "time"
+
+    ## Store original to verify no outlier processing occurred
+    original_ch1 <- data$ch1
+
+    result <- replace_mnirs(
+        data,
+        outlier_cutoff = NULL,
+        invalid_values = c(999),
+        method = "NA",
+        verbose = FALSE
+    )
+
+    ## Data should be unchanged except for invalid value processing
+    expect_equal(result$ch1, original_ch1)
+})
+
+test_that("replace_mnirs outlier removal processes when outlier_cutoff provided", {
+    data <- data.frame(
+        time = 1:10,
+        ch1 = c(50, 51, 52, 200, 54, 55, 56, 57, 58, 59),
+        ch2 = c(60, 61, 62, 63, 64, 65, 250, 67, 68, 69)
+    )
+    class(data) <- c("mnirs", "data.frame")
+    attr(data, "nirs_channels") <- c("ch1", "ch2")
+    attr(data, "time_channel") <- "time"
+
+    result <- replace_mnirs(
+        data,
+        outlier_cutoff = 3,
+        width = 5,
+        method = "NA",
+        verbose = FALSE
+    )
+
+    ## Outlier (200) should be replaced with NA
+    expect_true(is.na(result$ch1[4]))
+    expect_equal(result$ch1[-4], data$ch1[-4])
+    expect_true(is.na(result$ch2[7]))
+    expect_equal(result$ch2[-7], data$ch2[-7])
+})
+
+test_that("replace_mnirs do nothing condition throws error appropriately", {
+    data <- data.frame(
+        time = 1:5,
+        ch1 = 50:54
+    )
+    class(data) <- c("mnirs", "data.frame")
+    attr(data, "nirs_channels") <- "ch1"
+    attr(data, "time_channel") <- "time"
+
+    expect_error(
+        replace_mnirs(
+            data,
+            invalid_values = NULL,
+            width = NULL,
+            span = NULL,
+            method = "NA",
+            verbose = FALSE
+        ),
+        "must be defined"
+    )
+})
+
+test_that("replace_mnirs passthrough returns early when no NAs and no processing", {
+    data <- read_mnirs(
+        file_path = example_mnirs("moxy_ramp"),
+        nirs_channels = c(smo2 = "SmO2 Live(2)"),
+        time_channel = c(time = "hh:mm:ss"),
+        verbose = FALSE
+    )
+
+    expect_message(
+        result <- replace_mnirs(
+            data,
+            method = "linear",
+            verbose = TRUE
+        ),
+        "No invalid or missing"
+    )
+
+    ## Should return identical data
+    expect_equal(result$smo2, data$smo2)
+    expect_s3_class(result, "mnirs")
+    expect_equal(attr(data, "nirs_channels"), c("smo2"))
+    expect_equal(attr(data, "time_channel"), "time")
+    expect_equal(attr(data, "sample_rate"), 2)
+    expect_false(attr(data, "verbose"))
+})
+
 test_that("replace_mnirs updates metadata correctly", {
     data <- read_mnirs(
         file_path = example_mnirs("moxy_ramp"),
