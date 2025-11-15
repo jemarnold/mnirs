@@ -9,7 +9,7 @@ Inspired by ggplot2::scale_x_time()."><meta name="twitter:card" content="summary
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@ Inspired by ggplot2::scale_x_time()."><meta name="twitter:card" content="summary
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Format Timespan Data as h:mm:ss</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v0.1.0/R/plot.mnirs.R" class="external-link"><code>R/plot.mnirs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/plot.mnirs.R" class="external-link"><code>R/plot.mnirs.R</code></a></small>
       <div class="d-none name"><code>format_hmmss.Rd</code></div>
     </div>
 
@@ -81,13 +81,13 @@ Inspired by <code><a href="https://ggplot2.tidyverse.org/reference/scale_date.ht
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">120</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="va">x</span> <span class="op">/</span> <span class="fl">15</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>, <span class="fl">0</span>, <span class="fl">0.2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">ggplot</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="fu">scale_x_continuous</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        breaks <span class="op">=</span> <span class="fu"><a href="breaks_timespan.html">breaks_timespan</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        labels <span class="op">=</span> <span class="va">format_hmmss</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span> <span class="op">+</span></span></span>
-<span class="r-in"><span>    <span class="fu">geom_line</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

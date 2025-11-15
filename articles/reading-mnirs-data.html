@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,7 @@
 
 
 
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v0.1.0/vignettes/reading-mnirs-data.qmd" class="external-link"><code>vignettes/reading-mnirs-data.qmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/vignettes/reading-mnirs-data.qmd" class="external-link"><code>vignettes/reading-mnirs-data.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
     </div>
 
@@ -90,10 +90,9 @@
 <li><p>📂 Read data files exported from various wearable NIRS devices and import NIRS channels into a standard data frame with metadata, ready for further processing.</p></li>
 <li><p>📊 Plot and visualise data frames of class <em><code>"mnirs"</code></em>.</p></li>
 <li><p>🔍 Retrieve metadata stored with data frames of class <em><code>"mnirs"</code></em>.</p></li>
-<li><p>🧹 Detect and replace local outliers and invalid values.</p></li>
+<li><p>🧹 Detect and replace local outliers, invalid values, and interpolate across missing data.</p></li>
 <li><p>⏱️ Re-sample (up- or down-sample) to match the sample rate of other recording devices.</p></li>
-<li><p>📈 Interpolate and fill across missing data.</p></li>
-<li><p>〰️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.</p></li>
+<li><p>📈️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.</p></li>
 <li><p>⚖️ Shift and rescale across multiple NIRS channels, to normalise signal dynamic range with absolute or relative scaling between muscle sites and NIRS channels.</p></li>
 </ul>
 <div>
@@ -103,7 +102,7 @@
 <p><em><code>mnirs</code></em> is designed to process mNIRS data, but there is no reason why it can’t be used to read, clean, and filter other time series datasets, which require many of the same processing steps. Enjoy!</p>
 </blockquote>
 </div>
-</section><section class="section level2"><h2 id="read-data-from-file">Read Data From File<a class="anchor" aria-label="anchor" href="#read-data-from-file"></a>
+</section><section class="section level2"><h2 id="read-data-from-file">📂 Read Data From File<a class="anchor" aria-label="anchor" href="#read-data-from-file"></a>
 </h2>
 <p>We will read an example data file with two NIRS channels from an incremental ramp cycling assessment recorded with <em>Moxy</em> muscle oxygen monitor.</p>
 <p>First, install and load the <em><code>mnirs</code></em> package and other required libraries.</p>
@@ -226,7 +225,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <span><span class="co">#&gt; 10  4.81         57        67</span></span>
 <span><span class="co">#&gt; # ℹ 2,193 more rows</span></span></code></pre></div>
 </div>
-</section></section><section class="section level2"><h2 id="plot-mnirs-data">Plot <em><code>mnirs</code></em> data<a class="anchor" aria-label="anchor" href="#plot-mnirs-data"></a>
+</section></section><section class="section level2"><h2 id="plot-mnirs-data">📊 Plot <em><code>mnirs</code></em> data<a class="anchor" aria-label="anchor" href="#plot-mnirs-data"></a>
 </h2>
 <p><em><code>mnirs</code></em> data can be easily visualised by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>. This generic plot function uses the package <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a> and will work on data frames generated or read by <em><code>mnirs</code></em> functions where the metadata contain <code>class = "mnirs"</code>.</p>
 <div class="cell" data-layout-align="center">
@@ -241,7 +240,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 </div>
 </div>
 <p><em><code>mnirs</code></em> includes a custom <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a> theme and colour palette available with <code><a href="../reference/theme_mnirs.html">theme_mnirs()</a></code> and <code><a href="../reference/palette_mnirs.html">palette_mnirs()</a></code>. See those documentation references for more details.</p>
-</section><section class="section level2"><h2 id="metadata-stored-in-mnirs-data-frames">Metadata stored in <code>mnirs</code> data frames<a class="anchor" aria-label="anchor" href="#metadata-stored-in-mnirs-data-frames"></a>
+</section><section class="section level2"><h2 id="metadata-stored-in-mnirs-data-frames">🔍 Metadata stored in <code>mnirs</code> data frames<a class="anchor" aria-label="anchor" href="#metadata-stored-in-mnirs-data-frames"></a>
 </h2>
 <p>Data frames generated or read by <em><code>mnirs</code></em> functions will return <code>class = "mnirs"</code> and contain metadata, which can be retrieved with <code>attributes(data)</code>.</p>
 <p>Instead of re-defining values like our channel names or sample rate, certain <em><code>mnirs</code></em> functions will automatically retrieve them from metadata. They can always be overwritten manually in subsequent functions, or by using a helper function <code><a href="../reference/create_mnirs_data.html">create_mnirs_data()</a></code>.</p>
@@ -280,7 +279,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data_table</span>, <span class="st">"nirs_device"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Moxy"</span></span></code></pre></div>
 </div>
-</section><section class="section level2"><h2 id="replace-local-outliers-invalid-values-and-missing-values">Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace-local-outliers-invalid-values-and-missing-values"></a>
+</section><section class="section level2"><h2 id="replace-local-outliers-invalid-values-and-missing-values">🧹 Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace-local-outliers-invalid-values-and-missing-values"></a>
 </h2>
 <p>We can see some data issues in the plot above, so let’s clean those with a single data wrangling function <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, to prepare it for digital filtering and smoothing.</p>
 <p><em><code>mnirs</code></em> tries to include functions which work on vector data, and convenience wrapper functions which can be used on multiple specified columns in a data frame at once. Let’s explain the functionality of this data-wide function, and for more details about the vector-specific functions see <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>.</p>
@@ -343,7 +342,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 </div>
 </div>
 <p>That cleaned up all the obvious data issues.</p>
-</section></section><section class="section level2"><h2 id="resample-data">Resample Data<a class="anchor" aria-label="anchor" href="#resample-data"></a>
+</section></section><section class="section level2"><h2 id="resample-data">⏱️ Resample Data<a class="anchor" aria-label="anchor" href="#resample-data"></a>
 </h2>
 <p>Say we have NIRS data recorded at 25 Hz, but we are only interested in exercise responses over a time span of 5-minutes, and our other heart rate data are only recorded at 1 Hz anyway. It may be easier and faster to work with our NIRS data down-sampled from 25 to 1 Hz.</p>
 <p>Alternatively, if we have something like high-frequency EMG data, we may want to up-sample our NIRS data to match samples for analysis. Although, we should be cautious with up-sampling as this can artificially inflate our confidence with subsequent analysis or modelling methods.</p>
@@ -401,7 +400,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <p>If you are getting a warning from <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> about duplicated or irregular samples, <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code> can be used to restore regular sample rate and interpolate across skipped samples.</p>
 </blockquote>
 </div>
-</section></section><section class="section level2"><h2 id="digital-filtering">Digital Filtering<a class="anchor" aria-label="anchor" href="#digital-filtering"></a>
+</section></section><section class="section level2"><h2 id="digital-filtering">📈 Digital Filtering<a class="anchor" aria-label="anchor" href="#digital-filtering"></a>
 </h2>
 <p>If we want to improve our signal-to-noise ratio in our dataset without losing information, we should apply digital filtering to smooth the data.</p>
 <section class="level2"><h3 id="choosing-a-digital-filter">Choosing a digital filter<a class="anchor" aria-label="anchor" href="#choosing-a-digital-filter"></a>
@@ -505,7 +504,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 </div>
 </div>
 </div>
-</section></section><section class="section level2"><h2 id="shift-and-rescale-data">Shift and Rescale Data<a class="anchor" aria-label="anchor" href="#shift-and-rescale-data"></a>
+</section></section><section class="section level2"><h2 id="shift-and-rescale-data">⚖️ Shift and Rescale Data<a class="anchor" aria-label="anchor" href="#shift-and-rescale-data"></a>
 </h2>
 <p>NIRS values are not measured on an absolute scale (even saturation %). Therefore, we may need to adjust or calibrate our data to normalise NIRS signal values between muscle sites, individuals, trials, etc.</p>
 <p>For example, we may want to set our mean baseline value to zero for all NIRS signals at the start of a recording. Or we may want to compare signal kinetics (the rate of change or time course of a response) after rescaling signal amplitudes to the same dynamic range.</p>
@@ -656,7 +655,7 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 </div>
 </div>
 <p>Our interpretation might now be that assuming the same starting baseline condition in both tissues, <em>smo2_right</em> deoxygenates less during exercise and recovers faster to a greater hyperaemic reperfusion, compared to <em>smo2_left</em>.</p>
-</section></section><section class="section level2"><h2 id="signal-preparation">Signal Preparation<a class="anchor" aria-label="anchor" href="#signal-preparation"></a>
+</section></section><section class="section level2"><h2 id="signal-preparation">✅ Signal Preparation<a class="anchor" aria-label="anchor" href="#signal-preparation"></a>
 </h2>
 <p>After the NIRS signal has been cleaned and filtered, it should be ready for further processing and analysis.</p>
 <p><em><code>mnirs</code></em> is being developed to include functionality for processing discrete intervals and events, e.g. reoxygenation kinetics, slope calculations for post-occlusion microvascular responsiveness or critical oxygenation breakpoints.</p>

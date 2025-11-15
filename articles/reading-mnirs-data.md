@@ -23,14 +23,13 @@ In this vignette we will demonstrate how to:
 
 - 🔍 Retrieve metadata stored with data frames of class *`"mnirs"`*.
 
-- 🧹 Detect and replace local outliers and invalid values.
+- 🧹 Detect and replace local outliers, invalid values, and interpolate
+  across missing data.
 
 - ⏱️ Re-sample (up- or down-sample) to match the sample rate of other
   recording devices.
 
-- 📈 Interpolate and fill across missing data.
-
-- 〰️ Apply digital filtering to optimise signal-to-noise ratio for the
+- 📈️ Apply digital filtering to optimise signal-to-noise ratio for the
   responses observed in our data.
 
 - ⚖️ Shift and rescale across multiple NIRS channels, to normalise
@@ -49,7 +48,7 @@ In this vignette we will demonstrate how to:
 > why it can’t be used to read, clean, and filter other time series
 > datasets, which require many of the same processing steps. Enjoy!
 
-## Read Data From File
+## 📂 Read Data From File
 
 We will read an example data file with two NIRS channels from an
 incremental ramp cycling assessment recorded with *Moxy* muscle oxygen
@@ -208,7 +207,7 @@ data_table
 #> # ℹ 2,193 more rows
 ```
 
-## Plot *`mnirs`* data
+## 📊 Plot *`mnirs`* data
 
 *`mnirs`* data can be easily visualised by calling
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html). This generic
@@ -230,7 +229,7 @@ and
 [`palette_mnirs()`](https://jemarnold.github.io/mnirs/reference/palette_mnirs.md).
 See those documentation references for more details.
 
-## Metadata stored in `mnirs` data frames
+## 🔍 Metadata stored in `mnirs` data frames
 
 Data frames generated or read by *`mnirs`* functions will return
 `class = "mnirs"` and contain metadata, which can be retrieved with
@@ -280,7 +279,7 @@ attr(data_table, "nirs_device")
 #> [1] "Moxy"
 ```
 
-## Replace local outliers, invalid values, and missing values
+## 🧹 Replace local outliers, invalid values, and missing values
 
 We can see some data issues in the plot above, so let’s clean those with
 a single data wrangling function
@@ -373,7 +372,7 @@ plot(data_cleaned, label_time = TRUE)
 
 That cleaned up all the obvious data issues.
 
-## Resample Data
+## ⏱️ Resample Data
 
 Say we have NIRS data recorded at 25 Hz, but we are only interested in
 exercise responses over a time span of 5-minutes, and our other heart
@@ -452,7 +451,7 @@ Although nothing would be noticeable in the plot at this scale.
 > can be used to restore regular sample rate and interpolate across
 > skipped samples.
 
-## Digital Filtering
+## 📈 Digital Filtering
 
 If we want to improve our signal-to-noise ratio in our dataset without
 losing information, we should apply digital filtering to smooth the
@@ -599,7 +598,7 @@ plot(data_filtered, label_time = TRUE) +
 
 ![](reading-mnirs-data_files/figure-html/unnamed-chunk-8-1.png)
 
-## Shift and Rescale Data
+## ⚖️ Shift and Rescale Data
 
 NIRS values are not measured on an absolute scale (even saturation %).
 Therefore, we may need to adjust or calibrate our data to normalise NIRS
@@ -815,7 +814,7 @@ condition in both tissues, *smo2_right* deoxygenates less during
 exercise and recovers faster to a greater hyperaemic reperfusion,
 compared to *smo2_left*.
 
-## Signal Preparation
+## ✅ Signal Preparation
 
 After the NIRS signal has been cleaned and filtered, it should be ready
 for further processing and analysis.
