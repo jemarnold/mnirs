@@ -1,0 +1,70 @@
+url: https://jemarnold.github.io/mnirs/
+template:
+  bootstrap: 5
+  light-switch: true
+  opengraph:
+    twitter:
+      creator: '@jem_arnold'
+navbar:
+  structure:
+    left:
+    - intro
+    - articles
+    - reference
+    - news
+    right:
+    - search
+    - bluesky
+    - twitter
+    - github
+    - lightswitch
+  components:
+    bluesky:
+      icon: fa-brands fa-bluesky
+      href: https://bsky.app/profile/jemarnold.bsky.social
+      aria-label: Bluesky
+    twitter:
+      icon: fa-twitter
+      href: https://twitter.com/jem_arnold
+      aria-label: Twitter
+    github:
+      icon: fa-github
+      href: https://github.com/jemarnold/epl
+      aria-label: GitHub
+figures:
+  bg: white
+reference:
+- title: Read data
+  desc: |
+    Read raw data from exported files.
+  contents:
+  - read_mnirs
+  - example_mnirs
+  - create_mnirs_data
+- title: Clean data
+  desc: |
+    Clean, filter, and process data.
+  contents:
+  - starts_with("replace")
+  - resample_mnirs
+  - starts_with("filter")
+  - shift_mnirs
+  - rescale_mnirs
+- title: Plotting
+  desc: |
+    Tools for pretty plotting.
+  contents:
+  - plot.mnirs
+  - theme_mnirs
+  - starts_with("palette")
+  - starts_with("scale")
+  - breaks_timespan
+  - format_hmmss
+- title: Data
+  desc: |
+    Example data files included in the package
+  contents:
+  - starts_with("moxy")
+  - starts_with("train.red")
+  - starts_with("artinis")
+
