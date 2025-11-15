@@ -1,4 +1,4 @@
-# Breaks for Timespan Data
+# Breaks for timespan data
 
 Pretty timespan breaks for plotting in units of 5, 15, 30, 60 sec, etc.
 Modified from

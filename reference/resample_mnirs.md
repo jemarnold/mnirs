@@ -1,4 +1,4 @@
-# Re-sample a Data Frame
+# Re-sample a data frame
 
 Up- or down-sample the number of samples in an *"mnirs"* data frame
 using interpolation.

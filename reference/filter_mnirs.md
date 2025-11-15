@@ -1,6 +1,7 @@
-# Filter Data
+# Filter a data frame
 
-Apply signal filtering to vector data with either:
+Apply digital filtering/smoothing to numeric vector data within a data
+frame using either:
 
 1.  A cubic smoothing spline.
 

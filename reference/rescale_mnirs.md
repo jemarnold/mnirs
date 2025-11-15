@@ -1,4 +1,4 @@
-# Re-scale Data Range
+# Re-scale data range
 
 Expand or reduce the range (min and max values) of data channels to a
 new amplitude/dynamic range, e.g. re-scale the range of NIRS data to

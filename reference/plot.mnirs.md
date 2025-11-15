@@ -1,4 +1,4 @@
-# Plot mnirs objects
+# Plot *mnirs* objects
 
 Create a simple plot for objects returned from
 [`create_mnirs_data()`](https://jemarnold.github.io/mnirs/reference/create_mnirs_data.md).
@@ -47,7 +47,8 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 ## Examples
 
 ``` r
-## call an example mNIRS data file
+if (FALSE) { # \dontrun{
+## call an example *{mnirs}* data file
 file_path <- example_mnirs("moxy_ramp")
 
 data_table <- read_mnirs(
@@ -60,5 +61,5 @@ data_table <- read_mnirs(
 
 ## note the hidden plot option to display time values as `hh:mm:ss`
 plot(data_table, label_time = TRUE)
-
+} # }
 ```

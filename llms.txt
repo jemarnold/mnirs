@@ -329,7 +329,9 @@ the following devices and apps:
 Read raw data from exported files.
 
 - [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
-  : Read mNIRS Data From File
+  :
+
+  Read *mnirs* data from file
 
 - [`example_mnirs()`](https://jemarnold.github.io/mnirs/reference/example_mnirs.md)
   :
@@ -337,7 +339,9 @@ Read raw data from exported files.
   Get path to *mnirs* example files
 
 - [`create_mnirs_data()`](https://jemarnold.github.io/mnirs/reference/create_mnirs_data.md)
-  : Create an mNIRS data frame with Metadata
+  :
+
+  Create an *mnirs* data frame with metadata
 
 ## Clean data
 
@@ -349,38 +353,51 @@ Clean, filter, and process data.
   [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
   : Replace outliers, invalid values, and missing values
 - [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
-  : Re-sample a Data Frame
-- [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md)
-  : Apply a Butterworth Digital Filter
+  : Re-sample a data frame
 - [`filter_mnirs(`*`<smooth_spline>`*`)`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
   [`filter_mnirs(`*`<butterworth>`*`)`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
   [`filter_mnirs(`*`<moving_average>`*`)`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
-  : Filter Data
+  : Filter a data frame
+- [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md)
+  : Apply a Butterworth digital filter
 - [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
-  : Apply a Moving Average Filter
+  : Apply a moving average filter
 - [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md)
-  : Shift Data Range
+  : Shift data range
 - [`rescale_mnirs()`](https://jemarnold.github.io/mnirs/reference/rescale_mnirs.md)
-  : Re-scale Data Range
+  : Re-scale data range
 
 ## Plotting
 
 Tools for pretty plotting.
 
 - [`plot(`*`<mnirs>`*`)`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)
-  : Plot mnirs objects
+  :
+
+  Plot *mnirs* objects
+
 - [`theme_mnirs()`](https://jemarnold.github.io/mnirs/reference/theme_mnirs.md)
-  : Custom mNIRS ggplot2 theme
+  :
+
+  Custom *mnirs* ggplot2 theme
+
 - [`palette_mnirs()`](https://jemarnold.github.io/mnirs/reference/palette_mnirs.md)
-  : Custom mNIRS colour palette
+  :
+
+  Custom *mnirs* colour palette
+
 - [`scale_colour_mnirs()`](https://jemarnold.github.io/mnirs/reference/scale_colour_mnirs.md)
   [`scale_color_mnirs()`](https://jemarnold.github.io/mnirs/reference/scale_colour_mnirs.md)
   [`scale_fill_mnirs()`](https://jemarnold.github.io/mnirs/reference/scale_colour_mnirs.md)
-  : Scales for custom mNIRS palette
+  :
+
+  Scales for custom *mnirs* palette
+
 - [`breaks_timespan()`](https://jemarnold.github.io/mnirs/reference/breaks_timespan.md)
-  : Breaks for Timespan Data
+  : Breaks for timespan data
+
 - [`format_hmmss()`](https://jemarnold.github.io/mnirs/reference/format_hmmss.md)
-  : Format Timespan Data as h:mm:ss
+  : Format timespan data as h:mm:ss
 
 ## Data
 

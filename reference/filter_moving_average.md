@@ -1,4 +1,4 @@
-# Apply a Moving Average Filter
+# Apply a moving average filter
 
 Apply a simple moving average smoothing filter to vector data
 

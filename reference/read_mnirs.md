@@ -1,4 +1,4 @@
-# Read mNIRS Data From File
+# Read *mnirs* data from file
 
 Read files exported from most commercially available mNIRS devices and
 return a data frame of class *"mnirs"* with recorded time series data

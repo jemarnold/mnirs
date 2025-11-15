@@ -259,7 +259,7 @@ data_clean <- replace_mnirs(
 
 if (FALSE) { # \dontrun{
 ## plot original and and show where values have been replaced
-plot(data, display_mmss = TRUE) +
+plot(data, label_time = TRUE) +
     scale_colour_manual(
         breaks = c("smo2", "replaced"),
         values = palette_mnirs(2)

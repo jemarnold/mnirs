@@ -1,6 +1,6 @@
-# Scales for custom mNIRS palette
+# Scales for custom *mnirs* palette
 
-Scales for custom mNIRS palette
+Scales for custom *mnirs* palette
 
 ## Usage
 

@@ -1,4 +1,4 @@
-# Custom mNIRS ggplot2 theme
+# Custom *mnirs* ggplot2 theme
 
 A `[ggplot2][ggplot2::ggplot2-package]` theme for display.
 

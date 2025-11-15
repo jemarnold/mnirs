@@ -1,6 +1,6 @@
-# Custom mNIRS colour palette
+# Custom *mnirs* colour palette
 
-Custom mNIRS colour palette
+Custom *mnirs* colour palette
 
 ## Usage
 

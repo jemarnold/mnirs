@@ -1,4 +1,4 @@
-# Create an mNIRS data frame with Metadata
+# Create an *mnirs* data frame with metadata
 
 Manually add class *"mnirs"* and metadata to an existing data frame.
 

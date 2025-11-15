@@ -1,4 +1,4 @@
-# Apply a Butterworth Digital Filter
+# Apply a Butterworth digital filter
 
 Apply a Butterworth digital filter to vector data with
 [`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html) and

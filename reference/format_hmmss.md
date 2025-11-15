@@ -1,4 +1,4 @@
-# Format Timespan Data as h:mm:ss
+# Format timespan data as h:mm:ss
 
 Convert numeric timespan data to `h:mm:ss` format for pretty plotting.
 Inspired by
