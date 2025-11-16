@@ -40,9 +40,6 @@ object.
 ``` r
 library(ggplot2)
 
-## set theme for the current script
-theme_set(theme_mnirs())
-
 ## plot example data
 df <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
@@ -52,7 +49,8 @@ df <- read_mnirs(
 )
 
 ggplot(df, aes(x = time)) +
-    scale_colour_mnirs() +
-    geom_line(aes(y = smo2_left, colour = "left")) +
-    geom_line(aes(y = smo2_right, colour = "right"))
+    theme_mnirs() +
+    scale_colour_mnirs(name = NULL) +
+    geom_line(aes(y = smo2_left, colour = "smo2_left")) +
+    geom_line(aes(y = smo2_right, colour = "smo2_right"))
 ```
