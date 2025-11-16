@@ -1,4 +1,4 @@
-# Test compute_local_windows() =========================================
+## Test compute_local_windows() =========================================
 test_that("compute_local_windows validates inputs", {
     t <- 1:10
 
@@ -65,7 +65,7 @@ test_that("compute_local_windows excludes central value", {
 
 test_that("compute_local_windows respects width boundaries", {
     t <- 1:10
-    width <- 2
+    width <- 4
     result <- compute_local_windows(t, width = width, span = NULL)
 
     # First element: can only look forward
@@ -77,7 +77,7 @@ test_that("compute_local_windows respects width boundaries", {
 
     ## with span
     t <- seq(0, 10, by = 0.5)
-    span <- 1
+    span <- 2
     result <- compute_local_windows(t, width = NULL, span = span)
 
     # First element: can only look forward
@@ -93,11 +93,20 @@ test_that("compute_local_windows respects width boundaries", {
 
 test_that("compute_local_windows width and span >= length(x) works", {
     t <- 1:10
-    result <- compute_local_windows(t, width = 15)
+    result <- compute_local_windows(t, width = 20)
     expect_equal(result, rep(list(t), length(t)))
 
-    result <- compute_local_windows(t, span = 15)
+    result <- compute_local_windows(t, span = 20)
     expect_equal(result, rep(list(t), length(t)))
+})
+
+test_that("compute_local_windows works with width = 1 and span = 0", {
+    t <- 1:10
+    result <- compute_local_windows(t, width = 1)
+    expect_equal(result, as.list(t))
+
+    result <- compute_local_windows(t, span = 0)
+    expect_equal(result, as.list(t))
 })
 
 ## test compute_window_of_valid_neighbours() ===========================
@@ -128,7 +137,7 @@ test_that("compute_window_of_valid_neighbours() validates inputs", {
 
     # Both width and span warns and uses width
     expect_warning(
-        compute_window_of_valid_neighbours(x, width = 1, span = 0.5),
+        compute_window_of_valid_neighbours(x, width = 2, span = 0.5),
         "Either.*width.*or.*span.*not both"
     )
 })
@@ -137,24 +146,24 @@ test_that("compute_window_of_valid_neighbours() works with width", {
     x <- c(1, 2, NA, 4, 5, NA, 7)
 
     # width = 1
-    result <- compute_window_of_valid_neighbours(x, width = 1)
+    result <- compute_window_of_valid_neighbours(x, width = 2)
     expect_length(result, 2) # Two NAs
     expect_equal(result[[1]], c(2, 4))
     expect_equal(result[[2]], c(5, 7))
 
     # width = 2
     x <- c(1, 2, 3, NA, 5, 6, 7)
-    result <- compute_window_of_valid_neighbours(x, width = 2)
+    result <- compute_window_of_valid_neighbours(x, width = 4)
     expect_equal(result[[1]], c(2, 3, 5, 6))
 
     # Edge case: NA at start
     x <- c(NA, 20, 30, 40)
-    result <- compute_window_of_valid_neighbours(x, width = 1)
+    result <- compute_window_of_valid_neighbours(x, width = 2)
     expect_equal(result[[1]], 2)
 
     # Edge case: NA at end
     x <- c(10, 20, 30, NA)
-    result <- compute_window_of_valid_neighbours(x, width = 1)
+    result <- compute_window_of_valid_neighbours(x, width = 2)
     expect_equal(result[[1]], 3)
 })
 
@@ -170,7 +179,7 @@ test_that("compute_window_of_valid_neighbours() works with span", {
     # span = 0.5 (no values of t within t ± span should return same as width = 1)
     result <- compute_window_of_valid_neighbours(x, t = t, span = 0.5)
     expect_equal(result[[1]], c(2, 4))
-    expect_equal(result, compute_window_of_valid_neighbours(x, width = 1))
+    expect_equal(result, compute_window_of_valid_neighbours(x, width = 2))
 
     # Multiple NAs
     x <- c(1, NA, 3, NA, 5)
@@ -218,7 +227,16 @@ test_that("compute_window_of_valid_neighbours() handles all NAs", {
     expect_equal(result[[3]], integer(0))
 })
 
-# Test compute_local_fun() =========================================
+test_that("compute_window_of_valid_neighbours works with width = 1 and span = 0", {
+    x <- c(1, 2, NA, 4, 5)
+    result <- compute_window_of_valid_neighbours(x, width = 1)
+    expect_equal(result[[1]], c(2, 4))
+
+    result <- compute_window_of_valid_neighbours(x, span = 0)
+    expect_equal(result[[1]], c(2, 4))
+})
+
+## Test compute_local_fun() =========================================
 test_that("compute_local_fun returns correct length", {
     x <- c(1, 2, 3, 4, 5)
     window_idx <- compute_local_windows(x, width = 1)
@@ -231,7 +249,7 @@ test_that("compute_local_fun returns correct length", {
 test_that("compute_local_fun calculates correct medians", {
     x <- c(10, 20, 30, 40, 50)
     # Manual windows: each looks at neighbours
-    window_idx <- compute_local_windows(x, width = 1)
+    window_idx <- compute_local_windows(x, width = 2)
     result <- compute_local_fun(x, window_idx, FUN = median)
 
     expect_equal(result[1], median(x[1:2]))         # median of x[2]
@@ -242,7 +260,7 @@ test_that("compute_local_fun calculates correct medians", {
 test_that("compute_local_fun handles NA values", {
     ## this shouldn't happen with handle_na, but just in case
     x <- c(1, NA, 3, 4, 5)
-    window_idx <- compute_local_windows(x, width = 1)
+    window_idx <- compute_local_windows(x, width = 2)
     result <- compute_local_fun(x, window_idx, FUN = median)
 
     expect_false(all(is.na(result[1:3])))
@@ -267,11 +285,11 @@ test_that("compute_local_fun() handles single values", {
 })
 
 
-# Test compute_outliers() ==============================================
+## Test compute_outliers() ==============================================
 test_that("compute_outliers returns logical vector", {
     x <- c(1, 2, 3, 100, 5)
     t <- 1:5
-    window_idx <- compute_local_windows(t, width = 1, span = NULL)
+    window_idx <- compute_local_windows(t, width = 2, span = NULL)
     local_medians <- compute_local_fun(x, window_idx, FUN = median)
     result <- compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3)
 
@@ -284,7 +302,7 @@ test_that("compute_outliers returns logical vector", {
 test_that("compute_outliers threshold sensitivity via outlier_cutoff", {
     x <- c(1, 2, 3, 10, 5)
     t <- 1:5
-    window_idx <- compute_local_windows(t, width = 1, span = NULL)
+    window_idx <- compute_local_windows(t, width = 2, span = NULL)
     local_medians <- compute_local_fun(x, window_idx, FUN = median)
 
     # Strict threshold
@@ -298,7 +316,7 @@ test_that("compute_outliers threshold sensitivity via outlier_cutoff", {
 test_that("compute_outliers validates outlier_cutoff", {
     x <- 1:5
     t <- 1:5
-    window_idx <- compute_local_windows(t, width = 1, span = NULL)
+    window_idx <- compute_local_windows(t, width = 2, span = NULL)
     local_medians <- compute_local_fun(x, window_idx, FUN = median)
 
     expect_error(
@@ -310,7 +328,7 @@ test_that("compute_outliers validates outlier_cutoff", {
 test_that("compute_outliers handles no outliers", {
     x <- 1:5
     t <- 1:5
-    window_idx <- compute_local_windows(t, width = 1, span = NULL)
+    window_idx <- compute_local_windows(t, width = 2, span = NULL)
     local_medians <- compute_local_fun(x, window_idx, FUN = median)
     result <- compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3)
 
@@ -321,7 +339,7 @@ test_that("compute_outliers handles NA", {
     ## this shouldn't happen with handle_na, but just in case
     x <- c(1, 2, NA, 100, 5)
     t <- 1:5
-    window_idx <- compute_local_windows(t, width = 1, span = NULL)
+    window_idx <- compute_local_windows(t, width = 2, span = NULL)
     local_medians <- compute_local_fun(x, window_idx, FUN = median)
     result <- compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3)
 

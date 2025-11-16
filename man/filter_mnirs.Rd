@@ -75,7 +75,7 @@ name. Must match column names in \code{data} exactly. Will be taken from
 metadata if not defined explicitly.}
 
 \item{sample_rate}{A numeric value for the sample rate in Hz for
-\verb{method = }\emph{\code{"butterworth"}}. Will be taken from metadata or estimated
+\code{method = "butterworth"}. Will be taken from metadata or estimated
 from \code{time_channel} if not defined explicitly.}
 
 \item{method}{A character string indicating how to filter the data (see
@@ -88,10 +88,10 @@ from \code{time_channel} if not defined explicitly.}
 }}
 
 \item{spar}{A numeric value defining the smoothing parameter for
-\verb{method = }\emph{\code{"smooth_spline"}}.}
+\code{method = "smooth_spline"}.}
 
 \item{type}{A character string indicating the digital filter type for
-\verb{method = }\emph{\code{"butterworth"}} (see \emph{Details}).
+\code{method = "butterworth"} (see \emph{Details}).
 \describe{
 \item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
 \item{\code{"high"}}{For a \emph{high-pass} filter.}
@@ -99,23 +99,24 @@ from \code{time_channel} if not defined explicitly.}
 \item{\code{"pass"}}{For a \emph{pass-band} filter.}
 }}
 
-\item{n}{An integer defining the filter order for \verb{method = }
-\emph{\code{"butterworth"}} (\emph{default} \code{n = 1}).}
+\item{n}{An integer defining the filter order for \code{method = "butterworth"}
+(\emph{default} \code{n = 1}).}
 
 \item{W}{A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for \verb{method = }\emph{\code{"butterworth"}}, as a fraction of the
+frequency(ies) for \code{method = "butterworth"}, as a fraction of the
 Nyquist frequency (see \emph{Details}).}
 
 \item{fc}{A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for \verb{method = }\emph{\code{"butterworth"}}, in Hz (see \emph{Details}).}
+frequency(ies) for \code{method = "butterworth"}, in Hz (see \emph{Details}).}
 
-\item{width}{An integer value defining the number of samples centred on
-\code{idx} over which the operation will be performed for \verb{method = }
-\emph{\code{"moving_average"}}.}
+\item{width}{An integer defining the local window in number of samples
+around \code{idx} in which to perform the operation for
+\code{method = "moving_average"}. Between
+\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value in units of time_channel defining the timespan
-centred on \code{idx} over which the operation will be performed for
-\verb{method = }\emph{"moving_average"}.}
+\item{span}{A numeric value defining the local window timespan around \code{idx}
+in which to perform the operation for \code{method = "moving_average"}.
+In units of \code{time_channel} or \code{t}, between \verb{[t - span/2, t + span/2]}.}
 
 \item{na.rm}{A logical indicating whether missing values should be ignored
 (\code{TRUE}) before the filter is applied. Otherwise \code{FALSE} (the \emph{default})
@@ -142,7 +143,7 @@ using either:
 }
 \details{
 \describe{
-\item{\verb{method = }\emph{\code{"smooth_spline"}}}{Applies a non-parametric cubic
+\item{\code{method = "smooth_spline"}}{Applies a non-parametric cubic
 smoothing spline from \code{\link[stats:smooth.spline]{stats::smooth.spline()}}. Smoothing is defined
 by the parameter \code{spar}, which can be left as \code{NULL} and automatically
 determined via penalised log liklihood. This usually works well for
@@ -150,7 +151,7 @@ smoothing responses occurring on the order of minutes or longer. \code{spar}
 can be defined explicitly, typically (but not necessarily) in the range
 \verb{spar = [0, 1]}.}
 
-\item{\verb{method = }\emph{\code{"butterworth"}}}{Applies a centred (two-pass
+\item{\code{method = "butterworth"}}{Applies a centred (two-pass
 symmetrical) Butterworth digital filter from \code{\link[signal:butter]{signal::butter()}} and
 \code{\link[signal:filtfilt]{signal::filtfilt()}}.
 
@@ -184,7 +185,7 @@ Hz. \code{W = fc / (sample_rate / 2)}.
 Only One of either \code{W} or \code{fc} should be defined. If both are defined,
 \code{W} will be preferred over \code{fc}.}
 
-\item{\verb{method = }\emph{\code{"moving_average"}}}{Applies a centred (symmetrical)
+\item{\code{method = "moving_average"}}{Applies a centred (symmetrical)
 moving average filter in a local window, defined by either \code{width}
 as the number of samples around \code{idx} between \verb{[idx - floor(width/2),}
 \verb{idx + floor(width/2)]}. Or by \code{span} as the timespan in units of
@@ -192,11 +193,14 @@ as the number of samples around \code{idx} between \verb{[idx - floor(width/2),}
 average will be calculated at the edges of the data.}
 }
 
-Missing values (\code{NA}) in \code{nirs_channels} will cause an error for \verb{method =}
-\emph{\code{"smooth_spline"}} or \emph{\code{"butterworth"}}, unless \code{na.rm = TRUE}. Then
-\code{NA}s will be preserved and passed through in the returned data.
+Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
+\code{method = "smooth_spline"} or \code{"butterworth"}, unless \code{na.rm = TRUE}.
+Then \code{NA}s will be preserved and passed through in the returned data.
 }
 \examples{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
@@ -207,7 +211,7 @@ data <- read_mnirs(
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 7,
+        width = 10,
         verbose = FALSE
     )
 
@@ -223,13 +227,11 @@ data_filtered <- filter_mnirs(
     verbose = FALSE
 )
 
-\dontrun{
 ## add the non-filtered data back to the plot to compare
-plot(data_filtered, display_timestamp = TRUE) +
+plot(data_filtered, label_time = TRUE) +
     geom_line(
         data = data,
         aes(y = smo2, colour = "smo2"), alpha = 0.4
     )
-}
-
+\dontshow{\}) # examplesIf}
 }

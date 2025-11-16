@@ -25,7 +25,9 @@ A \link[ggplot2:ggplot]{ggplot2} scale object.
 Scales for custom \emph{{mnirs}} palette
 }
 \examples{
-\dontrun{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+
 ## set theme for the current script
 theme_set(theme_mnirs())
 
@@ -41,8 +43,7 @@ ggplot(df, aes(x = time)) +
     scale_colour_mnirs() +
     geom_line(aes(y = smo2_left, colour = "left")) +
     geom_line(aes(y = smo2_right, colour = "right"))
-}
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=theme_mnirs]{theme_mnirs()}} \code{\link[=palette_mnirs]{palette_mnirs()}}

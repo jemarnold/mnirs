@@ -23,10 +23,6 @@
 #'   channels will be shifted, e.g. shift the minimum value to zero.
 #' @param by A numeric value in units of `nirs_channels` by which the data
 #'   channels will be shifted, e.g. shift all values up by 10 units.
-#' @param width An integer value defining the number of samples centred on
-#'   `idx` over which the operation will be performed.
-#' @param span A numeric value in units of `time_channel` defining the timespan
-#'   centred on `idx` over which the operation will be performed.
 #' @param position Indicates where the reference values will be shifted from.
 #'   \describe{
 #'      \item{`"min"`}{(The *default*) will shift the minimum value(s) `to`
@@ -37,6 +33,7 @@
 #'      values.}
 #'   }
 #' @inheritParams validate_mnirs
+#' @inheritParams replace_mnirs
 #'
 #' @details
 #' `nirs_channels = list()` can be used to group data channels to preserve
@@ -65,9 +62,11 @@
 #' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
 #'   available with `attributes()`.
 #'
-#' @examples
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' library(ggplot2)
+#'
 #' ## read example data
-#' data <- read_mnirs(
+#' data_shifted <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
@@ -77,24 +76,19 @@
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 7,
+#'         width = 10,
 #'         verbose = FALSE
 #'     ) |>
-#'     filter_mnirs(na.rm = TRUE, verbose = FALSE)
+#'     filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+#'     shift_mnirs(
+#'         to = 0,             ## NIRS values will be shifted to zero
+#'         span = 120,         ## shift the first 120 sec of data to zero
+#'         position = "first",
+#'         verbose = FALSE
+#'     )
 #'
-#' data_shifted <- shift_mnirs(
-#'     data,
-#'     # nirs_channels = NULL, ## taken from metadata
-#'     to = 0,                 ## NIRS values will be shifted to zero
-#'     span = 120,             ## shift the first 120 sec of data to zero
-#'     position = "first",
-#'     verbose = FALSE
-#' )
-#'
-#' \dontrun{
-#' plot(data_shifted, display_timestamp = TRUE) +
+#' plot(data_shifted, label_time = TRUE) +
 #'     geom_hline(yintercept = 0, linetype = "dotted")
-#' }
 #'
 #' @export
 shift_mnirs <- function(
@@ -169,10 +163,7 @@ shift_mnirs <- function(
         ## find local windows within width/span centred around idx
         ## TODO need to fix edges where only half width/span included
         window_idx <- compute_local_windows(
-            t = time_vec,
-            width = width,
-            span = span,
-            method = "centred"
+            t = time_vec, width = width, span = span,
         )
         shift_fun <- get(position)
         ## compute min or max along local means

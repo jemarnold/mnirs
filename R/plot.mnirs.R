@@ -18,8 +18,7 @@
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' ## call an example *{mnirs}* data file
 #' file_path <- example_mnirs("moxy_ramp")
 #'
@@ -33,7 +32,6 @@
 #'
 #' ## note the hidden plot option to display time values as `hh:mm:ss`
 #' plot(data_table, label_time = TRUE)
-#' }
 #'
 #' @export
 plot.mnirs <- function(x, ...) {
@@ -110,7 +108,7 @@ plot.mnirs <- function(x, ...) {
             expand = ggplot2::expansion(mult = 0.01)
         ) +
         ggplot2::scale_y_continuous(
-            name = "mNIRS Signals",
+            name = "signal",
             breaks = y_breaks,
             expand = ggplot2::expansion(mult = 0.01)
         ) +
@@ -161,8 +159,9 @@ plot.mnirs <- function(x, ...) {
 #'
 #' @seealso [palette_mnirs()] [scale_colour_mnirs()]
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' library(ggplot2)
+#'
 #' ## set theme for the current script
 #' theme_set(theme_mnirs())
 #'
@@ -174,7 +173,6 @@ plot.mnirs <- function(x, ...) {
 #'     verbose = FALSE
 #' ) |>
 #'     plot(label_time = TRUE)
-#' }
 #'
 #' @export
 theme_mnirs <- function(
@@ -243,12 +241,10 @@ theme_mnirs <- function(
 #'
 #' @seealso [theme_mnirs()] [scale_colour_mnirs()]
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' scales::show_col(palette_mnirs())
 #' scales::show_col(palette_mnirs(2))
 #' scales::show_col(palette_mnirs(c("red", "orange")))
-#' }
 #'
 #' @export
 palette_mnirs <- function(n = NULL) {
@@ -294,8 +290,9 @@ palette_mnirs <- function(n = NULL) {
 #'
 #' @seealso [theme_mnirs()] [palette_mnirs()]
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' library(ggplot2)
+#'
 #' ## set theme for the current script
 #' theme_set(theme_mnirs())
 #'
@@ -311,7 +308,6 @@ palette_mnirs <- function(n = NULL) {
 #'     scale_colour_mnirs() +
 #'     geom_line(aes(y = smo2_left, colour = "left")) +
 #'     geom_line(aes(y = smo2_right, colour = "right"))
-#' }
 #'
 #' @rdname scale_colour_mnirs
 #' @export
@@ -357,15 +353,15 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #'
 #' @returns Returns a function for generating breaks.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' library(ggplot2)
 #' x = 0:120
 #' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+#'
 #' ggplot(data.frame(x, y)) +
 #'     aes(x = x, y = y) +
 #'     scale_x_continuous(breaks = breaks_timespan()) +
 #'     geom_line()
-#' }
 #'
 #' @keywords internal
 #' @export
@@ -433,10 +429,12 @@ breaks_timespan <- function(
 #'
 #' @returns A character vector the same length as `x`.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' library(ggplot2)
+#'
 #' x = 0:120
 #' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+#'
 #' ggplot(data.frame(x, y)) +
 #'     aes(x = x, y = y) +
 #'     scale_x_continuous(
@@ -444,7 +442,6 @@ breaks_timespan <- function(
 #'         labels = format_hmmss
 #'     ) +
 #'     geom_line()
-#' }
 #'
 #' @keywords internal
 #' @export

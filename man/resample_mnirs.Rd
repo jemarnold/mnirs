@@ -92,12 +92,13 @@ data <- read_mnirs(
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 )
+
 data
 
 data_resampled <- resample_mnirs(
     data,
-    time_channel = NULL,           ## taken from metadata
-    sample_rate = NULL,
+    # time_channel = NULL,           ## taken from metadata
+    # sample_rate = NULL,
     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
     method = "linear",             ## default linear interpolation across any new samples
     verbose = FALSE                ## will confirm the output sample rate

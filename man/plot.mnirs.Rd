@@ -29,7 +29,7 @@ A \link[ggplot2:ggplot]{ggplot2} object.
 Create a simple plot for objects returned from \code{\link[=create_mnirs_data]{create_mnirs_data()}}.
 }
 \examples{
-\dontrun{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
 ## call an example *{mnirs}* data file
 file_path <- example_mnirs("moxy_ramp")
 
@@ -43,6 +43,5 @@ data_table <- read_mnirs(
 
 ## note the hidden plot option to display time values as `hh:mm:ss`
 plot(data_table, label_time = TRUE)
-}
-
+\dontshow{\}) # examplesIf}
 }

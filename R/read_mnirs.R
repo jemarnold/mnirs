@@ -228,17 +228,22 @@ read_mnirs <- function(
 #'   metadata available with `attributes()`.
 #'
 #' @examples
-#' df <- data.frame(A = 1:3,
-#'                  B = seq(10, 30, 10),
-#'                  C = seq(11, 33, 11))
+#' df <- data.frame(
+#'     A = 1:3,
+#'     B = seq(10, 30, 10),
+#'     C = seq(11, 33, 11)
+#' )
+#'
 #' attributes(df)
 #'
+#' ## inject metadata
 #' nirs_data <- create_mnirs_data(
 #'     df,
-#'     metadata = list(nirs_channels = c("B", "C"),
-#'                     time_channel = "A",
-#'                     sample_rate = 1)
+#'     nirs_channels = c("B", "C"),
+#'     time_channel = "A",
+#'     sample_rate = 1
 #' )
+#'
 #' attributes(nirs_data)
 #'
 #' @export
@@ -252,7 +257,12 @@ create_mnirs_data <- function(data, ...) {
 
     ## overwrite existing attributes and add from incoming metadata
     ## incoming metadata from `...` can be either listed or un-listed
-    incoming_metadata <- do.call(c, lapply(list(...), as.list))
+    args <- list(...)
+    incoming_metadata <- if (length(args) == 1L && is.list(args[[1L]])) {
+        args[[1L]]
+    } else {
+        args
+    }
     metadata <- utils::modifyList(attributes(data), incoming_metadata)
 
     nirs_data <- tibble::new_tibble(
@@ -262,7 +272,7 @@ create_mnirs_data <- function(data, ...) {
         nirs_channels = metadata$nirs_channels,
         time_channel = metadata$time_channel,
         event_channel = metadata$event_channel,
-        sample_rate = metadata$sample_rate, ## samples per second
+        sample_rate = metadata$sample_rate,
         verbose = metadata$verbose
     )
 

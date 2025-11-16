@@ -52,7 +52,9 @@ alternative font which can be installed from
 }
 }
 \examples{
-\dontrun{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+
 ## set theme for the current script
 theme_set(theme_mnirs())
 
@@ -64,8 +66,7 @@ read_mnirs(
     verbose = FALSE
 ) |>
     plot(label_time = TRUE)
-}
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=palette_mnirs]{palette_mnirs()}} \code{\link[=scale_colour_mnirs]{scale_colour_mnirs()}}

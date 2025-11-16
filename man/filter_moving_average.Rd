@@ -17,11 +17,13 @@ filter_moving_average(
 
 \item{t}{An \emph{optional} numeric vector of time or sample number.}
 
-\item{width}{An integer value defining the number of samples centred on
-\code{idx} over which the operation will be performed.}
+\item{width}{An integer defining the local window in number of samples
+around \code{idx} in which to perform the operation., between
+\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value in units of \code{time_channel} defining the timespan
-centred on \code{idx} over which the operation will be performed.}
+\item{span}{A numeric value defining the local window timespan around \code{idx}
+in which to perform the operation. In units of \code{time_channel} or \code{t},
+between \verb{[t - span/2, t + span/2]}.}
 
 \item{verbose}{A logical to return (the \emph{default}) or silence warnings and
 messages which can be used for data error checking. Abort errors will

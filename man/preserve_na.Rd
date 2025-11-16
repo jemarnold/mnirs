@@ -35,21 +35,19 @@ values for later restoration with \code{restore_na()}.
 after processing valid non-\code{NA} values returned from \code{preserve_na()}.
 }
 \examples{
-\dontrun{
 x <- c(1, NA, 3, NA, 5)
-na_info <- preserve_na(x)
+(na_info <- mnirs:::preserve_na(x))#'
+
 ## process with a function that would normally fail on NA
 y <- na_info$x_valid * 2
-result <- restore_na(y, na_info)
-result
+(result <- mnirs:::restore_na(y, na_info))
 
-x <- c("A", NA, "B", NA, "C")
-na_info <- preserve_na(x)
+x <- c("A", "B", "C", NA, NA)
+(na_info <- mnirs:::preserve_na(x))
+
 ## process with a function that would normally fail on NA
 y <- tolower(na_info$x_valid)
-result <- restore_na(y, na_info)
-result
-}
+(result <- mnirs:::restore_na(y, na_info))
 
 }
 \keyword{internal}

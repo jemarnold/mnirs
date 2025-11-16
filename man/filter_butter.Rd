@@ -16,15 +16,15 @@ filter_butter(
 \arguments{
 \item{x}{A numeric vector.}
 
-\item{n}{An integer defining the filter order for \verb{method = }
-\emph{\code{"butterworth"}} (\emph{default} \code{n = 1}).}
+\item{n}{An integer defining the filter order for \code{method = "butterworth"}
+(\emph{default} \code{n = 1}).}
 
 \item{W}{A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for \verb{method = }\emph{\code{"butterworth"}}, as a fraction of the
+frequency(ies) for \code{method = "butterworth"}, as a fraction of the
 Nyquist frequency (see \emph{Details}).}
 
 \item{type}{A character string indicating the digital filter type for
-\verb{method = }\emph{\code{"butterworth"}} (see \emph{Details}).
+\code{method = "butterworth"} (see \emph{Details}).
 \describe{
 \item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
 \item{\code{"high"}}{For a \emph{high-pass} filter.}
@@ -82,6 +82,9 @@ Missing values (\code{NA}) in \code{x} will cause an error unless \code{na.rm = 
 Then \code{NA}s will be preserved and passed through in the returned vector.
 }
 \examples{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+
 set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
@@ -89,12 +92,13 @@ noisy_sin <- sin + noise
 filt_without_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "none")
 filt_with_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "rep1")
 
-\dontrun{
-plot(noisy_sin, type = "l")
-lines(filt_without_edge, col = "red", lwd = 4)
-lines(filt_with_edge, col = "blue", lwd = 4)
-}
-
+ggplot(data.frame(), aes(x = seq_along(noise))) +
+    theme_mnirs() +
+    scale_colour_mnirs(name = NULL) +
+    geom_line(aes(y = noisy_sin)) +
+    geom_line(aes(y = filt_without_edge, colour = "filt_without_edge")) +
+    geom_line(aes(y = filt_with_edge, colour = "filt_with_edge"))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[signal:filtfilt]{signal::filtfilt()}} \code{\link[signal:butter]{signal::butter()}}

@@ -71,13 +71,13 @@ number of standard deviations above and below the local median. The
 \code{outlier_cutoff = 3} is the standard replacement threshold following
 Pearson's rule.}
 
-\item{width}{An integer defining the window in number of samples around
-\code{idx} in which to detect local outliers and perform median replacement,
-between \verb{[idx - width, idx + width]}.}
+\item{width}{An integer defining the local window in number of samples
+around \code{idx} in which to perform the operation., between
+\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value defining window timespan around \code{idx} in which
-to detect local outliers and perform median replacement. In units of
-\code{time_channel} or \code{t}, between \verb{[t - span, t + span]}.}
+\item{span}{A numeric value defining the local window timespan around \code{idx}
+in which to perform the operation. In units of \code{time_channel} or \code{t},
+between \verb{[t - span/2, t + span/2]}.}
 
 \item{method}{A character string indicating how to handle replacement
 (see \emph{Details} for more on each method):
@@ -134,6 +134,13 @@ if not defined explicitly.
 Channels (columns) in \code{data} not explicitly defined in \code{nirs_channels}
 will be passed through untouched to the output data frame.
 
+Local rolling calculations are made within a window defined by either
+\code{width} as the number of samples centred on \code{idx} between
+\verb{[idx - floor(width/2), idx + floor(width/2)]}, or \code{span} as the
+timespan in units of \code{time_channel} centred on \code{idx} between
+\verb{[t - span/2, t + span/2]}. A partial moving average will be calculated
+at the edges of the data.
+
 \code{replace_invalid()} can be used to overwrite known invalid values in
 exported data, such as \code{c(0, 100, 102.3)}.
 \itemize{
@@ -141,7 +148,7 @@ exported data, such as \code{c(0, 100, 102.3)}.
 than specified values.}
 }
 
-\code{replace_outliers()} will compute local rolling median values across \code{x},
+\code{replace_outliers()} will compute rolling local median values across \code{x},
 defined by either \code{width} number of samples, or \code{span} timespan in units
 of \code{t}.
 \itemize{
@@ -179,12 +186,14 @@ equivalent to \code{replace_missing(x, width = 1)}).
 }
 }
 \examples{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
-replace_invalid(x, invalid_values = 999, width = 1, method = "median")
+replace_invalid(x, invalid_values = 999, width = 2, method = "median")
 
-x_na <- replace_outliers(x, outlier_cutoff = 3, width = 1, method = "NA")
-x_na
+(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "NA"))
 
 replace_missing(x_na, method = "linear")
 
@@ -203,30 +212,29 @@ data_clean <- replace_mnirs(
     time_channel = NULL,        ## default to time_channel in metadata
     invalid_values = c(0, 100), ## known invalid values in the data
     outlier_cutoff = 3,         ## recommended default value
-    width = 7,                  ## local window to detect local outliers and replace missing values
+    width = 15,                 ## local window to detect local outliers and replace missing values
     method = "linear",          ## linear interpolation over `NA`s
 )
 
-\dontrun{
 ## plot original and and show where values have been replaced
 plot(data, label_time = TRUE) +
     scale_colour_manual(
+        name = NULL,
         breaks = c("smo2", "replaced"),
         values = palette_mnirs(2)
     ) +
     geom_point(
         data = data[data_clean$smo2 != data$smo2, ],
-        aes(y = smo2, colour = "replaced")
+        aes(y = smo2, colour = "replaced"), na.rm = TRUE
     ) +
     geom_line(
         data = {
             data_clean[!is.na(data$smo2), "smo2"] <- NA
             data_clean
         },
-        aes(y = smo2, colour = "replaced"), linewidth = 1
+        aes(y = smo2, colour = "replaced"), linewidth = 1, na.rm = TRUE
     )
-}
-
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[pracma:hampel]{pracma::hampel()}} \code{\link[stats:approxfun]{stats::approx()}}

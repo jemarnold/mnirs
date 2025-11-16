@@ -45,11 +45,13 @@ channels will be shifted, e.g. shift the minimum value to zero.}
 \item{by}{A numeric value in units of \code{nirs_channels} by which the data
 channels will be shifted, e.g. shift all values up by 10 units.}
 
-\item{width}{An integer value defining the number of samples centred on
-\code{idx} over which the operation will be performed.}
+\item{width}{An integer defining the local window in number of samples
+around \code{idx} in which to perform the operation., between
+\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value in units of \code{time_channel} defining the timespan
-centred on \code{idx} over which the operation will be performed.}
+\item{span}{A numeric value defining the local window timespan around \code{idx}
+in which to perform the operation. In units of \code{time_channel} or \code{t},
+between \verb{[t - span/2, t + span/2]}.}
 
 \item{position}{Indicates where the reference values will be shifted from.
 \describe{
@@ -99,8 +101,11 @@ be defined. If both of either pairing are defined, \code{to} will be preferred
 over \code{by}, and \code{width} will be preferred over \code{span}.
 }
 \examples{
+\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+library(ggplot2)
+
 ## read example data
-data <- read_mnirs(
+data_shifted <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
@@ -110,23 +115,18 @@ data <- read_mnirs(
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 7,
+        width = 10,
         verbose = FALSE
     ) |>
-    filter_mnirs(na.rm = TRUE, verbose = FALSE)
+    filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+    shift_mnirs(
+        to = 0,             ## NIRS values will be shifted to zero
+        span = 120,         ## shift the first 120 sec of data to zero
+        position = "first",
+        verbose = FALSE
+    )
 
-data_shifted <- shift_mnirs(
-    data,
-    # nirs_channels = NULL, ## taken from metadata
-    to = 0,                 ## NIRS values will be shifted to zero
-    span = 120,             ## shift the first 120 sec of data to zero
-    position = "first",
-    verbose = FALSE
-)
-
-\dontrun{
-plot(data_shifted, display_timestamp = TRUE) +
+plot(data_shifted, label_time = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
-}
-
+\dontshow{\}) # examplesIf}
 }

@@ -13,12 +13,12 @@
 #'   *default* `outlier_cutoff = NULL` will not replace outliers.
 #'   `outlier_cutoff = 3` is the standard replacement threshold following
 #'   Pearson's rule.
-#' @param width An integer defining the window in number of samples around
-#'   `idx` in which to detect local outliers and perform median replacement,
-#'   between `[idx - width, idx + width]`.
-#' @param span A numeric value defining window timespan around `idx` in which
-#'   to detect local outliers and perform median replacement. In units of
-#'   `time_channel` or `t`, between `[t - span, t + span]`.
+#' @param width An integer defining the local window in number of samples
+#'   around `idx` in which to perform the operation., between
+#'   `[idx - floor(width/2), idx + floor(width/2)]`.
+#' @param span A numeric value defining the local window timespan around `idx`
+#'   in which to perform the operation. In units of `time_channel` or `t`,
+#'   between `[t - span/2, t + span/2]`.
 #' @param method A character string indicating how to handle replacement
 #'   (see *Details* for more on each method):
 #'   \describe{
@@ -45,19 +45,27 @@
 #' Channels (columns) in `data` not explicitly defined in `nirs_channels`
 #'   will be passed through untouched to the output data frame.
 #'
+#' Local rolling calculations are made within a window defined by either
+#'   `width` as the number of samples centred on `idx` between
+#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
+#'   timespan in units of `time_channel` centred on `idx` between
+#'   `[t - span/2, t + span/2]`. A partial moving average will be calculated
+#'   at the edges of the data.
+#'
 #' @returns
 #' `replace_mnirs()` returns a [tibble][tibble::tibble-package] of class
 #'   *"mnirs"* with metadata available with `attributes()`.
 #'
 #' @seealso [pracma::hampel()] [stats::approx()]
 #'
-#' @examples
+#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' library(ggplot2)
+#'
 #' ## vectorised operation
 #' x <- c(1, 999, 3, 4, 999, 6)
-#' replace_invalid(x, invalid_values = 999, width = 1, method = "median")
+#' replace_invalid(x, invalid_values = 999, width = 2, method = "median")
 #'
-#' x_na <- replace_outliers(x, outlier_cutoff = 3, width = 1, method = "NA")
-#' x_na
+#' (x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "NA"))
 #'
 #' replace_missing(x_na, method = "linear")
 #'
@@ -76,29 +84,28 @@
 #'     time_channel = NULL,        ## default to time_channel in metadata
 #'     invalid_values = c(0, 100), ## known invalid values in the data
 #'     outlier_cutoff = 3,         ## recommended default value
-#'     width = 7,                  ## local window to detect local outliers and replace missing values
+#'     width = 15,                 ## local window to detect local outliers and replace missing values
 #'     method = "linear",          ## linear interpolation over `NA`s
 #' )
 #'
-#' \dontrun{
 #' ## plot original and and show where values have been replaced
 #' plot(data, label_time = TRUE) +
 #'     scale_colour_manual(
+#'         name = NULL,
 #'         breaks = c("smo2", "replaced"),
 #'         values = palette_mnirs(2)
 #'     ) +
 #'     geom_point(
 #'         data = data[data_clean$smo2 != data$smo2, ],
-#'         aes(y = smo2, colour = "replaced")
+#'         aes(y = smo2, colour = "replaced"), na.rm = TRUE
 #'     ) +
 #'     geom_line(
 #'         data = {
 #'             data_clean[!is.na(data$smo2), "smo2"] <- NA
 #'             data_clean
 #'         },
-#'         aes(y = smo2, colour = "replaced"), linewidth = 1
+#'         aes(y = smo2, colour = "replaced"), linewidth = 1, na.rm = TRUE
 #'     )
-#' }
 #'
 #' @rdname replace_mnirs
 #' @order 1
@@ -280,7 +287,7 @@ replace_invalid <- function(
 #' @inheritParams replace_invalid
 #'
 #' @details
-#' `replace_outliers()` will compute local rolling median values across `x`,
+#' `replace_outliers()` will compute rolling local median values across `x`,
 #'   defined by either `width` number of samples, or `span` timespan in units
 #'   of `t`.
 #'

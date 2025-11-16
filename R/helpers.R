@@ -9,48 +9,38 @@
 #' @param idx A numeric vector of indices of `t` at which to calculate local
 #'   windows. All indices of `t` by *default*, or can be used to only calculate
 #'   for known indicies, such as invalid values of `x`.
-#' @param method A character string specifying whether the local window should
-#'   take a *"two-sided"* `width` or `span` on both sides of `idx` (the
-#'   *default*), or *"centred"* around `idx`.
 #'
 #' @returns
 #' `compute_local_windows()`: A list the same length as `idx` and the same or
 #'   shorter length as `t` with numeric vectors of sample indices of length
-#'   `2 * width` samples or `2 * span` units of time `t` for `method = `
-#'   `"two-sided"`, or `width / span` for `method = "centred"`.
+#'   `width` samples or `span` units of time `t`.
 #'
 #' @details
-#' `method = "two-sided"` (the *default*) is used for `replace_mnirs()`
-#'   functions where the user is entering `width` or `span` for both
-#'   sides of `idx`.
-#'
-#' `method = "centred"` is used for `shift_mnirs()` where the user is entering
-#'   `width` or `span` centred around `idx`.
+#' Local rolling calculations are made within a window defined by either
+#'   `width` as the number of samples centred on `idx` between
+#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
+#'   timespan in units of `time_channel` centred on `idx` between
+#'   `[t - span/2, t + span/2]`. A partial moving average will be calculated
+#'   at the edges of the data.
 #'
 #' @examples
 #' x <- c(1, 2, 3, 100, 5)
 #' t <- seq_along(x)
 #'
 #' ## a list of numeric vectors of rolling local windows along `t`
-#' window_idx <- mnirs:::compute_local_windows(t, width = 1, span = NULL)
-#' window_idx
+#' (window_idx <- mnirs:::compute_local_windows(t, width = 2, span = NULL))
 #'
 #' ## a numeric vector of local medians of `x`
-#' local_medians <- mnirs:::compute_local_fun(x, window_idx, median)
-#' local_medians
+#' (local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
 #'
 #' ## a logical vector of local outliers of `x`
-#' is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3)
-#' is.outlier
+#' (is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3))
 #'
-#' ## a list of numeric vectors of local windows of valid values of `x`
-#' ## neighbouring `NA`s.
+#' ## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.
 #' x <- c(1, 2, 3, NA, NA, 6)
-#' window_idx <- mnirs:::compute_window_of_valid_neighbours(x, width = 1)
-#' window_idx
+#' (window_idx <- mnirs:::compute_window_of_valid_neighbours(x, width = 2))
 #'
-#' local_medians <- mnirs:::compute_local_fun(x, window_idx, median)
-#' local_medians
+#' (local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
 #'
 #' x[is.na(x)] <- local_medians
 #' x
@@ -62,13 +52,9 @@ compute_local_windows <- function(
         idx = seq_along(t),
         width = NULL,
         span = NULL,
-        method = c("two-sided", "centred"),
         verbose = TRUE
 ) {
     ## validation ===========================================
-    method <- match.arg(method)
-    centred <- method == "centred" ## as.logical
-
     if (is.null(c(width, span))) {
         cli_abort("{.arg width} or {.arg span} must be defined.")
     }
@@ -90,17 +76,13 @@ compute_local_windows <- function(
     ## process ============================================
     n <- length(t)
     if (!is.null(width)) {
-        if (centred) {
-            width <- floor(width * 0.5)
-        }
-        start_idx <- pmax(1, seq_len(n) - width)
-        end_idx <- pmin(n, seq_len(n) + width)
+        half_width <- floor(width * 0.5)
+        start_idx <- pmax(1L, seq_len(n) - half_width)
+        end_idx <- pmin(n, seq_len(n) + half_width)
     } else {
-        if (centred) {
-            span <- span * 0.5
-        }
-        start_idx <- findInterval(t - span, t, left.open = TRUE) + 1
-        end_idx <- findInterval(t + span, t, left.open = FALSE)
+        half_span <- span * 0.5
+        start_idx <- findInterval(t - half_span, t, left.open = TRUE) + 1L
+        end_idx <- findInterval(t + half_span, t, left.open = FALSE)
     }
 
     lapply(idx, \(.i) {
@@ -122,7 +104,7 @@ compute_local_windows <- function(
 #'   shorter length as `x` with numeric vectors for the sample indices of
 #'   local rolling windows.
 #' @param FUN A function to pass through for local rolling calculation.
-#'   Current options are `c(median, mean)`
+#'   Currently used functions are `c(median, mean)`.
 #'
 #' @returns
 #' `compute_local_fun()`: A numeric vector the same length as `x`.
@@ -169,6 +151,7 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
     }, numeric(1))
 
     ## robust variance threshold based on minimum sample difference
+    ## TODO need to verify behaviour in edge cases
     abs_diffs <- abs(diff(x[!is.na(x)]))
     smallest_var <- suppressWarnings(min(abs_diffs[abs_diffs > 1e-5]))
 
@@ -195,8 +178,8 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
 #' @returns
 #' `compute_window_of_valid_neighbours()`: A list the same length as `NA`
 #'   values in `x` with numeric vectors of sample indices of length
-#'   `2 * width` samples or `2 * span` units of time `t` for valid values
-#'   neighbouring either side of the invalid `NA`s.
+#'   `width` samples or `span` units of time `t` for valid values neighbouring
+#'   split to either side of the invalid `NA`s.
 #'
 #' @rdname compute_helpers
 #' @keywords internal
@@ -232,24 +215,26 @@ compute_window_of_valid_neighbours <- function(
     n_na <- length(na_idx)
     ## process ============================================
     if (!is.null(width)) {
-        ## Find position of each NA in valid_idx sequence
+        ## Find position to the left of each NA in valid_idx sequence
         pos <- findInterval(na_idx, valid_idx)
+        half_width <- floor(width * 0.5)
 
         window_idx <- vector("list", n_na)
         for (i in seq_len(n_na)) {
             ## Extract width samples before and after
-            left <- max(1L, pos[i] - width + 1L):pos[i]
-            right <- min(n_valid, pos[i] + 1L):min(n_valid, pos[i] + width)
-            window_idx[[i]] <- valid_idx[unique(c(left, right))]
+            left <- max(1L, pos[i] - half_width + 1L):pos[i]
+            right <- min(n_valid, pos[i] + 1L):min(n_valid, pos[i] + half_width)
+            window_idx[[i]] <- valid_idx[sort(unique(c(left, right)))]
         }
     } else if (!is.null(span)) {
         ## Pre-compute for span approach
         t_valid <- t[valid_idx]
         t_na <- t[na_idx]
+        half_span <- span * 0.5
 
         window_idx <- lapply(seq_len(n_na), \(.i) {
-            t_range <- c(t_na[.i] - span, t_na[.i] + span)
-            in_range <- valid_idx[t_valid >= t_range[1] & t_valid <= t_range[2]]
+            t_range <- c(t_na[.i] - half_span, t_na[.i] + half_span)
+            in_range <- valid_idx[t_valid >= t_range[1L] & t_valid <= t_range[2L]]
 
             if (length(in_range) == 0) {
                 pos <- findInterval(na_idx[.i], valid_idx)
@@ -284,21 +269,19 @@ compute_window_of_valid_neighbours <- function(
 #'   input vector `x` with `NA` values restored to their original positions.
 #'
 #' @examples
-#' \dontrun{
 #' x <- c(1, NA, 3, NA, 5)
-#' na_info <- preserve_na(x)
+#' (na_info <- mnirs:::preserve_na(x))#'
+#'
 #' ## process with a function that would normally fail on NA
 #' y <- na_info$x_valid * 2
-#' result <- restore_na(y, na_info)
-#' result
+#' (result <- mnirs:::restore_na(y, na_info))
 #'
-#' x <- c("A", NA, "B", NA, "C")
-#' na_info <- preserve_na(x)
+#' x <- c("A", "B", "C", NA, NA)
+#' (na_info <- mnirs:::preserve_na(x))
+#'
 #' ## process with a function that would normally fail on NA
 #' y <- tolower(na_info$x_valid)
-#' result <- restore_na(y, na_info)
-#' result
-#' }
+#' (result <- mnirs:::restore_na(y, na_info))
 #'
 #' @keywords internal
 preserve_na <- function(x) {
