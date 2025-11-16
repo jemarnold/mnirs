@@ -293,9 +293,6 @@ palette_mnirs <- function(n = NULL) {
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' library(ggplot2)
 #'
-#' ## set theme for the current script
-#' theme_set(theme_mnirs())
-#'
 #' ## plot example data
 #' df <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
@@ -305,9 +302,10 @@ palette_mnirs <- function(n = NULL) {
 #' )
 #'
 #' ggplot(df, aes(x = time)) +
-#'     scale_colour_mnirs() +
-#'     geom_line(aes(y = smo2_left, colour = "left")) +
-#'     geom_line(aes(y = smo2_right, colour = "right"))
+#'     theme_mnirs() +
+#'     scale_colour_mnirs(name = NULL) +
+#'     geom_line(aes(y = smo2_left, colour = "smo2_left")) +
+#'     geom_line(aes(y = smo2_right, colour = "smo2_right"))
 #'
 #' @rdname scale_colour_mnirs
 #' @export
@@ -360,6 +358,7 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #'
 #' ggplot(data.frame(x, y)) +
 #'     aes(x = x, y = y) +
+#'     theme_mnirs() +
 #'     scale_x_continuous(breaks = breaks_timespan()) +
 #'     geom_line()
 #'
@@ -437,6 +436,7 @@ breaks_timespan <- function(
 #'
 #' ggplot(data.frame(x, y)) +
 #'     aes(x = x, y = y) +
+#'     theme_mnirs() +
 #'     scale_x_continuous(
 #'         breaks = breaks_timespan(),
 #'         labels = format_hmmss

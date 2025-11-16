@@ -28,6 +28,7 @@ y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 
 ggplot(data.frame(x, y)) +
     aes(x = x, y = y) +
+    theme_mnirs() +
     scale_x_continuous(breaks = breaks_timespan()) +
     geom_line()
 \dontshow{\}) # examplesIf}
