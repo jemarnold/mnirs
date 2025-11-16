@@ -73,13 +73,15 @@ shift_mnirs(
 
 - width:
 
-  An integer value defining the number of samples centred on `idx` over
-  which the operation will be performed.
+  An integer defining the local window in number of samples around `idx`
+  in which to perform the operation., between
+  `[idx - floor(width/2), idx + floor(width/2)]`.
 
 - span:
 
-  A numeric value in units of `time_channel` defining the timespan
-  centred on `idx` over which the operation will be performed.
+  A numeric value defining the local window timespan around `idx` in
+  which to perform the operation. In units of `time_channel` or `t`,
+  between `[t - span/2, t + span/2]`.
 
 - position:
 
@@ -137,8 +139,10 @@ preferred over `by`, and `width` will be preferred over `span`.
 ## Examples
 
 ``` r
+library(ggplot2)
+
 ## read example data
-data <- read_mnirs(
+data_shifted <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
@@ -148,22 +152,17 @@ data <- read_mnirs(
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 7,
+        width = 10,
         verbose = FALSE
     ) |>
-    filter_mnirs(na.rm = TRUE, verbose = FALSE)
+    filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+    shift_mnirs(
+        to = 0,             ## NIRS values will be shifted to zero
+        span = 120,         ## shift the first 120 sec of data to zero
+        position = "first",
+        verbose = FALSE
+    )
 
-data_shifted <- shift_mnirs(
-    data,
-    # nirs_channels = NULL, ## taken from metadata
-    to = 0,                 ## NIRS values will be shifted to zero
-    span = 120,             ## shift the first 120 sec of data to zero
-    position = "first",
-    verbose = FALSE
-)
-
-if (FALSE) { # \dontrun{
-plot(data_shifted, display_timestamp = TRUE) +
+plot(data_shifted, label_time = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
-} # }
 ```

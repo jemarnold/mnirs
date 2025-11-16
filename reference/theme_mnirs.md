@@ -79,7 +79,8 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+library(ggplot2)
+
 ## set theme for the current script
 theme_set(theme_mnirs())
 
@@ -91,5 +92,4 @@ read_mnirs(
     verbose = FALSE
 ) |>
     plot(label_time = TRUE)
-} # }
 ```

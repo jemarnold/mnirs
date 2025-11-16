@@ -26,19 +26,19 @@ filter_butter(
 
 - n:
 
-  An integer defining the filter order for `method = ` *`"butterworth"`*
+  An integer defining the filter order for `method = "butterworth"`
   (*default* `n = 1`).
 
 - W:
 
   A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = `*`"butterworth"`*, as a fraction of the
+  frequency(ies) for `method = "butterworth"`, as a fraction of the
   Nyquist frequency (see *Details*).
 
 - type:
 
   A character string indicating the digital filter type for
-  `method = `*`"butterworth"`* (see *Details*).
+  `method = "butterworth"` (see *Details*).
 
   `"low"`
 
@@ -124,6 +124,8 @@ Then `NA`s will be preserved and passed through in the returned vector.
 ## Examples
 
 ``` r
+library(ggplot2)
+
 set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
@@ -131,9 +133,10 @@ noisy_sin <- sin + noise
 filt_without_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "none")
 filt_with_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "rep1")
 
-if (FALSE) { # \dontrun{
-plot(noisy_sin, type = "l")
-lines(filt_without_edge, col = "red", lwd = 4)
-lines(filt_with_edge, col = "blue", lwd = 4)
-} # }
+ggplot(data.frame(), aes(x = seq_along(noise))) +
+    theme_mnirs() +
+    scale_colour_mnirs(name = NULL) +
+    geom_line(aes(y = noisy_sin)) +
+    geom_line(aes(y = filt_without_edge, colour = "filt_without_edge")) +
+    geom_line(aes(y = filt_with_edge, colour = "filt_with_edge"))
 ```

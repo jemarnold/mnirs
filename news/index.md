@@ -1,5 +1,20 @@
 # Changelog
 
+## mnirs 0.1.2
+
+- Simplify use of `width` and `span` to be centred on `idx`.
+  - Updated internal helpers:
+    [`compute_local_windows()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+    &
+    [`compute_window_of_valid_neighbours()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+  - Updated appropriate documentation.
+  - Updated README, vignette, & examples to `width = 10`.
+- Updated examples with
+  `@examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))`.
+- Updated
+  [`create_mnirs_data()`](https://jemarnold.github.io/mnirs/reference/create_mnirs_data.md)
+  to correctly accept listed or unlisted metadata.
+
 ## mnirs 0.1.1
 
 - Fix formatting error in README.Rmd.

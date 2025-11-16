@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -321,7 +321,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## default to time_channel in metadata</span></span>
 <span>    invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="co">## known invalid values in the data</span></span>
 <span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,         <span class="co">## recommended default value</span></span>
-<span>    width <span class="op">=</span> <span class="fl">7</span>,                  <span class="co">## local window to detect local outliers and replace missing values</span></span>
+<span>    width <span class="op">=</span> <span class="fl">10</span>,                  <span class="co">## local window to detect local outliers and replace missing values</span></span>
 <span>    method <span class="op">=</span> <span class="st">"linear"</span>           <span class="co">## linear interpolation over `NA`s</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -427,7 +427,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 </li>
 <li>
 <p><code>spar</code></p>
-<p>The smoothing parameter of the cubic spline can be determined automatically, or specified explicitly. See <code>{stats::smooth.spline()}</code></p>
+<p>The smoothing parameter of the cubic spline can be determined automatically, or specified explicitly. See <code><a href="https://rdrr.io/r/stats/smooth.spline.html" class="external-link">stats::smooth.spline()</a></code></p>
 </li>
 </ul></section><section class="level3"><h4 id="butterworth-digital-filter">Butterworth digital filter<a class="anchor" aria-label="anchor" href="#butterworth-digital-filter"></a>
 </h4>
@@ -446,7 +446,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 </li>
 <li>
 <p><code>W</code> or <code>fc</code></p>
-<p>the cutoff frequency can be specified either as <code>W</code>; a fraction (between <code>[0, 1]</code>) of the <em>Nyquist frequency</em>, which is equal to half of the <code>sample_rate</code> of the data. Or as <code>fc</code>; the cutoff frequency in Hz.</p>
+<p>The cutoff frequency can be specified either as <code>W</code>; a fraction (between <code>[0, 1]</code>) of the <a href="https://www.youtube.com/watch?v=IZJQXlbm2dU" class="external-link"><em>Nyquist frequency</em></a>, which is equal to half of the <code>sample_rate</code> of the data. Or as <code>fc</code>; the cutoff frequency in Hz, where this absolute frequency should still be between 0 Hz and the Nyquist frequency.</p>
 </li>
 </ul>
 <p>For filtering vector data and more details about Butterworth filter parameters, see <code><a href="../reference/filter_butter.html">filter_butter()</a></code>.</p>
@@ -564,8 +564,10 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 </div>
 </div>
 </div>
-<p>Before shifting, the ending (minimum) values for <em>smo2_left</em> and <em>smo2_right</em> were similar, but the starting baseline values were different. Whereas when we shift the baseline values to zero, we can see that the <em>smo2_right</em> signal has a smaller deoxygenation amplitude compared to the <em>smo2_left</em> signal.</p>
-<p>We have to consider how our assumptions and processing decisions will influence our interpretations; by shifting both starting values, we are normalising for the starting condition of the two tissue sites and implicitly assuming the baseline represents the same starting condition in both legs. This may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as <code>"∇SmO[2]"</code>).</p>
+<p>Before shifting, the ending (minimum) values for <em>smo2_left</em> and <em>smo2_right</em> were similar, but the starting baseline values were different.</p>
+<p>Whereas when we shift the baseline values to zero, we can see that the <em>smo2_right</em> signal has a smaller deoxygenation amplitude compared to the <em>smo2_left</em> signal.</p>
+<p>We have to consider how our assumptions and processing decisions will influence our interpretations; by shifting both starting values, we are normalising for the starting condition of the two tissue sites and implicitly assuming the baseline represents the same starting condition in both legs.</p>
+<p>This may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as <code>"∇SmO[2]"</code>).</p>
 </section><section class="level2"><h3 id="rescale_mnirs">
 <code>rescale_mnirs()</code><a class="anchor" aria-label="anchor" href="#rescale_mnirs"></a>
 </h3>
@@ -602,7 +604,8 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 </div>
 </div>
 <p>Here, our assumption is that during a maximal exercise task, the minimum and maximum values represent the functional capacity of the tissue being observed. So we normalise the functional dynamic range in each leg.</p>
-<p>By normalising this way, the differences between <em>smo2_left</em> and <em>smo2_right</em> appear less pronounced than when the baselines were shifted to zero. Our interpretation may be that <em>smo2_left</em> appears to start at a slightly higher percent of it’s functional range, and deoxygenates faster toward it’s minimum. while <em>smo2_right</em> deoxygenates slightly slower during work, and reoxygenates slightly faster during recovery.</p>
+<p>By normalising this way, the differences between <em>smo2_left</em> and <em>smo2_right</em> appear less pronounced than when the baselines were shifted to zero.</p>
+<p>Our interpretation may be that <em>smo2_left</em> appears to start at a slightly higher percent of it’s functional range, and deoxygenates faster toward it’s minimum. While <em>smo2_right</em> deoxygenates slightly slower during work, and reoxygenates slightly faster during recovery.</p>
 </section><section class="level2"><h3 id="combined-shift-and-rescale">Combined shift and rescale<a class="anchor" aria-label="anchor" href="#combined-shift-and-rescale"></a>
 </h3>
 <p>What if we wanted to shift each NIRS signal to start from a mean 120-sec baseline at zero, then rescale the dynamic range of both signals grouped together, such that the highest and lowest values across both signals together range from 0-100%?</p>

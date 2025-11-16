@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,13 +67,15 @@
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>An integer value defining the number of samples centred on
-<code>idx</code> over which the operation will be performed.</p></dd>
+<dd><p>An integer defining the local window in number of samples
+around <code>idx</code> in which to perform the operation., between
+<code>[idx - floor(width/2), idx + floor(width/2)]</code>.</p></dd>
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>A numeric value in units of <code>time_channel</code> defining the timespan
-centred on <code>idx</code> over which the operation will be performed.</p></dd>
+<dd><p>A numeric value defining the local window timespan around <code>idx</code>
+in which to perform the operation. In units of <code>time_channel</code> or <code>t</code>,
+between <code>[t - span/2, t + span/2]</code>.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

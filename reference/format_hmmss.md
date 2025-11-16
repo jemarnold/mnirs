@@ -29,9 +29,11 @@ If all values are less than 3600 (1 hour), then format is returned as
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+library(ggplot2)
+
 x = 0:120
 y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+
 ggplot(data.frame(x, y)) +
     aes(x = x, y = y) +
     scale_x_continuous(
@@ -39,5 +41,4 @@ ggplot(data.frame(x, y)) +
         labels = format_hmmss
     ) +
     geom_line()
-} # }
 ```

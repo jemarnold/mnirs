@@ -27,9 +27,9 @@ Named or unnamed character vector of hex colours.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 scales::show_col(palette_mnirs())
+
 scales::show_col(palette_mnirs(2))
+
 scales::show_col(palette_mnirs(c("red", "orange")))
-} # }
 ```

@@ -47,7 +47,6 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 ## call an example *{mnirs}* data file
 file_path <- example_mnirs("moxy_ramp")
 
@@ -61,5 +60,4 @@ data_table <- read_mnirs(
 
 ## note the hidden plot option to display time values as `hh:mm:ss`
 plot(data_table, label_time = TRUE)
-} # }
 ```

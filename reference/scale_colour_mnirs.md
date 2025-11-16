@@ -38,7 +38,8 @@ object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+library(ggplot2)
+
 ## set theme for the current script
 theme_set(theme_mnirs())
 
@@ -54,5 +55,4 @@ ggplot(df, aes(x = time)) +
     scale_colour_mnirs() +
     geom_line(aes(y = smo2_left, colour = "left")) +
     geom_line(aes(y = smo2_right, colour = "right"))
-} # }
 ```

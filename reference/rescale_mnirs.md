@@ -83,8 +83,10 @@ arrangements.
 ## Examples
 
 ``` r
+library(ggplot2)
+
 ## read example data
-data <- read_mnirs(
+data_rescaled <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
@@ -94,20 +96,15 @@ data <- read_mnirs(
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 7,
+        width = 10,
         verbose = FALSE
     ) |>
-    filter_mnirs(na.rm = TRUE, verbose = FALSE)
+    filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+    rescale_mnirs(
+        range = c(0, 100),   ## rescale to a 0-100% functional exercise range
+        verbose = FALSE
+    )
 
-data_rescaled <- rescale_mnirs(
-    data,
-    # nirs_channels = NULL, ## taken from metadata
-    range = c(0, 100),      ## rescale to a 0-100% functional exercise range
-    verbose = FALSE
-)
-
-if (FALSE) { # \dontrun{
-plot(data_rescaled, display_timestamp = TRUE) +
+plot(data_rescaled, label_time = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")
-} # }
 ```

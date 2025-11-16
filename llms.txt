@@ -147,7 +147,7 @@ data_cleaned <- replace_mnirs(
     time_channel = NULL,        ## default to time_channel in metadata
     invalid_values = c(0, 100), ## known invalid values in the data
     outlier_cutoff = 3,         ## recommended default value
-    width = 7,                  ## local window to detect local outliers and replace missing values
+    width = 10,                  ## local window to detect local outliers and replace missing values
     method = "linear"           ## linear interpolation over `NA`s
 )
 

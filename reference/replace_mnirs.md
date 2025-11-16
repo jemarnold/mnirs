@@ -93,15 +93,15 @@ replace_missing(
 
 - width:
 
-  An integer defining the window in number of samples around `idx` in
-  which to detect local outliers and perform median replacement, between
-  `[idx - width, idx + width]`.
+  An integer defining the local window in number of samples around `idx`
+  in which to perform the operation., between
+  `[idx - floor(width/2), idx + floor(width/2)]`.
 
 - span:
 
-  A numeric value defining window timespan around `idx` in which to
-  detect local outliers and perform median replacement. In units of
-  `time_channel` or `t`, between `[t - span, t + span]`.
+  A numeric value defining the local window timespan around `idx` in
+  which to perform the operation. In units of `time_channel` or `t`,
+  between `[t - span/2, t + span/2]`.
 
 - method:
 
@@ -168,13 +168,20 @@ not defined explicitly.
 Channels (columns) in `data` not explicitly defined in `nirs_channels`
 will be passed through untouched to the output data frame.
 
+Local rolling calculations are made within a window defined by either
+`width` as the number of samples centred on `idx` between
+`[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
+timespan in units of `time_channel` centred on `idx` between
+`[t - span/2, t + span/2]`. A partial moving average will be calculated
+at the edges of the data.
+
 `replace_invalid()` can be used to overwrite known invalid values in
 exported data, such as `c(0, 100, 102.3)`.
 
 - `<under development>`: *allow for overwriting all values greater or
   less than specified values.*
 
-`replace_outliers()` will compute local rolling median values across
+`replace_outliers()` will compute rolling local median values across
 `x`, defined by either `width` number of samples, or `span` timespan in
 units of `t`.
 
@@ -226,13 +233,14 @@ specified by `method`.
 ## Examples
 
 ``` r
+library(ggplot2)
+
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
-replace_invalid(x, invalid_values = 999, width = 1, method = "median")
+replace_invalid(x, invalid_values = 999, width = 2, method = "median")
 #> [1] 1 2 3 4 5 6
 
-x_na <- replace_outliers(x, outlier_cutoff = 3, width = 1, method = "NA")
-x_na
+(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "NA"))
 #> [1]  1 NA  3  4 NA  6
 
 replace_missing(x_na, method = "linear")
@@ -253,27 +261,28 @@ data_clean <- replace_mnirs(
     time_channel = NULL,        ## default to time_channel in metadata
     invalid_values = c(0, 100), ## known invalid values in the data
     outlier_cutoff = 3,         ## recommended default value
-    width = 7,                  ## local window to detect local outliers and replace missing values
+    width = 15,                 ## local window to detect local outliers and replace missing values
     method = "linear",          ## linear interpolation over `NA`s
 )
 
-if (FALSE) { # \dontrun{
 ## plot original and and show where values have been replaced
 plot(data, label_time = TRUE) +
     scale_colour_manual(
+        name = NULL,
         breaks = c("smo2", "replaced"),
         values = palette_mnirs(2)
     ) +
     geom_point(
         data = data[data_clean$smo2 != data$smo2, ],
-        aes(y = smo2, colour = "replaced")
+        aes(y = smo2, colour = "replaced"), na.rm = TRUE
     ) +
     geom_line(
         data = {
             data_clean[!is.na(data$smo2), "smo2"] <- NA
             data_clean
         },
-        aes(y = smo2, colour = "replaced"), linewidth = 1
+        aes(y = smo2, colour = "replaced"), linewidth = 1, na.rm = TRUE
     )
-} # }
+#> Scale for colour is already present.
+#> Adding another scale for colour, which will replace the existing scale.
 ```

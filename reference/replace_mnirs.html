@@ -23,7 +23,7 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -148,15 +148,15 @@ Pearson's rule.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>An integer defining the window in number of samples around
-<code>idx</code> in which to detect local outliers and perform median replacement,
-between <code>[idx - width, idx + width]</code>.</p></dd>
+<dd><p>An integer defining the local window in number of samples
+around <code>idx</code> in which to perform the operation., between
+<code>[idx - floor(width/2), idx + floor(width/2)]</code>.</p></dd>
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>A numeric value defining window timespan around <code>idx</code> in which
-to detect local outliers and perform median replacement. In units of
-<code>time_channel</code> or <code>t</code>, between <code>[t - span, t + span]</code>.</p></dd>
+<dd><p>A numeric value defining the local window timespan around <code>idx</code>
+in which to perform the operation. In units of <code>time_channel</code> or <code>t</code>,
+between <code>[t - span/2, t + span/2]</code>.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -215,10 +215,16 @@ functions to operate on a data frame.</p>
 if not defined explicitly.</p>
 <p>Channels (columns) in <code>data</code> not explicitly defined in <code>nirs_channels</code>
 will be passed through untouched to the output data frame.</p>
+<p>Local rolling calculations are made within a window defined by either
+<code>width</code> as the number of samples centred on <code>idx</code> between
+<code>[idx - floor(width/2), idx + floor(width/2)]</code>, or <code>span</code> as the
+timespan in units of <code>time_channel</code> centred on <code>idx</code> between
+<code>[t - span/2, t + span/2]</code>. A partial moving average will be calculated
+at the edges of the data.</p>
 <p><code>replace_invalid()</code> can be used to overwrite known invalid values in
 exported data, such as <code>c(0, 100, 102.3)</code>.</p><ul><li><p><code>&lt;under development&gt;</code>: <em>allow for overwriting all values greater or less
 than specified values.</em></p></li>
-</ul><p><code>replace_outliers()</code> will compute local rolling median values across <code>x</code>,
+</ul><p><code>replace_outliers()</code> will compute rolling local median values across <code>x</code>,
 defined by either <code>width</code> number of samples, or <code>span</code> timespan in units
 of <code>t</code>.</p><ul><li><p>Outliers are detected with robust median absolute deviation (MAD) method
 adapted from <code>pracma::hampel()</code>. Outliers equal to or less than the
@@ -255,13 +261,14 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## vectorised operation</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## vectorised operation</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">999</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">999</span>, <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5 6</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">1</span>, method <span class="op">=</span> <span class="st">"NA"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">x_na</span></span></span>
+<span class="r-in"><span><span class="op">(</span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"NA"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1 NA  3  4 NA  6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">replace_missing</span><span class="op">(</span><span class="va">x_na</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></span>
@@ -282,30 +289,31 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## default to time_channel in metadata</span></span></span>
 <span class="r-in"><span>    invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="co">## known invalid values in the data</span></span></span>
 <span class="r-in"><span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,         <span class="co">## recommended default value</span></span></span>
-<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">7</span>,                  <span class="co">## local window to detect local outliers and replace missing values</span></span></span>
+<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">15</span>,                 <span class="co">## local window to detect local outliers and replace missing values</span></span></span>
 <span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>,          <span class="co">## linear interpolation over `NA`s</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
 <span class="r-in"><span><span class="co">## plot original and and show where values have been replaced</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        name <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
 <span class="r-in"><span>        breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"smo2"</span>, <span class="st">"replaced"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        values <span class="op">=</span> <span class="fu"><a href="palette_mnirs.html">palette_mnirs</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        data <span class="op">=</span> <span class="va">data</span><span class="op">[</span><span class="va">data_clean</span><span class="op">$</span><span class="va">smo2</span> <span class="op">!=</span> <span class="va">data</span><span class="op">$</span><span class="va">smo2</span>, <span class="op">]</span>,</span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">smo2</span>, colour <span class="op">=</span> <span class="st">"replaced"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">smo2</span>, colour <span class="op">=</span> <span class="st">"replaced"</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        data <span class="op">=</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>            <span class="va">data_clean</span><span class="op">[</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">smo2</span><span class="op">)</span>, <span class="st">"smo2"</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
 <span class="r-in"><span>            <span class="va">data_clean</span></span></span>
 <span class="r-in"><span>        <span class="op">}</span>,</span></span>
-<span class="r-in"><span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">smo2</span>, colour <span class="op">=</span> <span class="st">"replaced"</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">1</span></span></span>
+<span class="r-in"><span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">smo2</span>, colour <span class="op">=</span> <span class="st">"replaced"</span><span class="op">)</span>, linewidth <span class="op">=</span> <span class="fl">1</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Scale for <span style="color: #00BB00;">colour</span> is already present.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Adding another scale for <span style="color: #00BB00;">colour</span>, which will replace the existing scale.</span>
+<span class="r-plt img"><img src="replace_mnirs-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

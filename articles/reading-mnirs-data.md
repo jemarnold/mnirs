@@ -361,7 +361,7 @@ data_cleaned <- replace_mnirs(
     time_channel = NULL,        ## default to time_channel in metadata
     invalid_values = c(0, 100), ## known invalid values in the data
     outlier_cutoff = 3,         ## recommended default value
-    width = 7,                  ## local window to detect local outliers and replace missing values
+    width = 10,                  ## local window to detect local outliers and replace missing values
     method = "linear"           ## linear interpolation over `NA`s
 )
 
@@ -511,7 +511,8 @@ vignette `<currently under development>`.
 - `spar`
 
   The smoothing parameter of the cubic spline can be determined
-  automatically, or specified explicitly. See `{stats::smooth.spline()}`
+  automatically, or specified explicitly. See
+  [`stats::smooth.spline()`](https://rdrr.io/r/stats/smooth.spline.html)
 
 #### Butterworth digital filter
 
@@ -535,10 +536,12 @@ vignette `<currently under development>`.
 
 - `W` or `fc`
 
-  the cutoff frequency can be specified either as `W`; a fraction
-  (between `[0, 1]`) of the *Nyquist frequency*, which is equal to half
-  of the `sample_rate` of the data. Or as `fc`; the cutoff frequency in
-  Hz.
+  The cutoff frequency can be specified either as `W`; a fraction
+  (between `[0, 1]`) of the [*Nyquist
+  frequency*](https://www.youtube.com/watch?v=IZJQXlbm2dU), which is
+  equal to half of the `sample_rate` of the data. Or as `fc`; the cutoff
+  frequency in Hz, where this absolute frequency should still be between
+  0 Hz and the Nyquist frequency.
 
 For filtering vector data and more details about Butterworth filter
 parameters, see
@@ -698,17 +701,21 @@ plot(data_shifted, label_time = TRUE) +
 
 Before shifting, the ending (minimum) values for *smo2_left* and
 *smo2_right* were similar, but the starting baseline values were
-different. Whereas when we shift the baseline values to zero, we can see
-that the *smo2_right* signal has a smaller deoxygenation amplitude
-compared to the *smo2_left* signal.
+different.
+
+Whereas when we shift the baseline values to zero, we can see that the
+*smo2_right* signal has a smaller deoxygenation amplitude compared to
+the *smo2_left* signal.
 
 We have to consider how our assumptions and processing decisions will
 influence our interpretations; by shifting both starting values, we are
 normalising for the starting condition of the two tissue sites and
 implicitly assuming the baseline represents the same starting condition
-in both legs. This may be appropriate when we are more interested in the
-relative change (delta) in each leg during an intervention or exposure
-(often referred to as `"∇SmO[2]"`).
+in both legs.
+
+This may be appropriate when we are more interested in the relative
+change (delta) in each leg during an intervention or exposure (often
+referred to as `"∇SmO[2]"`).
 
 ### `rescale_mnirs()`
 
@@ -759,9 +766,11 @@ observed. So we normalise the functional dynamic range in each leg.
 
 By normalising this way, the differences between *smo2_left* and
 *smo2_right* appear less pronounced than when the baselines were shifted
-to zero. Our interpretation may be that *smo2_left* appears to start at
-a slightly higher percent of it’s functional range, and deoxygenates
-faster toward it’s minimum. while *smo2_right* deoxygenates slightly
+to zero.
+
+Our interpretation may be that *smo2_left* appears to start at a
+slightly higher percent of it’s functional range, and deoxygenates
+faster toward it’s minimum. While *smo2_right* deoxygenates slightly
 slower during work, and reoxygenates slightly faster during recovery.
 
 ### Combined shift and rescale

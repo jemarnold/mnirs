@@ -92,7 +92,7 @@ filter_mnirs(
 - sample_rate:
 
   A numeric value for the sample rate in Hz for
-  `method = `*`"butterworth"`*. Will be taken from metadata or estimated
+  `method = "butterworth"`. Will be taken from metadata or estimated
   from `time_channel` if not defined explicitly.
 
 - method:
@@ -115,12 +115,12 @@ filter_mnirs(
 - spar:
 
   A numeric value defining the smoothing parameter for
-  `method = `*`"smooth_spline"`*.
+  `method = "smooth_spline"`.
 
 - type:
 
   A character string indicating the digital filter type for
-  `method = `*`"butterworth"`* (see *Details*).
+  `method = "butterworth"` (see *Details*).
 
   `"low"`
 
@@ -140,32 +140,31 @@ filter_mnirs(
 
 - n:
 
-  An integer defining the filter order for `method = ` *`"butterworth"`*
+  An integer defining the filter order for `method = "butterworth"`
   (*default* `n = 1`).
 
 - W:
 
   A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = `*`"butterworth"`*, as a fraction of the
+  frequency(ies) for `method = "butterworth"`, as a fraction of the
   Nyquist frequency (see *Details*).
 
 - fc:
 
   A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = `*`"butterworth"`*, in Hz (see
-  *Details*).
+  frequency(ies) for `method = "butterworth"`, in Hz (see *Details*).
 
 - width:
 
-  An integer value defining the number of samples centred on `idx` over
-  which the operation will be performed for `method = `
-  *`"moving_average"`*.
+  An integer defining the local window in number of samples around `idx`
+  in which to perform the operation for `method = "moving_average"`.
+  Between `[idx - floor(width/2), idx + floor(width/2)]`.
 
 - span:
 
-  A numeric value in units of time_channel defining the timespan centred
-  on `idx` over which the operation will be performed for
-  `method = `*"moving_average"*.
+  A numeric value defining the local window timespan around `idx` in
+  which to perform the operation for `method = "moving_average"`. In
+  units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 
 - na.rm:
 
@@ -191,7 +190,7 @@ of class *"mnirs"* with metadata available with
 
 ## Details
 
-- `method = `*`"smooth_spline"`*:
+- `method = "smooth_spline"`:
 
   Applies a non-parametric cubic smoothing spline from
   [`stats::smooth.spline()`](https://rdrr.io/r/stats/smooth.spline.html).
@@ -201,7 +200,7 @@ of class *"mnirs"* with metadata available with
   minutes or longer. `spar` can be defined explicitly, typically (but
   not necessarily) in the range `spar = [0, 1]`.
 
-- `method = `*`"butterworth"`*:
+- `method = "butterworth"`:
 
   Applies a centred (two-pass symmetrical) Butterworth digital filter
   from [`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html)
@@ -238,7 +237,7 @@ of class *"mnirs"* with metadata available with
   Only One of either `W` or `fc` should be defined. If both are defined,
   `W` will be preferred over `fc`.
 
-- `method = `*`"moving_average"`*:
+- `method = "moving_average"`:
 
   Applies a centred (symmetrical) moving average filter in a local
   window, defined by either `width` as the number of samples around
@@ -248,13 +247,14 @@ of class *"mnirs"* with metadata available with
   calculated at the edges of the data.
 
 Missing values (`NA`) in `nirs_channels` will cause an error for
-`method =` *`"smooth_spline"`* or *`"butterworth"`*, unless
-`na.rm = TRUE`. Then `NA`s will be preserved and passed through in the
-returned data.
+`method = "smooth_spline"` or `"butterworth"`, unless `na.rm = TRUE`.
+Then `NA`s will be preserved and passed through in the returned data.
 
 ## Examples
 
 ``` r
+library(ggplot2)
+
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
@@ -265,7 +265,7 @@ data <- read_mnirs(
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 7,
+        width = 10,
         verbose = FALSE
     )
 
@@ -281,12 +281,10 @@ data_filtered <- filter_mnirs(
     verbose = FALSE
 )
 
-if (FALSE) { # \dontrun{
 ## add the non-filtered data back to the plot to compare
-plot(data_filtered, display_timestamp = TRUE) +
+plot(data_filtered, label_time = TRUE) +
     geom_line(
         data = data,
         aes(y = smo2, colour = "smo2"), alpha = 0.4
     )
-} # }
 ```

@@ -11,7 +11,7 @@ of the data."><meta name="twitter:card" content="summary"><meta name="twitter:cr
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,19 +70,19 @@ of the data.</p>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>An integer defining the filter order for <code>method = </code>
-<em><code>"butterworth"</code></em> (<em>default</em> <code>n = 1</code>).</p></dd>
+<dd><p>An integer defining the filter order for <code>method = "butterworth"</code>
+(<em>default</em> <code>n = 1</code>).</p></dd>
 
 
 <dt id="arg-w">W<a class="anchor" aria-label="anchor" href="#arg-w"></a></dt>
 <dd><p>A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for <code>method = </code><em><code>"butterworth"</code></em>, as a fraction of the
+frequency(ies) for <code>method = "butterworth"</code>, as a fraction of the
 Nyquist frequency (see <em>Details</em>).</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>A character string indicating the digital filter type for
-<code>method = </code><em><code>"butterworth"</code></em> (see <em>Details</em>).</p><dl><dt><code>"low"</code></dt>
+<code>method = "butterworth"</code> (see <em>Details</em>).</p><dl><dt><code>"low"</code></dt>
 <dd><p>For a <em>low-pass</em> filter (the <em>default</em>).</p></dd>
 
 <dt><code>"high"</code></dt>
@@ -156,19 +156,22 @@ Then <code>NA</code>s will be preserved and passed through in the returned vecto
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">13</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">13</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="fl">1</span><span class="op">:</span><span class="fl">150</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span> <span class="op">*</span> <span class="fl">20</span> <span class="op">+</span> <span class="fl">40</span></span></span>
 <span class="r-in"><span><span class="va">noise</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">150</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">noisy_sin</span> <span class="op">&lt;-</span> <span class="va">sin</span> <span class="op">+</span> <span class="va">noise</span></span></span>
 <span class="r-in"><span><span class="va">filt_without_edge</span> <span class="op">&lt;-</span> <span class="fu">filter_butter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">noisy_sin</span>, n <span class="op">=</span> <span class="fl">2</span>, W <span class="op">=</span> <span class="fl">0.1</span>, edges <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">filt_with_edge</span> <span class="op">&lt;-</span> <span class="fu">filter_butter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">noisy_sin</span>, n <span class="op">=</span> <span class="fl">2</span>, W <span class="op">=</span> <span class="fl">0.1</span>, edges <span class="op">=</span> <span class="st">"rep1"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">noisy_sin</span>, type <span class="op">=</span> <span class="st">"l"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">filt_without_edge</span>, col <span class="op">=</span> <span class="st">"red"</span>, lwd <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">filt_with_edge</span>, col <span class="op">=</span> <span class="st">"blue"</span>, lwd <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
-<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">noise</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="theme_mnirs.html">theme_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="scale_colour_mnirs.html">scale_colour_mnirs</a></span><span class="op">(</span>name <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">noisy_sin</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">filt_without_edge</span>, colour <span class="op">=</span> <span class="st">"filt_without_edge"</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">filt_with_edge</span>, colour <span class="op">=</span> <span class="st">"filt_with_edge"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="filter_butter-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

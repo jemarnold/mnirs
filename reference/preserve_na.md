@@ -45,19 +45,37 @@ input vector `x` with `NA` values restored to their original positions.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 x <- c(1, NA, 3, NA, 5)
-na_info <- preserve_na(x)
+(na_info <- mnirs:::preserve_na(x))#'
+#> $x_valid
+#> [1] 1 3 5
+#> 
+#> $x_length
+#> [1] 5
+#> 
+#> $na_idx
+#> [1] FALSE  TRUE FALSE  TRUE FALSE
+#> 
+
 ## process with a function that would normally fail on NA
 y <- na_info$x_valid * 2
-result <- restore_na(y, na_info)
-result
+(result <- mnirs:::restore_na(y, na_info))
+#> [1]  2 NA  6 NA 10
 
-x <- c("A", NA, "B", NA, "C")
-na_info <- preserve_na(x)
+x <- c("A", "B", "C", NA, NA)
+(na_info <- mnirs:::preserve_na(x))
+#> $x_valid
+#> [1] "A" "B" "C"
+#> 
+#> $x_length
+#> [1] 5
+#> 
+#> $na_idx
+#> [1] FALSE FALSE FALSE  TRUE  TRUE
+#> 
+
 ## process with a function that would normally fail on NA
 y <- tolower(na_info$x_valid)
-result <- restore_na(y, na_info)
-result
-} # }
+(result <- mnirs:::restore_na(y, na_info))
+#> [1] "a" "b" "c" NA  NA 
 ```
