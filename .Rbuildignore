@@ -12,3 +12,5 @@
 ^pkgdown$
 ^doc$
 ^Meta$
+^[.]?air[.]toml$
+^\.vscode$

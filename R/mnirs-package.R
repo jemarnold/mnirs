@@ -6,6 +6,7 @@
 #' @importFrom cli cli_bullets
 #' @importFrom cli cli_warn
 #' @importFrom lifecycle deprecated
+#' @importFrom rlang %||%
 #' @importFrom rlang .data
 #' @importFrom stats approx
 #' @importFrom stats median

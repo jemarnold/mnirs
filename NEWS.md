@@ -1,3 +1,11 @@
+# mnirs 0.1.3
+
+* Remove redundant file mnirs.test-package.Rd.
+* Remove obsolete {utils} dependency.
+* Remove redundant `nirs_device` arg in internal `read_data_table()`.
+* Implement `{air}` formatter.
+* Migrate package development into Positron IDE.
+
 # mnirs 0.1.2
 
 * Simplify use of `width` and `span` to be centred on `idx`.
@@ -5,6 +13,7 @@
     * Updated appropriate documentation.
     * Updated README, vignette, & examples to `width = 10`.
 * Updated examples with `@examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))`.
+    * Not entirely sure this will pass CRAN. May need to update.
 * Updated `create_mnirs_data()` to correctly accept listed or unlisted metadata.
 
 # mnirs 0.1.1

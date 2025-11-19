@@ -1,0 +1,5 @@
+[format]
+line-width = 80
+indent-width = 4
+exclude = ["Exploratory/"]
+skip = ["lapply", "sapply", "vapply", "mapply", "ggplot", "validate_numeric", "validate_nirs_channels", "validate_time_channel", "validate_event_channel", "validate_sample_rate"]

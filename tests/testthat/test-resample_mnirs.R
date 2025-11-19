@@ -330,7 +330,7 @@ test_that("resample_mnirs works on Moxy", {
     ## time-weighted average
     df2 <- df |>
         dplyr::mutate(
-            diff = c(diff(time), tail(diff(time), 1)),
+            diff = c(diff(time), diff(time)[length(diff(time))]),
             time = floor(time * 1) / 1,
         ) |>
         dplyr::summarise(

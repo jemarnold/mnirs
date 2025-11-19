@@ -86,8 +86,7 @@ read_data_table <- function(
         data,
         nirs_channels,
         time_channel = NULL,
-        event_channel = NULL,
-        nirs_device = NULL
+        event_channel = NULL
 ) {
     channel_vec <- c(nirs_channels, time_channel, event_channel)
     ## detect header row where channels exists

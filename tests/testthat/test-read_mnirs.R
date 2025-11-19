@@ -1106,8 +1106,8 @@ test_that("read_mnirs moxy .xlsx works with timestamp", {
     expect_true(any(class(df$timestamp) %in% "POSIXct"))
 
     ## check that time diffs should be 0 < Δ < 1 with proper POSIXct import
-    expect_gt(sum(diff(head(df$time, 100)) < 1 & diff(head(df$time, 100)) > 0), 0)
-    expect_lt(sum(diff(head(df$time, 100)) %in% c(0, 1)), 99)
+    expect_gt(sum(diff(df$time[1:100]) < 1 & diff(df$time[1:100]) > 0), 0)
+    expect_lt(sum(diff(df$time[1:100]) %in% c(0, 1)), 99)
 
     expect_true(all(
         c("nirs_device", "nirs_channels", "time_channel",
@@ -1136,7 +1136,7 @@ test_that("read_mnirs moxy .csv works converting time to numeric", {
     expect_false(c("timestamp") %in% names(df))
 
     ## check that time diffs should be Δ >= 2 with proper POSIXct import
-    expect_gt(sum(diff(head(df$time, 100)) >= 2), 0)
+    expect_gt(sum(diff(df$time[1:100]) >= 2), 0)
 
     expect_true(all(
         c("nirs_device", "nirs_channels", "time_channel",
@@ -1235,8 +1235,8 @@ test_that("read_mnirs train.red works", {
     expect_gte(df$time[1], 0)
 
     ## check that time diffs should be 0 < Δ < 1 with proper POSIXct import
-    expect_gt(sum(diff(head(df$time, 100)) < 1 & diff(head(df$time, 100)) > 0), 0)
-    expect_lt(sum(diff(head(df$time, 100)) %in% c(0, 1)), 99)
+    expect_gt(sum(diff(df$time[1:100]) < 1 & diff(df$time[1:100]) > 0), 0)
+    expect_lt(sum(diff(df$time[1:100]) %in% c(0, 1)), 99)
 
     expect_true(all(
         c("nirs_device", "nirs_channels", "time_channel",
@@ -1338,7 +1338,7 @@ test_that("read_mnirs oxysoft works", {
     expect_gte(df$time[1], 0)
     expect_equal(df$sample[1:10]/10, df$time[1:10])
 
-    expect_true(all.equal(diff(head(df$time, 100)), rep(0.1, 99)))
+    expect_true(all.equal(diff(df$time[1:100]), rep(0.1, 99)))
 
     expect_true(all(
         c("nirs_device", "nirs_channels", "time_channel",
