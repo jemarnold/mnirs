@@ -3,18 +3,7 @@
 Methods for reading, processing, and analysing data from muscle
 near-infrared spectroscopy (mNIRS) devices.
 
-Methods for reading, processing, and analysing data from muscle
-near-infrared spectroscopy (mNIRS) devices.
-
 ## See also
-
-Useful links:
-
-- <https://jemarnold.github.io/mnirs/>
-
-- <https://github.com/jemarnold/mnirs>
-
-- Report bugs at <https://github.com/jemarnold/mnirs/issues>
 
 Useful links:
 

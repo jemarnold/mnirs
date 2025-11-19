@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,14 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.3" id="mnirs-013">mnirs 0.1.3<a class="anchor" aria-label="anchor" href="#mnirs-013"></a></h2>
+<ul><li>Remove redundant file mnirs.test-package.Rd.</li>
+<li>Remove obsolete {utils} dependency.</li>
+<li>Remove redundant <code>nirs_device</code> arg in internal <code><a href="../reference/read_data_table.html">read_data_table()</a></code>.</li>
+<li>Implement <a href="https://github.com/soumyaray/air" class="external-link">air</a> formatter.</li>
+<li>Migrate package development into Positron IDE.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="mnirs-012">mnirs 0.1.2<a class="anchor" aria-label="anchor" href="#mnirs-012"></a></h2>
 <ul><li>Simplify use of <code>width</code> and <code>span</code> to be centred on <code>idx</code>.
 <ul><li>Updated internal helpers: <code><a href="../reference/compute_helpers.html">compute_local_windows()</a></code> &amp; <code><a href="../reference/compute_helpers.html">compute_window_of_valid_neighbours()</a></code>
@@ -46,7 +54,9 @@
 <li>Updated appropriate documentation.</li>
 <li>Updated README, vignette, &amp; examples to <code>width = 10</code>.</li>
 </ul></li>
-<li>Updated examples with <code>@examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))</code>.</li>
+<li>Updated examples with <code>@examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))</code>.
+<ul><li>Not entirely sure this will pass CRAN. May need to update.</li>
+</ul></li>
 <li>Updated <code><a href="../reference/create_mnirs_data.html">create_mnirs_data()</a></code> to correctly accept listed or unlisted metadata.</li>
 </ul></div>
     <div class="section level2">
