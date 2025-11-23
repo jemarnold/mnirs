@@ -9,7 +9,7 @@ if present, and validates relevant data quality checks."><meta name="twitter:car
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@ if present, and validates relevant data quality checks.</p>
 <span></span>
 <span><span class="fu">validate_mnirs_data</span><span class="op">(</span><span class="va">data</span>, ncol <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_nirs_channels</span><span class="op">(</span><span class="va">data</span>, <span class="va">nirs_channels</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu">validate_nirs_channels</span><span class="op">(</span><span class="va">data</span>, <span class="va">nirs_channels</span>, inform <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">validate_time_channel</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span><span class="op">)</span></span>
 <span></span>
@@ -67,7 +67,7 @@ if present, and validates relevant data quality checks.</p>
 <span></span>
 <span><span class="fu">estimate_sample_rate</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_sample_rate</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span>, <span class="va">sample_rate</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">validate_sample_rate</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span>, <span class="va">sample_rate</span>, inform <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -116,10 +116,9 @@ column names in <code>data</code> exactly. Will be taken from metadata if not
 defined explicitly.</p></dd>
 
 
-<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>A logical to return (the <em>default</em>) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.</p></dd>
+<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+warnings and information messages used for troubleshooting.</p></dd>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>

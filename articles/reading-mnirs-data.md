@@ -149,7 +149,7 @@ nirs_channels = c(new_name1 = "original_name1",
   in the file. Blank/empty columns will be omitted and duplicated or
   invalid column names will be repaired.
 
-- `verbose`
+- `inform`
 
   This and other *`mnirs`* functions may return warnings and info
   messages which are useful for troubleshooting and data validation.
@@ -179,7 +179,7 @@ data_table <- read_mnirs(
     add_timestamp = FALSE,               ## omit the date-time timestamp column
     zero_time = TRUE,                    ## recalculate time values from zero
     keep_all = FALSE,                    ## return only the specified data channels
-    verbose = TRUE                       ## show warnings & messages
+    inform = TRUE                        ## show warnings & messages
 )
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Overwrite this with `sample_rate` = <numeric>.
@@ -262,9 +262,6 @@ attributes(data_table)[-2]
 #> 
 #> $sample_rate
 #> [1] 2
-#> 
-#> $verbose
-#> [1] TRUE
 
 ## define nirs_channels externally for later use
 nirs_channels <- attr(data_table, "nirs_channels")
@@ -349,7 +346,7 @@ functions see
   it is good practice to identify and deal with missing data early
   during data processing.
 
-- `verbose`
+- `inform`
 
   As above, a logical to toggle warnings and info messages.
 
@@ -361,7 +358,7 @@ data_cleaned <- replace_mnirs(
     time_channel = NULL,        ## default to time_channel in metadata
     invalid_values = c(0, 100), ## known invalid values in the data
     outlier_cutoff = 3,         ## recommended default value
-    width = 10,                  ## local window to detect local outliers and replace missing values
+    width = 10,                 ## local window to detect local outliers and replace missing values
     method = "linear"           ## linear interpolation over `NA`s
 )
 
@@ -415,7 +412,7 @@ data_resampled <- resample_mnirs(
     # sample_rate = NULL,
     # resample_rate = sample_rate ## the default will re-sample to sample_rate
     method = "linear",            ## default linear interpolation across any new samples
-    verbose = TRUE                ## will confirm the output sample rate
+    inform = TRUE                 ## will confirm the output sample rate
 )
 #> ℹ Output is resampled at 2 Hz.
 

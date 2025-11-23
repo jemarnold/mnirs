@@ -28,8 +28,6 @@ create_mnirs_data(data, ...)
 
   - sample_rate
 
-  - verbose
-
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)

@@ -13,7 +13,7 @@ resample_mnirs(
   resample_rate = sample_rate,
   resample_time = NULL,
   method = c("linear", "locf", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 ```
 
@@ -73,11 +73,10 @@ resample_mnirs(
       `time_channel`, *without* interpolating across new samples or
       `NA`s in the original data frame.
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 ## Value
 
@@ -121,7 +120,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 )
 
 data
@@ -146,7 +145,7 @@ data_resampled <- resample_mnirs(
     # sample_rate = NULL,
     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
     method = "linear",             ## default linear interpolation across any new samples
-    verbose = FALSE                ## will confirm the output sample rate
+    inform = FALSE                 ## will confirm the output sample rate
 )
 
 ## note the altered "time" values 👇

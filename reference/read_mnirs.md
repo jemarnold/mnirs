@@ -16,7 +16,7 @@ read_mnirs(
   add_timestamp = FALSE,
   zero_time = FALSE,
   keep_all = FALSE,
-  verbose = TRUE
+  inform = TRUE
 )
 ```
 
@@ -56,10 +56,10 @@ read_mnirs(
 
 - add_timestamp:
 
-  A logical to add a *"timestamp"* column with date-time for each sample
-  (class *POSIXct*), if present in the data file. If no absolute
-  timestamp is detected, will instead return relative time as
-  *hh:mm:ss*.
+  `<under development>` A logical to add a *"timestamp"* column with
+  date-time for each sample (class *POSIXct*), if present in the data
+  file. If no absolute timestamp is detected, will instead return
+  relative time as *hh:mm:ss*.
 
 - zero_time:
 
@@ -71,11 +71,10 @@ read_mnirs(
   A logical to include all columns detected from the file or `FALSE` to
   only include the explicitly specified data columns (the *default*).
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or `FALSE` to silence warnings and
-  messages which can be used for data error checking. Abort errors will
-  always be returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 ## Value
 
@@ -119,7 +118,7 @@ relative time (*"hh:mm:ss"*) will be returned.
 
 If `time_channel` contains irregular sampling (i.e., non-sequential,
 repeated, or unordered values) a warning will be displayed (if
-`verbose = TRUE`) suggesting that the user confirm the file data
+`inform = TRUE`) suggesting that the user confirm the file data
 manually.
 
 `sample_rate` is required for certain `{mnirs}` functions to work
@@ -132,6 +131,11 @@ the `time_channel` represents sample indices rather than time values,
 
 Columns and rows which contain entirely missing data (`NA`) are omitted.
 
+`inform = TRUE` will display warnings and information messages which can
+be useful for troubleshooting. Errors causing abort messages will always
+be displayed. Messages can be silenced globally with
+`options(mnirs.inform = FALSE)`.
+
 ## Examples
 
 ``` r
@@ -143,7 +147,7 @@ data_table <- read_mnirs(
     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    verbose = FALSE                      ## hide warnings & messages
+    inform = FALSE                       ## hide warnings & messages
 )
 
 data_table

@@ -18,7 +18,7 @@ shift_mnirs(
   width = NULL,
   span = NULL,
   position = c("min", "max", "first"),
-  verbose = TRUE
+  inform = TRUE
 )
 ```
 
@@ -100,11 +100,10 @@ shift_mnirs(
 
   :   Will shift first value(s) `to` or `by` the specified values.
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 ## Value
 
@@ -146,21 +145,21 @@ data_shifted <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 ) |>
-    resample_mnirs(verbose = FALSE) |>
+    resample_mnirs(inform = FALSE) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
         width = 10,
-        verbose = FALSE
+        inform = FALSE
     ) |>
-    filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+    filter_mnirs(na.rm = TRUE, inform = FALSE) |>
     shift_mnirs(
         to = 0,             ## NIRS values will be shifted to zero
         span = 120,         ## shift the first 120 sec of data to zero
         position = "first",
-        verbose = FALSE
+        inform = FALSE
     )
 
 plot(data_shifted, label_time = TRUE) +

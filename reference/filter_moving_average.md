@@ -10,7 +10,7 @@ filter_moving_average(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  verbose = TRUE
+  inform = TRUE
 )
 ```
 
@@ -36,11 +36,10 @@ filter_moving_average(
   which to perform the operation. In units of `time_channel` or `t`,
   between `[t - span/2, t + span/2]`.
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 ## Value
 

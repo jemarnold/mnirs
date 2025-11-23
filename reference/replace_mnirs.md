@@ -4,8 +4,8 @@
 invalid values in `nirs_channels` within an *"mnirs"* data frame, and
 replaces missing `NA` values via interpolation methods.
 
-`replace_invalid()` detects specified invalid values in vector data and
-replaces them with the local median value or `NA`.
+`replace_invalid()` detects specified invalid values or cutoff values in
+vector data and replaces them with the local median value or `NA`.
 
 `replace_outliers()` detects local outliers in vector data with a Hampel
 filter and replaces with the local median value or `NA`.
@@ -21,21 +21,25 @@ replace_mnirs(
   nirs_channels = NULL,
   time_channel = NULL,
   invalid_values = NULL,
+  invalid_above = NULL,
+  invalid_below = NULL,
   outlier_cutoff = NULL,
   width = NULL,
   span = NULL,
   method = c("linear", "median", "locf", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 
 replace_invalid(
   x,
   t = seq_along(x),
-  invalid_values,
+  invalid_values = NULL,
+  invalid_above = NULL,
+  invalid_below = NULL,
   width = NULL,
   span = NULL,
   method = c("median", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 
 replace_outliers(
@@ -45,7 +49,7 @@ replace_outliers(
   width = NULL,
   span = NULL,
   method = c("median", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 
 replace_missing(
@@ -82,6 +86,12 @@ replace_missing(
   A numeric vector of invalid values to be replaced, e.g.
   `invalid_values = c(0, 100, 102.3)`. The *default* `NULL` will not
   replace invalid values.
+
+- invalid_above, invalid_below:
+
+  Numeric values each specifying cutoff values, above or below which
+  (respectively) will be replaced, *inclusive* of the specified cutoff
+  values.
 
 - outlier_cutoff:
 
@@ -129,11 +139,10 @@ replace_missing(
 
   :   Returns `NA`s without replacement.
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 - x:
 
@@ -168,18 +177,23 @@ not defined explicitly.
 Channels (columns) in `data` not explicitly defined in `nirs_channels`
 will be passed through untouched to the output data frame.
 
-Local rolling calculations are made within a window defined by either
-`width` as the number of samples centred on `idx` between
+`replace_outliers` and `replace_missing` when `method = "median"`
+require defining a local rolling window in which to perform outlier
+detection and median interpolation. This window can be specified by
+either `width` as the number of samples centred on `idx` between
 `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
 timespan in units of `time_channel` centred on `idx` between
 `[t - span/2, t + span/2]`. A partial moving average will be calculated
 at the edges of the data.
 
 `replace_invalid()` can be used to overwrite known invalid values in
-exported data, such as `c(0, 100, 102.3)`.
+exported data.
 
-- `<under development>`: *allow for overwriting all values greater or
-  less than specified values.*
+- Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
+  Data ranges can be replaced with cutoff values specified by
+  `invalid_above` and `invalid_below`, where any values higher or lower
+  than the specified cutoff values (respectively) will be replaced,
+  *inclusive* of the cutoff values themselves.
 
 `replace_outliers()` will compute rolling local median values across
 `x`, defined by either `width` number of samples, or `span` timespan in
@@ -251,7 +265,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 )
 
 ## clean data

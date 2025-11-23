@@ -24,7 +24,7 @@ compute_local_windows(
   idx = seq_along(t),
   width = NULL,
   span = NULL,
-  verbose = TRUE
+  inform = TRUE
 )
 
 compute_local_fun(x, window_idx, FUN)
@@ -36,7 +36,7 @@ compute_window_of_valid_neighbours(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  verbose = TRUE
+  inform = TRUE
 )
 ```
 
@@ -64,11 +64,10 @@ compute_window_of_valid_neighbours(
   which to perform the operation. In units of `time_channel` or `t`,
   between `[t - span/2, t + span/2]`.
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 - x:
 

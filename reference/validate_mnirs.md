@@ -17,7 +17,7 @@ validate_numeric(
 
 validate_mnirs_data(data, ncol = 2L)
 
-validate_nirs_channels(data, nirs_channels, verbose = TRUE)
+validate_nirs_channels(data, nirs_channels, inform = TRUE)
 
 validate_time_channel(data, time_channel)
 
@@ -25,7 +25,7 @@ validate_event_channel(data, event_channel, require = TRUE)
 
 estimate_sample_rate(x)
 
-validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
+validate_sample_rate(data, time_channel, sample_rate, inform = TRUE)
 ```
 
 ## Arguments
@@ -71,11 +71,10 @@ validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
   A character vector of mNIRS channel names. Must match column names in
   `data` exactly. Will be taken from metadata if not defined explicitly.
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 - time_channel:
 

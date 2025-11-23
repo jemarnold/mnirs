@@ -27,7 +27,7 @@ filter_mnirs(
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  verbose = TRUE,
+  inform = TRUE,
   ...
 )
 
@@ -46,7 +46,7 @@ filter_mnirs(
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  verbose = TRUE,
+  inform = TRUE,
   ...
 )
 
@@ -65,7 +65,7 @@ filter_mnirs(
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  verbose = TRUE,
+  inform = TRUE,
   ...
 )
 ```
@@ -172,11 +172,10 @@ filter_mnirs(
   before the filter is applied. Otherwise `FALSE` (the *default*) will
   throw an error (see *Details*).
 
-- verbose:
+- inform:
 
-  A logical to return (the *default*) or silence warnings and messages
-  which can be used for data error checking. Abort errors will always be
-  returned.
+  A logical to display (the *default*) or `FALSE` to silence warnings
+  and information messages used for troubleshooting.
 
 - ...:
 
@@ -260,13 +259,13 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
         width = 10,
-        verbose = FALSE
+        inform = FALSE
     )
 
 data_filtered <- filter_mnirs(
@@ -278,7 +277,7 @@ data_filtered <- filter_mnirs(
     type = "low",           ## specify a low-pass filter
     n = 2,                  ## filter order number
     W = 0.02,               ## filter fractional critical frequency
-    verbose = FALSE
+    inform = FALSE
 )
 
 ## add the non-filtered data back to the plot to compare

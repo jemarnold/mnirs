@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,7 +121,7 @@
 <span>    add_timestamp <span class="op">=</span> <span class="cn">FALSE</span>,               <span class="co">## omit the date-time timestamp column</span></span>
 <span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>,                    <span class="co">## recalculate time values from zero</span></span>
 <span>    keep_all <span class="op">=</span> <span class="cn">FALSE</span>,                    <span class="co">## return only the specified data channels</span></span>
-<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span>                       <span class="co">## show warnings &amp; messages</span></span>
+<span>    inform <span class="op">=</span> <span class="cn">TRUE</span>                        <span class="co">## show warnings &amp; messages</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ! Estimated `sample_rate` = 2 Hz.</span></span>
 <span><span class="co">#&gt; ℹ Overwrite this with `sample_rate` = &lt;numeric&gt;.</span></span>
@@ -172,9 +172,6 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $sample_rate</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $verbose</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
 <span></span>
 <span><span class="co">## define nirs_channels externally for later use</span></span>
 <span><span class="va">nirs_channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data_table</span>, <span class="st">"nirs_channels"</span><span class="op">)</span></span>
@@ -199,7 +196,7 @@
 <span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## default to time_channel in metadata</span></span>
 <span>    invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="co">## known invalid values in the data</span></span>
 <span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,         <span class="co">## recommended default value</span></span>
-<span>    width <span class="op">=</span> <span class="fl">10</span>,                  <span class="co">## local window to detect local outliers and replace missing values</span></span>
+<span>    width <span class="op">=</span> <span class="fl">10</span>,                 <span class="co">## local window to detect local outliers and replace missing values</span></span>
 <span>    method <span class="op">=</span> <span class="st">"linear"</span>           <span class="co">## linear interpolation over `NA`s</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -217,7 +214,7 @@
 <span>    <span class="co"># sample_rate = NULL,</span></span>
 <span>    <span class="co"># resample_rate = sample_rate ## the default will re-sample to sample_rate</span></span>
 <span>    method <span class="op">=</span> <span class="st">"linear"</span>,            <span class="co">## default linear interpolation across any new samples</span></span>
-<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span>                <span class="co">## will confirm the output sample rate</span></span>
+<span>    inform <span class="op">=</span> <span class="cn">TRUE</span>                 <span class="co">## will confirm the output sample rate</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ℹ Output is resampled at 2 Hz.</span></span>
 <span></span>
