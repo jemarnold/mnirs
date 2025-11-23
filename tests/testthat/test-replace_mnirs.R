@@ -288,6 +288,69 @@ test_that("replace_invalid() handles edge cases", {
 })
 
 
+test_that("replace_invalid handles range filtering", {
+    x <- c(0, 5, 10, 20, 25, 50.5, 100, 150, 35, 40)
+
+    # Test invalid_below only (inclusive)
+    result <- replace_invalid(x, invalid_below = 5, method = "NA")
+    expect_setequal(result[1:2], NA_real_)
+    expect_equal(result[3:10], x[3:10])
+
+    # Test invalid_above only (inclusive)
+    result <- replace_invalid(x, invalid_above = 100, method = "NA")
+    expect_setequal(result[7:8], NA_real_)
+    expect_equal(result[c(1:5, 9:10)], x[c(1:5, 9:10)])
+
+    # Test both invalid_below and invalid_above
+    result <- replace_invalid(
+        x,
+        invalid_below = 5,
+        invalid_above = 100,
+        method = "NA"
+    )
+    expect_setequal(result[c(1:2, 7:8)], NA_real_)
+    expect_equal(result[c(3:5, 9:10)], x[c(3:5, 9:10)])
+
+    ## combines exact values and ranges
+    result <- replace_invalid(
+        x,
+        invalid_values = 50.5,
+        invalid_below = 5,
+        invalid_above = 100,
+        method = "NA"
+    )
+    expect_setequal(result[c(1:2, 6, 7:8)], NA_real_)
+    expect_equal(result[c(3:5, 9:10)], x[c(3:5, 9:10)])
+})
+
+test_that("replace_invalid errors when no invalid criteria specified", {
+    x <- c(1, 2, 3)
+
+    expect_error(
+        replace_invalid(
+            x,
+            invalid_values = NULL,
+            invalid_above = NULL,
+            invalid_below = NULL
+        ),
+        "At least one of.*must be specified"
+    )
+})
+
+test_that("replace_invalid handles overlapping conditions", {
+    x <- c(-999, 0, 5, -999, 10)
+
+    # Value meets both invalid_values and invalid_below criteria
+    result <- replace_invalid(
+        x,
+        invalid_values = -999,
+        invalid_below = 5,
+        method = "NA"
+    )
+    expect_setequal(is.na(result[1:4]), TRUE)
+})
+
+
 
 test_that("replace_invalid() works correctly", {
     x <- c(1, 2, 3, 16, 5, 6, 7)
@@ -545,33 +608,8 @@ test_that("replace_mnirs do nothing condition throws error appropriately", {
             method = "NA",
             inform = FALSE
         ),
-        "must be defined"
+        "must be specified"
     )
-})
-
-test_that("replace_mnirs passthrough returns early when no NAs and no processing", {
-    data <- read_mnirs(
-        file_path = example_mnirs("moxy_ramp"),
-        nirs_channels = c(smo2 = "SmO2 Live(2)"),
-        time_channel = c(time = "hh:mm:ss"),
-        inform = FALSE
-    )
-
-    expect_message(
-        result <- replace_mnirs(
-            data,
-            method = "linear",
-            inform = TRUE
-        ),
-        "No invalid or missing"
-    )
-
-    ## Should return identical data
-    expect_equal(result$smo2, data$smo2)
-    expect_s3_class(result, "mnirs")
-    expect_equal(attr(data, "nirs_channels"), c("smo2"))
-    expect_equal(attr(data, "time_channel"), "time")
-    expect_equal(attr(data, "sample_rate"), 2)
 })
 
 test_that("replace_mnirs updates metadata correctly", {

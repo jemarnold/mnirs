@@ -12,6 +12,8 @@ replace_mnirs(
   nirs_channels = NULL,
   time_channel = NULL,
   invalid_values = NULL,
+  invalid_above = NULL,
+  invalid_below = NULL,
   outlier_cutoff = NULL,
   width = NULL,
   span = NULL,
@@ -22,7 +24,9 @@ replace_mnirs(
 replace_invalid(
   x,
   t = seq_along(x),
-  invalid_values,
+  invalid_values = NULL,
+  invalid_above = NULL,
+  invalid_below = NULL,
   width = NULL,
   span = NULL,
   method = c("median", "NA"),
@@ -64,6 +68,10 @@ metadata if not defined explicitly.}
 \item{invalid_values}{A numeric vector of invalid values to be replaced,
 e.g. \code{invalid_values = c(0, 100, 102.3)}. The \emph{default} \code{NULL} will not
 replace invalid values.}
+
+\item{invalid_above, invalid_below}{Numeric values each specifying cutoff
+values, above or below which (respectively) will be replaced, \emph{inclusive}
+of the specified cutoff values.}
 
 \item{outlier_cutoff}{An integer for the local outlier threshold, as
 number of standard deviations above and below the local median. The
@@ -113,8 +121,8 @@ Vectorised \verb{replace_*()} return a numeric vector the same length as \code{x
 values in \code{nirs_channels} within an \emph{"mnirs"} data frame, and replaces
 missing \code{NA} values via interpolation methods.
 
-\code{replace_invalid()} detects specified invalid values in vector data and
-replaces them with the local median value or \code{NA}.
+\code{replace_invalid()} detects specified invalid values or cutoff values in
+vector data and replaces them with the local median value or \code{NA}.
 
 \code{replace_outliers()} detects local outliers in vector data with a Hampel
 filter and replaces with the local median value or \code{NA}.
@@ -133,18 +141,23 @@ if not defined explicitly.
 Channels (columns) in \code{data} not explicitly defined in \code{nirs_channels}
 will be passed through untouched to the output data frame.
 
-Local rolling calculations are made within a window defined by either
-\code{width} as the number of samples centred on \code{idx} between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}, or \code{span} as the
-timespan in units of \code{time_channel} centred on \code{idx} between
+\code{replace_outliers} and \code{replace_missing} when \code{method = "median"} require
+defining a local rolling window in which to perform outlier detection and
+median interpolation. This window can be specified by either \code{width} as
+the number of samples centred on \code{idx} between
+\verb{[idx - floor(width/2), idx + floor(width/2)]}, or \code{span} as the timespan
+in units of \code{time_channel} centred on \code{idx} between
 \verb{[t - span/2, t + span/2]}. A partial moving average will be calculated
 at the edges of the data.
 
 \code{replace_invalid()} can be used to overwrite known invalid values in
-exported data, such as \code{c(0, 100, 102.3)}.
+exported data.
 \itemize{
-\item \verb{<under development>}: \emph{allow for overwriting all values greater or less
-than specified values.}
+\item Specific \code{invalid_values} can be replaced, such as \code{c(0, 100, 102.3)}.
+Data ranges can be replaced with cutoff values specified by \code{invalid_above}
+and \code{invalid_below}, where any values higher or lower than the specified
+cutoff values (respectively) will be replaced, \emph{inclusive} of the cutoff
+values themselves.
 }
 
 \code{replace_outliers()} will compute rolling local median values across \code{x},

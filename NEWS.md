@@ -1,9 +1,11 @@
 # mnirs 0.1.4
 
-* Breaking change: Updated argument `inform` replaces `verbose` to display/hide messages & warnings.
-* Implemented global option to set `inform = FALSE` with `options(mnirs.inform = FALSE)`.
+* Breaking change: Update argument `inform` replaces `verbose` to display/hide messages & warnings.
+* Implement global option to set `inform = FALSE` with `options(mnirs.inform = FALSE)`.
     * Global option `mnirs.inform = FALSE` will override functions' implicit default `inform = TRUE`.
     * Explicit call `inform = TRUE` will override the global option.
+* Update `replace_mnirs()` and `replace_invalid()` with additional arguments.
+    * Replace ranges above or below `invalid_above` and `invalid_below`, respectively.
 
 # mnirs 0.1.3
 
@@ -16,12 +18,12 @@
 # mnirs 0.1.2
 
 * Simplify use of `width` and `span` to be centred on `idx`.
-    * Updated internal helpers: `compute_local_windows()` & `compute_window_of_valid_neighbours()`
-    * Updated appropriate documentation.
-    * Updated README, vignette, & examples to `width = 10`.
-* Updated examples with `@examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))`.
+    * Update internal helpers: `compute_local_windows()` & `compute_window_of_valid_neighbours()`
+    * Update appropriate documentation.
+    * Update README, vignette, & examples to `width = 10`.
+* Update examples with `@examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))`.
     * Not entirely sure this will pass CRAN. May need to update.
-* Updated `create_mnirs_data()` to correctly accept listed or unlisted metadata.
+* Update `create_mnirs_data()` to correctly accept listed or unlisted metadata.
 
 # mnirs 0.1.1
 

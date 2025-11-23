@@ -8,6 +8,9 @@
 #' @param invalid_values A numeric vector of invalid values to be replaced,
 #'   e.g. `invalid_values = c(0, 100, 102.3)`. The *default* `NULL` will not
 #'   replace invalid values.
+#' @param invalid_above,invalid_below Numeric values each specifying cutoff
+#'   values, above or below which (respectively) will be replaced, *inclusive*
+#'   of the specified cutoff values.
 #' @param outlier_cutoff An integer for the local outlier threshold, as
 #'   number of standard deviations above and below the local median. The
 #'   *default* `outlier_cutoff = NULL` will not replace outliers.
@@ -45,10 +48,12 @@
 #' Channels (columns) in `data` not explicitly defined in `nirs_channels`
 #'   will be passed through untouched to the output data frame.
 #'
-#' Local rolling calculations are made within a window defined by either
-#'   `width` as the number of samples centred on `idx` between
-#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
-#'   timespan in units of `time_channel` centred on `idx` between
+#' `replace_outliers` and `replace_missing` when `method = "median"` require 
+#'   defining a local rolling window in which to perform outlier detection and 
+#'   median interpolation. This window can be specified by either `width` as 
+#'   the number of samples centred on `idx` between
+#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan 
+#'   in units of `time_channel` centred on `idx` between 
 #'   `[t - span/2, t + span/2]`. A partial moving average will be calculated
 #'   at the edges of the data.
 #'
@@ -115,6 +120,8 @@ replace_mnirs <- function(
         nirs_channels = NULL,
         time_channel = NULL,
         invalid_values = NULL,
+        invalid_above = NULL,
+        invalid_below = NULL,
         outlier_cutoff = NULL,
         width = NULL,
         span = NULL,
@@ -123,11 +130,17 @@ replace_mnirs <- function(
 ) {
     ## validation ====================================
     method <- match.arg(method)
+    check_conditions <- c(
+        !is.null(c(invalid_values, invalid_above, invalid_below)),
+        !is.null(outlier_cutoff),
+        method != "NA"
+    )
     ## do nothing condition
-    if (is.null(c(invalid_values, width, span)) && method == "NA") {
+    if (!any(check_conditions)) {
         cli_abort(
-            "{.arg invalid_values}, {.arg width}, {.arg span}, or \\
-            {.arg method} must be defined."
+            "At least one of {.arg invalid_values}, {.arg invalid_above}, \\
+            {.arg invalid_below}, {.arg outlier_cutoff}, or {.arg method} \\
+            must be specified."
         )
     }
     if (missing(inform)) {
@@ -139,43 +152,26 @@ replace_mnirs <- function(
     ## inform = FALSE because grouping irrelevant
     nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
     nirs_channels <- unlist(nirs_channels, use.names = FALSE)
-
-    ## passthrough if only replacing missing but no `NA` in any nirs_channels
-    if (
-        !any(is.na(data[nirs_channels])) && method != "NA" &&
-        is.null(c(invalid_values, width, span))
-    ) {
-        if (inform) {
-            cli_bullets(c(
-                "i" = "No invalid or missing values detected in {.arg data}."
-            ))
-        }
-
-        return(data)
-    }
-
     time_channel <- validate_time_channel(data, time_channel)
     validate_numeric(invalid_values)
+    validate_numeric(invalid_above, 1, msg = "one-element")
+    validate_numeric(invalid_below, 1, msg = "one-element")
     time_vec <- round(data[[time_channel]], 6)
 
-    ## remove invalid ========================================
-    if (!is.null(invalid_values)) {
-        valid_values_list <- lapply(data[nirs_channels], \(.x) {
-            replace_invalid(
+    ## remove invalid, outliers, and NA ==============================
+    data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
+        if (check_conditions[1L]) {
+            .x <- replace_invalid(
                 x = .x,
                 t = time_vec,
                 invalid_values = invalid_values,
+                invalid_above = invalid_above,
+                invalid_below = invalid_below,
                 method = "NA"
             )
-        })
-
-        data[names(valid_values_list)] <- valid_values_list
-    }
-
-    ## remove outliers ======================================
-    if (!is.null(outlier_cutoff)) {
-        outliers_removed_list <- lapply(data[nirs_channels], \(.x) {
-            replace_outliers(
+        }
+        if (check_conditions[2L]) {
+            .x <- replace_outliers(
                 x = .x,
                 t = time_vec,
                 width = width,
@@ -183,25 +179,18 @@ replace_mnirs <- function(
                 method = "NA",
                 outlier_cutoff = outlier_cutoff
             )
-        })
-
-        data[names(outliers_removed_list)] <- outliers_removed_list
-    }
-
-    ## replace missing NA ===============================================
-    if (method != "NA") {
-        interpolated <- lapply(data[nirs_channels], \(.x) {
-            replace_missing(
+        }
+        if (check_conditions[3L]) {
+            .x <- replace_missing(
                 x = .x,
                 t = time_vec,
                 width = width,
                 span = span,
                 method = method
             )
-        })
-
-        data[names(interpolated)] <- interpolated
-    }
+        }
+        .x
+    })
 
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
@@ -214,8 +203,8 @@ replace_mnirs <- function(
 
 #' Replace Invalid Values
 #'
-#' `replace_invalid()` detects specified invalid values in vector data and
-#' replaces them with the local median value or `NA`.
+#' `replace_invalid()` detects specified invalid values or cutoff values in 
+#' vector data and replaces them with the local median value or `NA`.
 #'
 #' @param x A numeric vector.
 #' @param t An *optional* numeric vector of time or sample number.
@@ -223,10 +212,13 @@ replace_mnirs <- function(
 #'
 #' @details
 #' `replace_invalid()` can be used to overwrite known invalid values in
-#'   exported data, such as `c(0, 100, 102.3)`.
-#'
-#' - `<under development>`: *allow for overwriting all values greater or less
-#'   than specified values.*
+#'   exported data.
+#' 
+#' - Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
+#'   Data ranges can be replaced with cutoff values specified by `invalid_above`
+#'   and `invalid_below`, where any values higher or lower than the specified
+#'   cutoff values (respectively) will be replaced, *inclusive* of the cutoff
+#'   values themselves.
 #'
 #' @returns
 #' Vectorised `replace_*()` return a numeric vector the same length as `x`.
@@ -237,7 +229,9 @@ replace_mnirs <- function(
 replace_invalid <- function(
         x,
         t = seq_along(x),
-        invalid_values,
+        invalid_values = NULL,
+        invalid_above = NULL,
+        invalid_below = NULL,
         width = NULL,
         span = NULL,
         method = c("median", "NA"),
@@ -252,7 +246,17 @@ replace_invalid <- function(
             same length."
         )
     }
+  
+    if (is.null(c(invalid_values, invalid_above, invalid_below))) {
+        cli_abort(
+            "At least one of {.arg invalid_values}, {.arg invalid_above}, \\
+            or {.arg invalid_below} must be specified."
+        )
+    }
+  
     validate_numeric(invalid_values)
+    validate_numeric(invalid_above, 1, msg = "one-element")
+    validate_numeric(invalid_below, 1, msg = "one-element")
     method <- match.arg(method) == "median" ## into logical
     if (missing(inform)) {
         inform <- getOption("mnirs.inform", default = TRUE)
@@ -261,8 +265,12 @@ replace_invalid <- function(
     ## process ========================================================
     x <- round(x, 6) ## avoid floating point precision issues
     y <- x
-    invalid_idx <- which(y %in% invalid_values)
-    ## fill invalid values with NA
+    ## fill invalid indices with NA
+    invalid_idx <- c(
+        which(x %in% invalid_values),
+        which(x >= invalid_above),
+        which(x <= invalid_below)
+    )
     y[invalid_idx] <- NA_real_
 
     if (!method) { ## if method = "NA"
