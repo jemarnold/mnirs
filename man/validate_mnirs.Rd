@@ -22,7 +22,7 @@ validate_numeric(
 
 validate_mnirs_data(data, ncol = 2L)
 
-validate_nirs_channels(data, nirs_channels, verbose = TRUE)
+validate_nirs_channels(data, nirs_channels, inform = TRUE)
 
 validate_time_channel(data, time_channel)
 
@@ -30,7 +30,7 @@ validate_event_channel(data, event_channel, require = TRUE)
 
 estimate_sample_rate(x)
 
-validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
+validate_sample_rate(data, time_channel, sample_rate, inform = TRUE)
 }
 \arguments{
 \item{x}{A numeric vector.}
@@ -59,9 +59,8 @@ mNIRS values, along with metadata.}
 column names in \code{data} exactly. Will be taken from metadata if not
 defined explicitly.}
 
-\item{verbose}{A logical to return (the \emph{default}) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 
 \item{time_channel}{A character string indicating the time or sample channel
 name. Must match column names in \code{data} exactly. Will be taken from

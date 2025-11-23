@@ -3,11 +3,11 @@ test_that("filter_moving_average() returns expected smoothed values", {
     x <- c(1, 2, 3, 4, 5)
 
     # Width-based centred window
-    result <- filter_moving_average(x, width = 3, verbose = FALSE)
+    result <- filter_moving_average(x, width = 3, inform = FALSE)
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 
     # Width-based with single width (floor(1/2) = 0, so just x itself)
-    result <- filter_moving_average(x, width = 1, verbose = FALSE)
+    result <- filter_moving_average(x, width = 1, inform = FALSE)
     expect_equal(result, x)
 })
 
@@ -16,38 +16,38 @@ test_that("filter_moving_average() handles custom time vectors", {
     t <- c(0, 1, 3, 6, 10, 11)
 
     # Span-based with time gaps
-    result <- filter_moving_average(x, t, span = 2, verbose = FALSE)
+    result <- filter_moving_average(x, t, span = 2, inform = FALSE)
     expect_equal(result, c(15, 15, 30, 40, 55, 55))
 })
 
 test_that("filter_moving_average() handles NA values correctly", {
     x <- c(1, NA, 3, 4, 5)
 
-    result <- filter_moving_average(x, width = 3, verbose = FALSE)
+    result <- filter_moving_average(x, width = 3, inform = FALSE)
     expect_equal(result, c(1, 2, 3.5, 4, 4.5))
 
     x <- c(1, NA, NA, NA, NA, 6, 7, 8)
-    result <- filter_moving_average(x, width = 3, verbose = FALSE)
+    result <- filter_moving_average(x, width = 3, inform = FALSE)
     expect_equal(result, c(1, 1, NA, NA, 6, 6.5, 7, 7.5))
 })
 
 test_that("filter_moving_average() validates x as numeric", {
     expect_error(
-        filter_moving_average(c("a", "b", "c"), width = 3, verbose = FALSE),
+        filter_moving_average(c("a", "b", "c"), width = 3, inform = FALSE),
         "x.*numeric"
     )
 })
 
 test_that("filter_moving_average() validates t as numeric", {
     expect_error(
-        filter_moving_average(1:5, t = letters[1:5], width = 3, verbose = FALSE),
+        filter_moving_average(1:5, t = letters[1:5], width = 3, inform = FALSE),
         "t.*numeric"
     )
 })
 
 test_that("filter_moving_average() validates x and t have same length", {
     expect_error(
-        filter_moving_average(1:5, t = 1:3, width = 3, verbose = FALSE),
+        filter_moving_average(1:5, t = 1:3, width = 3, inform = FALSE),
         "same length"
     )
 })
@@ -57,58 +57,58 @@ test_that("filter_moving_average() validates width & span constraints", {
 
     ## width or span required
     expect_error(
-        filter_moving_average(x, verbose = FALSE),
+        filter_moving_average(x, inform = FALSE),
         "width.*or.*span.*must be defined"
     )
 
     # Width must be positive integer
     expect_error(
-        filter_moving_average(x, width = -1, verbose = FALSE),
+        filter_moving_average(x, width = -1, inform = FALSE),
         "width.*integer"
     )
 
     ## width = 0
-    expect_equal(filter_moving_average(x, width = 0, verbose = FALSE), x)
+    expect_equal(filter_moving_average(x, width = 0, inform = FALSE), x)
     ## width > length(x)
-    expect_true(all(filter_moving_average(x, width = 21, verbose = FALSE) == mean(x)))
+    expect_true(all(filter_moving_average(x, width = 21, inform = FALSE) == mean(x)))
 
     # Span must be positive
     expect_error(
-        filter_moving_average(x, span = -1, verbose = FALSE),
+        filter_moving_average(x, span = -1, inform = FALSE),
         "span.*numeric"
     )
 
     ## span = 0
-    expect_equal(filter_moving_average(x, span = 0, verbose = FALSE), x)
+    expect_equal(filter_moving_average(x, span = 0, inform = FALSE), x)
     ## span = 0.5 takes nearest 1 sample
-    expect_equal(filter_moving_average(x, span = 0.5, verbose = FALSE), x)
+    expect_equal(filter_moving_average(x, span = 0.5, inform = FALSE), x)
     ## span > length(x)
-    expect_true(all(filter_moving_average(x, span = 21, verbose = FALSE) == mean(x)))
+    expect_true(all(filter_moving_average(x, span = 21, inform = FALSE) == mean(x)))
 })
 
 test_that("filter_moving_average() warns when both width and span provided", {
     expect_warning(
-        filter_moving_average(1:5, width = 3, span = 2, verbose = TRUE),
+        filter_moving_average(1:5, width = 3, span = 2, inform = TRUE),
         "Either.*width.*or.*span"
     )
 
     # Should default to width
     expect_silent(
-        result <- filter_moving_average(1:5, width = 3, span = 2, verbose = FALSE)
+        result <- filter_moving_average(1:5, width = 3, span = 2, inform = FALSE)
     )
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 })
 
 test_that("filter_moving_average() handles edge cases", {
     # Single value
-    expect_equal(filter_moving_average(5, width = 1, verbose = FALSE), 5)
+    expect_equal(filter_moving_average(5, width = 1, inform = FALSE), 5)
 
     # Two values
-    expect_equal(filter_moving_average(c(1, 2), width = 1, verbose = FALSE), c(1, 2))
+    expect_equal(filter_moving_average(c(1, 2), width = 1, inform = FALSE), c(1, 2))
 
     # All NA
     expect_error(
-        filter_moving_average(c(NA, NA, NA), width = 3, verbose = FALSE),
+        filter_moving_average(c(NA, NA, NA), width = 3, inform = FALSE),
         "x.*numeric"
     )
 })
@@ -288,9 +288,9 @@ moxy_data <- read_mnirs(
     nirs_channels = c(smo2_left = "SmO2 Live",
                       smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 ) |>
-    resample_mnirs(verbose = FALSE)
+    resample_mnirs(inform = FALSE)
 
 ## Input validation tests =======================================
 test_that("filter_mnirs validates input data", {
@@ -309,7 +309,7 @@ test_that("filter_mnirs validates method argument", {
 
 ## Smooth spline tests ==============================================
 test_that("smooth_spline filters data correctly", {
-    result <- filter_mnirs(moxy_data, method = "smooth_spline", verbose = FALSE)
+    result <- filter_mnirs(moxy_data, method = "smooth_spline", inform = FALSE)
 
     expect_s3_class(result, "mnirs")
     expect_equal(nrow(result), nrow(moxy_data))
@@ -322,9 +322,9 @@ test_that("smooth_spline filters data correctly", {
 
 test_that("smooth_spline respects spar parameter", {
     result_low <- filter_mnirs(moxy_data, method = "smooth_spline",
-                               spar = 0.1, verbose = FALSE)
+                               spar = 0.1, inform = FALSE)
     result_high <- filter_mnirs(moxy_data, method = "smooth_spline",
-                                spar = 0.9, verbose = FALSE)
+                                spar = 0.9, inform = FALSE)
 
     # Higher spar = more smoothing
     expect_lt(var(result_high$smo2_left), var(result_low$smo2_left))
@@ -337,12 +337,12 @@ test_that("smooth_spline handles NAs", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE, method = "NA")
+        resample_mnirs(inform = FALSE, method = "NA")
 
     result <- filter_mnirs(moxy_data, method = "smooth_spline",
-                           na.rm = TRUE, verbose = FALSE)
+                           na.rm = TRUE, inform = FALSE)
 
     expect_true(anyNA(result$smo2_left))
     expect_true(anyNA(result$smo2_right))
@@ -361,7 +361,7 @@ test_that("smooth_spline errors with non-sequential time", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_error(
@@ -386,7 +386,7 @@ test_that("smooth_spline validates spar parameter", {
 test_that("butterworth low-pass filter works", {
     result <- filter_mnirs(moxy_data, method = "butterworth",
                            type = "low", n = 2, W = 0.1,
-                           verbose = FALSE)
+                           inform = FALSE)
 
     expect_s3_class(result, "mnirs")
     expect_equal(nrow(result), nrow(moxy_data))
@@ -401,12 +401,12 @@ test_that("butterworth accepts fc instead of W", {
 
     result_W <- filter_mnirs(moxy_data, method = "butterworth",
                              type = "low", n = 2, W = 0.1,
-                             verbose = FALSE)
+                             inform = FALSE)
 
     result_fc <- filter_mnirs(moxy_data, method = "butterworth",
                               type = "low", n = 2,
                               fc = 0.1 * sr * 0.5,
-                              verbose = FALSE)
+                              inform = FALSE)
 
     expect_equal(result_W$smo2_left, result_fc$smo2_left,
                  tolerance = 1e-10)
@@ -438,19 +438,19 @@ test_that("butterworth validates filter type", {
 test_that("butterworth handles different filter types", {
     result_low <- filter_mnirs(moxy_data, method = "butterworth",
                                type = "low", n = 2, W = 0.1,
-                               verbose = FALSE)
+                               inform = FALSE)
 
     result_high <- filter_mnirs(moxy_data, method = "butterworth",
                                 type = "high", n = 2, W = 0.1,
-                                verbose = FALSE)
+                                inform = FALSE)
 
     result_stop <- filter_mnirs(moxy_data, method = "butterworth",
                                 type = "stop", n = 2,
-                                W = c(0.05, 0.15), verbose = FALSE)
+                                W = c(0.05, 0.15), inform = FALSE)
 
     result_pass <- filter_mnirs(moxy_data, method = "butterworth",
                                 type = "pass", n = 2,
-                                W = c(0.05, 0.15), verbose = FALSE)
+                                W = c(0.05, 0.15), inform = FALSE)
 
     expect_s3_class(result_low, "mnirs")
     expect_s3_class(result_high, "mnirs")
@@ -478,13 +478,13 @@ test_that("butterworth handles NAs with na.rm = TRUE", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE, method = "NA")
+        resample_mnirs(inform = FALSE, method = "NA")
 
     result <- filter_mnirs(moxy_data, method = "butterworth",
                            type = "low", n = 2, W = 0.1,
-                           na.rm = TRUE, verbose = FALSE)
+                           na.rm = TRUE, inform = FALSE)
 
     expect_true(anyNA(result$smo2_left))
     expect_true(anyNA(result$smo2_right))
@@ -494,7 +494,7 @@ test_that("butterworth handles NAs with na.rm = TRUE", {
     expect_error(
         filter_mnirs(moxy_data, method = "butterworth",
                      type = "low", n = 2, W = 0.1,
-                     na.rm = FALSE, verbose = FALSE),
+                     na.rm = FALSE, inform = FALSE),
         "NA"
     )
 })
@@ -502,7 +502,7 @@ test_that("butterworth handles NAs with na.rm = TRUE", {
 ## Moving average tests ==============================================
 test_that("moving_average with width works", {
     result <- filter_mnirs(moxy_data, method = "moving_average",
-                           width = 10, verbose = FALSE)
+                           width = 10, inform = FALSE)
 
     expect_s3_class(result, "mnirs")
     expect_equal(nrow(result), nrow(moxy_data))
@@ -514,7 +514,7 @@ test_that("moving_average with width works", {
 
 test_that("moving_average with span works", {
     result <- filter_mnirs(moxy_data, method = "moving_average",
-                           span = 1, verbose = FALSE)
+                           span = 1, inform = FALSE)
 
     expect_s3_class(result, "mnirs")
     expect_equal(nrow(result), nrow(moxy_data))
@@ -522,10 +522,10 @@ test_that("moving_average with span works", {
 
 test_that("moving_average with larger width = more smoothing", {
     result_narrow <- filter_mnirs(moxy_data, method = "moving_average",
-                                  width = 5, verbose = FALSE)
+                                  width = 5, inform = FALSE)
 
     result_wide <- filter_mnirs(moxy_data, method = "moving_average",
-                                width = 20, verbose = FALSE)
+                                width = 20, inform = FALSE)
 
     expect_lt(var(result_wide$smo2_left), var(result_narrow$smo2_left))
 })
@@ -534,7 +534,7 @@ test_that("moving_average with larger width = more smoothing", {
 test_that("filter_mnirs respects nirs_channels argument", {
     result <- filter_mnirs(moxy_data, nirs_channels = "smo2_right",
                            method = "smooth_spline", spar = 0.5,
-                           verbose = FALSE)
+                           inform = FALSE)
 
     # channel1 should be filtered
     expect_false(identical(result$smo2_right, moxy_data$smo2_right))
@@ -553,7 +553,7 @@ test_that("filter_mnirs preserves and updates metadata", {
     original_meta <- attributes(moxy_data)
 
     result <- filter_mnirs(moxy_data, method = "smooth_spline",
-                           verbose = FALSE)
+                           inform = FALSE)
 
     result_meta <- attributes(result)
 
@@ -566,7 +566,7 @@ test_that("filter_mnirs preserves and updates metadata", {
 test_that("butterworth updates sample_rate in metadata", {
     result <- filter_mnirs(moxy_data, method = "butterworth",
                            type = "low", n = 2, W = 0.1,
-                           sample_rate = 10, verbose = FALSE)
+                           sample_rate = 10, inform = FALSE)
 
     expect_equal(attr(result, "sample_rate"), 10)
     expect_false(attr(result, "sample_rate") == attr(moxy_data, "sample_rate"))
@@ -581,7 +581,7 @@ test_that("filter_mnirs accumulates nirs_channels across calls", {
         moxy_data,
         method = "smooth_spline",
         spar = 0.5,
-        verbose = FALSE
+        inform = FALSE
     )
 
 
@@ -596,7 +596,7 @@ test_that("filter_mnirs accumulates nirs_channels across calls", {
         nirs_channels = "smo2_right",
         method = "smooth_spline",
         spar = 0.5,
-        verbose = FALSE
+        inform = FALSE
     )
 
     # Should accumulate both channels
@@ -606,27 +606,27 @@ test_that("filter_mnirs accumulates nirs_channels across calls", {
     )
 })
 
-## Verbose output tests ==============================================
-test_that("verbose output works", {
+## inform output tests ==============================================
+test_that("inform output works", {
     expect_message(
-        filter_mnirs(moxy_data, method = "smooth_spline", verbose = TRUE),
+        filter_mnirs(moxy_data, method = "smooth_spline", inform = TRUE),
         "spar ="
     ) |>
         expect_message("spar =")
 
     expect_silent(
-        filter_mnirs(moxy_data, method = "smooth_spline", verbose = FALSE)
+        filter_mnirs(moxy_data, method = "smooth_spline", inform = FALSE)
     )
 
     expect_warning(
         filter_mnirs(moxy_data, method = "butterworth", type = "low",
-                     n = 2, W = 0.1, fc = 0.1, verbose = TRUE),
+                     n = 2, W = 0.1, fc = 0.1, inform = TRUE),
         "W.*fc.*should be defined"
     )
 
     expect_silent(
         filter_mnirs(moxy_data, method = "butterworth", type = "low",
-                     n = 2, W = 0.1, fc = 0.1, verbose = FALSE)
+                     n = 2, W = 0.1, fc = 0.1, inform = FALSE)
     )
 
 })
@@ -634,7 +634,7 @@ test_that("verbose output works", {
 ## Integration tests ==============================================
 test_that("filter_mnirs works with pipe", {
     result <- moxy_data |>
-        filter_mnirs(method = "smooth_spline", verbose = FALSE)
+        filter_mnirs(method = "smooth_spline", inform = FALSE)
 
     expect_s3_class(result, "mnirs")
     expect_equal(nrow(result), nrow(moxy_data))
@@ -645,9 +645,9 @@ test_that("multiple filtering operations can be chained", {
     result <- moxy_data |>
         filter_mnirs(
             method = "butterworth", type = "high",
-            n = 1, W = 0.01, verbose = FALSE
+            n = 1, W = 0.01, inform = FALSE
         ) |>
-        filter_mnirs(method = "smooth_spline", spar = 0.3, verbose = FALSE)
+        filter_mnirs(method = "smooth_spline", spar = 0.3, inform = FALSE)
 
     expect_s3_class(result, "mnirs")
     expect_equal(nrow(result), nrow(moxy_data))
@@ -660,9 +660,9 @@ test_that("filter_mnirs works visually on Moxy data", {
         file_path = example_mnirs("moxy_ramp.xlsx"),
         nirs_channels = c(smo2 = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE) |>
+        resample_mnirs(inform = FALSE) |>
         dplyr::mutate(
             dplyr::across(smo2, \(.x) filter_butter(.x, 2, 0.05),
                           .names = "{.col}_filtfilt")
@@ -682,7 +682,7 @@ test_that("filter_mnirs works visually on Moxy data", {
         width = NULL,
         span = 30,
         # na.rm = FALSE,
-        verbose = TRUE
+        inform = TRUE
     )
 
 

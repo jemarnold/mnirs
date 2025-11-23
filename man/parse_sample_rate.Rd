@@ -10,7 +10,7 @@ parse_sample_rate(
   time_channel,
   sample_rate = NULL,
   nirs_device = NULL,
-  verbose = TRUE
+  inform = TRUE
 )
 }
 \description{

@@ -190,7 +190,7 @@ test_that("plot.mnirs moxy.perfpro works", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                          smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE)
+        inform = FALSE)
 
     ## visual check
     plot <- plot(df, na.omit = TRUE, label_time = TRUE, n = 8)

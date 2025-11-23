@@ -51,19 +51,19 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' ) |>
-#'     resample_mnirs(verbose = FALSE) |>
+#'     resample_mnirs(inform = FALSE) |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
 #'         width = 10,
-#'         verbose = FALSE
+#'         inform = FALSE
 #'     ) |>
-#'     filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+#'     filter_mnirs(na.rm = TRUE, inform = FALSE) |>
 #'     rescale_mnirs(
 #'         range = c(0, 100),   ## rescale to a 0-100% functional exercise range
-#'         verbose = FALSE
+#'         inform = FALSE
 #'     )
 #'
 #' plot(data_rescaled, label_time = TRUE) +
@@ -74,12 +74,15 @@ rescale_mnirs <- function(
         data,
         nirs_channels = list(),
         range,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validate =================================
     validate_mnirs_data(data, ncol = 1)
     metadata <- attributes(data)
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform)
     validate_numeric(range, 2, msg = "two-element `c(min, max)`")
 
     ## rescale range ================================
@@ -99,7 +102,6 @@ rescale_mnirs <- function(
     metadata$nirs_channels <- unique(
         c(metadata$nirs_channels, unlist(nirs_channels))
     )
-    metadata$verbose <- verbose
 
     return(create_mnirs_data(data, metadata))
 }

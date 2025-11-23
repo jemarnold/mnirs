@@ -1,3 +1,10 @@
+# mnirs 0.1.4
+
+* Breaking change: Updated argument `inform` replaces `verbose` to display/hide messages & warnings.
+* Implemented global option to set `inform = FALSE` with `options(mnirs.inform = FALSE)`.
+    * Global option `mnirs.inform = FALSE` will override functions' implicit default `inform = TRUE`.
+    * Explicit call `inform = TRUE` will override the global option.
+
 # mnirs 0.1.3
 
 * Remove redundant file mnirs.test-package.Rd.

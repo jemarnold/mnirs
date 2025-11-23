@@ -129,11 +129,10 @@ test_that("rescale_mnirs updates metadata correctly", {
         data,
         nirs_channels = list("A", "B"),
         range = c(0, 100),
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_true(all(c("A", "B") %in% attr(result, "nirs_channels")))
-    expect_false(attr(result, "verbose"))
 })
 
 test_that("rescale_mnirs works on Moxy", {
@@ -144,7 +143,7 @@ test_that("rescale_mnirs works on Moxy", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     ) |>
         dplyr::mutate(
             dplyr::across(
@@ -191,7 +190,7 @@ test_that("rescale_mnirs works on Train.Red", {
                           dhb_left = "HBDiff",
                           dhb_right = "HBDiff"),
         time_channel = c(time = "Timestamp (seconds passed)"),
-        verbose = FALSE,
+        inform = FALSE,
         keep_all = TRUE,
     )
 

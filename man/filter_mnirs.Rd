@@ -21,7 +21,7 @@
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  verbose = TRUE,
+  inform = TRUE,
   ...
 )
 
@@ -39,7 +39,7 @@
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  verbose = TRUE,
+  inform = TRUE,
   ...
 )
 
@@ -57,7 +57,7 @@
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  verbose = TRUE,
+  inform = TRUE,
   ...
 )
 }
@@ -122,9 +122,8 @@ In units of \code{time_channel} or \code{t}, between \verb{[t - span/2, t + span
 (\code{TRUE}) before the filter is applied. Otherwise \code{FALSE} (the \emph{default})
 will throw an error (see \emph{Details}).}
 
-\item{verbose}{A logical to return (the \emph{default}) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 
 \item{...}{Additional arguments.}
 }
@@ -206,13 +205,13 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
         width = 10,
-        verbose = FALSE
+        inform = FALSE
     )
 
 data_filtered <- filter_mnirs(
@@ -224,7 +223,7 @@ data_filtered <- filter_mnirs(
     type = "low",           ## specify a low-pass filter
     n = 2,                  ## filter order number
     W = 0.02,               ## filter fractional critical frequency
-    verbose = FALSE
+    inform = FALSE
 )
 
 ## add the non-filtered data back to the plot to compare

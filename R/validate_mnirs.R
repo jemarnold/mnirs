@@ -31,9 +31,7 @@
 #'   *default*).
 #' @param msg A character string detailing the `cli_abort` error message
 #'   returned for invalid numeric values passed to `arg`.
-#' @param verbose A logical to return (the *default*) or silence warnings and
-#'   messages which can be used for data error checking. Abort errors will
-#'   always be returned.
+#' @inheritParams read_mnirs
 #'
 #' @returns The validated object or an error message with [cli::cli_abort()].
 #'
@@ -105,12 +103,12 @@ validate_mnirs_data <- function(data, ncol = 2L) {
 
 
 #' @rdname validate_mnirs
-validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
+validate_nirs_channels <- function(data, nirs_channels, inform = TRUE) {
     ## if not defined, check metadata
     if (is.null(nirs_channels) || length(nirs_channels) == 0) {
         nirs_channels <- attr(data, "nirs_channels") ## vector
 
-        if (verbose && !is.null(nirs_channels)) {
+        if (inform && !is.null(nirs_channels)) {
             cli_warn(
                 "All {.arg nirs_channels} are grouped together. Overwrite \\
                 this by grouping {.arg nirs_channels} explicitly"
@@ -254,7 +252,7 @@ validate_sample_rate <- function(
         data,
         time_channel,
         sample_rate,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## if not defined, check metadata
     if (is.null(sample_rate)) {
@@ -269,7 +267,7 @@ validate_sample_rate <- function(
     ## if still not defined, use estimated sample_rate
     if (is.null(sample_rate)) {
         sample_rate <- estimated_sample_rate
-        if (verbose) {
+        if (inform) {
             cli_bullets(c(
                 "!" = "Estimated {.arg sample_rate} = {.val {sample_rate}} Hz.",
                 "i" = "Overwrite this with {.arg sample_rate} = {.cls numeric}."
@@ -285,7 +283,7 @@ validate_sample_rate <- function(
     ## if provided sample rate seems off and time_channel doesn't appear
     ## to be integer values, report warning
     if (
-        verbose &&
+        inform &&
         !isTRUE(all.equal(1, estimated_sample_rate, tolerance = 0.001)) &
         !isTRUE(all.equal(estimated_sample_rate, sample_rate, tolerance = 0.5))
     ) {

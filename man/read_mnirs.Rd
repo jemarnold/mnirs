@@ -13,7 +13,7 @@ read_mnirs(
   add_timestamp = FALSE,
   zero_time = FALSE,
   keep_all = FALSE,
-  verbose = TRUE
+  inform = TRUE
 )
 }
 \arguments{
@@ -40,10 +40,10 @@ in the form: \code{c(new_name = "original_name")} (see \emph{Details}).}
 in Hz. If not defined explicitly, will be estimated from the data (see
 \emph{Details}).}
 
-\item{add_timestamp}{A logical to add a \emph{"timestamp"} column with date-time
-for each sample (class \emph{POSIXct}), if present in the data file. If no
-absolute timestamp is detected, will instead return relative time as
-\emph{hh:mm:ss}.}
+\item{add_timestamp}{\verb{<under development>} A logical to add a \emph{"timestamp"}
+column with date-time for each sample (class \emph{POSIXct}), if present in the
+data file. If no absolute timestamp is detected, will instead return
+relative time as \emph{hh:mm:ss}.}
 
 \item{zero_time}{A logical to re-calculate \code{time_channel} to start
 from zero or \code{FALSE} keep the original values (the \emph{default}).}
@@ -52,9 +52,8 @@ from zero or \code{FALSE} keep the original values (the \emph{default}).}
 or \code{FALSE} to only include the explicitly specified data columns
 (the \emph{default}).}
 
-\item{verbose}{A logical to return (the \emph{default}) or \code{FALSE} to silence
-warnings and messages which can be used for data error checking. Abort
-errors will always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
@@ -98,7 +97,7 @@ Otherwise, relative time (\emph{"hh:mm:ss"}) will be returned.
 
 If \code{time_channel} contains irregular sampling (i.e., non-sequential,
 repeated, or unordered values) a warning will be displayed (if
-\code{verbose = TRUE}) suggesting that the user confirm the file data manually.
+\code{inform = TRUE}) suggesting that the user confirm the file data manually.
 
 \code{sample_rate} is required for certain \code{{mnirs}} functions to work properly
 and can be carried forward in the data frame metadata. If it is not
@@ -109,6 +108,11 @@ values in the \code{time_channel}. As above, in certain cases where the
 \code{sample_rate} should be defined explicitly.
 
 Columns and rows which contain entirely missing data (\code{NA}) are omitted.
+
+\code{inform = TRUE} will display warnings and information messages which can be
+useful for troubleshooting. Errors causing abort messages will always be
+displayed. Messages can be silenced globally with
+\code{options(mnirs.inform = FALSE)}.
 }
 \examples{
 ## call an example mNIRS data file
@@ -119,7 +123,7 @@ data_table <- read_mnirs(
     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    verbose = FALSE                      ## hide warnings & messages
+    inform = FALSE                       ## hide warnings & messages
 )
 
 data_table

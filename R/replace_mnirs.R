@@ -74,7 +74,7 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' )
 #'
 #' ## clean data
@@ -119,7 +119,7 @@ replace_mnirs <- function(
         width = NULL,
         span = NULL,
         method = c("linear", "median", "locf", "NA"),
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validation ====================================
     method <- match.arg(method)
@@ -130,11 +130,14 @@ replace_mnirs <- function(
             {.arg method} must be defined."
         )
     }
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
 
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    ## verbose = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose = FALSE)
+    ## inform = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
     nirs_channels <- unlist(nirs_channels, use.names = FALSE)
 
     ## passthrough if only replacing missing but no `NA` in any nirs_channels
@@ -142,7 +145,7 @@ replace_mnirs <- function(
         !any(is.na(data[nirs_channels])) && method != "NA" &&
         is.null(c(invalid_values, width, span))
     ) {
-        if (verbose) {
+        if (inform) {
             cli_bullets(c(
                 "i" = "No invalid or missing values detected in {.arg data}."
             ))
@@ -203,7 +206,6 @@ replace_mnirs <- function(
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
     metadata$time_channel <- time_channel
-    metadata$verbose <- verbose
 
     return(create_mnirs_data(data, metadata))
 }
@@ -239,7 +241,7 @@ replace_invalid <- function(
         width = NULL,
         span = NULL,
         method = c("median", "NA"),
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validate ===============================================
     validate_numeric(x)
@@ -252,6 +254,9 @@ replace_invalid <- function(
     }
     validate_numeric(invalid_values)
     method <- match.arg(method) == "median" ## into logical
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
 
     ## process ========================================================
     x <- round(x, 6) ## avoid floating point precision issues
@@ -268,7 +273,7 @@ replace_invalid <- function(
         ## invalid_values removed to NA first,
         ## so returns local median excluding idx
         window_idx <- compute_local_windows(
-            t, invalid_idx, width, span, verbose = verbose
+            t, invalid_idx, width, span, inform = inform
         )
         local_medians <- compute_local_fun(y, window_idx, median)
         y[invalid_idx] <- local_medians
@@ -319,7 +324,7 @@ replace_outliers <- function(
         width = NULL,
         span = NULL,
         method = c("median", "NA"),
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validate ===============================================
     validate_numeric(x)
@@ -331,10 +336,13 @@ replace_outliers <- function(
         )
     }
     method <- match.arg(method) == "median" ## into logical
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
 
     ## process =====================================================
     window_idx <- compute_local_windows(
-        t, width = width, span = span, verbose = verbose
+        t, width = width, span = span, inform = inform
     )
     local_medians <- compute_local_fun(x, window_idx, median)
     is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)

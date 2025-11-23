@@ -58,7 +58,7 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' )
 #'
 #' data
@@ -69,7 +69,7 @@
 #'     # sample_rate = NULL,
 #'     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
 #'     method = "linear",             ## default linear interpolation across any new samples
-#'     verbose = FALSE                ## will confirm the output sample rate
+#'     inform = FALSE                 ## will confirm the output sample rate
 #' )
 #'
 #' ## note the altered "time" values 👇
@@ -83,14 +83,17 @@ resample_mnirs <- function(
     resample_rate = sample_rate, ## placeholder indicating default condition
     resample_time = NULL,
     method = c("linear", "locf", "NA"),
-    verbose = TRUE
+    inform = TRUE
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
     metadata <- attributes(data)
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
     time_channel <- validate_time_channel(data, time_channel)
     sample_rate <- validate_sample_rate(
-        data, time_channel, sample_rate, verbose
+        data, time_channel, sample_rate, inform
     )
     validate_numeric(
         resample_rate, 1, c(0, Inf), FALSE, msg = "one-element positive"
@@ -109,7 +112,7 @@ resample_mnirs <- function(
         resample_time <- 1 / resample_rate
     } else if (!is.null(resample_time) && is.null(resample_rate)) {
         resample_rate <- 1 / resample_time
-    } else if (verbose) {
+    } else if (inform) {
         resample_time <- 1 / resample_rate
         cli_warn(c(
             "Either {.arg resample_rate} or {.arg resample_time} should be \\
@@ -190,9 +193,8 @@ resample_mnirs <- function(
     ## Metadata =================================
     metadata$time_channel <- time_channel
     metadata$sample_rate <- resample_rate
-    metadata$verbose <- verbose
 
-    if (verbose) {
+    if (inform) {
         cli_bullets(c(
             "i" = "Output is resampled at {.val {resample_rate}} Hz."
         ))

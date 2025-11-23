@@ -495,7 +495,7 @@ test_that("replace_mnirs outlier removal skipped when outlier_cutoff = NULL", {
         outlier_cutoff = NULL,
         invalid_values = c(999),
         method = "NA",
-        verbose = FALSE
+        inform = FALSE
     )
 
     ## Data should be unchanged except for invalid value processing
@@ -517,7 +517,7 @@ test_that("replace_mnirs outlier removal processes when outlier_cutoff provided"
         outlier_cutoff = 3,
         width = 5,
         method = "NA",
-        verbose = FALSE
+        inform = FALSE
     )
 
     ## Outlier (200) should be replaced with NA
@@ -543,7 +543,7 @@ test_that("replace_mnirs do nothing condition throws error appropriately", {
             width = NULL,
             span = NULL,
             method = "NA",
-            verbose = FALSE
+            inform = FALSE
         ),
         "must be defined"
     )
@@ -554,14 +554,14 @@ test_that("replace_mnirs passthrough returns early when no NAs and no processing
         file_path = example_mnirs("moxy_ramp"),
         nirs_channels = c(smo2 = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_message(
         result <- replace_mnirs(
             data,
             method = "linear",
-            verbose = TRUE
+            inform = TRUE
         ),
         "No invalid or missing"
     )
@@ -572,7 +572,6 @@ test_that("replace_mnirs passthrough returns early when no NAs and no processing
     expect_equal(attr(data, "nirs_channels"), c("smo2"))
     expect_equal(attr(data, "time_channel"), "time")
     expect_equal(attr(data, "sample_rate"), 2)
-    expect_false(attr(data, "verbose"))
 })
 
 test_that("replace_mnirs updates metadata correctly", {
@@ -581,18 +580,17 @@ test_that("replace_mnirs updates metadata correctly", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     ) |>
         replace_mnirs(
             invalid_values = c(0, 100),
             span = 7,
             method = "linear",
-            verbose = FALSE
+            inform = FALSE
         )
     expect_equal(attr(data, "nirs_channels"), c("smo2_left", "smo2_right"))
     expect_equal(attr(data, "time_channel"), "time")
     expect_equal(attr(data, "sample_rate"), 2)
-    expect_false(attr(data, "verbose"))
 })
 
 test_that("replace_mnirs works visually on moxy data", {
@@ -602,7 +600,7 @@ test_that("replace_mnirs works visually on moxy data", {
             file_path = example_mnirs("moxy_ramp.xlsx"),
             nirs_channels = c(smo2 = "SmO2 Live"),
             time_channel = c(time = "hh:mm:ss"),
-            verbose = FALSE
+            inform = FALSE
         )
 
         plot(data) +

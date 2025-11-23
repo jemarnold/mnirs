@@ -116,13 +116,13 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' ) |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
 #'         width = 10,
-#'         verbose = FALSE
+#'         inform = FALSE
 #'     )
 #'
 #' data_filtered <- filter_mnirs(
@@ -134,7 +134,7 @@
 #'     type = "low",           ## specify a low-pass filter
 #'     n = 2,                  ## filter order number
 #'     W = 0.02,               ## filter fractional critical frequency
-#'     verbose = FALSE
+#'     inform = FALSE
 #' )
 #'
 #' ## add the non-filtered data back to the plot to compare
@@ -161,12 +161,15 @@ filter_mnirs <- function(
         width = NULL,
         span = NULL,
         na.rm = FALSE,
-        verbose = TRUE,
+        inform = TRUE,
         ...
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
     method <- match.arg(method)
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
 
     ## create object with class for method dispatch
     data <- structure(
@@ -196,14 +199,14 @@ filter_mnirs.smooth_spline <- function(
         width = NULL,
         span = NULL,
         na.rm = FALSE,
-        verbose = TRUE,
+        inform = TRUE,
         ...
 ) {
     ## validation ==========================================
     rlang::check_installed("stats", reason = "to use stats::smooth.spline()")
     metadata <- attributes(data)
-    ## verbose = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose = FALSE)
+    ## inform = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
     validate_numeric(
         spar, 1, c(0, Inf), FALSE, msg = "one-element positive"
@@ -236,7 +239,7 @@ filter_mnirs.smooth_spline <- function(
 
         spline_model <- stats::smooth.spline(x = time_vec, y = x, spar = spar)
 
-        if (is.null(spar) && verbose) {
+        if (is.null(spar) && inform) {
             cli_bullets(c(
                 "i" = "{.arg nirs_channel} = {.val {.x}}: \\
                 `smooth.spline(spar = {.val {round(spline_model$spar, 3)}})`"
@@ -252,7 +255,6 @@ filter_mnirs.smooth_spline <- function(
 
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
-    metadata$verbose <- verbose
 
     return(create_mnirs_data(data, metadata))
 }
@@ -275,17 +277,17 @@ filter_mnirs.butterworth <- function(
         width = NULL,
         span = NULL,
         na.rm = FALSE,
-        verbose = TRUE,
+        inform = TRUE,
         ...
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    ## verbose = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose = FALSE)
+    ## inform = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
 
     sample_rate <- validate_sample_rate(
-        data, time_channel, sample_rate, verbose
+        data, time_channel, sample_rate, inform
     )
     type <- match.arg(type)
     edges <- list(...)$edges %||% "rev" ## default filter_butter(edges)
@@ -303,7 +305,7 @@ filter_mnirs.butterworth <- function(
 
     if (!is.null(W) && !is.null(fc)) {
         fc <- NULL
-        if (verbose) {
+        if (inform) {
             cli_warn(c(
                 "Either {.arg W} or {.arg fc} should be defined, not both.",
                 "i" = "Defaulting to {.arg W} = {.val {W}}"
@@ -324,7 +326,6 @@ filter_mnirs.butterworth <- function(
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
     metadata$time_channel <- time_channel
     metadata$sample_rate <- sample_rate
-    metadata$verbose <- verbose
 
     return(create_mnirs_data(data, metadata))
 }
@@ -347,26 +348,25 @@ filter_mnirs.moving_average <- function(
         width = NULL,
         span = NULL,
         na.rm = FALSE,
-        verbose = TRUE,
+        inform = TRUE,
         ...
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    ## verbose = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose = FALSE)
+    ## inform = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
 
     ## processing ==========================================
     time_vec <- round(data[[time_channel]], 6)
 
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_moving_average(.x, time_vec, width, span, verbose)
+        filter_moving_average(.x, time_vec, width, span, inform)
     })
 
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
     metadata$time_channel <- time_channel
-    metadata$verbose <- verbose
 
     return(create_mnirs_data(data, metadata))
 }
@@ -414,7 +414,7 @@ filter_moving_average <- function(
         t = seq_along(x),
         width = NULL,
         span = NULL,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validation ===========================================
     validate_numeric(x)
@@ -425,10 +425,13 @@ filter_moving_average <- function(
             same length."
         )
     }
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
 
     ## processing ==============================================
     window_idx <- compute_local_windows(
-        t, width = width, span = span, verbose = verbose
+        t, width = width, span = span, inform = inform
     )
     y <- compute_local_fun(x, window_idx, mean)
     ## explicit overwrite NaN to NA

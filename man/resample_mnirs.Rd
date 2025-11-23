@@ -11,7 +11,7 @@ resample_mnirs(
   resample_rate = sample_rate,
   resample_time = NULL,
   method = c("linear", "locf", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 }
 \arguments{
@@ -49,9 +49,8 @@ for trailing samples or to the right for leading samples, using
 the original data frame.}
 }}
 
-\item{verbose}{A logical to return (the \emph{default}) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
@@ -90,7 +89,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 )
 
 data
@@ -101,7 +100,7 @@ data_resampled <- resample_mnirs(
     # sample_rate = NULL,
     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
     method = "linear",             ## default linear interpolation across any new samples
-    verbose = FALSE                ## will confirm the output sample rate
+    inform = FALSE                 ## will confirm the output sample rate
 )
 
 ## note the altered "time" values 👇

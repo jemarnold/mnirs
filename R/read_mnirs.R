@@ -22,18 +22,17 @@
 #' @param sample_rate An *optional* numeric value for the exported sample rate
 #'   in Hz. If not defined explicitly, will be estimated from the data (see
 #'   *Details*).
-#' @param add_timestamp A logical to add a *"timestamp"* column with date-time
-#'   for each sample (class *POSIXct*), if present in the data file. If no
-#'   absolute timestamp is detected, will instead return relative time as
-#'   *hh:mm:ss*.
+#' @param add_timestamp `<under development>` A logical to add a *"timestamp"* 
+#'   column with date-time for each sample (class *POSIXct*), if present in the 
+#'   data file. If no absolute timestamp is detected, will instead return 
+#'   relative time as *hh:mm:ss*.
 #' @param zero_time A logical to re-calculate `time_channel` to start
 #'   from zero or `FALSE` keep the original values (the *default*).
 #' @param keep_all A logical to include all columns detected from the file
 #'   or `FALSE` to only include the explicitly specified data columns
 #'   (the *default*).
-#' @param verbose A logical to return (the *default*) or `FALSE` to silence
-#'   warnings and messages which can be used for data error checking. Abort
-#'   errors will always be returned.
+#' @param inform A logical to display (the *default*) or `FALSE` to silence
+#'   warnings and information messages used for troubleshooting.
 #'
 #' @details
 #' Channel names are matched to a single row, representing the header row for
@@ -73,7 +72,7 @@
 # #'
 #' If `time_channel` contains irregular sampling (i.e., non-sequential,
 #'   repeated, or unordered values) a warning will be displayed (if
-#'   `verbose = TRUE`) suggesting that the user confirm the file data manually.
+#'   `inform = TRUE`) suggesting that the user confirm the file data manually.
 #'
 #' `sample_rate` is required for certain `{mnirs}` functions to work properly
 #'   and can be carried forward in the data frame metadata. If it is not
@@ -84,6 +83,11 @@
 #'   `sample_rate` should be defined explicitly.
 #'
 #' Columns and rows which contain entirely missing data (`NA`) are omitted.
+#' 
+#' `inform = TRUE` will display warnings and information messages which can be
+#'   useful for troubleshooting. Errors causing abort messages will always be 
+#'   displayed. Messages can be silenced globally with 
+#'   `options(mnirs.inform = FALSE)`.
 #'
 #' @returns
 #' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
@@ -98,7 +102,7 @@
 #'     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
 #'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-#'     verbose = FALSE                      ## hide warnings & messages
+#'     inform = FALSE                       ## hide warnings & messages
 #' )
 #'
 #' data_table
@@ -113,8 +117,13 @@ read_mnirs <- function(
         add_timestamp = FALSE,
         zero_time = FALSE,
         keep_all = FALSE,
-        verbose = TRUE
+        inform = TRUE
 ) {
+    ## global options overrides implicit but not explicit `inform`
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
+  
     ## import data_raw from either excel or csv
     data_raw <- read_file(file_path)
 
@@ -137,7 +146,7 @@ read_mnirs <- function(
         data_table,
         time_channel,
         nirs_device,
-        verbose
+        inform
     )
 
     ## rename from channel names, make duplicates unique, keep columns
@@ -148,7 +157,7 @@ read_mnirs <- function(
         time_channel,
         event_channel,
         keep_all,
-        verbose
+        inform
     )
     nirs_renamed  <- renamed_list$nirs_channel
     time_renamed  <- renamed_list$time_channel
@@ -178,7 +187,7 @@ read_mnirs <- function(
         time_renamed,
         sample_rate,
         nirs_device,
-        verbose
+        inform
     )
     data_sampled <- sample_list$data
     time_renamed <- sample_list$time_channel
@@ -188,7 +197,7 @@ read_mnirs <- function(
     detect_irregular_samples(
         data_sampled[[time_renamed]],
         time_renamed,
-        verbose
+        inform
     )
 
     ## assign metadata to attributes(data)
@@ -198,7 +207,7 @@ read_mnirs <- function(
         time_channel = time_renamed,
         event_channel = event_renamed,
         sample_rate = sample_rate,
-        verbose = verbose
+        inform = inform
     )
 
     return(create_mnirs_data(data_sampled, metadata))
@@ -218,7 +227,6 @@ read_mnirs <- function(
 #'   - time_channel
 #'   - event_channel
 #'   - sample_rate
-#'   - verbose
 #'
 #' @details
 #' Typically will only be called internally, but can be used to inject *{mnirs}*
@@ -273,7 +281,6 @@ create_mnirs_data <- function(data, ...) {
         time_channel = metadata$time_channel,
         event_channel = metadata$event_channel,
         sample_rate = metadata$sample_rate,
-        verbose = metadata$verbose
     )
 
     tibble::validate_tibble(nirs_data)

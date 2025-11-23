@@ -16,7 +16,6 @@ create_mnirs_data(data, ...)
 \item time_channel
 \item event_channel
 \item sample_rate
-\item verbose
 }}
 }
 \value{

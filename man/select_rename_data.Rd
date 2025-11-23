@@ -10,7 +10,7 @@ select_rename_data(
   time_channel,
   event_channel = NULL,
   keep_all = FALSE,
-  verbose = TRUE
+  inform = TRUE
 )
 }
 \description{

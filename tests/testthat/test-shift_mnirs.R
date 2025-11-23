@@ -20,7 +20,7 @@ test_that("shift_mnirs shifts by constant correctly", {
 
     result <- shift_mnirs(data, nirs_channels = list("ch1", "ch2"),
                           time_channel = "time", by = 5,
-                          verbose = FALSE)
+                          inform = FALSE)
 
     expect_equal(result$ch1, data$ch1+5)
     expect_equal(result$ch2, data$ch2+5)
@@ -35,7 +35,7 @@ test_that("shift_mnirs preserves relative scaling within groups", {
 
     result <- shift_mnirs(data, nirs_channels = list(c("ch1", "ch2")),
                           time_channel = "time", to = 0, width = 1,
-                          position = "min", verbose = FALSE)
+                          position = "min", inform = FALSE)
 
     # ch1 min is 1, so shift both by -1
     expect_equal(result$ch1, 0:9)
@@ -53,7 +53,7 @@ test_that("shift_mnirs loses relative scaling across groups", {
 
     result <- shift_mnirs(data, nirs_channels = list("ch1", "ch2"),
                           time_channel = "time", to = 0, width = 1,
-                          position = "min", verbose = FALSE)
+                          position = "min", inform = FALSE)
 
     # Each shifted independently to min = 0
     expect_equal(result$ch1, 0:9)
@@ -70,7 +70,7 @@ test_that("shift_mnirs handles position = 'max' correctly", {
 
     result <- shift_mnirs(data, nirs_channels = list("ch1"),
                           time_channel = "time", to = 100, width = 1,
-                          position = "max", verbose = FALSE)
+                          position = "max", inform = FALSE)
 
     # Max is 10, shift to 100 means add 90
     expect_equal(result$ch1, 91:100)
@@ -85,7 +85,7 @@ test_that("shift_mnirs handles position = 'first' with span", {
     result <- shift_mnirs(data, nirs_channels = list("ch1"),
                           time_channel = "time", to = 0,
                           position = "first", span = 2,
-                          verbose = FALSE)
+                          inform = FALSE)
 
     # Mean of first 3 values (time 0-2) is 10
     expect_equal(result$ch1, c(rep(0, 3), -9:-3))
@@ -101,7 +101,7 @@ test_that("shift_mnirs preserves unshifted channels", {
 
     result <- shift_mnirs(data, nirs_channels = list("ch1"),
                           time_channel = "time", by = 5, width = 1,
-                          verbose = FALSE)
+                          inform = FALSE)
 
     expect_equal(result$ch1, 6:15)
     expect_equal(result$ch2, 11:20)
@@ -118,11 +118,10 @@ test_that("shift_mnirs updates metadata correctly", {
 
     result <- shift_mnirs(data, nirs_channels = list("ch1"),
                           time_channel = "time", by = 5, width = 1,
-                          verbose = FALSE)
+                          inform = FALSE)
 
     expect_true("ch1" %in% attr(result, "nirs_channels"))
     expect_equal(attr(result, "time_channel"), "time")
-    expect_false(attr(result, "verbose"))
 })
 
 test_that("shift_mnirs handles mixed channel groups", {
@@ -141,7 +140,7 @@ test_that("shift_mnirs handles mixed channel groups", {
         to = 0,
         width = 1,
         position = "min",
-        verbose = FALSE
+        inform = FALSE
     )
 
     # Group 1: min is 1, both shifted by -1
@@ -163,7 +162,7 @@ test_that("shift_mnirs handles NA values correctly", {
 
     result <- shift_mnirs(data, nirs_channels = list("ch1"),
                           time_channel = "time", to = 0, width = 1,
-                          position = "min", verbose = FALSE)
+                          position = "min", inform = FALSE)
 
     # Min of non-NA values is 2
     expect_true(is.na(result$ch1[1]))
@@ -179,7 +178,7 @@ test_that("shift_mnirs prioritises to over by", {
     expect_warning(
         result <- shift_mnirs(data, nirs_channels = list("ch1"),
                               time_channel = "time", to = 0, by = 100,
-                              width = 1, position = "min", verbose = TRUE),
+                              width = 1, position = "min", inform = TRUE),
         ".*to.*by.*not both"
     )
 
@@ -278,7 +277,7 @@ test_that("shift_mnirs works on Moxy", {
         nirs_channels = c(smo2_left = "SmO2 Live",
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        verbose = FALSE
+        inform = FALSE
     ) |>
         dplyr::mutate(
             dplyr::across(
@@ -316,7 +315,7 @@ test_that("shift_mnirs(position = 'first') works on Moxy", {
                           smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
         zero_time = TRUE,
-        verbose = FALSE
+        inform = FALSE
     ) |>
         dplyr::mutate(
             dplyr::across(
@@ -363,7 +362,7 @@ test_that("shift_mnirs works on Train.Red", {
                           dhb_left = "HBDiff",
                           dhb_right = "HBDiff"),
         time_channel = c(time = "Timestamp (seconds passed)"),
-        verbose = FALSE,
+        inform = FALSE,
         keep_all = TRUE,
     )
 

@@ -52,7 +52,7 @@ compute_local_windows <- function(
         idx = seq_along(t),
         width = NULL,
         span = NULL,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validation ===========================================
     if (is.null(c(width, span))) {
@@ -64,7 +64,7 @@ compute_local_windows <- function(
     validate_numeric(span, 1, c(0, Inf), msg = "one-element positive")
     if (!is.null(width) && !is.null(span)) {
         span <- NULL
-        if (verbose) {
+        if (inform) {
             cli_warn(c(
                 "Either {.arg width} or {.arg span} should be defined, \\
                 not both.",
@@ -188,7 +188,7 @@ compute_window_of_valid_neighbours <- function(
         t = seq_along(x),
         width = NULL,
         span = NULL,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## validation ===========================================
     if (is.null(c(width, span))) {
@@ -200,7 +200,7 @@ compute_window_of_valid_neighbours <- function(
     validate_numeric(span, 1, c(0, Inf), msg = "one-element positive")
     if (!is.null(width) && !is.null(span)) {
         span <- NULL
-        if (verbose) {
+        if (inform) {
             cli_warn(c(
                 "Either {.arg width} or {.arg span} should be defined, \\
                 not both.",

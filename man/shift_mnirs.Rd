@@ -13,7 +13,7 @@ shift_mnirs(
   width = NULL,
   span = NULL,
   position = c("min", "max", "first"),
-  verbose = TRUE
+  inform = TRUE
 )
 }
 \arguments{
@@ -63,9 +63,8 @@ specified values.}
 values.}
 }}
 
-\item{verbose}{A logical to return (the \emph{default}) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
@@ -109,21 +108,21 @@ data_shifted <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 ) |>
-    resample_mnirs(verbose = FALSE) |>
+    resample_mnirs(inform = FALSE) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
         width = 10,
-        verbose = FALSE
+        inform = FALSE
     ) |>
-    filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+    filter_mnirs(na.rm = TRUE, inform = FALSE) |>
     shift_mnirs(
         to = 0,             ## NIRS values will be shifted to zero
         span = 120,         ## shift the first 120 sec of data to zero
         position = "first",
-        verbose = FALSE
+        inform = FALSE
     )
 
 plot(data_shifted, label_time = TRUE) +

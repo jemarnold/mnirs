@@ -99,7 +99,7 @@ test_that("validate_mnirs_data() rejects data frames with < 2 columns", {
 ## validate_nirs_channels() ========================================
 test_that("validate_nirs_channels() uses metadata when NULL", {
     data <- create_test_data()
-    result <- validate_nirs_channels(data, NULL, verbose = FALSE)
+    result <- validate_nirs_channels(data, NULL, inform = FALSE)
     expect_equal(result, c("nirs1", "nirs2"))
 })
 
@@ -120,7 +120,7 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
     expect_equal(result, nirs_list)
 
     attr(data, "nirs_channels") <- nirs_list
-    expect_warning(result <- validate_nirs_channels(data, NULL, verbose = TRUE),
+    expect_warning(result <- validate_nirs_channels(data, NULL, inform = TRUE),
                    "All `nirs_channels`.*grouped")
     expect_equal(result, nirs_list)
 })
@@ -361,7 +361,7 @@ test_that("validate_sample_rate() uses explicit value with warning when provided
     expect_equal(validate_sample_rate(data, "time", 20), 20) |>
         expect_warning("appears to be inconsistent with estimated")
     ## uses explicit without warning
-    expect_equal(validate_sample_rate(data, "time", 20, verbose = FALSE), 20) |>
+    expect_equal(validate_sample_rate(data, "time", 20, inform = FALSE), 20) |>
         expect_silent()
 })
 
@@ -373,34 +373,34 @@ test_that("validate_sample_rate() does not warn for integer time_channel", {
 test_that("validate_sample_rate() estimates from time_channel when NULL", {
     rate = 9.5
     data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
+    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
     expect_equal(result, round(rate))
 
     rate = 0.8
     data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
+    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
     expect_equal(result, round(rate))
 
     rate = 11
     data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
+    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
     expect_equal(result, 10)
 
     rate = 44
     data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
+    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
     expect_equal(result, 50)
 
     rate = 98
     data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
+    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
     expect_equal(result, 100)
 })
 
 test_that("validate_sample_rate() shows message when estimating", {
     data <- create_test_data(add_metadata = FALSE)
     expect_message(
-        validate_sample_rate(data, "time", NULL, verbose = TRUE),
+        validate_sample_rate(data, "time", NULL, inform = TRUE),
         "Estimated"
         ) |>
         expect_message("Overwrite")

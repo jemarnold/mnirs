@@ -70,21 +70,21 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' ) |>
-#'     resample_mnirs(verbose = FALSE) |>
+#'     resample_mnirs(inform = FALSE) |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
 #'         width = 10,
-#'         verbose = FALSE
+#'         inform = FALSE
 #'     ) |>
-#'     filter_mnirs(na.rm = TRUE, verbose = FALSE) |>
+#'     filter_mnirs(na.rm = TRUE, inform = FALSE) |>
 #'     shift_mnirs(
 #'         to = 0,             ## NIRS values will be shifted to zero
 #'         span = 120,         ## shift the first 120 sec of data to zero
 #'         position = "first",
-#'         verbose = FALSE
+#'         inform = FALSE
 #'     )
 #'
 #' plot(data_shifted, label_time = TRUE) +
@@ -100,7 +100,7 @@ shift_mnirs <- function(
         width = NULL,
         span = NULL,
         position = c("min", "max", "first"),
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## TODO convert sym(nirs_channels) to strings?
     ## TODO need to fix edges where only half width/span included
@@ -113,13 +113,16 @@ shift_mnirs <- function(
 
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
+    if (missing(inform)) {
+        inform <- getOption("mnirs.inform", default = TRUE)
+    }
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform)
     time_channel <- validate_time_channel(data, time_channel)
     validate_numeric(to, 1, msg = "one-element")
     validate_numeric(by, 1, msg = "one-element")
     if (!is.null(to) && !is.null(by)) {
         by <- NULL
-        if (verbose) {
+        if (inform) {
             cli_warn(c(
                 "Either {.arg to} or {.arg by} should be defined, \\
                 not both.",
@@ -139,7 +142,6 @@ shift_mnirs <- function(
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_unlisted))
     metadata$time_channel <- time_channel
-    metadata$verbose <- verbose
 
     ## shift_by ====================================================
     ## shift_by does not require grouping or calculating positions

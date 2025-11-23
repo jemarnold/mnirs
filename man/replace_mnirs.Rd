@@ -16,7 +16,7 @@ replace_mnirs(
   width = NULL,
   span = NULL,
   method = c("linear", "median", "locf", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 
 replace_invalid(
@@ -26,7 +26,7 @@ replace_invalid(
   width = NULL,
   span = NULL,
   method = c("median", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 
 replace_outliers(
@@ -36,7 +36,7 @@ replace_outliers(
   width = NULL,
   span = NULL,
   method = c("median", "NA"),
-  verbose = TRUE
+  inform = TRUE
 )
 
 replace_missing(
@@ -93,9 +93,8 @@ trailing \code{NA}s or to the right for leading \code{NA}s, using
 \item{\code{"NA"}}{Returns \code{NA}s without replacement.}
 }}
 
-\item{verbose}{A logical to return (the \emph{default}) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 
 \item{x}{A numeric vector.}
 
@@ -202,7 +201,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    inform = FALSE
 )
 
 ## clean data

@@ -4,7 +4,7 @@
 \alias{detect_irregular_samples}
 \title{Report warnings for unbalanced time_channel samples}
 \usage{
-detect_irregular_samples(x, time_channel, verbose = TRUE)
+detect_irregular_samples(x, time_channel, inform = TRUE)
 }
 \description{
 Report warnings for unbalanced time_channel samples

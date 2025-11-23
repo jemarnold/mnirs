@@ -128,16 +128,15 @@ detect_time_channel <- function(
         data,
         time_channel = NULL,
         nirs_device = NULL,
-        verbose = TRUE
+        inform = TRUE
 ) {
-    ## TODO fix for nirs_device = "Artinis"
     if (!is.null(time_channel)) {
         return(time_channel)
     }
 
     ## return default sample column for Artinis Oxysoft
     if (!is.null(nirs_device) && nirs_device == "Artinis") {
-        if (verbose) {
+        if (inform) {
             cli_bullets(c(
                 "!" = "Oxysoft detected {.arg time_channel} = {.val {1}} \\
                 and renamed as {.val sample}.",
@@ -149,7 +148,7 @@ detect_time_channel <- function(
 
     ## alert and return detected `time_channel` column name
     alert_time_channel <- function(time_channel) {
-        if (verbose) {
+        if (inform) {
             cli_bullets(c(
                 "!" = "Detected {.arg time_channel} = {.val {time_channel}}.",
                 "i" = "Overwrite with {.arg time_channel} = {.cls character}."
@@ -230,7 +229,7 @@ select_rename_data <- function(
         time_channel,
         event_channel = NULL,
         keep_all = FALSE,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## if channels not named, names from object
     channel_list <- list(
@@ -300,7 +299,7 @@ select_rename_data <- function(
 
     renamed <- !names(result)[channel_names_idx] %in% channel_inputs
 
-    if (verbose && any(renamed)) {
+    if (inform && any(renamed)) {
         ## warn about renamed names
         old_names <- channel_inputs[renamed]
         new_names <- names(result)[channel_names_idx][renamed]
@@ -415,7 +414,7 @@ parse_sample_rate <- function(
         time_channel,
         sample_rate = NULL,
         nirs_device = NULL,
-        verbose = TRUE
+        inform = TRUE
 ) {
     ## if Oxysoft, sample_rate will be detected = 1
     ## extract and overwrite with exported sample_rate
@@ -431,7 +430,7 @@ parse_sample_rate <- function(
         data[[time_channel]] <- time_vec
         data <- data[data_names]
 
-        if (verbose) {
+        if (inform) {
             cli_bullets(c(
                 "!" = "Oxysoft detected sample_rate = {.val {sample_rate}} Hz.",
                 "i" = "{.val {time_channel}} channel added to the data \\
@@ -448,7 +447,7 @@ parse_sample_rate <- function(
         data,
         time_channel,
         sample_rate,
-        verbose
+        inform
     )
 
     ## error on unable to determine sample_rate
@@ -473,9 +472,9 @@ parse_sample_rate <- function(
 detect_irregular_samples <- function(
         x,
         time_channel,
-        verbose = TRUE
+        inform = TRUE
 ) {
-    if (!verbose) {
+    if (!inform) {
         return(invisible())
     }
 

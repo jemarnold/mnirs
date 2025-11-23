@@ -272,7 +272,7 @@ test_that("read_data_table() is case sensitive", {
 test_that("detect_time_channel returns provided time_channel", {
     df <- data.frame(x = 1:5, y = 6:10)
     expect_equal(
-        detect_time_channel(df, time_channel = "custom", verbose = FALSE),
+        detect_time_channel(df, time_channel = "custom", inform = FALSE),
         "custom"
     )
 })
@@ -280,7 +280,7 @@ test_that("detect_time_channel returns provided time_channel", {
 test_that("detect_time_channel returns sample for Artinis", {
     df <- data.frame(`1` = 1:5, check.names = FALSE)
     expect_equal(
-        detect_time_channel(df, nirs_device = "Artinis", verbose = FALSE),
+        detect_time_channel(df, nirs_device = "Artinis", inform = FALSE),
         c(sample = "1")
     )
 })
@@ -288,31 +288,31 @@ test_that("detect_time_channel returns sample for Artinis", {
 test_that("detect_time_channel finds time column by name", {
     df <- data.frame(time = 1:5, value = 6:10)
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "time"
     )
 
     df <- data.frame(Time = 1:5, value = 6:10)
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "Time"
     )
 
     df <- tibble::tibble("hh:mm:ss" = 1:5, value = 6:10)
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "hh:mm:ss"
     )
 
     df <- data.frame("hms" = 1:5, value = 6:10)
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "hms"
     )
 
     df <- data.frame(duration = 1:5, value = 6:10)
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "duration"
     )
 })
@@ -323,7 +323,7 @@ test_that("detect_time_channel finds POSIXct column", {
         timestamp = as.POSIXct("2024-01-01 12:00:00") + 1:5
     )
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "timestamp"
     )
 })
@@ -335,7 +335,7 @@ test_that("detect_time_channel finds character time format", {
                      "12:30:48", "12:30:49")
     )
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "time_str"
     )
 
@@ -345,7 +345,7 @@ test_that("detect_time_channel finds character time format", {
         time_str = c("1:30", "1:31", "1:32", "1:33", "1:34")
     )
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "time_str"
     )
 })
@@ -357,7 +357,7 @@ test_that("detect_time_channel handles NA values in character column", {
                      "12:30:48")
     )
     expect_equal(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "time_str"
     )
 })
@@ -365,7 +365,7 @@ test_that("detect_time_channel handles NA values in character column", {
 test_that("detect_time_channel errors when no time column found", {
     df <- data.frame(x = 1:5, y = 6:10)
     expect_error(
-        detect_time_channel(df, verbose = FALSE),
+        detect_time_channel(df, inform = FALSE),
         "time_channel.*not detected"
     )
 })
@@ -377,15 +377,15 @@ test_that("detect_time_channel prioritises time_channel argument", {
         timestamp = as.POSIXct("2024-01-01 12:00:00") + 1:5
     )
     expect_equal(
-        detect_time_channel(df, time_channel = "custom", verbose = FALSE),
+        detect_time_channel(df, time_channel = "custom", inform = FALSE),
         "custom"
     )
 })
 
-test_that("detect_time_channel verbose messages work", {
+test_that("detect_time_channel inform messages work", {
     df <- data.frame(time = 1:5, value = 6:10)
     expect_message(
-        detect_time_channel(df, verbose = TRUE),
+        detect_time_channel(df, inform = TRUE),
         "Detected.*time_channel"
     ) |>
         expect_message("Overwrite")
@@ -393,7 +393,7 @@ test_that("detect_time_channel verbose messages work", {
     df_artinis <- data.frame(`1` = 1:5, check.names = FALSE)
     expect_message(
         detect_time_channel(df_artinis, nirs_device = "Artinis",
-                            verbose = TRUE),
+                            inform = TRUE),
         "Oxysoft detected"
     ) |>
         expect_message("Overwrite")
@@ -504,7 +504,7 @@ test_that("select_rename_data() selects and renames channels \\
         data,
         nirs_channels = c(oxy = "O2Hb", deoxy = "HHb"),
         time_channel = c(time = "Time"),
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(names(result$data), c("time", "oxy", "deoxy"))
@@ -523,7 +523,7 @@ test_that("select_rename_data() works with unnamed channels", {
         data,
         nirs_channels = "O2Hb",
         time_channel = "Time",
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(names(result$data), c("Time", "O2Hb"))
@@ -544,7 +544,7 @@ test_that("select_rename_data() includes event channel", {
         nirs_channels = "O2Hb",
         time_channel = "Time",
         event_channel = "Event",
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(names(result$data), c("Time", "Event", "O2Hb"))
@@ -565,7 +565,7 @@ test_that("select_rename_data() handles duplicate channel names", {
             data,
             nirs_channels = c("O2Hb", "O2Hb"),
             time_channel = "Time",
-            verbose = TRUE
+            inform = TRUE
         ),
         "Duplicated channel names"
     )
@@ -586,7 +586,7 @@ test_that("select_rename_data() handles duplicate data columns", {
         data,
         nirs_channels = c(oxy1 = "O2Hb", oxy2 = "O2Hb"),
         time_channel = "Time",
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(names(result$data), c("Time", "oxy1", "oxy2"))
@@ -606,7 +606,7 @@ test_that("select_rename_data() keeps all columns with keep_all", {
         nirs_channels = c(o2hb = "O2Hb", hhb = "HHb"),
         time_channel = c(time = "Time"),
         keep_all = TRUE,
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(ncol(result$data), 4)
@@ -629,7 +629,7 @@ test_that("select_rename_data() drops extra columns by default", {
         nirs_channels = "O2Hb",
         time_channel = "Time",
         keep_all = FALSE,
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(ncol(result$data), 2)
@@ -653,7 +653,7 @@ test_that("select_rename_data() errors when channel not found", {
     )
 })
 
-test_that("select_rename_data() suppresses warnings with verbose", {
+test_that("select_rename_data() suppresses warnings with inform", {
     data <- data.frame(
         O2Hb = c("10"),
         O2Hb = c("20"),
@@ -667,7 +667,7 @@ test_that("select_rename_data() suppresses warnings with verbose", {
             data,
             nirs_channels = c(o2hb = "O2Hb", o2hb = "O2Hb"),
             time_channel = "Time",
-            verbose = FALSE
+            inform = FALSE
         )
     )
 
@@ -676,7 +676,7 @@ test_that("select_rename_data() suppresses warnings with verbose", {
             data,
             nirs_channels = c(o2hb = "O2Hb", o2hb = "O2Hb"),
             time_channel = "Time",
-            verbose = TRUE
+            inform = TRUE
         ),
         "o2hb = o2hb_1"
     )
@@ -695,7 +695,7 @@ test_that("select_rename_data() prioritises custom names over data", {
         nirs_channels = c(custom = "O2Hb"),
         time_channel = "Time",
         keep_all = TRUE,
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_true(all(c("custom", "custom_1") %in% names(result$data)))
@@ -919,7 +919,7 @@ test_that("parse_sample_rate returns correct structure", {
         time_channel = "time",
         sample_rate = 10,
         nirs_device = NULL,
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_type(result, "list")
@@ -939,7 +939,7 @@ test_that("parse_sample_rate handles Artinis device", {
         nirs_channels = c(HHb = 2, O2Hb = 3),
         time_channel = c(sample = 1),
         event_channel = NULL,
-        verbose = FALSE
+        inform = FALSE
     ) |>
         dplyr::select(-time)
 
@@ -949,7 +949,7 @@ test_that("parse_sample_rate handles Artinis device", {
         time_channel = "sample",
         sample_rate = NULL,
         nirs_device = "Artinis",
-        verbose = FALSE
+        inform = FALSE
     )
 
     expect_equal(result$sample_rate, 10)
@@ -970,20 +970,20 @@ test_that("parse_sample_rate handles Artinis device", {
 #             file_header = file_header,
 #             time_channel = "x",
 #             sample_rate = NULL,
-#             verbose = FALSE
+#             inform = FALSE
 #         ),
 #         "sample_rate"
 #     )
 # })
 
-test_that("parse_sample_rate verbose output for Artinis", {
+test_that("parse_sample_rate inform output for Artinis", {
     file_header <- read_file(example_mnirs("artinis_intervals"))
     data <- read_mnirs(
         example_mnirs("artinis_intervals"),
         nirs_channels = c(HHb = 2, O2Hb = 3),
         time_channel = c(sample = 1),
         event_channel = NULL,
-        verbose = FALSE
+        inform = FALSE
     ) |>
         dplyr::select(-time)
 
@@ -994,7 +994,7 @@ test_that("parse_sample_rate verbose output for Artinis", {
             time_channel = "sample",
             sample_rate = NULL,
             nirs_device = "Artinis",
-            verbose = TRUE
+            inform = TRUE
         ),
         "Oxysoft detected") |>
         expect_message("time.*channel added") |>
@@ -1004,8 +1004,8 @@ test_that("parse_sample_rate verbose output for Artinis", {
 ## detect_irregular_samples() =========================================
 test_that("detect_irregular_samples returns invisibly with no irregularities", {
     x <- seq(0, 100, by = 1)
-    expect_invisible(detect_irregular_samples(x, "time", verbose = TRUE))
-    expect_invisible(detect_irregular_samples(x, "time", verbose = FALSE))
+    expect_invisible(detect_irregular_samples(x, "time", inform = TRUE))
+    expect_invisible(detect_irregular_samples(x, "time", inform = FALSE))
 })
 
 test_that("detect_irregular_samples detects duplicated samples", {
@@ -1058,10 +1058,10 @@ test_that("detect_irregular_samples shows all when <= 5 irregularities", {
     expect_false(grepl("more", w$message))
 })
 
-test_that("detect_irregular_samples respects verbose = FALSE", {
+test_that("detect_irregular_samples respects inform = FALSE", {
     x <- c(0, 1, 1, 2, 2)
-    expect_invisible(detect_irregular_samples(x, "time", verbose = FALSE))
-    expect_no_warning(detect_irregular_samples(x, "time", verbose = FALSE))
+    expect_invisible(detect_irregular_samples(x, "time", inform = FALSE))
+    expect_no_warning(detect_irregular_samples(x, "time", inform = FALSE))
 })
 
 test_that("detect_irregular_samples handles multiple irregularity types", {
@@ -1091,7 +1091,7 @@ test_that("read_mnirs moxy .xlsx works with timestamp", {
             time_channel = c(time = "hh:mm:ss"),
             add_timestamp = TRUE,
             keep_all = FALSE,
-            verbose = TRUE),
+            inform = TRUE),
         "duplicated or irregular") |>
         expect_message("Estimated.*sample_rate.*2") |>
         expect_message("Overwrite")
@@ -1110,13 +1110,11 @@ test_that("read_mnirs moxy .xlsx works with timestamp", {
     expect_lt(sum(diff(df$time[1:100]) %in% c(0, 1)), 99)
 
     expect_true(all(
-        c("nirs_device", "nirs_channels", "time_channel",
-          "sample_rate", "verbose") %in%
+        c("nirs_device", "nirs_channels", "time_channel", "sample_rate") %in%
             names(attributes(df))))
 
     expect_equal(attr(df, "nirs_device"), "Moxy")
     expect_equal(attr(df, "sample_rate"), 2)
-    expect_true(attr(df, "verbose"))
 })
 
 test_that("read_mnirs moxy .csv works converting time to numeric", {
@@ -1127,7 +1125,7 @@ test_that("read_mnirs moxy .csv works converting time to numeric", {
                           thb = "THb"),
         time_channel = c(time = "hh:mm:ss"),
         add_timestamp = FALSE,
-        verbose = TRUE),
+        inform = TRUE),
         "Estimated.*sample_rate.*0.5") |>
         expect_message("Overwrite")
 
@@ -1139,18 +1137,20 @@ test_that("read_mnirs moxy .csv works converting time to numeric", {
     expect_gt(sum(diff(df$time[1:100]) >= 2), 0)
 
     expect_true(all(
-        c("nirs_device", "nirs_channels", "time_channel",
-          "sample_rate", "verbose") %in%
+        c("nirs_device", "nirs_channels", "time_channel", "sample_rate") %in%
             names(attributes(df))))
 
     expect_equal(attr(df, "nirs_device"), "Moxy")
     expect_equal(attr(df, "sample_rate"), 0.5)
-    expect_true(attr(df, "verbose"))
 })
 
 
 test_that("read_mnirs moxy invalid channel names", {
     file_path <- example_mnirs("moxy_ramp.xlsx")
+
+    old_inform <- getOption("mnirs.inform")
+    on.exit(options(mnirs.inform = old_inform), add = TRUE)
+    options(mnirs.inform = FALSE)
 
     ## invalid channel names
     expect_error(
@@ -1158,7 +1158,7 @@ test_that("read_mnirs moxy invalid channel names", {
             file_path = file_path,
             nirs_channels = c(""),
             time_channel = c(time = "hh:mm:ss"),
-            verbose = FALSE),
+        ),
         "not detected")
 
     expect_error(
@@ -1166,7 +1166,7 @@ test_that("read_mnirs moxy invalid channel names", {
             file_path = file_path,
             nirs_channels = c(smo2_left = "smo2_doesnt_exist"),
             time_channel = c(time = "hh:mm:ss"),
-            verbose = FALSE),
+        ),
         "not detected")
 
     expect_message(
@@ -1175,7 +1175,7 @@ test_that("read_mnirs moxy invalid channel names", {
             nirs_channels = c(smo2_left = "SmO2 Live",
                               smo2_right = "SmO2 Live(2)"),
             time_channel = NULL,
-            verbose = TRUE),
+            inform = TRUE),
         "Detected.*time_channel") |>
         expect_message("Overwrite") |>
         expect_message("Estimated.*sample_rate.*2") |>
@@ -1191,7 +1191,7 @@ test_that("read_mnirs moxy invalid channel names", {
             nirs_channels = c(smo2 = "SmO2 Live",
                               smo2 = "SmO2 Live(2)"),
             time_channel = c(time = "hh:mm:ss"),
-            verbose = TRUE),
+            inform = TRUE),
         "Duplicated.*renamed") |>
         expect_warning("duplicated or irregular") |>
         expect_message("Estimated.*sample_rate.*2") |>
@@ -1212,7 +1212,7 @@ test_that("read_mnirs train.red works", {
             nirs_channels = c(smo2_left = "SmO2 unfiltered",
                               smo2_right = "SmO2 unfiltered"),
             time_channel = c(time = "Timestamp (seconds passed)"),
-            verbose = FALSE)
+            inform = FALSE)
     )
 
     expect_warning(
@@ -1221,7 +1221,7 @@ test_that("read_mnirs train.red works", {
             nirs_channels = c(smo2_left = "SmO2 unfiltered",
                               smo2_right = "SmO2 unfiltered"),
             time_channel = c(time = "Timestamp (seconds passed)"),
-            verbose = TRUE),
+            inform = TRUE),
         "duplicated or irregular") |>
         expect_message("Estimated.*sample_rate.*10") |>
         expect_message("Overwrite")
@@ -1239,13 +1239,11 @@ test_that("read_mnirs train.red works", {
     expect_lt(sum(diff(df$time[1:100]) %in% c(0, 1)), 99)
 
     expect_true(all(
-        c("nirs_device", "nirs_channels", "time_channel",
-          "sample_rate", "verbose") %in%
+        c("nirs_device", "nirs_channels", "time_channel", "sample_rate") %in%
             names(attributes(df))))
 
     expect_equal(attr(df, "nirs_device"), "Train.Red")
     expect_equal(attr(df, "sample_rate"), 10)
-    expect_true(attr(df, "verbose"))
 })
 
 test_that("read_mnirs train.red works with zero_time", {
@@ -1258,20 +1256,24 @@ test_that("read_mnirs train.red works with zero_time", {
                               smo2_right = "SmO2 unfiltered"),
             time_channel = c(time = "Timestamp (seconds passed)"),
             zero_time = TRUE,
-            verbose = FALSE)$time[1],
+            inform = FALSE)$time[1],
         0)
 })
 
 test_that("read_mnirs train.red invalid channel names", {
     file_path <- example_mnirs("train.red_intervals.csv")
 
+    old_inform <- getOption("mnirs.inform")
+    on.exit(options(mnirs.inform = old_inform), add = TRUE)
+    options(mnirs.inform = FALSE)
+  
     ## invalid channel names
     expect_error(
         read_mnirs(
             file_path = file_path,
             nirs_channels = c(""),
             time_channel = c(time = "Timestamp (seconds passed)"),
-            verbose = FALSE),
+        ),
         "not detected")
 
     expect_error(
@@ -1279,7 +1281,7 @@ test_that("read_mnirs train.red invalid channel names", {
             file_path = file_path,
             nirs_channels = c(smo2_left = "smo2_doesnt_exist"),
             time_channel = c(time = "Timestamp (seconds passed)"),
-            verbose = FALSE),
+        ),
         "not detected")
 
     expect_message(
@@ -1288,7 +1290,7 @@ test_that("read_mnirs train.red invalid channel names", {
             nirs_channels = c(smo2_left = "SmO2 unfiltered",
                               smo2_right = "SmO2 unfiltered"),
             time_channel = NULL,
-            verbose = TRUE),
+            inform = TRUE),
         "Detected.*time_channel") |>
         expect_message("Overwrite") |>
         expect_message("Estimated.*sample_rate.*10") |>
@@ -1304,7 +1306,7 @@ test_that("read_mnirs train.red invalid channel names", {
             nirs_channels = c(smo2 = "SmO2 unfiltered",
                               smo2 = "SmO2 unfiltered"),
             time_channel = c(time = "Timestamp (seconds passed)"),
-            verbose = TRUE),
+            inform = TRUE),
         "Duplicated.*renamed") |>
         expect_warning("duplicated or irregular") |>
         expect_message("Estimated.*sample_rate.*10") |>
@@ -1324,7 +1326,7 @@ test_that("read_mnirs oxysoft works", {
             nirs_channels = c(HHb = 2,
                               O2Hb = 3),
             time_channel = c(sample = 1),
-            verbose = TRUE),
+            inform = TRUE),
         "Oxysoft detected.*10") |>
         expect_message("time.*channel added") |>
         expect_message("Overwrite")
@@ -1342,25 +1344,28 @@ test_that("read_mnirs oxysoft works", {
 
     expect_true(all(
         c("nirs_device", "nirs_channels", "time_channel",
-          "sample_rate", "verbose") %in%
+          "sample_rate") %in%
             names(attributes(df))))
 
     expect_equal(attr(df, "nirs_device"), "Artinis")
     expect_equal(attr(df, "sample_rate"), 10)
     expect_equal(attr(df, "time_channel"), "time")
-    expect_true(attr(df, "verbose"))
 })
 
 test_that("read_mnirs Oxysoft invalid channel names", {
     file_path <- example_mnirs("artinis_intervals")
 
+    old_inform <- getOption("mnirs.inform")
+    on.exit(options(mnirs.inform = old_inform), add = TRUE)
+    options(mnirs.inform = FALSE)
+  
     ## invalid channel names
     expect_error(
         read_mnirs(
             file_path = file_path,
             nirs_channels = c(""),
             time_channel = c(sample = 1),
-            verbose = FALSE),
+        ),
         "not detected")
 
     expect_error(
@@ -1368,7 +1373,7 @@ test_that("read_mnirs Oxysoft invalid channel names", {
             file_path = file_path,
             nirs_channels = c(smo2_left = "smo2_doesnt_exist"),
             time_channel = c(sample = 1),
-            verbose = FALSE),
+        ),
         "not detected")
 
     expect_message(
@@ -1377,7 +1382,7 @@ test_that("read_mnirs Oxysoft invalid channel names", {
             nirs_channels = c(HHb = 2,
                               O2Hb = 3),
             time_channel = NULL,
-            verbose = TRUE),
+            inform = TRUE),
         "detected.*time_channel") |>
         expect_message("Overwrite") |>
         expect_message("detected.*sample_rate.*10") |>
@@ -1394,7 +1399,7 @@ test_that("read_mnirs Oxysoft invalid channel names", {
             nirs_channels = c(HHb = 2,
                               HHb = 3),
             time_channel = c(sample = 1),
-            verbose = TRUE),
+            inform = TRUE),
         "Oxysoft detected.*10") |>
         expect_message("time.*channel added") |>
         expect_message("Overwrite") |>

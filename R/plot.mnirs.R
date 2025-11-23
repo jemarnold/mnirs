@@ -27,7 +27,7 @@
 #'     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
 #'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-#'     verbose = FALSE                      ## hide warnings & messages
+#'     inform = FALSE                      ## hide warnings & messages
 #' )
 #'
 #' ## note the hidden plot option to display time values as `hh:mm:ss`
@@ -170,7 +170,7 @@ plot.mnirs <- function(x, ...) {
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' ) |>
 #'     plot(label_time = TRUE)
 #'
@@ -298,7 +298,7 @@ palette_mnirs <- function(n = NULL) {
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     inform = FALSE
 #' )
 #'
 #' ggplot(df, aes(x = time)) +

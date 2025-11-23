@@ -12,7 +12,7 @@ compute_local_windows(
   idx = seq_along(t),
   width = NULL,
   span = NULL,
-  verbose = TRUE
+  inform = TRUE
 )
 
 compute_local_fun(x, window_idx, FUN)
@@ -24,7 +24,7 @@ compute_window_of_valid_neighbours(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  verbose = TRUE
+  inform = TRUE
 )
 }
 \arguments{
@@ -42,9 +42,8 @@ around \code{idx} in which to perform the operation., between
 in which to perform the operation. In units of \code{time_channel} or \code{t},
 between \verb{[t - span/2, t + span/2]}.}
 
-\item{verbose}{A logical to return (the \emph{default}) or silence warnings and
-messages which can be used for data error checking. Abort errors will
-always be returned.}
+\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+warnings and information messages used for troubleshooting.}
 
 \item{x}{A numeric vector.}
 
