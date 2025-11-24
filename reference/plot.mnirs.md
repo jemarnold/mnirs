@@ -55,7 +55,7 @@ data_table <- read_mnirs(
     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    inform = FALSE                      ## hide warnings & messages
+    inform = FALSE                       ## hide warnings & messages
 )
 
 ## note the hidden plot option to display time values as `hh:mm:ss`

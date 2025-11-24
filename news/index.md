@@ -1,5 +1,20 @@
 # Changelog
 
+## mnirs 0.1.5
+
+- Remove redundant validation checks in
+  [`replace_mnirs()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md).
+- Fix erroneous url in \_pkgdown.yml.
+- Update internal `validate_event_channel` to error on empty numeric or
+  character column.
+- Update test coverage:
+  - Cover new `options(mnirs.inform = FALSE)`.
+  - Cover unlisted metadata added to
+    [`create_mnirs_data()`](https://jemarnold.github.io/mnirs/reference/create_mnirs_data.md).
+  - Cover hidden
+    [`plot.mnirs()`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)
+    options.
+
 ## mnirs 0.1.4
 
 - Breaking change: Update argument `inform` replaces `verbose` to
