@@ -87,14 +87,20 @@ test_that("filter_moving_average() validates width & span constraints", {
 })
 
 test_that("filter_moving_average() warns when both width and span provided", {
+    ## should produce warning
     expect_warning(
-        filter_moving_average(1:5, width = 3, span = 2, inform = TRUE),
+        filter_moving_average(1:5, width = 3, span = 2),
         "Either.*width.*or.*span"
     )
 
+    old_inform <- getOption("mnirs.inform")
+    on.exit(options(mnirs.inform = old_inform), add = TRUE)
+    options(mnirs.inform = FALSE)
+
+    ## should not produce warning
     # Should default to width
     expect_silent(
-        result <- filter_moving_average(1:5, width = 3, span = 2, inform = FALSE)
+        result <- filter_moving_average(1:5, width = 3, span = 2)
     )
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 })

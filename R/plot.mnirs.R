@@ -27,7 +27,7 @@
 #'     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
 #'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-#'     inform = FALSE                      ## hide warnings & messages
+#'     inform = FALSE                       ## hide warnings & messages
 #' )
 #'
 #' ## note the hidden plot option to display time values as `hh:mm:ss`
@@ -36,11 +36,11 @@
 #' @export
 plot.mnirs <- function(x, ...) {
 
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
-    rlang::check_installed("dplyr", reason = "to plot mNIRS data")
-    rlang::check_installed("tidyr", reason = "to plot mNIRS data")
-    rlang::check_installed("scales", reason = "to plot mNIRS data")
-
+    rlang::check_installed(
+        c("ggplot2", "dplyr", "tidyr", "scales"), 
+        reason = "to plot mNIRS data"
+    )
+    
     args <- list(...)
     na.omit <- args$na.omit %||% FALSE
     label_time <- args$label_time %||% FALSE
@@ -101,14 +101,16 @@ plot.mnirs <- function(x, ...) {
             colour = nirs_channels
         ) +
         theme_mnirs() +
+        ggplot2::labs(
+            x = x_name,
+            y = "signal"
+        ) +
         ggplot2::scale_x_continuous(
-            name = x_name,
             breaks = x_breaks,
             labels = x_labels,
             expand = ggplot2::expansion(mult = 0.01)
         ) +
         ggplot2::scale_y_continuous(
-            name = "signal",
             breaks = y_breaks,
             expand = ggplot2::expansion(mult = 0.01)
         ) +

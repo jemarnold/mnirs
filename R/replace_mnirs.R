@@ -89,7 +89,7 @@
 #'     time_channel = NULL,        ## default to time_channel in metadata
 #'     invalid_values = c(0, 100), ## known invalid values in the data
 #'     outlier_cutoff = 3,         ## recommended default value
-#'     width = 15,                 ## local window to detect local outliers and replace missing values
+#'     width = 10,                 ## local window to detect local outliers and replace missing values
 #'     method = "linear",          ## linear interpolation over `NA`s
 #' )
 #'
@@ -153,9 +153,6 @@ replace_mnirs <- function(
     nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
     nirs_channels <- unlist(nirs_channels, use.names = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
-    validate_numeric(invalid_values)
-    validate_numeric(invalid_above, 1, msg = "one-element")
-    validate_numeric(invalid_below, 1, msg = "one-element")
     time_vec <- round(data[[time_channel]], 6)
 
     ## remove invalid, outliers, and NA ==============================

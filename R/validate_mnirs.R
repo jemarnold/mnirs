@@ -216,7 +216,8 @@ validate_event_channel <- function(data, event_channel, require = TRUE) {
     }
 
     ## check for empty column
-    if (sum(!is.na(data[[event_channel]])) == 0) {
+    valid_values <- !is.na(data[[event_channel]]) & data[[event_channel]] != ""
+    if (sum(valid_values) == 0) {
         cli_abort(
             "{.arg event_channel} must contain at least one valid value."
         )

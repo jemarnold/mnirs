@@ -29,7 +29,7 @@ navbar:
       aria-label: Twitter
     github:
       icon: fa-github
-      href: https://github.com/jemarnold/epl
+      href: https://github.com/jemarnold/mnirs
       aria-label: GitHub
 figures:
   bg: white

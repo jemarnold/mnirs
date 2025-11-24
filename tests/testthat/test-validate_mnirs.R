@@ -202,6 +202,9 @@ test_that("validate_event_channel() uses explicit channel when provided", {
 test_that("validate_event_channel() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
     expect_error(validate_event_channel(data, NULL), "not found in metadata")
+
+    ## no metadata, required = FALSE
+    expect_equal(validate_event_channel(data, NULL, require = FALSE), NULL)
 })
 
 test_that("validate_event_channel() errors when column doesn't exist", {

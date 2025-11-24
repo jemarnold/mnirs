@@ -555,10 +555,8 @@ test_that("replace_mnirs outlier removal skipped when outlier_cutoff = NULL", {
 
     result <- replace_mnirs(
         data,
-        outlier_cutoff = NULL,
         invalid_values = c(999),
-        method = "NA",
-        inform = FALSE
+        method = "NA"
     )
 
     ## Data should be unchanged except for invalid value processing
@@ -629,6 +627,31 @@ test_that("replace_mnirs updates metadata correctly", {
     expect_equal(attr(data, "nirs_channels"), c("smo2_left", "smo2_right"))
     expect_equal(attr(data, "time_channel"), "time")
     expect_equal(attr(data, "sample_rate"), 2)
+})
+
+test_that("replace_mnirs global inform works", {
+    expect_warning(
+        read_mnirs(
+        file_path = example_mnirs("moxy_ramp.xlsx"),
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss")
+    ),
+    "duplicated or irregular") |> 
+        expect_message("Estimated.*sample_rate.*2") |> 
+        expect_message("Overwrite")
+
+    old_inform <- getOption("mnirs.inform")
+    on.exit(options(mnirs.inform = old_inform), add = TRUE)
+    options(mnirs.inform = FALSE)
+
+    expect_silent(
+        read_mnirs(
+            file_path = example_mnirs("moxy_ramp.xlsx"),
+            nirs_channels = c(smo2 = "SmO2 Live"),
+            time_channel = c(time = "hh:mm:ss")
+        )
+    )
+
 })
 
 test_that("replace_mnirs works visually on moxy data", {

@@ -1407,3 +1407,22 @@ test_that("read_mnirs Oxysoft invalid channel names", {
 
     expect_true(all(c("HHb", "HHb_1") %in% names(df)))
 })
+
+## create_mnirs_data() ==================================================
+
+test_that("create_mnirs_data edge cases", {
+    ## error when data isn't a dataframe
+    vec <- c(1, 2)
+    expect_error(create_mnirs_data(vec), "should be a data frame")
+
+    ## attach metadata unlisted
+    df <- tibble(A = 1:2, B = letters[1:2])
+    df_meta <- create_mnirs_data(
+        df,
+        nirs_channels = c("A", "B"),
+        sample_rate = 1
+    )
+    expect_null(attr(df, "sample_rate"))
+    expect_equal(attr(df_meta, "sample_rate"), 1)
+    expect_equal(attr(df_meta, "nirs_channels"), c("A", "B"))
+})

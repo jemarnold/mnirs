@@ -180,7 +180,67 @@ test_that("format_hmmss handles NA values", {
 })
 
 
-## plot.mnirs works on real data ===============================
+## plot.mnirs() ===============================
+# Helper to create mock mNIRS object
+mock_mnirs <- function() {
+    df <- data.frame(
+        time = 1:10,
+        HHb = c(1:8, NA, NA),
+        O2Hb = c(rep(2, 8), NA, NA)
+    )
+    structure(
+        df,
+        class = c("mnirs", "data.frame"),
+        nirs_channels = c("HHb", "O2Hb"),
+        time_channel = "time"
+    )
+}
+
+test_that("na.omit removes rows with any NA in nirs_channels", {
+    x <- mock_mnirs()
+
+    # With na.omit = FALSE (default)
+    p1 <- plot(x)
+    expect_equal(nrow(p1$data), 20L) # 10 rows × 2 channels
+
+    # With na.omit = TRUE
+    p2 <- plot(x, na.omit = TRUE)
+    expect_equal(nrow(p2$data), 16L) # 8 rows × 2 channels
+})
+
+test_that("label_time controls x-axis name and formatting", {
+    x <- mock_mnirs()
+
+    # With label_time = FALSE (default)
+    p1 <- plot(x)    
+    expect_true(ggplot2::is_waiver(p1$scales$get_scales("x")$name))
+    expect_true(ggplot2::is_waiver(p1$scales$get_scales("x")$labels))
+
+    # With label_time = TRUE
+    p2 <- plot(x, label_time = TRUE)
+    expect_equal(p2$labels$x, "time (mm:ss)")
+    expect_false(ggplot2::is_waiver(p2$scales$get_scales("x")$labels))
+})
+
+test_that("n controls number of breaks", {
+    x <- mock_mnirs()
+
+    # Extract breaks by building plot
+    get_breaks <- function(p, axis = "x") {
+        built <- ggplot2::ggplot_build(p)
+        built$layout$panel_params[[1]]$x$breaks
+    }
+  
+    p1 <- plot(x, n = 3)
+    p2 <- plot(x, n = 10)
+
+    breaks1 <- get_breaks(p1)
+    breaks2 <- get_breaks(p2)
+
+    # More n should generally produce more breaks
+    expect_true(length(breaks2) >= length(breaks1))
+})
+
 test_that("plot.mnirs moxy.perfpro works", {
     file_path <- system.file("extdata/moxy_ramp.xlsx",
                              package = "mnirs")
