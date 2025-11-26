@@ -7,43 +7,7 @@
 \alias{filter_mnirs.moving_average}
 \title{Filter a data frame}
 \usage{
-\method{filter_mnirs}{smooth_spline}(
-  data,
-  nirs_channels = NULL,
-  time_channel = NULL,
-  sample_rate = NULL,
-  method = c("smooth_spline", "butterworth", "moving_average"),
-  spar = NULL,
-  type = c("low", "high", "stop", "pass"),
-  n = 1,
-  W = NULL,
-  fc = NULL,
-  width = NULL,
-  span = NULL,
-  na.rm = FALSE,
-  inform = TRUE,
-  ...
-)
-
-\method{filter_mnirs}{butterworth}(
-  data,
-  nirs_channels = NULL,
-  time_channel = NULL,
-  sample_rate = NULL,
-  method = c("smooth_spline", "butterworth", "moving_average"),
-  spar = NULL,
-  type = c("low", "high", "stop", "pass"),
-  n = 1,
-  W = NULL,
-  fc = NULL,
-  width = NULL,
-  span = NULL,
-  na.rm = FALSE,
-  inform = TRUE,
-  ...
-)
-
-\method{filter_mnirs}{moving_average}(
+filter_mnirs(
   data,
   nirs_channels = NULL,
   time_channel = NULL,

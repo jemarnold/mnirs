@@ -18,8 +18,6 @@
 NULL
 
 
-
-
 #' @name moxy_intervals.csv
 #'
 #' @title 0.5 Hz Moxy onboard export
@@ -37,8 +35,6 @@ NULL
 #'   - `event_channel = c("Lap)`
 #'
 NULL
-
-
 
 
 #' @name moxy_ramp.xlsx
@@ -60,8 +56,6 @@ NULL
 #'   - `event_channel = c("Lap)`
 #'
 NULL
-
-
 
 
 #' @name train.red_intervals.csv

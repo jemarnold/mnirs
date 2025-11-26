@@ -41,9 +41,10 @@ A more detailed vignette for common usage can be found here: [Reading
 and Cleaning Data with
 {mnirs}](https://jemarnold.github.io/mnirs.dev/articles/cleaning-mnirs-data.html)
 
-*{mnirs}* is currently in experimental development and functionality may
-change! Stay updated on development and follow releases at
-[github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
+> \[!NOTE\] *{mnirs}* is currently in experimental development and
+> functionality may change! Stay updated on development and follow
+> releases at
+> [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
 
 *{mnirs}* is designed to process mNIRS data, but there is no reason why
 it can’t be used to read, clean, and filter other time series datasets,

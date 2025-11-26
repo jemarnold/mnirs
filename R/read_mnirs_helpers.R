@@ -83,10 +83,10 @@ detect_mnirs_device <- function(data) {
 #' Read data table from raw data
 #' @keywords internal
 read_data_table <- function(
-        data,
-        nirs_channels,
-        time_channel = NULL,
-        event_channel = NULL
+    data,
+    nirs_channels,
+    time_channel = NULL,
+    event_channel = NULL
 ) {
     channel_vec <- c(nirs_channels, time_channel, event_channel)
     ## detect header row where channels exists
@@ -125,10 +125,10 @@ read_data_table <- function(
 #' Detect time_channel from header row
 #' @keywords internal
 detect_time_channel <- function(
-        data,
-        time_channel = NULL,
-        nirs_device = NULL,
-        inform = TRUE
+    data,
+    time_channel = NULL,
+    nirs_device = NULL,
+    inform = TRUE
 ) {
     if (!is.null(time_channel)) {
         return(time_channel)
@@ -224,12 +224,12 @@ name_channels <- function(x) {
 #' Select data table columns and rename from channels, handling duplicates
 #' @keywords internal
 select_rename_data <- function(
-        data,
-        nirs_channels,
-        time_channel,
-        event_channel = NULL,
-        keep_all = FALSE,
-        inform = TRUE
+    data,
+    nirs_channels,
+    time_channel,
+    event_channel = NULL,
+    keep_all = FALSE,
+    inform = TRUE
 ) {
     ## if channels not named, names from object
     channel_list <- list(
@@ -343,10 +343,10 @@ remove_empty_rows_cols <- function(data) {
 #' Parse time_channel character or dttm to numeric
 #' @keywords internal
 parse_time_channel <- function(
-        data,
-        time_channel,
-        add_timestamp = FALSE,
-        zero_time = FALSE
+    data,
+    time_channel,
+    add_timestamp = FALSE,
+    zero_time = FALSE
 ) {
     time_vec <- data[[time_channel]]
     ## fractional unix time to POSIXct
@@ -355,9 +355,12 @@ parse_time_channel <- function(
     } else if (is.character(time_vec)) {
         ## character to POSIXct
         formats <- c(
-            "%Y-%m-%dT%H:%M:%OS", "%Y-%m-%dT%H:%M:%OS%z",
-            "%Y-%m-%d %H:%M:%OS", "%Y/%m/%d %H:%M:%OS",
-            "%d-%m-%Y %H:%M:%OS", "%d/%m/%Y %H:%M:%OS",
+            "%Y-%m-%dT%H:%M:%OS",
+            "%Y-%m-%dT%H:%M:%OS%z",
+            "%Y-%m-%d %H:%M:%OS",
+            "%Y/%m/%d %H:%M:%OS",
+            "%d-%m-%Y %H:%M:%OS",
+            "%d/%m/%Y %H:%M:%OS",
             "%H:%M:%OS"
         )
         time_vec <- as.POSIXct(time_vec, tryFormats = formats, optional = TRUE)
@@ -389,11 +392,9 @@ parse_time_channel <- function(
 }
 
 
-#' Extract absolute date-time values
-#' @keywords internal
-extract_timestamp <- function(file_header) {
-
-}
+# #' Extract absolute date-time values
+# #' @keywords internal
+# extract_timestamp <- function(file_header) {}
 
 
 #' Extract Oxysoft sample rate
@@ -409,12 +410,12 @@ extract_oxysoft_rate <- function(file_header, sample_rate = NULL) {
 #' Validate and Estimate Sample Rate
 #' @keywords internal
 parse_sample_rate <- function(
-        data,
-        file_header,
-        time_channel,
-        sample_rate = NULL,
-        nirs_device = NULL,
-        inform = TRUE
+    data,
+    file_header,
+    time_channel,
+    sample_rate = NULL,
+    nirs_device = NULL,
+    inform = TRUE
 ) {
     ## if Oxysoft, sample_rate will be detected = 1
     ## extract and overwrite with exported sample_rate
@@ -470,9 +471,9 @@ parse_sample_rate <- function(
 #' Report warnings for unbalanced time_channel samples
 #' @keywords internal
 detect_irregular_samples <- function(
-        x,
-        time_channel,
-        inform = TRUE
+    x,
+    time_channel,
+    inform = TRUE
 ) {
     if (!inform) {
         return(invisible())

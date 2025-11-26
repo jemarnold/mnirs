@@ -53,7 +53,7 @@ reference:
   - rescale_mnirs
 - title: Plotting
   desc: |
-    Tools for pretty plotting.
+    Tools for pretty plotting with `{ggplot2}`.
   contents:
   - plot.mnirs
   - theme_mnirs
@@ -61,7 +61,7 @@ reference:
   - starts_with("scale")
   - breaks_timespan
   - format_hmmss
-- title: Data
+- title: Files
   desc: |
     Example data files included in the package
   contents:

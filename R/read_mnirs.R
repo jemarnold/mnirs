@@ -22,9 +22,9 @@
 #' @param sample_rate An *optional* numeric value for the exported sample rate
 #'   in Hz. If not defined explicitly, will be estimated from the data (see
 #'   *Details*).
-#' @param add_timestamp `<under development>` A logical to add a *"timestamp"* 
-#'   column with date-time for each sample (class *POSIXct*), if present in the 
-#'   data file. If no absolute timestamp is detected, will instead return 
+#' @param add_timestamp `<under development>` A logical to add a *"timestamp"*
+#'   column with date-time for each sample (class *POSIXct*), if present in the
+#'   data file. If no absolute timestamp is detected, will instead return
 #'   relative time as *hh:mm:ss*.
 #' @param zero_time A logical to re-calculate `time_channel` to start
 #'   from zero or `FALSE` keep the original values (the *default*).
@@ -83,10 +83,10 @@
 #'   `sample_rate` should be defined explicitly.
 #'
 #' Columns and rows which contain entirely missing data (`NA`) are omitted.
-#' 
+#'
 #' `inform = TRUE` will display warnings and information messages which can be
-#'   useful for troubleshooting. Errors causing abort messages will always be 
-#'   displayed. Messages can be silenced globally with 
+#'   useful for troubleshooting. Errors causing abort messages will always be
+#'   displayed. Messages can be silenced globally with
 #'   `options(mnirs.inform = FALSE)`.
 #'
 #' @returns
@@ -109,21 +109,21 @@
 #'
 #' @export
 read_mnirs <- function(
-        file_path,
-        nirs_channels,
-        time_channel = NULL,
-        event_channel = NULL,
-        sample_rate = NULL,
-        add_timestamp = FALSE,
-        zero_time = FALSE,
-        keep_all = FALSE,
-        inform = TRUE
+    file_path,
+    nirs_channels,
+    time_channel = NULL,
+    event_channel = NULL,
+    sample_rate = NULL,
+    add_timestamp = FALSE,
+    zero_time = FALSE,
+    keep_all = FALSE,
+    inform = TRUE
 ) {
     ## global options overrides implicit but not explicit `inform`
     if (missing(inform)) {
         inform <- getOption("mnirs.inform", default = TRUE)
     }
-  
+
     ## import data_raw from either excel or csv
     data_raw <- read_file(file_path)
 
@@ -159,8 +159,8 @@ read_mnirs <- function(
         keep_all,
         inform
     )
-    nirs_renamed  <- renamed_list$nirs_channel
-    time_renamed  <- renamed_list$time_channel
+    nirs_renamed <- renamed_list$nirs_channel
+    time_renamed <- renamed_list$time_channel
     event_renamed <- renamed_list$event_channel
 
     ## prepare data
@@ -191,7 +191,7 @@ read_mnirs <- function(
     )
     data_sampled <- sample_list$data
     time_renamed <- sample_list$time_channel
-    sample_rate  <- sample_list$sample_rate
+    sample_rate <- sample_list$sample_rate
 
     ## print warnings for irregular samples
     detect_irregular_samples(
@@ -212,8 +212,6 @@ read_mnirs <- function(
 
     return(create_mnirs_data(data_sampled, metadata))
 }
-
-
 
 
 #' Create an *{mnirs}* data frame with metadata
@@ -287,8 +285,6 @@ create_mnirs_data <- function(data, ...) {
 
     return(nirs_data)
 }
-
-
 
 
 #' Get path to *{mnirs}* example files

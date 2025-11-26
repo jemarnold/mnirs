@@ -48,11 +48,11 @@
 #' @rdname compute_helpers
 #' @keywords internal
 compute_local_windows <- function(
-        t,
-        idx = seq_along(t),
-        width = NULL,
-        span = NULL,
-        inform = TRUE
+    t,
+    idx = seq_along(t),
+    width = NULL,
+    span = NULL,
+    inform = TRUE
 ) {
     ## validation ===========================================
     if (is.null(c(width, span))) {
@@ -93,8 +93,6 @@ compute_local_windows <- function(
 }
 
 
-
-
 #' @description
 #' `compute_local_fun()`: Helper function to return a vector of local values
 #' calculated from `x` by a function `FUN` within a list of rolling sample
@@ -122,8 +120,6 @@ compute_local_fun <- function(x, window_idx, FUN) {
 }
 
 
-
-
 #' @description
 #' `compute_outliers()`: Helper function to return a vector of logicals
 #' indicating local outliers of `x` within a list of rolling sample windows
@@ -143,7 +139,7 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
     )
 
     n <- length(x)
-    L <- 1.4826  ## 1 / qnorm(0.75): MAD at the 75% percentile of |Z|
+    L <- 1.4826 ## 1 / qnorm(0.75): MAD at the 75% percentile of |Z|
 
     ## median of absolute local residuals from the local median
     local_outliers <- vapply(seq_len(n), \(.i) {
@@ -165,8 +161,6 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
 }
 
 
-
-
 #' @description
 #' `compute_window_of_valid_neighbours()`: Helper function to return a list of
 #' sample indices `idx` along valid values of `x` to either side of `NA`s,
@@ -184,11 +178,11 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
 #' @rdname compute_helpers
 #' @keywords internal
 compute_window_of_valid_neighbours <- function(
-        x,
-        t = seq_along(x),
-        width = NULL,
-        span = NULL,
-        inform = TRUE
+    x,
+    t = seq_along(x),
+    width = NULL,
+    span = NULL,
+    inform = TRUE
 ) {
     ## validation ===========================================
     if (is.null(c(width, span))) {
@@ -250,8 +244,6 @@ compute_window_of_valid_neighbours <- function(
 }
 
 
-
-
 #' Preserve and Restore NA Information Within a Vector
 #'
 #' `preserve_na()` stores `NA` vector positions and extracts valid non-`NA`
@@ -292,8 +284,6 @@ preserve_na <- function(x) {
     )
     return(na_info)
 }
-
-
 
 
 #' Preserve and Restore NA Information Within a Vector

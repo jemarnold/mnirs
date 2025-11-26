@@ -92,15 +92,15 @@
 #'
 #' @export
 shift_mnirs <- function(
-        data,
-        nirs_channels = list(),
-        time_channel = NULL,
-        to = NULL,
-        by = NULL,
-        width = NULL,
-        span = NULL,
-        position = c("min", "max", "first"),
-        inform = TRUE
+    data,
+    nirs_channels = list(),
+    time_channel = NULL,
+    to = NULL,
+    by = NULL,
+    width = NULL,
+    span = NULL,
+    position = c("min", "max", "first"),
+    inform = TRUE
 ) {
     ## TODO convert sym(nirs_channels) to strings?
     ## TODO need to fix edges where only half width/span included

@@ -144,25 +144,24 @@
 #'         aes(y = smo2, colour = "smo2"), alpha = 0.4
 #'     )
 #'
-#' @usage NULL
 #' @rdname filter_mnirs
 #' @export
 filter_mnirs <- function(
-        data,
-        nirs_channels = NULL,
-        time_channel = NULL,
-        sample_rate = NULL,
-        method = c("smooth_spline", "butterworth", "moving_average"),
-        spar = NULL,
-        type = c("low", "high", "stop", "pass"),
-        n = 1,
-        W = NULL,
-        fc = NULL,
-        width = NULL,
-        span = NULL,
-        na.rm = FALSE,
-        inform = TRUE,
-        ...
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    sample_rate = NULL,
+    method = c("smooth_spline", "butterworth", "moving_average"),
+    spar = NULL,
+    type = c("low", "high", "stop", "pass"),
+    n = 1,
+    W = NULL,
+    fc = NULL,
+    width = NULL,
+    span = NULL,
+    na.rm = FALSE,
+    inform = TRUE,
+    ...
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
@@ -181,26 +180,25 @@ filter_mnirs <- function(
 }
 
 
-
-
 #' @rdname filter_mnirs
+#' @usage NULL
 #' @export
 filter_mnirs.smooth_spline <- function(
-        data,
-        nirs_channels = NULL,
-        time_channel = NULL,
-        sample_rate = NULL,
-        method = c("smooth_spline", "butterworth", "moving_average"),
-        spar = NULL,
-        type = c("low", "high", "stop", "pass"),
-        n = 1,
-        W = NULL,
-        fc = NULL,
-        width = NULL,
-        span = NULL,
-        na.rm = FALSE,
-        inform = TRUE,
-        ...
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    sample_rate = NULL,
+    method = c("smooth_spline", "butterworth", "moving_average"),
+    spar = NULL,
+    type = c("low", "high", "stop", "pass"),
+    n = 1,
+    W = NULL,
+    fc = NULL,
+    width = NULL,
+    span = NULL,
+    na.rm = FALSE,
+    inform = TRUE,
+    ...
 ) {
     ## validation ==========================================
     rlang::check_installed("stats", reason = "to use stats::smooth.spline()")
@@ -260,25 +258,25 @@ filter_mnirs.smooth_spline <- function(
 }
 
 
-
 #' @rdname filter_mnirs
+#' @usage NULL
 #' @export
 filter_mnirs.butterworth <- function(
-        data,
-        nirs_channels = NULL,
-        time_channel = NULL,
-        sample_rate = NULL,
-        method = c("smooth_spline", "butterworth", "moving_average"),
-        spar = NULL,
-        type = c("low", "high", "stop", "pass"),
-        n = 1,
-        W = NULL,
-        fc = NULL,
-        width = NULL,
-        span = NULL,
-        na.rm = FALSE,
-        inform = TRUE,
-        ...
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    sample_rate = NULL,
+    method = c("smooth_spline", "butterworth", "moving_average"),
+    spar = NULL,
+    type = c("low", "high", "stop", "pass"),
+    n = 1,
+    W = NULL,
+    fc = NULL,
+    width = NULL,
+    span = NULL,
+    na.rm = FALSE,
+    inform = TRUE,
+    ...
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
@@ -331,25 +329,25 @@ filter_mnirs.butterworth <- function(
 }
 
 
-
 #' @rdname filter_mnirs
+#' @usage NULL
 #' @export
 filter_mnirs.moving_average <- function(
-        data,
-        nirs_channels = NULL,
-        time_channel = NULL,
-        sample_rate = NULL,
-        method = c("smooth_spline", "butterworth", "moving_average"),
-        spar = NULL,
-        type = c("low", "high", "stop", "pass"),
-        n = 1,
-        W = NULL,
-        fc = NULL,
-        width = NULL,
-        span = NULL,
-        na.rm = FALSE,
-        inform = TRUE,
-        ...
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    sample_rate = NULL,
+    method = c("smooth_spline", "butterworth", "moving_average"),
+    spar = NULL,
+    type = c("low", "high", "stop", "pass"),
+    n = 1,
+    W = NULL,
+    fc = NULL,
+    width = NULL,
+    span = NULL,
+    na.rm = FALSE,
+    inform = TRUE,
+    ...
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
@@ -370,8 +368,6 @@ filter_mnirs.moving_average <- function(
 
     return(create_mnirs_data(data, metadata))
 }
-
-
 
 
 #' Apply a moving average filter
@@ -410,11 +406,11 @@ filter_mnirs.moving_average <- function(
 #'
 #' @export
 filter_moving_average <- function(
-        x,
-        t = seq_along(x),
-        width = NULL,
-        span = NULL,
-        inform = TRUE
+    x,
+    t = seq_along(x),
+    width = NULL,
+    span = NULL,
+    inform = TRUE
 ) {
     ## validation ===========================================
     validate_numeric(x)
@@ -438,8 +434,6 @@ filter_moving_average <- function(
     y[!is.finite(y)] <- NA_real_
     return(y)
 }
-
-
 
 
 #' Apply a Butterworth digital filter
@@ -510,12 +504,12 @@ filter_moving_average <- function(
 #'
 #' @export
 filter_butter <- function(
-        x,
-        n = 1,
-        W,
-        type = c("low", "high", "stop", "pass"),
-        edges = c("rev", "rep1", "none"),
-        na.rm = FALSE
+    x,
+    n = 1,
+    W,
+    type = c("low", "high", "stop", "pass"),
+    edges = c("rev", "rep1", "none"),
+    na.rm = FALSE
 ) {
     ## validation ============================================
     rlang::check_installed("signal", "to use Butterworth digital filter")

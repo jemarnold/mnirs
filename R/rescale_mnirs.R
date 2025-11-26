@@ -71,10 +71,10 @@
 #'
 #' @export
 rescale_mnirs <- function(
-        data,
-        nirs_channels = list(),
-        range,
-        inform = TRUE
+    data,
+    nirs_channels = list(),
+    range,
+    inform = TRUE
 ) {
     ## validate =================================
     validate_mnirs_data(data, ncol = 1)
@@ -93,6 +93,7 @@ rescale_mnirs <- function(
         range_diff <- diff(group_data_range)
 
         if (range_diff != 0) {
+            # fmt: skip
             data[, group] <- (group_data - group_data_range[1]) /
                 range_diff * diff(range) + range[1]
         }

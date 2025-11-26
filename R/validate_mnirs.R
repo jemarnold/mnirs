@@ -40,18 +40,17 @@
 NULL
 
 
-
-
 #' @rdname validate_mnirs
 validate_numeric <- function(
-        x,
-        elements = Inf,
-        range = NULL,
-        inclusive = c("left", "right"),
-        integer = FALSE,
-        msg = ""
+    x,
+    elements = Inf,
+    range = NULL,
+    inclusive = c("left", "right"),
+    integer = FALSE,
+    msg = ""
 ) {
-    if (is.null(x)) { ## pass through not defined
+    if (is.null(x)) {
+        ## pass through not defined
         return(invisible(NULL))
     }
     not_all_na <- !all(is.na(x))
@@ -72,17 +71,18 @@ validate_numeric <- function(
 
     ## abort message if fails any
     if (
-        !is.numeric(x) || !not_all_na || !element_ok ||
-        !range_ok || !integer_ok
+        !is.numeric(x) || !not_all_na || !element_ok || !range_ok || !integer_ok
     ) {
-        type <- if (integer) {"integer"} else {"numeric"}
+        type <- if (integer) {
+            "integer"
+        } else {
+            "numeric"
+        }
         cli_abort("{.arg {name}} must be a valid {msg} {.cls {type}}.")
     }
 
     return(invisible())
 }
-
-
 
 
 #' @rdname validate_mnirs
@@ -98,8 +98,6 @@ validate_mnirs_data <- function(data, ncol = 2L) {
 
     return(invisible())
 }
-
-
 
 
 #' @rdname validate_mnirs
@@ -149,7 +147,6 @@ validate_nirs_channels <- function(data, nirs_channels, inform = TRUE) {
 }
 
 
-
 #' @rdname validate_mnirs
 validate_time_channel <- function(data, time_channel) {
     ## if not defined, check metadata
@@ -176,7 +173,7 @@ validate_time_channel <- function(data, time_channel) {
     ## validate is numeric and has >=2 valid values
     if (
         !is.numeric(data[[time_channel]]) ||
-        sum(is.finite(data[[time_channel]])) < 2
+            sum(is.finite(data[[time_channel]])) < 2
     ) {
         cli_abort(
             "{.arg time_channel} must be a {.cls numeric} vector with \\
@@ -186,7 +183,6 @@ validate_time_channel <- function(data, time_channel) {
 
     return(time_channel)
 }
-
 
 
 #' @rdname validate_mnirs
@@ -227,15 +223,13 @@ validate_event_channel <- function(data, event_channel, require = TRUE) {
 }
 
 
-
-
 #' @rdname validate_mnirs
 estimate_sample_rate <- function(x) {
     ## estimate samples per second
     sample_rate_raw <- 1 / median(diff(x), na.rm = TRUE)
 
     (\(x) {
-        mags <- 10 ^ floor(log10(x))
+        mags <- 10^floor(log10(x))
         vals <- x / mags
         pretty_base <- c(1, 2, 5, 10)
         rounded <- sapply(vals, \(.val) {
@@ -246,14 +240,12 @@ estimate_sample_rate <- function(x) {
 }
 
 
-
-
 #' @rdname validate_mnirs
 validate_sample_rate <- function(
-        data,
-        time_channel,
-        sample_rate,
-        inform = TRUE
+    data,
+    time_channel,
+    sample_rate,
+    inform = TRUE
 ) {
     ## if not defined, check metadata
     if (is.null(sample_rate)) {
@@ -263,11 +255,11 @@ validate_sample_rate <- function(
     ## estimate sample_rate from time_channel
     ## time_channel MUST be validated before this
     time_vec <- round(as.numeric(data[[time_channel]]), 6)
-    estimated_sample_rate <- estimate_sample_rate(time_vec)
+    sample_rate_est <- estimate_sample_rate(time_vec)
 
     ## if still not defined, use estimated sample_rate
     if (is.null(sample_rate)) {
-        sample_rate <- estimated_sample_rate
+        sample_rate <- sample_rate_est
         if (inform) {
             cli_bullets(c(
                 "!" = "Estimated {.arg sample_rate} = {.val {sample_rate}} Hz.",
@@ -285,13 +277,13 @@ validate_sample_rate <- function(
     ## to be integer values, report warning
     if (
         inform &&
-        !isTRUE(all.equal(1, estimated_sample_rate, tolerance = 0.001)) &
-        !isTRUE(all.equal(estimated_sample_rate, sample_rate, tolerance = 0.5))
+            !isTRUE(all.equal(1, sample_rate_est, tolerance = 0.001)) &
+            !isTRUE(all.equal(sample_rate_est, sample_rate, tolerance = 0.5))
     ) {
         cli_warn(c(
             "!" = "{.arg sample_rate} = {.val {sample_rate}} appears to be \\
             inconsistent with estimated sample_rate = \\
-            {.val {estimated_sample_rate}}.",
+            {.val {sample_rate_est}}.",
             "i" = "Check that your sample rate and {.arg time_channel} \\
             values are consistent."
         ))
@@ -299,8 +291,6 @@ validate_sample_rate <- function(
 
     return(sample_rate)
 }
-
-
 
 
 #' Detect if numeric values fall between a range

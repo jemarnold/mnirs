@@ -48,12 +48,12 @@
 #' Channels (columns) in `data` not explicitly defined in `nirs_channels`
 #'   will be passed through untouched to the output data frame.
 #'
-#' `replace_outliers` and `replace_missing` when `method = "median"` require 
-#'   defining a local rolling window in which to perform outlier detection and 
-#'   median interpolation. This window can be specified by either `width` as 
+#' `replace_outliers` and `replace_missing` when `method = "median"` require
+#'   defining a local rolling window in which to perform outlier detection and
+#'   median interpolation. This window can be specified by either `width` as
 #'   the number of samples centred on `idx` between
-#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan 
-#'   in units of `time_channel` centred on `idx` between 
+#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
+#'   in units of `time_channel` centred on `idx` between
 #'   `[t - span/2, t + span/2]`. A partial moving average will be calculated
 #'   at the edges of the data.
 #'
@@ -116,17 +116,17 @@
 #' @order 1
 #' @export
 replace_mnirs <- function(
-        data,
-        nirs_channels = NULL,
-        time_channel = NULL,
-        invalid_values = NULL,
-        invalid_above = NULL,
-        invalid_below = NULL,
-        outlier_cutoff = NULL,
-        width = NULL,
-        span = NULL,
-        method = c("linear", "median", "locf", "NA"),
-        inform = TRUE
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    invalid_values = NULL,
+    invalid_above = NULL,
+    invalid_below = NULL,
+    outlier_cutoff = NULL,
+    width = NULL,
+    span = NULL,
+    method = c("linear", "median", "locf", "NA"),
+    inform = TRUE
 ) {
     ## validation ====================================
     method <- match.arg(method)
@@ -197,10 +197,9 @@ replace_mnirs <- function(
 }
 
 
-
 #' Replace Invalid Values
 #'
-#' `replace_invalid()` detects specified invalid values or cutoff values in 
+#' `replace_invalid()` detects specified invalid values or cutoff values in
 #' vector data and replaces them with the local median value or `NA`.
 #'
 #' @param x A numeric vector.
@@ -210,7 +209,7 @@ replace_mnirs <- function(
 #' @details
 #' `replace_invalid()` can be used to overwrite known invalid values in
 #'   exported data.
-#' 
+#'
 #' - Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
 #'   Data ranges can be replaced with cutoff values specified by `invalid_above`
 #'   and `invalid_below`, where any values higher or lower than the specified
@@ -224,15 +223,15 @@ replace_mnirs <- function(
 #' @order 2
 #' @export
 replace_invalid <- function(
-        x,
-        t = seq_along(x),
-        invalid_values = NULL,
-        invalid_above = NULL,
-        invalid_below = NULL,
-        width = NULL,
-        span = NULL,
-        method = c("median", "NA"),
-        inform = TRUE
+    x,
+    t = seq_along(x),
+    invalid_values = NULL,
+    invalid_above = NULL,
+    invalid_below = NULL,
+    width = NULL,
+    span = NULL,
+    method = c("median", "NA"),
+    inform = TRUE
 ) {
     ## validate ===============================================
     validate_numeric(x)
@@ -243,14 +242,14 @@ replace_invalid <- function(
             same length."
         )
     }
-  
+
     if (is.null(c(invalid_values, invalid_above, invalid_below))) {
         cli_abort(
             "At least one of {.arg invalid_values}, {.arg invalid_above}, \\
             or {.arg invalid_below} must be specified."
         )
     }
-  
+
     validate_numeric(invalid_values)
     validate_numeric(invalid_above, 1, msg = "one-element")
     validate_numeric(invalid_below, 1, msg = "one-element")
@@ -270,11 +269,13 @@ replace_invalid <- function(
     )
     y[invalid_idx] <- NA_real_
 
-    if (!method) { ## if method = "NA"
+    if (!method) {
+        ## if method = "NA"
         return(y)
     }
 
-    if (method) { ## if method = "median"
+    if (method) {
+        ## if method = "median"
         ## invalid_values removed to NA first,
         ## so returns local median excluding idx
         window_idx <- compute_local_windows(
@@ -285,8 +286,6 @@ replace_invalid <- function(
         return(y)
     }
 }
-
-
 
 
 #' Replace Local Outliers
@@ -323,13 +322,13 @@ replace_invalid <- function(
 #' @order 3
 #' @export
 replace_outliers <- function(
-        x,
-        t = seq_along(x),
-        outlier_cutoff = 3,
-        width = NULL,
-        span = NULL,
-        method = c("median", "NA"),
-        inform = TRUE
+    x,
+    t = seq_along(x),
+    outlier_cutoff = 3,
+    width = NULL,
+    span = NULL,
+    method = c("median", "NA"),
+    inform = TRUE
 ) {
     ## validate ===============================================
     validate_numeric(x)
@@ -363,8 +362,6 @@ replace_outliers <- function(
 }
 
 
-
-
 #' Replace Missing Values
 #'
 #' `replace_missing()` detects missing values in vector data and replaces
@@ -396,12 +393,12 @@ replace_outliers <- function(
 #' @order 4
 #' @export
 replace_missing <- function(
-        x,
-        t = seq_along(x),
-        width = NULL,
-        span = NULL,
-        method = c("linear", "median", "locf"),
-        ...
+    x,
+    t = seq_along(x),
+    width = NULL,
+    span = NULL,
+    method = c("linear", "median", "locf"),
+    ...
 ) {
     ## validate ===============================================
     validate_numeric(x)

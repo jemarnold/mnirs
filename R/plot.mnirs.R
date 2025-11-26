@@ -35,12 +35,11 @@
 #'
 #' @export
 plot.mnirs <- function(x, ...) {
-
     rlang::check_installed(
-        c("ggplot2", "dplyr", "tidyr", "scales"), 
+        c("ggplot2", "dplyr", "tidyr", "scales"),
         reason = "to plot mNIRS data"
     )
-    
+
     args <- list(...)
     na.omit <- args$na.omit %||% FALSE
     label_time <- args$label_time %||% FALSE
@@ -97,7 +96,8 @@ plot.mnirs <- function(x, ...) {
     ## plot
     plot <- ggplot2::ggplot(plot_data) +
         ggplot2::aes(
-            x = .data[[time_channel]], y = .data$y,
+            x = .data[[time_channel]],
+            y = .data$y,
             colour = nirs_channels
         ) +
         theme_mnirs() +
@@ -122,8 +122,6 @@ plot.mnirs <- function(x, ...) {
 
     return(plot)
 }
-
-
 
 
 #' Custom *{mnirs}* ggplot2 theme
@@ -178,13 +176,13 @@ plot.mnirs <- function(x, ...) {
 #'
 #' @export
 theme_mnirs <- function(
-        base_size = 14,
-        base_family = "sans",
-        border = c("partial", "full"),
-        ink = "black",
-        paper = "white",
-        accent = "#0080ff",
-        ...
+    base_size = 14,
+    base_family = "sans",
+    border = c("partial", "full"),
+    ink = "black",
+    paper = "white",
+    accent = "#0080ff",
+    ...
 ) {
     rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
 
@@ -208,7 +206,8 @@ theme_mnirs <- function(
     ) +
         ggplot2::theme(
             plot.title = ggplot2::element_text(
-                size = ggplot2::rel(1.2), lineheight = 1.1
+                size = ggplot2::rel(1.2),
+                lineheight = 1.1
             ),
             plot.subtitle = ggplot2::element_text(lineheight = 1.1),
             plot.caption = ggplot2::element_text(colour = "grey50"),
@@ -232,8 +231,6 @@ theme_mnirs <- function(
 }
 
 
-
-
 #' Custom *{mnirs}* colour palette
 #'
 #' @param n A character or numeric vector specifying either the name or the
@@ -250,6 +247,7 @@ theme_mnirs <- function(
 #'
 #' @export
 palette_mnirs <- function(n = NULL) {
+    # fmt: skip
     colours <- c(
         `light blue`  = "#0080ff",      ## "VL"
         `dark red`    = "#ba2630",      ## "FCR"
@@ -262,7 +260,8 @@ palette_mnirs <- function(n = NULL) {
         `purple`      = "#9f79ee",      ## "RF"
         `brown`       = "#8b4726",      ## "PS"
         `blue`        = "#0000ff",      ## "HHb"
-        `red`         = "#ED0000FF")    ## "O2Hb"
+        `red`         = "#ED0000FF"     ## "O2Hb"
+    )
 
     if (is.null(n)) {
         return(unname(colours))
@@ -277,9 +276,6 @@ palette_mnirs <- function(n = NULL) {
         return(grDevices::colorRampPalette(colours)(n))
     }
 }
-
-
-
 
 
 #' Scales for custom *{mnirs}* palette
@@ -340,7 +336,6 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 }
 
 
-
 #' Breaks for timespan data
 #'
 #' Pretty timespan breaks for plotting in units of 5, 15, 30, 60 sec, etc.
@@ -367,8 +362,8 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #' @keywords internal
 #' @export
 breaks_timespan <- function(
-        unit = c("secs", "mins", "hours", "days", "weeks"),
-        n = 5
+    unit = c("secs", "mins", "hours", "days", "weeks"),
+    n = 5
 ) {
     unit <- match.arg(unit)
     force(n)
@@ -412,8 +407,6 @@ breaks_timespan <- function(
         round(as.numeric(as.difftime(breaks_scaled * scale, units = "secs")))
     }
 }
-
-
 
 
 #' Format timespan data as h:mm:ss
