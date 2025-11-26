@@ -12,45 +12,6 @@ frame using either:
 ## Usage
 
 ``` r
-# S3 method for class 'smooth_spline'
-filter_mnirs(
-  data,
-  nirs_channels = NULL,
-  time_channel = NULL,
-  sample_rate = NULL,
-  method = c("smooth_spline", "butterworth", "moving_average"),
-  spar = NULL,
-  type = c("low", "high", "stop", "pass"),
-  n = 1,
-  W = NULL,
-  fc = NULL,
-  width = NULL,
-  span = NULL,
-  na.rm = FALSE,
-  inform = TRUE,
-  ...
-)
-
-# S3 method for class 'butterworth'
-filter_mnirs(
-  data,
-  nirs_channels = NULL,
-  time_channel = NULL,
-  sample_rate = NULL,
-  method = c("smooth_spline", "butterworth", "moving_average"),
-  spar = NULL,
-  type = c("low", "high", "stop", "pass"),
-  n = 1,
-  W = NULL,
-  fc = NULL,
-  width = NULL,
-  span = NULL,
-  na.rm = FALSE,
-  inform = TRUE,
-  ...
-)
-
-# S3 method for class 'moving_average'
 filter_mnirs(
   data,
   nirs_channels = NULL,

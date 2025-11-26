@@ -30,9 +30,7 @@ Clean, filter, and process data.
   : Replace outliers, invalid values, and missing values
 - [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
   : Re-sample a data frame
-- [`filter_mnirs(`*`<smooth_spline>`*`)`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
-  [`filter_mnirs(`*`<butterworth>`*`)`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
-  [`filter_mnirs(`*`<moving_average>`*`)`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
+- [`filter_mnirs()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
   : Filter a data frame
 - [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md)
   : Apply a Butterworth digital filter
@@ -45,7 +43,7 @@ Clean, filter, and process data.
 
 ## Plotting
 
-Tools for pretty plotting.
+Tools for pretty plotting with [ggplot2](https://ggplot2.tidyverse.org).
 
 - [`plot(`*`<mnirs>`*`)`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)
   :
@@ -75,7 +73,7 @@ Tools for pretty plotting.
 - [`format_hmmss()`](https://jemarnold.github.io/mnirs/reference/format_hmmss.md)
   : Format timespan data as h:mm:ss
 
-## Data
+## Files
 
 Example data files included in the package
 
