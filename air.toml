@@ -1,5 +1,4 @@
 [format]
 line-width = 80
 indent-width = 4
-exclude = ["Exploratory/"]
-skip = ["lapply", "sapply", "vapply", "mapply", "ggplot", "Position", "validate_numeric", "validate_nirs_channels", "validate_time_channel", "validate_event_channel", "validate_sample_rate", "compute_local_windows"]
+skip = ["lapply", "sapply", "vapply", "mapply", "Position", "validate_numeric", "validate_nirs_channels", "validate_time_channel", "validate_event_channel", "validate_sample_rate", "compute_local_windows"]

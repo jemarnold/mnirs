@@ -396,7 +396,6 @@ parse_time_channel <- function(
 # #' @keywords internal
 # extract_timestamp <- function(file_header) {}
 
-
 #' Extract Oxysoft sample rate
 #' @keywords internal
 extract_oxysoft_rate <- function(file_header, sample_rate = NULL) {
@@ -444,21 +443,13 @@ parse_sample_rate <- function(
     ## validate priority user input sample_rate
     ## metadata check will be skipped
     ## will estimate from time_channel (time_channel)
+    ## will error on unable to estimate sample_rate
     sample_rate <- validate_sample_rate(
         data,
         time_channel,
         sample_rate,
         inform
     )
-
-    ## error on unable to determine sample_rate
-    if (is.null(sample_rate)) {
-        cli_abort(c(
-            "x" = "{.arg sample_rate} not provided and cannot be \\
-                determined.",
-            "i" = "Set {.arg sample_rate} = {.cls numeric}."
-        ))
-    }
 
     return(list(
         data = data,

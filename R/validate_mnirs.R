@@ -104,7 +104,7 @@ validate_mnirs_data <- function(data, ncol = 2L) {
 validate_nirs_channels <- function(data, nirs_channels, inform = TRUE) {
     ## if not defined, check metadata
     if (is.null(nirs_channels) || length(nirs_channels) == 0) {
-        nirs_channels <- attr(data, "nirs_channels") ## vector
+        nirs_channels <- attr(data, "nirs_channels") ## should be vector
 
         if (inform && !is.null(nirs_channels)) {
             cli_warn(
@@ -227,10 +227,18 @@ validate_event_channel <- function(data, event_channel, require = TRUE) {
 estimate_sample_rate <- function(x) {
     ## estimate samples per second
     sample_rate_raw <- 1 / median(diff(x), na.rm = TRUE)
+    if (!is.finite(sample_rate_raw) || sample_rate_raw == 0) {
+        cli_abort(c(
+            "x" = "Estimated sample rate is undetectable.",
+            "i" = "Check that your sample rate and {.arg time_channel} \\
+            values are consistent.",
+            "i" = "Set {.arg sample_rate} = {.cls numeric}."
+        ))
+    }
 
-    (\(x) {
-        mags <- 10^floor(log10(x))
-        vals <- x / mags
+    (\(.x) {
+        mags <- 10^floor(log10(.x))
+        vals <- .x / mags
         pretty_base <- c(1, 2, 5, 10)
         rounded <- sapply(vals, \(.val) {
             pretty_base[which.min(abs(pretty_base - .val))]
@@ -255,6 +263,7 @@ validate_sample_rate <- function(
     ## estimate sample_rate from time_channel
     ## time_channel MUST be validated before this
     time_vec <- round(as.numeric(data[[time_channel]]), 6)
+    ## will error on unable to estimate sample_rate
     sample_rate_est <- estimate_sample_rate(time_vec)
 
     ## if still not defined, use estimated sample_rate

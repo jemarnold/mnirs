@@ -331,3 +331,8 @@ the following devices and apps:
   - non-parametric kinetics & slope analysis
 
 - Critical oxygenation breakpoint analysis
+
+------------------------------------------------------------------------
+
+Generative codebots were used to assist with code optimisation. All code
+was thoroughly reviewed, revised, and validated by the package author.

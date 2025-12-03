@@ -111,17 +111,17 @@ test_that("validate_nirs_channels() uses explicit channels when provided", {
 
 test_that("validate_nirs_channels() works with nirs_channels = list()", {
     data <- create_test_data()
-    nirs_list <- list("nirs1", "nirs2")
-    result <- validate_nirs_channels(data, nirs_list)
-    expect_equal(result, nirs_list)
+    nirs_vec <- c("nirs1", "nirs2")
+    result <- validate_nirs_channels(data, nirs_vec)
+    expect_equal(result, nirs_vec)
+
+    attr(data, "nirs_channels") <- nirs_vec
+    expect_warning(result <- validate_nirs_channels(data, NULL, inform = TRUE),
+                   "All `nirs_channels`.*grouped")
+    expect_equal(result, nirs_vec)
 
     nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
     result <- validate_nirs_channels(data, nirs_list)
-    expect_equal(result, nirs_list)
-
-    attr(data, "nirs_channels") <- nirs_list
-    expect_warning(result <- validate_nirs_channels(data, NULL, inform = TRUE),
-                   "All `nirs_channels`.*grouped")
     expect_equal(result, nirs_list)
 })
 
@@ -349,6 +349,16 @@ test_that("estimate_sample_rate works correctly", {
     # Edge case: single diff value
     expect_equal(estimate_sample_rate(c(0, 0.01)), 100)
     expect_error(estimate_sample_rate(NA), "numeric")
+
+    ## edge case sample rate undetectable returns NULL
+    expect_error(
+        estimate_sample_rate(c(1, 1, 1, 1, 1)),
+        "undetectable"
+    )
+    expect_error(
+        estimate_sample_rate(Inf),
+        "undetectable"
+    )
 })
 
 

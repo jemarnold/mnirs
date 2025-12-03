@@ -320,33 +320,33 @@ test_that("detect_time_channel finds time column by name", {
 test_that("detect_time_channel finds POSIXct column", {
     df <- data.frame(
         value = 1:5,
-        timestamp = as.POSIXct("2024-01-01 12:00:00") + 1:5
+        posixct_col = as.POSIXct("2024-01-01 12:00:00") + 1:5
     )
     expect_equal(
         detect_time_channel(df, inform = FALSE),
-        "timestamp"
+        "posixct_col"
     )
 })
 
 test_that("detect_time_channel finds character time format", {
     df <- data.frame(
         value = 1:5,
-        time_str = c("12:30:45", "12:30:46", "12:30:47",
+        string_col = c("12:30:45", "12:30:46", "12:30:47",
                      "12:30:48", "12:30:49")
     )
     expect_equal(
         detect_time_channel(df, inform = FALSE),
-        "time_str"
+        "string_col"
     )
 
     # Test with H:MM format
     df <- data.frame(
         value = 1:5,
-        time_str = c("1:30", "1:31", "1:32", "1:33", "1:34")
+        string_col = c("1:30", "1:31", "1:32", "1:33", "1:34")
     )
     expect_equal(
         detect_time_channel(df, inform = FALSE),
-        "time_str"
+        "string_col"
     )
 })
 
@@ -702,6 +702,31 @@ test_that("select_rename_data() prioritises custom names over data", {
     expect_equal(result$data$custom, "10")
 })
 
+## clean_invalid() ==================================================
+test_that("clean_invalid handles character vectors", {
+    expect_equal(clean_invalid(c("a", "", "b")), c("a", NA_character_, "b"))
+    expect_equal(clean_invalid(c("x", "NA", "y")), c("x", NA_character_, "y"))
+    expect_equal(clean_invalid(c("", "NA")), c(NA_character_, NA_character_))
+    expect_equal(clean_invalid(""), NA_character_)
+    expect_equal(clean_invalid(NA_character_), NA_character_)
+    expect_equal(clean_invalid(character(0)), character(0))
+})
+
+test_that("clean_invalid handles numeric vectors", {
+    expect_equal(
+        clean_invalid(c(1.2345678, 2.3, NA)),
+        c(1.234568, 2.3, NA_real_)
+    )
+    expect_equal(clean_invalid(c(0, -0)), c(0, 0))
+    expect_equal(clean_invalid(c(Inf, -Inf, NaN)), rep(NA_real_, 3))
+    expect_equal(clean_invalid(numeric(0)), numeric(0))
+    expect_equal(clean_invalid(NA_real_), NA_real_)
+})
+
+test_that("clean_invalid does nothing to other types", {
+    expect_equal(clean_invalid(TRUE), TRUE)
+    expect_equal(clean_invalid(list(1, 2)), list(1, 2))
+})
 
 ## remove_empty_rows_cols() ===========================================
 test_that("remove_empty_rows_cols() removes empty rows & cols", {
@@ -791,16 +816,20 @@ test_that("parse_time_channel() parses numeric time from zero", {
     expect_equal(result$time, c(0, 10, 20))
 })
 
-# test_that("parse_time_channel() parses fractional unix time", {
-#     data <- data.frame(
-#         time = c(0.5, 0.6, 0.7),
-#         value = c(1, 2, 3)
-#     )
-#
-#     result <- parse_time_channel(data, "time")
-#
-#     expect_s3_class(result$time, "POSIXct")
-# })
+test_that("parse_time_channel() parses fractional unix time", {
+    skip("fractional time doesn't seem to work properly, but \
+    I also don't have a real-world example to challenge it")
+    
+    hrs_vec <- seq(4, 24, by = 4)
+    data <- data.frame(
+        time = hrs_vec / 24, ## fractions of a day
+        value = 1
+    )
+
+    result <- parse_time_channel(data, "time")
+    expect_setequal(result$time / 60 / 60, hrs_vec)
+    expect_type(result$time, "double")
+})
 
 test_that("parse_time_channel() parses ISO 8601 timestamps", {
     data <- data.frame(
@@ -960,21 +989,21 @@ test_that("parse_sample_rate handles Artinis device", {
 
 })
 
-# test_that("parse_sample_rate errors when rate indeterminable", {
-#     data <- data.frame(x = rep(1, 10))
-#     file_header <- matrix(NA, nrow = 5, ncol = 5)
-#
-#     expect_error(
-#         parse_sample_rate(
-#             data = data,
-#             file_header = file_header,
-#             time_channel = "x",
-#             sample_rate = NULL,
-#             inform = FALSE
-#         ),
-#         "sample_rate"
-#     )
-# })
+test_that("parse_sample_rate errors when rate indeterminable", {
+    data <- data.frame(x = rep(1, 10))
+    file_header <- matrix(NA, nrow = 5, ncol = 5)
+
+    expect_error(
+        parse_sample_rate(
+            data = data,
+            file_header = file_header,
+            time_channel = "x",
+            sample_rate = NULL,
+            inform = FALSE
+        ),
+        "sample.*rate.*undetectable"
+    )
+})
 
 test_that("parse_sample_rate inform output for Artinis", {
     file_header <- read_file(example_mnirs("artinis_intervals"))

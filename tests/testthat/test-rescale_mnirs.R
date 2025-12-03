@@ -12,7 +12,7 @@ test_that("rescale_mnirs rescales single channel correctly", {
 })
 
 test_that("rescale_mnirs preserves relative scaling across grouped channels", {
-    data <- tibble(A = c(0, 50, 100), B = c(0, 25, 50))
+    data <- tibble(A = c(0, 50, 100), B = c(25, 25, 50))
 
     result <- rescale_mnirs(
         data,
@@ -20,14 +20,12 @@ test_that("rescale_mnirs preserves relative scaling across grouped channels", {
         range = c(0, 1)
     )
 
-    # B should remain half of A
-    expect_equal(result$B, result$A / 2)
     expect_equal(result$A, c(0, 0.5, 1))
-    expect_equal(result$B, c(0, 0.25, 0.5))
+    expect_equal(result$B, c(0.25, 0.25, 0.5))
 })
 
 test_that("rescale_mnirs handles multiple separate groups", {
-    data <- tibble(A = c(0, 100), B = c(0, 50), C = c(0, 200))
+    data <- tibble(A = c(10, 100), B = c(0, 50), C = c(10, 200))
 
     result <- rescale_mnirs(
         data,
@@ -35,8 +33,8 @@ test_that("rescale_mnirs handles multiple separate groups", {
         range = c(0, 10)
     )
 
-    # A and B grouped: B should be half of A
-    expect_equal(result$B, result$A / 2)
+    expect_equal(result$A, c(1, 10))
+    expect_equal(result$B, c(0, 5))
     # C scaled independently
     expect_equal(result$C, c(0, 10))
 })
