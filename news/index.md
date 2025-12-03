@@ -1,5 +1,23 @@
 # Changelog
 
+## mnirs 0.1.6
+
+- Create internal numeric vector helper functions
+  - [`signif_whole()`](https://jemarnold.github.io/mnirs/reference/signif_trailing.md)
+    applies sig-fig rounding to decimal places, or whole values.
+  - [`signif_trailing()`](https://jemarnold.github.io/mnirs/reference/signif_trailing.md)
+    applies decimal or sig-fig rounding and convers to character strings
+    with trailing zeroes, for display.
+  - [`signif_pvalue()`](https://jemarnold.github.io/mnirs/reference/signif_trailing.md)
+    applies formatting for p-value display as character strings or
+    significance symbols.
+  - [`seq_range()`](https://jemarnold.github.io/mnirs/reference/seq_range.md)
+    creates a numeric sequence spanning the range of an ipnut vector.
+  - [`wrap()`](https://jemarnold.github.io/mnirs/reference/wrap.md)
+    rotates vector elements from head to tail (or tail to head) by
+    position.
+- Add statement about use of generative AI codebots to README.Rmd
+
 ## mnirs 0.1.5
 
 - Remove redundant validation checks in
