@@ -120,8 +120,8 @@ shift_mnirs <- function(
     }
     nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
     time_channel <- validate_time_channel(data, time_channel)
-    validate_numeric(to, 1, msg = "one-element")
-    validate_numeric(by, 1, msg = "one-element")
+    validate_numeric(to, 1, msg1 = "one-element")
+    validate_numeric(by, 1, msg1 = "one-element")
     if (!is.null(to) && !is.null(by)) {
         by <- NULL
         if (verbose) {

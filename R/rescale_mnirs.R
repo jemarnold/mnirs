@@ -82,7 +82,11 @@ rescale_mnirs <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
-    validate_numeric(range, 2, msg = "two-element `c(min, max)`")
+    validate_numeric(
+        range, 2, 
+        msg1 = "two-element", 
+        msg2 = " between {col_blue('range[1], range[2]]')}."
+    )
 
     ## rescale range ================================
     ## this is actually a fast modify-in-place for loop

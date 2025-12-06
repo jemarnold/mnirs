@@ -247,8 +247,8 @@ replace_invalid <- function(
     }
 
     validate_numeric(invalid_values)
-    validate_numeric(invalid_above, 1, msg = "one-element")
-    validate_numeric(invalid_below, 1, msg = "one-element")
+    validate_numeric(invalid_above, 1, msg1 = "one-element")
+    validate_numeric(invalid_below, 1, msg1 = "one-element")
     method <- match.arg(method)
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)

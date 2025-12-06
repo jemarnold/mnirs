@@ -29,7 +29,7 @@
 #' @param integer A logical indicating whether to test `arg` as an integer
 #'   using `rlang::is_integerish()`, rather than a numeric (`FALSE` by
 #'   *default*).
-#' @param msg A character string detailing the `cli_abort` error message
+#' @param msg1,msg2 A character string detailing the `cli_abort` error message
 #'   returned for invalid numeric values passed to `arg`.
 #' @inheritParams read_mnirs
 #'
@@ -47,7 +47,8 @@ validate_numeric <- function(
     range = NULL,
     inclusive = c("left", "right"),
     integer = FALSE,
-    msg = ""
+    msg1 = "",
+    msg2 = "."
 ) {
     if (is.null(x)) {
         ## pass through not defined
@@ -78,7 +79,15 @@ validate_numeric <- function(
         } else {
             "numeric"
         }
-        cli_abort(c("x" = "{.arg {name}} must be a valid {msg} {.cls {type}}."))
+
+        cli_abort(c(
+            "x" = paste0(
+                "{.arg {name}} must be a valid ",
+                msg1,
+                " {.cls {type}}",
+                msg2
+            )
+        ))
     }
 
     return(invisible())
@@ -277,7 +286,7 @@ validate_sample_rate <- function(
 
     ## validate has one numeric value
     validate_numeric(
-        sample_rate, 1, c(0, Inf), FALSE, msg = "one-element positive"
+        sample_rate, 1, c(0, Inf), FALSE, msg1 = "one-element positive"
     )
 
     ## if provided sample rate seems off and time_channel doesn't appear
@@ -308,9 +317,9 @@ validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
         ))
     }
     validate_numeric(
-        width, 1, c(0, Inf), integer = TRUE, msg = "one-element positive"
+        width, 1, c(0, Inf), integer = TRUE, msg1 = "one-element positive"
     )
-    validate_numeric(span, 1, c(0, Inf), msg = "one-element positive")
+    validate_numeric(span, 1, c(0, Inf), msg1 = "one-element positive")
     if (!is.null(width) && !is.null(span)) {
         span <- NULL
         if (verbose) {
@@ -356,8 +365,8 @@ validate_x_t <- function(x, t = seq_along(x)) {
 #' @keywords internal
 between <- function(x, left, right, inclusive = c("left", "right")) {
     # validate_numeric(x)
-    validate_numeric(left, 1L, msg = "one-element")
-    validate_numeric(right, 1L, msg = "one-element")
+    validate_numeric(left, 1L, msg1 = "one-element")
+    validate_numeric(right, 1L, msg1 = "one-element")
     inclusive <- match.arg(
         as.character(inclusive),
         choices = c("left", "right", "FALSE"),

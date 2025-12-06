@@ -119,7 +119,8 @@ compute_local_fun <- function(x, window_idx, fn) {
 #' @keywords internal
 compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
     validate_numeric(
-        outlier_cutoff, 1, c(0, Inf), integer = TRUE, msg = "one-element positive"
+        outlier_cutoff, 1, c(0, Inf), integer = TRUE, 
+        msg1 = "one-element positive"
     )
 
     n <- length(x)

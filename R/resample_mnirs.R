@@ -93,7 +93,7 @@ resample_mnirs <- function(
         data, time_channel, sample_rate, verbose
     )
     validate_numeric(
-        resample_rate, 1, c(0, Inf), FALSE, msg = "one-element positive"
+        resample_rate, 1, c(0, Inf), FALSE, msg1 = "one-element positive"
     )
     ## assign default resample_rate as sample_rate
     if (is.null(resample_rate)) {

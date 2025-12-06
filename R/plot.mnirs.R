@@ -275,7 +275,7 @@ palette_mnirs <- function(n = NULL, names = NULL) {
         return(unname(colours))
     }
 
-    validate_numeric(n, 1, c(1, Inf), msg = "one-element positive")
+    validate_numeric(n, 1, c(1, Inf), msg1 = "one-element positive")
     if (n <= length(colours)) {
         return(unname(colours[seq_len(n)]))
     }

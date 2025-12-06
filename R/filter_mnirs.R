@@ -209,7 +209,7 @@ filter_mnirs.smooth_spline <- function(
     )
     time_channel <- validate_time_channel(data, time_channel)
     validate_numeric(
-        spar, 1, c(0, Inf), FALSE, msg = "one-element positive"
+        spar, 1, c(0, Inf), FALSE, msg1 = "one-element positive"
     )
 
     ## processing ==========================================
@@ -306,7 +306,7 @@ filter_mnirs.butterworth <- function(
     ## order & W are validated in filter_butter
     validate_numeric(
         fc, fc_n, c(0, Inf), inclusive = FALSE,
-        msg = paste0(fc_n, "-element positive")
+        msg1 = paste0(fc_n, "-element positive")
     )
 
     if (!is.null(W) && !is.null(fc)) {
@@ -518,18 +518,20 @@ filter_butter <- function(
     rlang::check_installed("signal", "to use Butterworth digital filter")
     validate_numeric(x)
     validate_numeric(
-        order, 1, c(1, Inf), integer = TRUE, msg = "one-element positive"
+        order, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
     )
     type <- match.arg(type)
     if (type %in% c("low", "high")) {
         validate_numeric(
             W, 1, c(0, 1), inclusive = FALSE,
-            msg = "one-element positive fractional"
+            msg1 = "one-element positive",
+            msg2 = " between {col_blue('[0, 1]')}."
         )
     } else if (type %in% c("stop", "pass")) {
         validate_numeric(
             W, 2, c(0, 1), inclusive = FALSE,
-            msg = "two-element positive fractional"
+            msg1 = "two-element positive",
+            msg2 = " between {col_blue('[0, 1]')}."
         )
     }
     edges <- match.arg(edges)

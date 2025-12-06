@@ -162,7 +162,11 @@ signif_pvalue <- function(
     display <- match.arg(display)
     validate_numeric(x)
     validate_numeric(digits, 1, c(0, Inf), FALSE, TRUE)
-    validate_numeric(alpha, 1, c(0, 1), FALSE, msg = "probability")
+    validate_numeric(
+        alpha, 1, c(0, 1), FALSE, 
+        msg1 = "one-element",
+        msg2 = " between {col_blue('[0, 1]')}"
+    )
 
     if (display == "symbol" && symbol_repeat) {
         return(strrep(symbol, 3L - findInterval(x, c(0.001, 0.01, alpha))))

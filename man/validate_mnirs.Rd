@@ -19,7 +19,8 @@ validate_numeric(
   range = NULL,
   inclusive = c("left", "right"),
   integer = FALSE,
-  msg = ""
+  msg1 = "",
+  msg2 = "."
 )
 
 validate_mnirs_data(data, ncol = 2L)
@@ -54,7 +55,7 @@ values in \code{arg}.}
 using \code{rlang::is_integerish()}, rather than a numeric (\code{FALSE} by
 \emph{default}).}
 
-\item{msg}{A character string detailing the \code{cli_abort} error message
+\item{msg1, msg2}{A character string detailing the \code{cli_abort} error message
 returned for invalid numeric values passed to \code{arg}.}
 
 \item{data}{A data frame of class \emph{"mnirs"} containing at least one
