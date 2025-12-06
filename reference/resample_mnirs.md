@@ -11,9 +11,8 @@ resample_mnirs(
   time_channel = NULL,
   sample_rate = NULL,
   resample_rate = sample_rate,
-  resample_time = NULL,
-  method = c("linear", "locf", "NA"),
-  inform = TRUE
+  method = c("linear", "locf", "none"),
+  verbose = TRUE
 )
 ```
 
@@ -21,20 +20,20 @@ resample_mnirs(
 
 - data:
 
-  A data frame of class *"mnirs"* containing at least one column with
-  numeric time or sample values, and one column with numeric mNIRS
-  values, along with metadata.
+  A data frame of class *"mnirs"* containing time series data and
+  metadata.
 
 - time_channel:
 
   A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Will be taken from metadata if
-  not defined explicitly.
+  match column names in `data` exactly. Retrieved from metadata if not
+  defined explicitly.
 
 - sample_rate:
 
-  A numeric value for the sample rate in Hz. Will be taken from metadata
-  or estimated from `time_channel` if not defined explicitly.
+  A numeric value for the exported data sample rate in Hz. Retrieved
+  from metadata or estimated from `time_channel` if not defined
+  explicitly.
 
 - resample_rate:
 
@@ -43,11 +42,6 @@ resample_mnirs(
   `resample_rate = sample_rate` will interpolate over missing and
   repeated samples within the bounds of the existing data rounded to the
   nearest value in Hz.
-
-- resample_time:
-
-  An *optional* numeric value indicating the desired sample time (in
-  seconds) to re-sample the data frame.
 
 - method:
 
@@ -67,16 +61,16 @@ resample_mnirs(
       trailing samples or to the right for leading samples, using
       [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html).
 
-  `"NA"`
+  `"none"`
 
   :   Re-samples by matching values to their nearest value of
       `time_channel`, *without* interpolating across new samples or
       `NA`s in the original data frame.
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 ## Value
 
@@ -107,7 +101,7 @@ By *default*, `method = "linear"` or `"locf"` will interpolate across
 `NA`s in the original data and any new samples between existing values
 of `time_channel` (see
 [`?replace_missing`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)).
-Whereas `method = "NA"` will match values of numeric columns from the
+Whereas `method = "none"` will match values of numeric columns from the
 original samples of `time_channel` to the new re-sampled samples,
 without interpolation. Meaning `NA`s in the original data and any new
 samples will be returned as `NA`.
@@ -120,7 +114,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 )
 
 data
@@ -145,7 +139,7 @@ data_resampled <- resample_mnirs(
     # sample_rate = NULL,
     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
     method = "linear",             ## default linear interpolation across any new samples
-    inform = FALSE                 ## will confirm the output sample rate
+    verbose = FALSE                ## will confirm the output sample rate
 )
 
 ## note the altered "time" values 👇

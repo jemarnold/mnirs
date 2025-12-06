@@ -11,7 +11,7 @@ and metadata.'><meta name="twitter:card" content="summary"><meta name="twitter:c
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ and metadata.</p>
 <span>  add_timestamp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  zero_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  keep_all <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,24 +103,24 @@ in Hz. If not defined explicitly, will be estimated from the data (see
 
 <dt id="arg-add-timestamp">add_timestamp<a class="anchor" aria-label="anchor" href="#arg-add-timestamp"></a></dt>
 <dd><p><code>&lt;under development&gt;</code> A logical to add a <em>"timestamp"</em>
-column with date-time for each sample (class <em>POSIXct</em>), if present in the
-data file. If no absolute timestamp is detected, will instead return
-relative time as <em>hh:mm:ss</em>.</p></dd>
+column with date-time values of class <em>POSIXct</em>, if present in the
+data file. Currently only functions if the existing <code>time_channel</code> data
+are in timestamp format (see <em>Details</em>).</p></dd>
 
 
 <dt id="arg-zero-time">zero_time<a class="anchor" aria-label="anchor" href="#arg-zero-time"></a></dt>
-<dd><p>A logical to re-calculate <code>time_channel</code> to start
-from zero or <code>FALSE</code> keep the original values (the <em>default</em>).</p></dd>
+<dd><p>A logical to re-calculate <code>time_channel</code> from zero or
+preserve the original <code>time_channel</code> values (<code>FALSE</code>, the <em>default</em>).</p></dd>
 
 
 <dt id="arg-keep-all">keep_all<a class="anchor" aria-label="anchor" href="#arg-keep-all"></a></dt>
 <dd><p>A logical to include all columns detected from the file
-or <code>FALSE</code> to only include the explicitly specified data columns
-(the <em>default</em>).</p></dd>
+or only include the explicitly specified data columns (<code>FALSE</code>, the
+<em>default</em>).</p></dd>
 
 
-<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
 </dl></div>
@@ -150,14 +150,18 @@ some NIRS devices (for example, <em>Artinis</em> devices recorded with <em>Oxyso
 export the sample index (i.e. integer row numbers). If <em>Oxysoft</em> export
 sample rate is detected in the file metadata, a <code>"time"</code> column will be
 added converting the sample indices to time values in seconds.</p>
-<p>When the <code>time_channel</code> is provided in date-time format, it will be
-converted to numeric values and re-calculated from zero. A timestamp
-column can be included with absolute date-time (e.g.
-<em>"yyyy-mm-dd hh:mm:ss"</em>) if unix timestamps are present in the data file.
-Otherwise, relative time (<em>"hh:mm:ss"</em>) will be returned.</p>
+<p>When the <code>time_channel</code> is provided in date-time (<em>POSIXct</em>) format, it
+will be converted to numeric values and re-calculated from zero,
+even when <code>zero_time = FALSE</code>.</p>
+<p>With <code>add_timestamp = TRUE</code>, an additional <em>"timestamp "</em> column will be
+added with the original date-time values. This functionality is currently
+<code>&lt;under development&gt;</code> to recognise start-time values in the file and
+return absolute unix timestamps if available.</p>
+<p>Setting <code>zero_time = TRUE</code> will re-calculate numeric <code>time_channel</code> values
+to start from zero.</p>
 <p>If <code>time_channel</code> contains irregular sampling (i.e., non-sequential,
 repeated, or unordered values) a warning will be displayed (if
-<code>inform = TRUE</code>) suggesting that the user confirm the file data manually.</p>
+<code>verbose = TRUE</code>) suggesting that the user confirm the file data manually.</p>
 <p><code>sample_rate</code> is required for certain <code>{mnirs}</code> functions to work properly
 and can be carried forward in the data frame metadata. If it is not
 defined explicitly, it will be estimated from the differences between
@@ -166,10 +170,10 @@ values in the <code>time_channel</code>. As above, in certain cases where the
 <code>sample_rate</code> will be inaccurately estimated to be 1 Hz. In such cases,
 <code>sample_rate</code> should be defined explicitly.</p>
 <p>Columns and rows which contain entirely missing data (<code>NA</code>) are omitted.</p>
-<p><code>inform = TRUE</code> will display warnings and information messages which can be
+<p><code>verbose = TRUE</code> will display warnings and information messages which can be
 useful for troubleshooting. Errors causing abort messages will always be
 displayed. Messages can be silenced globally with
-<code>options(mnirs.inform = FALSE)</code>.</p>
+<code>options(mnirs.verbose = FALSE)</code>.</p>
     </div>
 
     <div class="section level2">
@@ -182,7 +186,7 @@ displayed. Messages can be silenced globally with
 <span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>, <span class="co">## identify and rename channels</span></span></span>
 <span class="r-in"><span>                      smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>, <span class="co">## date-time format will be converted to numeric</span></span></span>
-<span class="r-in"><span>    inform <span class="op">=</span> <span class="cn">FALSE</span>                       <span class="co">## hide warnings &amp; messages</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span>                       <span class="co">## hide warnings &amp; messages</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_table</span></span></span>

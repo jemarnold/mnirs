@@ -9,7 +9,7 @@ using interpolation.'><meta name="twitter:card" content="summary"><meta name="tw
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,9 +53,8 @@ using interpolation.</p>
 <span>  time_channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sample_rate <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  resample_rate <span class="op">=</span> <span class="va">sample_rate</span>,</span>
-<span>  resample_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"locf"</span>, <span class="st">"NA"</span><span class="op">)</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"locf"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -64,20 +63,20 @@ using interpolation.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame of class <em>"mnirs"</em> containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.</p></dd>
+<dd><p>A data frame of class <em>"mnirs"</em> containing time series data
+and metadata.</p></dd>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
 <dd><p>A character string indicating the time or sample channel
-name. Must match column names in <code>data</code> exactly. Will be taken from
-metadata if not defined explicitly.</p></dd>
+name. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-sample-rate">sample_rate<a class="anchor" aria-label="anchor" href="#arg-sample-rate"></a></dt>
-<dd><p>A numeric value for the sample rate in Hz. Will be taken
-from metadata or estimated from <code>time_channel</code> if not defined explicitly.</p></dd>
+<dd><p>A numeric value for the exported data sample rate in Hz.
+Retrieved from metadata or estimated from <code>time_channel</code> if not defined
+explicitly.</p></dd>
 
 
 <dt id="arg-resample-rate">resample_rate<a class="anchor" aria-label="anchor" href="#arg-resample-rate"></a></dt>
@@ -86,11 +85,6 @@ output sample rate (in Hz) to re-sample the data frame. The <em>default</em>
 <code>resample_rate = sample_rate</code> will interpolate over missing and repeated
 samples within the bounds of the existing data rounded to the nearest
 value in Hz.</p></dd>
-
-
-<dt id="arg-resample-time">resample_time<a class="anchor" aria-label="anchor" href="#arg-resample-time"></a></dt>
-<dd><p>An <em>optional</em> numeric value indicating the desired
-sample time (in seconds) to re-sample the data frame.</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
@@ -105,7 +99,7 @@ replaces <code>NA</code>s with the most recent valid non-<code>NA</code> value t
 for trailing samples or to the right for leading samples, using
 <code><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">stats::approx()</a></code>.</p></dd>
 
-<dt><code>"NA"</code></dt>
+<dt><code>"none"</code></dt>
 <dd><p>Re-samples by matching values to their nearest value of
 <code>time_channel</code>, <em>without</em> interpolating across new samples or <code>NA</code>s in
 the original data frame.</p></dd>
@@ -114,8 +108,8 @@ the original data frame.</p></dd>
 </dl></dd>
 
 
-<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
 </dl></div>
@@ -139,7 +133,7 @@ missing and repeated samples within the bounds of the existing data
 rounded to the nearest <code>sample_rate</code>.</p>
 <p>By <em>default</em>, <code>method = "linear"</code> or <code>"locf"</code> will interpolate across <code>NA</code>s
 in the original data and any new samples between existing values of
-<code>time_channel</code> (see <code><a href="replace_mnirs.html">?replace_missing</a></code>). Whereas <code>method = "NA"</code> will
+<code>time_channel</code> (see <code><a href="replace_mnirs.html">?replace_missing</a></code>). Whereas <code>method = "none"</code> will
 match values of numeric columns from the original samples of <code>time_channel</code>
 to the new re-sampled samples, without interpolation. Meaning <code>NA</code>s in the
 original data and any new samples will be returned as <code>NA</code>.</p>
@@ -152,7 +146,7 @@ original data and any new samples will be returned as <code>NA</code>.</p>
 <span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2 <span class="op">=</span> <span class="st">"SmO2 Live"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    inform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data</span></span></span>
@@ -177,7 +171,7 @@ original data and any new samples will be returned as <code>NA</code>.</p>
 <span class="r-in"><span>    <span class="co"># sample_rate = NULL,</span></span></span>
 <span class="r-in"><span>    <span class="co"># resample_rate = sample_rate, ## the default will re-sample to sample_rate</span></span></span>
 <span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>,             <span class="co">## default linear interpolation across any new samples</span></span></span>
-<span class="r-in"><span>    inform <span class="op">=</span> <span class="cn">FALSE</span>                 <span class="co">## will confirm the output sample rate</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span>                <span class="co">## will confirm the output sample rate</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## note the altered "time" values 👇</span></span></span>

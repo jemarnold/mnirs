@@ -19,7 +19,7 @@ or significance symbols."><meta name="twitter:card" content="summary"><meta name
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@ or significance symbols.</p>
 <span>  format <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"digits"</span>, <span class="st">"signif"</span><span class="op">)</span>,</span>
 <span>  display <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"value"</span>, <span class="st">"symbol"</span><span class="op">)</span>,</span>
 <span>  symbol <span class="op">=</span> <span class="st">"*"</span>,</span>
-<span>  symbol.repeat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  symbol_repeat <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -108,7 +108,7 @@ formatted numbers or <em>"symbol"</em> for significance symbols.</p></dd>
 <em>Default</em> is "*".</p></dd>
 
 
-<dt id="arg-symbol-repeat">symbol.repeat<a class="anchor" aria-label="anchor" href="#arg-symbol-repeat"></a></dt>
+<dt id="arg-symbol-repeat">symbol_repeat<a class="anchor" aria-label="anchor" href="#arg-symbol-repeat"></a></dt>
 <dd><p>Logical indicating whether to repeat symbols for
 different significance levels. Default is <em>FALSE</em>.</p></dd>
 
@@ -139,10 +139,10 @@ e.g. <code>signif_whole(123, digits = -5)</code> still returns <code>123</code>.
 rounded to 3 decimal places with <code>signif_trailing()</code>, or appear as e.g.
 <em>"&lt; 0.001"</em>.</p></li>
 <li><p><code>digits = 1</code> will display <em>"less than <code>alpha</code>"</em>, e.g. <em>"&lt; 0.05"</em>.</p></li>
-<li><p>When <code>display = "symbol"</code>, if <code>symbol.repeat = TRUE</code>: Uses repeated
+<li><p>When <code>display = "symbol"</code>, if <code>symbol_repeat = TRUE</code>: Uses repeated
 symbols based on thresholds
 <code>(0.001 = "***", 0.01 = "**", alpha = "*", ns = "")</code>.</p></li>
-<li><p>If <code>symbol.repeat = FALSE</code>: Shows one symbol <code>"*"</code> for p &lt; alpha,
+<li><p>If <code>symbol_repeat = FALSE</code>: Shows one symbol <code>"*"</code> for p &lt; alpha,
 otherwise empty string.</p></li>
 </ul></div>
     <div class="section level2">
@@ -183,11 +183,11 @@ otherwise empty string.</p></li>
 <span class="r-in"><span><span class="co">## format as symbols</span></span></span>
 <span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">signif_pvalue</span><span class="op">(</span><span class="va">p_vals</span>, display <span class="op">=</span> <span class="st">"symbol"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "*" "*" "*" ""  "" </span>
-<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">signif_pvalue</span><span class="op">(</span><span class="va">p_vals</span>, display <span class="op">=</span> <span class="st">"symbol"</span>, symbol.repeat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">signif_pvalue</span><span class="op">(</span><span class="va">p_vals</span>, display <span class="op">=</span> <span class="st">"symbol"</span>, symbol_repeat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "***" "**"  "*"   ""    ""   </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## custom alpha and symbol</span></span></span>
-<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">signif_pvalue</span><span class="op">(</span><span class="va">p_vals</span>, display <span class="op">=</span> <span class="st">"symbol"</span>, alpha <span class="op">=</span> <span class="fl">0.01</span>, symbol <span class="op">=</span> <span class="st">"†"</span>, symbol.repeat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">signif_pvalue</span><span class="op">(</span><span class="va">p_vals</span>, display <span class="op">=</span> <span class="st">"symbol"</span>, alpha <span class="op">=</span> <span class="fl">0.01</span>, symbol <span class="op">=</span> <span class="st">"†"</span>, symbol_repeat <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "†††" "††"  ""    ""    ""   </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

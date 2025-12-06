@@ -89,7 +89,7 @@ read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 ) |>
     plot(label_time = TRUE)
 ```

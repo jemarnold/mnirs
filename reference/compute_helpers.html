@@ -3,7 +3,7 @@
 sample indices idx along a time variable t, defined by either width
 in samples or span in units of t.
 compute_local_fun(): Helper function to return a vector of local values
-calculated from x by a function FUN within a list of rolling sample
+calculated from x by a function fn within a list of rolling sample
 windows.
 compute_outliers(): Helper function to return a vector of logicals
 indicating local outliers of x within a list of rolling sample windows
@@ -14,7 +14,7 @@ defined by either width in samples or span in units of t."><meta property="og:de
 sample indices idx along a time variable t, defined by either width
 in samples or span in units of t.
 compute_local_fun(): Helper function to return a vector of local values
-calculated from x by a function FUN within a list of rolling sample
+calculated from x by a function fn within a list of rolling sample
 windows.
 compute_outliers(): Helper function to return a vector of logicals
 indicating local outliers of x within a list of rolling sample windows
@@ -29,7 +29,7 @@ defined by either width in samples or span in units of t."><meta name="twitter:c
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,7 +66,7 @@ defined by either width in samples or span in units of t."><meta name="twitter:c
 sample indices <code>idx</code> along a time variable <code>t</code>, defined by either <code>width</code>
 in samples or <code>span</code> in units of <code>t</code>.</p>
 <p><code>compute_local_fun()</code>: Helper function to return a vector of local values
-calculated from <code>x</code> by a function <code>FUN</code> within a list of rolling sample
+calculated from <code>x</code> by a function <code>fn</code> within a list of rolling sample
 windows.</p>
 <p><code>compute_outliers()</code>: Helper function to return a vector of logicals
 indicating local outliers of <code>x</code> within a list of rolling sample windows
@@ -83,10 +83,10 @@ defined by either <code>width</code> in samples or <code>span</code> in units of
 <span>  idx <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">t</span><span class="op">)</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">compute_local_fun</span><span class="op">(</span><span class="va">x</span>, <span class="va">window_idx</span>, <span class="va">FUN</span><span class="op">)</span></span>
+<span><span class="fu">compute_local_fun</span><span class="op">(</span><span class="va">x</span>, <span class="va">window_idx</span>, <span class="va">fn</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">compute_outliers</span><span class="op">(</span><span class="va">x</span>, <span class="va">window_idx</span>, <span class="va">local_medians</span>, <span class="va">outlier_cutoff</span><span class="op">)</span></span>
 <span></span>
@@ -95,7 +95,7 @@ defined by either <code>width</code> in samples or <code>span</code> in units of
 <span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -125,8 +125,8 @@ in which to perform the operation. In units of <code>time_channel</code> or <cod
 between <code>[t - span/2, t + span/2]</code>.</p></dd>
 
 
-<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
 
@@ -140,7 +140,7 @@ shorter length as <code>x</code> with numeric vectors for the sample indices of
 local rolling windows.</p></dd>
 
 
-<dt id="arg-fun">FUN<a class="anchor" aria-label="anchor" href="#arg-fun"></a></dt>
+<dt id="arg-fn">fn<a class="anchor" aria-label="anchor" href="#arg-fn"></a></dt>
 <dd><p>A function to pass through for local rolling calculation.
 Currently used functions are <code>c(median, mean)</code>.</p></dd>
 

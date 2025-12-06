@@ -5,15 +5,18 @@ Custom *mnirs* colour palette
 ## Usage
 
 ``` r
-palette_mnirs(n = NULL)
+palette_mnirs(n = NULL, names = NULL)
 ```
 
 ## Arguments
 
 - n:
 
-  A character or numeric vector specifying either the name or the number
-  in order of colours to return.
+  A numeric vector specifying the number of colours to return.
+
+- names:
+
+  A character vector specifying colour names to return.
 
 ## Value
 
@@ -29,7 +32,7 @@ Named or unnamed character vector of hex colours.
 ``` r
 scales::show_col(palette_mnirs())
 
-scales::show_col(palette_mnirs(2))
+scales::show_col(palette_mnirs(n = 2))
 
-scales::show_col(palette_mnirs(c("red", "orange")))
+scales::show_col(palette_mnirs(names = c("red", "orange")))
 ```

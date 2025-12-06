@@ -26,8 +26,8 @@ replace_mnirs(
   outlier_cutoff = NULL,
   width = NULL,
   span = NULL,
-  method = c("linear", "median", "locf", "NA"),
-  inform = TRUE
+  method = c("linear", "median", "locf", "none"),
+  verbose = TRUE
 )
 
 replace_invalid(
@@ -38,18 +38,18 @@ replace_invalid(
   invalid_below = NULL,
   width = NULL,
   span = NULL,
-  method = c("median", "NA"),
-  inform = TRUE
+  method = c("median", "none"),
+  verbose = TRUE
 )
 
 replace_outliers(
   x,
   t = seq_along(x),
-  outlier_cutoff = 3,
+  outlier_cutoff = 3L,
   width = NULL,
   span = NULL,
-  method = c("median", "NA"),
-  inform = TRUE
+  method = c("median", "none"),
+  verbose = TRUE
 )
 
 replace_missing(
@@ -66,20 +66,20 @@ replace_missing(
 
 - data:
 
-  A data frame of class *"mnirs"* containing at least one column with
-  numeric time or sample values, and one column with numeric mNIRS
-  values, along with metadata.
+  A data frame of class *"mnirs"* containing time series data and
+  metadata.
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names. Must match column names in
-  `data` exactly. Will be taken from metadata if not defined explicitly.
+  A character vector of mNIRS channel names to operate on. Must match
+  column names in `data` exactly. Retrieved from metadata if not defined
+  explicitly.
 
 - time_channel:
 
   A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Will be taken from metadata if
-  not defined explicitly.
+  match column names in `data` exactly. Retrieved from metadata if not
+  defined explicitly.
 
 - invalid_values:
 
@@ -135,14 +135,14 @@ replace_missing(
       to the right for leading `NA`s, using
       [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html).
 
-  `"NA"`
+  `"none"`
 
   :   Returns `NA`s without replacement.
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 - x:
 
@@ -186,7 +186,7 @@ timespan in units of `time_channel` centred on `idx` between
 `[t - span/2, t + span/2]`. A partial moving average will be calculated
 at the edges of the data.
 
-`replace_invalid()` can be used to overwrite known invalid values in
+`replace_invalid()` can be used to remove known invalid values in
 exported data.
 
 - Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
@@ -206,8 +206,8 @@ units of `t`.
   have minimal or zero variation.
 
 - Values of `x` outside local bounds defined by `outlier_cutoff` are
-  identified as local outliers and either removed if `method = "NA"`, or
-  replaced with the local median value (`method = "median"`, the
+  identified as local outliers and either removed if `method = "none"`,
+  or replaced with the local median value (`method = "median"`, the
   *default*).
 
 - This function will NOT replace `NA` values already existing in the
@@ -254,7 +254,7 @@ x <- c(1, 999, 3, 4, 999, 6)
 replace_invalid(x, invalid_values = 999, width = 2, method = "median")
 #> [1] 1 2 3 4 5 6
 
-(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "NA"))
+(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
 #> [1]  1 NA  3  4 NA  6
 
 replace_missing(x_na, method = "linear")
@@ -265,7 +265,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 )
 
 ## clean data

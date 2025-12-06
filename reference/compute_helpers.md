@@ -5,7 +5,7 @@ sample indices `idx` along a time variable `t`, defined by either
 `width` in samples or `span` in units of `t`.
 
 `compute_local_fun()`: Helper function to return a vector of local
-values calculated from `x` by a function `FUN` within a list of rolling
+values calculated from `x` by a function `fn` within a list of rolling
 sample windows.
 
 `compute_outliers()`: Helper function to return a vector of logicals
@@ -24,10 +24,10 @@ compute_local_windows(
   idx = seq_along(t),
   width = NULL,
   span = NULL,
-  inform = TRUE
+  verbose = TRUE
 )
 
-compute_local_fun(x, window_idx, FUN)
+compute_local_fun(x, window_idx, fn)
 
 compute_outliers(x, window_idx, local_medians, outlier_cutoff)
 
@@ -36,7 +36,7 @@ compute_window_of_valid_neighbours(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  inform = TRUE
+  verbose = TRUE
 )
 ```
 
@@ -64,10 +64,10 @@ compute_window_of_valid_neighbours(
   which to perform the operation. In units of `time_channel` or `t`,
   between `[t - span/2, t + span/2]`.
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 - x:
 
@@ -79,7 +79,7 @@ compute_window_of_valid_neighbours(
   as `x` with numeric vectors for the sample indices of local rolling
   windows.
 
-- FUN:
+- fn:
 
   A function to pass through for local rolling calculation. Currently
   used functions are `c(median, mean)`.

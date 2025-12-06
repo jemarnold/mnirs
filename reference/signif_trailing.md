@@ -23,7 +23,7 @@ signif_pvalue(
   format = c("digits", "signif"),
   display = c("value", "symbol"),
   symbol = "*",
-  symbol.repeat = FALSE,
+  symbol_repeat = FALSE,
   alpha = 0.05
 )
 ```
@@ -56,7 +56,7 @@ signif_pvalue(
   Character string specifying the significance symbol. *Default* is
   "\*".
 
-- symbol.repeat:
+- symbol_repeat:
 
   Logical indicating whether to repeat symbols for different
   significance levels. Default is *FALSE*.
@@ -101,11 +101,11 @@ of [`signif()`](https://rdrr.io/r/base/Round.html) and
 
 - `digits = 1` will display *"less than `alpha`"*, e.g. *"\< 0.05"*.
 
-- When `display = "symbol"`, if `symbol.repeat = TRUE`: Uses repeated
+- When `display = "symbol"`, if `symbol_repeat = TRUE`: Uses repeated
   symbols based on thresholds
   `(0.001 = "***", 0.01 = "**", alpha = "*", ns = "")`.
 
-- If `symbol.repeat = FALSE`: Shows one symbol `"*"` for p \< alpha,
+- If `symbol_repeat = FALSE`: Shows one symbol `"*"` for p \< alpha,
   otherwise empty string.
 
 ## See also
@@ -148,10 +148,10 @@ mnirs:::signif_pvalue(p_vals, digits = 1)
 ## format as symbols
 mnirs:::signif_pvalue(p_vals, display = "symbol")
 #> [1] "*" "*" "*" ""  "" 
-mnirs:::signif_pvalue(p_vals, display = "symbol", symbol.repeat = TRUE)
+mnirs:::signif_pvalue(p_vals, display = "symbol", symbol_repeat = TRUE)
 #> [1] "***" "**"  "*"   ""    ""   
 
 ## custom alpha and symbol
-mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol.repeat = TRUE)
+mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol_repeat = TRUE)
 #> [1] "†††" "††"  ""    ""    ""   
 ```

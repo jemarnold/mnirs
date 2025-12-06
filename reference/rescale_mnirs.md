@@ -7,51 +7,48 @@ new amplitude/dynamic range, e.g. re-scale the range of NIRS data to
 ## Usage
 
 ``` r
-rescale_mnirs(data, nirs_channels = list(), range, inform = TRUE)
+rescale_mnirs(data, nirs_channels = list(NULL), range, verbose = TRUE)
 ```
 
 ## Arguments
 
 - data:
 
-  A data frame of class *"mnirs"* containing at least one column with
-  numeric time or sample values, and one column with numeric mNIRS
-  values, along with metadata.
+  A data frame of class *"mnirs"* containing time series data and
+  metadata.
 
 - nirs_channels:
 
   A [`list()`](https://rdrr.io/r/base/list.html) of character vectors
-  indicating the column names for data channels to be re-scaled (see
-  *Details*).
+  indicating grouping structure of mNIRS channel names to operate on
+  (see *Details*). Must match column names in `data` exactly. Retrieved
+  from metadata if not defined explicitly.
 
   `list("A", "B", "C")`
 
-  :   Will re-scale each channel independently, losing the relative
+  :   Will operate on each channel independently, losing the relative
       scaling between channels.
 
   `list(c("A", "B", "C"))`
 
-  :   Will re-scale all channels together, preserving the relative
+  :   Will operate on all channels together, preserving the relative
       scaling between channels.
 
   `list(c("A", "B"), c("C", "D"))`
 
-  :   Will re-scale channels `A` and `B` in one group, and channels `C`
-      and `D` in another group, preserving relative scaling within, but
-      not between groups.
-
-  Must match column names in data exactly. Will be taken from metadata
-  if not defined explicitly.
+  :   Will operate on channels `A` & `B` in one group, and `C` & `D` in
+      another group, preserving relative scaling within, but not between
+      groups.
 
 - range:
 
   A numeric vector in the form `c(min, max)`, indicating the range of
   output values to which data channels will be re-scaled.
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 ## Value
 
@@ -61,14 +58,19 @@ of class *"mnirs"* with metadata available with
 
 ## Details
 
-`nirs_channels = list()` can be used to group data channels to preserve
-absolute or relative scaling.
+`nirs_channels = list()` can be used to group data channels (column
+names) to preserve absolute or relative scaling.
 
-- Channels grouped together in a list item will be re-scaled to a common
-  value, and the relative scaling within that group will be preserved.
+- Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will
+  be re-scaled to a common range, and the relative scaling within that
+  group will be preserved.
 
-- Channels grouped in separate list items will be re-scaled
-  independently, and relative scaling between groups will be lost.
+- Channels in separate list vectors (e.g. `list("A", "B")`) will be
+  re-scaled independently, and relative scaling between groups will be
+  lost.
+
+- A single vector of channel names (e.g. `c("A", "B")`) will group
+  channels together.
 
 - Channels (columns) in `data` not explicitly defined in `nirs_channels`
   will be passed through untouched to the output data frame.
@@ -84,25 +86,25 @@ arrangements.
 ``` r
 library(ggplot2)
 
+options(mnirs.verbose = FALSE)
+
 ## read example data
 data_rescaled <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    time_channel = c(time = "hh:mm:ss")
 ) |>
-    resample_mnirs(inform = FALSE) |>
+    resample_mnirs() |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10,
-        inform = FALSE
+        width = 10
     ) |>
-    filter_mnirs(na.rm = TRUE, inform = FALSE) |>
+    filter_mnirs(na.rm = TRUE) |>
     rescale_mnirs(
-        range = c(0, 100),   ## rescale to a 0-100% functional exercise range
-        inform = FALSE
+        range = c(0, 100)   ## rescale to a 0-100% functional exercise range
     )
+#> ℹ `nirs_channel` = "smo2": `smooth.spline(spar = 0.052)`
 
 plot(data_rescaled, label_time = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")

@@ -11,14 +11,14 @@ in a recording to zero.
 ``` r
 shift_mnirs(
   data,
-  nirs_channels = list(),
+  nirs_channels = list(NULL),
   time_channel = NULL,
   to = NULL,
   by = NULL,
   width = NULL,
   span = NULL,
   position = c("min", "max", "first"),
-  inform = TRUE
+  verbose = TRUE
 )
 ```
 
@@ -26,40 +26,20 @@ shift_mnirs(
 
 - data:
 
-  A data frame of class *"mnirs"* containing at least one column with
-  numeric time or sample values, and one column with numeric mNIRS
-  values, along with metadata.
+  A data frame of class *"mnirs"* containing time series data and
+  metadata.
 
 - nirs_channels:
 
-  A [`list()`](https://rdrr.io/r/base/list.html) of character vectors
-  indicating the column names for data channels to be shifted (see
-  *Details*).
-
-  `list("A", "B", "C")`
-
-  :   Will shift each channel independently, losing the relative scaling
-      between channels.
-
-  `list(c("A", "B", "C"))`
-
-  :   Will shift all channels together, preserving the relative scaling
-      between channels.
-
-  `list(c("A", "B"), c("C", "D"))`
-
-  :   Will shift channels `A` and `B` in one group, and channels `C` and
-      `D` in another group, preserving relative scaling within, but not
-      between groups.
-
-  Must match column names in data exactly. Will be taken from metadata
-  if not defined explicitly.
+  A character vector of mNIRS channel names to operate on. Must match
+  column names in `data` exactly. Retrieved from metadata if not defined
+  explicitly.
 
 - time_channel:
 
   A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Will be taken from metadata if
-  not defined explicitly.
+  match column names in `data` exactly. Retrieved from metadata if not
+  defined explicitly.
 
 - to:
 
@@ -100,10 +80,10 @@ shift_mnirs(
 
   :   Will shift first value(s) `to` or `by` the specified values.
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 ## Value
 
@@ -113,14 +93,19 @@ of class *"mnirs"* with metadata available with
 
 ## Details
 
-`nirs_channels = list()` can be used to group data channels to preserve
-absolute or relative scaling.
+`nirs_channels = list()` can be used to group data channels (column
+names) to preserve absolute or relative scaling.
 
-- Channels grouped together in a list item will be shifted to a common
-  value, and the relative scaling within that group will be preserved.
+- Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will
+  be shifted to a common value, and the relative scaling within that
+  group will be preserved.
 
-- Channels grouped in separate list items will be shifted independently,
-  and relative scaling between groups will be lost.
+- Channels in separate list vectors (e.g. `list("A", "B")`) will be
+  shifted independently, and relative scaling between groups will be
+  lost.
+
+- A single vector of channel names (e.g. `c("A", "B")`) will group
+  channels together.
 
 - Channels (columns) in `data` not explicitly defined in `nirs_channels`
   will be passed through untouched to the output data frame.
@@ -140,27 +125,27 @@ preferred over `by`, and `width` will be preferred over `span`.
 ``` r
 library(ggplot2)
 
+options(mnirs.verbose = FALSE)
+
 ## read example data
 data_shifted <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    time_channel = c(time = "hh:mm:ss")
 ) |>
-    resample_mnirs(inform = FALSE) |>
+    resample_mnirs() |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10,
-        inform = FALSE
+        width = 10
     ) |>
-    filter_mnirs(na.rm = TRUE, inform = FALSE) |>
+    filter_mnirs(na.rm = TRUE) |>
     shift_mnirs(
         to = 0,             ## NIRS values will be shifted to zero
         span = 120,         ## shift the first 120 sec of data to zero
-        position = "first",
-        inform = FALSE
+        position = "first"
     )
+#> ℹ `nirs_channel` = "smo2": `smooth.spline(spar = 0.052)`
 
 plot(data_shifted, label_time = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")

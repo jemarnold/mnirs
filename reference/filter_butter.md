@@ -10,7 +10,7 @@ which handles 'edges' better at the start and end of the data.
 ``` r
 filter_butter(
   x,
-  n = 1,
+  order = 1,
   W,
   type = c("low", "high", "stop", "pass"),
   edges = c("rev", "rep1", "none"),
@@ -24,10 +24,10 @@ filter_butter(
 
   A numeric vector.
 
-- n:
+- order:
 
   An integer defining the filter order for `method = "butterworth"`
-  (*default* `n = 1`).
+  (*default* `order = 1`).
 
 - W:
 
@@ -77,9 +77,9 @@ filter_butter(
 
 - na.rm:
 
-  A logical indicating whether missing values should be ignored (`TRUE`)
-  before the filter is applied. Otherwise `FALSE` (the *default*) will
-  throw an error (see *Details*).
+  A logical indicating whether missing values should be preserved and
+  passed through the filter (`TRUE`). Otherwise `FALSE` (the *default*)
+  will throw an error if there are any `NA`s (see *Details*).
 
 ## Value
 
@@ -99,9 +99,9 @@ frequency `W` to be passed through as the output signal, respectively.
 from the output signal. *Pass-band* defines a critical range of
 frequencies which are passed through as the output signal.
 
-The filter order (number of passes) is defined by `n`, typically in the
-range `n = [1, 10]`. Higher filter order tends to capture more rapid
-changes in amplitude, but also causes more distortion around those
+The filter order (number of passes) is defined by `order`, typically in
+the range `order = [1, 10]`. Higher filter order tends to capture more
+rapid changes in amplitude, but also causes more distortion around those
 change points in the signal. General advice is to use the lowest filter
 order which sufficiently captures the desired rapid responses in the
 data.
@@ -130,8 +130,8 @@ set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
 noisy_sin <- sin + noise
-filt_without_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "none")
-filt_with_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "rep1")
+filt_without_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "none")
+filt_with_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "rep1")
 
 ggplot(data.frame(), aes(x = seq_along(noise))) +
     theme_mnirs() +

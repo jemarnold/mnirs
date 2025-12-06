@@ -11,7 +11,7 @@ of the data."><meta name="twitter:card" content="summary"><meta name="twitter:cr
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@ of the data.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">filter_butter</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
-<span>  n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  order <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">W</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"low"</span>, <span class="st">"high"</span>, <span class="st">"stop"</span>, <span class="st">"pass"</span><span class="op">)</span>,</span>
 <span>  edges <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rev"</span>, <span class="st">"rep1"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
@@ -69,9 +69,9 @@ of the data.</p>
 <dd><p>A numeric vector.</p></dd>
 
 
-<dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>An integer defining the filter order for <code>method = "butterworth"</code>
-(<em>default</em> <code>n = 1</code>).</p></dd>
+<dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
+<dd><p>An integer defining the filter order for
+<code>method = "butterworth"</code> (<em>default</em> <code>order = 1</code>).</p></dd>
 
 
 <dt id="arg-w">W<a class="anchor" aria-label="anchor" href="#arg-w"></a></dt>
@@ -114,9 +114,9 @@ in reverse sequence.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
-<dd><p>A logical indicating whether missing values should be ignored
-(<code>TRUE</code>) before the filter is applied. Otherwise <code>FALSE</code> (the <em>default</em>)
-will throw an error (see <em>Details</em>).</p></dd>
+<dd><p>A logical indicating whether missing values should be preserved
+and passed through the filter (<code>TRUE</code>). Otherwise <code>FALSE</code> (the <em>default</em>)
+will throw an error if there are any <code>NA</code>s (see <em>Details</em>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -134,8 +134,8 @@ frequency <code>W</code> to be passed through as the output signal, respectively
 <em>Stop-band</em> defines a critical range of frequencies which are rejected
 from the output signal. <em>Pass-band</em> defines a critical range of
 frequencies which are passed through as the output signal.</p>
-<p>The filter order (number of passes) is defined by <code>n</code>, typically in
-the range <code>n = [1, 10]</code>. Higher filter order tends to capture more
+<p>The filter order (number of passes) is defined by <code>order</code>, typically in
+the range <code>order = [1, 10]</code>. Higher filter order tends to capture more
 rapid changes in amplitude, but also causes more distortion around
 those change points in the signal. General advice is to use the
 lowest filter order which sufficiently captures the desired rapid
@@ -162,8 +162,8 @@ Then <code>NA</code>s will be preserved and passed through in the returned vecto
 <span class="r-in"><span><span class="va">sin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span> <span class="op">*</span> <span class="va">pi</span> <span class="op">*</span> <span class="fl">1</span><span class="op">:</span><span class="fl">150</span> <span class="op">/</span> <span class="fl">50</span><span class="op">)</span> <span class="op">*</span> <span class="fl">20</span> <span class="op">+</span> <span class="fl">40</span></span></span>
 <span class="r-in"><span><span class="va">noise</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">150</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">noisy_sin</span> <span class="op">&lt;-</span> <span class="va">sin</span> <span class="op">+</span> <span class="va">noise</span></span></span>
-<span class="r-in"><span><span class="va">filt_without_edge</span> <span class="op">&lt;-</span> <span class="fu">filter_butter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">noisy_sin</span>, n <span class="op">=</span> <span class="fl">2</span>, W <span class="op">=</span> <span class="fl">0.1</span>, edges <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">filt_with_edge</span> <span class="op">&lt;-</span> <span class="fu">filter_butter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">noisy_sin</span>, n <span class="op">=</span> <span class="fl">2</span>, W <span class="op">=</span> <span class="fl">0.1</span>, edges <span class="op">=</span> <span class="st">"rep1"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">filt_without_edge</span> <span class="op">&lt;-</span> <span class="fu">filter_butter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">noisy_sin</span>, order <span class="op">=</span> <span class="fl">2</span>, W <span class="op">=</span> <span class="fl">0.1</span>, edges <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">filt_with_edge</span> <span class="op">&lt;-</span> <span class="fu">filter_butter</span><span class="op">(</span>x <span class="op">=</span> <span class="va">noisy_sin</span>, order <span class="op">=</span> <span class="fl">2</span>, W <span class="op">=</span> <span class="fl">0.1</span>, edges <span class="op">=</span> <span class="st">"rep1"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">noise</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="theme_mnirs.html">theme_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span></span>

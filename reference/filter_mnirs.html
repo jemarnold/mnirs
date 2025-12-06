@@ -19,7 +19,7 @@ A simple moving average.
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,13 +68,13 @@ using either:</p><ol><li><p>A cubic smoothing spline.</p></li>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"smooth_spline"</span>, <span class="st">"butterworth"</span>, <span class="st">"moving_average"</span><span class="op">)</span>,</span>
 <span>  spar <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"low"</span>, <span class="st">"high"</span>, <span class="st">"stop"</span>, <span class="st">"pass"</span><span class="op">)</span>,</span>
-<span>  n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  order <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  W <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  na.rm <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -84,21 +84,20 @@ using either:</p><ol><li><p>A cubic smoothing spline.</p></li>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame of class <em>"mnirs"</em> containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.</p></dd>
+<dd><p>A data frame of class <em>"mnirs"</em> containing time series data
+and metadata.</p></dd>
 
 
 <dt id="arg-nirs-channels">nirs_channels<a class="anchor" aria-label="anchor" href="#arg-nirs-channels"></a></dt>
-<dd><p>A character vector of mNIRS channel names. Must match
-column names in <code>data</code> exactly. Will be taken from metadata if not
-defined explicitly.</p></dd>
+<dd><p>A character vector of mNIRS channel names to operate
+on. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
 <dd><p>A character string indicating the time or sample channel
-name. Must match column names in <code>data</code> exactly. Will be taken from
-metadata if not defined explicitly.</p></dd>
+name. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-sample-rate">sample_rate<a class="anchor" aria-label="anchor" href="#arg-sample-rate"></a></dt>
@@ -114,7 +113,7 @@ from <code>time_channel</code> if not defined explicitly.</p></dd>
 
 <dt><code>"butterworth"</code></dt>
 <dd><p>Uses a centred Butterworth digital filter.
-<code>type</code> should be defined (see <em>Details</em>).</p></dd>
+<code>type</code> must be defined (see <em>Details</em>).</p></dd>
 
 <dt><code>"moving_average"</code></dt>
 <dd><p>Uses a centred moving average filter.</p></dd>
@@ -146,9 +145,9 @@ from <code>time_channel</code> if not defined explicitly.</p></dd>
 </dl></dd>
 
 
-<dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>An integer defining the filter order for <code>method = "butterworth"</code>
-(<em>default</em> <code>n = 1</code>).</p></dd>
+<dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
+<dd><p>An integer defining the filter order for
+<code>method = "butterworth"</code> (<em>default</em> <code>order = 1</code>).</p></dd>
 
 
 <dt id="arg-w">W<a class="anchor" aria-label="anchor" href="#arg-w"></a></dt>
@@ -176,13 +175,13 @@ In units of <code>time_channel</code> or <code>t</code>, between <code>[t - span
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
-<dd><p>A logical indicating whether missing values should be ignored
-(<code>TRUE</code>) before the filter is applied. Otherwise <code>FALSE</code> (the <em>default</em>)
-will throw an error (see <em>Details</em>).</p></dd>
+<dd><p>A logical indicating whether missing values should be preserved
+and passed through the filter (<code>TRUE</code>). Otherwise <code>FALSE</code> (the <em>default</em>)
+will throw an error if there are any <code>NA</code>s (see <em>Details</em>).</p></dd>
 
 
-<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
 
@@ -219,8 +218,8 @@ frequency <code>W</code> to be passed through as the output signal, respectively
 <em>Stop-band</em> defines a critical range of frequencies which are rejected
 from the output signal. <em>Pass-band</em> defines a critical range of
 frequencies which are passed through as the output signal.</p>
-<p>The filter order (number of passes) is defined by <code>n</code>, typically in
-the range <code>n = [1, 10]</code>. Higher filter order tends to capture more
+<p>The filter order (number of passes) is defined by <code>order</code>, typically in
+the range <code>order = [1, 10]</code>. Higher filter order tends to capture more
 rapid changes in amplitude, but also causes more distortion around
 those change points in the signal. General advice is to use the
 lowest filter order which sufficiently captures the desired rapid
@@ -235,7 +234,7 @@ frequency, i.e., half the sample rate of the data in Hz.</p>
 <code>sample_rate</code> together. <code>fc</code> represents the desired cutoff frequency
 in Hz, and <code>sample_rate</code> is the sample rate of the recorded data in
 Hz. <code>W = fc / (sample_rate / 2)</code>.</p>
-<p>Only One of either <code>W</code> or <code>fc</code> should be defined. If both are defined,
+<p>Only one of either <code>W</code> or <code>fc</code> should be defined. If both are defined,
 <code>W</code> will be preferred over <code>fc</code>.</p></dd>
 
 
@@ -262,25 +261,25 @@ Then <code>NA</code>s will be preserved and passed through in the returned data.
 <span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2 <span class="op">=</span> <span class="st">"SmO2 Live"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    inform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span></span>
 <span class="r-in"><span>        width <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>        inform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>        verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu">filter_mnirs</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">data</span>,</span></span>
-<span class="r-in"><span>    <span class="co"># nirs_channel = NULL,  ## taken from metadata</span></span></span>
+<span class="r-in"><span>    <span class="co"># nirs_channel = NULL,  ## retrieved from metadata</span></span></span>
 <span class="r-in"><span>    <span class="co"># time_channel = NULL,</span></span></span>
 <span class="r-in"><span>    <span class="co"># sample_rate = NULL,</span></span></span>
 <span class="r-in"><span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span></span>
 <span class="r-in"><span>    type <span class="op">=</span> <span class="st">"low"</span>,           <span class="co">## specify a low-pass filter</span></span></span>
-<span class="r-in"><span>    n <span class="op">=</span> <span class="fl">2</span>,                  <span class="co">## filter order number</span></span></span>
+<span class="r-in"><span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span></span>
 <span class="r-in"><span>    W <span class="op">=</span> <span class="fl">0.02</span>,               <span class="co">## filter fractional critical frequency</span></span></span>
-<span class="r-in"><span>    inform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## add the non-filtered data back to the plot to compare</span></span></span>

@@ -9,7 +9,7 @@ if present, and validates relevant data quality checks."><meta name="twitter:car
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,12 +54,13 @@ if present, and validates relevant data quality checks.</p>
 <span>  range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  inclusive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
 <span>  integer <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  msg <span class="op">=</span> <span class="st">""</span></span>
+<span>  msg1 <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  msg2 <span class="op">=</span> <span class="st">"."</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">validate_mnirs_data</span><span class="op">(</span><span class="va">data</span>, ncol <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_nirs_channels</span><span class="op">(</span><span class="va">data</span>, <span class="va">nirs_channels</span>, inform <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu">validate_nirs_channels</span><span class="op">(</span><span class="va">data</span>, <span class="va">nirs_channels</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">validate_time_channel</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span><span class="op">)</span></span>
 <span></span>
@@ -67,7 +68,11 @@ if present, and validates relevant data quality checks.</p>
 <span></span>
 <span><span class="fu">estimate_sample_rate</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_sample_rate</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span>, <span class="va">sample_rate</span>, inform <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">validate_sample_rate</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span>, <span class="va">sample_rate</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">validate_width_span</span><span class="op">(</span>width <span class="op">=</span> <span class="cn">NULL</span>, span <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">validate_x_t</span><span class="op">(</span><span class="va">x</span>, t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -99,48 +104,48 @@ using <code><a href="https://rlang.r-lib.org/reference/is_integerish.html" class
 <em>default</em>).</p></dd>
 
 
-<dt id="arg-msg">msg<a class="anchor" aria-label="anchor" href="#arg-msg"></a></dt>
+<dt id="arg-msg-msg-">msg1, msg2<a class="anchor" aria-label="anchor" href="#arg-msg-msg-"></a></dt>
 <dd><p>A character string detailing the <code>cli_abort</code> error message
 returned for invalid numeric values passed to <code>arg</code>.</p></dd>
 
 
 <dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame of class <em>"mnirs"</em> containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.</p></dd>
+<dd><p>A data frame of class <em>"mnirs"</em> containing time series data
+and metadata.</p></dd>
 
 
 <dt id="arg-nirs-channels">nirs_channels<a class="anchor" aria-label="anchor" href="#arg-nirs-channels"></a></dt>
-<dd><p>A character vector of mNIRS channel names. Must match
-column names in <code>data</code> exactly. Will be taken from metadata if not
-defined explicitly.</p></dd>
+<dd><p>A character vector of mNIRS channel names to operate
+on. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
-<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
 <dd><p>A character string indicating the time or sample channel
-name. Must match column names in <code>data</code> exactly. Will be taken from
-metadata if not defined explicitly.</p></dd>
+name. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-event-channel">event_channel<a class="anchor" aria-label="anchor" href="#arg-event-channel"></a></dt>
 <dd><p>A character string indicating the event or lap channel
-name. Must match column names in <code>data</code> exactly. Will be taken from
-metadata if not defined explicitly.</p></dd>
+name. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-require">require<a class="anchor" aria-label="anchor" href="#arg-require"></a></dt>
-<dd><p>A logical to specify whether <code>event_channel</code> is required
+<dd><p>A logical specifying whether <code>event_channel</code> is required
 (the <em>default</em>) or optional (<code>event_channel</code> returned as <code>NULL</code>).</p></dd>
 
 
 <dt id="arg-sample-rate">sample_rate<a class="anchor" aria-label="anchor" href="#arg-sample-rate"></a></dt>
-<dd><p>A numeric value for the sample rate in Hz. Will be taken
-from metadata or estimated from <code>time_channel</code> if not defined explicitly.</p></dd>
+<dd><p>A numeric value for the exported data sample rate in Hz.
+Retrieved from metadata or estimated from <code>time_channel</code> if not defined
+explicitly.</p></dd>
 
 </dl></div>
     <div class="section level2">

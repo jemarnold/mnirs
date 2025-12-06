@@ -4,14 +4,14 @@
 
 Modern wearable **muscle near-infrared spectroscopy (mNIRS)** devices
 make it extremely easy to collect local muscle oxygenation data during
-exercise. The real challenge comes with deciding how to clean, filter,
-and interpret those data.
+dynamic activities. The real challenge comes with deciding how to clean,
+filter, process, and eventually interpret those data.
 
 [mnirs](https://jemarnold.github.io/mnirs/) package aims to provide
-standardised, reproducible methods for reading, cleaning, filtering, and
-processing NIRS data, helping practitioners detect meaningful signals
-from noise and improve confidence in our interpretations and
-applications.
+standardised, reproducible methods for processing and analysing NIRS
+data, helping practitioners detect meaningful signals from noise and
+improve our confidence in interpreting information and applying that
+information back to the clients we work with.
 
 In this vignette we will demonstrate how to:
 
@@ -44,9 +44,9 @@ In this vignette we will demonstrate how to:
 > releases at
 > [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
 >
-> *`mnirs`* is designed to process mNIRS data, but there is no reason
-> why it can’t be used to read, clean, and filter other time series
-> datasets, which require many of the same processing steps. Enjoy!
+> *{mnirs}* is designed to process mNIRS data, but it can be used to
+> read, clean, and pre-process other time series datasets, which require
+> many of the same processing steps. Enjoy!
 
 ## 📂 Read Data From File
 
@@ -85,8 +85,8 @@ for more details.
 
 > **Example Data Files**
 >
-> A few example data files are included in the *`mnirs`* package. Their
-> file paths can be accessed with
+> A few example data files are included in the *`mnirs`* package. File
+> paths can be accessed with
 > [`example_mnirs()`](https://jemarnold.github.io/mnirs/reference/example_mnirs.md)
 
 - `nirs_channels`
@@ -149,7 +149,7 @@ nirs_channels = c(new_name1 = "original_name1",
   in the file. Blank/empty columns will be omitted and duplicated or
   invalid column names will be repaired.
 
-- `inform`
+- `verbose`
 
   This and other *`mnirs`* functions may return warnings and info
   messages which are useful for troubleshooting and data validation.
@@ -171,21 +171,23 @@ file_path <- example_mnirs("moxy_ramp")
 
 data_table <- read_mnirs(
     file_path,
-    nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(
+        smo2_right = "SmO2 Live",        ## identify and rename channels
+        smo2_left = "SmO2 Live(2)"
+    ),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
     event_channel = NULL,                ## left blank, not currently used in analysis
     sample_rate = NULL,                  ## sample_rate will be estimated from time column
     add_timestamp = FALSE,               ## omit the date-time timestamp column
     zero_time = TRUE,                    ## recalculate time values from zero
     keep_all = FALSE,                    ## return only the specified data channels
-    inform = TRUE                        ## show warnings & messages
+    verbose = TRUE                       ## show warnings & messages
 )
 #> ! Estimated `sample_rate` = 2 Hz.
-#> ℹ Overwrite this with `sample_rate` = <numeric>.
-#> Warning: ! `time_channel` has duplicated or irregular samples. Consider re-sampling with
-#>   `mnirs::resample_mnirs()`.
+#> ℹ Define `sample_rate` explicitly to override.
+#> Warning: ! Duplicate or irregular `time_channel` samples detected.
 #> ℹ Investigate at `time` = 211.99, 211.99, and 1184.
+#> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
 ## ignore the warning about repeated samples for now ☝
 ## Note that sample_rate was estimated correctly at 2 Hz
@@ -304,28 +306,30 @@ functions see
 - `nirs_channels`
 
   Specify which column names in `data` will be processed, i.e. the
-  response variables. If not specified, these channels will be taken
+  response variables. If not specified, these channels will be retrieved
   from *`mnirs`* metadata.
 
 - `time_channels`
 
   The time channel can be specified, i.e. the predictor variable, or
-  taken from *`mnirs`* metadata. If not specified or present in
+  retrieved from *`mnirs`* metadata. If not specified or present in
   metadata, a sample index will be used instead. This can alter the
   results in unintended ways, and we suggest `time_channel` should be
   specified explicitly.
 
-- `invalid_values`
+- `invalid_values`, `invalid_above`, or `invalid_below`
 
-  Optionally, invalid values can be specified for replacement, e.g. if a
-  NIRS device exports `0` or `100` values when signal recording is lost.
-  If left as `NULL`, no values will be replaced.
+  Invalid values can be specified for replacement, e.g. if a NIRS device
+  exports `0`, `100`, or some other fixed value when signal recording is
+  lost. If spikes or drops are present in the data, these can be
+  replaced by specifying values above or below which to consider
+  invalid. If left as `NULL`, no values will be replaced.
 
 - `outlier_cutoff`
 
-  Optionally, local outliers can be detected using a cutoff calculated
-  from the local median value. A default value of `3` is recommended. If
-  left as `NULL`, no outliers will be replaced.
+  Local outliers can be detected using a cutoff calculated from the
+  local median value. A default value of `3` is recommended. If left as
+  `NULL`, no outliers will be replaced.
 
 - `width` or `span`
 
@@ -341,12 +345,12 @@ functions see
   above can be replaced via interpolation or fill methods; either
   `"linear"` interpolation, fill with local `"median"`, or `"locf"`
   fill, which stands for *“last observation carried forward”*./ / `NA`s
-  can be preserved with `method = "NA"`. However, subsequent processing
-  & analysis steps may return errors when `NA`s are present. Therefore,
-  it is good practice to identify and deal with missing data early
-  during data processing.
+  can be preserved with `method = "none"`. However, subsequent
+  processing & analysis steps may return errors when `NA`s are present.
+  Therefore, it is good practice to identify and deal with missing data
+  early during data processing.
 
-- `inform`
+- `verbose`
 
   As above, a logical to toggle warnings and info messages.
 
@@ -356,7 +360,8 @@ data_cleaned <- replace_mnirs(
     data_table,
     nirs_channels = NULL,       ## default to all nirs_channels in metadata
     time_channel = NULL,        ## default to time_channel in metadata
-    invalid_values = c(0, 100), ## known invalid values in the data
+    invalid_values = 0,         ## known invalid values in the data
+    invalid_above = 90,
     outlier_cutoff = 3,         ## recommended default value
     width = 10,                 ## local window to detect local outliers and replace missing values
     method = "linear"           ## linear interpolation over `NA`s
@@ -394,25 +399,23 @@ our confidence with subsequent analysis or modelling methods.
   If the data contains *`mnirs`* metadata, these channels will be
   detected automatically. Or they can be specified explicitly.
 
-- `resample_rate` or `resample_time`
+- `resample_rate`
 
-  Resampling can be specified by one of either the `resample_rate` in
-  number of samples per second (Hz), or the `resample_time` in number of
-  seconds per sample (i.e. the inverse of each other).
-
-The default `resample_rate` will re-sample back to the existing
-`sample_rate` of the data. This can be useful to average over irregular
-sampling resulting in unequal time values. Linear interpolation will be
-used to re-sample `time_channel` to round values of the `sample_rate`.
+  Resampling can be specified by the number of samples per second (Hz).
+  The default `resample_rate` will re-sample back to the existing
+  `sample_rate` of the data. This can be useful to average over
+  irregular sampling resulting in unequal time values. Linear
+  interpolation will be used to re-sample `time_channel` to round values
+  of the `sample_rate`.
 
 ``` r
 data_resampled <- resample_mnirs(
     data_cleaned,
-    # time_channel = NULL,        ## taken from metadata
+    # time_channel = NULL,        ## retrieved from metadata
     # sample_rate = NULL,
     # resample_rate = sample_rate ## the default will re-sample to sample_rate
     method = "linear",            ## default linear interpolation across any new samples
-    inform = TRUE                 ## will confirm the output sample rate
+    verbose = TRUE                ## will confirm the output sample rate
 )
 #> ℹ Output is resampled at 2 Hz.
 
@@ -526,7 +529,7 @@ vignette `<currently under development>`.
   The filter type is specified as either
   `c("low", "high", "stop", "pass")`.
 
-- `n`
+- `order`
 
   The filter order number, specifying the number of passes the filter
   performs over the data.
@@ -575,12 +578,12 @@ respective parameters.
 ``` r
 data_filtered <- filter_mnirs(
     data_resampled,
-    # nirs_channel = NULL,  ## taken from metadata
+    # nirs_channel = NULL,  ## retrieved from metadata
     # time_channel = NULL,
     # sample_rate = NULLL,
     method = "butterworth", ## Butterworth digital filter is a common choice
     type = "low",           ## specify a low-pass filter
-    n = 2,                  ## filter order number
+    order = 2,              ## filter order number
     W = 0.02                ## filter fractional critical frequency
 )
 
@@ -770,55 +773,55 @@ slightly higher percent of it’s functional range, and deoxygenates
 faster toward it’s minimum. While *smo2_right* deoxygenates slightly
 slower during work, and reoxygenates slightly faster during recovery.
 
-### Combined shift and rescale
+### Pipe-friendly combined functions
 
-What if we wanted to shift each NIRS signal to start from a mean 120-sec
-baseline at zero, then rescale the dynamic range of both signals grouped
-together, such that the highest and lowest values across both signals
-together range from 0-100%?
+Most *`mnirs`* functions can be piped together. The entire
+pre-processing stage can easily be performed in a sequential pipe. To
+demonstrate this, we’ll read a different example file recorded with
+*Train.Red FYER* muscle oxygen sensor.
 
-This is also a good chance to demonstrate how functions can be piped
-together.
+This is also a good time to point out how to use the global
+`mnirs.verbose` argument to silence all warning & information messages
+for a familiar dataset. We recommend leaving `verbose = TRUE` by default
+whenever reading and exploring a new file.
 
 ``` r
-## un-group `nirs_channels` to shift each channel separately
-as.list(nirs_channels)
-#> [[1]]
-#> [1] "smo2_right"
-#> 
-#> [[2]]
-#> [1] "smo2_left"
+options(mnirs.verbose = FALSE)
 
-## then group `nirs_channels` to rescale together 
-list(nirs_channels)
-#> [[1]]
-#> [1] "smo2_right" "smo2_left"
-
-## pipe (|>) data frame from one function to the next
-data_rescaled <- data_filtered |> 
-    ## shift the mean of the first 120 sec of each signal to zero
+read_mnirs(
+    example_mnirs("train.red"),
+    nirs_channels = c(
+        smo2_left = "SmO2 unfiltered",
+        smo2_right = "SmO2 unfiltered"
+    ),
+    time_channel = c(time = "Timestamp (seconds passed)"),
+    zero_time = TRUE
+) |>
+    resample_mnirs(verbose = FALSE) |>
+    replace_mnirs(
+        invalid_above = 73,
+        outlier_cutoff = 3,
+        span = 7
+    ) |>
+    filter_mnirs(
+        method = "butterworth",
+        order = 2,
+        W = 0.01
+    ) |>
     shift_mnirs(
-        nirs_channels = as.list(nirs_channels), ## un-grouped
+        nirs_channels = list("smo2_left", "smo2_right"),
         to = 0,
-        position = "first",
-        span = 120
-    ) |> 
-    ## then rescale the min and max of the grouped data to 0-100%
+        span = 60,
+        position = "first"
+    ) |>
     rescale_mnirs(
-        nirs_channels = list(nirs_channels), ## grouped
+        nirs_channels = list(c("smo2_left", "smo2_right")),
         range = c(0, 100)
-    )
-
-plot(data_rescaled, label_time = TRUE) +
-    geom_hline(yintercept = c(0, 100), linetype = "dotted")
+    ) |>
+    plot(label_time = TRUE)
 ```
 
 ![](reading-mnirs-data_files/figure-html/unnamed-chunk-11-1.png)
-
-Our interpretation might now be that assuming the same starting baseline
-condition in both tissues, *smo2_right* deoxygenates less during
-exercise and recovers faster to a greater hyperaemic reperfusion,
-compared to *smo2_left*.
 
 ## ✅ Signal Preparation
 
@@ -827,5 +830,5 @@ for further processing and analysis.
 
 *`mnirs`* is being developed to include functionality for processing
 discrete intervals and events, e.g. reoxygenation kinetics, slope
-calculations for post-occlusion microvascular responsiveness or critical
-oxygenation breakpoints.
+calculations for post-occlusion microvascular responsiveness, and
+critical oxygenation breakpoints.

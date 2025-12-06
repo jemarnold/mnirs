@@ -16,7 +16,8 @@ create_mnirs_data(data, ...)
 
 - ...:
 
-  Additional arguments with metadata to add to the data frame.
+  Additional arguments with metadata to add to the data frame. Can be
+  either seperate named arguments or a list of named values.
 
   - nirs_device
 

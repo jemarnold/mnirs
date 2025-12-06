@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@
 <div class="section level2">
 <h2 id="online-app">Online App<a class="anchor" aria-label="anchor" href="#online-app"></a>
 </h2>
-<p>A very basic implementation of this package is hosted at <a href="https://jem-arnold.shinyapps.io/mnirs-app/" class="external-link uri">https://jem-arnold.shinyapps.io/mnirs-app/</a> and can be used for mNIRS data importing and cleaning.</p>
+<p>A very basic implementation of this package is hosted at <a href="https://jem-arnold.shinyapps.io/mnirs/" class="external-link uri">https://jem-arnold.shinyapps.io/mnirs/</a> and can currently be used for reading and pre-processing mNIRS data.</p>
 </div>
 <div class="section level2">
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
@@ -88,7 +88,7 @@
 <blockquote>
 <p>[!NOTE] <em>{mnirs}</em> is currently in experimental development and functionality may change! Stay updated on development and follow releases at <a href="https://github.com/jemarnold/mnirs" class="external-link">github.com/jemarnold/mnirs</a>.</p>
 </blockquote>
-<p><em>{mnirs}</em> is designed to process mNIRS data, but there is no reason why it can’t be used to read, clean, and filter other time series datasets, which require many of the same processing steps. Enjoy!</p>
+<p><em>{mnirs}</em> is designed to process mNIRS data, but it can be used to read, clean, and pre-process other time series datasets, which require many of the same processing steps. Enjoy!</p>
 <div class="section level3">
 <h3 id="read_mnirs-read-data-from-file">
 <code>read_mnirs()</code> Read data from file<a class="anchor" aria-label="anchor" href="#read_mnirs-read-data-from-file"></a>
@@ -115,21 +115,23 @@
 <span><span class="co">## where "original_name1" should match the file column name exactly</span></span>
 <span><span class="va">data_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">file_path</span>,</span>
-<span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>, <span class="co">## identify and rename channels</span></span>
-<span>                      smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span><span class="op">)</span>,</span>
+<span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>,        <span class="co">## identify and rename channels</span></span>
+<span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span></span>
+<span>    <span class="op">)</span>,</span>
 <span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>, <span class="co">## date-time format will be converted to numeric</span></span>
 <span>    event_channel <span class="op">=</span> <span class="cn">NULL</span>,                <span class="co">## left blank, not currently used in analysis</span></span>
 <span>    sample_rate <span class="op">=</span> <span class="cn">NULL</span>,                  <span class="co">## sample_rate will be estimated from time column</span></span>
 <span>    add_timestamp <span class="op">=</span> <span class="cn">FALSE</span>,               <span class="co">## omit the date-time timestamp column</span></span>
 <span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>,                    <span class="co">## recalculate time values from zero</span></span>
 <span>    keep_all <span class="op">=</span> <span class="cn">FALSE</span>,                    <span class="co">## return only the specified data channels</span></span>
-<span>    inform <span class="op">=</span> <span class="cn">TRUE</span>                        <span class="co">## show warnings &amp; messages</span></span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span>                       <span class="co">## show warnings &amp; messages</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ! Estimated `sample_rate` = 2 Hz.</span></span>
-<span><span class="co">#&gt; ℹ Overwrite this with `sample_rate` = &lt;numeric&gt;.</span></span>
-<span><span class="co">#&gt; Warning: ! `time_channel` has duplicated or irregular samples. Consider re-sampling with</span></span>
-<span><span class="co">#&gt;   `mnirs::resample_mnirs()`.</span></span>
+<span><span class="co">#&gt; ℹ Define `sample_rate` explicitly to override.</span></span>
+<span><span class="co">#&gt; Warning: ! Duplicate or irregular `time_channel` samples detected.</span></span>
 <span><span class="co">#&gt; ℹ Investigate at `time` = 211.99, 211.99, and 1184.</span></span>
+<span><span class="co">#&gt; ℹ Re-sample with `mnirs::resample_mnirs()`.</span></span>
 <span></span>
 <span><span class="co">## ignore the warning about repeated samples for now ☝</span></span>
 <span><span class="co">## Note that sample_rate was estimated correctly at 2 Hz</span></span>
@@ -158,7 +160,7 @@
 <h3 id="metadata-stored-in-mnirs-data-frames">Metadata stored in <code>mnirs</code> data frames<a class="anchor" aria-label="anchor" href="#metadata-stored-in-mnirs-data-frames"></a>
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## view metadata, omitting item two (a list of row numbers)</span></span>
+<code class="sourceCode R"><span><span class="co">## view metadata (hiding item two which is just a list of row numbers)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">data_table</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">2</span><span class="op">]</span></span>
 <span><span class="co">#&gt; $class</span></span>
 <span><span class="co">#&gt; [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"</span></span>
@@ -176,8 +178,7 @@
 <span><span class="co">#&gt; [1] 2</span></span>
 <span></span>
 <span><span class="co">## define nirs_channels externally for later use</span></span>
-<span><span class="va">nirs_channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data_table</span>, <span class="st">"nirs_channels"</span><span class="op">)</span></span>
-<span><span class="va">nirs_channels</span></span>
+<span><span class="op">(</span><span class="va">nirs_channels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data_table</span>, <span class="st">"nirs_channels"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "smo2_right" "smo2_left"</span></span>
 <span></span>
 <span><span class="co">## add nirs device to metadata</span></span>
@@ -196,7 +197,8 @@
 <span>    <span class="va">data_table</span>,</span>
 <span>    nirs_channels <span class="op">=</span> <span class="cn">NULL</span>,       <span class="co">## default to all nirs_channels in metadata</span></span>
 <span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## default to time_channel in metadata</span></span>
-<span>    invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="co">## known invalid values in the data</span></span>
+<span>    invalid_values <span class="op">=</span> <span class="fl">0</span>,         <span class="co">## known invalid values in the data</span></span>
+<span>    invalid_above <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,         <span class="co">## recommended default value</span></span>
 <span>    width <span class="op">=</span> <span class="fl">10</span>,                 <span class="co">## local window to detect local outliers and replace missing values</span></span>
 <span>    method <span class="op">=</span> <span class="st">"linear"</span>           <span class="co">## linear interpolation over `NA`s</span></span>
@@ -212,11 +214,11 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_resampled</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_cleaned</span>,</span>
-<span>    <span class="co"># time_channel = NULL,        ## taken from metadata</span></span>
+<span>    <span class="co"># time_channel = NULL,        ## retrieved from metadata</span></span>
 <span>    <span class="co"># sample_rate = NULL,</span></span>
 <span>    <span class="co"># resample_rate = sample_rate ## the default will re-sample to sample_rate</span></span>
 <span>    method <span class="op">=</span> <span class="st">"linear"</span>,            <span class="co">## default linear interpolation across any new samples</span></span>
-<span>    inform <span class="op">=</span> <span class="cn">TRUE</span>                 <span class="co">## will confirm the output sample rate</span></span>
+<span>    verbose <span class="op">=</span> <span class="cn">TRUE</span>                <span class="co">## will confirm the output sample rate</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ℹ Output is resampled at 2 Hz.</span></span>
 <span></span>
@@ -244,12 +246,12 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_resampled</span>,</span>
-<span>    <span class="co"># nirs_channel = NULL,  ## taken from metadata</span></span>
+<span>    <span class="co"># nirs_channel = NULL,  ## retrieved from metadata</span></span>
 <span>    <span class="co"># time_channel = NULL,</span></span>
 <span>    <span class="co"># sample_rate = NULLL,</span></span>
 <span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span>
 <span>    type <span class="op">=</span> <span class="st">"low"</span>,           <span class="co">## specify a low-pass filter</span></span>
-<span>    n <span class="op">=</span> <span class="fl">2</span>,                  <span class="co">## filter order number</span></span>
+<span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span>
 <span>    W <span class="op">=</span> <span class="fl">0.02</span>                <span class="co">## filter fractional critical frequency</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -305,46 +307,49 @@
 <p><img src="reference/figures/README-unnamed-chunk-9-1.png" width="100%"></p>
 </div>
 <div class="section level3">
-<h3 id="pipe-friendly-functions">Pipe-friendly functions<a class="anchor" aria-label="anchor" href="#pipe-friendly-functions"></a>
+<h3 id="pipe-friendly-combined-functions">Pipe-friendly combined functions<a class="anchor" aria-label="anchor" href="#pipe-friendly-combined-functions"></a>
 </h3>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## un-group `nirs_channels` to shift each channel separately</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">nirs_channels</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "smo2_right"</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; [[2]]</span></span>
-<span><span class="co">#&gt; [1] "smo2_left"</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## then group `nirs_channels` to rescale together </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">nirs_channels</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
-<span><span class="co">#&gt; [1] "smo2_right" "smo2_left"</span></span>
-<span></span>
-<span><span class="co">## pipe (base R `|&gt;` or {magrittr} `%&gt;%`) from one function to the next</span></span>
-<span><span class="va">data_rescaled</span> <span class="op">&lt;-</span> <span class="va">data_filtered</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="co">## shift the mean of the first 120 sec of each signal to zero</span></span>
+<span><span class="fu"><a href="reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"train.red"</span><span class="op">)</span>,</span>
+<span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 unfiltered"</span>,</span>
+<span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 unfiltered"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"Timestamp (seconds passed)"</span><span class="op">)</span>,</span>
+<span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span>verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
+<span>        invalid_above <span class="op">=</span> <span class="fl">73</span>,</span>
+<span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>        span <span class="op">=</span> <span class="fl">7</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="reference/filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span></span>
+<span>        method <span class="op">=</span> <span class="st">"butterworth"</span>,</span>
+<span>        order <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>        W <span class="op">=</span> <span class="fl">0.01</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/shift_mnirs.html">shift_mnirs</a></span><span class="op">(</span></span>
-<span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">as.list</a></span><span class="op">(</span><span class="va">nirs_channels</span><span class="op">)</span>, <span class="co">## un-grouped</span></span>
+<span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"smo2_left"</span>, <span class="st">"smo2_right"</span><span class="op">)</span>,</span>
 <span>        to <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>        position <span class="op">=</span> <span class="st">"first"</span>,</span>
-<span>        span <span class="op">=</span> <span class="fl">120</span></span>
-<span>    <span class="op">)</span> <span class="op">|&gt;</span> </span>
-<span>    <span class="co">## then rescale the min and max of the grouped data to 0-100%</span></span>
+<span>        span <span class="op">=</span> <span class="fl">60</span>,</span>
+<span>        position <span class="op">=</span> <span class="st">"first"</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/rescale_mnirs.html">rescale_mnirs</a></span><span class="op">(</span></span>
-<span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">nirs_channels</span><span class="op">)</span>, <span class="co">## grouped</span></span>
+<span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"smo2_left"</span>, <span class="st">"smo2_right"</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>        range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_rescaled</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-10-1.png" width="100%"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="mnirs-device-compatibility">mNIRS Device Compatibility<a class="anchor" aria-label="anchor" href="#mnirs-device-compatibility"></a>
 </h2>
-<p>This package is designed to recognise mNIRS data exported as <em>.csv</em> or <em>.xls(x)</em> files. It should be flexible for use with many different mNIRS devices, and compatibility will improve with continued development.</p>
+<p>This package is designed to recognise mNIRS data exported as <em>.csv</em> or <em>.xls(x)</em> files. It should be flexible for use with many different NIRS devices, and compatibility will improve with continued development.</p>
 <p>Currently, it has been tested successfully with mNIRS data exported from the following devices and apps:</p>
 <ul>
 <li>

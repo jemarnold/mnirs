@@ -20,13 +20,13 @@ filter_mnirs(
   method = c("smooth_spline", "butterworth", "moving_average"),
   spar = NULL,
   type = c("low", "high", "stop", "pass"),
-  n = 1,
+  order = 1,
   W = NULL,
   fc = NULL,
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  inform = TRUE,
+  verbose = TRUE,
   ...
 )
 ```
@@ -35,20 +35,20 @@ filter_mnirs(
 
 - data:
 
-  A data frame of class *"mnirs"* containing at least one column with
-  numeric time or sample values, and one column with numeric mNIRS
-  values, along with metadata.
+  A data frame of class *"mnirs"* containing time series data and
+  metadata.
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names. Must match column names in
-  `data` exactly. Will be taken from metadata if not defined explicitly.
+  A character vector of mNIRS channel names to operate on. Must match
+  column names in `data` exactly. Retrieved from metadata if not defined
+  explicitly.
 
 - time_channel:
 
   A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Will be taken from metadata if
-  not defined explicitly.
+  match column names in `data` exactly. Retrieved from metadata if not
+  defined explicitly.
 
 - sample_rate:
 
@@ -66,8 +66,8 @@ filter_mnirs(
 
   `"butterworth"`
 
-  :   Uses a centred Butterworth digital filter. `type` should be
-      defined (see *Details*).
+  :   Uses a centred Butterworth digital filter. `type` must be defined
+      (see *Details*).
 
   `"moving_average"`
 
@@ -99,10 +99,10 @@ filter_mnirs(
 
   :   For a *pass-band* filter.
 
-- n:
+- order:
 
   An integer defining the filter order for `method = "butterworth"`
-  (*default* `n = 1`).
+  (*default* `order = 1`).
 
 - W:
 
@@ -129,14 +129,14 @@ filter_mnirs(
 
 - na.rm:
 
-  A logical indicating whether missing values should be ignored (`TRUE`)
-  before the filter is applied. Otherwise `FALSE` (the *default*) will
-  throw an error (see *Details*).
+  A logical indicating whether missing values should be preserved and
+  passed through the filter (`TRUE`). Otherwise `FALSE` (the *default*)
+  will throw an error if there are any `NA`s (see *Details*).
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 - ...:
 
@@ -175,12 +175,12 @@ of class *"mnirs"* with metadata available with
   from the output signal. *Pass-band* defines a critical range of
   frequencies which are passed through as the output signal.
 
-  The filter order (number of passes) is defined by `n`, typically in
-  the range `n = [1, 10]`. Higher filter order tends to capture more
-  rapid changes in amplitude, but also causes more distortion around
-  those change points in the signal. General advice is to use the lowest
-  filter order which sufficiently captures the desired rapid responses
-  in the data.
+  The filter order (number of passes) is defined by `order`, typically
+  in the range `order = [1, 10]`. Higher filter order tends to capture
+  more rapid changes in amplitude, but also causes more distortion
+  around those change points in the signal. General advice is to use the
+  lowest filter order which sufficiently captures the desired rapid
+  responses in the data.
 
   The critical (cutoff) frequency is defined by `W`, a numeric value for
   *low-pass* and *high-pass* filters, or a two-element vector
@@ -194,7 +194,7 @@ of class *"mnirs"* with metadata available with
   in Hz, and `sample_rate` is the sample rate of the recorded data in
   Hz. `W = fc / (sample_rate / 2)`.
 
-  Only One of either `W` or `fc` should be defined. If both are defined,
+  Only one of either `W` or `fc` should be defined. If both are defined,
   `W` will be preferred over `fc`.
 
 - `method = "moving_average"`:
@@ -220,25 +220,25 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
         width = 10,
-        inform = FALSE
+        verbose = FALSE
     )
 
 data_filtered <- filter_mnirs(
     data,
-    # nirs_channel = NULL,  ## taken from metadata
+    # nirs_channel = NULL,  ## retrieved from metadata
     # time_channel = NULL,
     # sample_rate = NULL,
     method = "butterworth", ## Butterworth digital filter is a common choice
     type = "low",           ## specify a low-pass filter
-    n = 2,                  ## filter order number
+    order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency
-    inform = FALSE
+    verbose = FALSE
 )
 
 ## add the non-filtered data back to the plot to compare

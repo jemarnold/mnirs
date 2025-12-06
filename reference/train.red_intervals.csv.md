@@ -8,8 +8,8 @@ sites.
 
 .csv file with header metadata and with 18 columns and 12001 rows.
 
-- `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
+- `nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
 
-- `time_channel = c("hh:mm:ss)`
+- `time_channel = c("Timestamp (seconds passed)")`
 
-- `event_channel = c("Lap)`
+- `event_channel = c("Lap/Event")`

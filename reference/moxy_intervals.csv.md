@@ -10,6 +10,4 @@ muscle site.
 
 - `nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")`
 
-- `time_channel = c("hh:mm:ss)`
-
-- `event_channel = c("Lap)`
+- `time_channel = c("hh:mm:ss")`

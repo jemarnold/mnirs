@@ -23,7 +23,7 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,8 +79,8 @@ via interpolation methods.</p>
 <span>  outlier_cutoff <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"median"</span>, <span class="st">"locf"</span>, <span class="st">"NA"</span><span class="op">)</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"median"</span>, <span class="st">"locf"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">replace_invalid</span><span class="op">(</span></span>
@@ -91,18 +91,18 @@ via interpolation methods.</p>
 <span>  invalid_below <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"NA"</span><span class="op">)</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">replace_outliers</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,</span>
-<span>  outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  outlier_cutoff <span class="op">=</span> <span class="fl">3L</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"NA"</span><span class="op">)</span>,</span>
-<span>  inform <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">replace_missing</span><span class="op">(</span></span>
@@ -120,21 +120,20 @@ via interpolation methods.</p>
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame of class <em>"mnirs"</em> containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.</p></dd>
+<dd><p>A data frame of class <em>"mnirs"</em> containing time series data
+and metadata.</p></dd>
 
 
 <dt id="arg-nirs-channels">nirs_channels<a class="anchor" aria-label="anchor" href="#arg-nirs-channels"></a></dt>
-<dd><p>A character vector of mNIRS channel names. Must match
-column names in <code>data</code> exactly. Will be taken from metadata if not
-defined explicitly.</p></dd>
+<dd><p>A character vector of mNIRS channel names to operate
+on. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
 <dd><p>A character string indicating the time or sample channel
-name. Must match column names in <code>data</code> exactly. Will be taken from
-metadata if not defined explicitly.</p></dd>
+name. Must match column names in <code>data</code> exactly. Retrieved from metadata
+if not defined explicitly.</p></dd>
 
 
 <dt id="arg-invalid-values">invalid_values<a class="anchor" aria-label="anchor" href="#arg-invalid-values"></a></dt>
@@ -185,15 +184,15 @@ within a centred window defined by either <code>width</code> or <code>span</code
 trailing <code>NA</code>s or to the right for leading <code>NA</code>s, using
 <code><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">stats::approx()</a></code>.</p></dd>
 
-<dt><code>"NA"</code></dt>
+<dt><code>"none"</code></dt>
 <dd><p>Returns <code>NA</code>s without replacement.</p></dd>
 
 
 </dl></dd>
 
 
-<dt id="arg-inform">inform<a class="anchor" aria-label="anchor" href="#arg-inform"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or <code>FALSE</code> to silence
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
+<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
 
@@ -232,7 +231,7 @@ the number of samples centred on <code>idx</code> between
 in units of <code>time_channel</code> centred on <code>idx</code> between
 <code>[t - span/2, t + span/2]</code>. A partial moving average will be calculated
 at the edges of the data.</p>
-<p><code>replace_invalid()</code> can be used to overwrite known invalid values in
+<p><code>replace_invalid()</code> can be used to remove known invalid values in
 exported data.</p><ul><li><p>Specific <code>invalid_values</code> can be replaced, such as <code>c(0, 100, 102.3)</code>.
 Data ranges can be replaced with cutoff values specified by <code>invalid_above</code>
 and <code>invalid_below</code>, where any values higher or lower than the specified
@@ -246,7 +245,7 @@ smallest absolute time series difference in <code>x</code> will be excluded, to
 avoid detecting negligible differences as outliers where local data have
 minimal or zero variation.</p></li>
 <li><p>Values of <code>x</code> outside local bounds defined by <code>outlier_cutoff</code> are
-identified as local outliers and either removed if <code>method = "NA"</code>, or
+identified as local outliers and either removed if <code>method = "none"</code>, or
 replaced with the local median value (<code>method = "median"</code>, the <em>default</em>).</p></li>
 <li><p>This function will NOT replace <code>NA</code> values already existing in the <code>x</code>.
 They will be passed along in the returned vector. See <code>replace_missing()</code>.</p></li>
@@ -282,7 +281,7 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 <span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5 6</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"NA"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">(</span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1 NA  3  4 NA  6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">replace_missing</span><span class="op">(</span><span class="va">x_na</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></span>
@@ -293,7 +292,7 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 <span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2 <span class="op">=</span> <span class="st">"SmO2 Live"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    inform <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## clean data</span></span></span>

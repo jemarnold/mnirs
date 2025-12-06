@@ -12,12 +12,13 @@ validate_numeric(
   range = NULL,
   inclusive = c("left", "right"),
   integer = FALSE,
-  msg = ""
+  msg1 = "",
+  msg2 = "."
 )
 
 validate_mnirs_data(data, ncol = 2L)
 
-validate_nirs_channels(data, nirs_channels, inform = TRUE)
+validate_nirs_channels(data, nirs_channels, verbose = TRUE)
 
 validate_time_channel(data, time_channel)
 
@@ -25,7 +26,11 @@ validate_event_channel(data, event_channel, require = TRUE)
 
 estimate_sample_rate(x)
 
-validate_sample_rate(data, time_channel, sample_rate, inform = TRUE)
+validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
+
+validate_width_span(width = NULL, span = NULL, verbose = TRUE)
+
+validate_x_t(x, t = seq_along(x))
 ```
 
 ## Arguments
@@ -55,48 +60,49 @@ validate_sample_rate(data, time_channel, sample_rate, inform = TRUE)
   [`rlang::is_integerish()`](https://rlang.r-lib.org/reference/is_integerish.html),
   rather than a numeric (`FALSE` by *default*).
 
-- msg:
+- msg1, msg2:
 
   A character string detailing the `cli_abort` error message returned
   for invalid numeric values passed to `arg`.
 
 - data:
 
-  A data frame of class *"mnirs"* containing at least one column with
-  numeric time or sample values, and one column with numeric mNIRS
-  values, along with metadata.
+  A data frame of class *"mnirs"* containing time series data and
+  metadata.
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names. Must match column names in
-  `data` exactly. Will be taken from metadata if not defined explicitly.
+  A character vector of mNIRS channel names to operate on. Must match
+  column names in `data` exactly. Retrieved from metadata if not defined
+  explicitly.
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 - time_channel:
 
   A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Will be taken from metadata if
-  not defined explicitly.
+  match column names in `data` exactly. Retrieved from metadata if not
+  defined explicitly.
 
 - event_channel:
 
   A character string indicating the event or lap channel name. Must
-  match column names in `data` exactly. Will be taken from metadata if
-  not defined explicitly.
+  match column names in `data` exactly. Retrieved from metadata if not
+  defined explicitly.
 
 - require:
 
-  A logical to specify whether `event_channel` is required (the
+  A logical specifying whether `event_channel` is required (the
   *default*) or optional (`event_channel` returned as `NULL`).
 
 - sample_rate:
 
-  A numeric value for the sample rate in Hz. Will be taken from metadata
-  or estimated from `time_channel` if not defined explicitly.
+  A numeric value for the exported data sample rate in Hz. Retrieved
+  from metadata or estimated from `time_channel` if not defined
+  explicitly.
 
 ## Value
 

@@ -12,6 +12,6 @@ placed on bilateral vastus lateralis muscle sites. With data errors
 
 - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
 
-- `time_channel = c("hh:mm:ss)`
+- `time_channel = c("hh:mm:ss")`
 
-- `event_channel = c("Lap)`
+- `event_channel = c("Lap")`

@@ -1,5 +1,28 @@
 # Changelog
 
+## mnirs 0.1.7
+
+- Minor edits to functions and documentation to improve clarity.
+- Changes to user-facing functions:
+  - [`filter_mnirs()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
+    and
+    [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md)
+    arg from `n` to `order`.
+  - [`palette_mnirs()`](https://jemarnold.github.io/mnirs/reference/palette_mnirs.md)
+    arg from `n` as either numeric or character, to numeric, with
+    `names` as the character arg.
+  - [`replace_mnirs()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    `replace_outleirs()`,
+    [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    and
+    [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
+    arg from `method = "NA"` to `method = "none"`.
+- Revert argument `inform` to `verbose`.
+- Standardise `cli_inform()`, `cli_warn()`, and `cli_abort()` messages.
+- Remove redundant
+  [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
+  argument `resample_time`.
+
 ## mnirs 0.1.6
 
 - Create internal numeric vector helper functions
@@ -35,8 +58,8 @@
 
 ## mnirs 0.1.4
 
-- Breaking change: Update argument `inform` replaces `verbose` to
-  display/hide messages & warnings.
+- Update argument `inform` replaces `verbose` to display/hide messages &
+  warnings.
 - Implement global option to set `inform = FALSE` with
   `options(mnirs.inform = FALSE)`.
   - Global option `mnirs.inform = FALSE` will override functions’

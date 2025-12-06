@@ -16,7 +16,7 @@ read_mnirs(
   add_timestamp = FALSE,
   zero_time = FALSE,
   keep_all = FALSE,
-  inform = TRUE
+  verbose = TRUE
 )
 ```
 
@@ -57,24 +57,25 @@ read_mnirs(
 - add_timestamp:
 
   `<under development>` A logical to add a *"timestamp"* column with
-  date-time for each sample (class *POSIXct*), if present in the data
-  file. If no absolute timestamp is detected, will instead return
-  relative time as *hh:mm:ss*.
+  date-time values of class *POSIXct*, if present in the data file.
+  Currently only functions if the existing `time_channel` data are in
+  timestamp format (see *Details*).
 
 - zero_time:
 
-  A logical to re-calculate `time_channel` to start from zero or `FALSE`
-  keep the original values (the *default*).
+  A logical to re-calculate `time_channel` from zero or preserve the
+  original `time_channel` values (`FALSE`, the *default*).
 
 - keep_all:
 
-  A logical to include all columns detected from the file or `FALSE` to
-  only include the explicitly specified data columns (the *default*).
+  A logical to include all columns detected from the file or only
+  include the explicitly specified data columns (`FALSE`, the
+  *default*).
 
-- inform:
+- verbose:
 
-  A logical to display (the *default*) or `FALSE` to silence warnings
-  and information messages used for troubleshooting.
+  A logical to display (the *default*) or silence (`FALSE`) warnings and
+  information messages used for troubleshooting.
 
 ## Value
 
@@ -110,15 +111,21 @@ some NIRS devices (for example, *Artinis* devices recorded with
 `"time"` column will be added converting the sample indices to time
 values in seconds.
 
-When the `time_channel` is provided in date-time format, it will be
-converted to numeric values and re-calculated from zero. A timestamp
-column can be included with absolute date-time (e.g. *"yyyy-mm-dd
-hh:mm:ss"*) if unix timestamps are present in the data file. Otherwise,
-relative time (*"hh:mm:ss"*) will be returned.
+When the `time_channel` is provided in date-time (*POSIXct*) format, it
+will be converted to numeric values and re-calculated from zero, even
+when `zero_time = FALSE`.
+
+With `add_timestamp = TRUE`, an additional *"timestamp "* column will be
+added with the original date-time values. This functionality is
+currently `<under development>` to recognise start-time values in the
+file and return absolute unix timestamps if available.
+
+Setting `zero_time = TRUE` will re-calculate numeric `time_channel`
+values to start from zero.
 
 If `time_channel` contains irregular sampling (i.e., non-sequential,
 repeated, or unordered values) a warning will be displayed (if
-`inform = TRUE`) suggesting that the user confirm the file data
+`verbose = TRUE`) suggesting that the user confirm the file data
 manually.
 
 `sample_rate` is required for certain `{mnirs}` functions to work
@@ -131,10 +138,10 @@ the `time_channel` represents sample indices rather than time values,
 
 Columns and rows which contain entirely missing data (`NA`) are omitted.
 
-`inform = TRUE` will display warnings and information messages which can
-be useful for troubleshooting. Errors causing abort messages will always
-be displayed. Messages can be silenced globally with
-`options(mnirs.inform = FALSE)`.
+`verbose = TRUE` will display warnings and information messages which
+can be useful for troubleshooting. Errors causing abort messages will
+always be displayed. Messages can be silenced globally with
+`options(mnirs.verbose = FALSE)`.
 
 ## Examples
 
@@ -147,7 +154,7 @@ data_table <- read_mnirs(
     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    inform = FALSE                       ## hide warnings & messages
+    verbose = FALSE                       ## hide warnings & messages
 )
 
 data_table
