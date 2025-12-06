@@ -41,18 +41,18 @@ in Hz. If not defined explicitly, will be estimated from the data (see
 \emph{Details}).}
 
 \item{add_timestamp}{\verb{<under development>} A logical to add a \emph{"timestamp"}
-column with date-time values (class \emph{POSIXct}), if present in the
+column with date-time values of class \emph{POSIXct}, if present in the
 data file. Currently only functions if the existing \code{time_channel} data
 are in timestamp format (see \emph{Details}).}
 
-\item{zero_time}{A logical to re-calculate \code{time_channel} to start
-from zero or \code{FALSE} keep the original values (the \emph{default}).}
+\item{zero_time}{A logical to re-calculate \code{time_channel} from zero or
+preserve the original \code{time_channel} values (\code{FALSE}, the \emph{default}).}
 
 \item{keep_all}{A logical to include all columns detected from the file
-or \code{FALSE} to only include the explicitly specified data columns
-(the \emph{default}).}
+or only include the explicitly specified data columns (\code{FALSE}, the
+\emph{default}).}
 
-\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 }
 \value{

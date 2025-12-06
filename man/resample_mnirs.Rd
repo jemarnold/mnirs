@@ -14,16 +14,16 @@ resample_mnirs(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data
+and metadata.}
 
 \item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Will be taken from
-metadata if not defined explicitly.}
+name. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
-\item{sample_rate}{A numeric value for the sample rate in Hz. Will be taken
-from metadata or estimated from \code{time_channel} if not defined explicitly.}
+\item{sample_rate}{A numeric value for the exported data sample rate in Hz.
+Retrieved from metadata or estimated from \code{time_channel} if not defined
+explicitly.}
 
 \item{resample_rate}{An \emph{optional} numeric value indicating the desired
 output sample rate (in Hz) to re-sample the data frame. The \emph{default}
@@ -45,7 +45,7 @@ for trailing samples or to the right for leading samples, using
 the original data frame.}
 }}
 
-\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 }
 \value{

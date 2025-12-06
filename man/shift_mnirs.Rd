@@ -17,27 +17,16 @@ shift_mnirs(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data
+and metadata.}
 
-\item{nirs_channels}{A \code{list()} of character vectors indicating the column
-names for data channels to be shifted (see \emph{Details}).
-\describe{
-\item{\code{list("A", "B", "C")}}{Will shift each channel independently,
-losing the relative scaling between channels.}
-\item{\code{list(c("A", "B", "C"))}}{Will shift all channels together,
-preserving the relative scaling between channels.}
-\item{\code{list(c("A", "B"), c("C", "D"))}}{Will shift channels \code{A} and \code{B}
-in one group, and channels \code{C} and \code{D} in another group, preserving
-relative scaling within, but not between groups.}
-}
-Must match column names in data exactly. Will be taken from metadata if
-not defined explicitly.}
+\item{nirs_channels}{A character vector of mNIRS channel names to operate
+on. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
 \item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Will be taken from
-metadata if not defined explicitly.}
+name. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
 \item{to}{A numeric value in units of \code{nirs_channels} to which the data
 channels will be shifted, e.g. shift the minimum value to zero.}
@@ -63,7 +52,7 @@ specified values.}
 values.}
 }}
 
-\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 }
 \value{
@@ -78,13 +67,16 @@ positive values, or shift the mean of the first time span in a recording
 to zero.
 }
 \details{
-\code{nirs_channels = list()} can be used to group data channels to preserve
-absolute or relative scaling.
+\code{nirs_channels = list()} can be used to group data channels (column names)
+to preserve absolute or relative scaling.
 \itemize{
-\item Channels grouped together in a list item will be shifted to a common
-value, and the relative scaling within that group will be preserved.
-\item Channels grouped in separate list items will be shifted independently,
-and relative scaling between groups will be lost.
+\item Channels grouped together in a vector (e.g. \code{list(c("A", "B"))}) will be
+shifted to a common value, and the relative scaling within that group
+will be preserved.
+\item Channels in separate list vectors (e.g. \code{list("A", "B")}) will be
+shifted independently, and relative scaling between groups will be lost.
+\item A single vector of channel names (e.g. \code{c("A", "B")}) will group
+channels together.
 \item Channels (columns) in \code{data} not explicitly defined in \code{nirs_channels}
 will be passed through untouched to the output data frame.
 }

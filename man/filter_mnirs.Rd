@@ -26,17 +26,16 @@ filter_mnirs(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data
+and metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names. Must match
-column names in \code{data} exactly. Will be taken from metadata if not
-defined explicitly.}
+\item{nirs_channels}{A character vector of mNIRS channel names to operate
+on. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
 \item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Will be taken from
-metadata if not defined explicitly.}
+name. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
 \item{sample_rate}{A numeric value for the sample rate in Hz for
 \code{method = "butterworth"}. Will be taken from metadata or estimated
@@ -86,7 +85,7 @@ In units of \code{time_channel} or \code{t}, between \verb{[t - span/2, t + span
 and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
 will throw an error if there are any \code{NA}s (see \emph{Details}).}
 
-\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 
 \item{...}{Additional arguments.}

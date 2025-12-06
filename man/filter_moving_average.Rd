@@ -25,7 +25,7 @@ around \code{idx} in which to perform the operation., between
 in which to perform the operation. In units of \code{time_channel} or \code{t},
 between \verb{[t - span/2, t + span/2]}.}
 
-\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 }
 \value{

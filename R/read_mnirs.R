@@ -23,15 +23,15 @@
 #'   in Hz. If not defined explicitly, will be estimated from the data (see
 #'   *Details*).
 #' @param add_timestamp `<under development>` A logical to add a *"timestamp"*
-#'   column with date-time values (class *POSIXct*), if present in the
+#'   column with date-time values of class *POSIXct*, if present in the
 #'   data file. Currently only functions if the existing `time_channel` data
 #'   are in timestamp format (see *Details*).
-#' @param zero_time A logical to re-calculate `time_channel` to start
-#'   from zero or `FALSE` keep the original values (the *default*).
+#' @param zero_time A logical to re-calculate `time_channel` from zero or 
+#'   preserve the original `time_channel` values (`FALSE`, the *default*).
 #' @param keep_all A logical to include all columns detected from the file
-#'   or `FALSE` to only include the explicitly specified data columns
-#'   (the *default*).
-#' @param verbose A logical to display (the *default*) or `FALSE` to silence
+#'   or only include the explicitly specified data columns (`FALSE`, the 
+#'   *default*).
+#' @param verbose A logical to display (the *default*) or silence (`FALSE`)
 #'   warnings and information messages used for troubleshooting.
 #'
 #' @details

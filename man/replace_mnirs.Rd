@@ -53,17 +53,16 @@ replace_missing(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing at least one
-column with numeric time or sample values, and one column with numeric
-mNIRS values, along with metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data
+and metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names. Must match
-column names in \code{data} exactly. Will be taken from metadata if not
-defined explicitly.}
+\item{nirs_channels}{A character vector of mNIRS channel names to operate
+on. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
 \item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Will be taken from
-metadata if not defined explicitly.}
+name. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
 
 \item{invalid_values}{A numeric vector of invalid values to be replaced,
 e.g. \code{invalid_values = c(0, 100, 102.3)}. The \emph{default} \code{NULL} will not
@@ -101,7 +100,7 @@ trailing \code{NA}s or to the right for leading \code{NA}s, using
 \item{\code{"none"}}{Returns \code{NA}s without replacement.}
 }}
 
-\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 
 \item{x}{A numeric vector.}

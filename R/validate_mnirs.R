@@ -3,23 +3,23 @@
 #' Passes through manually defined parameters, or defines them from metadata
 #' if present, and validates relevant data quality checks.
 #'
-#' @param data A data frame of class *"mnirs"* containing at least one
-#'   column with numeric time or sample values, and one column with numeric
-#'   mNIRS values, along with metadata.
-#' @param nirs_channels A character vector of mNIRS channel names. Must match
-#'   column names in `data` exactly. Will be taken from metadata if not
-#'   defined explicitly.
+#' @param data A data frame of class *"mnirs"* containing time series data 
+#'   and metadata.
+#' @param nirs_channels A character vector of mNIRS channel names to operate 
+#'   on. Must match column names in `data` exactly. Retrieved from metadata 
+#'   if not defined explicitly.
 #' @param time_channel A character string indicating the time or sample channel
-#'   name. Must match column names in `data` exactly. Will be taken from
-#'   metadata if not defined explicitly.
+#'   name. Must match column names in `data` exactly. Retrieved from metadata 
+#'   if not defined explicitly.
 #' @param event_channel A character string indicating the event or lap channel
-#'   name. Must match column names in `data` exactly. Will be taken from
-#'   metadata if not defined explicitly.
-#' @param require A logical to specify whether `event_channel` is required
+#'   name. Must match column names in `data` exactly. Retrieved from metadata 
+#'   if not defined explicitly.
+#' @param require A logical specifying whether `event_channel` is required
 #'   (the *default*) or optional (`event_channel` returned as `NULL`).
 #' @param x A numeric vector.
-#' @param sample_rate A numeric value for the sample rate in Hz. Will be taken
-#'   from metadata or estimated from `time_channel` if not defined explicitly.
+#' @param sample_rate A numeric value for the exported data sample rate in Hz.
+#'   Retrieved from metadata or estimated from `time_channel` if not defined
+#'   explicitly.
 #' @param elements A numeric value for the number of numeric elements in `arg`.
 #' @param range A two-element numeric vector for the range of valid numeric
 #'   values in `arg`.

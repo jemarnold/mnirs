@@ -6,19 +6,6 @@
 #' positive values, or shift the mean of the first time span in a recording
 #' to zero.
 #'
-#' @param nirs_channels A `list()` of character vectors indicating the column
-#'   names for data channels to be shifted (see *Details*).
-#'   \describe{
-#'      \item{`list("A", "B", "C")`}{Will shift each channel independently,
-#'      losing the relative scaling between channels.}
-#'      \item{`list(c("A", "B", "C"))`}{Will shift all channels together,
-#'      preserving the relative scaling between channels.}
-#'      \item{`list(c("A", "B"), c("C", "D"))`}{Will shift channels `A` and `B`
-#'      in one group, and channels `C` and `D` in another group, preserving
-#'      relative scaling within, but not between groups.}
-#'   }
-#'   Must match column names in data exactly. Will be taken from metadata if
-#'   not defined explicitly.
 #' @param to A numeric value in units of `nirs_channels` to which the data
 #'   channels will be shifted, e.g. shift the minimum value to zero.
 #' @param by A numeric value in units of `nirs_channels` by which the data
@@ -34,16 +21,21 @@
 #'   }
 #' @inheritParams validate_mnirs
 #' @inheritParams replace_mnirs
+#' @inheritParams rescale_mnirs
 #'
 #' @details
-#' `nirs_channels = list()` can be used to group data channels to preserve
-#'   absolute or relative scaling.
+#' `nirs_channels = list()` can be used to group data channels (column names) 
+#'   to preserve absolute or relative scaling.
 #'
-#' - Channels grouped together in a list item will be shifted to a common
-#'   value, and the relative scaling within that group will be preserved.
+#' - Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will be 
+#'   shifted to a common value, and the relative scaling within that group 
+#'   will be preserved.
 #'
-#' - Channels grouped in separate list items will be shifted independently,
-#'   and relative scaling between groups will be lost.
+#' - Channels in separate list vectors (e.g. `list("A", "B")`) will be 
+#'   shifted independently, and relative scaling between groups will be lost.
+#' 
+#' - A single vector of channel names (e.g. `c("A", "B")`) will group
+#'   channels together.
 #'
 #' - Channels (columns) in `data` not explicitly defined in `nirs_channels`
 #'   will be passed through untouched to the output data frame.
