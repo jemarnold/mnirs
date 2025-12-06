@@ -8,8 +8,6 @@
 #'   `resample_rate = sample_rate` will interpolate over missing and repeated
 #'   samples within the bounds of the existing data rounded to the nearest
 #'   value in Hz.
-#' @param resample_time An *optional* numeric value indicating the desired
-#'   sample time (in seconds) to re-sample the data frame.
 #' @param method A character string indicating how to handle resampling
 #'   (see *Details* for more on each method):
 #'   \describe{
@@ -81,7 +79,6 @@ resample_mnirs <- function(
     time_channel = NULL,
     sample_rate = NULL,
     resample_rate = sample_rate, ## placeholder indicating default condition
-    resample_time = NULL,
     method = c("linear", "locf", "none"),
     verbose = TRUE
 ) {
@@ -98,29 +95,12 @@ resample_mnirs <- function(
     validate_numeric(
         resample_rate, 1, c(0, Inf), FALSE, msg = "one-element positive"
     )
-    validate_numeric(
-        resample_time, 1, c(0, Inf), FALSE, msg = "one-element positive"
-    )
     ## assign default resample_rate as sample_rate
-    if (is.null(c(resample_rate, resample_time))) {
+    if (is.null(resample_rate)) {
         resample_rate <- sample_rate
     }
+    resample_time <- 1 / resample_rate
     method <- match.arg(method)
-
-    ## convert between `resample_rate` and `resample_time`
-    if (!is.null(resample_rate) && is.null(resample_time)) {
-        resample_time <- 1 / resample_rate
-    } else if (!is.null(resample_time) && is.null(resample_rate)) {
-        resample_rate <- 1 / resample_time
-    } else if (inform) {
-        resample_time <- 1 / resample_rate
-        cli_warn(c(
-            "Either {.arg resample_rate} or {.arg resample_time} should be \\
-            defined, not both.",
-            "i" = "Defaulting to {.arg resample_rate} = {.val {resample_rate}}"
-        ))
-    }
-
     ## calculate resampling parameters  ===================================
     time_vec <- round(data[[time_channel]], 6)
     sample_range <- floor(range(time_vec, na.rm = TRUE) * sample_rate) /

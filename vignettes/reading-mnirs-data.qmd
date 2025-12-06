@@ -277,11 +277,9 @@ Alternatively, if we have something like high-frequency EMG data, we may want to
 
     If the data contains *`mnirs`* metadata, these channels will be detected automatically. Or they can be specified explicitly.
 
-* `resample_rate` or `resample_time`
+* `resample_rate`
 
-    Resampling can be specified by one of either the `resample_rate` in number of samples per second (Hz), or the `resample_time` in number of seconds per sample (i.e. the inverse of each other).
-
-The default `resample_rate` will re-sample back to the existing `sample_rate` of the data. This can be useful to average over irregular sampling resulting in unequal time values. Linear interpolation will be used to re-sample `time_channel` to round values of the `sample_rate`.
+    Resampling can be specified by the number of samples per second (Hz). The default `resample_rate` will re-sample back to the existing `sample_rate` of the data. This can be useful to average over irregular sampling resulting in unequal time values. Linear interpolation will be used to re-sample `time_channel` to round values of the `sample_rate`.
 
 ```{r}
 data_resampled <- resample_mnirs(

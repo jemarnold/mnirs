@@ -103,6 +103,8 @@ test_that("resample_mnirs handles resample_rate == sample_rate", {
 })
 
 test_that("resample_mnirs handles resample_time", {
+    skip("resample_time obsolete argument")
+
     data <- data.frame(time = 1:3, value = seq(10, 30, 10))
     result <- resample_mnirs(
         data,

@@ -7,6 +7,7 @@
     * `replace_mnirs()`, `replace_outleirs()`, `replace_missing()`, and `resample_mnirs()` arg from `method = "NA"` to `method = "none"`.
 * Revert argument `inform` to `verbose`.
 * Standardise `cli_inform()`, `cli_warn()`, and `cli_abort()` messages.
+* Remove redundant `resample_mnirs()` argument `resample_time`.
 
 # mnirs 0.1.6
 
