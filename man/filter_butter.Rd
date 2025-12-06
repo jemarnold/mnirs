@@ -6,7 +6,7 @@
 \usage{
 filter_butter(
   x,
-  n = 1,
+  order = 1,
   W,
   type = c("low", "high", "stop", "pass"),
   edges = c("rev", "rep1", "none"),
@@ -16,8 +16,8 @@ filter_butter(
 \arguments{
 \item{x}{A numeric vector.}
 
-\item{n}{An integer defining the filter order for \code{method = "butterworth"}
-(\emph{default} \code{n = 1}).}
+\item{order}{An integer defining the filter order for
+\code{method = "butterworth"} (\emph{default} \code{order = 1}).}
 
 \item{W}{A one- or two-element numeric vector defining the filter cutoff
 frequency(ies) for \code{method = "butterworth"}, as a fraction of the
@@ -40,9 +40,9 @@ in reverse sequence.}
 \item{\code{"none"}}{Will return the unpadded \code{\link[signal:filtfilt]{signal::filtfilt()}} output.}
 }}
 
-\item{na.rm}{A logical indicating whether missing values should be ignored
-(\code{TRUE}) before the filter is applied. Otherwise \code{FALSE} (the \emph{default})
-will throw an error (see \emph{Details}).}
+\item{na.rm}{A logical indicating whether missing values should be preserved
+and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
+will throw an error if there are any \code{NA}s (see \emph{Details}).}
 }
 \value{
 A numeric vector the same length as \code{x}.
@@ -64,8 +64,8 @@ frequency \code{W} to be passed through as the output signal, respectively.
 from the output signal. \emph{Pass-band} defines a critical range of
 frequencies which are passed through as the output signal.
 
-The filter order (number of passes) is defined by \code{n}, typically in
-the range \verb{n = [1, 10]}. Higher filter order tends to capture more
+The filter order (number of passes) is defined by \code{order}, typically in
+the range \verb{order = [1, 10]}. Higher filter order tends to capture more
 rapid changes in amplitude, but also causes more distortion around
 those change points in the signal. General advice is to use the
 lowest filter order which sufficiently captures the desired rapid
@@ -89,8 +89,8 @@ set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
 noisy_sin <- sin + noise
-filt_without_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "none")
-filt_with_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "rep1")
+filt_without_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "none")
+filt_with_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "rep1")
 
 ggplot(data.frame(), aes(x = seq_along(noise))) +
     theme_mnirs() +

@@ -161,7 +161,7 @@ test_that("signif_pvalue returns symbols", {
     expect_equal(result, c("*", "*", "*", "", ""))
 
     ## repeats symbols
-    result <- signif_pvalue(p_vals, display = "symbol", symbol.repeat = TRUE)
+    result <- signif_pvalue(p_vals, display = "symbol", symbol_repeat = TRUE)
     expect_equal(result, c("***", "**", "*", "", ""))
 })
 
@@ -180,28 +180,28 @@ test_that("signif_pvalue respects custom symbol", {
         0.0001,
         display = "symbol",
         symbol = "†",
-        symbol.repeat = TRUE
+        symbol_repeat = TRUE
     )
     expect_equal(result_repeat, "†††")
 })
 
-test_that("signif_pvalue handles boundary values for symbol.repeat", {
+test_that("signif_pvalue handles boundary values for symbol_repeat", {
     expect_equal(signif_pvalue(0.05, display = "symbol", alpha = 0.05), "")
     expect_equal(signif_pvalue(0.049, display = "symbol", alpha = 0.05), "*")
     expect_equal(
-        signif_pvalue(0.001, display = "symbol", symbol.repeat = TRUE),
+        signif_pvalue(0.001, display = "symbol", symbol_repeat = TRUE),
         "**"
     )
     expect_equal(
-        signif_pvalue(0.0009, display = "symbol", symbol.repeat = TRUE),
+        signif_pvalue(0.0009, display = "symbol", symbol_repeat = TRUE),
         "***"
     )
     expect_equal(
-        signif_pvalue(0.01, display = "symbol", symbol.repeat = TRUE),
+        signif_pvalue(0.01, display = "symbol", symbol_repeat = TRUE),
         "*"
     )
     expect_equal(
-        signif_pvalue(0.0099, display = "symbol", symbol.repeat = TRUE),
+        signif_pvalue(0.0099, display = "symbol", symbol_repeat = TRUE),
         "**"
     )
 })

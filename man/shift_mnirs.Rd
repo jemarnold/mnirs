@@ -6,14 +6,14 @@
 \usage{
 shift_mnirs(
   data,
-  nirs_channels = list(),
+  nirs_channels = list(NULL),
   time_channel = NULL,
   to = NULL,
   by = NULL,
   width = NULL,
   span = NULL,
   position = c("min", "max", "first"),
-  inform = TRUE
+  verbose = TRUE
 )
 }
 \arguments{
@@ -63,7 +63,7 @@ specified values.}
 values.}
 }}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 }
 \value{
@@ -103,26 +103,25 @@ over \code{by}, and \code{width} will be preferred over \code{span}.
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
 library(ggplot2)
 
+options(mnirs.verbose = FALSE)
+
 ## read example data
 data_shifted <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    time_channel = c(time = "hh:mm:ss")
 ) |>
-    resample_mnirs(inform = FALSE) |>
+    resample_mnirs() |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10,
-        inform = FALSE
+        width = 10
     ) |>
-    filter_mnirs(na.rm = TRUE, inform = FALSE) |>
+    filter_mnirs(na.rm = TRUE) |>
     shift_mnirs(
         to = 0,             ## NIRS values will be shifted to zero
         span = 120,         ## shift the first 120 sec of data to zero
-        position = "first",
-        inform = FALSE
+        position = "first"
     )
 
 plot(data_shifted, label_time = TRUE) +

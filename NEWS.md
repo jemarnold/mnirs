@@ -1,3 +1,13 @@
+# mnirs 0.1.7
+
+* Minor edits to functions and documentation to improve clarity.
+* Changes to user-facing functions:
+    * `filter_mnirs()` and `filter_butter()` arg from `n` to `order`.
+    * `palette_mnirs()` arg from `n` as either numeric or character, to numeric, with `names` as the character arg.
+    * `replace_mnirs()`, `replace_outleirs()`, `replace_missing()`, and `resample_mnirs()` arg from `method = "NA"` to `method = "none"`.
+* Revert argument `inform` to `verbose`.
+* Standardise `cli_inform()`, `cli_warn()`, and `cli_abort()` messages.
+
 # mnirs 0.1.6
 
 * Create internal numeric vector helper functions
@@ -20,7 +30,7 @@
 
 # mnirs 0.1.4
 
-* Breaking change: Update argument `inform` replaces `verbose` to display/hide messages & warnings.
+* Update argument `inform` replaces `verbose` to display/hide messages & warnings.
 * Implement global option to set `inform = FALSE` with `options(mnirs.inform = FALSE)`.
     * Global option `mnirs.inform = FALSE` will override functions' implicit default `inform = TRUE`.
     * Explicit call `inform = TRUE` will override the global option.

@@ -9,9 +9,8 @@ resample_mnirs(
   time_channel = NULL,
   sample_rate = NULL,
   resample_rate = sample_rate,
-  resample_time = NULL,
-  method = c("linear", "locf", "NA"),
-  inform = TRUE
+  method = c("linear", "locf", "none"),
+  verbose = TRUE
 )
 }
 \arguments{
@@ -32,9 +31,6 @@ output sample rate (in Hz) to re-sample the data frame. The \emph{default}
 samples within the bounds of the existing data rounded to the nearest
 value in Hz.}
 
-\item{resample_time}{An \emph{optional} numeric value indicating the desired
-sample time (in seconds) to re-sample the data frame.}
-
 \item{method}{A character string indicating how to handle resampling
 (see \emph{Details} for more on each method):
 \describe{
@@ -44,12 +40,12 @@ interpolation (the \emph{default}) using \code{\link[stats:approxfun]{stats::app
 replaces \code{NA}s with the most recent valid non-\code{NA} value to the left
 for trailing samples or to the right for leading samples, using
 \code{\link[stats:approxfun]{stats::approx()}}.}
-\item{\code{"NA"}}{Re-samples by matching values to their nearest value of
+\item{\code{"none"}}{Re-samples by matching values to their nearest value of
 \code{time_channel}, \emph{without} interpolating across new samples or \code{NA}s in
 the original data frame.}
 }}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 }
 \value{
@@ -78,7 +74,7 @@ rounded to the nearest \code{sample_rate}.
 
 By \emph{default}, \code{method = "linear"} or \code{"locf"} will interpolate across \code{NA}s
 in the original data and any new samples between existing values of
-\code{time_channel} (see \code{?replace_missing}). Whereas \code{method = "NA"} will
+\code{time_channel} (see \code{?replace_missing}). Whereas \code{method = "none"} will
 match values of numeric columns from the original samples of \code{time_channel}
 to the new re-sampled samples, without interpolation. Meaning \code{NA}s in the
 original data and any new samples will be returned as \code{NA}.
@@ -89,7 +85,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 )
 
 data
@@ -100,7 +96,7 @@ data_resampled <- resample_mnirs(
     # sample_rate = NULL,
     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
     method = "linear",             ## default linear interpolation across any new samples
-    inform = FALSE                 ## will confirm the output sample rate
+    verbose = FALSE                ## will confirm the output sample rate
 )
 
 ## note the altered "time" values 👇

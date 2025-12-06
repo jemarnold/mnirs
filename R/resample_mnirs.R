@@ -19,7 +19,7 @@
 #'      replaces `NA`s with the most recent valid non-`NA` value to the left
 #'      for trailing samples or to the right for leading samples, using
 #'      [stats::approx()].}
-#'      \item{`"NA"`}{Re-samples by matching values to their nearest value of
+#'      \item{`"none"`}{Re-samples by matching values to their nearest value of
 #'      `time_channel`, *without* interpolating across new samples or `NA`s in
 #'      the original data frame.}
 #'   }
@@ -43,7 +43,7 @@
 #'
 #' By *default*, `method = "linear"` or `"locf"` will interpolate across `NA`s
 #'   in the original data and any new samples between existing values of
-#'   `time_channel` (see `?replace_missing`). Whereas `method = "NA"` will
+#'   `time_channel` (see `?replace_missing`). Whereas `method = "none"` will
 #'   match values of numeric columns from the original samples of `time_channel`
 #'   to the new re-sampled samples, without interpolation. Meaning `NA`s in the
 #'   original data and any new samples will be returned as `NA`.
@@ -58,7 +58,7 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     verbose = FALSE
 #' )
 #'
 #' data
@@ -69,7 +69,7 @@
 #'     # sample_rate = NULL,
 #'     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
 #'     method = "linear",             ## default linear interpolation across any new samples
-#'     inform = FALSE                 ## will confirm the output sample rate
+#'     verbose = FALSE                ## will confirm the output sample rate
 #' )
 #'
 #' ## note the altered "time" values 👇
@@ -82,18 +82,18 @@ resample_mnirs <- function(
     sample_rate = NULL,
     resample_rate = sample_rate, ## placeholder indicating default condition
     resample_time = NULL,
-    method = c("linear", "locf", "NA"),
-    inform = TRUE
+    method = c("linear", "locf", "none"),
+    verbose = TRUE
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     time_channel <- validate_time_channel(data, time_channel)
     sample_rate <- validate_sample_rate(
-        data, time_channel, sample_rate, inform
+        data, time_channel, sample_rate, verbose
     )
     validate_numeric(
         resample_rate, 1, c(0, Inf), FALSE, msg = "one-element positive"
@@ -134,7 +134,7 @@ resample_mnirs <- function(
     non_numeric_cols <- names(data)[!numeric_cols & names(data) != time_channel]
 
     ## interpolate numeric columns ==================================
-    if (method != "NA" && any(numeric_cols)) {
+    if (method != "none" && any(numeric_cols)) {
         result[names(data)[numeric_cols]] <- lapply(data[numeric_cols], \(.x) {
             replace_missing(
                 x = .x,
@@ -143,7 +143,7 @@ resample_mnirs <- function(
                 xout = resampled_times
             )
         })
-    } else if (method == "NA" && any(numeric_cols)) {
+    } else if (method == "none" && any(numeric_cols)) {
         tol <- resample_time * 0.5
         result[names(data)[numeric_cols]] <- lapply(data[numeric_cols], \(.x) {
             vapply(resampled_times, \(.t) {
@@ -158,7 +158,7 @@ resample_mnirs <- function(
     }
 
     ## vectorized forward fill for non-numeric columns =====================
-    if (method == "NA" && length(non_numeric_cols) > 0) {
+    if (method == "none" && length(non_numeric_cols) > 0) {
         ## tolerance-based matching
         tol <- resample_time * 0.5
         idx <- max.col(
@@ -194,8 +194,8 @@ resample_mnirs <- function(
     metadata$time_channel <- time_channel
     metadata$sample_rate <- resample_rate
 
-    if (inform) {
-        cli_bullets(c(
+    if (verbose) {
+        cli_inform(c(
             "i" = "Output is resampled at {.val {resample_rate}} Hz."
         ))
     }

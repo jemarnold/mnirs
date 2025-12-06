@@ -16,7 +16,7 @@ signif_pvalue(
   format = c("digits", "signif"),
   display = c("value", "symbol"),
   symbol = "*",
-  symbol.repeat = FALSE,
+  symbol_repeat = FALSE,
   alpha = 0.05
 )
 }
@@ -37,7 +37,7 @@ formatted numbers or \emph{"symbol"} for significance symbols.}
 \item{symbol}{Character string specifying the significance symbol.
 \emph{Default} is "*".}
 
-\item{symbol.repeat}{Logical indicating whether to repeat symbols for
+\item{symbol_repeat}{Logical indicating whether to repeat symbols for
 different significance levels. Default is \emph{FALSE}.}
 
 \item{alpha}{A numeric value specifying significance threshold.
@@ -86,10 +86,10 @@ e.g. \code{signif_whole(123, digits = -5)} still returns \code{123}.
 rounded to 3 decimal places with \code{signif_trailing()}, or appear as e.g.
 \emph{"< 0.001"}.
 \item \code{digits = 1} will display \emph{"less than \code{alpha}"}, e.g. \emph{"< 0.05"}.
-\item When \code{display = "symbol"}, if \code{symbol.repeat = TRUE}: Uses repeated
+\item When \code{display = "symbol"}, if \code{symbol_repeat = TRUE}: Uses repeated
 symbols based on thresholds
 \verb{(0.001 = "***", 0.01 = "**", alpha = "*", ns = "")}.
-\item If \code{symbol.repeat = FALSE}: Shows one symbol \code{"*"} for p < alpha,
+\item If \code{symbol_repeat = FALSE}: Shows one symbol \code{"*"} for p < alpha,
 otherwise empty string.
 }
 }
@@ -115,10 +115,10 @@ mnirs:::signif_pvalue(p_vals, digits = 1)
 
 ## format as symbols
 mnirs:::signif_pvalue(p_vals, display = "symbol")
-mnirs:::signif_pvalue(p_vals, display = "symbol", symbol.repeat = TRUE)
+mnirs:::signif_pvalue(p_vals, display = "symbol", symbol_repeat = TRUE)
 
 ## custom alpha and symbol
-mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol.repeat = TRUE)
+mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol_repeat = TRUE)
 
 }
 \seealso{

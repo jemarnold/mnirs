@@ -31,8 +31,7 @@ NULL
 #' @format .csv file with seven columns and 974 rows.
 #'
 #'   - `nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")`
-#'   - `time_channel = c("hh:mm:ss)`
-#'   - `event_channel = c("Lap)`
+#'   - `time_channel = c("hh:mm:ss")`
 #'
 NULL
 
@@ -52,8 +51,8 @@ NULL
 #' @format .xlsx file with six columns and 2203 rows.
 #'
 #'   - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
-#'   - `time_channel = c("hh:mm:ss)`
-#'   - `event_channel = c("Lap)`
+#'   - `time_channel = c("hh:mm:ss")`
+#'   - `event_channel = c("Lap")`
 #'
 NULL
 
@@ -70,8 +69,8 @@ NULL
 #'
 #' @format .csv file with header metadata and with 18 columns and 12001 rows.
 #'
-#'   - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
-#'   - `time_channel = c("hh:mm:ss)`
-#'   - `event_channel = c("Lap)`
+#'   - `nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
+#'   - `time_channel = c("Timestamp (seconds passed)")`
+#'   - `event_channel = c("Lap/Event")`
 #'
 NULL

@@ -68,11 +68,11 @@ test_that("rescale_mnirs errors for nirs_channels", {
 
     expect_error(
         rescale_mnirs(data, nirs_channels = NULL, range = c(0, 1)),
-        "nirs_channels.*not found"
+        "nirs_channels.*not detected"
     )
     expect_error(
         rescale_mnirs(data, range = c(0, 1)),
-        "nirs_channels.*not found"
+        "nirs_channels.*not detected"
     )
     expect_error(
         rescale_mnirs(data, nirs_channels = "doesn't exist", range = c(0, 1)),
@@ -115,8 +115,8 @@ test_that("rescale_mnirs returns unmodified column when values are constant", {
 
     # When grouped, if one channel is constant and another varies,
     # the constant channel should remain unchanged
-    expect_equal(result$A, data$A/2)
-    expect_equal(result$B, data$B/2)
+    expect_equal(result$A, data$A / 2)
+    expect_equal(result$B, data$B / 2)
 })
 
 test_that("rescale_mnirs updates metadata correctly", {
@@ -127,7 +127,7 @@ test_that("rescale_mnirs updates metadata correctly", {
         data,
         nirs_channels = list("A", "B"),
         range = c(0, 100),
-        inform = FALSE
+        verbose = FALSE
     )
 
     expect_true(all(c("A", "B") %in% attr(result, "nirs_channels")))
@@ -138,15 +138,20 @@ test_that("rescale_mnirs works on Moxy", {
 
     df <- read_mnirs(
         file_path = file_path,
-        nirs_channels = c(smo2_left = "SmO2 Live",
-                          smo2_right = "SmO2 Live(2)"),
+        nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        inform = FALSE
+        verbose = FALSE
     ) |>
         dplyr::mutate(
             dplyr::across(
-                dplyr::matches("smo2"), \(.x)
-                replace_invalid(.x, invalid_values = c(0, 100), method = "NA")
+                dplyr::matches("smo2"),
+                \(.x) {
+                    replace_invalid(
+                        .x,
+                        invalid_values = c(0, 100),
+                        method = "none"
+                    )
+                }
             )
         )
 
@@ -183,18 +188,24 @@ test_that("rescale_mnirs works on Train.Red", {
 
     df <- read_mnirs(
         file_path = file_path,
-        nirs_channels = c(smo2_left = "SmO2",
-                          smo2_right = "SmO2",
-                          dhb_left = "HBDiff",
-                          dhb_right = "HBDiff"),
+        nirs_channels = c(
+            smo2_left = "SmO2",
+            smo2_right = "SmO2",
+            dhb_left = "HBDiff",
+            dhb_right = "HBDiff"
+        ),
         time_channel = c(time = "Timestamp (seconds passed)"),
-        inform = FALSE,
+        verbose = FALSE,
         keep_all = TRUE,
     )
 
     result <- rescale_mnirs(
         df,
-        nirs_channels = list("smo2_left", "smo2_right", c("dhb_left", "dhb_right")),
+        nirs_channels = list(
+            "smo2_left",
+            "smo2_right",
+            c("dhb_left", "dhb_right")
+        ),
         range = c(0, 100)
     )
 

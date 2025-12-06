@@ -31,17 +31,21 @@ test_that("palettes returns correct colour vector", {
 test_that("palettes subset by number works", {
     expect_length(palette_mnirs(3), 3)
     expect_length(palette_mnirs(1), 1)
-    expect_error(palette_mnirs(2:4))
+    expect_error(palette_mnirs(2:4), "valid.*numeric")
+    expect_error(palette_mnirs(0), "valid.*numeric")
 })
 
 test_that("palettes subset by name works", {
-    red <- palette_mnirs("red")
+    red <- palette_mnirs(names = "red")
     expect_named(red, "red")
     expect_equal(red[["red"]], "#ED0000FF")
+    expect_error(palette_mnirs(names = "invalid"), "should be one of")
+    expect_error(palette_mnirs(n = 2, names = "red"), "Cannot specify both")
 
-    multi <- palette_mnirs(c("red", "blue"))
+    multi <- palette_mnirs(names = c("red", "blue"))
     expect_length(multi, 2)
     expect_named(multi, c("red", "blue"))
+    expect_equal(palette_mnirs(names = c("red", "invalid")), red)
 })
 
 test_that("palette_mnirs interpolates when n > 12", {
@@ -82,8 +86,8 @@ test_that("scale functions use palette_mnirs", {
 
     # Test with character argument
     expect_equal(
-        scale_colour_mnirs()$palette(c("light blue", "dark red")),
-        palette_mnirs(c("light blue", "dark red"))
+        scale_colour_mnirs()$palette(names = c("light blue", "dark red")),
+        palette_mnirs(names = c("light blue", "dark red"))
     )
 
     ## test with na.value
@@ -107,10 +111,9 @@ test_that("breaks_timespan returns a function", {
 })
 
 test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
-
     # Test scale = 1 (diff <= 5 * 60)
     nice_steps_sec <- c(1, 2, 5, 10, 15, 20, 30, 60, 120)
-    x_sec <- c(0, 150)  # 2.5 min range
+    x_sec <- c(0, 150) # 2.5 min range
     breaks_sec <- breaks_timespan("secs", n = 5)(x_sec)
     steps_sec <- unique(diff(breaks_sec))
     expect_true(all(steps_sec %in% nice_steps_sec))
@@ -120,7 +123,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
 
     # Test scale = 60 (5 * 60 < diff <= 5 * 3600)
     nice_steps_min <- c(1, 2, 5, 10, 15, 20, 30, 60, 120) * 60
-    x_min <- c(0, 7200)  # 2 hour range
+    x_min <- c(0, 7200) # 2 hour range
     breaks_min <- breaks_timespan("secs", n = 5)(x_min)
     steps_min <- unique(diff(breaks_min))
     expect_true(all(steps_min %in% nice_steps_min))
@@ -130,7 +133,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
 
     # Test scale = 3600 (5 * 3600 < diff <= 5 * 86400)
     nice_steps_hr <- c(0.25, 0.5, 1, 2, 3, 4, 6, 8, 12, 24) * 3600
-    x_hr <- c(0, 86400)  # 1 day range
+    x_hr <- c(0, 86400) # 1 day range
     breaks_hr <- breaks_timespan("secs", n = 5)(x_hr)
     steps_hr <- unique(diff(breaks_hr))
     expect_true(all(steps_hr %in% nice_steps_hr))
@@ -140,7 +143,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
 
     # Test scale = 86400 (diff > 5 * 86400)
     nice_steps_day <- c(1, 7, 28) * 86400
-    x_day <- c(0, 86400 * 28)  # 28 day range
+    x_day <- c(0, 86400 * 28) # 28 day range
     breaks_day <- breaks_timespan("secs", n = 5)(x_day)
     steps_day <- unique(diff(breaks_day))
     expect_true(all(steps_day %in% nice_steps_day))
@@ -212,7 +215,7 @@ test_that("label_time controls x-axis name and formatting", {
     x <- mock_mnirs()
 
     # With label_time = FALSE (default)
-    p1 <- plot(x)    
+    p1 <- plot(x)
     expect_true(ggplot2::is_waiver(p1$scales$get_scales("x")$name))
     expect_true(ggplot2::is_waiver(p1$scales$get_scales("x")$labels))
 
@@ -230,7 +233,7 @@ test_that("n controls number of breaks", {
         built <- ggplot2::ggplot_build(p)
         built$layout$panel_params[[1]]$x$breaks
     }
-  
+
     p1 <- plot(x, n = 3)
     p2 <- plot(x, n = 10)
 
@@ -242,15 +245,14 @@ test_that("n controls number of breaks", {
 })
 
 test_that("plot.mnirs moxy.perfpro works", {
-    file_path <- system.file("extdata/moxy_ramp.xlsx",
-                             package = "mnirs")
+    file_path <- system.file("extdata/moxy_ramp.xlsx", package = "mnirs")
 
     df <- read_mnirs(
         file_path = file_path,
-        nirs_channels = c(smo2_left = "SmO2 Live",
-                         smo2_right = "SmO2 Live(2)"),
+        nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        inform = FALSE)
+        verbose = FALSE
+    )
 
     ## visual check
     plot <- plot(df, na.omit = TRUE, label_time = TRUE, n = 8)

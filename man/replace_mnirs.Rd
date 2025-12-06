@@ -17,8 +17,8 @@ replace_mnirs(
   outlier_cutoff = NULL,
   width = NULL,
   span = NULL,
-  method = c("linear", "median", "locf", "NA"),
-  inform = TRUE
+  method = c("linear", "median", "locf", "none"),
+  verbose = TRUE
 )
 
 replace_invalid(
@@ -29,18 +29,18 @@ replace_invalid(
   invalid_below = NULL,
   width = NULL,
   span = NULL,
-  method = c("median", "NA"),
-  inform = TRUE
+  method = c("median", "none"),
+  verbose = TRUE
 )
 
 replace_outliers(
   x,
   t = seq_along(x),
-  outlier_cutoff = 3,
+  outlier_cutoff = 3L,
   width = NULL,
   span = NULL,
-  method = c("median", "NA"),
-  inform = TRUE
+  method = c("median", "none"),
+  verbose = TRUE
 )
 
 replace_missing(
@@ -98,10 +98,10 @@ within a centred window defined by either \code{width} or \code{span}.}
 \code{NA}s with the most recent valid non-\code{NA} value to the left for
 trailing \code{NA}s or to the right for leading \code{NA}s, using
 \code{\link[stats:approxfun]{stats::approx()}}.}
-\item{\code{"NA"}}{Returns \code{NA}s without replacement.}
+\item{\code{"none"}}{Returns \code{NA}s without replacement.}
 }}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 
 \item{x}{A numeric vector.}
@@ -150,7 +150,7 @@ in units of \code{time_channel} centred on \code{idx} between
 \verb{[t - span/2, t + span/2]}. A partial moving average will be calculated
 at the edges of the data.
 
-\code{replace_invalid()} can be used to overwrite known invalid values in
+\code{replace_invalid()} can be used to remove known invalid values in
 exported data.
 \itemize{
 \item Specific \code{invalid_values} can be replaced, such as \code{c(0, 100, 102.3)}.
@@ -170,7 +170,7 @@ smallest absolute time series difference in \code{x} will be excluded, to
 avoid detecting negligible differences as outliers where local data have
 minimal or zero variation.
 \item Values of \code{x} outside local bounds defined by \code{outlier_cutoff} are
-identified as local outliers and either removed if \code{method = "NA"}, or
+identified as local outliers and either removed if \code{method = "none"}, or
 replaced with the local median value (\code{method = "median"}, the \emph{default}).
 \item This function will NOT replace \code{NA} values already existing in the \code{x}.
 They will be passed along in the returned vector. See \code{replace_missing()}.
@@ -205,7 +205,7 @@ library(ggplot2)
 x <- c(1, 999, 3, 4, 999, 6)
 replace_invalid(x, invalid_values = 999, width = 2, method = "median")
 
-(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "NA"))
+(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
 
 replace_missing(x_na, method = "linear")
 
@@ -214,7 +214,7 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 )
 
 ## clean data

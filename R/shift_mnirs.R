@@ -65,26 +65,25 @@
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' library(ggplot2)
 #'
+#' options(mnirs.verbose = FALSE)
+#' 
 #' ## read example data
 #' data_shifted <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
-#'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     time_channel = c(time = "hh:mm:ss")
 #' ) |>
-#'     resample_mnirs(inform = FALSE) |>
+#'     resample_mnirs() |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10,
-#'         inform = FALSE
+#'         width = 10
 #'     ) |>
-#'     filter_mnirs(na.rm = TRUE, inform = FALSE) |>
+#'     filter_mnirs(na.rm = TRUE) |>
 #'     shift_mnirs(
 #'         to = 0,             ## NIRS values will be shifted to zero
 #'         span = 120,         ## shift the first 120 sec of data to zero
-#'         position = "first",
-#'         inform = FALSE
+#'         position = "first"
 #'     )
 #'
 #' plot(data_shifted, label_time = TRUE) +
@@ -93,14 +92,14 @@
 #' @export
 shift_mnirs <- function(
     data,
-    nirs_channels = list(),
+    nirs_channels = list(NULL),
     time_channel = NULL,
     to = NULL,
     by = NULL,
     width = NULL,
     span = NULL,
     position = c("min", "max", "first"),
-    inform = TRUE
+    verbose = TRUE
 ) {
     ## TODO convert sym(nirs_channels) to strings?
     ## TODO need to fix edges where only half width/span included
@@ -108,26 +107,25 @@ shift_mnirs <- function(
     ## validation =============================================
     ## do nothing condition
     if (is.null(c(to, by))) {
-        cli_abort("One of either {.arg to} or {.arg by} must be defined.")
+        cli_abort(c(
+            "x" = "Shift value undefined",
+            "i" = "One of {.arg to} or {.arg by} must be defined."
+        ))
     }
 
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform)
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
     time_channel <- validate_time_channel(data, time_channel)
     validate_numeric(to, 1, msg = "one-element")
     validate_numeric(by, 1, msg = "one-element")
     if (!is.null(to) && !is.null(by)) {
         by <- NULL
-        if (inform) {
-            cli_warn(c(
-                "Either {.arg to} or {.arg by} should be defined, \\
-                not both.",
-                "i" = "Defaulting to {.arg to} = {.val {to}}"
-            ))
+        if (verbose) {
+            cli_inform(c("i" = "{.arg to} = {.val {to}} overrides {.arg by}."))
         }
     }
     position <- match.arg(position)
@@ -167,7 +165,7 @@ shift_mnirs <- function(
         window_idx <- compute_local_windows(
             t = time_vec, width = width, span = span,
         )
-        shift_fun <- get(position)
+        shift_fun <- match.fun(position)
         ## compute min or max along local means
         ## return named vec of min/max for each nirs_channel
         shift_values <- vapply(data[nirs_unlisted], \(.x) {

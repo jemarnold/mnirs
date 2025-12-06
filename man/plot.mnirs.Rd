@@ -35,10 +35,10 @@ file_path <- example_mnirs("moxy_ramp")
 
 data_table <- read_mnirs(
     file_path,
-    nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
+    nirs_channels = c(smo2_right = "SmO2 Live",
                       smo2_left = "SmO2 Live(2)"),
-    time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    inform = FALSE                       ## hide warnings & messages
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 )
 
 ## note the hidden plot option to display time values as `hh:mm:ss`

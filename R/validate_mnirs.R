@@ -53,7 +53,7 @@ validate_numeric <- function(
         ## pass through not defined
         return(invisible(NULL))
     }
-    not_all_na <- !all(is.na(x))
+    has_valid <- !all(is.na(x))
     name <- substitute(x)
     valid <- !is.na(x) & !is.nan(x)
 
@@ -71,14 +71,14 @@ validate_numeric <- function(
 
     ## abort message if fails any
     if (
-        !is.numeric(x) || !not_all_na || !element_ok || !range_ok || !integer_ok
+        !is.numeric(x) || !has_valid || !element_ok || !range_ok || !integer_ok
     ) {
         type <- if (integer) {
             "integer"
         } else {
             "numeric"
         }
-        cli_abort("{.arg {name}} must be a valid {msg} {.cls {type}}.")
+        cli_abort(c("x" = "{.arg {name}} must be a valid {msg} {.cls {type}}."))
     }
 
     return(invisible())
@@ -90,9 +90,8 @@ validate_mnirs_data <- function(data, ncol = 2L) {
     ## validate is a data frame with at least two columns
     if (!is.data.frame(data) || length(data) < ncol) {
         cli_abort(c(
-            "x" = "{.arg data} should be a data frame with at least one \\
-            {.cls numeric} {.arg time_channel} column and one \\
-            {.cls numeric} {.arg nirs_channels} column."
+            "x" = "{.arg data} must be a data frame with at least \\
+            {.val {ncol}} column{?s}."
         ))
     }
 
@@ -101,35 +100,36 @@ validate_mnirs_data <- function(data, ncol = 2L) {
 
 
 #' @rdname validate_mnirs
-validate_nirs_channels <- function(data, nirs_channels, inform = TRUE) {
-    ## if not defined, check metadata
-    if (is.null(nirs_channels) || length(nirs_channels) == 0) {
-        nirs_channels <- attr(data, "nirs_channels") ## should be vector
+validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
+    nirs_unlisted <- unlist(nirs_channels)
 
-        if (inform && !is.null(nirs_channels)) {
-            cli_warn(
-                "All {.arg nirs_channels} are grouped together. Overwrite \\
-                this by grouping {.arg nirs_channels} explicitly"
-            )
+    ## if not defined, check metadata
+    if (is.null(nirs_unlisted) || length(nirs_unlisted) == 0) {
+        nirs_channels <- attr(data, "nirs_channels") ## should be vector
+        nirs_unlisted <- nirs_channels
+        if (verbose && !is.null(nirs_unlisted)) {
+            cli_inform(c(
+                "!" = "{.arg nirs_channels} grouped together.",
+                "i" = "{.arg nirs_channels} groups can be defined explicitly."
+            ))
         }
     }
 
     ## if still not defined, return error
-    if (is.null(nirs_channels)) {
-        cli_abort(
-            "{.arg nirs_channels} not found in metadata. Please check your \\
-            data attributes or define {.arg nirs_channels} explicitly."
-        )
+    if (is.null(nirs_unlisted)) {
+        cli_abort(c(
+            "x" = "{.arg nirs_channels} not detected in metadata.",
+            "i" = "Check your data attributes or define \\
+            {.arg nirs_channels} explicitly."
+        ))
     }
-
-    nirs_unlisted <- unlist(nirs_channels)
 
     ## validate exists in data
     if (!is.character(nirs_unlisted) || !all(nirs_unlisted %in% names(data))) {
-        cli_abort(
-            "{.arg nirs_channels} not detected in {.arg data}. \\
-            Channel names are case sensitive and should match exactly."
-        )
+        cli_abort(c(
+            "x" = "{.arg nirs_channels} not detected in {.arg data}.",
+            "i" = "Channel names are case-sensitive and must match exactly."
+        ))
     }
 
     ## validate is numeric and has >=2 valid values
@@ -137,10 +137,9 @@ validate_nirs_channels <- function(data, nirs_channels, inform = TRUE) {
         vapply(data[nirs_unlisted], \(.x) sum(is.finite(.x)) < 2, logical(1))
 
     if (sum(invalid_channels) > 0) {
-        cli_abort(
-            "All specified {.arg nirs_channels} must be {.cls numeric} \\
-            vector(s) with at least two valid values."
-        )
+        cli_abort(c(
+            "x" = "{.arg nirs_channels} must contain valid {.cls numeric} data."
+        ))
     }
 
     return(nirs_channels)
@@ -156,18 +155,19 @@ validate_time_channel <- function(data, time_channel) {
 
     ## if still not defined, return error
     if (is.null(time_channel)) {
-        cli_abort(
-            "{.arg time_channel} not found in metadata. Please check your \\
-            data attributes or define {.arg time_channel} explicitly."
-        )
+        cli_abort(c(
+            "x" = "{.arg time_channel} not detected in metadata.",
+            "i" = "Check your data attributes or define \\
+            {.arg time_channel} explicitly."
+        ))
     }
 
     ## validate exists in data
     if (!is.character(time_channel) || !time_channel %in% names(data)) {
-        cli_abort(
-            "{.arg time_channel} not detected in {.arg data}. \\
-            Channel names are case sensitive and should match exactly."
-        )
+        cli_abort(c(
+            "x" = "{.arg time_channel} not detected in {.arg data}.",
+            "i" = "Channel names are case-sensitive and must match exactly."
+        ))
     }
 
     ## validate is numeric and has >=2 valid values
@@ -175,10 +175,9 @@ validate_time_channel <- function(data, time_channel) {
         !is.numeric(data[[time_channel]]) ||
             sum(is.finite(data[[time_channel]])) < 2
     ) {
-        cli_abort(
-            "{.arg time_channel} must be a {.cls numeric} vector with \\
-            at least two valid values."
-        )
+        cli_abort(c(
+            "x" = "{.arg time_channel} must contain valid {.cls numeric} data."
+        ))
     }
 
     return(time_channel)
@@ -194,10 +193,11 @@ validate_event_channel <- function(data, event_channel, require = TRUE) {
 
     ## if still not defined, return error
     if (is.null(event_channel) && require) {
-        cli_abort(
-            "{.arg event_channel} not found in metadata. Please check your \\
-            data attributes or define {.arg event_channel} explicitly."
-        )
+        cli_abort(c(
+            "x" = "{.arg event_channel} not detected in metadata.",
+            "i" = "Check your data attributes or define \\
+            {.arg event_channel} explicitly."
+        ))
     } else if (is.null(event_channel) && !require) {
         ## return event_channel = NULL if not required
         return(event_channel)
@@ -205,18 +205,19 @@ validate_event_channel <- function(data, event_channel, require = TRUE) {
 
     ## validate exists in data
     if (!is.character(event_channel) || !event_channel %in% names(data)) {
-        cli_abort(
-            "{.arg event_channel} not detected in {.arg data}. \\
-            Channel names are case sensitive and should match exactly."
-        )
+        cli_abort(c(
+            "x" = "{.arg event_channel} not detected in {.arg data}.",
+            "i" = "Channel names are case-sensitive and must match exactly."
+        ))
     }
 
     ## check for empty column
     valid_values <- !is.na(data[[event_channel]]) & data[[event_channel]] != ""
     if (sum(valid_values) == 0) {
-        cli_abort(
-            "{.arg event_channel} must contain at least one valid value."
-        )
+        cli_abort(c(
+            "x" = "{.arg event_channel} must contain valid {.cls numeric} \\
+            or {.cls character} data."
+        ))
     }
 
     return(event_channel)
@@ -229,22 +230,19 @@ estimate_sample_rate <- function(x) {
     sample_rate_raw <- 1 / median(diff(x), na.rm = TRUE)
     if (!is.finite(sample_rate_raw) || sample_rate_raw == 0) {
         cli_abort(c(
-            "x" = "Estimated sample rate is undetectable.",
-            "i" = "Check that your sample rate and {.arg time_channel} \\
-            values are consistent.",
+            "x" = "Unable to estimate {.arg sample_rate}.",
+            "i" = "Check that {.arg time_channel} values are consistent.",
             "i" = "Set {.arg sample_rate} = {.cls numeric}."
         ))
     }
 
-    (\(.x) {
-        mags <- 10^floor(log10(.x))
-        vals <- .x / mags
-        pretty_base <- c(1, 2, 5, 10)
-        rounded <- sapply(vals, \(.val) {
-            pretty_base[which.min(abs(pretty_base - .val))]
-        })
-        rounded * mags
-    })(sample_rate_raw)
+    mags <- 10^floor(log10(sample_rate_raw))
+    vals <- sample_rate_raw / mags
+    pretty_base <- c(1, 2, 5, 10)
+    rounded <- sapply(vals, \(.val) {
+        pretty_base[which.min(abs(pretty_base - .val))]
+    })
+    return(rounded * mags)
 }
 
 
@@ -253,7 +251,7 @@ validate_sample_rate <- function(
     data,
     time_channel,
     sample_rate,
-    inform = TRUE
+    verbose = TRUE
 ) {
     ## if not defined, check metadata
     if (is.null(sample_rate)) {
@@ -269,10 +267,10 @@ validate_sample_rate <- function(
     ## if still not defined, use estimated sample_rate
     if (is.null(sample_rate)) {
         sample_rate <- sample_rate_est
-        if (inform) {
-            cli_bullets(c(
+        if (verbose) {
+            cli_inform(c(
                 "!" = "Estimated {.arg sample_rate} = {.val {sample_rate}} Hz.",
-                "i" = "Overwrite this with {.arg sample_rate} = {.cls numeric}."
+                "i" = "Define {.arg sample_rate} explicitly to override."
             ))
         }
     }
@@ -285,7 +283,7 @@ validate_sample_rate <- function(
     ## if provided sample rate seems off and time_channel doesn't appear
     ## to be integer values, report warning
     if (
-        inform &&
+        verbose &&
             !isTRUE(all.equal(1, sample_rate_est, tolerance = 0.001)) &
             !isTRUE(all.equal(sample_rate_est, sample_rate, tolerance = 0.5))
     ) {
@@ -299,6 +297,40 @@ validate_sample_rate <- function(
     }
 
     return(sample_rate)
+}
+
+#' @rdname validate_mnirs
+validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
+    if (is.null(c(width, span))) {
+        cli_abort(c(
+            "x" = "Window size undefined",
+            "i" = "One of {.arg width} or {.arg span} must be defined."
+        ))
+    }
+    validate_numeric(
+        width, 1, c(0, Inf), integer = TRUE, msg = "one-element positive"
+    )
+    validate_numeric(span, 1, c(0, Inf), msg = "one-element positive")
+    if (!is.null(width) && !is.null(span)) {
+        span <- NULL
+        if (verbose) {
+            cli_inform(c(
+                "i" = "{.arg width} = {.val {width}} overrides {.arg span}."
+            ))
+        }
+    }
+}
+
+#' @rdname validate_mnirs
+validate_x_t <- function(x, t = seq_along(x)) {
+    validate_numeric(x)
+    validate_numeric(t)
+    if (length(x) != length(t)) {
+        cli_abort(c(
+            "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
+            of equal length."
+        ))
+    }
 }
 
 

@@ -34,7 +34,7 @@
 #' @order 1
 #' @keywords internal
 signif_trailing <- function(x, digits = 2L, format = c("digits", "signif")) {
-    format = match.arg(format)
+    format <- match.arg(format)
 
     if (format == "digits") {
         validate_numeric(x)
@@ -111,7 +111,7 @@ signif_whole <- function(x, digits = 5L) {
 #'   formatted numbers or *"symbol"* for significance symbols.
 #' @param symbol Character string specifying the significance symbol.
 #'   *Default* is "*".
-#' @param symbol.repeat Logical indicating whether to repeat symbols for
+#' @param symbol_repeat Logical indicating whether to repeat symbols for
 #'   different significance levels. Default is *FALSE*.
 #' @param alpha A numeric value specifying significance threshold.
 #'   *Default* is `0.05`.
@@ -126,10 +126,10 @@ signif_whole <- function(x, digits = 5L) {
 #'   rounded to 3 decimal places with `signif_trailing()`, or appear as e.g.
 #'   *"< 0.001"*.
 #' - `digits = 1` will display *"less than `alpha`"*, e.g. *"< 0.05"*.
-#' - When `display = "symbol"`, if `symbol.repeat = TRUE`: Uses repeated
+#' - When `display = "symbol"`, if `symbol_repeat = TRUE`: Uses repeated
 #'   symbols based on thresholds
 #'   `(0.001 = "***", 0.01 = "**", alpha = "*", ns = "")`.
-#' - If `symbol.repeat = FALSE`: Shows one symbol `"*"` for p < alpha,
+#' - If `symbol_repeat = FALSE`: Shows one symbol `"*"` for p < alpha,
 #'   otherwise empty string.
 #'
 #' @examples
@@ -141,10 +141,10 @@ signif_whole <- function(x, digits = 5L) {
 #'
 #' ## format as symbols
 #' mnirs:::signif_pvalue(p_vals, display = "symbol")
-#' mnirs:::signif_pvalue(p_vals, display = "symbol", symbol.repeat = TRUE)
+#' mnirs:::signif_pvalue(p_vals, display = "symbol", symbol_repeat = TRUE)
 #'
 #' ## custom alpha and symbol
-#' mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol.repeat = TRUE)
+#' mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol_repeat = TRUE)
 #'
 #' @rdname signif_trailing
 #' @order 3
@@ -155,7 +155,7 @@ signif_pvalue <- function(
     format = c("digits", "signif"),
     display = c("value", "symbol"),
     symbol = "*",
-    symbol.repeat = FALSE,
+    symbol_repeat = FALSE,
     alpha = 0.05
 ) {
     format <- match.arg(format)
@@ -164,7 +164,7 @@ signif_pvalue <- function(
     validate_numeric(digits, 1, c(0, Inf), FALSE, TRUE)
     validate_numeric(alpha, 1, c(0, 1), FALSE, msg = "probability")
 
-    if (display == "symbol" && symbol.repeat) {
+    if (display == "symbol" && symbol_repeat) {
         return(strrep(symbol, 3L - findInterval(x, c(0.001, 0.01, alpha))))
     }
     if (display == "symbol") {

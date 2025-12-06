@@ -3,7 +3,7 @@
 
 ## usethis namespace: start
 #' @importFrom cli cli_abort
-#' @importFrom cli cli_bullets
+#' @importFrom cli cli_inform
 #' @importFrom cli cli_warn
 #' @importFrom lifecycle deprecated
 #' @importFrom rlang %||%

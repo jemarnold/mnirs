@@ -24,10 +24,10 @@
 #'
 #' data_table <- read_mnirs(
 #'     file_path,
-#'     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
+#'     nirs_channels = c(smo2_right = "SmO2 Live",
 #'                       smo2_left = "SmO2 Live(2)"),
-#'     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-#'     inform = FALSE                       ## hide warnings & messages
+#'     time_channel = c(time = "hh:mm:ss"),
+#'     verbose = FALSE
 #' )
 #'
 #' ## note the hidden plot option to display time values as `hh:mm:ss`
@@ -170,7 +170,7 @@ plot.mnirs <- function(x, ...) {
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     verbose = FALSE
 #' ) |>
 #'     plot(label_time = TRUE)
 #'
@@ -185,9 +185,8 @@ theme_mnirs <- function(
     ...
 ) {
     rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
-
-    half_line = base_size * 0.5
-    border = match.arg(border)
+    border <- match.arg(border)
+    half_line <- base_size * 0.5
 
     if (border == "partial") {
         panel.border <- ggplot2::element_blank()
@@ -233,8 +232,8 @@ theme_mnirs <- function(
 
 #' Custom *{mnirs}* colour palette
 #'
-#' @param n A character or numeric vector specifying either the name or the
-#'   number in order of colours to return.
+#' @param n A numeric vector specifying the number of colours to return.
+#' @param names A character vector specifying colour names to return.
 #'
 #' @returns Named or unnamed character vector of hex colours.
 #'
@@ -242,11 +241,11 @@ theme_mnirs <- function(
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' scales::show_col(palette_mnirs())
-#' scales::show_col(palette_mnirs(2))
-#' scales::show_col(palette_mnirs(c("red", "orange")))
+#' scales::show_col(palette_mnirs(n = 2))
+#' scales::show_col(palette_mnirs(names = c("red", "orange")))
 #'
 #' @export
-palette_mnirs <- function(n = NULL) {
+palette_mnirs <- function(n = NULL, names = NULL) {
     # fmt: skip
     colours <- c(
         `light blue`  = "#0080ff",      ## "VL"
@@ -263,18 +262,25 @@ palette_mnirs <- function(n = NULL) {
         `red`         = "#ED0000FF"     ## "O2Hb"
     )
 
+    if (!is.null(names) && !is.null(n)) {
+        cli_abort(c("x" = "Cannot specify both {.arg n} and {.arg names}"))
+    }
+
+    if (!is.null(names)) {
+        names <- match.arg(names, choices = names(colours), several.ok = TRUE)
+        return(colours[names])
+    }
+
     if (is.null(n)) {
         return(unname(colours))
     }
-    if (is.character(n)) {
-        return(colours[n])
-    }
-    if (is.numeric(n) && n <= length(colours)) {
+
+    validate_numeric(n, 1, c(1, Inf), msg = "one-element positive")
+    if (n <= length(colours)) {
         return(unname(colours[seq_len(n)]))
-    } else if (is.numeric(n)) {
-        ## interpolate if more colours needed, but this probably won't look good!
-        return(grDevices::colorRampPalette(colours)(n))
     }
+    ## interpolate if more colours needed, but this probably won't look good!
+    return(grDevices::colorRampPalette(colours)(n))
 }
 
 
@@ -296,7 +302,7 @@ palette_mnirs <- function(n = NULL) {
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     verbose = FALSE
 #' )
 #'
 #' ggplot(df, aes(x = time)) +

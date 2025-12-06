@@ -8,8 +8,7 @@
 .csv file with seven columns and 974 rows.
 \itemize{
 \item \code{nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")}
-\item \verb{time_channel = c("hh:mm:ss)}
-\item \verb{event_channel = c("Lap)}
+\item \code{time_channel = c("hh:mm:ss")}
 }
 }
 \description{

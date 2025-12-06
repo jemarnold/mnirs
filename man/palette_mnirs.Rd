@@ -4,11 +4,12 @@
 \alias{palette_mnirs}
 \title{Custom \emph{{mnirs}} colour palette}
 \usage{
-palette_mnirs(n = NULL)
+palette_mnirs(n = NULL, names = NULL)
 }
 \arguments{
-\item{n}{A character or numeric vector specifying either the name or the
-number in order of colours to return.}
+\item{n}{A numeric vector specifying the number of colours to return.}
+
+\item{names}{A character vector specifying colour names to return.}
 }
 \value{
 Named or unnamed character vector of hex colours.
@@ -19,8 +20,8 @@ Custom \emph{{mnirs}} colour palette
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
 scales::show_col(palette_mnirs())
-scales::show_col(palette_mnirs(2))
-scales::show_col(palette_mnirs(c("red", "orange")))
+scales::show_col(palette_mnirs(n = 2))
+scales::show_col(palette_mnirs(names = c("red", "orange")))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

@@ -15,13 +15,13 @@ filter_mnirs(
   method = c("smooth_spline", "butterworth", "moving_average"),
   spar = NULL,
   type = c("low", "high", "stop", "pass"),
-  n = 1,
+  order = 1,
   W = NULL,
   fc = NULL,
   width = NULL,
   span = NULL,
   na.rm = FALSE,
-  inform = TRUE,
+  verbose = TRUE,
   ...
 )
 }
@@ -47,7 +47,7 @@ from \code{time_channel} if not defined explicitly.}
 \describe{
 \item{\code{"smooth_spline"}}{Fits a cubic smoothing spline.}
 \item{\code{"butterworth"}}{Uses a centred Butterworth digital filter.
-\code{type} should be defined (see \emph{Details}).}
+\code{type} must be defined (see \emph{Details}).}
 \item{\code{"moving_average"}}{Uses a centred moving average filter.}
 }}
 
@@ -63,8 +63,8 @@ from \code{time_channel} if not defined explicitly.}
 \item{\code{"pass"}}{For a \emph{pass-band} filter.}
 }}
 
-\item{n}{An integer defining the filter order for \code{method = "butterworth"}
-(\emph{default} \code{n = 1}).}
+\item{order}{An integer defining the filter order for
+\code{method = "butterworth"} (\emph{default} \code{order = 1}).}
 
 \item{W}{A one- or two-element numeric vector defining the filter cutoff
 frequency(ies) for \code{method = "butterworth"}, as a fraction of the
@@ -82,11 +82,11 @@ around \code{idx} in which to perform the operation for
 in which to perform the operation for \code{method = "moving_average"}.
 In units of \code{time_channel} or \code{t}, between \verb{[t - span/2, t + span/2]}.}
 
-\item{na.rm}{A logical indicating whether missing values should be ignored
-(\code{TRUE}) before the filter is applied. Otherwise \code{FALSE} (the \emph{default})
-will throw an error (see \emph{Details}).}
+\item{na.rm}{A logical indicating whether missing values should be preserved
+and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
+will throw an error if there are any \code{NA}s (see \emph{Details}).}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 
 \item{...}{Additional arguments.}
@@ -126,8 +126,8 @@ frequency \code{W} to be passed through as the output signal, respectively.
 from the output signal. \emph{Pass-band} defines a critical range of
 frequencies which are passed through as the output signal.
 
-The filter order (number of passes) is defined by \code{n}, typically in
-the range \verb{n = [1, 10]}. Higher filter order tends to capture more
+The filter order (number of passes) is defined by \code{order}, typically in
+the range \verb{order = [1, 10]}. Higher filter order tends to capture more
 rapid changes in amplitude, but also causes more distortion around
 those change points in the signal. General advice is to use the
 lowest filter order which sufficiently captures the desired rapid
@@ -145,7 +145,7 @@ Alternatively, the cutoff frequency can be defined by \code{fc} and
 in Hz, and \code{sample_rate} is the sample rate of the recorded data in
 Hz. \code{W = fc / (sample_rate / 2)}.
 
-Only One of either \code{W} or \code{fc} should be defined. If both are defined,
+Only one of either \code{W} or \code{fc} should be defined. If both are defined,
 \code{W} will be preferred over \code{fc}.}
 
 \item{\code{method = "moving_average"}}{Applies a centred (symmetrical)
@@ -169,25 +169,25 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    verbose = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
         width = 10,
-        inform = FALSE
+        verbose = FALSE
     )
 
 data_filtered <- filter_mnirs(
     data,
-    # nirs_channel = NULL,  ## taken from metadata
+    # nirs_channel = NULL,  ## retrieved from metadata
     # time_channel = NULL,
     # sample_rate = NULL,
     method = "butterworth", ## Butterworth digital filter is a common choice
     type = "low",           ## specify a low-pass filter
-    n = 2,                  ## filter order number
+    order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency
-    inform = FALSE
+    verbose = FALSE
 )
 
 ## add the non-filtered data back to the plot to compare

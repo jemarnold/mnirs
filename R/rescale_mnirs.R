@@ -46,24 +46,23 @@
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' library(ggplot2)
 #'
+#' options(mnirs.verbose = FALSE)
+#' 
 #' ## read example data
 #' data_rescaled <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
-#'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     time_channel = c(time = "hh:mm:ss")
 #' ) |>
-#'     resample_mnirs(inform = FALSE) |>
+#'     resample_mnirs() |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10,
-#'         inform = FALSE
+#'         width = 10
 #'     ) |>
-#'     filter_mnirs(na.rm = TRUE, inform = FALSE) |>
+#'     filter_mnirs(na.rm = TRUE) |>
 #'     rescale_mnirs(
-#'         range = c(0, 100),   ## rescale to a 0-100% functional exercise range
-#'         inform = FALSE
+#'         range = c(0, 100)   ## rescale to a 0-100% functional exercise range
 #'     )
 #'
 #' plot(data_rescaled, label_time = TRUE) +
@@ -72,21 +71,21 @@
 #' @export
 rescale_mnirs <- function(
     data,
-    nirs_channels = list(),
+    nirs_channels = list(NULL),
     range,
-    inform = TRUE
+    verbose = TRUE
 ) {
     ## validate =================================
     validate_mnirs_data(data, ncol = 1)
     metadata <- attributes(data)
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform)
+    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
     validate_numeric(range, 2, msg = "two-element `c(min, max)`")
 
     ## rescale range ================================
-    ## this is actually a fast for loop
+    ## this is actually a fast modify-in-place for loop
     for (group in nirs_channels) {
         group_data <- as.matrix(data[, group, drop = FALSE])
         group_data_range <- range(group_data, na.rm = TRUE)

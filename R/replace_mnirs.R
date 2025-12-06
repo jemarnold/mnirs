@@ -33,7 +33,7 @@
 #'      `NA`s with the most recent valid non-`NA` value to the left for
 #'      trailing `NA`s or to the right for leading `NA`s, using
 #'      [stats::approx()].}
-#'      \item{`"NA"`}{Returns `NA`s without replacement.}
+#'      \item{`"none"`}{Returns `NA`s without replacement.}
 #'   }
 #' @inheritParams validate_mnirs
 #'
@@ -70,7 +70,7 @@
 #' x <- c(1, 999, 3, 4, 999, 6)
 #' replace_invalid(x, invalid_values = 999, width = 2, method = "median")
 #'
-#' (x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "NA"))
+#' (x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
 #'
 #' replace_missing(x_na, method = "linear")
 #'
@@ -79,7 +79,7 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     verbose = FALSE
 #' )
 #'
 #' ## clean data
@@ -125,32 +125,35 @@ replace_mnirs <- function(
     outlier_cutoff = NULL,
     width = NULL,
     span = NULL,
-    method = c("linear", "median", "locf", "NA"),
-    inform = TRUE
+    method = c("linear", "median", "locf", "none"),
+    verbose = TRUE
 ) {
     ## validation ====================================
     method <- match.arg(method)
     check_conditions <- c(
         !is.null(c(invalid_values, invalid_above, invalid_below)),
         !is.null(outlier_cutoff),
-        method != "NA"
+        method != "none"
     )
     ## do nothing condition
     if (!any(check_conditions)) {
-        cli_abort(
-            "At least one of {.arg invalid_values}, {.arg invalid_above}, \\
-            {.arg invalid_below}, {.arg outlier_cutoff}, or {.arg method} \\
-            must be specified."
-        )
+        cli_abort(c(
+            "x" = "No replacement criteria specified",
+            "i" = "At least one of {.arg invalid_values}, \\
+            {.arg invalid_above}, {.arg invalid_below}, \\
+            {.arg outlier_cutoff}, or {.arg method} must be specified."
+        ))
     }
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    ## inform = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
+    ## verbose = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(
+        data, nirs_channels, verbose = FALSE
+    )
     nirs_channels <- unlist(nirs_channels, use.names = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
     time_vec <- round(data[[time_channel]], 6)
@@ -164,7 +167,7 @@ replace_mnirs <- function(
                 invalid_values = invalid_values,
                 invalid_above = invalid_above,
                 invalid_below = invalid_below,
-                method = "NA"
+                method = "none"
             )
         }
         if (check_conditions[2L]) {
@@ -173,7 +176,7 @@ replace_mnirs <- function(
                 t = time_vec,
                 width = width,
                 span = span,
-                method = "NA",
+                method = "none",
                 outlier_cutoff = outlier_cutoff
             )
         }
@@ -207,7 +210,7 @@ replace_mnirs <- function(
 #' @inheritParams replace_mnirs
 #'
 #' @details
-#' `replace_invalid()` can be used to overwrite known invalid values in
+#' `replace_invalid()` can be used to remove known invalid values in
 #'   exported data.
 #'
 #' - Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
@@ -230,32 +233,25 @@ replace_invalid <- function(
     invalid_below = NULL,
     width = NULL,
     span = NULL,
-    method = c("median", "NA"),
-    inform = TRUE
+    method = c("median", "none"),
+    verbose = TRUE
 ) {
     ## validate ===============================================
-    validate_numeric(x)
-    validate_numeric(t)
-    if (length(x) != length(t)) {
-        cli_abort(
-            "{.arg x} and {.arg t} must be {.cls numeric} vectors of the \\
-            same length."
-        )
-    }
-
+    validate_x_t(x, t)
     if (is.null(c(invalid_values, invalid_above, invalid_below))) {
-        cli_abort(
-            "At least one of {.arg invalid_values}, {.arg invalid_above}, \\
-            or {.arg invalid_below} must be specified."
-        )
+        cli_abort(c(
+            "x" = "No replacement criteria specified",
+            "i" = "At least one of {.arg invalid_values}, \\
+            {.arg invalid_above}, or {.arg invalid_below} must be specified."
+        ))
     }
 
     validate_numeric(invalid_values)
     validate_numeric(invalid_above, 1, msg = "one-element")
     validate_numeric(invalid_below, 1, msg = "one-element")
-    method <- match.arg(method) == "median" ## into logical
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    method <- match.arg(method)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
     ## process ========================================================
@@ -269,22 +265,18 @@ replace_invalid <- function(
     )
     y[invalid_idx] <- NA_real_
 
-    if (!method) {
-        ## if method = "NA"
-        return(y)
-    }
-
-    if (method) {
+    if (method == "median") {
         ## if method = "median"
         ## invalid_values removed to NA first,
         ## so returns local median excluding idx
         window_idx <- compute_local_windows(
-            t, invalid_idx, width, span, inform = inform
+            t, invalid_idx, width, span, verbose = verbose
         )
         local_medians <- compute_local_fun(y, window_idx, median)
         y[invalid_idx] <- local_medians
-        return(y)
     }
+    
+    return(y)
 }
 
 
@@ -307,7 +299,7 @@ replace_invalid <- function(
 #'   minimal or zero variation.
 #'
 #' - Values of `x` outside local bounds defined by `outlier_cutoff` are
-#'   identified as local outliers and either removed if `method = "NA"`, or
+#'   identified as local outliers and either removed if `method = "none"`, or
 #'   replaced with the local median value (`method = "median"`, the *default*).
 #'
 #' - This function will NOT replace `NA` values already existing in the `x`.
@@ -324,36 +316,29 @@ replace_invalid <- function(
 replace_outliers <- function(
     x,
     t = seq_along(x),
-    outlier_cutoff = 3,
+    outlier_cutoff = 3L,
     width = NULL,
     span = NULL,
-    method = c("median", "NA"),
-    inform = TRUE
+    method = c("median", "none"),
+    verbose = TRUE
 ) {
     ## validate ===============================================
-    validate_numeric(x)
-    validate_numeric(t)
-    if (length(x) != length(t)) {
-        cli_abort(
-            "{.arg x} and {.arg t} must be {.cls numeric} vectors of the \\
-            same length."
-        )
-    }
-    method <- match.arg(method) == "median" ## into logical
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    validate_x_t(x, t)
+    method <- match.arg(method)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
     ## process =====================================================
     window_idx <- compute_local_windows(
-        t, width = width, span = span, inform = inform
+        t, width = width, span = span, verbose = verbose
     )
     local_medians <- compute_local_fun(x, window_idx, median)
     is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)
 
     ## fill outliers with median or NA
     y <- x
-    y[is_outlier] <- if (method) {
+    y[is_outlier] <- if (method == "median") {
         local_medians[is_outlier]
     } else {
         NA_real_
@@ -401,14 +386,7 @@ replace_missing <- function(
     ...
 ) {
     ## validate ===============================================
-    validate_numeric(x)
-    validate_numeric(t)
-    if (length(x) != length(t)) {
-        cli_abort(
-            "{.arg x} and {.arg t} must be {.cls numeric} vectors of the \\
-            same length."
-        )
-    }
+    validate_x_t(x, t)
     method <- match.arg(method)
     if (method == "locf") {
         method <- "constant" ## swap for approx method arg

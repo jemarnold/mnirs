@@ -8,7 +8,7 @@ detect_time_channel(
   data,
   time_channel = NULL,
   nirs_device = NULL,
-  inform = TRUE
+  verbose = TRUE
 )
 }
 \description{

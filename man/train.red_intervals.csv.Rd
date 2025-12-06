@@ -7,9 +7,9 @@
 \format{
 .csv file with header metadata and with 18 columns and 12001 rows.
 \itemize{
-\item \code{nirs_channels = c("SmO2 Live", "SmO2 Live(2)")}
-\item \verb{time_channel = c("hh:mm:ss)}
-\item \verb{event_channel = c("Lap)}
+\item \code{nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")}
+\item \code{time_channel = c("Timestamp (seconds passed)")}
+\item \code{event_channel = c("Lap/Event")}
 }
 }
 \description{

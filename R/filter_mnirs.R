@@ -14,7 +14,7 @@
 #'   \describe{
 #'      \item{`"smooth_spline"`}{Fits a cubic smoothing spline.}
 #'      \item{`"butterworth"`}{Uses a centred Butterworth digital filter.
-#'      `type` should be defined (see *Details*).}
+#'      `type` must be defined (see *Details*).}
 #'      \item{`"moving_average"`}{Uses a centred moving average filter.}
 #'   }
 #' @param spar A numeric value defining the smoothing parameter for
@@ -27,8 +27,8 @@
 #'      \item{`"stop"`}{For a *stop-band* (band-reject) filter.}
 #'      \item{`"pass"`}{For a *pass-band* filter.}
 #'   }
-#' @param n An integer defining the filter order for `method = "butterworth"`
-#'   (*default* `n = 1`).
+#' @param order An integer defining the filter order for 
+#'   `method = "butterworth"` (*default* `order = 1`).
 #' @param W A one- or two-element numeric vector defining the filter cutoff
 #'   frequency(ies) for `method = "butterworth"`, as a fraction of the
 #'   Nyquist frequency (see *Details*).
@@ -42,9 +42,9 @@
 #'   in which to perform the operation for `method = "moving_average"`.
 #'   In units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 #'
-#' @param na.rm A logical indicating whether missing values should be ignored
-#'   (`TRUE`) before the filter is applied. Otherwise `FALSE` (the *default*)
-#'   will throw an error (see *Details*).
+#' @param na.rm A logical indicating whether missing values should be preserved
+#'   and passed through the filter (`TRUE`). Otherwise `FALSE` (the *default*)
+#'   will throw an error if there are any `NA`s (see *Details*).
 #' @param ... Additional arguments.
 #' @inheritParams validate_mnirs
 #'
@@ -70,8 +70,8 @@
 #'   from the output signal. *Pass-band* defines a critical range of
 #'   frequencies which are passed through as the output signal.
 #'
-#'   The filter order (number of passes) is defined by `n`, typically in
-#'   the range `n = [1, 10]`. Higher filter order tends to capture more
+#'   The filter order (number of passes) is defined by `order`, typically in
+#'   the range `order = [1, 10]`. Higher filter order tends to capture more
 #'   rapid changes in amplitude, but also causes more distortion around
 #'   those change points in the signal. General advice is to use the
 #'   lowest filter order which sufficiently captures the desired rapid
@@ -89,7 +89,7 @@
 #'   in Hz, and `sample_rate` is the sample rate of the recorded data in
 #'   Hz. `W = fc / (sample_rate / 2)`.
 #'
-#'   Only One of either `W` or `fc` should be defined. If both are defined,
+#'   Only one of either `W` or `fc` should be defined. If both are defined,
 #'   `W` will be preferred over `fc`.}
 #'
 #'   \item{`method = "moving_average"`}{Applies a centred (symmetrical)
@@ -116,25 +116,25 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     inform = FALSE
+#'     verbose = FALSE
 #' ) |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
 #'         width = 10,
-#'         inform = FALSE
+#'         verbose = FALSE
 #'     )
 #'
 #' data_filtered <- filter_mnirs(
 #'     data,
-#'     # nirs_channel = NULL,  ## taken from metadata
+#'     # nirs_channel = NULL,  ## retrieved from metadata
 #'     # time_channel = NULL,
 #'     # sample_rate = NULL,
 #'     method = "butterworth", ## Butterworth digital filter is a common choice
 #'     type = "low",           ## specify a low-pass filter
-#'     n = 2,                  ## filter order number
+#'     order = 2,              ## filter order number
 #'     W = 0.02,               ## filter fractional critical frequency
-#'     inform = FALSE
+#'     verbose = FALSE
 #' )
 #'
 #' ## add the non-filtered data back to the plot to compare
@@ -154,20 +154,20 @@ filter_mnirs <- function(
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
     type = c("low", "high", "stop", "pass"),
-    n = 1,
+    order = 1,
     W = NULL,
     fc = NULL,
     width = NULL,
     span = NULL,
     na.rm = FALSE,
-    inform = TRUE,
+    verbose = TRUE,
     ...
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
     method <- match.arg(method)
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
     ## create object with class for method dispatch
@@ -191,20 +191,22 @@ filter_mnirs.smooth_spline <- function(
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
     type = c("low", "high", "stop", "pass"),
-    n = 1,
+    order = 1,
     W = NULL,
     fc = NULL,
     width = NULL,
     span = NULL,
     na.rm = FALSE,
-    inform = TRUE,
+    verbose = TRUE,
     ...
 ) {
     ## validation ==========================================
     rlang::check_installed("stats", reason = "to use stats::smooth.spline()")
     metadata <- attributes(data)
-    ## inform = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
+    ## verbose = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(
+        data, nirs_channels, verbose = FALSE
+    )
     time_channel <- validate_time_channel(data, time_channel)
     validate_numeric(
         spar, 1, c(0, Inf), FALSE, msg = "one-element positive"
@@ -215,9 +217,8 @@ filter_mnirs.smooth_spline <- function(
 
     if (anyDuplicated(time_vec)) {
         cli_abort(c(
-            "{.arg time_channel} has non-sequential or repeating values \\
-            causing {.fn stats::smooth.spline} to fail.",
-            "i" = "Use {.fn mnirs::resample_mnirs} to fix samples."
+            "x" = "{.arg time_channel} has duplicated or irregular samples.",
+            "i" = "Re-sample with {.fn mnirs::resample_mnirs}."
         ))
     }
 
@@ -230,15 +231,17 @@ filter_mnirs.smooth_spline <- function(
             x <- na_info$x_valid
             time_vec <- time_vec[!na_info$na_idx]
         } else if (anyNA(x)) {
-            cli_abort(
-                "{.arg x} contains internal `NA`s."
-            )
+            cli_abort(c(
+                "x" = "{.arg nirs_channels} = {.val {.x}} contains internal \\
+                {.val {NA}}'s.",
+                "i" = "Set {.arg na.rm = TRUE} to preserve {.val {NA}}'s."
+            ))
         }
 
         spline_model <- stats::smooth.spline(x = time_vec, y = x, spar = spar)
 
-        if (is.null(spar) && inform) {
-            cli_bullets(c(
+        if (is.null(spar) && verbose) {
+            cli_inform(c(
                 "i" = "{.arg nirs_channel} = {.val {.x}}: \\
                 `smooth.spline(spar = {.val {round(spline_model$spar, 3)}})`"
             ))
@@ -269,33 +272,38 @@ filter_mnirs.butterworth <- function(
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
     type = c("low", "high", "stop", "pass"),
-    n = 1,
+    order = 1,
     W = NULL,
     fc = NULL,
     width = NULL,
     span = NULL,
     na.rm = FALSE,
-    inform = TRUE,
+    verbose = TRUE,
     ...
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    ## inform = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
+    ## verbose = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(
+        data, nirs_channels, verbose = FALSE
+    )
     time_channel <- validate_time_channel(data, time_channel)
 
     sample_rate <- validate_sample_rate(
-        data, time_channel, sample_rate, inform
+        data, time_channel, sample_rate, verbose
     )
     type <- match.arg(type)
     edges <- list(...)$edges %||% "rev" ## default filter_butter(edges)
 
     if (is.null(c(W, fc))) {
-        cli_abort("{.arg W} or {.arg fc} must be defined.")
+        cli_abort(c(
+            "x" = "Cutoff frequency undefined.",
+            "i" = "One of {.arg W} or {.arg fc} must be defined."
+        ))
     }
 
     fc_n <- if (type %in% c("low", "high")) 1 else 2
-    ## n & W are validated in filter_butter
+    ## order & W are validated in filter_butter
     validate_numeric(
         fc, fc_n, c(0, Inf), inclusive = FALSE,
         msg = paste0(fc_n, "-element positive")
@@ -303,10 +311,10 @@ filter_mnirs.butterworth <- function(
 
     if (!is.null(W) && !is.null(fc)) {
         fc <- NULL
-        if (inform) {
-            cli_warn(c(
-                "Either {.arg W} or {.arg fc} should be defined, not both.",
-                "i" = "Defaulting to {.arg W} = {.val {W}}"
+        if (verbose) {
+            cli_inform(c(
+                "i" = "{.val Butterworth} parameter {.arg W} = \\
+                {.val {W}} overrides {.arg fc}."
             ))
         }
     }
@@ -317,7 +325,7 @@ filter_mnirs.butterworth <- function(
 
     ## processing ==========================================
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_butter(.x, n, W, type, edges, na.rm)
+        filter_butter(.x, order, W, type, edges, na.rm)
     })
 
     ## Metadata =================================
@@ -340,26 +348,28 @@ filter_mnirs.moving_average <- function(
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
     type = c("low", "high", "stop", "pass"),
-    n = 1,
+    order = 1,
     W = NULL,
     fc = NULL,
     width = NULL,
     span = NULL,
     na.rm = FALSE,
-    inform = TRUE,
+    verbose = TRUE,
     ...
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    ## inform = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, inform = FALSE)
+    ## verbose = FALSE because grouping irrelevant
+    nirs_channels <- validate_nirs_channels(
+        data, nirs_channels, verbose = FALSE
+    )
     time_channel <- validate_time_channel(data, time_channel)
 
     ## processing ==========================================
     time_vec <- round(data[[time_channel]], 6)
 
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_moving_average(.x, time_vec, width, span, inform)
+        filter_moving_average(.x, time_vec, width, span, verbose)
     })
 
     ## Metadata =================================
@@ -410,24 +420,17 @@ filter_moving_average <- function(
     t = seq_along(x),
     width = NULL,
     span = NULL,
-    inform = TRUE
+    verbose = TRUE
 ) {
     ## validation ===========================================
-    validate_numeric(x)
-    validate_numeric(t)
-    if (length(x) != length(t)) {
-        cli_abort(
-            "{.arg x} and {.arg t} must be {.cls numeric} vectors of the \\
-            same length."
-        )
-    }
-    if (missing(inform)) {
-        inform <- getOption("mnirs.inform", default = TRUE)
+    validate_x_t(x, t)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
     ## processing ==============================================
     window_idx <- compute_local_windows(
-        t, width = width, span = span, inform = inform
+        t, width = width, span = span, verbose = verbose
     )
     y <- compute_local_fun(x, window_idx, mean)
     ## explicit overwrite NaN to NA
@@ -464,8 +467,8 @@ filter_moving_average <- function(
 #'   from the output signal. *Pass-band* defines a critical range of
 #'   frequencies which are passed through as the output signal.
 #'
-#' The filter order (number of passes) is defined by `n`, typically in
-#'   the range `n = [1, 10]`. Higher filter order tends to capture more
+#' The filter order (number of passes) is defined by `order`, typically in
+#'   the range `order = [1, 10]`. Higher filter order tends to capture more
 #'   rapid changes in amplitude, but also causes more distortion around
 #'   those change points in the signal. General advice is to use the
 #'   lowest filter order which sufficiently captures the desired rapid
@@ -492,8 +495,8 @@ filter_moving_average <- function(
 #' sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 #' noise <- rnorm(150, mean = 0, sd = 6)
 #' noisy_sin <- sin + noise
-#' filt_without_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "none")
-#' filt_with_edge <- filter_butter(x = noisy_sin, n = 2, W = 0.1, edges = "rep1")
+#' filt_without_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "none")
+#' filt_with_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "rep1")
 #'
 #' ggplot(data.frame(), aes(x = seq_along(noise))) +
 #'     theme_mnirs() +
@@ -505,7 +508,7 @@ filter_moving_average <- function(
 #' @export
 filter_butter <- function(
     x,
-    n = 1,
+    order = 1,
     W,
     type = c("low", "high", "stop", "pass"),
     edges = c("rev", "rep1", "none"),
@@ -515,7 +518,7 @@ filter_butter <- function(
     rlang::check_installed("signal", "to use Butterworth digital filter")
     validate_numeric(x)
     validate_numeric(
-        n, 1, c(1, Inf), integer = TRUE, msg = "one-element positive"
+        order, 1, c(1, Inf), integer = TRUE, msg = "one-element positive"
     )
     type <- match.arg(type)
     if (type %in% c("low", "high")) {
@@ -538,13 +541,14 @@ filter_butter <- function(
         na_info <- preserve_na(x)
         x <- na_info$x_valid
     } else if (any(is.na(x))) {
-        cli_abort(
-            "{.arg x} contains internal `NA`s."
-        )
+        cli_abort(c(
+            "x" = "{.arg x} contains internal {.val {NA}}'s.",
+            "i" = "Set {.arg na.rm = TRUE} to preserve {.val {NA}}'s."
+        ))
     }
 
     if (edges == "none") {
-        y <- signal::filtfilt(signal::butter(n, W, type), x = x)
+        y <- signal::filtfilt(signal::butter(n = order, W, type), x = x)
     } else {
         x_n <- length(x)
         pad <- max(1, x_n %/% 20) ## 5% padded length
@@ -555,7 +559,10 @@ filter_butter <- function(
             "rep1" = c(rep(x[1], pad), x, rep(x[x_n], pad))
         )
 
-        y_padded <- signal::filtfilt(signal::butter(n, W, type), x = padded)
+        y_padded <- signal::filtfilt(
+            signal::butter(n = order, W, type),
+            x = padded
+        )
         y <- y_padded[(pad + 1):(pad + x_n)]
     }
 

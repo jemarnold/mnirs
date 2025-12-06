@@ -12,10 +12,10 @@ compute_local_windows(
   idx = seq_along(t),
   width = NULL,
   span = NULL,
-  inform = TRUE
+  verbose = TRUE
 )
 
-compute_local_fun(x, window_idx, FUN)
+compute_local_fun(x, window_idx, fn)
 
 compute_outliers(x, window_idx, local_medians, outlier_cutoff)
 
@@ -24,7 +24,7 @@ compute_window_of_valid_neighbours(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  inform = TRUE
+  verbose = TRUE
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ around \code{idx} in which to perform the operation., between
 in which to perform the operation. In units of \code{time_channel} or \code{t},
 between \verb{[t - span/2, t + span/2]}.}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 
 \item{x}{A numeric vector.}
@@ -51,7 +51,7 @@ warnings and information messages used for troubleshooting.}
 shorter length as \code{x} with numeric vectors for the sample indices of
 local rolling windows.}
 
-\item{FUN}{A function to pass through for local rolling calculation.
+\item{fn}{A function to pass through for local rolling calculation.
 Currently used functions are \code{c(median, mean)}.}
 
 \item{local_medians}{A numeric vector the same length as \code{x} of local
@@ -83,7 +83,7 @@ sample indices \code{idx} along a time variable \code{t}, defined by either \cod
 in samples or \code{span} in units of \code{t}.
 
 \code{compute_local_fun()}: Helper function to return a vector of local values
-calculated from \code{x} by a function \code{FUN} within a list of rolling sample
+calculated from \code{x} by a function \code{fn} within a list of rolling sample
 windows.
 
 \code{compute_outliers()}: Helper function to return a vector of logicals

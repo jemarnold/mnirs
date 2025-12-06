@@ -52,28 +52,10 @@ compute_local_windows <- function(
     idx = seq_along(t),
     width = NULL,
     span = NULL,
-    inform = TRUE
+    verbose = TRUE
 ) {
-    ## validation ===========================================
-    if (is.null(c(width, span))) {
-        cli_abort("{.arg width} or {.arg span} must be defined.")
-    }
-    validate_numeric(
-        width, 1, c(0, Inf), integer = TRUE, msg = "one-element positive"
-    )
-    validate_numeric(span, 1, c(0, Inf), msg = "one-element positive")
-    if (!is.null(width) && !is.null(span)) {
-        span <- NULL
-        if (inform) {
-            cli_warn(c(
-                "Either {.arg width} or {.arg span} should be defined, \\
-                not both.",
-                "i" = "Defaulting to {.arg width} = {.val {width}}"
-            ))
-        }
-    }
+    validate_width_span(width, span, verbose)
 
-    ## process ============================================
     n <- length(t)
     if (!is.null(width)) {
         half_width <- floor(width * 0.5)
@@ -89,19 +71,20 @@ compute_local_windows <- function(
         start_idx[.i]:end_idx[.i] ## inclusive of x[i] for detect outliers
         # setdiff(start_idx[.i]:end_idx[.i], .i) ## exclusive of x[i]
     })
+    ## TODO implement faster two-element range idx vectorisation
     # cbind(start = start_idx[idx], end = end_idx[idx]) ## start/end indices
 }
 
 
 #' @description
 #' `compute_local_fun()`: Helper function to return a vector of local values
-#' calculated from `x` by a function `FUN` within a list of rolling sample
+#' calculated from `x` by a function `fn` within a list of rolling sample
 #' windows.
 #'
 #' @param window_idx A list the same length as `window_idx` and the same or
 #'   shorter length as `x` with numeric vectors for the sample indices of
 #'   local rolling windows.
-#' @param FUN A function to pass through for local rolling calculation.
+#' @param fn A function to pass through for local rolling calculation.
 #'   Currently used functions are `c(median, mean)`.
 #'
 #' @returns
@@ -109,13 +92,14 @@ compute_local_windows <- function(
 #'
 #' @rdname compute_helpers
 #' @keywords internal
-compute_local_fun <- function(x, window_idx, FUN) {
+compute_local_fun <- function(x, window_idx, fn) {
     n <- length(window_idx)
     vapply(seq_len(n), \(.i) {
+        ## TODO implement faster two-element range idx vectorisation
         # window <- window_idx[.i,]
         # idx <- window[1L]:window[2L]
-        # FUN(x[window[idx]], na.rm = TRUE)
-        FUN(x[window_idx[[.i]]], na.rm = TRUE)
+        # fn(x[window[idx]], na.rm = TRUE)
+        fn(x[window_idx[[.i]]], na.rm = TRUE)
     }, numeric(1))
 }
 
@@ -182,32 +166,15 @@ compute_window_of_valid_neighbours <- function(
     t = seq_along(x),
     width = NULL,
     span = NULL,
-    inform = TRUE
+    verbose = TRUE
 ) {
-    ## validation ===========================================
-    if (is.null(c(width, span))) {
-        cli_abort("{.arg width} or {.arg span} must be defined.")
-    }
-    validate_numeric(
-        width, 1, c(0, Inf), integer = TRUE, msg = "one-element positive"
-    )
-    validate_numeric(span, 1, c(0, Inf), msg = "one-element positive")
-    if (!is.null(width) && !is.null(span)) {
-        span <- NULL
-        if (inform) {
-            cli_warn(c(
-                "Either {.arg width} or {.arg span} should be defined, \\
-                not both.",
-                "i" = "Defaulting to {.arg width} = {.val {width}}"
-            ))
-        }
-    }
+    validate_width_span(width, span, verbose)
 
     na_idx <- which(is.na(x))
     valid_idx <- which(!is.na(x))
     n_valid <- length(valid_idx)
     n_na <- length(na_idx)
-    ## process ============================================
+    
     if (!is.null(width)) {
         ## Find position to the left of each NA in valid_idx sequence
         pos <- findInterval(na_idx, valid_idx)

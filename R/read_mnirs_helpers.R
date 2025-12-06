@@ -4,8 +4,8 @@ read_file <- function(file_path) {
     ## validation: check file exists
     if (!file.exists(file_path)) {
         cli_abort(c(
-            "{.arg file_path} = {.path {file_path}}",
-            "x" = "File not found. Check that file exists."
+            "x" = "File not found. Check that file exists.",
+            "i" = "{.arg file_path} = {.path {file_path}}"
         ))
     }
 
@@ -13,24 +13,23 @@ read_file <- function(file_path) {
     if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
         ## report error when file is open and cannot be accessed by readxl
         data_raw <- tryCatch(
-            {
-                readxl::read_excel(
-                    path = file_path,
-                    col_names = FALSE,
-                    col_types = "text",
-                    .name_repair = "minimal"
-                )
-            },
+            readxl::read_excel(
+                path = file_path,
+                col_names = FALSE,
+                col_types = "text",
+                .name_repair = "minimal"
+            ),
             error = \(e) {
                 if (grepl("cannot be opened", e$message)) {
                     cli_abort(c(
                         "{e}",
-                        "{.arg file_path} = {.path {file_path}}",
-                        "!" = "Cannot be opened, likely because the file \\
-                        is in use."
+                        "x" = "File cannot be opened.",
+                        "i" = "Check the file is not in use by another \\
+                        application.",
+                        "i" = "{.arg file_path} = {.path {file_path}}"
                     ))
                 } else {
-                    stop(e)
+                    cli_abort(e$message)
                 }
             }
         )
@@ -45,9 +44,9 @@ read_file <- function(file_path) {
     } else {
         ## validation: check file types
         cli_abort(c(
-            "{.arg file_path} = {.path {file_path}}",
             "x" = "Unrecognised file type. Only {.var .xls(x)} or \\
-            {.var .csv} supported."
+            {.var .csv} supported.",
+            "i" = "{.arg file_path} = {.path {file_path}}"
         ))
     }
 
@@ -128,7 +127,7 @@ detect_time_channel <- function(
     data,
     time_channel = NULL,
     nirs_device = NULL,
-    inform = TRUE
+    verbose = TRUE
 ) {
     if (!is.null(time_channel)) {
         return(time_channel)
@@ -136,11 +135,9 @@ detect_time_channel <- function(
 
     ## return default sample column for Artinis Oxysoft
     if (!is.null(nirs_device) && nirs_device == "Artinis") {
-        if (inform) {
-            cli_bullets(c(
-                "!" = "Oxysoft detected {.arg time_channel} = {.val {1}} \\
-                and renamed as {.val sample}.",
-                "i" = "Overwrite with {.arg time_channel} = {.cls character}."
+        if (verbose) {
+            cli_inform(c(
+                "!" = "Oxysoft {.val sample} column detected."
             ))
         }
         return(c(sample = "1"))
@@ -148,10 +145,9 @@ detect_time_channel <- function(
 
     ## alert and return detected `time_channel` column name
     alert_time_channel <- function(time_channel) {
-        if (inform) {
-            cli_bullets(c(
-                "!" = "Detected {.arg time_channel} = {.val {time_channel}}.",
-                "i" = "Overwrite with {.arg time_channel} = {.cls character}."
+        if (verbose) {
+            cli_inform(c(
+                "!" = "Detected {.arg time_channel} = {.val {time_channel}}."
             ))
         }
         return(time_channel)
@@ -229,7 +225,7 @@ select_rename_data <- function(
     time_channel,
     event_channel = NULL,
     keep_all = FALSE,
-    inform = TRUE
+    verbose = TRUE
 ) {
     ## if channels not named, names from object
     channel_list <- list(
@@ -261,17 +257,7 @@ select_rename_data <- function(
     channel_inputs <- unlist(channel_inputs, use.names = FALSE)
     renamed_channels <- unlist(renamed_channels, use.names = FALSE)
 
-    ## TODO check for duplicate channel_inputs not in data names
-    # x_counts <- table(channel_vec)
-    # y_counts <- table(names(data))
-    # over_matched <- names(which(table(x) > table(y)[names(table(x))]))
-    # over_matched <- over_matched[!is.na(over_matched)]
-    # if (length(over_matched) > 0) {
-    #     cli::cli_abort(c(
-    #         "Insufficient matches in target vector",
-    #         "x" = "Values exceeding available matches: {.val {over_matched}}"
-    #     ))
-    # }
+    ## TODO check for duplicate channel_inputs not in data names33
 
     ## check channels exist in data
     if (length(setdiff(channel_vec, data_names)) > 0) {
@@ -299,14 +285,14 @@ select_rename_data <- function(
 
     renamed <- !names(result)[channel_names_idx] %in% channel_inputs
 
-    if (inform && any(renamed)) {
+    if (verbose && any(renamed)) {
         ## warn about renamed names
         old_names <- channel_inputs[renamed]
         new_names <- names(result)[channel_names_idx][renamed]
         cli_warn(c(
-            "!" = "Duplicated channel names detected and renamed:",
-            "i" = "{.val {paste(old_names, new_names, sep = ' = ')}}",
-            "i" = "Consider revising to unique names."
+            "!" = "Duplicate channel names detected.",
+            "i" = "Renamed: {.val {paste(old_names, new_names, sep = ' = ')}}",
+            "i" = "Unique channel names can be defined explicitly."
         ))
     }
 
@@ -392,10 +378,6 @@ parse_time_channel <- function(
 }
 
 
-# #' Extract absolute date-time values
-# #' @keywords internal
-# extract_timestamp <- function(file_header) {}
-
 #' Extract Oxysoft sample rate
 #' @keywords internal
 extract_oxysoft_rate <- function(file_header, sample_rate = NULL) {
@@ -414,7 +396,7 @@ parse_sample_rate <- function(
     time_channel,
     sample_rate = NULL,
     nirs_device = NULL,
-    inform = TRUE
+    verbose = TRUE
 ) {
     ## if Oxysoft, sample_rate will be detected = 1
     ## extract and overwrite with exported sample_rate
@@ -430,12 +412,11 @@ parse_sample_rate <- function(
         data[[time_channel]] <- time_vec
         data <- data[data_names]
 
-        if (inform) {
-            cli_bullets(c(
-                "!" = "Oxysoft detected sample_rate = {.val {sample_rate}} Hz.",
-                "i" = "{.val {time_channel}} channel added to the data \\
-                frame with time in {.cls seconds}.",
-                "i" = "Overwrite with {.arg sample_rate} = {.cls numeric}."
+        if (verbose) {
+            cli_inform(c(
+                "!" = "Oxysoft {.arg sample_rate} = {.val {sample_rate}} Hz.",
+                "i" = "{.arg time_channel} = {.val {time_channel}} added to \\
+                the data frame, in {.cls seconds}."
             ))
         }
     }
@@ -448,7 +429,7 @@ parse_sample_rate <- function(
         data,
         time_channel,
         sample_rate,
-        inform
+        verbose
     )
 
     return(list(
@@ -464,9 +445,9 @@ parse_sample_rate <- function(
 detect_irregular_samples <- function(
     x,
     time_channel,
-    inform = TRUE
+    verbose = TRUE
 ) {
-    if (!inform) {
+    if (!verbose) {
         return(invisible())
     }
 
@@ -495,15 +476,14 @@ detect_irregular_samples <- function(
     } else {
         ## if 5 or fewer irregular samples, print all of them
         info_msg <- c(
-            "Investigate at {.arg {time_channel}} = \\
-            {.val {irregular_vec}}."
+            "Investigate at {.arg {time_channel}} = {.val {irregular_vec}}."
         )
     }
 
     cli_warn(c(
-        "!" = "{.arg time_channel} has duplicated or irregular samples. \\
-            Consider re-sampling with {.fn mnirs::resample_mnirs}.",
-        "i" = info_msg
+        "!" = "Duplicate or irregular {.arg time_channel} samples detected.",
+        "i" = info_msg,
+        "i" = "Re-sample with {.fn mnirs::resample_mnirs}."
     ))
 
     return(invisible())

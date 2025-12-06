@@ -1,16 +1,17 @@
 ## helper to create test data with metadata
 create_test_data <- function(
-        time_max = 10,
-        sample_rate = 10,
-        add_metadata = TRUE
+    time_max = 10,
+    sample_rate = 10,
+    add_metadata = TRUE
 ) {
-    time = seq(0, time_max, by = 1/sample_rate)
+    time = seq(0, time_max, by = 1 / sample_rate)
     nrow <- length(time)
-    data <- tibble(time = time,
-                   nirs1 = rnorm(nrow, 50, 5),
-                   nirs2 = rnorm(nrow, 60, 5),
-                   nirs3 = rnorm(nrow, 80, 5),
-                   event = c(1, rep(NA, nrow - 2), 2),
+    data <- tibble(
+        time = time,
+        nirs1 = rnorm(nrow, 50, 5),
+        nirs2 = rnorm(nrow, 60, 5),
+        nirs3 = rnorm(nrow, 80, 5),
+        event = c(1, rep(NA, nrow - 2), 2),
     )
     class(data) <- c("mnirs", class(data))
 
@@ -87,8 +88,11 @@ test_that("validate_mnirs_data() accepts valid data frames", {
 })
 
 test_that("validate_mnirs_data() rejects non-data frames", {
-    expect_error(validate_mnirs_data(list(a = 1, b = 2)), "should be a data frame")
-    expect_error(validate_mnirs_data(c(1, 2, 3)), "should be a data frame")
+    expect_error(
+        validate_mnirs_data(list(a = 1, b = 2)),
+        "must be a data frame"
+    )
+    expect_error(validate_mnirs_data(c(1, 2, 3)), "must be a data frame")
 })
 
 test_that("validate_mnirs_data() rejects data frames with < 2 columns", {
@@ -99,7 +103,7 @@ test_that("validate_mnirs_data() rejects data frames with < 2 columns", {
 ## validate_nirs_channels() ========================================
 test_that("validate_nirs_channels() uses metadata when NULL", {
     data <- create_test_data()
-    result <- validate_nirs_channels(data, NULL, inform = FALSE)
+    result <- validate_nirs_channels(data, NULL, verbose = FALSE)
     expect_equal(result, c("nirs1", "nirs2"))
 })
 
@@ -116,8 +120,10 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
     expect_equal(result, nirs_vec)
 
     attr(data, "nirs_channels") <- nirs_vec
-    expect_warning(result <- validate_nirs_channels(data, NULL, inform = TRUE),
-                   "All `nirs_channels`.*grouped")
+    expect_message(
+        result <- validate_nirs_channels(data, NULL, verbose = TRUE),
+        "`nirs_channels`.*grouped"
+    )
     expect_equal(result, nirs_vec)
 
     nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
@@ -127,7 +133,7 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
 
 test_that("validate_nirs_channels() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
-    expect_error(validate_nirs_channels(data, NULL), "not found in metadata")
+    expect_error(validate_nirs_channels(data, NULL), "not detected in metadata")
 })
 
 test_that("validate_nirs_channels() errors when columns don't exist", {
@@ -138,13 +144,19 @@ test_that("validate_nirs_channels() errors when columns don't exist", {
 test_that("validate_nirs_channels() errors for non-numeric channels", {
     data <- create_test_data()
     data$nirs1 <- as.character(data$nirs1)
-    expect_error(validate_nirs_channels(data, c("nirs1", "nirs2")), "must be .*numeric")
+    expect_error(
+        validate_nirs_channels(data, c("nirs1", "nirs2")),
+        "must contain valid.*numeric"
+    )
 })
 
 test_that("validate_nirs_channels() errors when < 2 valid values", {
     data <- create_test_data()
-    data$nirs1 <- c(1, rep(NA, nrow(data)-1))
-    expect_error(validate_nirs_channels(data, c("nirs1", "nirs2")), "at least two valid")
+    data$nirs1 <- c(1, rep(NA, nrow(data) - 1))
+    expect_error(
+        validate_nirs_channels(data, c("nirs1", "nirs2")),
+        "must contain valid.*numeric"
+    )
 })
 
 
@@ -164,7 +176,7 @@ test_that("validate_time_channel() uses explicit channel when provided", {
 
 test_that("validate_time_channel() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
-    expect_error(validate_time_channel(data, NULL), "not found in metadata")
+    expect_error(validate_time_channel(data, NULL), "not detected in metadata")
 })
 
 test_that("validate_time_channel() errors when column doesn't exist", {
@@ -175,13 +187,13 @@ test_that("validate_time_channel() errors when column doesn't exist", {
 test_that("validate_time_channel() errors for non-numeric channel", {
     data <- create_test_data()
     data$time <- as.character(data$time)
-    expect_error(validate_time_channel(data, "time"), "must be .*numeric")
+    expect_error(validate_time_channel(data, "time"), "must contain valid.*numeric")
 })
 
 test_that("validate_time_channel() errors when < 2 valid values", {
     data <- create_test_data()
-    data$time <- c(1, rep(NA, nrow(data)-1))
-    expect_error(validate_time_channel(data, "time"), "at least two valid")
+    data$time <- c(1, rep(NA, nrow(data) - 1))
+    expect_error(validate_time_channel(data, "time"), "must contain valid.*numeric")
 })
 
 
@@ -201,7 +213,7 @@ test_that("validate_event_channel() uses explicit channel when provided", {
 
 test_that("validate_event_channel() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
-    expect_error(validate_event_channel(data, NULL), "not found in metadata")
+    expect_error(validate_event_channel(data, NULL), "not detected in metadata")
 
     ## no metadata, required = FALSE
     expect_equal(validate_event_channel(data, NULL, require = FALSE), NULL)
@@ -214,12 +226,14 @@ test_that("validate_event_channel() errors when column doesn't exist", {
 
 test_that("validate_event_channel() errors when all NA", {
     data <- create_test_data()
-    data_one <- data[1:(nrow(data)-1),] ## one valid should work
+    data_one <- data[1:(nrow(data) - 1), ] ## one valid should work
     expect_equal(validate_event_channel(data_one, "event"), "event")
-    data_na <- data[2:(nrow(data)-1),]
-    expect_error(validate_event_channel(data_na, "event"), "at least one valid")
+    data_na <- data[2:(nrow(data) - 1), ]
+    expect_error(
+        validate_event_channel(data_na, "event"),
+        "must contain valid"
+    )
 })
-
 
 
 ## between() ===============================================================
@@ -258,17 +272,26 @@ test_that("between() handles inclusive/exclusive", {
     expect_false(between(1, 1, 10, inclusive = FALSE))
     expect_false(between(10, 1, 10, inclusive = FALSE))
     expect_true(between(5, 1, 10, inclusive = FALSE))
-    expect_equal(between(c(1, 5, 10), 1, 10, inclusive = FALSE), c(FALSE, TRUE, FALSE))
+    expect_equal(
+        between(c(1, 5, 10), 1, 10, inclusive = FALSE),
+        c(FALSE, TRUE, FALSE)
+    )
 
     ## left inclusive
     expect_true(between(1, 1, 10, inclusive = "left"))
     expect_false(between(10, 1, 10, inclusive = "left"))
-    expect_equal(between(c(1, 5, 10), 1, 10, inclusive = "left"), c(TRUE, TRUE, FALSE))
+    expect_equal(
+        between(c(1, 5, 10), 1, 10, inclusive = "left"),
+        c(TRUE, TRUE, FALSE)
+    )
 
     ## right inclusive
     expect_false(between(1, 1, 10, inclusive = "right"))
     expect_true(between(10, 1, 10, inclusive = "right"))
-    expect_equal(between(c(1, 5, 10), 1, 10, inclusive = "right"), c(FALSE, TRUE, TRUE))
+    expect_equal(
+        between(c(1, 5, 10), 1, 10, inclusive = "right"),
+        c(FALSE, TRUE, TRUE)
+    )
 })
 
 test_that("between() detects positive non-zero values", {
@@ -320,7 +343,8 @@ test_that("between is equivalent to dplyr::between()", {
     expect_equal(between(NA, 1, 10), dplyr::between(NA, 1, 10))
     expect_equal(
         between(c(1, NA, 5), 1, 10),
-        dplyr::between(c(1, NA, 5), 1, 10))
+        dplyr::between(c(1, NA, 5), 1, 10)
+    )
 })
 
 
@@ -353,11 +377,11 @@ test_that("estimate_sample_rate works correctly", {
     ## edge case sample rate undetectable returns NULL
     expect_error(
         estimate_sample_rate(c(1, 1, 1, 1, 1)),
-        "undetectable"
+        "Unable to estimate"
     )
     expect_error(
         estimate_sample_rate(Inf),
-        "undetectable"
+        "Unable to estimate"
     )
 })
 
@@ -374,7 +398,7 @@ test_that("validate_sample_rate() uses explicit value with warning when provided
     expect_equal(validate_sample_rate(data, "time", 20), 20) |>
         expect_warning("appears to be inconsistent with estimated")
     ## uses explicit without warning
-    expect_equal(validate_sample_rate(data, "time", 20, inform = FALSE), 20) |>
+    expect_equal(validate_sample_rate(data, "time", 20, verbose = FALSE), 20) |>
         expect_silent()
 })
 
@@ -385,47 +409,79 @@ test_that("validate_sample_rate() does not warn for integer time_channel", {
 
 test_that("validate_sample_rate() estimates from time_channel when NULL", {
     rate = 9.5
-    data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
+    data <- create_test_data(
+        time_max = 10,
+        sample_rate = rate,
+        add_metadata = FALSE
+    )
+    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
     expect_equal(result, round(rate))
 
     rate = 0.8
-    data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
+    data <- create_test_data(
+        time_max = 10,
+        sample_rate = rate,
+        add_metadata = FALSE
+    )
+    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
     expect_equal(result, round(rate))
 
     rate = 11
-    data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
+    data <- create_test_data(
+        time_max = 10,
+        sample_rate = rate,
+        add_metadata = FALSE
+    )
+    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
     expect_equal(result, 10)
 
     rate = 44
-    data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
+    data <- create_test_data(
+        time_max = 10,
+        sample_rate = rate,
+        add_metadata = FALSE
+    )
+    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
     expect_equal(result, 50)
 
     rate = 98
-    data <- create_test_data(time_max = 10, sample_rate = rate, add_metadata = FALSE)
-    result <- validate_sample_rate(data, "time", NULL, inform = FALSE)
+    data <- create_test_data(
+        time_max = 10,
+        sample_rate = rate,
+        add_metadata = FALSE
+    )
+    result <- validate_sample_rate(data, "time", NULL, verbose = FALSE)
     expect_equal(result, 100)
 })
 
 test_that("validate_sample_rate() shows message when estimating", {
     data <- create_test_data(add_metadata = FALSE)
     expect_message(
-        validate_sample_rate(data, "time", NULL, inform = TRUE),
+        validate_sample_rate(data, "time", NULL, verbose = TRUE),
         "Estimated"
-        ) |>
-        expect_message("Overwrite")
+    )
 })
 
 test_that("validate_sample_rate() errors for non-single non-numeric non-positive", {
     data <- create_test_data()
-    expect_error(validate_sample_rate(data, "time", "10", FALSE), "must be .*numeric")
-    expect_error(validate_sample_rate(data, "time", NA, FALSE), "must be .*numeric")
-    expect_error(validate_sample_rate(data, "time", 0, FALSE), "must be .*positive")
-    expect_error(validate_sample_rate(data, "time", -5, FALSE), "must be .*positive")
-    expect_error(validate_sample_rate(data, "time", c(10, 20), FALSE), "must be .*one-element")
+    expect_error(
+        validate_sample_rate(data, "time", "10", FALSE),
+        "must be .*numeric"
+    )
+    expect_error(
+        validate_sample_rate(data, "time", NA, FALSE),
+        "must be .*numeric"
+    )
+    expect_error(
+        validate_sample_rate(data, "time", 0, FALSE),
+        "must be .*positive"
+    )
+    expect_error(
+        validate_sample_rate(data, "time", -5, FALSE),
+        "must be .*positive"
+    )
+    expect_error(
+        validate_sample_rate(data, "time", c(10, 20), FALSE),
+        "must be .*one-element"
+    )
 })
-
-

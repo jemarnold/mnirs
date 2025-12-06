@@ -33,11 +33,11 @@ test_that("preserve_na() handles vector with all NA", {
 test_that("restore_na() correctly restores NA positions", {
     x <- c(1, NA, 3, NA, 5)
     na_info <- preserve_na(x)
-    y <- na_info$x_valid * 2  ## y_valid = c(2, 6, 10)
+    y <- na_info$x_valid * 2 ## y_valid = c(2, 6, 10)
     result <- restore_na(y, na_info)
 
     expect_length(result, 5)
-    expect_equal(result, x*2)
+    expect_equal(result, x * 2)
 })
 
 test_that("restore_na() handles no NA in original vector", {
@@ -46,13 +46,13 @@ test_that("restore_na() handles no NA in original vector", {
     y <- na_info$x_valid * 2
     result <- restore_na(y, na_info)
 
-    expect_equal(result, x*2)
+    expect_equal(result, x * 2)
 })
 
 test_that("restore_na() handles all NA in original vector", {
     x <- rep(NA_real_, 5)
     na_info <- preserve_na(x)
-    y <- na_info$x_valid  # no clean values to process
+    y <- na_info$x_valid # no clean values to process
     result <- restore_na(y, na_info)
 
     expect_length(result, 5)
@@ -87,13 +87,13 @@ test_that("replace_outliers() returns unchanged vector with no outliers", {
 })
 
 test_that("replace_outliers() detects and replaces outliers with median", {
-    x <- c(1:10, 100, 12:20)  # 100 is clear outlier
+    x <- c(1:10, 100, 12:20) # 100 is clear outlier
     result <- replace_outliers(x, width = 4)
 
     expect_type(result, "double")
     expect_length(result, length(x))
-    expect_true(result[11] != 100)  # outlier replaced
-    expect_true(result[11] == median(x[c(8:14)]))  # outlier replaced
+    expect_true(result[11] != 100) # outlier replaced
+    expect_true(result[11] == median(x[c(8:14)])) # outlier replaced
     expect_false(any(is.na(result)))
 
     ## span
@@ -101,23 +101,23 @@ test_that("replace_outliers() detects and replaces outliers with median", {
 
     expect_type(result, "double")
     expect_length(result, length(x))
-    expect_true(result[11] != 100)  # outlier replaced
-    expect_equal(result[11], median(x[c(8:14)]))  # outlier replaced
+    expect_true(result[11] != 100) # outlier replaced
+    expect_equal(result[11], median(x[c(8:14)])) # outlier replaced
     expect_false(any(is.na(result)))
 })
 
 test_that("replace_outliers() detects and replaces outliers with NA", {
     x <- c(1:10, 100, 11:20)
-    result <- replace_outliers(x, method = "NA", width = 4)
+    result <- replace_outliers(x, method = "none", width = 4)
 
     expect_length(result, length(x))
-    expect_true(is.na(result[11]))  # outlier replaced with NA
+    expect_true(is.na(result[11])) # outlier replaced with NA
 
     ## span
-    result <- replace_outliers(x, method = "NA", span = 3)
+    result <- replace_outliers(x, method = "none", span = 3)
 
     expect_length(result, length(x))
-    expect_true(is.na(result[11]))  # outlier replaced with NA
+    expect_true(is.na(result[11])) # outlier replaced with NA
 })
 
 test_that("replace_outliers() handles NA values in input", {
@@ -127,32 +127,32 @@ test_that("replace_outliers() handles NA values in input", {
     median(c(8, 9, NA), na.rm = TRUE)
 
     expect_length(result, length(x))
-    expect_true(result[11] != 100)  # outlier replaced
-    expect_true(all(is.na(result[c(10, 16)])))  # original NA preserved
+    expect_true(result[11] != 100) # outlier replaced
+    expect_true(all(is.na(result[c(10, 16)]))) # original NA preserved
 
     ## span
     result <- replace_outliers(x, span = 4)
 
     expect_length(result, length(x))
-    expect_true(result[11] != 100)  # outlier replaced
-    expect_true(all(is.na(result[c(10, 16)])))  # original NA preserved
+    expect_true(result[11] != 100) # outlier replaced
+    expect_true(all(is.na(result[c(10, 16)]))) # original NA preserved
 })
 
 test_that("replace_outliers() respects outlier_cutoff threshold", {
-    x <- c(1:10, 15, 11:20)  # mild outlier
+    x <- c(1:10, 15, 11:20) # mild outlier
 
     strict <- replace_outliers(x, width = 4, outlier_cutoff = 1)
     lenient <- replace_outliers(x, width = 4, outlier_cutoff = 5)
 
-    expect_true(strict[11] != 15)  # detected with strict threshold
-    expect_equal(lenient[11], 15)  # not detected with lenient threshold
+    expect_true(strict[11] != 15) # detected with strict threshold
+    expect_equal(lenient[11], 15) # not detected with lenient threshold
 
     ## span
     strict <- replace_outliers(x, span = 3, outlier_cutoff = 1)
     lenient <- replace_outliers(x, span = 3, outlier_cutoff = 5)
 
-    expect_true(strict[11] != 15)  # detected with strict threshold
-    expect_equal(lenient[11], 15)  # not detected with lenient threshold
+    expect_true(strict[11] != 15) # detected with strict threshold
+    expect_equal(lenient[11], 15) # not detected with lenient threshold
 
     ## Tukey's median filter.
     x <- c(1:10, 15, 11:20, 20.1) ## reduce min diff to 0.1 to avoid modification
@@ -167,9 +167,15 @@ test_that("replace_outliers() respects outlier_cutoff threshold", {
 test_that("replace_outliers() validates inputs correctly", {
     x <- 1:10
 
-    expect_error(replace_outliers("text", width = 4), "x.*?numeric")  # non-numeric x
-    expect_error(replace_outliers(x, method = "NA", width = -1), "width.*?integer")  # negative width
-    expect_error(replace_outliers(x, method = "NA", width = 4, outlier_cutoff = -1), "outlier_cutoff.*?integer")  # negative outlier_cutoff
+    expect_error(replace_outliers("text", width = 4), "x.*?numeric") # non-numeric x
+    expect_error(
+        replace_outliers(x, method = "none", width = -1),
+        "width.*?integer"
+    ) # negative width
+    expect_error(
+        replace_outliers(x, method = "none", width = 4, outlier_cutoff = -1),
+        "outlier_cutoff.*?integer"
+    ) # negative outlier_cutoff
 
     ## halfes all NA
     x <- rep(NA_real_, 10)
@@ -179,9 +185,15 @@ test_that("replace_outliers() validates inputs correctly", {
 
     ## span
     x <- 1:10
-    expect_error(replace_outliers("text", span = 3), "x.*?numeric")  # non-numeric x
-    expect_error(replace_outliers(x, method = "NA", span = -1), "span.*?numeric")  # negative span
-    expect_error(replace_outliers(x, method = "NA", span = 3, outlier_cutoff = -1), "outlier_cutoff.*?integer")  # negative outlier_cutoff
+    expect_error(replace_outliers("text", span = 3), "x.*?numeric") # non-numeric x
+    expect_error(
+        replace_outliers(x, method = "none", span = -1),
+        "span.*?numeric"
+    ) # negative span
+    expect_error(
+        replace_outliers(x, method = "none", span = 3, outlier_cutoff = -1),
+        "outlier_cutoff.*?integer"
+    ) # negative outlier_cutoff
 
     ## haldes all NA
     x <- rep(NA_real_, 10)
@@ -191,7 +203,7 @@ test_that("replace_outliers() validates inputs correctly", {
 test_that("replace_outliers() errors when x and t have different lengths", {
     expect_error(
         replace_outliers(c(1, 2, 3), t = c(1, 2), outlier_cutoff = 3, span = 1),
-        "same length"
+        "equal length"
     )
 })
 
@@ -205,7 +217,7 @@ test_that("replace_invalid() returns expected structure", {
 
 test_that("replace_invalid() replaces invalid values with NA when method = 'NA'", {
     x <- c(1, 999, 3, 4, 999, 6)
-    result <- replace_invalid(x, invalid_values = 999, method = "NA")
+    result <- replace_invalid(x, invalid_values = 999, method = "none")
     expect_equal(result, c(1, NA, 3, 4, NA, 6))
 })
 
@@ -244,7 +256,7 @@ test_that("replace_invalid() handles non-integer span argument", {
 test_that("replace_invalid() errors when x and t have different lengths", {
     expect_error(
         replace_invalid(c(1, 2, 3), t = c(1, 2), invalid_values = 999),
-        "same length"
+        "equal length"
     )
 })
 
@@ -263,7 +275,6 @@ test_that("replace_invalid() errors when args are not numeric", {
         replace_invalid(c(1, 2), invalid_values = "a"),
         "invalid.*numeric"
     )
-
 })
 
 test_that("replace_invalid() handles edge cases", {
@@ -292,12 +303,12 @@ test_that("replace_invalid handles range filtering", {
     x <- c(0, 5, 10, 20, 25, 50.5, 100, 150, 35, 40)
 
     # Test invalid_below only (inclusive)
-    result <- replace_invalid(x, invalid_below = 5, method = "NA")
+    result <- replace_invalid(x, invalid_below = 5, method = "none")
     expect_setequal(result[1:2], NA_real_)
     expect_equal(result[3:10], x[3:10])
 
     # Test invalid_above only (inclusive)
-    result <- replace_invalid(x, invalid_above = 100, method = "NA")
+    result <- replace_invalid(x, invalid_above = 100, method = "none")
     expect_setequal(result[7:8], NA_real_)
     expect_equal(result[c(1:5, 9:10)], x[c(1:5, 9:10)])
 
@@ -306,7 +317,7 @@ test_that("replace_invalid handles range filtering", {
         x,
         invalid_below = 5,
         invalid_above = 100,
-        method = "NA"
+        method = "none"
     )
     expect_setequal(result[c(1:2, 7:8)], NA_real_)
     expect_equal(result[c(3:5, 9:10)], x[c(3:5, 9:10)])
@@ -317,7 +328,7 @@ test_that("replace_invalid handles range filtering", {
         invalid_values = 50.5,
         invalid_below = 5,
         invalid_above = 100,
-        method = "NA"
+        method = "none"
     )
     expect_setequal(result[c(1:2, 6, 7:8)], NA_real_)
     expect_equal(result[c(3:5, 9:10)], x[c(3:5, 9:10)])
@@ -345,21 +356,22 @@ test_that("replace_invalid handles overlapping conditions", {
         x,
         invalid_values = -999,
         invalid_below = 5,
-        method = "NA"
+        method = "none"
     )
     expect_setequal(is.na(result[1:4]), TRUE)
 })
 
 
-
 test_that("replace_invalid() works correctly", {
     x <- c(1, 2, 3, 16, 5, 6, 7)
     expect_equal(
-        replace_invalid(x, invalid_values = 16, method = "NA")[4],
+        replace_invalid(x, invalid_values = 16, method = "none")[4],
         NA_real_
     )
     expect_equal(
-        replace_invalid(x, invalid_values = 16, width = 4, method = "median")[4],
+        replace_invalid(x, invalid_values = 16, width = 4, method = "median")[
+            4
+        ],
         median(x[c(1:3, 5:7)])
     )
 
@@ -369,9 +381,9 @@ test_that("replace_invalid() works correctly", {
     expect_equal(result_clean, x_valid)
 
     ## edge cases
-    expect_equal(replace_invalid(c(1), invalid_values = 16, method = "NA"), 1)
+    expect_equal(replace_invalid(c(1), invalid_values = 16, method = "none"), 1)
     expect_equal(
-        sum(replace_invalid(rep(1, 7), invalid_values = 16, method = "NA")),
+        sum(replace_invalid(rep(1, 7), invalid_values = 16, method = "none")),
         7
     )
     expect_error(
@@ -382,28 +394,39 @@ test_that("replace_invalid() works correctly", {
     ## NA handling
     x_na <- c(1, 2, 3, NA, 5, 6, 7)
     expect_equal(
-        replace_invalid(x_na, invalid_values = 35, method = "NA"),
+        replace_invalid(x_na, invalid_values = 35, method = "none"),
         x_na
     )
     expect_equal(
-        replace_invalid(x_na, invalid_values = 35, width = 2, method = "median"),
+        replace_invalid(
+            x_na,
+            invalid_values = 35,
+            width = 2,
+            method = "median"
+        ),
         x_na
     )
     expect_true(
-        is.na(replace_invalid(x_na, invalid_values = 35, method = "NA")[4])
+        is.na(replace_invalid(x_na, invalid_values = 35, method = "none")[4])
     )
 
     x_na <- c(1, 2, NA, 35, 5, 6, 7)
     expect_true(
-        all(is.na(replace_invalid(x_na, invalid_values = 35, method = "NA")[3:4]))
+        all(is.na(replace_invalid(x_na, invalid_values = 35, method = "none")[
+            3:4
+        ]))
     )
 
     expect_equal(
-        replace_invalid(x_na, invalid_values = 35, width = 2, method = "median")[4],
+        replace_invalid(
+            x_na,
+            invalid_values = 35,
+            width = 2,
+            method = "median"
+        )[4],
         median(x_na[c(2:3, 5:6)], na.rm = TRUE)
     )
 })
-
 
 
 ## replace_missing() =================================================
@@ -420,10 +443,10 @@ test_that("replace_missing() validates inputs", {
         "t.*numeric"
     )
 
-    # x and t must be same length
+    # x and t must be equal length
     expect_error(
         replace_missing(c(1, NA, 3), t = c(1, 2)),
-        "x.*t.*numeric.*same length"
+        "x.*t.*numeric.*equal length"
     )
 
     ## missing width/span
@@ -556,7 +579,7 @@ test_that("replace_mnirs outlier removal skipped when outlier_cutoff = NULL", {
     result <- replace_mnirs(
         data,
         invalid_values = c(999),
-        method = "NA"
+        method = "none"
     )
 
     ## Data should be unchanged except for invalid value processing
@@ -577,8 +600,8 @@ test_that("replace_mnirs outlier removal processes when outlier_cutoff provided"
         data,
         outlier_cutoff = 3,
         width = 5,
-        method = "NA",
-        inform = FALSE
+        method = "none",
+        verbose = FALSE
     )
 
     ## Outlier (200) should be replaced with NA
@@ -603,8 +626,8 @@ test_that("replace_mnirs do nothing condition throws error appropriately", {
             invalid_values = NULL,
             width = NULL,
             span = NULL,
-            method = "NA",
-            inform = FALSE
+            method = "none",
+            verbose = FALSE
         ),
         "must be specified"
     )
@@ -613,36 +636,35 @@ test_that("replace_mnirs do nothing condition throws error appropriately", {
 test_that("replace_mnirs updates metadata correctly", {
     data <- read_mnirs(
         file_path = example_mnirs("moxy_ramp"),
-        nirs_channels = c(smo2_left = "SmO2 Live",
-                          smo2_right = "SmO2 Live(2)"),
+        nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
-        inform = FALSE
+        verbose = FALSE
     ) |>
         replace_mnirs(
             invalid_values = c(0, 100),
             span = 7,
             method = "linear",
-            inform = FALSE
+            verbose = FALSE
         )
     expect_equal(attr(data, "nirs_channels"), c("smo2_left", "smo2_right"))
     expect_equal(attr(data, "time_channel"), "time")
     expect_equal(attr(data, "sample_rate"), 2)
 })
 
-test_that("replace_mnirs global inform works", {
+test_that("replace_mnirs global verbose works", {
     expect_warning(
         read_mnirs(
-        file_path = example_mnirs("moxy_ramp.xlsx"),
-        nirs_channels = c(smo2 = "SmO2 Live"),
-        time_channel = c(time = "hh:mm:ss")
-    ),
-    "duplicated or irregular") |> 
-        expect_message("Estimated.*sample_rate.*2") |> 
-        expect_message("Overwrite")
+            file_path = example_mnirs("moxy_ramp.xlsx"),
+            nirs_channels = c(smo2 = "SmO2 Live"),
+            time_channel = c(time = "hh:mm:ss")
+        ),
+        "irregular.*detected"
+    ) |>
+        expect_message("Estimated.*sample_rate.*2")
 
-    old_inform <- getOption("mnirs.inform")
-    on.exit(options(mnirs.inform = old_inform), add = TRUE)
-    options(mnirs.inform = FALSE)
+    old_verbose <- getOption("mnirs.verbose")
+    on.exit(options(mnirs.verbose = old_verbose), add = TRUE)
+    options(mnirs.verbose = FALSE)
 
     expect_silent(
         read_mnirs(
@@ -651,31 +673,54 @@ test_that("replace_mnirs global inform works", {
             time_channel = c(time = "hh:mm:ss")
         )
     )
-
 })
 
 test_that("replace_mnirs works visually on moxy data", {
     skip_if_not_installed("ggplot2")
     skip("visual check of ggplots")
-        data <- read_mnirs(
-            file_path = example_mnirs("moxy_ramp.xlsx"),
-            nirs_channels = c(smo2 = "SmO2 Live"),
-            time_channel = c(time = "hh:mm:ss"),
-            inform = FALSE
-        )
+    data <- read_mnirs(
+        file_path = example_mnirs("moxy_ramp.xlsx"),
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        verbose = FALSE
+    )
 
-        plot(data) +
-            ggplot2::ylim(0, 100)
+    plot(data) +
+        ggplot2::ylim(0, 100)
 
-        replace_mnirs(data, invalid_values = c(0, 100), span = 7, method = "NA") |>
-            plot() + ggplot2::ylim(0, 100)
+    replace_mnirs(
+        data,
+        invalid_values = c(0, 100),
+        span = 7,
+        method = "none"
+    ) |>
+        plot() +
+        ggplot2::ylim(0, 100)
 
-        replace_mnirs(data, invalid_values = c(0, 100), span = 7, method = "median") |>
-            plot() + ggplot2::ylim(0, 100)
+    replace_mnirs(
+        data,
+        invalid_values = c(0, 100),
+        span = 7,
+        method = "median"
+    ) |>
+        plot() +
+        ggplot2::ylim(0, 100)
 
-        replace_mnirs(data, invalid_values = c(0, 100), span = 7, method = "locf") |>
-            plot() + ggplot2::ylim(0, 100)
+    replace_mnirs(
+        data,
+        invalid_values = c(0, 100),
+        span = 7,
+        method = "locf"
+    ) |>
+        plot() +
+        ggplot2::ylim(0, 100)
 
-        replace_mnirs(data, invalid_values = c(0, 100), span = 7, method = "linear") |>
-            plot() + ggplot2::ylim(0, 100)
+    replace_mnirs(
+        data,
+        invalid_values = c(0, 100),
+        span = 7,
+        method = "linear"
+    ) |>
+        plot() +
+        ggplot2::ylim(0, 100)
 })

@@ -13,7 +13,7 @@ read_mnirs(
   add_timestamp = FALSE,
   zero_time = FALSE,
   keep_all = FALSE,
-  inform = TRUE
+  verbose = TRUE
 )
 }
 \arguments{
@@ -41,9 +41,9 @@ in Hz. If not defined explicitly, will be estimated from the data (see
 \emph{Details}).}
 
 \item{add_timestamp}{\verb{<under development>} A logical to add a \emph{"timestamp"}
-column with date-time for each sample (class \emph{POSIXct}), if present in the
-data file. If no absolute timestamp is detected, will instead return
-relative time as \emph{hh:mm:ss}.}
+column with date-time values (class \emph{POSIXct}), if present in the
+data file. Currently only functions if the existing \code{time_channel} data
+are in timestamp format (see \emph{Details}).}
 
 \item{zero_time}{A logical to re-calculate \code{time_channel} to start
 from zero or \code{FALSE} keep the original values (the \emph{default}).}
@@ -52,7 +52,7 @@ from zero or \code{FALSE} keep the original values (the \emph{default}).}
 or \code{FALSE} to only include the explicitly specified data columns
 (the \emph{default}).}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 }
 \value{
@@ -89,15 +89,21 @@ export the sample index (i.e. integer row numbers). If \emph{Oxysoft} export
 sample rate is detected in the file metadata, a \code{"time"} column will be
 added converting the sample indices to time values in seconds.
 
-When the \code{time_channel} is provided in date-time format, it will be
-converted to numeric values and re-calculated from zero. A timestamp
-column can be included with absolute date-time (e.g.
-\emph{"yyyy-mm-dd hh:mm:ss"}) if unix timestamps are present in the data file.
-Otherwise, relative time (\emph{"hh:mm:ss"}) will be returned.
+When the \code{time_channel} is provided in date-time (\emph{POSIXct}) format, it
+will be converted to numeric values and re-calculated from zero,
+even when \code{zero_time = FALSE}.
+
+With \code{add_timestamp = TRUE}, an additional \emph{"timestamp "} column will be
+added with the original date-time values. This functionality is currently
+\verb{<under development>} to recognise start-time values in the file and
+return absolute unix timestamps if available.
+
+Setting \code{zero_time = TRUE} will re-calculate numeric \code{time_channel} values
+to start from zero.
 
 If \code{time_channel} contains irregular sampling (i.e., non-sequential,
 repeated, or unordered values) a warning will be displayed (if
-\code{inform = TRUE}) suggesting that the user confirm the file data manually.
+\code{verbose = TRUE}) suggesting that the user confirm the file data manually.
 
 \code{sample_rate} is required for certain \code{{mnirs}} functions to work properly
 and can be carried forward in the data frame metadata. If it is not
@@ -109,10 +115,10 @@ values in the \code{time_channel}. As above, in certain cases where the
 
 Columns and rows which contain entirely missing data (\code{NA}) are omitted.
 
-\code{inform = TRUE} will display warnings and information messages which can be
+\code{verbose = TRUE} will display warnings and information messages which can be
 useful for troubleshooting. Errors causing abort messages will always be
 displayed. Messages can be silenced globally with
-\code{options(mnirs.inform = FALSE)}.
+\code{options(mnirs.verbose = FALSE)}.
 }
 \examples{
 ## call an example mNIRS data file
@@ -123,7 +129,7 @@ data_table <- read_mnirs(
     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    inform = FALSE                       ## hide warnings & messages
+    verbose = FALSE                       ## hide warnings & messages
 )
 
 data_table

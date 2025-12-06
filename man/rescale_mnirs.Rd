@@ -4,7 +4,7 @@
 \alias{rescale_mnirs}
 \title{Re-scale data range}
 \usage{
-rescale_mnirs(data, nirs_channels = list(), range, inform = TRUE)
+rescale_mnirs(data, nirs_channels = list(NULL), range, verbose = TRUE)
 }
 \arguments{
 \item{data}{A data frame of class \emph{"mnirs"} containing at least one
@@ -28,7 +28,7 @@ not defined explicitly.}
 \item{range}{A numeric vector in the form \code{c(min, max)}, indicating the
 range of output values to which data channels will be re-scaled.}
 
-\item{inform}{A logical to display (the \emph{default}) or \code{FALSE} to silence
+\item{verbose}{A logical to display (the \emph{default}) or \code{FALSE} to silence
 warnings and information messages used for troubleshooting.}
 }
 \value{
@@ -61,24 +61,23 @@ for other grouping arrangements.
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
 library(ggplot2)
 
+options(mnirs.verbose = FALSE)
+
 ## read example data
 data_rescaled <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss"),
-    inform = FALSE
+    time_channel = c(time = "hh:mm:ss")
 ) |>
-    resample_mnirs(inform = FALSE) |>
+    resample_mnirs() |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10,
-        inform = FALSE
+        width = 10
     ) |>
-    filter_mnirs(na.rm = TRUE, inform = FALSE) |>
+    filter_mnirs(na.rm = TRUE) |>
     rescale_mnirs(
-        range = c(0, 100),   ## rescale to a 0-100\% functional exercise range
-        inform = FALSE
+        range = c(0, 100)   ## rescale to a 0-100\% functional exercise range
     )
 
 plot(data_rescaled, label_time = TRUE) +

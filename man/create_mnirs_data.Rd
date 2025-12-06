@@ -10,6 +10,7 @@ create_mnirs_data(data, ...)
 \item{data}{A data frame with existing metadata (\code{attributes(data)}).}
 
 \item{...}{Additional arguments with metadata to add to the data frame.
+Can be either seperate named arguments or a list of named values.
 \itemize{
 \item nirs_device
 \item nirs_channels
