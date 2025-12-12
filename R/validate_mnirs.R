@@ -107,14 +107,14 @@ validate_mnirs_data <- function(data, ncol = 2L) {
 #' @rdname validate_mnirs
 validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
     ## if not defined, check metadata
-    if (is.null(nirs_channels) || length(nirs_channels) == 0) {
-        nirs_channels <- attr(data, "nirs_channels") ## vector
-
-        if (verbose && !is.null(nirs_channels)) {
-            cli_warn(
-                "All {.arg nirs_channels} are grouped together. Overwrite \\
-                this by grouping {.arg nirs_channels} explicitly"
-            )
+    if (is.null(nirs_unlisted) || length(nirs_unlisted) == 0) {
+        nirs_unlisted <- attr(data, "nirs_channels") ## should be vector
+        nirs_channels <- nirs_unlisted
+        if (verbose && !is.null(nirs_unlisted)) {
+            cli_inform(c(
+                "!" = "{.arg nirs_channels} grouped together.",
+                "i" = "{.arg nirs_channels} groups can be defined explicitly."
+            ))
         }
     }
 
@@ -302,6 +302,16 @@ validate_sample_rate <- function(
 }
 
 
+
+#' Validate if an item is a list
+#' @keywords internal
+make_list <- function(x) {
+    if (is.list(x)) {
+        return(x)
+    } else {
+        return(list(x))
+    }
+}
 
 
 #' Detect if numeric values fall between a range

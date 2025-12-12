@@ -526,12 +526,26 @@ This is also a good chance to demonstrate how functions can be piped together.
 ## un-group `nirs_channels` to shift each channel separately
 as.list(nirs_channels)
 
-## then group `nirs_channels` to rescale together 
-list(nirs_channels)
-
-## pipe (|>) data frame from one function to the next
-data_rescaled <- data_filtered |> 
-    ## shift the mean of the first 120 sec of each signal to zero
+read_mnirs(
+    example_mnirs("train.red"),
+    nirs_channels = c(
+        smo2_left = "SmO2 unfiltered",
+        smo2_right = "SmO2 unfiltered"
+    ),
+    time_channel = c(time = "Timestamp (seconds passed)"),
+    zero_time = TRUE
+) |>
+    resample_mnirs() |>
+    replace_mnirs(
+        invalid_above = 73,
+        outlier_cutoff = 3,
+        span = 7
+    ) |>
+    filter_mnirs(
+        method = "butterworth",
+        order = 2,
+        W = 0.01
+    ) |>
     shift_mnirs(
         nirs_channels = as.list(nirs_channels), ## un-grouped
         to = 0,

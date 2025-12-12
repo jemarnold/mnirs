@@ -262,8 +262,9 @@ create_mnirs_data <- function(data, ...) {
         nirs_channels = metadata$nirs_channels,
         time_channel = metadata$time_channel,
         event_channel = metadata$event_channel,
-        sample_rate = metadata$sample_rate, ## samples per second
-        verbose = metadata$verbose
+        sample_rate = metadata$sample_rate,
+        event_times = metadata$event_times,
+        interval_span = metadata$interval_span,
     )
 
     tibble::validate_tibble(nirs_data)
