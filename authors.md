@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/jemarnold/mnirs/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/jemarnold/mnirs/blob/v0.1.8/DESCRIPTION)
 
 Arnold J (2025). *mnirs: Muscle Near-Infrared Spectroscopy Processing &
 Analysis*. R package version 0.1.8,
