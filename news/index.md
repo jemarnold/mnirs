@@ -1,5 +1,15 @@
 # Changelog
 
+## mnirs 0.1.8
+
+- Create
+  [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  to detect events and extract surrounding data frames.
+- Replace internal `between()` with
+  [`within()`](https://jemarnold.github.io/mnirs/reference/within.md) to
+  differentiate from
+  [`dplyr::between()`](https://dplyr.tidyverse.org/reference/between.html)
+
 ## mnirs 0.1.7
 
 - Minor edits to functions and documentation to improve clarity.

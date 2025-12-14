@@ -19,7 +19,7 @@ Read raw data from exported files.
 
   Create an *mnirs* data frame with metadata
 
-## Clean data
+## Pre-process data
 
 Clean, filter, and process data.
 
@@ -40,6 +40,15 @@ Clean, filter, and process data.
   : Shift data range
 - [`rescale_mnirs()`](https://jemarnold.github.io/mnirs/reference/rescale_mnirs.md)
   : Re-scale data range
+
+## Analysis
+
+Detect and extract intervals for further analysis
+
+- [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  :
+
+  Extract intervals from *mnirs* data
 
 ## Plotting
 

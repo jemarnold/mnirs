@@ -797,7 +797,7 @@ read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs(verbose = FALSE) |>
+    resample_mnirs() |>
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,

@@ -15,3 +15,5 @@ placed on bilateral vastus lateralis muscle sites. With data errors
 - `time_channel = c("hh:mm:ss")`
 
 - `event_channel = c("Lap")`
+
+- `event_times = c(870)`

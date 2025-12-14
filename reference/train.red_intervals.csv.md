@@ -13,3 +13,5 @@ sites.
 - `time_channel = c("Timestamp (seconds passed)")`
 
 - `event_channel = c("Lap/Event")`
+
+- `event_times = c(2455, 3166)` \## c(371, 1082) from zero_time
