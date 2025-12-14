@@ -33,7 +33,7 @@ A logical vector the same length as `x`.
 ## Details
 
 `inclusive = FALSE` can be used to test for positive non-zero values:
-`between(x, vec, inclusive = FALSE)`.
+`within(x, c(0, Inf), inclusive = FALSE)`.
 
 ## See also
 
