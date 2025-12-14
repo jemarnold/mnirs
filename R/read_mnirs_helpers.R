@@ -456,14 +456,15 @@ detect_irregular_samples <- function(
     duplicates <- which(duplicated(x))
     unordered <- which(diffs < 0)
     big_gap <- which(diffs >= 3600)
-    irregular_idx <- unique(c(duplicates, unordered, big_gap))
+    irregular_idx <- c(duplicates, unordered, big_gap)
+    
 
     ## silence if no irregular samples
     if (length(irregular_idx) == 0) {
         return(invisible())
     }
 
-    irregular_vec <- x[irregular_idx]
+    irregular_vec <- unique(x[irregular_idx])
 
     if (length(irregular_vec) > 5) {
         ## if more than 5 irregular samples, print the first three

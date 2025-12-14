@@ -245,10 +245,8 @@ test_that("n controls number of breaks", {
 })
 
 test_that("plot.mnirs moxy.perfpro works", {
-    file_path <- system.file("extdata/moxy_ramp.xlsx", package = "mnirs")
-
     df <- read_mnirs(
-        file_path = file_path,
+        file_path = example_mnirs("moxy_ramp"),
         nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
         verbose = FALSE

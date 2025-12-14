@@ -25,7 +25,7 @@ boundary values, specified independently.
 }
 \details{
 \code{inclusive = FALSE} can be used to test for positive non-zero values:
-\code{between(x, vec, inclusive = FALSE)}.
+\code{within(x, c(0, Inf), inclusive = FALSE)}.
 }
 \seealso{
 \code{\link[dplyr:between]{dplyr::between()}}

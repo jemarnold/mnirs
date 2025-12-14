@@ -36,7 +36,7 @@
 #' @export
 plot.mnirs <- function(x, ...) {
     rlang::check_installed(
-        c("ggplot2", "dplyr", "tidyr", "scales"),
+        c("ggplot2", "tidyr", "scales"),
         reason = "to plot mNIRS data"
     )
 
@@ -72,25 +72,17 @@ plot.mnirs <- function(x, ...) {
         ggplot2::waiver()
     }
 
+    ## TODO can I remove tidyr dependency?
     ## pivot all `nirs_channels` to `y` and plot by group
+    plot_data <- tidyr::pivot_longer(
+        x,
+        cols = tidyr::all_of(nirs_channels),
+        names_to = "nirs_channels",
+        values_to = "y"
+    )
+
     if (na.omit) {
-        plot_data <- x |>
-            dplyr::filter(dplyr::if_any(
-                dplyr::all_of(nirs_channels),
-                \(.x) !is.na(.x)
-            )) |>
-            tidyr::pivot_longer(
-                cols = dplyr::all_of(nirs_channels),
-                names_to = "nirs_channels",
-                values_to = "y"
-            )
-    } else {
-        plot_data <- tidyr::pivot_longer(
-            data = x,
-            cols = dplyr::all_of(nirs_channels),
-            names_to = "nirs_channels",
-            values_to = "y"
-        )
+        plot_data <- plot_data[complete.cases(plot_data["y"]), ]
     }
 
     ## plot
