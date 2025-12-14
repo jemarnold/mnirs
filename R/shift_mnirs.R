@@ -122,11 +122,7 @@ shift_mnirs <- function(
     }
     position <- match.arg(position)
 
-    nirs_listed <- if (is.list(nirs_channels)) {
-        nirs_channels
-    } else {
-        list(nirs_channels)
-    }
+    nirs_listed <- make_list(nirs_channels)
     nirs_unlisted <- unlist(nirs_listed, use.names = FALSE)
 
     ## Metadata =================================

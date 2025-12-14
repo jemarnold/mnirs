@@ -41,7 +41,7 @@ reference:
   - read_mnirs
   - example_mnirs
   - create_mnirs_data
-- title: Clean data
+- title: Pre-process data
   desc: |
     Clean, filter, and process data.
   contents:
@@ -51,6 +51,11 @@ reference:
   - starts_with("filter")
   - shift_mnirs
   - rescale_mnirs
+- title: Analysis
+  desc: |
+    Detect and extract intervals for further analysis
+  contents:
+  - extract_intervals
 - title: Plotting
   desc: |
     Tools for pretty plotting with `{ggplot2}`.

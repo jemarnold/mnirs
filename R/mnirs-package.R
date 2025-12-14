@@ -6,6 +6,7 @@
 #' @importFrom cli cli_inform
 #' @importFrom cli cli_warn
 #' @importFrom cli col_blue
+#' @importFrom cli qty
 #' @importFrom lifecycle deprecated
 #' @importFrom rlang %||%
 #' @importFrom rlang .data

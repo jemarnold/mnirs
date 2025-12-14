@@ -1,3 +1,8 @@
+# mnirs 0.1.8
+
+* Create `extract_intervals()` to detect events and extract surrounding data frames.
+* Replace internal `between()` with `within()` to differentiate from `dplyr::between()`
+
 # mnirs 0.1.7
 
 * Minor edits to functions and documentation to improve clarity.

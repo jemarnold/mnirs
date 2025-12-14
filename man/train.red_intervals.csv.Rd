@@ -10,6 +10,7 @@
 \item \code{nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")}
 \item \code{time_channel = c("Timestamp (seconds passed)")}
 \item \code{event_channel = c("Lap/Event")}
+\item \code{event_times = c(2455, 3166)} ## c(371, 1082) from zero_time
 }
 }
 \description{

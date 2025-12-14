@@ -53,6 +53,7 @@ NULL
 #'   - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
 #'   - `time_channel = c("hh:mm:ss")`
 #'   - `event_channel = c("Lap")`
+#'   - `event_times = c(870)`
 #'
 NULL
 
@@ -72,5 +73,6 @@ NULL
 #'   - `nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
 #'   - `time_channel = c("Timestamp (seconds passed)")`
 #'   - `event_channel = c("Lap/Event")`
+#'   - `event_times = c(2455, 3166)` ## c(371, 1082) from zero_time
 #'
 NULL

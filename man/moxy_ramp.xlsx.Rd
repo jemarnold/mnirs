@@ -10,6 +10,7 @@
 \item \code{nirs_channels = c("SmO2 Live", "SmO2 Live(2)")}
 \item \code{time_channel = c("hh:mm:ss")}
 \item \code{event_channel = c("Lap")}
+\item \code{event_times = c(870)}
 }
 }
 \description{

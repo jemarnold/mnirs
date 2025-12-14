@@ -64,7 +64,7 @@ compute_local_windows <- function(
     } else {
         half_span <- span * 0.5
         start_idx <- findInterval(t - half_span, t, left.open = TRUE) + 1L
-        end_idx <- findInterval(t + half_span, t, left.open = FALSE)
+        end_idx <- findInterval(t + half_span, t)
     }
 
     lapply(idx, \(.i) {

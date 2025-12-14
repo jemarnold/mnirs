@@ -65,9 +65,7 @@ validate_numeric <- function(
         sum(valid) > 0
     }
 
-    range_ok <- is.null(range) ||
-        all(between(x[valid], range[1L], range[2L], inclusive))
-
+    range_ok <- is.null(range) || all(within(x[valid], range, inclusive))
     integer_ok <- !integer || rlang::is_integerish(x[valid])
 
     ## abort message if fails any
@@ -118,8 +116,8 @@ validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
         nirs_unlisted <- nirs_channels
         if (verbose && !is.null(nirs_unlisted)) {
             cli_inform(c(
-                "!" = "{.arg nirs_channels} grouped together.",
-                "i" = "{.arg nirs_channels} groups can be defined explicitly."
+                "i" = "{.arg nirs_channels} grouped together by default."#,
+                # "i" = "{.arg nirs_channels} groups can be defined explicitly."
             ))
         }
     }
@@ -330,6 +328,7 @@ validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
     }
 }
 
+
 #' @rdname validate_mnirs
 validate_x_t <- function(x, t = seq_along(x)) {
     validate_numeric(x)
@@ -343,50 +342,58 @@ validate_x_t <- function(x, t = seq_along(x)) {
 }
 
 
-#' Detect if numeric values fall between a range
+
+#' Validate if an item is a list
+#' @keywords internal
+make_list <- function(x) {
+    if (is.list(x)) {
+        return(x)
+    } else {
+        return(list(x))
+    }
+}
+
+
+#' Detect if numeric values fall within range of a vector
 #'
-#' Vectorised inclusive within `x >= left` & `x <= right`, or exclusive
-#' between `x > left` & `x < right`. Each side can be specified separately.
+#' Vectorised check for `x %in% vec`, inclusive or exclusive of left and right
+#' boundary values, specified independently.
 #'
 #' @param x A numeric vector.
-#' @param left,right Numeric boundary values for `x`
+#' @param vec A numeric vector from which `left` and `right` boundary values 
+#'   for `x` will be taken.
 #' @param inclusive A character vector to specify which of `left` and/or
 #'   `right` boundary values should be included in the range, or both (the
 #'   default), or excluded if `FALSE`.
 #'
 #' @details
 #' `inclusive = FALSE` can be used to test for positive non-zero values:
-#'   `between(x, 0, Inf, inclusive = FALSE)`.
+#'   `within(x, c(0, Inf), inclusive = FALSE)`.
 #'
 #' @returns A logical vector the same length as `x`.
 #'
 #' @seealso [dplyr::between()]
 #'
 #' @keywords internal
-between <- function(x, left, right, inclusive = c("left", "right")) {
-    # validate_numeric(x)
-    validate_numeric(left, 1L, msg1 = "one-element")
-    validate_numeric(right, 1L, msg1 = "one-element")
+within <- function(x, vec, inclusive = c("left", "right")) {
+    validate_numeric(vec, Inf)
+
     inclusive <- match.arg(
         as.character(inclusive),
         choices = c("left", "right", "FALSE"),
         several.ok = TRUE
     )
 
+    ## extract bounds from vec
+    left <- min(vec, na.rm = TRUE)
+    right <- max(vec, na.rm = TRUE)
+
     if ("FALSE" %in% inclusive) {
         return(x > left & x < right)
     }
 
-    left_compare <- if ("left" %in% inclusive) {
-        x >= left
-    } else {
-        x > left
-    }
-    right_compare <- if ("right" %in% inclusive) {
-        x <= right
-    } else {
-        x < right
-    }
+    left_op <- if ("left" %in% inclusive) `>=` else `>`
+    right_op <- if ("right" %in% inclusive) `<=` else `<`
 
-    return(left_compare & right_compare)
+    return(left_op(x, left) & right_op(x, right))
 }
