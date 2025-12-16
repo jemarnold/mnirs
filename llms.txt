@@ -23,20 +23,23 @@ A very basic implementation of this package is hosted at
 <https://jem-arnold.shinyapps.io/mnirs/> and can currently be used for
 reading and pre-processing mNIRS data.
 
+[![mnirs processing shiny
+app](reference/figures/README-shinyapp.jpg)](https://jem-arnold.shinyapps.io/mnirs/)
+
 ## Usage
 
 A more detailed vignette for common usage can be found here: [Reading
 and Cleaning Data with
-{mnirs}](https://jemarnold.github.io/mnirs.dev/articles/cleaning-mnirs-data.html)
+{mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
+
+*{mnirs}* is designed to process mNIRS data, but it can be used to read,
+clean, and pre-process other time series datasets, which require many of
+the same processing steps. Enjoy!
 
 > \[!NOTE\] *{mnirs}* is currently in experimental development and
 > functionality may change! Stay updated on development and follow
 > releases at
 > [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
-
-*{mnirs}* is designed to process mNIRS data, but it can be used to read,
-clean, and pre-process other time series datasets, which require many of
-the same processing steps. Enjoy!
 
 ### `read_mnirs()` Read data from file
 
@@ -49,11 +52,6 @@ library(mnirs)
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
 #> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
-
-## partial matching will error if matches multiple
-try(example_mnirs("moxy"))
-#> Error in example_mnirs("moxy") : ✖ Multiple files match "moxy":
-#> ℹ Matching files: "moxy_intervals.csv" and "moxy_ramp.xlsx"
 
 ## call an example mNIRS data file
 file_path <- example_mnirs("moxy_ramp") 
@@ -77,11 +75,11 @@ data_table <- read_mnirs(
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
 #> Warning: ! Duplicate or irregular `time_channel` samples detected.
-#> ℹ Investigate at `time` = 211.99, 211.99, and 1184.
+#> ℹ Investigate at `time` = 211.99 and 1184.
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
-## ignore the warning about repeated samples for now ☝
-## Note that sample_rate was estimated correctly at 2 Hz
+## Note the above info message that sample_rate was estimated correctly at 2 Hz ☝
+## ignore the warnings about irregular sampling for now
 
 data_table
 #> # A tibble: 2,203 × 3
@@ -218,21 +216,9 @@ plot(data_filtered, label_time = TRUE) +
 ### `shift_mnirs()` & `rescale_mnirs()`: Shift and rescale data
 
 ``` r
-## our default *mnirs* nirs_channel will be grouped together
-nirs_channels
-#> [1] "smo2_right" "smo2_left"
-
-## to shift each nirs_channel separately, the channels should be un-grouped
-as.list(nirs_channels)
-#> [[1]]
-#> [1] "smo2_right"
-#> 
-#> [[2]]
-#> [1] "smo2_left"
-
 data_shifted <- shift_mnirs(
     data_filtered,
-    nirs_channels = as.list(nirs_channels), ## un-grouped, as above
+    nirs_channels = as.list(nirs_channels), ## create a list of nirs_channel to shift separately
     to = 0,                                 ## NIRS values will be shifted to zero
     span = 120,                             ## shift the first 120 sec of data to zero
     position = "first"
@@ -247,7 +233,7 @@ plot(data_shifted, label_time = TRUE) +
 ``` r
 data_rescaled <- rescale_mnirs(
     data_filtered,
-    nirs_channels = as.list(nirs_channels), ## un-group `nirs_channels` to rescale each channel separately
+    nirs_channels = as.list(nirs_channels), ## create a list of nirs_channel to rescale separately
     range = c(0, 100)                       ## rescale to a 0-100% functional exercise range
 )
 
@@ -260,8 +246,10 @@ plot(data_rescaled, label_time = TRUE) +
 ### Pipe-friendly combined functions
 
 ``` r
+## global option to silence info & warning messages
 options(mnirs.verbose = FALSE)
 
+## read, process, and plot an mNIRS file in one pipeline
 read_mnirs(
     example_mnirs("train.red"),
     nirs_channels = c(
@@ -327,8 +315,9 @@ the following devices and apps:
 
 ------------------------------------------------------------------------
 
-Generative codebots were used to assist with code optimisation. All code
-was thoroughly reviewed, revised, and validated by the package author.
+*Generative codebots were used to assist with code optimisation. All
+code was thoroughly reviewed, revised, and validated by the package
+author.*
 
 # Package index
 

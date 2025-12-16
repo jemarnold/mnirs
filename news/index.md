@@ -8,7 +8,12 @@
 - Replace internal `between()` with
   [`within()`](https://jemarnold.github.io/mnirs/reference/within.md) to
   differentiate from
-  [`dplyr::between()`](https://dplyr.tidyverse.org/reference/between.html)
+  [`dplyr::between()`](https://dplyr.tidyverse.org/reference/between.html).
+- Update `README` with image of
+  [mnirs](https://jemarnold.github.io/mnirs/) shiny app.
+- Update
+  [`filter_mnirs()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
+  with error message when `fc` outside 0 Hz and Nyquist frequency.
 
 ## mnirs 0.1.7
 
