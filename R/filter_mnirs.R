@@ -320,7 +320,13 @@ filter_mnirs.butterworth <- function(
     }
 
     if (is.null(W) && !is.null(fc) && !is.null(sample_rate)) {
-        W <- fc / (sample_rate * 0.5)
+        nq <- sample_rate * 0.5
+        W <- fc / nq
+        if (W > 1 | W <= 0) {
+            cli_abort(c(
+                "x" = "{.val fc} must be between {.val {0}} and half the {.val sample_rate} ({.val {signif(nq, 3)}} Hz)"
+            ))
+        }
     }
 
     ## processing ==========================================
@@ -521,19 +527,12 @@ filter_butter <- function(
         order, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
     )
     type <- match.arg(type)
-    if (type %in% c("low", "high")) {
-        validate_numeric(
-            W, 1, c(0, 1), inclusive = FALSE,
-            msg1 = "one-element positive",
-            msg2 = " between {col_blue('[0, 1]')}."
-        )
-    } else if (type %in% c("stop", "pass")) {
-        validate_numeric(
-            W, 2, c(0, 1), inclusive = FALSE,
-            msg1 = "two-element positive",
-            msg2 = " between {col_blue('[0, 1]')}."
-        )
-    }
+    W_n <- if (type %in% c("low", "high")) 1 else 2
+    validate_numeric(
+        W, W_n, c(0, 1), inclusive = FALSE,
+        msg1 = paste0(W_n, "-element positive"),
+        msg2 = " between {col_blue('[0, 1]')}."
+    )
     edges <- match.arg(edges)
 
     ## processing ==============================================

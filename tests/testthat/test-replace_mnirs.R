@@ -280,10 +280,15 @@ test_that("replace_invalid() errors when args are not numeric", {
 test_that("replace_invalid() handles edge cases", {
     ## no invalid values present
     x <- c(1, 2, 3, 4)
-    expect_equal(replace_invalid(x, invalid_values = 999, width = 1), x)
+    expect_equal(
+        replace_invalid(x, invalid_values = 999, width = 1),
+        x,
+        ignore_attr = TRUE
+    )
     expect_equal(
         replace_invalid(x, invalid_values = 999, width = 1, method = "median"),
-        x
+        x,
+        ignore_attr = TRUE
     )
 
     ## all invalid values

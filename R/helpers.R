@@ -71,8 +71,6 @@ compute_local_windows <- function(
         start_idx[.i]:end_idx[.i] ## inclusive of x[i] for detect outliers
         # setdiff(start_idx[.i]:end_idx[.i], .i) ## exclusive of x[i]
     })
-    ## TODO implement faster two-element range idx vectorisation
-    # cbind(start = start_idx[idx], end = end_idx[idx]) ## start/end indices
 }
 
 
@@ -95,10 +93,6 @@ compute_local_windows <- function(
 compute_local_fun <- function(x, window_idx, fn) {
     n <- length(window_idx)
     vapply(seq_len(n), \(.i) {
-        ## TODO implement faster two-element range idx vectorisation
-        # window <- window_idx[.i,]
-        # idx <- window[1L]:window[2L]
-        # fn(x[window[idx]], na.rm = TRUE)
         fn(x[window_idx[[.i]]], na.rm = TRUE)
     }, numeric(1))
 }

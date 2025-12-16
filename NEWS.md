@@ -1,7 +1,9 @@
 # mnirs 0.1.8
 
 * Create `extract_intervals()` to detect events and extract surrounding data frames.
-* Replace internal `between()` with `within()` to differentiate from `dplyr::between()`
+* Replace internal `between()` with `within()` to differentiate from `dplyr::between()`.
+* Update `README` with image of `{mnirs}` shiny app.
+* Update `filter_mnirs()` with error message when `fc` outside 0 Hz and Nyquist frequency.
 
 # mnirs 0.1.7
 

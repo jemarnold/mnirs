@@ -82,7 +82,7 @@ plot.mnirs <- function(x, ...) {
     )
 
     if (na.omit) {
-        plot_data <- plot_data[complete.cases(plot_data["y"]), ]
+        plot_data <- plot_data[stats::complete.cases(plot_data["y"]), ]
     }
 
     ## plot

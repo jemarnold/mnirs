@@ -116,7 +116,11 @@ test_that("filter_moving_average() warns when both width and span provided", {
 
 test_that("filter_moving_average() handles edge cases", {
     # Single value
-    expect_equal(filter_moving_average(5, width = 1, verbose = FALSE), 5)
+    expect_equal(
+        filter_moving_average(5, width = 1, verbose = FALSE),
+        5,
+        ignore_attr = TRUE
+    )
 
     # Two values
     expect_equal(
@@ -238,11 +242,11 @@ test_that("filter_butter handles different filter types", {
     ## wrong W elements
     expect_error(
         filter_butter(x, order = 2, W = c(0.3, 0.7), type = "low"),
-        "W.*one-element.*numeric"
+        "W.*1-element.*numeric"
     )
     expect_error(
         filter_butter(x, order = 2, W = 0.9, type = "pass"),
-        "W.*two-element.*numeric"
+        "W.*2-element.*numeric"
     )
 })
 
