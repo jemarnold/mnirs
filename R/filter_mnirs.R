@@ -390,8 +390,7 @@ filter_mnirs.moving_average <- function(
 #'
 #' Apply a simple moving average smoothing filter to vector data
 #'
-#' @param x A numeric vector.
-#' @param t An *optional* numeric vector of time or sample number.
+#' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
 #' @inheritParams filter_mnirs
 #'
@@ -434,11 +433,27 @@ filter_moving_average <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
+    ## use {roll} for fast rolling ==================================
+    if (!is.null(width) && is.null(span)) {
+        validate_numeric(
+            width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
+        )
+        rlang::check_installed(
+            c("roll", "RcppParallel"),
+            reason = "to use fast rolling functions"
+        )
+        if (rlang::is_installed("roll")) {
+            y <- roll_mean_centred(x, width)
+        }
+    }
+
     ## processing ==============================================
-    window_idx <- compute_local_windows(
-        t, width = width, span = span, verbose = verbose
-    )
-    y <- compute_local_fun(x, window_idx, mean)
+    if (!exists("y")) {
+        window_idx <- compute_local_windows(
+            t, width = width, span = span, verbose = verbose
+        )
+        y <- compute_local_fun(x, window_idx, mean)
+    }
     ## explicit overwrite NaN to NA
     y[!is.finite(y)] <- NA_real_
     return(y)

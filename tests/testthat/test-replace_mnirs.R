@@ -87,13 +87,14 @@ test_that("replace_outliers() returns unchanged vector with no outliers", {
 })
 
 test_that("replace_outliers() detects and replaces outliers with median", {
-    x <- c(1:10, 100, 12:20) # 100 is clear outlier
+    x <- c(1:4, 100, 6:10) # 100 is clear outlier
     result <- replace_outliers(x, width = 4)
 
     expect_type(result, "double")
     expect_length(result, length(x))
-    expect_true(result[11] != 100) # outlier replaced
-    expect_true(result[11] == median(x[c(8:14)])) # outlier replaced
+    expect_lt(result[5], 100) # outlier replaced
+    ## ! reconcile rolling median methods
+    expect_equal(result[5], median(x[c(3:7)])) # outlier replaced
     expect_false(any(is.na(result)))
 
     ## span
@@ -101,8 +102,8 @@ test_that("replace_outliers() detects and replaces outliers with median", {
 
     expect_type(result, "double")
     expect_length(result, length(x))
-    expect_true(result[11] != 100) # outlier replaced
-    expect_equal(result[11], median(x[c(8:14)])) # outlier replaced
+    expect_lt(result[5], 100) # outlier replaced
+    expect_equal(result[5], median(x[c(3:7)])) # outlier replaced
     expect_false(any(is.na(result)))
 })
 

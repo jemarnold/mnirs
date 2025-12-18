@@ -107,6 +107,8 @@ test_that("compute_local_windows works with width = 1 and span = 0", {
 
     result <- compute_local_windows(t, span = 0)
     expect_equal(result, as.list(t))
+
+    compute_local_windows(t, width = 1, span = 0)
 })
 
 ## test compute_window_of_valid_neighbours() ===========================
@@ -291,7 +293,12 @@ test_that("compute_outliers returns logical vector", {
     t <- 1:5
     window_idx <- compute_local_windows(t, width = 2, span = NULL)
     local_medians <- compute_local_fun(x, window_idx, fn = median)
-    result <- compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3)
+    result <- compute_outliers(
+        x,
+        window_idx,
+        local_medians,
+        outlier_cutoff = 3
+    )
 
     expect_type(result, "logical")
     expect_length(result, length(x))

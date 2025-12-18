@@ -205,8 +205,9 @@ replace_mnirs <- function(
 #' `replace_invalid()` detects specified invalid values or cutoff values in
 #' vector data and replaces them with the local median value or `NA`.
 #'
-#' @param x A numeric vector.
-#' @param t An *optional* numeric vector of time or sample number.
+#' @param x A numeric vector of the response variable.
+#' @param t An *optional* numeric vector of the predictor variable; time
+#'   or sample number. *Defaults* to indices of `t = seq_along(x)`.
 #' @inheritParams replace_mnirs
 #'
 #' @details
@@ -329,12 +330,33 @@ replace_outliers <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
+    ## use {roll} for fast rolling ==================================
+    if (!is.null(width) && is.null(span)) {
+        validate_numeric(
+            width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
+        )
+        rlang::check_installed(
+            c("roll", "RcppParallel"),
+            reason = "to use fast rolling functions"
+        )
+        if (rlang::is_installed("roll")) {
+            local_medians <- roll_median_centred(x, width)
+        }
+    }
+
     ## process =====================================================
     window_idx <- compute_local_windows(
         t, width = width, span = span, verbose = verbose
     )
-    local_medians <- compute_local_fun(x, window_idx, median)
-    is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+    if (!exists("local_medians")) {
+        local_medians <- compute_local_fun(x, window_idx, median)
+    }
+    is_outlier <- compute_outliers(
+        x,
+        window_idx,
+        local_medians,
+        outlier_cutoff
+    )
 
     ## fill outliers with median or NA
     y <- x

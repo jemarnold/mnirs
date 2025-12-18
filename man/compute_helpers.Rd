@@ -5,6 +5,8 @@
 \alias{compute_local_fun}
 \alias{compute_outliers}
 \alias{compute_window_of_valid_neighbours}
+\alias{roll_median_centred}
+\alias{roll_mean_centred}
 \title{Computes vectorised rolling local values}
 \usage{
 compute_local_windows(
@@ -26,9 +28,14 @@ compute_window_of_valid_neighbours(
   span = NULL,
   verbose = TRUE
 )
+
+roll_median_centred(x, width)
+
+roll_mean_centred(x, width)
 }
 \arguments{
-\item{t}{An \emph{optional} numeric vector of time or sample number.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable; time
+or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{idx}{A numeric vector of indices of \code{t} at which to calculate local
 windows. All indices of \code{t} by \emph{default}, or can be used to only calculate
@@ -45,7 +52,7 @@ between \verb{[t - span/2, t + span/2]}.}
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 
-\item{x}{A numeric vector.}
+\item{x}{A numeric vector of the response variable.}
 
 \item{window_idx}{A list the same length as \code{window_idx} and the same or
 shorter length as \code{x} with numeric vectors for the sample indices of
@@ -62,6 +69,10 @@ number of standard deviations above and below the local median. The
 \emph{default} \code{outlier_cutoff = NULL} will not replace outliers.
 \code{outlier_cutoff = 3} is the standard replacement threshold following
 Pearson's rule.}
+
+\item{roll_check}{A logical to determine whether to perform fast rolling
+operations with \code{\link[roll:roll_median]{roll::roll_median()}}, or slow local window operations
+with \code{\link[=vapply]{vapply()}}.}
 }
 \value{
 \code{compute_local_windows()}: A list the same length as \code{idx} and the same or
@@ -76,6 +87,12 @@ shorter length as \code{t} with numeric vectors of sample indices of length
 values in \code{x} with numeric vectors of sample indices of length
 \code{width} samples or \code{span} units of time \code{t} for valid values neighbouring
 split to either side of the invalid \code{NA}s.
+
+\code{roll_median_centred()}: A numeric vector of local median values,
+centre-aligned, the same length as \code{x}.
+
+\code{roll_mean_centred()}: A numeric vector of local median values,
+centre-aligned, the same length as \code{x}.
 }
 \description{
 \code{compute_local_windows()}: Helper function to return a list of rolling
@@ -93,6 +110,12 @@ indicating local outliers of \code{x} within a list of rolling sample windows
 \code{compute_window_of_valid_neighbours()}: Helper function to return a list of
 sample indices \code{idx} along valid values of \code{x} to either side of \code{NA}s,
 defined by either \code{width} in samples or \code{span} in units of \code{t}.
+
+\code{roll_median_centred()}: Compute rolling median using \emph{{roll}} with centre
+alignment
+
+\code{roll_mean_centred()}: Compute rolling mean using \emph{{roll}} with centre
+alignment
 }
 \details{
 Local rolling calculations are made within a window defined by either
@@ -113,7 +136,7 @@ t <- seq_along(x)
 (local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
 
 ## a logical vector of local outliers of `x`
-(is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3))
+(is.outlier <- mnirs:::compute_outliers(x, local_medians, outlier_cutoff = 3, window_idx))
 
 ## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.
 x <- c(1, 2, 3, NA, NA, 6)

@@ -5,7 +5,6 @@
 #' in samples or `span` in units of `t`.
 #'
 #' @inheritParams replace_invalid
-#' @inheritParams replace_mnirs
 #' @param idx A numeric vector of indices of `t` at which to calculate local
 #'   windows. All indices of `t` by *default*, or can be used to only calculate
 #'   for known indicies, such as invalid values of `x`.
@@ -34,7 +33,7 @@
 #' (local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
 #'
 #' ## a logical vector of local outliers of `x`
-#' (is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3))
+#' (is.outlier <- mnirs:::compute_outliers(x, local_medians, outlier_cutoff = 3, window_idx))
 #'
 #' ## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.
 #' x <- c(1, 2, 3, NA, NA, 6)
@@ -55,11 +54,13 @@ compute_local_windows <- function(
     verbose = TRUE
 ) {
     validate_width_span(width, span, verbose)
-
+    
     n <- length(t)
     if (!is.null(width)) {
         half_width <- floor(width * 0.5)
-        start_idx <- pmax(1L, seq_len(n) - half_width)
+        ## ! RECONCILE FOR EVEN WIDTHS
+        ## bias right when width is even; last single value
+        start_idx <- pmax(1L, seq_len(n) - half_width) ## + 1L
         end_idx <- pmin(n, seq_len(n) + half_width)
     } else {
         half_span <- span * 0.5
@@ -105,13 +106,21 @@ compute_local_fun <- function(x, window_idx, fn) {
 #'
 #' @param local_medians A numeric vector the same length as `x` of local
 #'   median values.
+#' @param roll_check A logical to determine whether to perform fast rolling
+#'   operations with [roll::roll_median()], or slow local window operations
+#'   with [vapply()].
 #'
 #' @returns
 #' `compute_outliers()`: A logical vector the same length as `x`.
 #'
 #' @rdname compute_helpers
 #' @keywords internal
-compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
+compute_outliers <- function(
+    x,
+    window_idx,
+    local_medians,
+    outlier_cutoff
+) {
     validate_numeric(
         outlier_cutoff, 1, c(0, Inf), integer = TRUE, 
         msg1 = "one-element positive"
@@ -119,9 +128,9 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
 
     n <- length(x)
     L <- 1.4826 ## 1 / qnorm(0.75): MAD at the 75% percentile of |Z|
-
+    # MAD = median(|x - median(x)|) within each window
     ## median of absolute local residuals from the local median
-    local_outliers <- vapply(seq_len(n), \(.i) {
+    local_mad <- vapply(seq_len(n), \(.i) {
         median(abs(x[window_idx[[.i]]] - local_medians[.i]), na.rm = TRUE)
     }, numeric(1))
 
@@ -131,8 +140,9 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
     smallest_var <- suppressWarnings(min(abs_diffs[abs_diffs > 1e-5]))
 
     ## logical outlier positions
-    is_outlier <- abs(x - local_medians) > smallest_var &
-        abs(x - local_medians) > (L * outlier_cutoff * local_outliers)
+    abs_dev <- abs(x - local_medians)
+    is_outlier <- abs_dev > smallest_var &
+        abs_dev > (L * outlier_cutoff * local_mad)
     ## edge case to handle NAs if not handled before.
     ## TODO need to verify behaviour
     is_outlier[is.na(is_outlier)] <- FALSE
@@ -144,9 +154,6 @@ compute_outliers <- function(x, window_idx, local_medians, outlier_cutoff) {
 #' `compute_window_of_valid_neighbours()`: Helper function to return a list of
 #' sample indices `idx` along valid values of `x` to either side of `NA`s,
 #' defined by either `width` in samples or `span` in units of `t`.
-#'
-#' @inheritParams replace_invalid
-#' @inheritParams replace_mnirs
 #'
 #' @returns
 #' `compute_window_of_valid_neighbours()`: A list the same length as `NA`
@@ -182,28 +189,103 @@ compute_window_of_valid_neighbours <- function(
             right <- min(n_valid, pos[i] + 1L):min(n_valid, pos[i] + half_width)
             window_idx[[i]] <- valid_idx[sort(unique(c(left, right)))]
         }
-    } else if (!is.null(span)) {
-        ## Pre-compute for span approach
-        t_valid <- t[valid_idx]
-        t_na <- t[na_idx]
-        half_span <- span * 0.5
-
-        window_idx <- lapply(seq_len(n_na), \(.i) {
-            t_range <- c(t_na[.i] - half_span, t_na[.i] + half_span)
-            in_range <- valid_idx[t_valid >= t_range[1L] & t_valid <= t_range[2L]]
-
-            if (length(in_range) == 0) {
-                pos <- findInterval(na_idx[.i], valid_idx)
-                in_range <- valid_idx[c(pos, min(n_valid, pos + 1L))]
-                in_range <- unique(in_range)
-            }
-            in_range
-        })
+        return(window_idx)
     }
+
+    ## Pre-compute for span approach
+    t_valid <- t[valid_idx]
+    t_na <- t[na_idx]
+    half_span <- span * 0.5
+
+    window_idx <- lapply(seq_len(n_na), \(.i) {
+        t_range <- c(t_na[.i] - half_span, t_na[.i] + half_span)
+        in_range <- valid_idx[t_valid >= t_range[1L] & t_valid <= t_range[2L]]
+
+        if (length(in_range) == 0) {
+            pos <- findInterval(na_idx[.i], valid_idx)
+            in_range <- valid_idx[c(pos, min(n_valid, pos + 1L))]
+            in_range <- unique(in_range)
+        }
+        in_range
+    })
 
     ## window of valid values exclusive around `x`
     return(window_idx)
 }
+
+
+#' @description
+#' `roll_median_centred()`: Compute rolling median using *{roll}* with centre 
+#' alignment
+#' 
+#' @returns
+#' `roll_median_centred()`: A numeric vector of local median values, 
+#'   centre-aligned, the same length as `x`.
+#'
+#' @rdname compute_helpers
+#' @keywords internal
+roll_median_centred <- function(x, width) {
+    n <- length(x)
+    half_width <- floor(width / 2L)
+    x_padded <- c(x, rep_len(x[n], half_width))
+
+    # roll_median is right-aligned:  result[i] uses x[(i-width+1):i]
+    # Shift output left by half_width for centre alignment
+    rolled <- roll::roll_median(
+        x_padded,
+        width,
+        min_obs = 1L,
+        na_restore = TRUE
+    )
+
+    # Shift left by half_width to centre-align
+    rolled[seq.int(half_width + 1L, n + half_width)]
+}
+
+
+#' @description
+#' `roll_mean_centred()`: Compute rolling mean using *{roll}* with centre 
+#' alignment
+#'
+#' @returns
+#' `roll_mean_centred()`: A numeric vector of local median values, 
+#'   centre-aligned, the same length as `x`.
+#'
+#' @rdname compute_helpers
+#' @keywords internal
+roll_mean_centred <- function(x, width) {
+    n <- length(x)
+    half_width <- floor(width / 2L)
+    x_padded <- c(x, rep_len(NA_real_, half_width))
+
+    # roll_mean is right-aligned:  result[i] uses x[(i-width+1):i]
+    # Shift output left by half_width for centre alignment
+    rolled <- roll::roll_mean(
+        x_padded,
+        width,
+        min_obs = 1L
+    )
+
+    # Shift left by half_width to centre-align
+    rolled[seq.int(half_width + 1L, n + half_width)]
+}
+
+
+# #' Pad the edges of a numeric vector for robust partial window calculations
+# #' 
+# #' @inheritParams replace_invalid
+# #' @inheritParams replace_mnirs
+# #' 
+# #' @keywords internal
+# pad_edges <- function(x, width = NULL) {
+#     n <- length(x)
+#     half_width <- floor(width / 2L)
+
+#     ## reverse padded edges
+#     pad_left <- x[seq(min(half_width, n), 1L)]
+#     pad_right <- x[seq(n, max(1L, n - half_width + 1L))]
+#     return(c(pad_left, x, pad_right))
+# }
 
 
 #' Preserve and Restore NA Information Within a Vector

@@ -256,7 +256,7 @@ test_that("within() handles vectorised inputs", {
     )
 })
 
-test_that("within() handles invalid `vec` values", {
+test_that("within() handles non-numeric `vec` values", {
     expect_error(
         within(1:5, c("A", "B")),
         "valid.*numeric"
@@ -304,7 +304,8 @@ test_that("within() detects positive non-zero values", {
 })
 
 test_that("within() handles NA values", {
-    expect_equal(within(NA, c(1, 10)), NA)
+    expect_error(within(NA, c(1, 10)), "valid.*numeric")
+    expect_equal(within(NA_real_, c(1, 10)), NA)
     expect_equal(within(c(1, NA, 5), c(1, 10)), c(TRUE, NA, TRUE))
     expect_false(within(5, c(NA, 10)))
     expect_false(within(5, c(1, NA)))
@@ -336,7 +337,9 @@ test_that("within is equivalent to dplyr::between()", {
         dplyr::between(c(0, 5, 10, 15), 1, 10)
     )
 
-    expect_equal(within(NA, c(1, 10)), dplyr::between(NA, 1, 10))
+    ## TODO should it have the same non-numeric NA behaviour?
+    # expect_equal(within(NA, c(1, 10)), dplyr::between(NA, 1, 10))
+    expect_equal(within(NA_real_, c(1, 10)), dplyr::between(NA_real_, 1, 10))
     expect_equal(
         within(c(1, NA, 5), c(1, 10)),
         dplyr::between(c(1, NA, 5), 1, 10)

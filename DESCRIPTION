@@ -25,6 +25,7 @@ Suggests:
     ggplot2,
     knitr,
     quarto,
+    roll,
     scales,
     signal,
     testthat (>= 3.0.0),

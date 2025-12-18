@@ -103,9 +103,10 @@ trailing \code{NA}s or to the right for leading \code{NA}s, using
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 
-\item{x}{A numeric vector.}
+\item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of time or sample number.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable; time
+or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{...}{Additional arguments.}
 }
