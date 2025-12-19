@@ -1,5 +1,6 @@
 ## Test compute_local_windows() =========================================
 test_that("compute_local_windows validates inputs", {
+    skip("validation now occurs above this lower function")
     t <- 1:10
 
     expect_error(
@@ -113,6 +114,8 @@ test_that("compute_local_windows works with width = 1 and span = 0", {
 
 ## test compute_window_of_valid_neighbours() ===========================
 test_that("compute_window_of_valid_neighbours() validates inputs", {
+    skip("validation now occurs above this lower function")
+    
     x <- c(1, 2, NA, 4, 5)
 
     # Must specify width or span
@@ -263,7 +266,7 @@ test_that("compute_local_fun handles NA values", {
     ## this shouldn't happen with handle_na, but just in case
     x <- c(1, NA, 3, 4, 5)
     window_idx <- compute_local_windows(x, width = 2)
-    result <- compute_local_fun(x, window_idx, fn = median)
+    result <- compute_local_fun(x, window_idx, fn = median, na.rm = TRUE)
 
     expect_false(all(is.na(result[1:3])))
     expect_equal(result[1], median(x[1]))
@@ -275,7 +278,7 @@ test_that("compute_local_fun() handles empty windows", {
     x <- c(1, 2, 3)
     window_idx <- list(integer(0))
     ## TODO returns NA, is this good?
-    result <- compute_local_fun(x, window_idx, fn = median)
+    result <- compute_local_fun(x, window_idx, fn = median, na.rm = TRUE)
     expect_true(is.na(result))
 })
 
@@ -292,7 +295,7 @@ test_that("compute_outliers returns logical vector", {
     x <- c(1, 2, 3, 100, 5)
     t <- 1:5
     window_idx <- compute_local_windows(t, width = 2, span = NULL)
-    local_medians <- compute_local_fun(x, window_idx, fn = median)
+    local_medians <- compute_local_fun(x, window_idx, fn = median, na.rm = TRUE)
     result <- compute_outliers(
         x,
         window_idx,
@@ -326,6 +329,7 @@ test_that("compute_outliers threshold sensitivity via outlier_cutoff", {
 })
 
 test_that("compute_outliers validates outlier_cutoff", {
+    skip("validation now occurs above this lower function")
     x <- 1:5
     t <- 1:5
     window_idx <- compute_local_windows(t, width = 2, span = NULL)
@@ -352,7 +356,7 @@ test_that("compute_outliers handles NA", {
     x <- c(1, 2, NA, 100, 5)
     t <- 1:5
     window_idx <- compute_local_windows(t, width = 2, span = NULL)
-    local_medians <- compute_local_fun(x, window_idx, fn = median)
+    local_medians <- compute_local_fun(x, window_idx, fn = median, na.rm = TRUE)
     result <- compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3)
 
     expect_true(all(!result))

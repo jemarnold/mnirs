@@ -2,35 +2,39 @@
 #'
 #' Calculates the linear regression slope of a numeric vector.
 #'
+#' @param na.rm A logical indicating whether missing values should be ignored
+#'   (`TRUE`). Otherwise `FALSE` (the *default*) will return `NA` when there
+#'   are any missing data within the vector.
 #' @inheritParams replace_invalid
 #'
 #' @details
-#' Uses the closed-form ordinary least squares formula when `t` is sequential 
-#'   integers. The denominator simplifies to `n(n²-1)/12`
+#' Uses the least squares formula. When `na.rm = TRUE` uses complete case
+#'   analysis, where at least two valid samples will return a slope value.
+#'   Otherwise, a single `NA` sample will return `NA`.
 #'
 #' @returns A numeric slope of `x/t`.
 #'
 #' @examples
-#' y <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
-#' slope(y)
+#' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+#' slope(x)
 #'
-#' y <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
-#' slope(y)
+#' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
+#' slope(x)
 #'
 #' @export
-slope <- function(x, t = seq_along(x), na.rm = FALSE) {
-    validate_x_t(x, t)
-    if (na.rm) {
-        complete <- !is.na(x) & !is.na(t)
-        x <- x[complete]
-        t <- t[complete]
+slope <- function(x, t = seq_along(x), na.rm = FALSE, bypass_checks = FALSE) {
+    if (!bypass_checks) {
+        validate_x_t(x, t)
+        if (na.rm) {
+            complete <- !is.na(x) & !is.na(t)
+            x <- x[complete]
+            t <- t[complete]
+        }
     }
-
     n <- length(x)
     if (n < 2L) {
         return(NA_real_)
     }
-    
     sum_t <- sum(t)
     sum_x <- sum(x)
     sum_tx <- sum(t * x)
@@ -42,65 +46,87 @@ slope <- function(x, t = seq_along(x), na.rm = FALSE) {
     return((n * sum_tx - sum_t * sum_x) / denom)
 }
 
-# roll::roll_median()
+#' Calculate rolling slope
+#'
+#' Computes rolling linear regression slopes within a local window along a
+#' numeric vector.
+#'
+#' @param align Window alignment as *"center"* (the *default*), *"left"*, or
+#'   *"right"*. Where *"left"* is *forward looking*, and *"right"* is
+#'   *backward looking* from the current sample.
+#' @inheritParams slope
+#' @inheritParams replace_mnirs
+#'
+#' @details
+#' Uses the least squares formula. When `na.rm = TRUE` uses complete case
+#'   analysis, where at least two valid samples will return a slope value.
+#'   Otherwise, a single `NA` sample will return `NA`.
+#'
+#' The local rolling window can be specified by either `width` as the number of
+#'   samples centred on `idx` between
+#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
+#'   in units of `time_channel` centred on `idx` between
+#'   `[t - span/2, t + span/2]`. Specifying `width` calls [roll::roll_lm()]
+#'   which is often much faster than specifying `span`. A partial moving
+#'   average will be calculated at the edges of the data.
+#'
+#' @seealso [zoo::rollapply()], [roll::roll_lm()]
+#'
+#' @return A numeric vector of rolling local slopes in units of `x/t` the
+#'   same length as `x`.
+#'
+#' @examples
+#' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+#' rolling_slope(x, span = 3)
+#' rolling_slope(x, width = 3)
+#'
+#' x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
+#' rolling_slope(x_na, span = 3)
+#' rolling_slope(x_na, span = 3, na.rm = TRUE)
+#'
+#' @export
+rolling_slope <- function(
+    x,
+    t = seq_along(x),
+    width = NULL,
+    span = NULL,
+    align = c("center", "left", "right"),
+    na.rm = FALSE,
+    bypass_checks = FALSE,
+    verbose = TRUE
+) {
+    if (!bypass_checks) {
+        validate_x_t(x, t)
+        if (na.rm) {
+            complete <- !is.na(x) & !is.na(t)
+            x <- x[complete]
+            t <- t[complete]
+        }
+        if (length(x) < 2L) {
+            return(NA_real_)
+        }
+        validate_width_span(width, span, verbose)
+        align <- match.arg(align)
+    }
 
+    ## use {roll} for fast rolling ==================================
+    if (!is.null(width) && is.null(span)) {
+        rlang::check_installed(
+            c("roll", "RcppParallel"),
+            reason = "to use fast rolling functions"
+        )
+        if (rlang::is_installed("roll")) {
+            return(roll_lm_centred(x, t, width))
+        }
+    }
 
-# rolling_slope <- function(
-#     y,
-#     x = seq_along(y),
-#     span,
-#     align = c("center", "left", "right"),
-#     na.rm = FALSE
-# ) {
-#     ## check for sufficient non-NA observations
-#     if (sum(!is.na(y)) < 1) {
-#         return(NA_real_)
-#     }
+    ## process =====================================================
+    window_idx <- compute_local_windows(
+        t, width = width, span = span, align = align
+    )
+    compute_local_fun(
+        x, window_idx, slope, na.rm = na.rm, bypass_checks = TRUE
+    )
+}
 
-#     ## invalidate NULL
-#     if (is.null(span)) {
-#         span <- NA
-#     }
-#     validate_numeric(span, 1, c(0, Inf), FALSE, msg1 = "one-element positive")
-
-#     align <- match.arg(align)
-#     x <- round(x, 8)
-#     y <- round(y, 8) ## avoid floating point precision issues
-#     n <- length(y)
-
-#     ## find indices for x values between span (in units of x) based on align
-#     if (align == "center") {
-#         start_x <- pmax(x[1], x - span / 2)
-#         end_x <- pmin(x[n], x + span / 2)
-#     } else if (align == "left") {
-#         ## align left is FORWARD looking
-#         ## current observation is at leftmost position of window
-#         ## window starts at current x value, extends span units forward
-#         start_x <- x
-#         end_x <- pmin(x[n], x + span)
-#     } else if (align == "right") {
-#         ## align right is BACKWARD looking
-#         ## current observation is at rightmost position of window
-#         ## window ends at current x value, extends span units backward
-#         start_x <- pmax(x[1], x - span)
-#         end_x <- x
-#     }
-
-#     ## vectorised window detection and slope calculation
-#     slopes <- sapply(seq_len(n), \(.x) {
-#         ## find indices for x within span
-#         window_idx <- which(x >= start_x[.x] & x <= end_x[.x])
-
-#         ## handle local missing data
-#         if ((!na.rm & any(is.na(y[window_idx]))) || (na.rm & is.na(y[.x]))) {
-#             NA_real_
-#         } else if (length(window_idx) < 2) {
-#             0
-#         } else {
-#             ## calculate slope within window
-#             slope(y[window_idx], x[window_idx])
-#         }
-#     })
-
-#     return(slopes)
-# }
+## ! add align parameter to roll_* functions

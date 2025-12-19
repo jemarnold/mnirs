@@ -168,7 +168,7 @@ test_that("replace_outliers() respects outlier_cutoff threshold", {
 test_that("replace_outliers() validates inputs correctly", {
     x <- 1:10
 
-    expect_error(replace_outliers("text", width = 4), "x.*?numeric") # non-numeric x
+    expect_error(replace_outliers(x = "text", width = 4), "x.*?numeric") # non-numeric x
     expect_error(
         replace_outliers(x, method = "none", width = -1),
         "width.*?integer"

@@ -157,7 +157,10 @@ shift_mnirs <- function(
         ## compute min or max along local means
         ## return named vec of min/max for each nirs_channel
         shift_values <- vapply(data[nirs_unlisted], \(.x) {
-            shift_fun(compute_local_fun(.x, window_idx, mean), na.rm = TRUE)
+            shift_fun(
+                compute_local_fun(.x, window_idx, mean, na.rm = TRUE), 
+                na.rm = TRUE
+            )
         }, numeric(1))
     }
 

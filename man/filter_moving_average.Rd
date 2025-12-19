@@ -9,6 +9,7 @@ filter_moving_average(
   t = seq_along(x),
   width = NULL,
   span = NULL,
+  bypass_checks = FALSE,
   verbose = TRUE
 )
 }
@@ -26,6 +27,9 @@ around \code{idx} in which to perform the operation., between
 in which to perform the operation. In units of \code{time_channel} or \code{t},
 between \verb{[t - span/2, t + span/2]}.}
 
+\item{bypass_checks}{A logical allowing wrapper functions to bypass redundant
+checks and validations.}
+
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 }
@@ -40,6 +44,9 @@ Applies a centred (symmetrical) moving average filter in a local window
 defined by either \code{width} as the number of samples around \code{idx} between
 \verb{[idx - floor(width/2),} \verb{idx + floor(width/2)]}. Or by \code{span} as the
 timespan in units of \code{time_channel} between \verb{[t - span/2, t + span/2]}.
+
+Specifying \code{width} calls \code{\link[roll:roll_median]{roll::roll_median()}} which is often much faster
+than specifying \code{span}.
 
 If there are no valid values within the calculation window, will return \code{NA}.
 A partial moving average will be calculated at the edges of the data.
@@ -58,5 +65,5 @@ filter_moving_average(x, span = 2)
 
 }
 \seealso{
-\code{\link[zoo:rollmean]{zoo::rollmean()}}
+\code{\link[zoo:rollmean]{zoo::rollmean()}}, \code{\link[roll:roll_mean]{roll::roll_mean()}}
 }

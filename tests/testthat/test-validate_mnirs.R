@@ -484,3 +484,39 @@ test_that("validate_sample_rate() errors for non-single non-numeric non-positive
         "must be .*one-element"
     )
 })
+
+## validate_width_span ==============================
+test_that("validate_width_span() validates inputs", {
+    expect_error(
+        validate_width_span(width = NULL, span = NULL),
+        "width.*span.*must be defined"
+    )
+
+    expect_message(
+        validate_width_span(width = 2, span = 1),
+        "width.*overrides.*span"
+    )
+
+    expect_error(
+        validate_width_span(width = -1),
+        "width.*valid.*integer"
+    )
+
+    expect_error(
+        validate_width_span(width = 1.5),
+        "width.*valid.*integer"
+    )
+
+    expect_error(
+        validate_width_span(span = -1),
+        "span.*valid.*numeric"
+    )
+})
+
+## validate_x_t =================================
+test_that("validate_x_t() validates inputs", {
+    expect_error(
+        validate_x_t(x = 1:10, t = 1:5),
+        "numeric.*equal length"
+    )
+})

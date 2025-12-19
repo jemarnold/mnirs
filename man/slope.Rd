@@ -4,13 +4,20 @@
 \alias{slope}
 \title{Calculate linear slope}
 \usage{
-slope(x, t = seq_along(x), na.rm = FALSE)
+slope(x, t = seq_along(x), na.rm = FALSE, bypass_checks = FALSE)
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
 \item{t}{An \emph{optional} numeric vector of the predictor variable; time
 or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
+
+\item{na.rm}{A logical indicating whether missing values should be ignored
+(\code{TRUE}). Otherwise \code{FALSE} (the \emph{default}) will return \code{NA} when there
+are any missing data within the vector.}
+
+\item{bypass_checks}{A logical allowing wrapper functions to bypass redundant
+checks and validations.}
 }
 \value{
 A numeric slope of \code{x/t}.
@@ -19,14 +26,15 @@ A numeric slope of \code{x/t}.
 Calculates the linear regression slope of a numeric vector.
 }
 \details{
-Uses the closed-form ordinary least squares formula when \code{t} is sequential
-integers. The denominator simplifies to \verb{n(n²-1)/12}
+Uses the least squares formula. When \code{na.rm = TRUE} uses complete case
+analysis, where at least two valid samples will return a slope value.
+Otherwise, a single \code{NA} sample will return \code{NA}.
 }
 \examples{
-y <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
-slope(y)
+x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+slope(x)
 
-y <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
-slope(y)
+x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
+slope(x)
 
 }

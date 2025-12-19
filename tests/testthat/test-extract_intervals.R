@@ -712,7 +712,7 @@ test_that("ensemble_intervals averages across intervals correctly", {
 
     result <- ensemble_intervals(
         interval_list = interval_list,
-        nirs_channels = c("smo2_left"),
+        nirs_channels = c("smo2_left", "smo2_right"),
         metadata = metadata,
         verbose = FALSE
     )
