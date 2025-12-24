@@ -1,6 +1,6 @@
 Package: mnirs
 Title: Muscle Near-Infrared Spectroscopy Processing & Analysis
-Version: 0.1.8
+Version: 0.1.9
 Authors@R: 
     person("Jem", "Arnold", , "jem.arnold@ubc.ca", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0003-3908-9447"))
@@ -25,10 +25,12 @@ Suggests:
     ggplot2,
     knitr,
     quarto,
+    roll,
     scales,
     signal,
     testthat (>= 3.0.0),
-    tidyr
+    tidyr,
+    zoo
 VignetteBuilder: 
     quarto
 Config/testthat/edition: 3

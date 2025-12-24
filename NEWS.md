@@ -1,3 +1,18 @@
+# mnirs 0.1.9
+
+* Create `rolling_slope()` to calculate local linear regression slopes along a vector.
+* Integrate [roll][roll::roll-package] for faster rolling median, mean, and lm implementation under certain conditions.
+    * Currently used: `roll_lm()` for `rolling_slope()`, `roll_median()` for `replace_outliers()`, `roll_mean()` for `filter_moving_average()`.
+    * May roll back in favour of `data.table::froll_*` when 1.17.99+ is updated on CRAN.
+* Update local rolling functions with `align = c("center", "left", "right")` arg.
+    * Currently used: internal `compute_local_windows()` for `rolling_slope()`.
+* Update internal `compute_local_fun()` to allow additional arguments, e.g. for `na.rm = TRUE`.
+* Remove redundant internal numeric rounding. Results may now have floating point precision issues, but avoid compounding rounding error.
+    * Affects: `filter_mnirs.smooth_spline()`, `filter_mnirs.moving_average()`, `parse_sample_rate()` and `clean_invalid()` for `read_mnirs()`, `replace_mnirs()`, `resample_mnirs()`, `shift_mnirs()`, `validate_sample_rate()`.
+* Add hidden `bypass_check` argument to reduce overhead from validation redundancy.
+    * Affects: `replace_invalid()`, `replace_outliers()`, `replace_missing()`, `filter_moving_average()`, new functions `slope()`, `rolling_slope()`.
+* Update `validate_numeric()` logic to reduce overhead.
+
 # mnirs 0.1.8
 
 * Create `extract_intervals()` to detect events and extract surrounding data frames.

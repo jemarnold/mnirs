@@ -54,14 +54,15 @@
 #'   the number of samples centred on `idx` between
 #'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
 #'   in units of `time_channel` centred on `idx` between
-#'   `[t - span/2, t + span/2]`. A partial moving average will be calculated
-#'   at the edges of the data.
+#'   `[t - span/2, t + span/2]`. Specifying `width` calls [roll::roll_median()] 
+#'   which is often much faster than specifying `span`. A partial moving 
+#'   average will be calculated at the edges of the data.
 #'
 #' @returns
 #' `replace_mnirs()` returns a [tibble][tibble::tibble-package] of class
 #'   *"mnirs"* with metadata available with `attributes()`.
 #'
-#' @seealso [pracma::hampel()] [stats::approx()]
+#' @seealso [pracma::hampel()], [stats::approx()], [roll::roll_median()]
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' library(ggplot2)
@@ -154,9 +155,13 @@ replace_mnirs <- function(
     nirs_channels <- validate_nirs_channels(
         data, nirs_channels, verbose = FALSE
     )
-    nirs_channels <- unlist(nirs_channels, use.names = FALSE)
+    # nirs_channels <- unlist(nirs_channels, use.names = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
+
+    if (any(check_conditions[2:3])) {
+        validate_width_span(width, span, verbose)
+    }
 
     ## remove invalid, outliers, and NA ==============================
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
@@ -167,7 +172,8 @@ replace_mnirs <- function(
                 invalid_values = invalid_values,
                 invalid_above = invalid_above,
                 invalid_below = invalid_below,
-                method = "none"
+                method = "none",
+                bypass_checks = TRUE
             )
         }
         if (check_conditions[2L]) {
@@ -177,7 +183,8 @@ replace_mnirs <- function(
                 width = width,
                 span = span,
                 method = "none",
-                outlier_cutoff = outlier_cutoff
+                outlier_cutoff = outlier_cutoff,
+                bypass_checks = TRUE
             )
         }
         if (check_conditions[3L]) {
@@ -186,7 +193,8 @@ replace_mnirs <- function(
                 t = time_vec,
                 width = width,
                 span = span,
-                method = method
+                method = method,
+                bypass_checks = TRUE
             )
         }
         .x
@@ -205,8 +213,11 @@ replace_mnirs <- function(
 #' `replace_invalid()` detects specified invalid values or cutoff values in
 #' vector data and replaces them with the local median value or `NA`.
 #'
-#' @param x A numeric vector.
-#' @param t An *optional* numeric vector of time or sample number.
+#' @param x A numeric vector of the response variable.
+#' @param t An *optional* numeric vector of the predictor variable; time
+#'   or sample number. *Defaults* to indices of `t = seq_along(x)`.
+#' @param bypass_checks A logical allowing wrapper functions to bypass redundant
+#'   checks and validations.
 #' @inheritParams replace_mnirs
 #'
 #' @details
@@ -234,10 +245,10 @@ replace_invalid <- function(
     width = NULL,
     span = NULL,
     method = c("median", "none"),
+    bypass_checks = FALSE,
     verbose = TRUE
 ) {
     ## validate ===============================================
-    validate_x_t(x, t)
     if (is.null(c(invalid_values, invalid_above, invalid_below))) {
         cli_abort(c(
             "x" = "No replacement criteria specified",
@@ -245,17 +256,18 @@ replace_invalid <- function(
             {.arg invalid_above}, or {.arg invalid_below} must be specified."
         ))
     }
-
+    if (!bypass_checks) {
+        validate_x_t(x, t)
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
+    }
     validate_numeric(invalid_values)
     validate_numeric(invalid_above, 1, msg1 = "one-element")
     validate_numeric(invalid_below, 1, msg1 = "one-element")
     method <- match.arg(method)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
-    }
 
     ## process ========================================================
-    x <- round(x, 6) ## avoid floating point precision issues
     y <- x
     ## fill invalid indices with NA
     invalid_idx <- c(
@@ -266,16 +278,22 @@ replace_invalid <- function(
     y[invalid_idx] <- NA_real_
 
     if (method == "median") {
+        if (!bypass_checks) {
+            validate_width_span(width, span, verbose)
+        }
+
+        window_idx <- compute_local_windows(
+            t, invalid_idx, width, span
+        )
+        local_medians <- compute_local_fun(
+            y, window_idx, median, na.rm = TRUE
+        )
         ## if method = "median"
         ## invalid_values removed to NA first,
         ## so returns local median excluding idx
-        window_idx <- compute_local_windows(
-            t, invalid_idx, width, span, verbose = verbose
-        )
-        local_medians <- compute_local_fun(y, window_idx, median)
         y[invalid_idx] <- local_medians
     }
-    
+
     return(y)
 }
 
@@ -290,7 +308,8 @@ replace_invalid <- function(
 #' @details
 #' `replace_outliers()` will compute rolling local median values across `x`,
 #'   defined by either `width` number of samples, or `span` timespan in units
-#'   of `t`.
+#'   of `t`. Specifying `width` calls [roll::roll_median()] which is often
+#'   much faster than specifying `span`.
 #'
 #' - Outliers are detected with robust median absolute deviation (MAD) method
 #'   adapted from [pracma::hampel()]. Outliers equal to or less than the
@@ -320,21 +339,49 @@ replace_outliers <- function(
     width = NULL,
     span = NULL,
     method = c("median", "none"),
+    bypass_checks = FALSE,
     verbose = TRUE
 ) {
     ## validate ===============================================
-    validate_x_t(x, t)
+    if (!bypass_checks) {
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
+        validate_x_t(x, t)
+        validate_width_span(width, span, verbose)
+    }
+    validate_numeric(
+        outlier_cutoff, 1, c(0, Inf), integer = TRUE, 
+        msg1 = "one-element positive"
+    )
     method <- match.arg(method)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
+    
+    ## process =====================================================
+    if (!is.null(width) && is.null(span)) {
+        ## use {roll} for fast rolling
+        validate_numeric(
+            width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
+        )
+        rlang::check_installed(
+            c("roll", "RcppParallel"),
+            reason = "to use fast rolling functions"
+        )
+        if (rlang::is_installed("roll")) {
+            local_medians <- rolling_median(x, width)
+        }
     }
 
-    ## process =====================================================
     window_idx <- compute_local_windows(
-        t, width = width, span = span, verbose = verbose
+        t, width = width, span = span
     )
-    local_medians <- compute_local_fun(x, window_idx, median)
-    is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+    if (!exists("local_medians")) {
+        local_medians <- compute_local_fun(
+            x, window_idx, median, na.rm = TRUE
+        )
+    }
+    is_outlier <- compute_outliers(
+        x, window_idx, local_medians, outlier_cutoff
+    )
 
     ## fill outliers with median or NA
     y <- x
@@ -345,7 +392,6 @@ replace_outliers <- function(
     }
     return(y)
 }
-
 
 #' Replace Missing Values
 #'
@@ -383,10 +429,14 @@ replace_missing <- function(
     width = NULL,
     span = NULL,
     method = c("linear", "median", "locf"),
+    bypass_checks = FALSE,
+    verbose = TRUE,
     ...
 ) {
     ## validate ===============================================
-    validate_x_t(x, t)
+    if (!bypass_checks) {
+        validate_x_t(x, t)
+    }
     method <- match.arg(method)
     if (method == "locf") {
         method <- "constant" ## swap for approx method arg
@@ -404,16 +454,22 @@ replace_missing <- function(
             ties = list("ordered", mean) ## assume ordered, take mean of ties
         )$y
     } else if (method == "median") {
+        if (!bypass_checks) {
+            if (missing(verbose)) {
+                verbose <- getOption("mnirs.verbose", default = TRUE)
+            }
+            validate_width_span(width, span, verbose)
+        }
         ## median of width or span VALID values to either side of sequential NAs
         y <- x
         na_idx <- which(is.na(x))
-        window_idx <- compute_window_of_valid_neighbours(
+        window_idx <- compute_valid_neighbours(
             x = x,
             t = t,
             width = width,
             span = span
         )
-        local_medians <- compute_local_fun(x, window_idx, median)
+        local_medians <- compute_local_fun(x, window_idx, median, na.rm = TRUE)
         y[na_idx] <- local_medians
     }
 

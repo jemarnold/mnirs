@@ -96,8 +96,10 @@
 #'   moving average filter in a local window, defined by either `width`
 #'   as the number of samples around `idx` between `[idx - floor(width/2),`
 #'   `idx + floor(width/2)]`. Or by `span` as the timespan in units of
-#'   `time_channel` between `[t - span/2, t + span/2]`. A partial moving
-#'   average will be calculated at the edges of the data.}
+#'   `time_channel` between `[t - span/2, t + span/2]`. Specifying `width`
+#'   calls [roll::roll_median()] which is often much faster than specifying 
+#'   `span`.A partial moving average will be calculated at the edges of 
+#'   the data.}
 #' }
 #'
 #' Missing values (`NA`) in `nirs_channels` will cause an error for
@@ -213,7 +215,7 @@ filter_mnirs.smooth_spline <- function(
     )
 
     ## processing ==========================================
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
 
     if (anyDuplicated(time_vec)) {
         cli_abort(c(
@@ -222,7 +224,7 @@ filter_mnirs.smooth_spline <- function(
         ))
     }
 
-    data[nirs_channels] <- sapply(nirs_channels, \(.x) {
+    data[nirs_channels] <- lapply(nirs_channels, \(.x) {
         x <- data[[.x]]
         ## handle NAs
         handle_na <- na.rm && anyNA(x)
@@ -252,7 +254,7 @@ filter_mnirs.smooth_spline <- function(
         } else {
             spline_model$y
         }
-    }, simplify = FALSE, USE.NAMES = TRUE)
+    })
 
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
@@ -370,12 +372,20 @@ filter_mnirs.moving_average <- function(
         data, nirs_channels, verbose = FALSE
     )
     time_channel <- validate_time_channel(data, time_channel)
-
+    validate_width_span(width, span, verbose)
+    
     ## processing ==========================================
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
 
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_moving_average(.x, time_vec, width, span, verbose)
+        filter_moving_average(
+            x = .x,
+            t = time_vec,
+            width = width,
+            span = span,
+            bypass_checks = TRUE,
+            verbose = verbose
+        )
     })
 
     ## Metadata =================================
@@ -390,8 +400,7 @@ filter_mnirs.moving_average <- function(
 #'
 #' Apply a simple moving average smoothing filter to vector data
 #'
-#' @param x A numeric vector.
-#' @param t An *optional* numeric vector of time or sample number.
+#' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
 #' @inheritParams filter_mnirs
 #'
@@ -400,13 +409,16 @@ filter_mnirs.moving_average <- function(
 #'   defined by either `width` as the number of samples around `idx` between
 #'   `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
 #'   timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
+#' 
+#' Specifying `width` calls [roll::roll_mean()] which is often much faster 
+#'   than specifying `span`.
 #'
 #' If there are no valid values within the calculation window, will return `NA`.
 #'   A partial moving average will be calculated at the edges of the data.
 #'
 #' @returns A numeric vector the same length as `x`.
 #'
-#' @seealso [zoo::rollmean()]
+#' @seealso [zoo::rollmean()], [roll::roll_mean()]
 #'
 #' @examples
 #' ## basic moving average with sample width
@@ -426,19 +438,36 @@ filter_moving_average <- function(
     t = seq_along(x),
     width = NULL,
     span = NULL,
+    bypass_checks = FALSE,
     verbose = TRUE
 ) {
     ## validation ===========================================
-    validate_x_t(x, t)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
+    if (!bypass_checks) {
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
+        validate_x_t(x, t)
+        validate_width_span(width, span, verbose)
     }
 
     ## processing ==============================================
-    window_idx <- compute_local_windows(
-        t, width = width, span = span, verbose = verbose
-    )
-    y <- compute_local_fun(x, window_idx, mean)
+    if (!is.null(width) && is.null(span)) {
+        ## use {roll} for fast rolling
+        rlang::check_installed(
+            c("roll", "RcppParallel"),
+            reason = "to use fast rolling functions"
+        )
+        if (rlang::is_installed("roll")) {
+            y <- rolling_mean(x, width)
+        }
+    }
+
+    if (!exists("y")) {
+        window_idx <- compute_local_windows(
+            t, width = width, span = span
+        )
+        y <- compute_local_fun(x, window_idx, mean, na.rm = TRUE)
+    }
     ## explicit overwrite NaN to NA
     y[!is.finite(y)] <- NA_real_
     return(y)

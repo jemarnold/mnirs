@@ -56,6 +56,8 @@ reference:
     Detect and extract intervals for further analysis
   contents:
   - extract_intervals
+  - slope
+  - rolling_slope
 - title: Plotting
   desc: |
     Tools for pretty plotting with `{ggplot2}`.

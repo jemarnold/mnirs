@@ -151,8 +151,10 @@ Only one of either \code{W} or \code{fc} should be defined. If both are defined,
 moving average filter in a local window, defined by either \code{width}
 as the number of samples around \code{idx} between \verb{[idx - floor(width/2),}
 \verb{idx + floor(width/2)]}. Or by \code{span} as the timespan in units of
-\code{time_channel} between \verb{[t - span/2, t + span/2]}. A partial moving
-average will be calculated at the edges of the data.}
+\code{time_channel} between \verb{[t - span/2, t + span/2]}. Specifying \code{width}
+calls \code{\link[roll:roll_median]{roll::roll_median()}} which is often much faster than specifying
+\code{span}.A partial moving average will be calculated at the edges of
+the data.}
 }
 
 Missing values (\code{NA}) in \code{nirs_channels} will cause an error for

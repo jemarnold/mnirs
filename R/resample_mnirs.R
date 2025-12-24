@@ -102,7 +102,7 @@ resample_mnirs <- function(
     resample_time <- 1 / resample_rate
     method <- match.arg(method)
     ## calculate resampling parameters  ===================================
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
     sample_range <- floor(range(time_vec, na.rm = TRUE) * sample_rate) /
         sample_rate
     resampled_times <- seq(sample_range[1], sample_range[2], by = resample_time)
@@ -127,7 +127,7 @@ resample_mnirs <- function(
         tol <- resample_time * 0.5
         result[names(data)[numeric_cols]] <- lapply(data[numeric_cols], \(.x) {
             vapply(resampled_times, \(.t) {
-                t_diffs <- round(abs(time_vec - .t), 6)
+                t_diffs <- abs(time_vec - .t)
                 if (min(t_diffs, na.rm = TRUE) < tol) {
                     .x[which.min(t_diffs)]
                 } else {

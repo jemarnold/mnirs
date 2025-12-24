@@ -186,6 +186,7 @@ extract_intervals <- function(
     }
     nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
     time_channel <- validate_time_channel(data, time_channel)
+    ## avoid floating point precision issues downstream with findIntervals()
     time_vec <- round(data[[time_channel]], 6)
     ## estimate sample_rate for appropriate time binning
     sample_rate <- validate_sample_rate(
@@ -663,7 +664,9 @@ group_intervals <- function(
     if (length(ungrouped_ids) > 0) {
         group_events <- c(group_events, as.list(ungrouped_ids))
         group_events <- group_events[
-            order(sapply(group_events, \(.x) median(.x, na.rm = TRUE)))
+            order(vapply(group_events, \(.x) {
+                median(.x, na.rm = TRUE)
+            }, FUN.VALUE = numeric(1))) ## TODO confirm length == 0 always
         ]
         if (verbose) {
             cli_inform(c(

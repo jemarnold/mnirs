@@ -73,7 +73,10 @@ test_that("filter_moving_average() validates width & span constraints", {
     )
 
     ## width = 0
-    expect_equal(filter_moving_average(x, width = 0, verbose = FALSE), x)
+    expect_error(
+        filter_moving_average(x, width = 0, verbose = FALSE),
+        "width.*integer"
+    )
     ## width > length(x)
     expect_true(all(
         filter_moving_average(x, width = 21, verbose = FALSE) == mean(x)

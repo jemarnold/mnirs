@@ -3,16 +3,16 @@
 #' Passes through manually defined parameters, or defines them from metadata
 #' if present, and validates relevant data quality checks.
 #'
-#' @param data A data frame of class *"mnirs"* containing time series data 
+#' @param data A data frame of class *"mnirs"* containing time series data
 #'   and metadata.
-#' @param nirs_channels A character vector of mNIRS channel names to operate 
-#'   on. Must match column names in `data` exactly. Retrieved from metadata 
+#' @param nirs_channels A character vector of mNIRS channel names to operate
+#'   on. Must match column names in `data` exactly. Retrieved from metadata
 #'   if not defined explicitly.
 #' @param time_channel A character string indicating the time or sample channel
-#'   name. Must match column names in `data` exactly. Retrieved from metadata 
+#'   name. Must match column names in `data` exactly. Retrieved from metadata
 #'   if not defined explicitly.
 #' @param event_channel A character string indicating the event or lap channel
-#'   name. Must match column names in `data` exactly. Retrieved from metadata 
+#'   name. Must match column names in `data` exactly. Retrieved from metadata
 #'   if not defined explicitly.
 #' @param require A logical specifying whether `event_channel` is required
 #'   (the *default*) or optional (`event_channel` returned as `NULL`).
@@ -39,6 +39,25 @@
 #' @keywords internal
 NULL
 
+#' validate_numeric abort message construction
+#' @keywords internal
+abort_validation <- function(name, integer = FALSE, msg1 = "", msg2 = ".") {
+    type <- if (integer) {
+        "integer"
+    } else {
+        "numeric"
+    }
+
+    cli_abort(c(
+        "x" = paste0(
+            "{.arg {name}} must be a valid ",
+            msg1,
+            " {.cls {type}}",
+            msg2
+        )
+    ))
+}
+
 
 #' @rdname validate_mnirs
 validate_numeric <- function(
@@ -50,42 +69,32 @@ validate_numeric <- function(
     msg1 = "",
     msg2 = "."
 ) {
+    ## pass through NULL
     if (is.null(x)) {
-        ## pass through not defined
         return(invisible(NULL))
     }
-    has_valid <- !all(is.na(x))
-    name <- substitute(x)
-    valid <- !is.na(x) & !is.nan(x)
 
-    ## check conditions
-    element_ok <- if (is.finite(elements)) {
-        sum(valid) == elements
-    } else {
-        sum(valid) > 0
+    name <- substitute(x)
+
+    ## cheap early type check
+    if (!is.numeric(x)) {
+        abort_validation(name, integer, msg1, msg2)
     }
 
-    range_ok <- is.null(range) || all(within(x[valid], range, inclusive))
-    integer_ok <- !integer || rlang::is_integerish(x[valid])
+    valid <- !is.na(x)
+    n_valid <- sum(valid)
 
-    ## abort message if fails any
-    if (
-        !is.numeric(x) || !has_valid || !element_ok || !range_ok || !integer_ok
-    ) {
-        type <- if (integer) {
-            "integer"
-        } else {
-            "numeric"
-        }
-
-        cli_abort(c(
-            "x" = paste0(
-                "{.arg {name}} must be a valid ",
-                msg1,
-                " {.cls {type}}",
-                msg2
-            )
-        ))
+    ## elements check
+    if (n_valid == 0L || (is.finite(elements) && n_valid != elements)) {
+        abort_validation(name, integer, msg1, msg2)
+    }
+    ## range check
+    if (!is.null(range) && !all(within(x[valid], range, inclusive))) {
+        abort_validation(name, integer, msg1, msg2)
+    }
+    ## expensive integer check
+    if (integer && !rlang::is_integerish(x[valid])) {
+        abort_validation(name, integer, msg1, msg2)
     }
 
     return(invisible())
@@ -116,7 +125,7 @@ validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
         nirs_unlisted <- nirs_channels
         if (verbose && !is.null(nirs_unlisted)) {
             cli_inform(c(
-                "i" = "{.arg nirs_channels} grouped together by default."#,
+                "i" = "{.arg nirs_channels} grouped together by default." #,
                 # "i" = "{.arg nirs_channels} groups can be defined explicitly."
             ))
         }
@@ -267,7 +276,7 @@ validate_sample_rate <- function(
 
     ## estimate sample_rate from time_channel
     ## time_channel MUST be validated before this
-    time_vec <- round(as.numeric(data[[time_channel]]), 6)
+    time_vec <- as.numeric(data[[time_channel]])
     ## will error on unable to estimate sample_rate
     sample_rate_est <- estimate_sample_rate(time_vec)
 
@@ -315,16 +324,13 @@ validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
         ))
     }
     validate_numeric(
-        width, 1, c(0, Inf), integer = TRUE, msg1 = "one-element positive"
+        width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
     )
     validate_numeric(span, 1, c(0, Inf), msg1 = "one-element positive")
-    if (!is.null(width) && !is.null(span)) {
-        span <- NULL
-        if (verbose) {
-            cli_inform(c(
-                "i" = "{.arg width} = {.val {width}} overrides {.arg span}."
-            ))
-        }
+    if (verbose && !is.null(width) && !is.null(span)) {
+        cli_inform(c(
+            "i" = "{.arg width} = {.val {width}} overrides {.arg span}."
+        ))
     }
 }
 
@@ -340,7 +346,6 @@ validate_x_t <- function(x, t = seq_along(x)) {
         ))
     }
 }
-
 
 
 #' Validate if an item is a list
@@ -360,7 +365,7 @@ make_list <- function(x) {
 #' boundary values, specified independently.
 #'
 #' @param x A numeric vector.
-#' @param vec A numeric vector from which `left` and `right` boundary values 
+#' @param vec A numeric vector from which `left` and `right` boundary values
 #'   for `x` will be taken.
 #' @param inclusive A character vector to specify which of `left` and/or
 #'   `right` boundary values should be included in the range, or both (the
@@ -376,8 +381,12 @@ make_list <- function(x) {
 #'
 #' @keywords internal
 within <- function(x, vec, inclusive = c("left", "right")) {
-    validate_numeric(vec, Inf)
-
+    if (!is.numeric(x)) {
+        abort_validation(substitute(x))
+    }
+    if (!is.numeric(vec)) {
+        abort_validation(substitute(vec))
+    }
     inclusive <- match.arg(
         as.character(inclusive),
         choices = c("left", "right", "FALSE"),

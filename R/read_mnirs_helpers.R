@@ -313,7 +313,6 @@ clean_invalid <- function(x) {
         x[x %in% c("", "NA")] <- NA_character_
     } else if (is.numeric(x)) {
         x[!is.finite(x)] <- NA_real_
-        x <- round(x, 6)
     }
     return(x)
 }
@@ -404,7 +403,7 @@ parse_sample_rate <- function(
     if (!is.null(nirs_device) && nirs_device == "Artinis") {
         sample_rate <- extract_oxysoft_rate(file_header, sample_rate)
 
-        time_vec <- round(data[[time_channel]] / sample_rate, 6)
+        time_vec <- data[[time_channel]] / sample_rate
         time_idx <- match(time_channel, names(data))
         data_names <- append(names(data), "time", time_idx)
         data_names <- rename_duplicates(data_names)
@@ -464,7 +463,7 @@ detect_irregular_samples <- function(
         return(invisible())
     }
 
-    irregular_vec <- unique(x[irregular_idx])
+    irregular_vec <- round(unique(x[irregular_idx]), 6)
 
     if (length(irregular_vec) > 5) {
         ## if more than 5 irregular samples, print the first three
