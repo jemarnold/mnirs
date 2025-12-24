@@ -215,7 +215,7 @@ filter_mnirs.smooth_spline <- function(
     )
 
     ## processing ==========================================
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
 
     if (anyDuplicated(time_vec)) {
         cli_abort(c(
@@ -224,7 +224,7 @@ filter_mnirs.smooth_spline <- function(
         ))
     }
 
-    data[nirs_channels] <- sapply(nirs_channels, \(.x) {
+    data[nirs_channels] <- lapply(nirs_channels, \(.x) {
         x <- data[[.x]]
         ## handle NAs
         handle_na <- na.rm && anyNA(x)
@@ -254,7 +254,7 @@ filter_mnirs.smooth_spline <- function(
         } else {
             spline_model$y
         }
-    }, simplify = FALSE, USE.NAMES = TRUE)
+    })
 
     ## Metadata =================================
     metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
@@ -375,7 +375,7 @@ filter_mnirs.moving_average <- function(
     validate_width_span(width, span, verbose)
     
     ## processing ==========================================
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
 
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
         filter_moving_average(
@@ -410,7 +410,7 @@ filter_mnirs.moving_average <- function(
 #'   `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
 #'   timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
 #' 
-#' Specifying `width` calls [roll::roll_median()] which is often much faster 
+#' Specifying `width` calls [roll::roll_mean()] which is often much faster 
 #'   than specifying `span`.
 #'
 #' If there are no valid values within the calculation window, will return `NA`.
@@ -450,18 +450,18 @@ filter_moving_average <- function(
         validate_width_span(width, span, verbose)
     }
 
-    ## use {roll} for fast rolling ==================================
+    ## processing ==============================================
     if (!is.null(width) && is.null(span)) {
+        ## use {roll} for fast rolling
         rlang::check_installed(
             c("roll", "RcppParallel"),
             reason = "to use fast rolling functions"
         )
         if (rlang::is_installed("roll")) {
-            y <- roll_mean_centred(x, width)
+            y <- rolling_mean(x, width)
         }
     }
 
-    ## processing ==============================================
     if (!exists("y")) {
         window_idx <- compute_local_windows(
             t, width = width, span = span

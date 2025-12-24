@@ -725,10 +725,11 @@ test_that("clean_invalid handles character vectors", {
 })
 
 test_that("clean_invalid handles numeric vectors", {
-    expect_equal(
-        clean_invalid(c(1.2345678, 2.3, NA)),
-        c(1.234568, 2.3, NA_real_)
-    )
+    ## skip, avoid loss of precision
+    # expect_equal(
+    #     clean_invalid(c(1.2345678, 2.3, NA)),
+    #     c(1.234568, 2.3, NA_real_)
+    # )
     expect_equal(clean_invalid(c(0, -0)), c(0, 0))
     expect_equal(clean_invalid(c(Inf, -Inf, NaN)), rep(NA_real_, 3))
     expect_equal(clean_invalid(numeric(0)), numeric(0))

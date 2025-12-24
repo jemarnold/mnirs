@@ -137,7 +137,7 @@ shift_mnirs <- function(
     }
 
     ## calculate shift_to values ====================================
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
 
     if (position == "first") {
         ## take data <= first time_channel value + span, assuming sorted

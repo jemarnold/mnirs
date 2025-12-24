@@ -276,7 +276,7 @@ validate_sample_rate <- function(
 
     ## estimate sample_rate from time_channel
     ## time_channel MUST be validated before this
-    time_vec <- round(as.numeric(data[[time_channel]]), 6)
+    time_vec <- as.numeric(data[[time_channel]])
     ## will error on unable to estimate sample_rate
     sample_rate_est <- estimate_sample_rate(time_vec)
 

@@ -4,7 +4,7 @@
 \alias{slope}
 \title{Calculate linear slope}
 \usage{
-slope(x, t = seq_along(x), na.rm = FALSE, bypass_checks = FALSE)
+slope(x, t = seq_along(x), na.rm = FALSE, ...)
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}
@@ -16,25 +16,24 @@ or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default}) will return \code{NA} when there
 are any missing data within the vector.}
 
-\item{bypass_checks}{A logical allowing wrapper functions to bypass redundant
-checks and validations.}
+\item{...}{Additional arguments.}
 }
 \value{
-A numeric slope of \code{x/t}.
+A numeric slope in units of \code{x/t}.
 }
 \description{
 Calculates the linear regression slope of a numeric vector.
 }
 \details{
-Uses the least squares formula. When \code{na.rm = TRUE} uses complete case
-analysis, where at least two valid samples will return a slope value.
-Otherwise, a single \code{NA} sample will return \code{NA}.
+Uses the least squares formula.
 }
 \examples{
 x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
-slope(x)
+mnirs:::slope(x)
 
-x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
-slope(x)
+x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
+mnirs:::slope(x_na)
+mnirs:::slope(x_na, na.rm = TRUE)
 
 }
+\keyword{internal}

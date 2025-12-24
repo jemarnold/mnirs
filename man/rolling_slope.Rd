@@ -10,9 +10,10 @@ rolling_slope(
   width = NULL,
   span = NULL,
   align = c("center", "left", "right"),
+  partial = FALSE,
   na.rm = FALSE,
-  bypass_checks = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
@@ -22,26 +23,29 @@ rolling_slope(
 or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{width}{An integer defining the local window in number of samples
-around \code{idx} in which to perform the operation., between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
+around \code{idx} in which to perform the operation, according to \code{align}.}
 
 \item{span}{A numeric value defining the local window timespan around \code{idx}
-in which to perform the operation. In units of \code{time_channel} or \code{t},
-between \verb{[t - span/2, t + span/2]}.}
+in which to perform the operation, according to \code{align}. In units of
+\code{time_channel} or \code{t}.}
 
 \item{align}{Window alignment as \emph{"center"} (the \emph{default}), \emph{"left"}, or
 \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"} is
 \emph{backward looking} from the current sample.}
 
+\item{partial}{A logical specifying whether to perform the operation over a
+subset of available data within the local rolling window (\code{TRUE}), or
+requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
+\emph{Details}.}
+
 \item{na.rm}{A logical indicating whether missing values should be ignored
 (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default}) will return \code{NA} when there
 are any missing data within the vector.}
 
-\item{bypass_checks}{A logical allowing wrapper functions to bypass redundant
-checks and validations.}
-
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
+
+\item{...}{Additional arguments.}
 }
 \value{
 A numeric vector of rolling local slopes in units of \code{x/t} the
@@ -52,17 +56,29 @@ Computes rolling linear regression slopes within a local window along a
 numeric vector.
 }
 \details{
-Uses the least squares formula. When \code{na.rm = TRUE} uses complete case
-analysis, where at least two valid samples will return a slope value.
-Otherwise, a single \code{NA} sample will return \code{NA}.
-
 The local rolling window can be specified by either \code{width} as the number of
-samples centred on \code{idx} between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}, or \code{span} as the timespan
-in units of \code{time_channel} centred on \code{idx} between
-\verb{[t - span/2, t + span/2]}. Specifying \code{width} calls \code{\link[roll:roll_lm]{roll::roll_lm()}}
-which is often much faster than specifying \code{span}. A partial moving
-average will be calculated at the edges of the data.
+samples, or \code{span} as the timespan in units of \code{t}. Specifying \code{width}
+tries to call \code{\link[roll:roll_lm]{roll::roll_lm()}} if \code{na.rm = TRUE} or there are
+no \code{NA}s, which is often \emph{much} faster than specifying \code{span}.
+
+\emph{\verb{<CAUTION>}}, under certain edge-conditions the \code{roll::roll_lm()} method
+may return slightly different values than the equivalent specifying \code{span}.
+
+\code{align} defaults to \emph{"center"} the local window around \code{idx} between
+\verb{[idx - floor((width-1)/2),} \verb{idx + floor(width/2)]} when \code{width} is
+specified. Even \code{width} values will bias \code{align} to \emph{"left"}, with the
+unequal sample forward of \code{idx}. When \code{span} is specified with
+\code{align = "center"}, the local window is between \verb{[t - span/2, t + span/2]}.
+
+\code{partial = TRUE} allows calculation of slope over partial windows with at
+least \code{2} valid samples, such as at edge conditions. However, this can
+return unstable results with noisy data and should not be used for certain
+applications, such as peak slope detection over a vector of noisy data.
+
+\code{na.rm = TRUE} will return a valid slope value as long as there are a
+minimum number of valid samples within the window (at least \code{2} when
+\code{partial = TRUE}). Otherwise, a single \code{NA} sample in the window will
+return \code{NA}.
 }
 \examples{
 x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
@@ -71,7 +87,10 @@ rolling_slope(x, width = 3)
 
 x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 rolling_slope(x_na, span = 3)
-rolling_slope(x_na, span = 3, na.rm = TRUE)
+rolling_slope(x_na, span = 3, partial = TRUE)
+rolling_slope(x_na, span = 3, partial = TRUE, na.rm = TRUE)
+rolling_slope(x_na, width = 3, partial = TRUE)
+rolling_slope(x_na, width = 3, partial = TRUE, na.rm = TRUE)
 
 }
 \seealso{

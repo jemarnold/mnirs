@@ -5,36 +5,56 @@
 #' @param na.rm A logical indicating whether missing values should be ignored
 #'   (`TRUE`). Otherwise `FALSE` (the *default*) will return `NA` when there
 #'   are any missing data within the vector.
+#' @param ... Additional arguments.
 #' @inheritParams replace_invalid
 #'
 #' @details
-#' Uses the least squares formula. When `na.rm = TRUE` uses complete case
-#'   analysis, where at least two valid samples will return a slope value.
-#'   Otherwise, a single `NA` sample will return `NA`.
-#'
-#' @returns A numeric slope of `x/t`.
-#'
+#' Uses the least squares formula.
+#' 
+#' @returns A numeric slope in units of `x/t`.
+#' 
 #' @examples
 #' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
-#' slope(x)
+#' mnirs:::slope(x)
 #'
-#' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
-#' slope(x)
-#'
-#' @export
-slope <- function(x, t = seq_along(x), na.rm = FALSE, bypass_checks = FALSE) {
+#' x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
+#' mnirs:::slope(x_na)
+#' mnirs:::slope(x_na, na.rm = TRUE)
+#' 
+#' @keywords internal
+slope <- function(
+    x,
+    t = seq_along(x),
+    na.rm = FALSE,
+    ...
+) {
+    ## validation =================================================
+    if (na.rm) {
+        complete <- which(is.finite(x) & is.finite(t))
+        x <- x[complete]
+        t <- t[complete]
+    }
+
+    n <- length(x)
+    args <- list(...)
+    bypass_checks <- args$bypass_checks %||% FALSE
     if (!bypass_checks) {
-        validate_x_t(x, t)
-        if (na.rm) {
-            complete <- !is.na(x) & !is.na(t)
-            x <- x[complete]
-            t <- t[complete]
+        if (!is.numeric(t)) {
+            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
+        }
+        if (n != length(t)) {
+            cli_abort(c(
+                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
+                of equal length."
+            ))
         }
     }
-    n <- length(x)
-    if (n < 2L) {
+    
+    if (n < max(args$min_obs, 2L)) {
         return(NA_real_)
     }
+
+    ## processing =================================================
     sum_t <- sum(t)
     sum_x <- sum(x)
     sum_tx <- sum(t * x)
@@ -48,31 +68,44 @@ slope <- function(x, t = seq_along(x), na.rm = FALSE, bypass_checks = FALSE) {
 
 #' Calculate rolling slope
 #'
-#' Computes rolling linear regression slopes within a local window along a
+#' Computes rolling linear regression slopes within a local window along a 
 #' numeric vector.
 #'
-#' @param align Window alignment as *"center"* (the *default*), *"left"*, or
-#'   *"right"*. Where *"left"* is *forward looking*, and *"right"* is
-#'   *backward looking* from the current sample.
+#' @param partial A logical specifying whether to perform the operation over a 
+#'   subset of available data within the local rolling window (`TRUE`), or
+#'   requiring a complete window of valid samples (`FALSE`, by *default*). See 
+#'   *Details*.
 #' @inheritParams slope
-#' @inheritParams replace_mnirs
+#' @inheritParams compute_local_windows
 #'
 #' @details
-#' Uses the least squares formula. When `na.rm = TRUE` uses complete case
-#'   analysis, where at least two valid samples will return a slope value.
-#'   Otherwise, a single `NA` sample will return `NA`.
-#'
 #' The local rolling window can be specified by either `width` as the number of
-#'   samples centred on `idx` between
-#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
-#'   in units of `time_channel` centred on `idx` between
-#'   `[t - span/2, t + span/2]`. Specifying `width` calls [roll::roll_lm()]
-#'   which is often much faster than specifying `span`. A partial moving
-#'   average will be calculated at the edges of the data.
+#'   samples, or `span` as the timespan in units of `t`. Specifying `width`
+#'   tries to call [roll::roll_lm()] if `na.rm = TRUE` or there are 
+#'   no `NA`s, which is often *much* faster than specifying `span`.
+#' 
+#' *`<CAUTION>`*, under certain edge-conditions the `roll::roll_lm()` method 
+#'   may return slightly different values than the equivalent specifying `span`.
+#'
+#' `align` defaults to *"center"* the local window around `idx` between
+#'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
+#'   specified. Even `width` values will bias `align` to *"left"*, with the
+#'   unequal sample forward of `idx`. When `span` is specified with 
+#'   `align = "center"`, the local window is between `[t - span/2, t + span/2]`.
+#' 
+#' `partial = TRUE` allows calculation of slope over partial windows with at 
+#'   least `2` valid samples, such as at edge conditions. However, this can 
+#'   return unstable results with noisy data and should not be used for certain
+#'   applications, such as peak slope detection over a vector of noisy data.
+#'
+#' `na.rm = TRUE` will return a valid slope value as long as there are a 
+#'   minimum number of valid samples within the window (at least `2` when
+#'   `partial = TRUE`). Otherwise, a single `NA` sample in the window will
+#'   return `NA`.
 #'
 #' @seealso [zoo::rollapply()], [roll::roll_lm()]
 #'
-#' @return A numeric vector of rolling local slopes in units of `x/t` the
+#' @returns A numeric vector of rolling local slopes in units of `x/t` the 
 #'   same length as `x`.
 #'
 #' @examples
@@ -82,7 +115,10 @@ slope <- function(x, t = seq_along(x), na.rm = FALSE, bypass_checks = FALSE) {
 #'
 #' x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 #' rolling_slope(x_na, span = 3)
-#' rolling_slope(x_na, span = 3, na.rm = TRUE)
+#' rolling_slope(x_na, span = 3, partial = TRUE)
+#' rolling_slope(x_na, span = 3, partial = TRUE, na.rm = TRUE)
+#' rolling_slope(x_na, width = 3, partial = TRUE)
+#' rolling_slope(x_na, width = 3, partial = TRUE, na.rm = TRUE)
 #'
 #' @export
 rolling_slope <- function(
@@ -91,42 +127,107 @@ rolling_slope <- function(
     width = NULL,
     span = NULL,
     align = c("center", "left", "right"),
+    # min_obs = width,
+    partial = FALSE,
     na.rm = FALSE,
-    bypass_checks = FALSE,
-    verbose = TRUE
+    verbose = TRUE,
+    ...
 ) {
+    ## validation =================================================
+    n <- length(x)
+    bypass_checks <- list(...)$bypass_checks %||% FALSE
     if (!bypass_checks) {
-        validate_x_t(x, t)
-        if (na.rm) {
-            complete <- !is.na(x) & !is.na(t)
-            x <- x[complete]
-            t <- t[complete]
+        align <- match.arg(align)
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
         }
-        if (length(x) < 2L) {
-            return(NA_real_)
+        if (!is.numeric(x)) {
+            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
+        }
+        if (!is.numeric(t)) {
+            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
+        }
+        if (n != length(t)) {
+            cli_abort(c(
+                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
+                of equal length."
+            ))
+        }
+        ## validate all t values identical
+        if (all(diff(t) == 0)) {
+            return(rep(NA_real_, n))
         }
         validate_width_span(width, span, verbose)
-        align <- match.arg(align)
-    }
+        ## min_obs default to estimated width when span is specified
+        min_obs <- if (partial) {
+            2L
+        } else {
+            ## less strict span_width - 2 to allow start & end buffer 
+            ## with irregular t values
+            max(width %||% (floor(span * estimate_sample_rate(t)) - 2L), 2L)
+        }
 
-    ## use {roll} for fast rolling ==================================
-    if (!is.null(width) && is.null(span)) {
+        ## TODO intend to warn when # samples < min_obs
+        # if (verbose && span_width < min_obs) {
+        #     cli_warn(c(
+        #         "!" = "Less than {.val {min_obs}} valid samples detected in \\
+        #         {.fn rolling_slope} windows.",
+        #         "i" = "Specify {.arg width} ≥ {.val {2}} or increase \\
+        #         {.arg span}."
+        #     ))
+        # }
+        # if (min_obs < 2L || (!is.null(width) && min_obs > span_width)) {
+        #     obs_range <- range(2L, span_width)
+        #     min_obs <- max(2L, min(min_obs, span_width))
+        #     if (verbose && span_width >= 2L) {
+        #         cli_warn(c(
+        #             "!" = "{.arg min_obs} must be an {.cls integer} between \\
+        #             {.val {obs_range[1L]}} and {.val {obs_range[2L]}}.",
+        #             "i" = "{.arg min_obs} set to {.val {min_obs}}."
+        #         ))
+        #     }
+        # }
+    }
+    
+    if (n < min_obs) {
+        return(rep(NA_real_, n))
+    }
+    
+    ## processing =================================================
+    if ((na.rm || !anyNA(x)) && !is.null(width) && is.null(span)) {
+        ## use {roll} for fast rolling
         rlang::check_installed(
             c("roll", "RcppParallel"),
             reason = "to use fast rolling functions"
         )
         if (rlang::is_installed("roll")) {
-            return(roll_lm_centred(x, t, width))
+            return(
+                rolling_lm(
+                    x,
+                    t,
+                    width,
+                    align,
+                    min_obs,
+                    verbose,
+                    bypass_checks = TRUE
+                )
+            )
         }
     }
 
-    ## process =====================================================
     window_idx <- compute_local_windows(
         t, width = width, span = span, align = align
     )
-    compute_local_fun(
-        x, window_idx, slope, na.rm = na.rm, bypass_checks = TRUE
-    )
+    if (verbose && all(lengths(window_idx) < min_obs)) {
+        ## TODO should warn for rolling_lm() condition
+        cli_warn(c(
+            "!" = "Less than {.val {min_obs}} valid samples detected in \\
+            {.fn rolling_slope} windows.",
+            "i" = "Specify {.arg width} >= {.val {2}} or increase {.arg span}."
+        ))
+    }
+    vapply(seq_along(window_idx), \(.i) {
+        idx <- window_idx[[.i]]
+        slope(x[idx], t[idx], na.rm, min_obs = min_obs, bypass_checks = TRUE)
+    }, numeric(1))
 }
-
-## ! add align parameter to roll_* functions

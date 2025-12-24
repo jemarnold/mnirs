@@ -155,9 +155,9 @@ replace_mnirs <- function(
     nirs_channels <- validate_nirs_channels(
         data, nirs_channels, verbose = FALSE
     )
-    nirs_channels <- unlist(nirs_channels, use.names = FALSE)
+    # nirs_channels <- unlist(nirs_channels, use.names = FALSE)
     time_channel <- validate_time_channel(data, time_channel)
-    time_vec <- round(data[[time_channel]], 6)
+    time_vec <- data[[time_channel]]
 
     if (any(check_conditions[2:3])) {
         validate_width_span(width, span, verbose)
@@ -268,7 +268,6 @@ replace_invalid <- function(
     method <- match.arg(method)
 
     ## process ========================================================
-    x <- round(x, 6) ## avoid floating point precision issues
     y <- x
     ## fill invalid indices with NA
     invalid_idx <- c(
@@ -282,13 +281,16 @@ replace_invalid <- function(
         if (!bypass_checks) {
             validate_width_span(width, span, verbose)
         }
-        ## if method = "median"
-        ## invalid_values removed to NA first,
-        ## so returns local median excluding idx
+
         window_idx <- compute_local_windows(
             t, invalid_idx, width, span
         )
-        local_medians <- compute_local_fun(y, window_idx, median, na.rm = TRUE)
+        local_medians <- compute_local_fun(
+            y, window_idx, median, na.rm = TRUE
+        )
+        ## if method = "median"
+        ## invalid_values removed to NA first,
+        ## so returns local median excluding idx
         y[invalid_idx] <- local_medians
     }
 
@@ -353,9 +355,10 @@ replace_outliers <- function(
         msg1 = "one-element positive"
     )
     method <- match.arg(method)
-
-    ## use {roll} for fast rolling ==================================
+    
+    ## process =====================================================
     if (!is.null(width) && is.null(span)) {
+        ## use {roll} for fast rolling
         validate_numeric(
             width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
         )
@@ -364,11 +367,10 @@ replace_outliers <- function(
             reason = "to use fast rolling functions"
         )
         if (rlang::is_installed("roll")) {
-            local_medians <- roll_median_centred(x, width)
+            local_medians <- rolling_median(x, width)
         }
     }
 
-    ## process =====================================================
     window_idx <- compute_local_windows(
         t, width = width, span = span
     )
@@ -390,7 +392,6 @@ replace_outliers <- function(
     }
     return(y)
 }
-
 
 #' Replace Missing Values
 #'
@@ -462,7 +463,7 @@ replace_missing <- function(
         ## median of width or span VALID values to either side of sequential NAs
         y <- x
         na_idx <- which(is.na(x))
-        window_idx <- compute_window_of_valid_neighbours(
+        window_idx <- compute_valid_neighbours(
             x = x,
             t = t,
             width = width,

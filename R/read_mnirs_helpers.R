@@ -313,7 +313,6 @@ clean_invalid <- function(x) {
         x[x %in% c("", "NA")] <- NA_character_
     } else if (is.numeric(x)) {
         x[!is.finite(x)] <- NA_real_
-        x <- round(x, 6)
     }
     return(x)
 }
@@ -404,7 +403,7 @@ parse_sample_rate <- function(
     if (!is.null(nirs_device) && nirs_device == "Artinis") {
         sample_rate <- extract_oxysoft_rate(file_header, sample_rate)
 
-        time_vec <- round(data[[time_channel]] / sample_rate, 6)
+        time_vec <- data[[time_channel]] / sample_rate
         time_idx <- match(time_channel, names(data))
         data_names <- append(names(data), "time", time_idx)
         data_names <- rename_duplicates(data_names)
@@ -469,7 +468,7 @@ detect_irregular_samples <- function(
     if (length(irregular_vec) > 5) {
         ## if more than 5 irregular samples, print the first three
         irregular_n <- min(3, length(irregular_vec))
-        irregular_display <- irregular_vec[seq_len(irregular_n)]
+        irregular_display <- round(irregular_vec[seq_len(irregular_n)], 6)
         info_msg <- c(
             "Investigate at {.arg {time_channel}} = \\
             {.val {irregular_display}} and {length(irregular_vec) - 3} more."

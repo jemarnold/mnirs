@@ -29,7 +29,8 @@ Suggests:
     scales,
     signal,
     testthat (>= 3.0.0),
-    tidyr
+    tidyr,
+    zoo
 VignetteBuilder: 
     quarto
 Config/testthat/edition: 3
