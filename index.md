@@ -85,16 +85,16 @@ data_table
 #> # A tibble: 2,203 × 3
 #>     time smo2_right smo2_left
 #>    <dbl>      <dbl>     <dbl>
-#>  1  0            54        68
-#>  2  0.4          54        68
-#>  3  0.96         54        68
-#>  4  1.51         54        66
-#>  5  2.06         54        66
-#>  6  2.61         54        66
-#>  7  3.16         54        66
-#>  8  3.71         57        67
-#>  9  4.26         57        67
-#> 10  4.81         57        67
+#>  1 0             54        68
+#>  2 0.400         54        68
+#>  3 0.960         54        68
+#>  4 1.51          54        66
+#>  5 2.06          54        66
+#>  6 2.61          54        66
+#>  7 3.16          54        66
+#>  8 3.71          57        67
+#>  9 4.26          57        67
+#> 10 4.81          57        67
 #> # ℹ 2,193 more rows
 
 ## note the hidden plot option to display timestamp values as `hh:mm:ss`
@@ -139,9 +139,7 @@ attr(data_table, "nirs_device")
 
 ``` r
 data_cleaned <- replace_mnirs(
-    data_table,
-    nirs_channels = NULL,       ## default to all nirs_channels in metadata
-    time_channel = NULL,        ## default to time_channel in metadata
+    data_table,                 ## channels retrieved from metadata
     invalid_values = 0,         ## known invalid values in the data
     invalid_above = 90,
     outlier_cutoff = 3,         ## recommended default value
@@ -158,9 +156,7 @@ plot(data_cleaned, label_time = TRUE)
 
 ``` r
 data_resampled <- resample_mnirs(
-    data_cleaned,
-    # time_channel = NULL,        ## retrieved from metadata
-    # sample_rate = NULL,
+    data_cleaned,                 ## channels retrieved from metadata
     # resample_rate = sample_rate ## the default will re-sample to sample_rate
     method = "linear",            ## default linear interpolation across any new samples
     verbose = TRUE                ## will confirm the output sample rate
@@ -189,10 +185,7 @@ data_resampled
 
 ``` r
 data_filtered <- filter_mnirs(
-    data_resampled,
-    # nirs_channel = NULL,  ## retrieved from metadata
-    # time_channel = NULL,
-    # sample_rate = NULLL,
+    data_resampled,         ## channels retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
     type = "low",           ## specify a low-pass filter
     order = 2,              ## filter order number

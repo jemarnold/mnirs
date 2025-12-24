@@ -23,7 +23,7 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,6 +92,7 @@ via interpolation methods.</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  bypass_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -102,6 +103,7 @@ via interpolation methods.</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  bypass_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -111,6 +113,8 @@ via interpolation methods.</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"median"</span>, <span class="st">"locf"</span><span class="op">)</span>,</span>
+<span>  bypass_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -197,11 +201,17 @@ warnings and information messages used for troubleshooting.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>A numeric vector.</p></dd>
+<dd><p>A numeric vector of the response variable.</p></dd>
 
 
 <dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>An <em>optional</em> numeric vector of time or sample number.</p></dd>
+<dd><p>An <em>optional</em> numeric vector of the predictor variable; time
+or sample number. <em>Defaults</em> to indices of <code>t = seq_along(x)</code>.</p></dd>
+
+
+<dt id="arg-bypass-checks">bypass_checks<a class="anchor" aria-label="anchor" href="#arg-bypass-checks"></a></dt>
+<dd><p>A logical allowing wrapper functions to bypass redundant
+checks and validations.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -229,8 +239,9 @@ median interpolation. This window can be specified by either <code>width</code> 
 the number of samples centred on <code>idx</code> between
 <code>[idx - floor(width/2), idx + floor(width/2)]</code>, or <code>span</code> as the timespan
 in units of <code>time_channel</code> centred on <code>idx</code> between
-<code>[t - span/2, t + span/2]</code>. A partial moving average will be calculated
-at the edges of the data.</p>
+<code>[t - span/2, t + span/2]</code>. Specifying <code>width</code> calls <code><a href="https://rdrr.io/pkg/roll/man/roll_median.html" class="external-link">roll::roll_median()</a></code>
+which is often much faster than specifying <code>span</code>. A partial moving
+average will be calculated at the edges of the data.</p>
 <p><code>replace_invalid()</code> can be used to remove known invalid values in
 exported data.</p><ul><li><p>Specific <code>invalid_values</code> can be replaced, such as <code>c(0, 100, 102.3)</code>.
 Data ranges can be replaced with cutoff values specified by <code>invalid_above</code>
@@ -239,7 +250,8 @@ cutoff values (respectively) will be replaced, <em>inclusive</em> of the cutoff
 values themselves.</p></li>
 </ul><p><code>replace_outliers()</code> will compute rolling local median values across <code>x</code>,
 defined by either <code>width</code> number of samples, or <code>span</code> timespan in units
-of <code>t</code>.</p><ul><li><p>Outliers are detected with robust median absolute deviation (MAD) method
+of <code>t</code>. Specifying <code>width</code> calls <code><a href="https://rdrr.io/pkg/roll/man/roll_median.html" class="external-link">roll::roll_median()</a></code> which is often
+much faster than specifying <code>span</code>.</p><ul><li><p>Outliers are detected with robust median absolute deviation (MAD) method
 adapted from <code>pracma::hampel()</code>. Outliers equal to or less than the
 smallest absolute time series difference in <code>x</code> will be excluded, to
 avoid detecting negligible differences as outliers where local data have
@@ -269,7 +281,7 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code>pracma::hampel()</code> <code><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">stats::approx()</a></code></p></div>
+    <div class="dont-index"><p><code>pracma::hampel()</code>, <code><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">stats::approx()</a></code>, <code><a href="https://rdrr.io/pkg/roll/man/roll_median.html" class="external-link">roll::roll_median()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -279,13 +291,13 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 <span class="r-in"><span><span class="co">## vectorised operation</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">999</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">999</span>, <span class="fl">6</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 3 3 4 6 6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="op">(</span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1 NA  3  4 NA  6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   1 999   3   4 999   6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">replace_missing</span><span class="op">(</span><span class="va">x_na</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   1 999   3   4 999   6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## read example data</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span></span>

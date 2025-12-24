@@ -1,5 +1,57 @@
 # Changelog
 
+## mnirs 0.1.9
+
+- Create
+  [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md)
+  to calculate local linear regression slopes along a vector.
+- Integrate \[roll\]\[roll::roll-package\] for faster rolling median,
+  mean, and lm implementation under certain conditions.
+  - Currently used: `roll_lm()` for
+    [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
+    `roll_median()` for
+    [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    `roll_mean()` for
+    [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md).
+  - May roll back in favour of `data.table::froll_*` when 1.17.99+ is
+    updated on CRAN.
+- Update local rolling functions with
+  `align = c("center", "left", "right")` arg.
+  - Currently used: internal
+    [`compute_local_windows()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+    for
+    [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md).
+- Update internal
+  [`compute_local_fun()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+  to allow additional arguments, e.g. for `na.rm = TRUE`.
+- Remove redundant internal numeric rounding. Results may now have
+  floating point precision issues, but avoid compounding rounding error.
+  - Affects:
+    [`filter_mnirs.smooth_spline()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md),
+    [`filter_mnirs.moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md),
+    [`parse_sample_rate()`](https://jemarnold.github.io/mnirs/reference/parse_sample_rate.md)
+    and
+    [`clean_invalid()`](https://jemarnold.github.io/mnirs/reference/clean_invalid.md)
+    for
+    [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md),
+    [`replace_mnirs()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md),
+    [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md),
+    [`validate_sample_rate()`](https://jemarnold.github.io/mnirs/reference/validate_mnirs.md).
+- Add hidden `bypass_check` argument to reduce overhead from validation
+  redundancy.
+  - Affects:
+    [`replace_invalid()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
+    [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md),
+    new functions
+    [`slope()`](https://jemarnold.github.io/mnirs/reference/slope.md),
+    [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md).
+- Update
+  [`validate_numeric()`](https://jemarnold.github.io/mnirs/reference/validate_mnirs.md)
+  logic to reduce overhead.
+
 ## mnirs 0.1.8
 
 - Create
@@ -102,8 +154,7 @@
 - Simplify use of `width` and `span` to be centred on `idx`.
   - Update internal helpers:
     [`compute_local_windows()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
-    &
-    [`compute_window_of_valid_neighbours()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+    & `compute_window_of_valid_neighbours()`
   - Update appropriate documentation.
   - Update README, vignette, & examples to `width = 10`.
 - Update examples with

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -207,16 +207,16 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <span><span class="co">#&gt; # A tibble: 2,203 × 3</span></span>
 <span><span class="co">#&gt;     time smo2_right smo2_left</span></span>
 <span><span class="co">#&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1  0            54        68</span></span>
-<span><span class="co">#&gt;  2  0.4          54        68</span></span>
-<span><span class="co">#&gt;  3  0.96         54        68</span></span>
-<span><span class="co">#&gt;  4  1.51         54        66</span></span>
-<span><span class="co">#&gt;  5  2.06         54        66</span></span>
-<span><span class="co">#&gt;  6  2.61         54        66</span></span>
-<span><span class="co">#&gt;  7  3.16         54        66</span></span>
-<span><span class="co">#&gt;  8  3.71         57        67</span></span>
-<span><span class="co">#&gt;  9  4.26         57        67</span></span>
-<span><span class="co">#&gt; 10  4.81         57        67</span></span>
+<span><span class="co">#&gt;  1 0             54        68</span></span>
+<span><span class="co">#&gt;  2 0.400         54        68</span></span>
+<span><span class="co">#&gt;  3 0.960         54        68</span></span>
+<span><span class="co">#&gt;  4 1.51          54        66</span></span>
+<span><span class="co">#&gt;  5 2.06          54        66</span></span>
+<span><span class="co">#&gt;  6 2.61          54        66</span></span>
+<span><span class="co">#&gt;  7 3.16          54        66</span></span>
+<span><span class="co">#&gt;  8 3.71          57        67</span></span>
+<span><span class="co">#&gt;  9 4.26          57        67</span></span>
+<span><span class="co">#&gt; 10 4.81          57        67</span></span>
 <span><span class="co">#&gt; # ℹ 2,193 more rows</span></span></code></pre></div>
 </div>
 </section></section><section class="section level2"><h2 id="plot-mnirs-data">📊 Plot <em><code>mnirs</code></em> data<a class="anchor" aria-label="anchor" href="#plot-mnirs-data"></a>
@@ -313,11 +313,8 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 </ul>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">data_cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_table</span>,</span>
-<span>    nirs_channels <span class="op">=</span> <span class="cn">NULL</span>,       <span class="co">## default to all nirs_channels in metadata</span></span>
-<span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## default to time_channel in metadata</span></span>
+<code class="sourceCode R"><span><span class="va">data_cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
+<span>    <span class="va">data_table</span>,                 <span class="co">## channels retrieved from metadata</span></span>
 <span>    invalid_values <span class="op">=</span> <span class="fl">0</span>,         <span class="co">## known invalid values in the data</span></span>
 <span>    invalid_above <span class="op">=</span> <span class="fl">90</span>,</span>
 <span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,         <span class="co">## recommended default value</span></span>
@@ -358,9 +355,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_resampled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_cleaned</span>,</span>
-<span>    <span class="co"># time_channel = NULL,        ## retrieved from metadata</span></span>
-<span>    <span class="co"># sample_rate = NULL,</span></span>
+<span>    <span class="va">data_cleaned</span>,                 <span class="co">## channels retrieved from metadata</span></span>
 <span>    <span class="co"># resample_rate = sample_rate ## the default will re-sample to sample_rate</span></span>
 <span>    method <span class="op">=</span> <span class="st">"linear"</span>,            <span class="co">## default linear interpolation across any new samples</span></span>
 <span>    verbose <span class="op">=</span> <span class="cn">TRUE</span>                <span class="co">## will confirm the output sample rate</span></span>
@@ -468,10 +463,7 @@ This usually works well unless there is irregular sampling, or the <code>time_ch
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_resampled</span>,</span>
-<span>    <span class="co"># nirs_channel = NULL,  ## retrieved from metadata</span></span>
-<span>    <span class="co"># time_channel = NULL,</span></span>
-<span>    <span class="co"># sample_rate = NULLL,</span></span>
+<span>    <span class="va">data_resampled</span>,         <span class="co">## channels retrieved from metadata</span></span>
 <span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span>
 <span>    type <span class="op">=</span> <span class="st">"low"</span>,           <span class="co">## specify a low-pass filter</span></span>
 <span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span>

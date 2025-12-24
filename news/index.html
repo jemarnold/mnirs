@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,25 @@
       <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.1.9" id="mnirs-019">mnirs 0.1.9<a class="anchor" aria-label="anchor" href="#mnirs-019"></a></h2>
+<ul><li>Create <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code> to calculate local linear regression slopes along a vector.</li>
+<li>Integrate [roll][roll::roll-package] for faster rolling median, mean, and lm implementation under certain conditions.
+<ul><li>Currently used: <code>roll_lm()</code> for <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>, <code>roll_median()</code> for <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code>roll_mean()</code> for <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code>.</li>
+<li>May roll back in favour of <code>data.table::froll_*</code> when 1.17.99+ is updated on CRAN.</li>
+</ul></li>
+<li>Update local rolling functions with <code>align = c("center", "left", "right")</code> arg.
+<ul><li>Currently used: internal <code><a href="../reference/compute_helpers.html">compute_local_windows()</a></code> for <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>.</li>
+</ul></li>
+<li>Update internal <code><a href="../reference/compute_helpers.html">compute_local_fun()</a></code> to allow additional arguments, e.g. for <code>na.rm = TRUE</code>.</li>
+<li>Remove redundant internal numeric rounding. Results may now have floating point precision issues, but avoid compounding rounding error.
+<ul><li>Affects: <code><a href="../reference/filter_mnirs.html">filter_mnirs.smooth_spline()</a></code>, <code><a href="../reference/filter_mnirs.html">filter_mnirs.moving_average()</a></code>, <code><a href="../reference/parse_sample_rate.html">parse_sample_rate()</a></code> and <code><a href="../reference/clean_invalid.html">clean_invalid()</a></code> for <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code>, <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/validate_mnirs.html">validate_sample_rate()</a></code>.</li>
+</ul></li>
+<li>Add hidden <code>bypass_check</code> argument to reduce overhead from validation redundancy.
+<ul><li>Affects: <code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_missing()</a></code>, <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code>, new functions <code><a href="../reference/slope.html">slope()</a></code>, <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>.</li>
+</ul></li>
+<li>Update <code><a href="../reference/validate_mnirs.html">validate_numeric()</a></code> logic to reduce overhead.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.8" id="mnirs-018">mnirs 0.1.8<a class="anchor" aria-label="anchor" href="#mnirs-018"></a></h2>
 <ul><li>Create <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> to detect events and extract surrounding data frames.</li>
@@ -109,7 +128,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="mnirs-012">mnirs 0.1.2<a class="anchor" aria-label="anchor" href="#mnirs-012"></a></h2>
 <ul><li>Simplify use of <code>width</code> and <code>span</code> to be centred on <code>idx</code>.
-<ul><li>Update internal helpers: <code><a href="../reference/compute_helpers.html">compute_local_windows()</a></code> &amp; <code><a href="../reference/compute_helpers.html">compute_window_of_valid_neighbours()</a></code>
+<ul><li>Update internal helpers: <code><a href="../reference/compute_helpers.html">compute_local_windows()</a></code> &amp; <code>compute_window_of_valid_neighbours()</code>
 </li>
 <li>Update appropriate documentation.</li>
 <li>Update README, vignette, &amp; examples to <code>width = 10</code>.</li>

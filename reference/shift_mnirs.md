@@ -145,7 +145,7 @@ data_shifted <- read_mnirs(
         span = 120,         ## shift the first 120 sec of data to zero
         position = "first"
     )
-#> ℹ `nirs_channel` = "smo2": `smooth.spline(spar = 0.052)`
+#> ℹ `nirs_channel` = "smo2": `smooth.spline(spar = 0.056)`
 
 plot(data_shifted, label_time = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")

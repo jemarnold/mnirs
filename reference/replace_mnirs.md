@@ -39,6 +39,7 @@ replace_invalid(
   width = NULL,
   span = NULL,
   method = c("median", "none"),
+  bypass_checks = FALSE,
   verbose = TRUE
 )
 
@@ -49,6 +50,7 @@ replace_outliers(
   width = NULL,
   span = NULL,
   method = c("median", "none"),
+  bypass_checks = FALSE,
   verbose = TRUE
 )
 
@@ -58,6 +60,8 @@ replace_missing(
   width = NULL,
   span = NULL,
   method = c("linear", "median", "locf"),
+  bypass_checks = FALSE,
+  verbose = TRUE,
   ...
 )
 ```
@@ -146,11 +150,17 @@ replace_missing(
 
 - x:
 
-  A numeric vector.
+  A numeric vector of the response variable.
 
 - t:
 
-  An *optional* numeric vector of time or sample number.
+  An *optional* numeric vector of the predictor variable; time or sample
+  number. *Defaults* to indices of `t = seq_along(x)`.
+
+- bypass_checks:
+
+  A logical allowing wrapper functions to bypass redundant checks and
+  validations.
 
 - ...:
 
@@ -183,8 +193,10 @@ detection and median interpolation. This window can be specified by
 either `width` as the number of samples centred on `idx` between
 `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
 timespan in units of `time_channel` centred on `idx` between
-`[t - span/2, t + span/2]`. A partial moving average will be calculated
-at the edges of the data.
+`[t - span/2, t + span/2]`. Specifying `width` calls
+[`roll::roll_median()`](https://rdrr.io/pkg/roll/man/roll_median.html)
+which is often much faster than specifying `span`. A partial moving
+average will be calculated at the edges of the data.
 
 `replace_invalid()` can be used to remove known invalid values in
 exported data.
@@ -197,7 +209,9 @@ exported data.
 
 `replace_outliers()` will compute rolling local median values across
 `x`, defined by either `width` number of samples, or `span` timespan in
-units of `t`.
+units of `t`. Specifying `width` calls
+[`roll::roll_median()`](https://rdrr.io/pkg/roll/man/roll_median.html)
+which is often much faster than specifying `span`.
 
 - Outliers are detected with robust median absolute deviation (MAD)
   method adapted from `pracma::hampel()`. Outliers equal to or less than
@@ -241,8 +255,9 @@ specified by `method`.
 
 ## See also
 
-`pracma::hampel()`
-[`stats::approx()`](https://rdrr.io/r/stats/approxfun.html)
+`pracma::hampel()`,
+[`stats::approx()`](https://rdrr.io/r/stats/approxfun.html),
+[`roll::roll_median()`](https://rdrr.io/pkg/roll/man/roll_median.html)
 
 ## Examples
 
@@ -252,13 +267,13 @@ library(ggplot2)
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
 replace_invalid(x, invalid_values = 999, width = 2, method = "median")
-#> [1] 1 2 3 4 5 6
+#> [1] 1 3 3 4 6 6
 
 (x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
-#> [1]  1 NA  3  4 NA  6
+#> [1]   1 999   3   4 999   6
 
 replace_missing(x_na, method = "linear")
-#> [1] 1 2 3 4 5 6
+#> [1]   1 999   3   4 999   6
 
 ## read example data
 data <- read_mnirs(

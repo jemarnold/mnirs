@@ -104,7 +104,7 @@ data_rescaled <- read_mnirs(
     rescale_mnirs(
         range = c(0, 100)   ## rescale to a 0-100% functional exercise range
     )
-#> ℹ `nirs_channel` = "smo2": `smooth.spline(spar = 0.052)`
+#> ℹ `nirs_channel` = "smo2": `smooth.spline(spar = 0.056)`
 
 plot(data_rescaled, label_time = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")

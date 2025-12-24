@@ -50,6 +50,12 @@ Detect and extract intervals for further analysis
 
   Extract intervals from *mnirs* data
 
+- [`slope()`](https://jemarnold.github.io/mnirs/reference/slope.md) :
+  Calculate linear slope
+
+- [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md)
+  : Calculate rolling slope
+
 ## Plotting
 
 Tools for pretty plotting with [ggplot2](https://ggplot2.tidyverse.org).

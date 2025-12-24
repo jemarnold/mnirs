@@ -10,6 +10,7 @@ filter_moving_average(
   t = seq_along(x),
   width = NULL,
   span = NULL,
+  bypass_checks = FALSE,
   verbose = TRUE
 )
 ```
@@ -18,11 +19,12 @@ filter_moving_average(
 
 - x:
 
-  A numeric vector.
+  A numeric vector of the response variable.
 
 - t:
 
-  An *optional* numeric vector of time or sample number.
+  An *optional* numeric vector of the predictor variable; time or sample
+  number. *Defaults* to indices of `t = seq_along(x)`.
 
 - width:
 
@@ -35,6 +37,11 @@ filter_moving_average(
   A numeric value defining the local window timespan around `idx` in
   which to perform the operation. In units of `time_channel` or `t`,
   between `[t - span/2, t + span/2]`.
+
+- bypass_checks:
+
+  A logical allowing wrapper functions to bypass redundant checks and
+  validations.
 
 - verbose:
 
@@ -52,13 +59,18 @@ defined by either `width` as the number of samples around `idx` between
 `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
 timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
 
+Specifying `width` calls
+[`roll::roll_mean()`](https://rdrr.io/pkg/roll/man/roll_mean.html) which
+is often much faster than specifying `span`.
+
 If there are no valid values within the calculation window, will return
 `NA`. A partial moving average will be calculated at the edges of the
 data.
 
 ## See also
 
-`zoo::rollmean()`
+[`zoo::rollmean()`](https://rdrr.io/pkg/zoo/man/rollmean.html),
+[`roll::roll_mean()`](https://rdrr.io/pkg/roll/man/roll_mean.html)
 
 ## Examples
 
@@ -71,7 +83,7 @@ filter_moving_average(x, width = 3)
 ## with explicit time vector
 t <- c(0, 1, 2, 3, 4, 5, 6, 7)
 filter_moving_average(x, t, width = 2)
-#> [1] 2.000000 2.000000 3.333333 3.666667 5.000000 5.000000 6.000000 6.000000
+#> [1] 2.0 2.5 3.5 4.5 5.0 5.5 6.0 7.0
 
 ## using timespan instead of sample width
 filter_moving_average(x, span = 2)

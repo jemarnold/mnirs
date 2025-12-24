@@ -7,6 +7,7 @@
 <url><loc>https://jemarnold.github.io/mnirs/authors.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/index.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/news/index.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/abort_validation.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/breaks_timespan.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/clean_invalid.html</loc></url>
@@ -48,11 +49,13 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/replace_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/resample_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/rescale_mnirs.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/rolling_slope.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/scale_colour_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/select_rename_data.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/seq_range.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/shift_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/signif_trailing.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/slope.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/specify_intervals.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/theme_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/train.red_intervals.csv.html</loc></url>
