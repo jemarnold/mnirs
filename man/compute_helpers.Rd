@@ -142,8 +142,7 @@ with configurable alignment
 \details{
 The local rolling window can be specified by either \code{width} as the number of
 samples, or \code{span} as the timespan in units of \code{t}. Specifying \code{width}
-calls \link[roll:roll-package]{roll} which is often much faster than
-specifying \code{span}.
+is often faster than \code{span}.
 
 \code{align} defaults to \emph{"centre"} the local window around \code{idx} between
 \verb{[idx - floor((width-1)/2),} \verb{idx + floor(width/2)]} when \code{width} is

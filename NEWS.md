@@ -1,3 +1,14 @@
+# mnirs 0.3.0
+
+* Create `peak_slope()`.
+
+# mnirs 0.2.1
+
+* Remove `na.rm` arg from `slope()`, `rolling_slope()`, `peak_slope()` in favour of opinionated `na.rm = TRUE` behaviour.
+    * `na.rm` arg currently remains in `filter_mnirs()` functions, but this may be removed in the future.
+* Fixed `filter_moving_average()` to correctly identify windows where `partial = FALSE` was not met due to `NA`s.
+* Remove internal `{roll}` functionality from external functions in expectation of moving to `data.table::froll_*()`
+
 # mnirs 0.2.0
 
 * Implement tidy evaluation with `{rlang}` and `{tidyselect}`.

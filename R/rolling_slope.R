@@ -2,52 +2,47 @@
 #'
 #' Calculates the linear regression slope of a numeric vector.
 #'
-#' @param na.rm A logical indicating whether missing values should be ignored
-#'   (`TRUE`). Otherwise `FALSE` (the *default*) will return `NA` when there
-#'   are any missing data within the vector.
 #' @param ... Additional arguments.
 #' @inheritParams replace_invalid
 #'
 #' @details
-#' Uses the least squares formula.
+#' Uses the least squares formula on complete case data (ignoring `NA`s).
 #' 
 #' @returns A numeric slope in units of `x/t`.
 #' 
 #' @examples
-#' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+#' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 #' mnirs:::slope(x)
-#'
-#' x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-#' mnirs:::slope(x_na)
-#' mnirs:::slope(x_na, na.rm = TRUE)
 #' 
 #' @keywords internal
 slope <- function(
     x,
     t = seq_along(x),
-    na.rm = FALSE,
     ...
 ) {
     ## validation =================================================
     args <- list(...)
-    if (na.rm) {
-        complete <- which(is.finite(x) & is.finite(t))
-        x <- x[complete]
-        t <- t[complete]
-    }
-
-    n <- length(x)
+    
     if (!(args$bypass_checks %||% FALSE)) {
+        if (!is.numeric(x)) {
+            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
+        }
         if (!is.numeric(t)) {
             abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
         }
-        if (n != length(t)) {
+        if (length(x) != length(t)) {
             cli_abort(c(
                 "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
-            of equal length."
+                of equal length."
             ))
         }
     }
+    
+    ## remove invalid
+    complete <- which(is.finite(x) & is.finite(t))
+    x <- x[complete]
+    t <- t[complete]
+    n <- length(x)   
     
     if (n < max(args$min_obs, 2L)) {
         return(NA_real_)
@@ -65,8 +60,7 @@ slope <- function(
     slope_val <- (n * sum_tx - sum_t * sum_x) / denom
 
     if (args$intercept %||% FALSE) {
-        intercept <- (sum_x - slope_val * sum_t) / n
-        attr(slope_val, "intercept") <- intercept
+        attr(slope_val, "intercept") <- (sum_x - slope_val * sum_t) / n
     }
 
     return(slope_val)
@@ -86,12 +80,7 @@ slope <- function(
 #'
 #' @details
 #' The local rolling window can be specified by either `width` as the number of
-#'   samples, or `span` as the timespan in units of `t`. Specifying `width`
-#'   tries to call [roll::roll_lm()] if `na.rm = TRUE` or there are
-#'   no `NA`s, which is often *much* faster than specifying `span`.
-#'
-#' *`<CAUTION>`*, under certain edge-conditions the `roll::roll_lm()` method
-#'   may return slightly different values than the equivalent specifying `span`.
+#'   samples, or `span` as the timespan in units of `t`.
 #'
 #' `align` defaults to *"centre"* the local window around `idx` between
 #'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
@@ -99,32 +88,25 @@ slope <- function(
 #'   unequal sample forward of `idx`. When `span` is specified with
 #'   `align = "centre"`, the local window is between `[t - span/2, t + span/2]`.
 #'
-#' `partial = TRUE` allows calculation of slope over partial windows with at
-#'   least `2` valid samples, such as at edge conditions. However, this can
-#'   return unstable results with noisy data and should not be used for certain
-#'   applications, such as peak slope detection over a vector of noisy data.
+#' The default `partial = FALSE` requires complete case data with the same
+#'   number of valid samples as specified by `width` or `span` (number of
+#'   samples is estimated for `span` from the sample rate of `t`). If fewer
+#'   than the requires valid samples are present in the local vector, `NA` is
+#'   returned.
+#' 
+#' `partial = TRUE` allows calculation over partial windows with at least `2` 
+#'   valid samples, such as at edge conditions or over missing data `NA`s.
 #'
-#' `na.rm = TRUE` will return a valid slope value as long as there are a
-#'   minimum number of valid samples within the window (at least `2` when
-#'   `partial = TRUE`). Otherwise, a single `NA` sample in the window will
-#'   return `NA`.
-#'
-#' @seealso [zoo::rollapply()], [roll::roll_lm()]
+#' @seealso [zoo::rollapply()]
 #'
 #' @returns A numeric vector of rolling local slopes in units of `x/t` the
 #'   same length as `x`.
 #'
 #' @examples
-#' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+#' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 #' rolling_slope(x, span = 3)
-#' rolling_slope(x, width = 3)
-#'
-#' x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-#' rolling_slope(x_na, span = 3)
-#' rolling_slope(x_na, span = 3, partial = TRUE)
-#' rolling_slope(x_na, span = 3, partial = TRUE, na.rm = TRUE)
-#' rolling_slope(x_na, width = 3, partial = TRUE)
-#' rolling_slope(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+#' rolling_slope(x, span = 3, partial = TRUE)
+#' rolling_slope(x, width = 3, partial = TRUE)
 #'
 #' @export
 rolling_slope <- function(
@@ -134,7 +116,6 @@ rolling_slope <- function(
     span = NULL,
     align = c("centre", "left", "right"),
     partial = FALSE,
-    na.rm = FALSE,
     verbose = TRUE,
     ...
 ) {
@@ -181,37 +162,10 @@ rolling_slope <- function(
     }
 
     ## processing =================================================
-    if (
-        (na.rm || !anyNA(x)) &&
-            !is.null(width) &&
-            is.null(span) &&
-            !(args$window_idx %||% FALSE)
-    ) {
-        ## use {roll} for fast rolling
-        rlang::check_installed(
-            c("roll", "RcppParallel"),
-            reason = "to use fast rolling functions"
-        )
-        if (rlang::is_installed("roll")) {
-            return(
-                rolling_lm(
-                    x,
-                    t,
-                    width,
-                    align,
-                    min_obs,
-                    verbose,
-                    bypass_checks = TRUE
-                )
-            )
-        }
-    }
-
     window_idx <- compute_local_windows(
         t, width = width, span = span, align = align
     )
     if (verbose && all(lengths(window_idx) < min_obs)) {
-        ## TODO should warn for rolling_lm() condition
         cli_warn(c(
             "!" = "Less than {.val {min_obs}} valid samples detected in \\
             {.fn rolling_slope} windows.",
@@ -220,7 +174,7 @@ rolling_slope <- function(
         ))
     }
     slopes <- vapply(window_idx, \(.idx) {
-        slope(x[.idx], t[.idx], na.rm, min_obs = min_obs, bypass_checks = TRUE)
+        slope(x[.idx], t[.idx], min_obs = min_obs, bypass_checks = TRUE)
     }, numeric(1))
 
     if (args$window_idx %||% FALSE) {
@@ -236,10 +190,19 @@ rolling_slope <- function(
 #' Identifies the maximum positive or negative local linear slope within a
 #' numeric vector and returns regression parameters
 #'
-#' @param direction A character string specifying either the peak
+#' @param direction A character string to detect either the peak
 #'   `"positive"` or `"negative"` slope, or `"auto"` detect (the *default*)
-#'   based on the overal trend of the signal.
+#'   based on the overal trend of the signal (see *Details*).
 #' @inheritParams rolling_slope
+#'
+#' @details
+#' When `direction = "auto"`, the net slope across all of `x` is calculated 
+#'   to determine the trend direction. If the net slope equals zero, will 
+#'   return the greatest absolute slope.
+#'
+#' When `direction = "positive"` or `"negative"`, returns the greatest 
+#'   respective directional slope. If no positive/negative slopes exist, 
+#'   returns `NA` with a warning.
 #'
 #' @returns A named list containing:
 #'   \item{`slope`}{The peak slope value in units of `x/t`.}
@@ -249,17 +212,6 @@ rolling_slope <- function(
 #'   \item{`idx`}{The index position of the peak slope.}
 #'   \item{`window_idx`}{An integer vector of indices for the peak slope 
 #'   window.}
-#'
-#' @details
-#' The function computes rolling slopes via [rolling_slope()].
-#'
-#' When `direction = "auto"`, the net slope across all of `x` is calculated 
-#'   to determine the trend direction. If the net slope equals zero, will 
-#'   return the greatest absolute slope.
-#'
-#' When `direction = "positive"`, returns the greatest positive slope. And 
-#'   vice versa for `"negative"`. If no positive/negative slopes exist, returns
-#'   `NA` with a warning.
 #'
 #' @examples
 #' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
@@ -277,7 +229,6 @@ peak_slope <- function(
     align = c("centre", "left", "right"),
     direction = c("auto", "positive", "negative"),
     partial = FALSE,
-    na.rm = FALSE,
     verbose = TRUE,
     ...
 ) {
@@ -306,7 +257,6 @@ peak_slope <- function(
         span,
         align,
         partial,
-        na.rm,
         verbose,
         window_idx = TRUE,
         bypass_checks = TRUE
@@ -318,7 +268,7 @@ peak_slope <- function(
 
     ## auto-detect direction from net trend
     if (direction == "auto") {
-        net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
+        net_slope <- slope(x, t, bypass_checks = TRUE)
 
         direction <- if (is.na(net_slope) || net_slope == 0) {
             ## fallback to magnitude comparison when net slope is zero/NA
@@ -366,7 +316,6 @@ peak_slope <- function(
     peak_slope_val <- slope(
         x[window_idx],
         t[window_idx],
-        na.rm = na.rm,
         intercept = TRUE,
         bypass_checks = TRUE
     )

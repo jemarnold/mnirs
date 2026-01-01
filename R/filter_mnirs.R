@@ -97,9 +97,8 @@
 #'   as the number of samples around `idx` between `[idx - floor(width/2),`
 #'   `idx + floor(width/2)]`. Or by `span` as the timespan in units of
 #'   `time_channel` between `[t - span/2, t + span/2]`. Specifying `width`
-#'   calls [roll::roll_median()] which is often much faster than specifying 
-#'   `span`.A partial moving average will be calculated at the edges of 
-#'   the data.}
+#'   is often faster than `span`. A partial moving average will be calculated 
+#'   at the edges of the data.}
 #' }
 #'
 #' Missing values (`NA`) in `nirs_channels` will cause an error for
@@ -408,15 +407,14 @@ filter_mnirs.moving_average <- function(
 #'   `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
 #'   timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
 #'
-#' Specifying `width` calls [roll::roll_mean()] which is often much faster
-#'   than specifying `span`.
+#' Specifying `width` is often faster than `span`.
 #'
 #' If there are no valid values within the calculation window, will return `NA`.
 #'   A partial moving average will be calculated at the edges of the data.
 #'
 #' @returns A numeric vector the same length as `x`.
 #'
-#' @seealso [zoo::rollmean()], [roll::roll_mean()]
+#' @seealso [zoo::rollmean()]
 #'
 #' @examples
 #' ## basic moving average with sample width
@@ -461,39 +459,25 @@ filter_moving_average <- function(
     }
 
     ## processing ==============================================
-    if ((na.rm || !anyNA(x)) && !is.null(width) && is.null(span)) {
-        ## use {roll} for fast rolling
-        rlang::check_installed(
-            c("roll", "RcppParallel"),
-            reason = "to use fast rolling functions"
-        )
-        if (rlang::is_installed("roll")) {
-            y <- rolling_mean(x, width = width, min_obs = min_obs)
-        }
+    window_idx <- compute_local_windows(
+        t, width = width, span = span
+    )
+
+    ## check for min_obs
+    window_valid <- lapply(window_idx, \(.idx) which(is.finite(x)[.idx]))
+    window_idx[lengths(window_valid) < min_obs] <- NA_real_
+    if (verbose && all(is.na(window_idx))) {
+        cli_warn(c(
+            "!" = "Less than {.val {min_obs}} valid samples detected in \\
+            {.fn filter_moving_average} windows.",
+            "i" = "Specify {.arg width} >= {.val {2}} or increase \\
+            {.arg span} to include more samples."
+        ))
     }
 
-    if (!exists("y")) {
-        window_idx <- compute_local_windows(
-            t, width = width, span = span
-        )
-
-        ## check for min_obs
-        window_idx[lengths(window_idx) < min_obs] <- NA_real_
-        if (verbose && all(is.na(window_idx))) {
-            ## TODO should warn for rolling_mean() condition
-            cli_warn(c(
-                "!" = "Less than {.val {min_obs}} valid samples detected in \\
-                {.fn filter_moving_average} windows.",
-                "i" = "Specify {.arg width} >= {.val {2}} or increase \\
-                {.arg span} to include more samples."
-            ))
-        }
-
-        y <- vapply(window_idx, \(.idx) {
-            mean(x[.idx], na.rm = na.rm)
-        }, numeric(1))
-    }
-    ## explicit overwrite NaN to NA
+    y <- vapply(window_idx, \(.idx) mean(x[.idx], na.rm = na.rm), numeric(1))
+    
+    ## NaN to NA
     y[!is.finite(y)] <- NA_real_
     return(y)
 }

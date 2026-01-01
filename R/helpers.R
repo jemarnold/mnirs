@@ -24,8 +24,7 @@
 #' @details
 #' The local rolling window can be specified by either `width` as the number of
 #'   samples, or `span` as the timespan in units of `t`. Specifying `width`
-#'   calls [roll][roll::roll-package] which is often much faster than
-#'   specifying `span`.
+#'   is often faster than `span`.
 #'
 #' `align` defaults to *"centre"* the local window around `idx` between
 #'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is

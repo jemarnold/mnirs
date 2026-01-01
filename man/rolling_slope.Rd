@@ -11,7 +11,6 @@ rolling_slope(
   span = NULL,
   align = c("centre", "left", "right"),
   partial = FALSE,
-  na.rm = FALSE,
   verbose = TRUE,
   ...
 )
@@ -38,10 +37,6 @@ subset of available data within the local rolling window (\code{TRUE}), or
 requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
 \emph{Details}.}
 
-\item{na.rm}{A logical indicating whether missing values should be ignored
-(\code{TRUE}). Otherwise \code{FALSE} (the \emph{default}) will return \code{NA} when there
-are any missing data within the vector.}
-
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
 
@@ -57,12 +52,7 @@ numeric vector.
 }
 \details{
 The local rolling window can be specified by either \code{width} as the number of
-samples, or \code{span} as the timespan in units of \code{t}. Specifying \code{width}
-tries to call \code{\link[roll:roll_lm]{roll::roll_lm()}} if \code{na.rm = TRUE} or there are
-no \code{NA}s, which is often \emph{much} faster than specifying \code{span}.
-
-\emph{\verb{<CAUTION>}}, under certain edge-conditions the \code{roll::roll_lm()} method
-may return slightly different values than the equivalent specifying \code{span}.
+samples, or \code{span} as the timespan in units of \code{t}.
 
 \code{align} defaults to \emph{"centre"} the local window around \code{idx} between
 \verb{[idx - floor((width-1)/2),} \verb{idx + floor(width/2)]} when \code{width} is
@@ -70,29 +60,22 @@ specified. Even \code{width} values will bias \code{align} to \emph{"left"}, wit
 unequal sample forward of \code{idx}. When \code{span} is specified with
 \code{align = "centre"}, the local window is between \verb{[t - span/2, t + span/2]}.
 
-\code{partial = TRUE} allows calculation of slope over partial windows with at
-least \code{2} valid samples, such as at edge conditions. However, this can
-return unstable results with noisy data and should not be used for certain
-applications, such as peak slope detection over a vector of noisy data.
+The default \code{partial = FALSE} requires complete case data with the same
+number of valid samples as specified by \code{width} or \code{span} (number of
+samples is estimated for \code{span} from the sample rate of \code{t}). If fewer
+than the requires valid samples are present in the local vector, \code{NA} is
+returned.
 
-\code{na.rm = TRUE} will return a valid slope value as long as there are a
-minimum number of valid samples within the window (at least \code{2} when
-\code{partial = TRUE}). Otherwise, a single \code{NA} sample in the window will
-return \code{NA}.
+\code{partial = TRUE} allows calculation over partial windows with at least \code{2}
+valid samples, such as at edge conditions or over missing data \code{NA}s.
 }
 \examples{
-x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 rolling_slope(x, span = 3)
-rolling_slope(x, width = 3)
-
-x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-rolling_slope(x_na, span = 3)
-rolling_slope(x_na, span = 3, partial = TRUE)
-rolling_slope(x_na, span = 3, partial = TRUE, na.rm = TRUE)
-rolling_slope(x_na, width = 3, partial = TRUE)
-rolling_slope(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+rolling_slope(x, span = 3, partial = TRUE)
+rolling_slope(x, width = 3, partial = TRUE)
 
 }
 \seealso{
-\code{\link[zoo:rollapply]{zoo::rollapply()}}, \code{\link[roll:roll_lm]{roll::roll_lm()}}
+\code{\link[zoo:rollapply]{zoo::rollapply()}}
 }

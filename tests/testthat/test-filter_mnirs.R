@@ -54,8 +54,8 @@ test_that("filter_moving_average() handles NA values correctly", {
     result <- filter_moving_average(
         x,
         width = 3,
-        partial = FALSE,
-        na.rm = TRUE,
+        partial = FALSE, ## min 3 valid obs
+        na.rm = TRUE, ## mean excludes NA
     )
     expect_equal(result, c(rep(NA, 3), 4, NA))
     

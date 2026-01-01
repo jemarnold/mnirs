@@ -55,8 +55,7 @@ defined by either \code{width} as the number of samples around \code{idx} betwee
 \verb{[idx - floor(width/2),} \verb{idx + floor(width/2)]}. Or by \code{span} as the
 timespan in units of \code{time_channel} between \verb{[t - span/2, t + span/2]}.
 
-Specifying \code{width} calls \code{\link[roll:roll_mean]{roll::roll_mean()}} which is often much faster
-than specifying \code{span}.
+Specifying \code{width} is often faster than \code{span}.
 
 If there are no valid values within the calculation window, will return \code{NA}.
 A partial moving average will be calculated at the edges of the data.
@@ -75,5 +74,5 @@ filter_moving_average(x, span = 2)
 
 }
 \seealso{
-\code{\link[zoo:rollmean]{zoo::rollmean()}}, \code{\link[roll:roll_mean]{roll::roll_mean()}}
+\code{\link[zoo:rollmean]{zoo::rollmean()}}
 }

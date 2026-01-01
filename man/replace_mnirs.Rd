@@ -154,9 +154,9 @@ median interpolation. This window can be specified by either \code{width} as
 the number of samples centred on \code{idx} between
 \verb{[idx - floor(width/2), idx + floor(width/2)]}, or \code{span} as the timespan
 in units of \code{time_channel} centred on \code{idx} between
-\verb{[t - span/2, t + span/2]}. Specifying \code{width} calls \code{\link[roll:roll_median]{roll::roll_median()}}
-which is often much faster than specifying \code{span}. A partial moving
-average will be calculated at the edges of the data.
+\verb{[t - span/2, t + span/2]}. Specifying \code{width} is often faster than
+\code{span}. A partial moving average will be calculated at the edges of the
+data.
 
 \code{replace_invalid()} can be used to remove known invalid values in
 exported data.
@@ -170,8 +170,7 @@ values themselves.
 
 \code{replace_outliers()} will compute rolling local median values across \code{x},
 defined by either \code{width} number of samples, or \code{span} timespan in units
-of \code{t}. Specifying \code{width} calls \code{\link[roll:roll_median]{roll::roll_median()}} which is often
-much faster than specifying \code{span}.
+of \code{t}. Specifying \code{width} is often faster than \code{span}.
 \itemize{
 \item Outliers are detected with robust median absolute deviation (MAD) method
 adapted from \code{\link[pracma:hampel]{pracma::hampel()}}. Outliers equal to or less than the
@@ -260,5 +259,5 @@ plot(data, label_time = TRUE) +
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[pracma:hampel]{pracma::hampel()}}, \code{\link[stats:approxfun]{stats::approx()}}, \code{\link[roll:roll_median]{roll::roll_median()}}
+\code{\link[pracma:hampel]{pracma::hampel()}}, \code{\link[stats:approxfun]{stats::approx()}}
 }

@@ -4,17 +4,13 @@
 \alias{slope}
 \title{Calculate linear slope}
 \usage{
-slope(x, t = seq_along(x), na.rm = FALSE, ...)
+slope(x, t = seq_along(x), ...)
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
 \item{t}{An \emph{optional} numeric vector of the predictor variable; time
 or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
-
-\item{na.rm}{A logical indicating whether missing values should be ignored
-(\code{TRUE}). Otherwise \code{FALSE} (the \emph{default}) will return \code{NA} when there
-are any missing data within the vector.}
 
 \item{...}{Additional arguments.}
 }
@@ -25,15 +21,11 @@ A numeric slope in units of \code{x/t}.
 Calculates the linear regression slope of a numeric vector.
 }
 \details{
-Uses the least squares formula.
+Uses the least squares formula on complete case data (ignoring \code{NA}s).
 }
 \examples{
-x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 mnirs:::slope(x)
-
-x_na <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-mnirs:::slope(x_na)
-mnirs:::slope(x_na, na.rm = TRUE)
 
 }
 \keyword{internal}

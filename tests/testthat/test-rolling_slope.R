@@ -33,25 +33,23 @@ test_that("slope calculates edge cases correctly", {
     ## all identical values = 0
     expect_true(slope(rep(5, 10)) == 0)
     ## all NA_real_ = NA
-    expect_true(is.na(slope(x = rep(NA, 5))))
+    expect_true(is.na(slope(x = rep(NA_real_, 5))))
     ## all t values identical = NA
     expect_true(is.na(slope(1:5, rep(1, 5))))
-    ## TODO character = valid.*numeric? or sum type error?
-    # expect_error(is.na(slope(x = letters[1:4])), "valid.*numeric")
-    expect_error(is.na(slope(x = letters[1:4])), "type.*character")
-    expect_error(is.na(slope(1:4, t = letters[1:4])), "valid.*numeric")
+    ## character vectors error
+    expect_error(slope(x = letters[1:4]), "valid.*numeric")
+    expect_error(slope(1:4, t = letters[1:4]), "valid.*numeric")
     ## unequal length = error
-    expect_error(slope(1:5, 1:3), "equal length")
+    expect_error(slope(x = 1:5, t = 1:3), "equal length")
     ## all invalid = NA
-    expect_true(is.na(slope(list())))
+    expect_error(is.na(slope(list())), "valid.*numeric")
     expect_true(is.na(slope(numeric(0))))
-    expect_true(is.na(slope(NULL)))
-    expect_true(is.na(slope(rep(NA, 4))))
-    expect_true(is.na(slope(rep(NA, 4), na.rm = TRUE)))
+    expect_error(is.na(slope(NULL)), "valid.*numeric")
+    expect_true(is.na(slope(rep(NA_real_, 4))))
     expect_true(is.na(slope(rep(NaN, 4))))
     expect_true(is.na(slope(rep(Inf, 4))))
-    ## na.rm removes NaN & Inf
-    expect_equal(slope(c(1, NaN, 3, Inf, 5), na.rm = TRUE), 1)
+    ## NaN & Inf removed
+    expect_equal(slope(c(1, NaN, 3, Inf, 5)), 1)
 })
 
 test_that("slope returns same as lm model", {
@@ -61,33 +59,24 @@ test_that("slope returns same as lm model", {
     expect_equal(slope(x, t_irreg), unname(coef(lm(x ~ t_irreg))[2]))
 
     x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-    expect_equal(slope(x, na.rm = TRUE), coef(lm(x ~ seq_along(x)))[[2L]])
+    expect_equal(slope(x), coef(lm(x ~ seq_along(x)))[[2L]])
 
     ## boundary NAs
     x <- c(NA, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, NA)
-    expect_equal(slope(x, na.rm = TRUE), coef(lm(x ~ seq_along(x)))[[2L]])
+    expect_equal(slope(x), coef(lm(x ~ seq_along(x)))[[2L]])
 })
 
 test_that("slope handles NA values correctly", {
     x_na <- c(1, NA, 3, 4, 5)
 
-    # NA propagates by default
-    expect_true(is.na(slope(x_na)))
-    # na.rm removes NA observations
-    expect_equal(slope(x_na, na.rm = TRUE), 1)
+    # NA ignored by default
+    expect_equal(slope(x_na), 1)
 
     # NA in t
     t_na <- c(1, 2, NA, 4, 5)
-    expect_true(is.na(slope(1:5, t_na)))
     expect_equal(
-        slope(1:5, t_na, na.rm = TRUE),
-        unname(coef(lm(1:5 ~ t_na))[2])
-    )
-
-    # NA in both - pairwise complete
-    expect_equal(
-        slope(x_na, t_na, na.rm = TRUE),
-        slope(c(1, 4, 5), t = c(1, 4, 5))
+        slope(1:5, t_na),
+        coef(lm(1:5 ~ t_na))[[2L]]
     )
 })
 
@@ -138,69 +127,69 @@ test_that("slope respects bypass_checks", {
 
 
 ## rolling_lm() ============================================
-test_that("rolling_lm handles min_obs correctly", {
-    skip_if_not_installed("roll")
-    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+# test_that("rolling_lm handles min_obs correctly", {
+#     skip_if_not_installed("roll")
+#     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    ## min_obs < 2 warns and adjusts
-    expect_warning(
-        rolling_lm(x, width = 3, min_obs = 1, verbose = TRUE),
-        "min_obs.*set to"
-    )
+#     ## min_obs < 2 warns and adjusts
+#     expect_warning(
+#         rolling_lm(x, width = 3, min_obs = 1, verbose = TRUE),
+#         "min_obs.*set to"
+#     )
 
-    ## min_obs > width warns and adjusts
-    expect_warning(
-        rolling_lm(x, width = 3, min_obs = 5, verbose = TRUE),
-        "min_obs.*set to"
-    )
+#     ## min_obs > width warns and adjusts
+#     expect_warning(
+#         rolling_lm(x, width = 3, min_obs = 5, verbose = TRUE),
+#         "min_obs.*set to"
+#     )
 
-    ## silent when verbose = FALSE
-    expect_silent(
-        rolling_lm(x, width = 3, min_obs = 1, verbose = FALSE)
-    )
-})
+#     ## silent when verbose = FALSE
+#     expect_silent(
+#         rolling_lm(x, width = 3, min_obs = 1, verbose = FALSE)
+#     )
+# })
 
-test_that("rolling_lm align options all work", {
-    skip_if_not_installed("roll")
-    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+# test_that("rolling_lm align options all work", {
+#     skip_if_not_installed("roll")
+#     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    result_centre <- rolling_lm(x, width = 3, align = "centre")
-    result_left <- rolling_lm(x, width = 3, align = "left")
-    result_right <- rolling_lm(x, width = 3, align = "right")
+#     result_centre <- rolling_lm(x, width = 3, align = "centre")
+#     result_left <- rolling_lm(x, width = 3, align = "left")
+#     result_right <- rolling_lm(x, width = 3, align = "right")
 
-    expect_length(result_centre, length(x))
-    expect_length(result_left, length(x))
-    expect_length(result_right, length(x))
+#     expect_length(result_centre, length(x))
+#     expect_length(result_left, length(x))
+#     expect_length(result_right, length(x))
 
-    ## different alignments should produce different NA patterns
-    expect_false(identical(
-        which(is.na(result_centre)),
-        which(is.na(result_left))
-    ))
-    expect_equal(wrap(result_right, 2), result_left)
-    expect_equal(wrap(result_centre, 1), result_left)
+#     ## different alignments should produce different NA patterns
+#     expect_false(identical(
+#         which(is.na(result_centre)),
+#         which(is.na(result_left))
+#     ))
+#     expect_equal(wrap(result_right, 2), result_left)
+#     expect_equal(wrap(result_centre, 1), result_left)
 
-    ## irregular t
-    t <- c(0.5, 1.5, 3, 3.5, 4, 5.5, 7, 8, 10, 11)
-    expect_equal(
-        rolling_lm(x, t, width = 3, align = "right"),
-        wrap(rolling_lm(x, t, width = 3, align = "centre"), -1)
-    )
-    expect_equal(
-        rolling_lm(x, t, width = 3, align = "right"),
-        wrap(rolling_lm(x, t, width = 3, align = "left"), -2)
-    )
-})
+#     ## irregular t
+#     t <- c(0.5, 1.5, 3, 3.5, 4, 5.5, 7, 8, 10, 11)
+#     expect_equal(
+#         rolling_lm(x, t, width = 3, align = "right"),
+#         wrap(rolling_lm(x, t, width = 3, align = "centre"), -1)
+#     )
+#     expect_equal(
+#         rolling_lm(x, t, width = 3, align = "right"),
+#         wrap(rolling_lm(x, t, width = 3, align = "left"), -2)
+#     )
+# })
 
-test_that("rolling_lm matches rolling_slope with width only", {
-    skip_if_not_installed("roll")
-    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+# test_that("rolling_lm matches rolling_slope with width only", {
+#     skip_if_not_installed("roll")
+#     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    expect_equal(
-        rolling_lm(x, width = 3),
-        rolling_slope(x, width = 3)
-    )
-})
+#     expect_equal(
+#         rolling_lm(x, width = 3),
+#         rolling_slope(x, width = 3)
+#     )
+# })
 
 
 ## rolling_slope ===========================================================
@@ -243,7 +232,47 @@ test_that("rolling_slope handles negative values correctly", {
     expect_all_equal(rolling_slope(x_desc, span = 2, partial = TRUE), -2)
 })
 
-test_that("rolling_slope works with width using roll_lm", {
+# test_that("rolling_slope works with width using roll_lm", {
+#     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+
+#     ## width = 3, centre aligned
+#     result <- rolling_slope(
+#         x,
+#         width = 3,
+#         align = "centre",
+#         verbose = FALSE
+#     )
+#     expect_equal(length(result), length(x))
+#     expect_all_true(is.na(result[c(1, 10)])) ## boundary < width
+#     expect_all_false(is.na(result[-c(1, 10)]))
+#     expect_equal(result[5], slope(x[4:6])) # centre window
+
+#     ## width = 3, left aligned
+#     result_left <- rolling_slope(
+#         x,
+#         width = 3,
+#         align = "left",
+#         verbose = FALSE
+#     )
+#     expect_equal(length(result_left), length(x))
+#     expect_all_true(is.na(result_left[9:10])) ## boundary < width
+#     expect_all_false(is.na(result_left[-c(9:10)]))
+#     expect_equal(result_left[5], slope(x[5:7]))
+
+#     ## width = 3, right aligned
+#     result_right <- rolling_slope(
+#         x,
+#         width = 3,
+#         align = "right",
+#         verbose = FALSE
+#     )
+#     expect_equal(length(result_right), length(x))
+#     expect_all_true(is.na(result_right[1:2])) ## boundary < width
+#     expect_all_false(is.na(result_right[-c(1:2)]))
+#     expect_equal(result_right[5], slope(x[3:5]))
+# })
+
+test_that("rolling_slope works with width", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
     ## width = 3, centre aligned
@@ -283,50 +312,7 @@ test_that("rolling_slope works with width using roll_lm", {
     expect_equal(result_right[5], slope(x[3:5]))
 })
 
-test_that("rolling_slope works with width using compute_local_fun", {
-    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
-
-    ## width = 3, centre aligned
-    result <- rolling_slope(
-        x,
-        width = 3,
-        span = 0,
-        align = "centre",
-        verbose = FALSE
-    )
-    expect_equal(length(result), length(x))
-    expect_all_true(is.na(result[c(1, 10)])) ## boundary < width
-    expect_all_false(is.na(result[-c(1, 10)]))
-    expect_equal(result[5], slope(x[4:6])) # centre window
-
-    ## width = 3, left aligned
-    result_left <- rolling_slope(
-        x,
-        width = 3,
-        span = 0,
-        align = "left",
-        verbose = FALSE
-    )
-    expect_equal(length(result_left), length(x))
-    expect_all_true(is.na(result_left[9:10])) ## boundary < width
-    expect_all_false(is.na(result_left[-c(9:10)]))
-    expect_equal(result_left[5], slope(x[5:7]))
-
-    ## width = 3, right aligned
-    result_right <- rolling_slope(
-        x,
-        width = 3,
-        span = 0,
-        align = "right",
-        verbose = FALSE
-    )
-    expect_equal(length(result_right), length(x))
-    expect_all_true(is.na(result_right[1:2])) ## boundary < width
-    expect_all_false(is.na(result_right[-c(1:2)]))
-    expect_equal(result_right[5], slope(x[3:5]))
-})
-
-test_that("rolling_slope works with span using compute_local_fun", {
+test_that("rolling_slope works with span", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
     ## span = 7, centre aligned
@@ -460,7 +446,7 @@ test_that("rolling_slope calculates invalid", {
     ## NA_real_, NaN, Inf = NA_real_
     expect_all_true(is.na(rolling_slope(rep(NA_real_, 4), width = 3)))
     expect_all_true(is.na(
-        rolling_slope(rep(NA_real_, 4), na.rm = TRUE, width = 3)
+        rolling_slope(rep(NA_real_, 4), width = 3)
     ))
     expect_all_true(is.na(rolling_slope(rep(NaN, 4), width = 3)))
     expect_all_true(is.na(rolling_slope(rep(Inf, 4), width = 3)))
@@ -472,52 +458,18 @@ test_that("rolling_slope calculates invalid", {
 })
 
 test_that("rolling_slope handles NaN & Inf", {
-    ## NaN propagates
-    expect_all_true(is.nan(rolling_slope(
-        x = c(1, NaN, 2, Inf, 8),
-        width = 3,
-        partial = TRUE,
-        na.rm = FALSE
-    )))
-    expect_all_true(is.nan(rolling_slope(
-        x = c(1, NaN, 2, Inf, 8),
-        span = 2,
-        na.rm = FALSE
-    )))
-
-    # rolling_slope(
-    #     x <- c(1, 3, NaN, 5, 8, Inf, 9, 12),
-    #     width = 3,
-    #     partial = TRUE,
-    #     na.rm = TRUE
-    # )
-
+    x <- c(1, 2, NaN, 4, 5, Inf, 7, 8)
     ## ! reconcile different results between methods
-    ## na.rm removes NaN & Inf
+    ## differences are that centred `span` is divided by two
+    ## so 2/1 = ±1 sample on each side
+    ## whereas `width` is left-biased forward looking c(idx, idx+1)
+    ## answers are different because questions are different
     expect_equal(
-        rolling_slope(
-            x = c(1, 2, NaN, 4, 5, Inf, 7, 8),
-            width = 2,
-            na.rm = TRUE
-        ),
-        c(1, NA, NA, 1, NA, NA, NA, NA)
-    )
-    expect_equal(
-        rolling_slope(
-            x = c(1, 2, NaN, 4, 5, Inf, 7, 8),
-            width = 2,
-            span = 0,
-            na.rm = TRUE,
-            verbose = FALSE
-        ),
+        rolling_slope(x, width = 2),
         c(1, NA, NA, 1, NA, NA, 1, NA)
     )
     expect_all_equal(
-        rolling_slope(
-            x = c(1, 2, NaN, 4, 5, Inf, 7, 8),
-            span = 2,
-            na.rm = TRUE
-        ),
+        rolling_slope(x, span = 2),
         1
     )
 })
@@ -636,34 +588,34 @@ test_that("rolling_slope returns same as zoo::rollapply()", {
 
 
 # fmt: skip
-test_that("rolling_slope handles NA with na.rm", {
-    x_na = c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-    w <- 3
-    df <- data.frame(
-        x = x_na,
-        span = rolling_slope(x_na, span = w - 1, partial = TRUE),
-        width = rolling_slope(x_na, width = w, span = 0, partial = TRUE, verbose = FALSE),
-        ## TODO roll_lm DOES NOT RETURN SAME if na.rm = FALSE, need to use compute_local_fun width
-        # roll_lm = rolling_slope(x_na, width = w, partial = TRUE),
-        span_na = rolling_slope(x_na, span = w - 1, partial = TRUE, na.rm = TRUE),
-        width_na = rolling_slope(x_na, width = w , span = 0, partial = TRUE, na.rm = TRUE, verbose = FALSE),
-        roll_lm_na = rolling_slope(x_na, width = w, partial = TRUE, na.rm = TRUE)
-    )
-    expect_equal(df$span, df$width)
-    # expect_equal(df$span, df$roll_lm)
-    # expect_equal(df$width, df$roll_lm)
-    expect_equal(df$span_na, df$width_na)
-    expect_equal(df$span_na, df$roll_lm_na)
-    expect_equal(df$width_na, df$roll_lm_na)
+# test_that("rolling_slope handles NA with na.rm", {
+#     x_na = c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
+#     w <- 3
+#     df <- data.frame(
+#         x = x_na,
+#         span = rolling_slope(x_na, span = w - 1, partial = TRUE),
+#         width = rolling_slope(x_na, width = w, span = 0, partial = TRUE, verbose = FALSE),
+#         ## TODO roll_lm DOES NOT RETURN SAME if na.rm = FALSE, need to use compute_local_fun width
+#         # roll_lm = rolling_slope(x_na, width = w, partial = TRUE),
+#         span_na = rolling_slope(x_na, span = w - 1, partial = TRUE, na.rm = TRUE),
+#         width_na = rolling_slope(x_na, width = w , span = 0, partial = TRUE, na.rm = TRUE, verbose = FALSE),
+#         roll_lm_na = rolling_slope(x_na, width = w, partial = TRUE, na.rm = TRUE)
+#     )
+#     expect_equal(df$span, df$width)
+#     # expect_equal(df$span, df$roll_lm)
+#     # expect_equal(df$width, df$roll_lm)
+#     expect_equal(df$span_na, df$width_na)
+#     expect_equal(df$span_na, df$roll_lm_na)
+#     expect_equal(df$width_na, df$roll_lm_na)
 
-    ## 2025-08-13 na.rm = FALSE returns NA where any local x is NA
-    result <- rolling_slope(x_na, width = 3, na.rm = FALSE)
-    expect_equal(which(!is.na(result)), 5:7)
+#     ## 2025-08-13 na.rm = FALSE returns NA where any local x is NA
+#     result <- rolling_slope(x_na, width = 3, na.rm = FALSE)
+#     expect_equal(which(!is.na(result)), 5:7)
 
-    ## 2025-08-13 na.rm = TRUE returns NA where target x is NA
-    result <- rolling_slope(x_na, width = 3, partial = TRUE, na.rm = TRUE)
-    expect_equal(which(is.na(result)), 9:11)
-})
+#     ## 2025-08-13 na.rm = TRUE returns NA where target x is NA
+#     result <- rolling_slope(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+#     expect_equal(which(is.na(result)), 9:11)
+# })
 
 test_that("rolling_slope handles span in units of t", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
@@ -864,12 +816,7 @@ test_that("peak_slope finds correct peak location", {
 test_that("peak_slope handles NA values", {
     x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 
-    ## na.rm = FALSE propagates NA
-    result <- peak_slope(x, width = 7, na.rm = FALSE, verbose = FALSE)
-    expect_all_true(is.na(result))
-
-    ## na.rm = TRUE removes NA
-    result_na <- peak_slope(x, width = 7, na.rm = TRUE, partial = TRUE, verbose = FALSE)
+    result_na <- peak_slope(x, width = 7, partial = TRUE, verbose = FALSE)
     expect_all_false(is.na(result_na))
 })
 
@@ -949,18 +896,18 @@ test_that("rolling_slope works visually", {
     t <- seq_along(x)
     window_idx <- compute_local_windows(t, width = 3)
 
-    ## partial = TRUE, na.rm = TRUE
+    ## partial = TRUE
     slopes <- vapply(window_idx, \(.idx) {
         df <- data.frame(t = t[.idx], x = x[.idx])
         tryCatch(coef(lm(x ~ t, df))[[2L]], error = \(e) NA_real_)
         }, numeric(1))
 
     expect_equal(
-        rolling_slope(x, t, width = 3, partial = TRUE, na.rm = TRUE),
+        rolling_slope(x, t, width = 3, partial = TRUE),
         slopes
     )
 
-    ## partial = FALSE, na.rm = FALSE
+    ## partial = FALSE
     slopes <- vapply(window_idx, \(.idx) {
         df <- data.frame(t = t[.idx], x = x[.idx])
         if (length(df$t) < 3 || any(is.na(df$x))) {
@@ -970,17 +917,15 @@ test_that("rolling_slope works visually", {
         }, numeric(1))
 
     expect_equal(
-        rolling_slope(x, t, width = 3, partial = FALSE, na.rm = FALSE),
+        rolling_slope(x, t, width = 3, partial = FALSE),
         slopes
     )
 
     ## visual confirmation
     # library(ggplot2)
     # predicted <- lapply(window_idx, \(.idx) {
-    #     # coef(lm(x[.idx] ~ t[.idx]))[[2L]]
     #     df <- data.frame(t = t[.idx], x = x[.idx])
     #     y <- tryCatch(predict(lm(x ~ t, df), df), error = \(e) NA_real_)
-    #     # df$y <- if (all(is.na(y)) || all.equal(y)) NA_real_ else y
     #     df$y <- if (!is.null(attr(y, "non-estim"))) NA_real_ else y
     #     df
     # })[2:12]
@@ -1004,8 +949,7 @@ test_that("rolling_slope works visually", {
     #                 size = c(2, 5, 2)
     #             )
     #         )
-    #     }) +
-    #     NULL
+    #     })
 })
 
 test_that("rolling_slope works on example_mnirs() data", {
@@ -1026,7 +970,6 @@ test_that("rolling_slope works on example_mnirs() data", {
         t = data$time,
         span = 10,
         partial = FALSE,
-        na.rm = TRUE
     )
 
     plot(data) +
@@ -1051,8 +994,7 @@ test_that("rolling_slope works on example_mnirs() data", {
         x = data$smo2_right,
         t = data$time,
         span = 10,
-        partial = FALSE,
-        na.rm = TRUE
+        partial = FALSE
     )
 
     plot(data) +
