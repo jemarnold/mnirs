@@ -97,7 +97,7 @@ test_that("shift_mnirs handles position = 'max' correctly", {
     expect_equal(result$ch1, 91:100)
 })
 
-test_that("shift_mnirs handles position = 'first' with span", {
+test_that("shift_mnirs handles position = 'first' with span and width", {
     data <- tibble(
         time = seq(0, 9, by = 1),
         ch1 = c(rep(10, 3), 1:7)
@@ -114,6 +114,17 @@ test_that("shift_mnirs handles position = 'first' with span", {
     )
 
     # Mean of first 3 values (time 0-2) is 10
+    expect_equal(result$ch1, c(rep(0, 3), -9:-3))
+
+    result <- shift_mnirs(
+        data,
+        nirs_channels = list("ch1"),
+        time_channel = "time",
+        to = 0,
+        position = "first",
+        width = 3,
+        verbose = FALSE
+    )
     expect_equal(result$ch1, c(rep(0, 3), -9:-3))
 })
 
@@ -256,12 +267,24 @@ test_that("shift_mnirs handles unevenly sampled data with span", {
         position = "first"
     )
 
-    # First window should average first 2-3 values within 4s of start
+    # First window should average first 3 values within 4s of start
     first_window_idx <- which(data$time <= data$time[1] + 4)
-    expected_mean <- mean(data$ch1[first_window_idx])
-
-    expect_equal(result$ch1[1], data$ch1[1] - expected_mean)
     expect_equal(which(data$time <= 4), first_window_idx)
+    expected_mean <- mean(data$ch1[first_window_idx])
+    expect_equal(result$ch1[1], data$ch1[1] - expected_mean)
+
+    ## width = 3
+    result <- shift_mnirs(
+        data,
+        list("ch1"),
+        time_channel = "time",
+        to = 0,
+        width = 3,
+        position = "first"
+    )
+
+    # First window should average first 3 values
+    expect_equal(result$ch1[1], data$ch1[1] - mean(data$ch1[1:3]))
 
     ## unequal sampling and position = "minimum"
     result_min <- shift_mnirs(
@@ -298,8 +321,10 @@ test_that("shift_mnirs handles multiple channel groups", {
         ch2 = c(15, 25),
         ch3 = c(5, 35)
     )
-    channels <- list(c("ch1", "ch2"), "ch3")
-    result <- shift_mnirs(data, channels, "time", to = 0, width = 1)
+    nirs_channels <- list(c("ch1", "ch2"), "ch3")
+    # parse_channel_name(enquo(nirs_channels), data)
+    # validate_nirs_channels(enquo(nirs_channels), data)
+    result <- shift_mnirs(data, nirs_channels, time, to = 0, width = 1)
 
     ## check grouping together: min shuold come from ch1 and ch3
     expect_true(any(result$ch1 == 0, na.rm = TRUE))
@@ -340,7 +365,295 @@ test_that("shift_mnirs handles empty channel list", {
     expect_error(shift_mnirs(data, list(), by = 5), "`nirs_channels` not detected")
 })
 
+## shift_mnirs() NSE integration ========================================
+## helper to create test data with metadata
+create_test_data <- function(
+    time_max = 10,
+    sample_rate = 10,
+    add_metadata = TRUE
+) {
+    time <- seq(0, time_max, by = 1 / sample_rate)
+    nrow <- length(time)
+    data <- tibble(
+        time = time,
+        nirs1 = rnorm(nrow, 50, 5),
+        nirs2 = rnorm(nrow, 60, 5),
+        nirs3 = rnorm(nrow, 80, 5),
+        event = c(1, rep(NA, nrow - 2), 2),
+    )
+    class(data) <- c("mnirs", class(data))
 
+    if (add_metadata) {
+        attr(data, "time_channel") <- "time"
+        attr(data, "nirs_channels") <- c("nirs1", "nirs2")
+        attr(data, "event_channel") <- "event"
+        attr(data, "sample_rate") <- sample_rate
+    }
+
+    return(data)
+}
+
+test_that("shift_mnirs() works with quoted character strings", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = c("nirs1", "nirs2"),
+        time_channel = "time",
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("nirs1", "nirs2") %in% names(result)))
+    expect_equal(
+        result$nirs1[1], 
+        data$nirs1[1] - mean(c(data$nirs1[1:5], data$nirs2[1:5]))
+    )
+})
+
+test_that("shift_mnirs() works with bare symbol column names", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = c(nirs1, nirs2),
+        time_channel = time,
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("nirs1", "nirs2") %in% names(result)))
+    expect_equal(
+        result$nirs1[1],
+        data$nirs1[1] - mean(c(data$nirs1[1:5], data$nirs2[1:5]))
+    )
+})
+
+test_that("shift_mnirs() works with external character vector", {
+    data <- create_test_data()
+    channels <- c("nirs1", "nirs2")
+    time_col <- "time"
+    result <- shift_mnirs(
+        data,
+        nirs_channels = channels,
+        time_channel = time_col,
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("nirs1", "nirs2") %in% names(result)))
+    first_mean <- mean(c(data$nirs1[1:5], data$nirs2[1:5]))
+    expect_equal(
+        c(result$nirs1[1], result$nirs2[1]),
+        c(
+            data$nirs1[1] - first_mean,
+            data$nirs2[1] - first_mean
+        )
+    )
+})
+
+test_that("shift_mnirs() works with external list object", {
+    data <- create_test_data()
+    channels <- list(c("nirs1", "nirs2"))
+    result <- shift_mnirs(
+        data,
+        nirs_channels = channels,
+        time_channel = "time",
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+    expect_s3_class(result, "mnirs")
+    first_mean <- mean(c(data$nirs1[1:5], data$nirs2[1:5]))
+    expect_equal(
+        c(result$nirs1[1], result$nirs2[1]),
+        c(
+            data$nirs1[1] - first_mean,
+            data$nirs2[1] - first_mean
+        )
+    )
+})
+
+test_that("shift_mnirs() works with list() grouping and bare symbols", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = list(c(nirs1, nirs2)),
+        time_channel = time,
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+    expect_s3_class(result, "mnirs")
+    first_mean <- mean(c(data$nirs1[1:5], data$nirs2[1:5]))
+    expect_equal(
+        c(result$nirs1[1], result$nirs2[1]),
+        c(
+            data$nirs1[1] - first_mean,
+            data$nirs2[1] - first_mean
+        )
+    )
+})
+
+test_that("shift_mnirs() works with list() separate groups", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = list(nirs1, nirs2),
+        time_channel = time,
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+    expect_s3_class(result, "mnirs")
+    expect_equal(
+        result$nirs1[1],
+        data$nirs1[1] - mean(c(data$nirs1[1:5]))
+    )
+    expect_equal(
+        result$nirs2[1],
+        data$nirs2[1] - mean(c(data$nirs2[1:5]))
+    )
+})
+
+test_that("shift_mnirs() works with tidyselect starts_with()", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = tidyselect::starts_with("nirs"),
+        time_channel = time,
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("nirs1", "nirs2") %in% names(result)))
+    first_mean <- mean(c(data$nirs1[1:5], data$nirs2[1:5], data$nirs3[1:5]))
+    expect_equal(
+        c(result$nirs1[1], result$nirs2[1], result$nirs3[1]),
+        c(
+            data$nirs1[1] - first_mean,
+            data$nirs2[1] - first_mean,
+            data$nirs3[1] - first_mean
+        )
+    )
+})
+
+test_that("shift_mnirs() works with tidyselect in list()", {
+    data <- data.frame(
+        time = 1:10,
+        smo2_left = runif(10, 50, 70),
+        smo2_right = runif(10, 50, 70),
+        thb = runif(10, 12, 14)
+    )
+    data <- create_mnirs_data(
+        data,
+        list(
+            nirs_channels = c("smo2_left", "smo2_right", "thb"),
+            time_channel = "time"
+        )
+    )
+
+    result <- shift_mnirs(
+        data,
+        nirs_channels = list(tidyselect::starts_with("smo2"), thb),
+        time_channel = time,
+        to = 0,
+        width = 5
+    )
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("smo2_left", "smo2_right", "thb") %in% names(result)))
+})
+
+test_that("shift_mnirs() uses metadata when channels NULL", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = NULL,
+        time_channel = NULL,
+        to = 0,
+        width = 5
+    )
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("nirs1", "nirs2") %in% names(result)))
+})
+
+test_that("shift_mnirs() errors with non-existent column name", {
+    data <- create_test_data()
+    expect_error(
+        shift_mnirs(
+            data,
+            nirs_channels = nonexistent,
+            time_channel = time,
+            to = 0,
+            width = 5
+        ),
+        "not detected"
+    )
+})
+
+test_that("shift_mnirs() mixed quoted and unquoted in list()", {
+    data <- create_test_data()
+    result <- shift_mnirs(
+        data,
+        nirs_channels = list("nirs1", nirs2),
+        time_channel = "time",
+        to = 0,
+        width = 5
+    )
+    expect_s3_class(result, "mnirs")
+    expect_true(all(c("nirs1", "nirs2") %in% names(result)))
+})
+
+test_that("shift_mnirs() preserves grouping with external list", {
+    data <- data.frame(
+        time = 1:10,
+        nirs1 = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100),
+        nirs2 = c(15, 25, 35, 45, 55, 65, 75, 85, 95, 105),
+        nirs3 = c(5, 15, 25, 35, 45, 55, 65, 75, 85, 95)
+    )
+    data <- create_mnirs_data(
+        data,
+        list(
+            nirs_channels = c("nirs1", "nirs2", "nirs3"),
+            time_channel = "time"
+        )
+    )
+
+    channels <- list(c("nirs1", "nirs2"), "nirs3")
+    result <- shift_mnirs(
+        data,
+        channels,
+        "time",
+        to = 0,
+        width = 5,
+        position = "first"
+    )
+
+    ## nirs1 and nirs2 grouped:  shifted by same amount
+    ## ch3 independent: shifted separately
+    expect_equal(
+        result$nirs1[1] - result$nirs2[1],
+        data$nirs1[1] - data$nirs2[1]
+    )
+    first_mean <- mean(c(data$nirs1[1:5], data$nirs2[1:5]))
+    expect_equal(
+        c(result$nirs1[1], result$nirs2[1]),
+        c(
+            data$nirs1[1] - first_mean,
+            data$nirs2[1] - first_mean
+        )
+    )
+    expect_equal(
+        result$nirs3[1],
+        data$nirs3[1] - mean(c(data$nirs3[1:5]))
+    )
+})
+
+
+## integration tests ================================================
 test_that("shift_mnirs works on Moxy", {
     data <- read_mnirs(
         file_path = example_mnirs("moxy_ramp.xlsx"),

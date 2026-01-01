@@ -10,6 +10,7 @@
 #' @importFrom lifecycle deprecated
 #' @importFrom rlang %||%
 #' @importFrom rlang .data
+#' @importFrom rlang enquo
 #' @importFrom stats approx
 #' @importFrom stats median
 #' @importFrom stats setNames

@@ -124,14 +124,13 @@ displayed. Messages can be silenced globally with
 ## call an example mNIRS data file
 file_path <- example_mnirs("moxy_ramp")
 
-data_table <- read_mnirs(
+read_mnirs(
     file_path,
     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    verbose = FALSE                       ## hide warnings & messages
+    sample_rate = NULL,                  ## sample_rate will be estimated from time_channel
+    verbose = FALSE                      ## silence warnings & messages
 )
-
-data_table
 
 }

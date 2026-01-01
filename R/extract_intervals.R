@@ -128,7 +128,6 @@
 #'   *"mnirs"* with metadata available with `attributes()`.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #'
 #' options(mnirs.verbose = FALSE)
 #'
@@ -142,25 +141,31 @@
 #'     time_channel = c(time = "Timestamp (seconds passed)"),
 #'     zero_time = TRUE
 #' ) |>
-#'     resample_mnirs() |>
-#'     filter_mnirs(
-#'         method = "butterworth",
-#'         order = 2,
-#'         W = 0.01
-#'     )
-#'
-#' ## specify intervals to extract by time values
+#'     resample_mnirs() ## avoid issues ensemble-averaging irregular samples
+#' 
+#' ## extract intervals as a list of data frames
 #' extract_intervals(
 #'     data,
-#'     # nirs_channels = NULL,               ## retrieved from metadata
-#'     # time_channel = NULL,
-#'     # sample_rate = NULL,
-#'     event_times = c(368, 1093),           ## specify a series of intervals
-#'     span = list(c(-20, 120), c(-20, 90)), ## specify the event timespans
-#'     group_events = "distinct",            ## return all discrete intervals
-#'     zero_time = TRUE                      ## re-calculate interval times to start from zero
+#'     nirs_channels = list(c(smo2_left, smo2_right)),
+#'     event_times = c(368, 1093), ## specify interval events
+#'     span = list(c(-20, 90)), ## specify the event start-end timespans
+#'     group_events = "distinct", ## return all unique intervals
+#'     zero_time = TRUE ## start time from zero
 #' )
-#'
+#' 
+#' ## ensemble-average across multiple intervals
+#' interval_list <- extract_intervals(
+#'     data,
+#'     nirs_channels = list(c(smo2_left, smo2_right)),
+#'     event_times = c(368, 1093),
+#'     span = list(c(-20, 90)),
+#'     group_events = "ensemble", ## return ensemble-averaged intervals
+#'     zero_time = TRUE
+#' )
+#' 
+#' library(ggplot2)
+#' plot(interval_list[[1L]], label_time = TRUE) +
+#'     geom_vline(xintercept = 0, linetype = "dotted")
 #'
 #' @export
 extract_intervals <- function(
@@ -184,8 +189,10 @@ extract_intervals <- function(
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
-    time_channel <- validate_time_channel(data, time_channel)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose
+    )
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     ## avoid floating point precision issues downstream with findIntervals()
     time_vec <- round(data[[time_channel]], 6)
     ## estimate sample_rate for appropriate time binning
@@ -220,7 +227,7 @@ extract_intervals <- function(
     ## if `event_labels` provided, `event_channel` must be provided
     if (!is.null(event_labels)) {
         event_channel <- validate_event_channel(
-            data, event_channel, require = TRUE
+            event_channel, data, required = TRUE
         )
         ## TODO redundant check but better error message
         # cli_abort(c(
@@ -231,7 +238,7 @@ extract_intervals <- function(
         event_vec <- data[[event_channel]]
     } else {
         event_channel <- validate_event_channel(
-            data, event_channel, require = FALSE
+            event_channel, data, required = FALSE
         )
         event_vec <- NULL
     }

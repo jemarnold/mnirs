@@ -60,28 +60,31 @@ together, and should be defined explicitly for other grouping arrangements.
 }
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-library(ggplot2)
 
 options(mnirs.verbose = FALSE)
 
 ## read example data
-data_rescaled <- read_mnirs(
+data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2 = "SmO2 Live"),
+    nirs_channels = c(smo2_right = "SmO2 Live",
+                      smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss")
 ) |>
     resample_mnirs() |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10
+        width = 10,
+        method = "linear"
     ) |>
     filter_mnirs(na.rm = TRUE) |>
     rescale_mnirs(
+        nirs_channels = list(c(smo2_right, smo2_left)),
         range = c(0, 100)   ## rescale to a 0-100\% functional exercise range
     )
 
-plot(data_rescaled, label_time = TRUE) +
+library(ggplot2)
+plot(data, label_time = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")
 \dontshow{\}) # examplesIf}
 }

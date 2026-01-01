@@ -9,11 +9,11 @@
 #' @param width An integer defining the local window in number of samples
 #'   around `idx` in which to perform the operation, according to `align`.
 #' @param span A numeric value defining the local window timespan around `idx`
-#'   in which to perform the operation, according to `align`. In units of 
+#'   in which to perform the operation, according to `align`. In units of
 #'   `time_channel` or `t`.
-#' @param align Window alignment as *"center"* (the *default*), *"left"*, or
-#'   *"right"*. Where *"left"* is *forward looking*, and *"right"* is
-#'   *backward looking* from the current sample.
+#' @param align Window alignment as *"centre"/"center"* (the *default*),
+#'   *"left"*, or *"right"*. Where *"left"* is *forward looking*, and *"right"*
+#'   is *backward looking* from the current sample.
 #' @inheritParams replace_invalid
 #'
 #' @returns
@@ -23,15 +23,15 @@
 #'
 #' @details
 #' The local rolling window can be specified by either `width` as the number of
-#'   samples, or `span` as the timespan in units of `t`. Specifying `width` 
-#'   calls [roll][roll::roll-package] which is often much faster than 
+#'   samples, or `span` as the timespan in units of `t`. Specifying `width`
+#'   calls [roll][roll::roll-package] which is often much faster than
 #'   specifying `span`.
-#' 
-#' `align` defaults to *"center"* the local window around `idx` between 
-#'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is 
-#'   specified. Even `width` values will bias `align` to *"left"*, with the 
-#'   unequal sample forward of `idx`, effectively returning `NA` at the last 
-#'   sample index. When `span` is specified, the local window is between 
+#'
+#' `align` defaults to *"centre"* the local window around `idx` between
+#'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
+#'   specified. Even `width` values will bias `align` to *"left"*, with the
+#'   unequal sample forward of `idx`, effectively returning `NA` at the last
+#'   sample index. When `span` is specified, the local window is between
 #'   `[t - span/2, t + span/2]`.
 #'
 #' @examples
@@ -65,17 +65,18 @@ compute_local_windows <- function(
     idx = seq_along(t),
     width = NULL,
     span = NULL,
-    align = c("center", "left", "right")
+    align = c("centre", "left", "right")
 ) {
+    align <- sub("^center$", "centre", align)
     align <- match.arg(align)
     n <- length(t)
 
     if (!is.null(width)) {
         ## right = backward looking; left = forward looking
-        ## center = left-biased
+        ## centre = left-biased
         offsets <- switch(
             align,
-            center = c(-floor((width - 1L) / 2L), floor(width / 2L)),
+            centre = c(-floor((width - 1L) / 2L), floor(width / 2L)),
             left = c(0L, width - 1L),
             right = c(-(width - 1L), 0L)
         )
@@ -85,7 +86,7 @@ compute_local_windows <- function(
         # fmt: skip
         offsets <- switch(
             align,
-            center = c(-0.5, 0.5),
+            centre = c(-0.5, 0.5),
             left = c(0, 1),
             right = c(-1, 0)
         ) * span
@@ -240,9 +241,25 @@ compute_valid_neighbours <- function(
 rolling_median <- function(
     x,
     width,
-    align = c("center", "left", "right")
+    align = c("centre", "left", "right")
 ) {
+    align <- sub("^center$", "centre", align)
     align <- match.arg(align)
+
+    ## centre = left-biased
+    if (align == "centre") {
+        n <- length(x)
+        shift <- floor(width / 2L)
+        x_padded <- c(x, rep_len(x[n], shift))
+        rolled <- roll::roll_median(
+            x_padded,
+            width,
+            min_obs = 1L,
+            na_restore = TRUE
+        )
+
+        return(rolled[seq_len(n) + shift])
+    }
 
     ## roll::roll_lm is right-aligned: result[i] uses x[(i-width+1):i]
     if (align == "right") {
@@ -256,28 +273,14 @@ rolling_median <- function(
     }
 
     ## right = backward looking; left = forward looking
-    if (align == "left") {
-        rolled <- roll::roll_median(
-            rev(x),
-            width,
-            min_obs = 1L,
-            na_restore = TRUE
-        )
-        return(rev(rolled))
-    }
-
-    ## center = left-biased
-    n <- length(x)
-    shift <- floor(width / 2L)
-    x_padded <- c(x, rep_len(x[n], shift))
     rolled <- roll::roll_median(
-        x_padded,
+        rev(x),
         width,
         min_obs = 1L,
         na_restore = TRUE
     )
 
-    return(rolled[seq_len(n) + shift])
+    return(rev(rolled))
 }
 
 
@@ -294,41 +297,66 @@ rolling_median <- function(
 rolling_mean <- function(
     x,
     width,
-    align = c("center", "left", "right")
+    align = c("centre", "left", "right"),
+    min_obs = width,
+    verbose = TRUE,
+    ...
 ) {
+    align <- sub("^center$", "centre", align)
     align <- match.arg(align)
+
+    bypass_checks <- list(...)$bypass_checks %||% FALSE
+    if (!bypass_checks) {
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
+        validate_numeric(
+            width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
+        )
+        # if (min_obs < 1L || min_obs > width) {
+        #     min_obs <- max(1L, min(min_obs, width))
+        #     if (verbose) {
+        #         cli_warn(c(
+        #             "!" = "{.arg min_obs} must be an {.cls integer} between \\
+        #         {.val {2}} and {.val {width}}.",
+        #             "i" = "{.arg min_obs} set to {.val {min_obs}}."
+        #         ))
+        #     }
+        # }
+    }
+
+    ## centre = left-biased
+    if (align == "centre") {
+        n <- length(x)
+        shift <- floor(width / 2L)
+        x_padded <- c(x, rep_len(NA_real_, shift))
+        rolled <- roll::roll_mean(
+            x_padded,
+            width,
+            min_obs = min_obs
+        )
+    
+        return(rolled[seq_len(n) + shift])
+    }
 
     ## roll::roll_lm is right-aligned: result[i] uses x[(i-width+1):i]
     if (align == "right") {
         rolled <- roll::roll_mean(
             x,
             width,
-            min_obs = 1L
+            min_obs = min_obs
         )
         return(rolled)
     }
 
     ## right = backward looking; left = forward looking
-    if (align == "left") {
-        rolled <- roll::roll_mean(
-            rev(x),
-            width,
-            min_obs = 1L
-        )
-        return(rev(rolled))
-    }
-
-    ## center = left-biased
-    n <- length(x)
-    shift <- floor(width / 2L)
-    x_padded <- c(x, rep_len(NA_real_, shift))
     rolled <- roll::roll_mean(
-        x_padded,
+        rev(x),
         width,
-        min_obs = 1L
+        min_obs = min_obs
     )
-
-    return(rolled[seq_len(n) + shift])
+ 
+    return(rev(rolled))
 }
 
 
@@ -351,13 +379,14 @@ rolling_lm <- function(
     x,
     t = seq_along(x),
     width,
-    align = c("center", "left", "right"),
+    align = c("centre", "left", "right"),
     min_obs = width,
     verbose = TRUE,
     ...
 ) {
     bypass_checks <- list(...)$bypass_checks %||% FALSE
     if (!bypass_checks) {
+        align <- sub("^center$", "centre", align)
         align <- match.arg(align)
         if (!is.numeric(x)) {
             abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
@@ -386,6 +415,23 @@ rolling_lm <- function(
         }
     }
 
+    ## centre = left-biased
+    if (align == "centre") {
+        n <- length(x)
+        shift <- floor(width / 2L)
+        x_padded <- c(x, rep_len(NA_real_, shift))
+        t_padded <- c(t, seq(t[n] + 1L, length.out = shift))
+
+        slopes <- roll::roll_lm(
+            x = t_padded,
+            y = x_padded,
+            width = width,
+            min_obs = min_obs
+        )$coefficients[, 2L]
+
+        return(slopes[seq_len(n) + shift])
+    }
+
     ## roll::roll_lm is right-aligned: result[i] uses x[(i-width+1):i]
     if (align == "right") {
         slopes <- roll::roll_lm(
@@ -398,32 +444,16 @@ rolling_lm <- function(
     }
 
     ## right = backward looking; left = forward looking
-    if (align == "left") {
-        slopes <- rev(
-            roll::roll_lm(
-                x = rev(t),
-                y = rev(x),
-                width = width,
-                min_obs = min_obs
-            )$coefficients[, 2L]
-        )
-        return(slopes)
-    }
+    slopes <- rev(
+        roll::roll_lm(
+            x = rev(t),
+            y = rev(x),
+            width = width,
+            min_obs = min_obs
+        )$coefficients[, 2L]
+    )
 
-    ## center = left-biased
-    n <- length(x)
-    shift <- floor(width / 2L)
-    x_padded <- c(x, rep_len(NA_real_, shift))
-    t_padded <- c(t, seq(t[n] + 1L, length.out = shift))
-
-    slopes <- roll::roll_lm(
-        x = t_padded,
-        y = x_padded,
-        width = width,
-        min_obs = min_obs
-    )$coefficients[, 2L]
-
-    return(slopes[seq_len(n) + shift])
+    return(slopes)
 }
 
 

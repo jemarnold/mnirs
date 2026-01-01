@@ -4,7 +4,7 @@ create_test_data <- function(
     sample_rate = 10,
     add_metadata = TRUE
 ) {
-    time = seq(0, time_max, by = 1 / sample_rate)
+    time <- seq(0, time_max, by = 1 / sample_rate)
     nrow <- length(time)
     data <- tibble(
         time = time,
@@ -100,52 +100,175 @@ test_that("validate_mnirs_data() rejects data frames with < 2 columns", {
 })
 
 
+## parse_channel_name() ============================================
+test_that("parse_channel_name() returns NULL for NULL input", {
+    data <- data.frame(a = 1, b = 2)
+    result <- parse_channel_name(rlang::quo(NULL), data)
+    expect_null(result)
+})
+
+test_that("parse_channel_name() handles already-evaluated character", {
+    data <- data.frame(a = 1, b = 2)
+    ch <- "a"
+    result <- parse_channel_name(rlang::enquo(ch), data)
+    expect_equal(result, "a")
+})
+
+test_that("parse_channel_name() handles already-evaluated character vector", {
+    data <- data.frame(a = 1, b = 2, c = 3)
+    ch <- c("a", "b")
+    result <- parse_channel_name(rlang::enquo(ch), data)
+    expect_equal(result, c("a", "b"))
+})
+
+test_that("parse_channel_name() handles already-evaluated list", {
+    data <- data.frame(a = 1, b = 2, c = 3)
+    ch <- list(c("a", "b"), "c")
+    result <- parse_channel_name(rlang::enquo(ch), data)
+    expect_equal(result, list(c("a", "b"), "c"))
+})
+
+test_that("parse_channel_name() handles bare symbol matching column", {
+    data <- data.frame(smo2 = 1, thb = 2)
+    env <- rlang::current_env()
+    expr <- rlang::quo(smo2)
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, "smo2")
+})
+
+test_that("parse_channel_name() handles bare symbol as external object", {
+    data <- data.frame(a = 1, b = 2, c = 3)
+    channels <- c("a", "b")
+    result <- parse_channel_name(rlang::enquo(channels), data)
+    expect_equal(result, c("a", "b"))
+})
+
+test_that("parse_channel_name() handles external list object", {
+    data <- data.frame(a = 1, b = 2, c = 3)
+    channels <- list(c("a", "b"), "c")
+    result <- parse_channel_name(rlang::enquo(channels), data)
+    expect_equal(result, list(c("a", "b"), "c"))
+})
+
+test_that("parse_channel_name() handles c() with bare symbols", {
+    data <- data.frame(smo2 = 1, thb = 2, hhr = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(c(smo2, thb))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, c("smo2", "thb"))
+})
+
+test_that("parse_channel_name() handles list() with bare symbols", {
+    data <- data.frame(smo2 = 1, thb = 2, hhr = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(list(c(smo2, thb), hhr))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, list(c("smo2", "thb"), "hhr"))
+})
+
+test_that("parse_channel_name() handles list() with mixed input", {
+    data <- data.frame(a = 1, b = 2, c = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(list(c("a", "b"), c))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, list(c("a", "b"), "c"))
+})
+
+test_that("parse_channel_name() handles tidyselect starts_with()", {
+    data <- data.frame(smo2_left = 1, smo2_right = 2, thb = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(tidyselect::starts_with("smo2"))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, c("smo2_left", "smo2_right"))
+})
+
+test_that("parse_channel_name() handles tidyselect ends_with()", {
+    data <- data.frame(smo2_left = 1, thb_left = 2, smo2_right = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(tidyselect::ends_with("left"))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, c("smo2_left", "thb_left"))
+})
+
+test_that("parse_channel_name() handles tidyselect matches()", {
+    data <- data.frame(left_smo2 = 1, smo2_right = 2, thb = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(tidyselect::matches("smo2"))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, c("left_smo2", "smo2_right"))
+})
+
+test_that("parse_channel_name() handles tidyselect in list()", {
+    data <- data.frame(smo2_a = 1, smo2_b = 2, thb = 3)
+    env <- rlang::current_env()
+    expr <- rlang::quo(list(tidyselect::starts_with("smo2"), thb))
+    result <- parse_channel_name(expr, data, env = env)
+    expect_equal(result, list(c("smo2_a", "smo2_b"), "thb"))
+})
+
+test_that("parse_channel_name() returns non-existent colname symbol", {
+    data <- data.frame(a = 1, b = 2)
+    env <- rlang::new_environment()
+    channel <- rlang::new_quosure(rlang::sym("nonexistent"), env = env)
+    result <- parse_channel_name(channel, data, env = env)
+    ## should pass through nonexistent colname to validate_nirs_channels
+    expect_equal(result, "nonexistent")
+})
+
+
 ## validate_nirs_channels() ========================================
 test_that("validate_nirs_channels() uses metadata when NULL", {
     data <- create_test_data()
-    result <- validate_nirs_channels(data, NULL, verbose = FALSE)
+    result <- validate_nirs_channels(NULL, data, verbose = FALSE)
     expect_equal(result, c("nirs1", "nirs2"))
 })
 
 test_that("validate_nirs_channels() uses explicit channels when provided", {
     data <- create_test_data()
-    result <- validate_nirs_channels(data, "nirs1")
+    result <- validate_nirs_channels("nirs1", data)
     expect_equal(result, "nirs1")
 })
 
 test_that("validate_nirs_channels() works with nirs_channels = list()", {
     data <- create_test_data()
     nirs_vec <- c("nirs1", "nirs2")
-    result <- validate_nirs_channels(data, nirs_vec)
+    result <- validate_nirs_channels(nirs_vec, data)
     expect_equal(result, nirs_vec)
 
     attr(data, "nirs_channels") <- nirs_vec
     expect_message(
-        result <- validate_nirs_channels(data, NULL, verbose = TRUE),
+        result <- validate_nirs_channels(NULL, data, verbose = TRUE),
         "`nirs_channels`.*grouped"
     )
     expect_equal(result, nirs_vec)
 
     nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
-    result <- validate_nirs_channels(data, nirs_list)
+    result <- validate_nirs_channels(nirs_list, data)
     expect_equal(result, nirs_list)
 })
 
 test_that("validate_nirs_channels() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
-    expect_error(validate_nirs_channels(data, NULL), "not detected in metadata")
+    expect_error(validate_nirs_channels(NULL, data), "not detected in metadata")
 })
 
 test_that("validate_nirs_channels() errors when columns don't exist", {
     data <- create_test_data()
-    expect_error(validate_nirs_channels(data, "nonexistent"), "match exactly")
+    expect_error(validate_nirs_channels("nonexistent", data), "match exactly")
+})
+
+test_that("validate_nirs_channels() errors when col symbols don't exist", {
+    data <- data.frame(a = 1, b = 2)
+    env <- rlang::new_environment()
+    channel <- rlang::new_quosure(rlang::sym("nonexistent"), env = env)
+    expect_error(validate_nirs_channels(channel, data), "match exactly")
 })
 
 test_that("validate_nirs_channels() errors for non-numeric channels", {
     data <- create_test_data()
     data$nirs1 <- as.character(data$nirs1)
     expect_error(
-        validate_nirs_channels(data, c("nirs1", "nirs2")),
+        validate_nirs_channels(c("nirs1", "nirs2"), data),
         "must contain valid.*numeric"
     )
 })
@@ -154,7 +277,7 @@ test_that("validate_nirs_channels() errors when < 2 valid values", {
     data <- create_test_data()
     data$nirs1 <- c(1, rep(NA, nrow(data) - 1))
     expect_error(
-        validate_nirs_channels(data, c("nirs1", "nirs2")),
+        validate_nirs_channels(c("nirs1", "nirs2"), data),
         "must contain valid.*numeric"
     )
 })
@@ -163,74 +286,74 @@ test_that("validate_nirs_channels() errors when < 2 valid values", {
 ## validate_time_channel() ========================================
 test_that("validate_time_channel() uses metadata when NULL", {
     data <- create_test_data()
-    result <- validate_time_channel(data, NULL)
+    result <- validate_time_channel(NULL, data)
     expect_equal(result, "time")
 })
 
 test_that("validate_time_channel() uses explicit channel when provided", {
     data <- create_test_data()
     data$time_new <- data$time
-    result <- validate_time_channel(data, "time_new")
+    result <- validate_time_channel("time_new", data)
     expect_equal(result, "time_new")
 })
 
 test_that("validate_time_channel() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
-    expect_error(validate_time_channel(data, NULL), "not detected in metadata")
+    expect_error(validate_time_channel(NULL, data), "not detected in metadata")
 })
 
 test_that("validate_time_channel() errors when column doesn't exist", {
     data <- create_test_data()
-    expect_error(validate_time_channel(data, "nonexistent"), "match exactly")
+    expect_error(validate_time_channel("nonexistent", data), "match exactly")
 })
 
 test_that("validate_time_channel() errors for non-numeric channel", {
     data <- create_test_data()
     data$time <- as.character(data$time)
-    expect_error(validate_time_channel(data, "time"), "must contain valid.*numeric")
+    expect_error(validate_time_channel("time", data), "must contain valid.*numeric")
 })
 
 test_that("validate_time_channel() errors when < 2 valid values", {
     data <- create_test_data()
     data$time <- c(1, rep(NA, nrow(data) - 1))
-    expect_error(validate_time_channel(data, "time"), "must contain valid.*numeric")
+    expect_error(validate_time_channel("time", data), "must contain valid.*numeric")
 })
 
 
 ## validate_event_channel() ========================================
 test_that("validate_event_channel() uses metadata when NULL", {
     data <- create_test_data()
-    result <- validate_event_channel(data, NULL)
+    result <- validate_event_channel(NULL, data)
     expect_equal(result, "event")
 })
 
 test_that("validate_event_channel() uses explicit channel when provided", {
     data <- create_test_data()
     data$lap <- data$event
-    result <- validate_event_channel(data, "lap")
+    result <- validate_event_channel("lap", data)
     expect_equal(result, "lap")
 })
 
 test_that("validate_event_channel() errors when not in metadata or provided", {
     data <- create_test_data(add_metadata = FALSE)
-    expect_error(validate_event_channel(data, NULL), "not detected in metadata")
+    expect_error(validate_event_channel(NULL, data), "not detected in metadata")
 
     ## no metadata, required = FALSE
-    expect_equal(validate_event_channel(data, NULL, require = FALSE), NULL)
+    expect_equal(validate_event_channel(NULL, data, required = FALSE), NULL)
 })
 
 test_that("validate_event_channel() errors when column doesn't exist", {
     data <- create_test_data()
-    expect_error(validate_event_channel(data, "nonexistent"), "match exactly")
+    expect_error(validate_event_channel("nonexistent", data), "match exactly")
 })
 
 test_that("validate_event_channel() errors when all NA", {
     data <- create_test_data()
     data_one <- data[1:(nrow(data) - 1), ] ## one valid should work
-    expect_equal(validate_event_channel(data_one, "event"), "event")
+    expect_equal(validate_event_channel("event", data_one), "event")
     data_na <- data[2:(nrow(data) - 1), ]
     expect_error(
-        validate_event_channel(data_na, "event"),
+        validate_event_channel("event", data_na),
         "must contain valid"
     )
 })

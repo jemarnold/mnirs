@@ -87,11 +87,11 @@ slope <- function(
 #' *`<CAUTION>`*, under certain edge-conditions the `roll::roll_lm()` method 
 #'   may return slightly different values than the equivalent specifying `span`.
 #'
-#' `align` defaults to *"center"* the local window around `idx` between
+#' `align` defaults to *"centre"* the local window around `idx` between
 #'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
 #'   specified. Even `width` values will bias `align` to *"left"*, with the
 #'   unequal sample forward of `idx`. When `span` is specified with 
-#'   `align = "center"`, the local window is between `[t - span/2, t + span/2]`.
+#'   `align = "centre"`, the local window is between `[t - span/2, t + span/2]`.
 #' 
 #' `partial = TRUE` allows calculation of slope over partial windows with at 
 #'   least `2` valid samples, such as at edge conditions. However, this can 
@@ -126,8 +126,7 @@ rolling_slope <- function(
     t = seq_along(x),
     width = NULL,
     span = NULL,
-    align = c("center", "left", "right"),
-    # min_obs = width,
+    align = c("centre", "left", "right"),
     partial = FALSE,
     na.rm = FALSE,
     verbose = TRUE,
@@ -137,6 +136,7 @@ rolling_slope <- function(
     n <- length(x)
     bypass_checks <- list(...)$bypass_checks %||% FALSE
     if (!bypass_checks) {
+        align <- sub("^center$", "centre", align)
         align <- match.arg(align)
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
@@ -223,11 +223,11 @@ rolling_slope <- function(
         cli_warn(c(
             "!" = "Less than {.val {min_obs}} valid samples detected in \\
             {.fn rolling_slope} windows.",
-            "i" = "Specify {.arg width} >= {.val {2}} or increase {.arg span}."
+            "i" = "Specify {.arg width} >= {.val {2}} or increase {.arg span} \\
+            to include more samples."
         ))
     }
-    vapply(seq_along(window_idx), \(.i) {
-        idx <- window_idx[[.i]]
-        slope(x[idx], t[idx], na.rm, min_obs = min_obs, bypass_checks = TRUE)
+    vapply(window_idx, \(.idx) {
+        slope(x[.idx], t[.idx], na.rm, min_obs = min_obs, bypass_checks = TRUE)
     }, numeric(1))
 }

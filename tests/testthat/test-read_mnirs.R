@@ -76,7 +76,7 @@ test_that("read_file() reads Excel files correctly", {
     expect_s3_class(result, "data.frame")
     expect_true(ncol(result) > 0)
     expect_true(nrow(result) > 0)
-    expect_true(all(sapply(result, is.character)))
+    expect_true(all(lapply(result, is.character)))
 })
 
 test_that("read_file() reads CSV files correctly", {
@@ -88,7 +88,7 @@ test_that("read_file() reads CSV files correctly", {
     expect_s3_class(result, "data.frame")
     expect_true(ncol(result) > 0)
     expect_true(nrow(result) > 0)
-    expect_true(all(sapply(result, is.character)))
+    expect_true(all(lapply(result, is.character)))
 })
 
 test_that("read_file() errors", {

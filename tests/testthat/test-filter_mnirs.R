@@ -2,8 +2,20 @@
 test_that("filter_moving_average() returns expected smoothed values", {
     x <- c(1, 2, 3, 4, 5)
 
-    # Width-based centred window
-    result <- filter_moving_average(x, width = 3, verbose = FALSE)
+    # Width-based centred window, partial = FALSE
+    result <- filter_moving_average(
+        x,
+        width = 3,
+        verbose = FALSE,
+        partial = FALSE
+    )
+    expect_equal(result, c(NA, 2, 3, 4, NA))
+    result <- filter_moving_average(
+        x,
+        width = 3,
+        verbose = FALSE,
+        partial = TRUE
+    )
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 
     # Width-based with single width (floor(1/2) = 0, so just x itself)
@@ -23,11 +35,40 @@ test_that("filter_moving_average() handles custom time vectors", {
 test_that("filter_moving_average() handles NA values correctly", {
     x <- c(1, NA, 3, 4, 5)
 
-    result <- filter_moving_average(x, width = 3, verbose = FALSE)
+    result <- filter_moving_average(
+        x,
+        width = 3,
+        partial = FALSE,
+        na.rm = FALSE,
+    )
+    expect_equal(result, c(rep(NA, 3), 4, NA))
+
+    result <- filter_moving_average(
+        x,
+        width = 3,
+        partial = TRUE,
+        na.rm = TRUE,
+    )
     expect_equal(result, c(1, 2, 3.5, 4, 4.5))
+    
+    result <- filter_moving_average(
+        x,
+        width = 3,
+        partial = FALSE,
+        na.rm = TRUE,
+    )
+    expect_equal(result, c(rep(NA, 3), 4, NA))
+    
+    result <- filter_moving_average(
+        x,
+        width = 3,
+        partial = TRUE,
+        na.rm = FALSE,
+    )
+    expect_equal(result, c(rep(NA, 3), 4, 4.5))
 
     x <- c(1, NA, NA, NA, NA, 6, 7, 8)
-    result <- filter_moving_average(x, width = 3, verbose = FALSE)
+    result <- filter_moving_average(x, width = 3, partial = TRUE, na.rm = TRUE)
     expect_equal(result, c(1, 1, NA, NA, 6, 6.5, 7, 7.5))
 })
 
@@ -79,7 +120,7 @@ test_that("filter_moving_average() validates width & span constraints", {
     )
     ## width > length(x)
     expect_true(all(
-        filter_moving_average(x, width = 21, verbose = FALSE) == mean(x)
+        filter_moving_average(x, width = 21, partial = TRUE) == mean(x)
     ))
 
     # Span must be positive
@@ -94,7 +135,7 @@ test_that("filter_moving_average() validates width & span constraints", {
     expect_equal(filter_moving_average(x, span = 0.5, verbose = FALSE), x)
     ## span > length(x)
     expect_true(all(
-        filter_moving_average(x, span = 21, verbose = FALSE) == mean(x)
+        filter_moving_average(x, span = 21, partial = TRUE) == mean(x)
     ))
 })
 
@@ -112,7 +153,7 @@ test_that("filter_moving_average() warns when both width and span provided", {
     ## should not produce warning
     # Should default to width
     expect_silent(
-        result <- filter_moving_average(1:5, width = 3, span = 2)
+        result <- filter_moving_average(1:5, width = 3, span = 2, partial = TRUE)
     )
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 })
@@ -477,6 +518,19 @@ test_that("butterworth errors without W or fc", {
     )
 })
 
+test_that("butterworth errors for invalid fc", {
+    expect_error(
+        filter_mnirs(
+            moxy_data,
+            method = "butterworth",
+            type = "low",
+            order = 2,
+            fc = 100
+        ),
+        "must be between.*0.*half"
+    )
+})
+
 test_that("butterworth validates filter type", {
     expect_error(
         filter_mnirs(
@@ -609,8 +663,14 @@ test_that("moving_average with width works", {
     expect_equal(nrow(result), nrow(moxy_data))
 
     # Should smooth the data
-    expect_lt(var(diff(result$smo2_left)), var(diff(moxy_data$smo2_left)))
-    expect_lt(var(diff(result$smo2_right)), var(diff(moxy_data$smo2_right)))
+    expect_lt(
+        var(diff(result$smo2_left), na.rm = TRUE),
+        var(diff(moxy_data$smo2_left), na.rm = TRUE)
+    )
+    expect_lt(
+        var(diff(result$smo2_right), na.rm = TRUE),
+        var(diff(moxy_data$smo2_right), na.rm = TRUE)
+    )
 })
 
 test_that("moving_average with span works", {
@@ -640,7 +700,10 @@ test_that("moving_average with larger width = more smoothing", {
         verbose = FALSE
     )
 
-    expect_lt(var(result_wide$smo2_left), var(result_narrow$smo2_left))
+    expect_lt(
+        var(result_wide$smo2_left, na.rm = TRUE),
+        var(result_narrow$smo2_left, na.rm = TRUE)
+    )
 })
 
 ## Channel selection tests ==============================================

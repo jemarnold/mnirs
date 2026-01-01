@@ -61,7 +61,8 @@ theme_set(theme_mnirs())
 ## plot example data
 read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_right = "SmO2 Live",
+                      smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>

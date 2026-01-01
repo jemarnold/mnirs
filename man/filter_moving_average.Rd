@@ -9,8 +9,10 @@ filter_moving_average(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  bypass_checks = FALSE,
-  verbose = TRUE
+  partial = FALSE,
+  na.rm = FALSE,
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
@@ -27,11 +29,19 @@ around \code{idx} in which to perform the operation., between
 in which to perform the operation. In units of \code{time_channel} or \code{t},
 between \verb{[t - span/2, t + span/2]}.}
 
-\item{bypass_checks}{A logical allowing wrapper functions to bypass redundant
-checks and validations.}
+\item{partial}{A logical specifying whether to perform the operation over a
+subset of available data within the local rolling window (\code{TRUE}), or
+requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
+\emph{Details}.}
+
+\item{na.rm}{A logical indicating whether missing values should be preserved
+and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
+will throw an error if there are any \code{NA}s (see \emph{Details}).}
 
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
+
+\item{...}{Additional arguments.}
 }
 \value{
 A numeric vector the same length as \code{x}.

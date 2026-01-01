@@ -54,9 +54,9 @@ test_that("compute_local_windows respects width boundaries", {
     # Middle element: symmetrical window
     expect_equal(result[[5]], c(4:6))
 
-    ## even width align centered
+    ## even width align centreed
     width <- 2
-    result <- compute_local_windows(t, width = width, align = "center")
+    result <- compute_local_windows(t, width = width, align = "centre")
 
     # left-biased forward looking
     expect_equal(result[[1]], 1:2)
@@ -79,6 +79,16 @@ test_that("compute_local_windows respects width boundaries", {
     # Middle element: symmetrical window
     expect_equal(result[[10]], c(8:12))
     expect_equal(t[result[[10]]], t[c(8:12)])
+})
+
+test_that("compute_local_windows align = 'center'", {
+    t <- 1:10
+    width <- 2
+    result <- compute_local_windows(t, width = width, align = "center")
+
+    expect_equal(result[[1]], 1:2)
+    expect_equal(result[[10]], 10)
+    expect_equal(result[[5]], c(5:6))
 })
 
 test_that("compute_local_windows width and span >= length(x) works", {

@@ -15,7 +15,7 @@ compute_local_windows(
   idx = seq_along(t),
   width = NULL,
   span = NULL,
-  align = c("center", "left", "right")
+  align = c("centre", "left", "right")
 )
 
 compute_local_fun(x, window_idx, fn, ...)
@@ -30,15 +30,22 @@ compute_valid_neighbours(
   verbose = TRUE
 )
 
-rolling_median(x, width, align = c("center", "left", "right"))
+rolling_median(x, width, align = c("centre", "left", "right"))
 
-rolling_mean(x, width, align = c("center", "left", "right"))
+rolling_mean(
+  x,
+  width,
+  align = c("centre", "left", "right"),
+  min_obs = width,
+  verbose = TRUE,
+  ...
+)
 
 rolling_lm(
   x,
   t = seq_along(x),
   width,
-  align = c("center", "left", "right"),
+  align = c("centre", "left", "right"),
   min_obs = width,
   verbose = TRUE,
   ...
@@ -59,9 +66,9 @@ around \code{idx} in which to perform the operation, according to \code{align}.}
 in which to perform the operation, according to \code{align}. In units of
 \code{time_channel} or \code{t}.}
 
-\item{align}{Window alignment as \emph{"center"} (the \emph{default}), \emph{"left"}, or
-\emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"} is
-\emph{backward looking} from the current sample.}
+\item{align}{Window alignment as \emph{"centre"/"center"} (the \emph{default}),
+\emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
+is \emph{backward looking} from the current sample.}
 
 \item{x}{A numeric vector of the response variable.}
 
@@ -138,7 +145,7 @@ samples, or \code{span} as the timespan in units of \code{t}. Specifying \code{w
 calls \link[roll:roll-package]{roll} which is often much faster than
 specifying \code{span}.
 
-\code{align} defaults to \emph{"center"} the local window around \code{idx} between
+\code{align} defaults to \emph{"centre"} the local window around \code{idx} between
 \verb{[idx - floor((width-1)/2),} \verb{idx + floor(width/2)]} when \code{width} is
 specified. Even \code{width} values will bias \code{align} to \emph{"left"}, with the
 unequal sample forward of \code{idx}, effectively returning \code{NA} at the last

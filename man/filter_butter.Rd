@@ -17,7 +17,7 @@ filter_butter(
 \item{x}{A numeric vector.}
 
 \item{order}{An integer defining the filter order for
-\code{method = "butterworth"} (\emph{default} \code{order = 1}).}
+\code{method = "butterworth"} (\emph{default} \code{order = 2}).}
 
 \item{W}{A one- or two-element numeric vector defining the filter cutoff
 frequency(ies) for \code{method = "butterworth"}, as a fraction of the

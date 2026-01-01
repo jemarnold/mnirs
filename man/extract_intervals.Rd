@@ -173,7 +173,6 @@ included in the interval range (e.g. with \code{span = c(30, 60)}).
 }
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-library(ggplot2)
 
 options(mnirs.verbose = FALSE)
 
@@ -187,24 +186,30 @@ data <- read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |>
-    filter_mnirs(
-        method = "butterworth",
-        order = 2,
-        W = 0.01
-    )
+    resample_mnirs() ## avoid issues ensemble-averaging irregular samples
 
-## specify intervals to extract by time values
+## extract intervals as a list of data frames
 extract_intervals(
     data,
-    # nirs_channels = NULL,               ## retrieved from metadata
-    # time_channel = NULL,
-    # sample_rate = NULL,
-    event_times = c(368, 1093),           ## specify a series of intervals
-    span = list(c(-20, 120), c(-20, 90)), ## specify the event timespans
-    group_events = "distinct",            ## return all discrete intervals
-    zero_time = TRUE                      ## re-calculate interval times to start from zero
+    nirs_channels = list(c(smo2_left, smo2_right)),
+    event_times = c(368, 1093), ## specify interval events
+    span = list(c(-20, 90)), ## specify the event start-end timespans
+    group_events = "distinct", ## return all unique intervals
+    zero_time = TRUE ## start time from zero
 )
 
+## ensemble-average across multiple intervals
+interval_list <- extract_intervals(
+    data,
+    nirs_channels = list(c(smo2_left, smo2_right)),
+    event_times = c(368, 1093),
+    span = list(c(-20, 90)),
+    group_events = "ensemble", ## return ensemble-averaged intervals
+    zero_time = TRUE
+)
+
+library(ggplot2)
+plot(interval_list[[1L]], label_time = TRUE) +
+    geom_vline(xintercept = 0, linetype = "dotted")
 \dontshow{\}) # examplesIf}
 }

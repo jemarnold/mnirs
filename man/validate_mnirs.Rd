@@ -25,11 +25,21 @@ validate_numeric(
 
 validate_mnirs_data(data, ncol = 2L)
 
-validate_nirs_channels(data, nirs_channels, verbose = TRUE)
+validate_nirs_channels(
+  nirs_channels,
+  data,
+  verbose = TRUE,
+  env = rlang::caller_env()
+)
 
-validate_time_channel(data, time_channel)
+validate_time_channel(time_channel, data, env = rlang::caller_env())
 
-validate_event_channel(data, event_channel, require = TRUE)
+validate_event_channel(
+  event_channel,
+  data,
+  required = TRUE,
+  env = rlang::caller_env()
+)
 
 estimate_sample_rate(x)
 
@@ -76,7 +86,7 @@ if not defined explicitly.}
 name. Must match column names in \code{data} exactly. Retrieved from metadata
 if not defined explicitly.}
 
-\item{require}{A logical specifying whether \code{event_channel} is required
+\item{required}{A logical specifying whether \code{event_channel} is required
 (the \emph{default}) or optional (\code{event_channel} returned as \code{NULL}).}
 
 \item{sample_rate}{A numeric value for the exported data sample rate in Hz.

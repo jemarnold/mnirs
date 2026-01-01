@@ -62,12 +62,10 @@
 #' data
 #'
 #' data_resampled <- resample_mnirs(
-#'     data,
-#'     # time_channel = NULL,         ## taken from metadata
-#'     # sample_rate = NULL,
-#'     # resample_rate = sample_rate, ## the default will re-sample to sample_rate
-#'     method = "linear",             ## default linear interpolation across any new samples
-#'     verbose = FALSE                ## will confirm the output sample rate
+#'     data,              ## channels retrieved from metadata
+#'     resample_rate = 2, ## the default `resample_rate = sample_rate` will resample to sample_rate
+#'     method = "linear", ## linear interpolation across any new samples
+#'     verbose = TRUE     ## will confirm the output sample rate
 #' )
 #'
 #' ## note the altered "time" values 👇
@@ -88,7 +86,7 @@ resample_mnirs <- function(
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    time_channel <- validate_time_channel(data, time_channel)
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     sample_rate <- validate_sample_rate(
         data, time_channel, sample_rate, verbose
     )

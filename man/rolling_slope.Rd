@@ -9,7 +9,7 @@ rolling_slope(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  align = c("center", "left", "right"),
+  align = c("centre", "left", "right"),
   partial = FALSE,
   na.rm = FALSE,
   verbose = TRUE,
@@ -29,9 +29,9 @@ around \code{idx} in which to perform the operation, according to \code{align}.}
 in which to perform the operation, according to \code{align}. In units of
 \code{time_channel} or \code{t}.}
 
-\item{align}{Window alignment as \emph{"center"} (the \emph{default}), \emph{"left"}, or
-\emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"} is
-\emph{backward looking} from the current sample.}
+\item{align}{Window alignment as \emph{"centre"/"center"} (the \emph{default}),
+\emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
+is \emph{backward looking} from the current sample.}
 
 \item{partial}{A logical specifying whether to perform the operation over a
 subset of available data within the local rolling window (\code{TRUE}), or
@@ -64,11 +64,11 @@ no \code{NA}s, which is often \emph{much} faster than specifying \code{span}.
 \emph{\verb{<CAUTION>}}, under certain edge-conditions the \code{roll::roll_lm()} method
 may return slightly different values than the equivalent specifying \code{span}.
 
-\code{align} defaults to \emph{"center"} the local window around \code{idx} between
+\code{align} defaults to \emph{"centre"} the local window around \code{idx} between
 \verb{[idx - floor((width-1)/2),} \verb{idx + floor(width/2)]} when \code{width} is
 specified. Even \code{width} values will bias \code{align} to \emph{"left"}, with the
 unequal sample forward of \code{idx}. When \code{span} is specified with
-\code{align = "center"}, the local window is between \verb{[t - span/2, t + span/2]}.
+\code{align = "centre"}, the local window is between \verb{[t - span/2, t + span/2]}.
 
 \code{partial = TRUE} allows calculation of slope over partial windows with at
 least \code{2} valid samples, such as at edge conditions. However, this can

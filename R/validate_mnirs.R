@@ -14,7 +14,7 @@
 #' @param event_channel A character string indicating the event or lap channel
 #'   name. Must match column names in `data` exactly. Retrieved from metadata
 #'   if not defined explicitly.
-#' @param require A logical specifying whether `event_channel` is required
+#' @param required A logical specifying whether `event_channel` is required
 #'   (the *default*) or optional (`event_channel` returned as `NULL`).
 #' @param x A numeric vector.
 #' @param sample_rate A numeric value for the exported data sample rate in Hz.
@@ -114,9 +114,83 @@ validate_mnirs_data <- function(data, ncol = 2L) {
     return(invisible())
 }
 
+#' Parse channel expressions for NSE
+#'
+#' Converts quosures to character vectors, handling bare symbols, character
+#' strings, lists, and tidyselect expressions.
+#'
+#' @param channel A quosure from `rlang::enquo()`.
+#' @param data A data frame for tidyselect context.
+#' @param env Environment for symbol evaluation.
+#'
+#' @returns A character vector, list of character vectors, or `NULL`.
+#'
+#' @keywords internal
+parse_channel_name <- function(channel, data, env = rlang::caller_env()) {
+    if (rlang::quo_is_null(channel)) {
+        return(NULL)
+    }
+
+    channel_raw <- rlang::quo_get_expr(channel)
+
+    ## already-evaluated list or character
+    if (is.list(channel_raw) || is.character(channel_raw)) {
+        return(channel_raw)
+    }
+
+    ## bare symbol: check if column name, otherwise evaluate
+    if (rlang::quo_is_symbol(channel)) {
+        sym_name <- rlang::as_name(channel)
+        if (sym_name %in% names(data)) {
+            return(sym_name)
+        }
+
+        ## external object: evaluate and return directly
+        result <- tryCatch(
+            rlang::eval_tidy(channel, env = env),
+            error = \(e) NULL
+        )
+        if (is.list(result) || is.character(result)) {
+            return(result)
+        }
+        return(sym_name)
+    }
+
+    ## list() call: recurse on each element
+    if (rlang::is_call(channel_raw, "list")) {
+        result <- lapply(rlang::call_args(channel_raw), \(.arg) {
+            parse_channel_name(rlang::new_quosure(.arg, env = env), data, env)
+        })
+        return(unname(result))
+    }
+
+    ## evaluate: tidyselect first, then fallback to direct evaluation
+    ## handles c(), tidyselect helpers, symbols, and external objects
+    tryCatch(
+        unname(names(tidyselect::eval_select(channel, data))),
+        error = \(e) {
+            result <- rlang::eval_tidy(channel, env = env)
+            if (is.list(result) || is.character(result)) {
+                result
+            } else {
+                NULL
+            }
+        }
+    )
+}
+
 
 #' @rdname validate_mnirs
-validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
+validate_nirs_channels <- function(
+    nirs_channels,
+    data,
+    verbose = TRUE,
+    env = rlang::caller_env()
+) {
+    ## parse NSE input
+    if (rlang::is_quosure(nirs_channels)) {
+        nirs_channels <- parse_channel_name(nirs_channels, data, env)
+    }
     nirs_unlisted <- unlist(nirs_channels)
 
     ## if not defined, check metadata
@@ -163,7 +237,16 @@ validate_nirs_channels <- function(data, nirs_channels, verbose = TRUE) {
 
 
 #' @rdname validate_mnirs
-validate_time_channel <- function(data, time_channel) {
+validate_time_channel <- function(
+    time_channel,
+    data,
+    env = rlang::caller_env()
+) {
+    ## parse NSE input
+    if (rlang::is_quosure(time_channel)) {
+        time_channel <- parse_channel_name(time_channel, data, env)
+    }
+
     ## if not defined, check metadata
     if (is.null(time_channel)) {
         time_channel <- attr(data, "time_channel")
@@ -201,20 +284,29 @@ validate_time_channel <- function(data, time_channel) {
 
 
 #' @rdname validate_mnirs
-validate_event_channel <- function(data, event_channel, require = TRUE) {
+validate_event_channel <- function(
+    event_channel,
+    data,
+    required = TRUE,
+    env = rlang::caller_env()
+) {
+    ## parse NSE input
+    if (rlang::is_quosure(event_channel)) {
+        event_channel <- parse_channel_name(event_channel, data, env)
+    }
     ## if not defined, check metadata
     if (is.null(event_channel)) {
         event_channel <- attr(data, "event_channel")
     }
 
     ## if still not defined, return error
-    if (is.null(event_channel) && require) {
+    if (is.null(event_channel) && required) {
         cli_abort(c(
             "x" = "{.arg event_channel} not detected in metadata.",
             "i" = "Check your data attributes or define \\
             {.arg event_channel} explicitly."
         ))
-    } else if (is.null(event_channel) && !require) {
+    } else if (is.null(event_channel) && !required) {
         ## return event_channel = NULL if not required
         return(event_channel)
     }
@@ -255,9 +347,9 @@ estimate_sample_rate <- function(x) {
     mags <- 10^floor(log10(sample_rate_raw))
     vals <- sample_rate_raw / mags
     pretty_base <- c(1, 2, 5, 10)
-    rounded <- sapply(vals, \(.val) {
+    rounded <- vapply(vals, \(.val) {
         pretty_base[which.min(abs(pretty_base - .val))]
-    })
+    }, numeric(1))
     return(rounded * mags)
 }
 

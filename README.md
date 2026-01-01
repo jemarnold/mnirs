@@ -44,14 +44,12 @@ A more detailed vignette for common usage can be found here: [Reading
 and Cleaning Data with
 {mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
 
-*{mnirs}* is designed to process mNIRS data, but it can be used to read,
-clean, and pre-process other time series datasets, which require many of
-the same processing steps. Enjoy!
-
-> \[!NOTE\] *{mnirs}* is currently in experimental development and
-> functionality may change! Stay updated on development and follow
-> releases at
+> *{mnirs}* is currently in experimental development and functionality
+> may change! Stay updated on development and follow releases at
 > [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
+> *{mnirs}* is designed to process NIRS data, but it can be used to
+> read, clean, and process other time series datasets which require many
+> of the same processing steps. Enjoy!
 
 ### `read_mnirs()` Read data from file
 
@@ -78,7 +76,7 @@ data_table <- read_mnirs(
     ),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
     event_channel = NULL,                ## left blank, not currently used in analysis
-    sample_rate = NULL,                  ## sample_rate will be estimated from time column
+    sample_rate = NULL,                  ## if blank, sample_rate will be estimated from time_channel
     add_timestamp = FALSE,               ## omit the date-time timestamp column
     zero_time = TRUE,                    ## recalculate time values from zero
     keep_all = FALSE,                    ## return only the specified data channels
@@ -91,7 +89,7 @@ data_table <- read_mnirs(
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
 ## Note the above info message that sample_rate was estimated correctly at 2 Hz ☝
-## ignore the warnings about irregular sampling for now
+## ignore the warnings about irregular sampling for now, we will resample later
 
 data_table
 #> # A tibble: 2,203 × 3
@@ -109,7 +107,7 @@ data_table
 #> 10 4.81          57        67
 #> # ℹ 2,193 more rows
 
-## note the hidden plot option to display timestamp values as `hh:mm:ss`
+## note the hidden plot option to display time values as `h:mm:ss`
 plot(data_table, label_time = TRUE)
 ```
 
@@ -118,13 +116,16 @@ plot(data_table, label_time = TRUE)
 ### Metadata stored in `mnirs` data frames
 
 ``` r
-## view metadata (hiding item two which is just a list of row numbers)
+## view metadata (omitting item two, a list of row numbers)
 attributes(data_table)[-2]
 #> $class
 #> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
 #> 
 #> $names
 #> [1] "time"       "smo2_right" "smo2_left" 
+#> 
+#> $nirs_device
+#> [1] "Moxy"
 #> 
 #> $nirs_channels
 #> [1] "smo2_right" "smo2_left" 
@@ -134,48 +135,38 @@ attributes(data_table)[-2]
 #> 
 #> $sample_rate
 #> [1] 2
-
-## define nirs_channels externally for later use
-(nirs_channels <- attr(data_table, "nirs_channels"))
-#> [1] "smo2_right" "smo2_left"
-
-## add nirs device to metadata
-data_table <- create_mnirs_data(data_table, nirs_device = "Moxy")
-
-## check that the added metadata is now present
-attr(data_table, "nirs_device")
-#> [1] "Moxy"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
 
 ``` r
 data_cleaned <- replace_mnirs(
-    data_table,                 ## channels retrieved from metadata
-    invalid_values = 0,         ## known invalid values in the data
-    invalid_above = 90,
-    outlier_cutoff = 3,         ## recommended default value
-    width = 10,                 ## local window to detect local outliers and replace missing values
-    method = "linear"           ## linear interpolation over `NA`s
+    data_table,         ## channels will be retrieved from metadata
+    invalid_values = 0, ## known invalid values in the data
+    invalid_above = 90, ## remove data spikes
+    outlier_cutoff = 3, ## recommended default value
+    width = 10,         ## local window to detect local outliers and replace missing values
+    method = "linear",  ## linear interpolation over `NA`s
+    verbose = TRUE
 )
 
 plot(data_cleaned, label_time = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
 
 ### `resample_mnirs()`: Resample data
 
 ``` r
 data_resampled <- resample_mnirs(
-    data_cleaned,                 ## channels retrieved from metadata
-    # resample_rate = sample_rate ## the default will re-sample to sample_rate
-    method = "linear",            ## default linear interpolation across any new samples
-    verbose = TRUE                ## will confirm the output sample rate
+    data_cleaned,      ## channels retrieved from metadata
+    resample_rate = 2, ## the default `resample_rate = sample_rate` will resample to sample_rate
+    method = "linear", ## linear interpolation across any new samples
+    verbose = TRUE     ## will confirm the output sample rate
 )
 #> ℹ Output is resampled at 2 Hz.
 
-## note the altered "time" values 👇
+## note the altered "time" values from the original data frame 👇
 data_resampled
 #> # A tibble: 2,419 × 3
 #>     time smo2_right smo2_left
@@ -201,7 +192,8 @@ data_filtered <- filter_mnirs(
     method = "butterworth", ## Butterworth digital filter is a common choice
     type = "low",           ## specify a low-pass filter
     order = 2,              ## filter order number
-    W = 0.02                ## filter fractional critical frequency
+    W = 0.02,               ## filter fractional critical frequency
+    na.rm = TRUE            ## explicitly preserve any NAs
 )
 
 ## we will add the non-filtered data back to the plot to compare
@@ -216,16 +208,16 @@ plot(data_filtered, label_time = TRUE) +
     )
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
 
 ### `shift_mnirs()` & `rescale_mnirs()`: Shift and rescale data
 
 ``` r
 data_shifted <- shift_mnirs(
-    data_filtered,
-    nirs_channels = as.list(nirs_channels), ## create a list of nirs_channel to shift separately
-    to = 0,                                 ## NIRS values will be shifted to zero
-    span = 120,                             ## shift the first 120 sec of data to zero
+    data_filtered,     ## un-grouped nirs channels to shift separately 
+    nirs_channels = list(smo2_left, smo2_right), 
+    to = 0,            ## NIRS values will be shifted to zero
+    span = 120,        ## shift the first 120 sec of data to zero
     position = "first"
 )
 
@@ -233,22 +225,22 @@ plot(data_shifted, label_time = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
 
 ``` r
 data_rescaled <- rescale_mnirs(
-    data_filtered,
-    nirs_channels = as.list(nirs_channels), ## create a list of nirs_channel to rescale separately
-    range = c(0, 100)                       ## rescale to a 0-100% functional exercise range
+    data_filtered,    ## un-grouped nirs channels to rescale separately 
+    nirs_channels = list(smo2_left, smo2_right), 
+    range = c(0, 100) ## rescale to a 0-100% functional exercise range
 )
 
 plot(data_rescaled, label_time = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
 
-### Pipe-friendly combined functions
+### Pipe-friendly functions
 
 ``` r
 ## global option to silence info & warning messages
@@ -264,7 +256,7 @@ read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |>
+    resample_mnirs() |> ## default will resample to fix irregular samples
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,
@@ -273,24 +265,25 @@ read_mnirs(
     filter_mnirs(
         method = "butterworth",
         order = 2,
-        W = 0.01
+        W = 0.01,
+        na.rm = TRUE
     ) |>
     shift_mnirs(
-        nirs_channels = list("smo2_left", "smo2_right"),
+        nirs_channels = list(smo2_left, smo2_right),
         to = 0,
         span = 60,
         position = "first"
     ) |>
     rescale_mnirs(
-        nirs_channels = list(c("smo2_left", "smo2_right")),
+        nirs_channels = list(c(smo2_left, smo2_right)), ## 👈 channels grouped together
         range = c(0, 100)
     ) |>
     plot(label_time = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" />
+<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
 
-## mNIRS Device Compatibility
+## mNIRS device compatibility
 
 This package is designed to recognise mNIRS data exported as *.csv* or
 *.xls(x)* files. It should be flexible for use with many different NIRS
@@ -306,7 +299,7 @@ the following devices and apps:
 - [Train.Red](https://train.red/) app (.csv)
 - [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
 
-## Future *{mnirs}* Development
+## Future *{mnirs}* development
 
 - Discrete interval processing
 

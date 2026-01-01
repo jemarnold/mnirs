@@ -28,7 +28,7 @@
 #'      \item{`"pass"`}{For a *pass-band* filter.}
 #'   }
 #' @param order An integer defining the filter order for 
-#'   `method = "butterworth"` (*default* `order = 1`).
+#'   `method = "butterworth"` (*default* `order = 2`).
 #' @param W A one- or two-element numeric vector defining the filter cutoff
 #'   frequency(ies) for `method = "butterworth"`, as a fraction of the
 #'   Nyquist frequency (see *Details*).
@@ -111,35 +111,32 @@
 #'   available with `attributes()`.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
+#' 
+#' options(mnirs.verbose = FALSE)
 #'
 #' ## read example data
 #' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
-#'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     time_channel = c(time = "hh:mm:ss")
 #' ) |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10,
-#'         verbose = FALSE
+#'         width = 10
 #'     )
 #'
 #' data_filtered <- filter_mnirs(
 #'     data,
-#'     # nirs_channel = NULL,  ## retrieved from metadata
-#'     # time_channel = NULL,
-#'     # sample_rate = NULL,
 #'     method = "butterworth", ## Butterworth digital filter is a common choice
 #'     type = "low",           ## specify a low-pass filter
-#'     order = 2,              ## filter order number
-#'     W = 0.02,               ## filter fractional critical frequency
-#'     verbose = FALSE
+#'     order = 2,              ## order is the number of filter passes
+#'     W = 0.02,               ## fractional critical frequency
+#'     na.rm = TRUE            ## explicitly preserve any NAs and avoid errors
 #' )
 #'
-#' ## add the non-filtered data back to the plot to compare
+#' library(ggplot2)
+#' ## plot filtered data and add the raw data back to the plot to compare
 #' plot(data_filtered, label_time = TRUE) +
 #'     geom_line(
 #'         data = data,
@@ -156,7 +153,7 @@ filter_mnirs <- function(
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
     type = c("low", "high", "stop", "pass"),
-    order = 1,
+    order = 2,
     W = NULL,
     fc = NULL,
     width = NULL,
@@ -207,9 +204,9 @@ filter_mnirs.smooth_spline <- function(
     metadata <- attributes(data)
     ## verbose = FALSE because grouping irrelevant
     nirs_channels <- validate_nirs_channels(
-        data, nirs_channels, verbose = FALSE
+        enquo(nirs_channels), data, verbose = FALSE
     )
-    time_channel <- validate_time_channel(data, time_channel)
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_numeric(
         spar, 1, c(0, Inf), FALSE, msg1 = "one-element positive"
     )
@@ -287,10 +284,9 @@ filter_mnirs.butterworth <- function(
     metadata <- attributes(data)
     ## verbose = FALSE because grouping irrelevant
     nirs_channels <- validate_nirs_channels(
-        data, nirs_channels, verbose = FALSE
+        enquo(nirs_channels), data, verbose = FALSE
     )
-    time_channel <- validate_time_channel(data, time_channel)
-
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     sample_rate <- validate_sample_rate(
         data, time_channel, sample_rate, verbose
     )
@@ -326,7 +322,8 @@ filter_mnirs.butterworth <- function(
         W <- fc / nq
         if (W > 1 | W <= 0) {
             cli_abort(c(
-                "x" = "{.val fc} must be between {.val {0}} and half the {.val sample_rate} ({.val {signif(nq, 3)}} Hz)"
+                "x" = "{.arg fc} must be between {.val {0}} and half \\
+                the {.val sample_rate} ({.val {signif(nq, 3)}} Hz)"
             ))
         }
     }
@@ -369,9 +366,9 @@ filter_mnirs.moving_average <- function(
     metadata <- attributes(data)
     ## verbose = FALSE because grouping irrelevant
     nirs_channels <- validate_nirs_channels(
-        data, nirs_channels, verbose = FALSE
+        enquo(nirs_channels), data, verbose = FALSE
     )
-    time_channel <- validate_time_channel(data, time_channel)
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
     
     ## processing ==========================================
@@ -403,14 +400,15 @@ filter_mnirs.moving_average <- function(
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
 #' @inheritParams filter_mnirs
+#' @inheritParams rolling_slope
 #'
 #' @details
 #' Applies a centred (symmetrical) moving average filter in a local window
 #'   defined by either `width` as the number of samples around `idx` between
 #'   `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
 #'   timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
-#' 
-#' Specifying `width` calls [roll::roll_mean()] which is often much faster 
+#'
+#' Specifying `width` calls [roll::roll_mean()] which is often much faster
 #'   than specifying `span`.
 #'
 #' If there are no valid values within the calculation window, will return `NA`.
@@ -438,10 +436,13 @@ filter_moving_average <- function(
     t = seq_along(x),
     width = NULL,
     span = NULL,
-    bypass_checks = FALSE,
-    verbose = TRUE
+    partial = FALSE,
+    na.rm = FALSE,
+    verbose = TRUE,
+    ...
 ) {
     ## validation ===========================================
+    bypass_checks <- list(...)$bypass_checks %||% FALSE
     if (!bypass_checks) {
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
@@ -450,15 +451,24 @@ filter_moving_average <- function(
         validate_width_span(width, span, verbose)
     }
 
+    ## min_obs default to estimated width when span is specified
+    min_obs <- if (partial) {
+        1L
+    } else {
+        ## less strict span_width - 2 to allow start & end buffer
+        ## with irregular t values
+        max(width %||% (floor(span * estimate_sample_rate(t)) - 2L), 1L)
+    }
+
     ## processing ==============================================
-    if (!is.null(width) && is.null(span)) {
+    if ((na.rm || !anyNA(x)) && !is.null(width) && is.null(span)) {
         ## use {roll} for fast rolling
         rlang::check_installed(
             c("roll", "RcppParallel"),
             reason = "to use fast rolling functions"
         )
         if (rlang::is_installed("roll")) {
-            y <- rolling_mean(x, width)
+            y <- rolling_mean(x, width = width, min_obs = min_obs)
         }
     }
 
@@ -466,7 +476,22 @@ filter_moving_average <- function(
         window_idx <- compute_local_windows(
             t, width = width, span = span
         )
-        y <- compute_local_fun(x, window_idx, mean, na.rm = TRUE)
+
+        ## check for min_obs
+        window_idx[lengths(window_idx) < min_obs] <- NA_real_
+        if (verbose && all(is.na(window_idx))) {
+            ## TODO should warn for rolling_mean() condition
+            cli_warn(c(
+                "!" = "Less than {.val {min_obs}} valid samples detected in \\
+                {.fn filter_moving_average} windows.",
+                "i" = "Specify {.arg width} >= {.val {2}} or increase \\
+                {.arg span} to include more samples."
+            ))
+        }
+
+        y <- vapply(window_idx, \(.idx) {
+            mean(x[.idx], na.rm = na.rm)
+        }, numeric(1))
     }
     ## explicit overwrite NaN to NA
     y[!is.finite(y)] <- NA_real_

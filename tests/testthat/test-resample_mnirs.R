@@ -70,6 +70,11 @@ test_that("resample_mnirs handles resample_rate == sample_rate", {
         data,
         ignore_attr = TRUE
     )
+    expect_equal(
+        resample_mnirs(data, "time", 1, resample_rate = NULL, verbose = FALSE),
+        data,
+        ignore_attr = TRUE
+    )
 
     ## silent sample_rate and resample_rate
     attr(data, "sample_rate")

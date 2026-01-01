@@ -24,16 +24,16 @@
 #' @inheritParams rescale_mnirs
 #'
 #' @details
-#' `nirs_channels = list()` can be used to group data channels (column names) 
+#' `nirs_channels = list()` can be used to group data channels (column names)
 #'   to preserve absolute or relative scaling.
 #'
-#' - Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will be 
-#'   shifted to a common value, and the relative scaling within that group 
+#' - Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will be
+#'   shifted to a common value, and the relative scaling within that group
 #'   will be preserved.
 #'
-#' - Channels in separate list vectors (e.g. `list("A", "B")`) will be 
+#' - Channels in separate list vectors (e.g. `list("A", "B")`) will be
 #'   shifted independently, and relative scaling between groups will be lost.
-#' 
+#'
 #' - A single vector of channel names (e.g. `c("A", "B")`) will group
 #'   channels together.
 #'
@@ -55,30 +55,33 @@
 #'   available with `attributes()`.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #'
 #' options(mnirs.verbose = FALSE)
-#' 
+#'
 #' ## read example data
-#' data_shifted <- read_mnirs(
+#' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
-#'     nirs_channels = c(smo2 = "SmO2 Live"),
+#'     nirs_channels = c(smo2_right = "SmO2 Live",
+#'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss")
 #' ) |>
 #'     resample_mnirs() |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10
+#'         width = 10,
+#'         method = "linear"
 #'     ) |>
 #'     filter_mnirs(na.rm = TRUE) |>
 #'     shift_mnirs(
-#'         to = 0,             ## NIRS values will be shifted to zero
-#'         span = 120,         ## shift the first 120 sec of data to zero
+#'         nirs_channels = list(smo2_right, smo2_left),
+#'         to = 0,            ## each channel will be shifted to zero
+#'         span = 120,        ## shift the mean of the first 120 sec
 #'         position = "first"
 #'     )
-#'
-#' plot(data_shifted, label_time = TRUE) +
+#' 
+#' library(ggplot2)
+#' plot(data, label_time = TRUE) +
 #'     geom_hline(yintercept = 0, linetype = "dotted")
 #'
 #' @export
@@ -93,7 +96,6 @@ shift_mnirs <- function(
     position = c("min", "max", "first"),
     verbose = TRUE
 ) {
-    ## TODO convert sym(nirs_channels) to strings?
     ## TODO need to fix edges where only half width/span included
 
     ## validation =============================================
@@ -110,8 +112,10 @@ shift_mnirs <- function(
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
-    time_channel <- validate_time_channel(data, time_channel)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose = FALSE
+    )
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_numeric(to, 1, msg1 = "one-element")
     validate_numeric(by, 1, msg1 = "one-element")
     if (!is.null(to) && !is.null(by)) {
@@ -120,8 +124,6 @@ shift_mnirs <- function(
             cli_inform(c("i" = "{.arg to} = {.val {to}} overrides {.arg by}."))
         }
     }
-    position <- match.arg(position)
-
     nirs_listed <- make_list(nirs_channels)
     nirs_unlisted <- unlist(nirs_listed, use.names = FALSE)
 
@@ -137,19 +139,22 @@ shift_mnirs <- function(
     }
 
     ## calculate shift_to values ====================================
+    ## validate
+    position <- match.arg(position)
+    validate_width_span(width, span, verbose)
     time_vec <- data[[time_channel]]
 
     if (position == "first") {
-        ## take data <= first time_channel value + span, assuming sorted
-        head_idx <- time_vec <= (time_vec[1L] + span)
+        ## for span, take data <= first time_channel value + span, assuming sorted
+        width <- width %||% rev(which(time_vec <= (time_vec[1L] + span)))[1L]
         ## drop = FALSE to avoid reducing to vector with one `nirs_unlisted`
         shift_values <- colMeans(
-            data[head_idx, nirs_unlisted, drop = FALSE],
+            data[seq_len(width), nirs_unlisted, drop = FALSE],
             na.rm = TRUE
         )
     } else if (position %in% c("min", "max")) {
         ## find local windows within width/span centred around idx
-        ## TODO need to fix edges where only half width/span included
+        ## TODO need to fix edges. Should be partial = FALSE
         window_idx <- compute_local_windows(
             t = time_vec, width = width, span = span,
         )

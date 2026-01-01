@@ -5,33 +5,31 @@
 #' @param x Object of class *"mnirs"* returned from [create_mnirs_data()]
 #' @param ... Additional arguments:
 #'  \describe{
-#'      \item{`na.omit`}{A logical to omit missing (`NA`) values for better
-#'      display of connected lines. `na.omit = FALSE` (the *default*) can be
-#'      used to identify missing values.}
 #'      \item{`label_time`}{A logical to display x-axis time values
 #'      formatted as *"hh:mm:ss"* using [label_time()].
 #'      `label_time = FALSE` (the *default*) will display simple numeric
 #'      values on the x-axis.}
-#'      \item{`n`}{A numeric value to define the number of breaks in both x-
-#'      and y-axes.}
+#'      \item{`n.breaks`}{A numeric value to define the number of breaks in 
+#'      both x- and y-axes.}
+#'      \item{`na.omit`}{A logical to omit missing (`NA`) values for better
+#'      display of connected lines. `na.omit = FALSE` (the *default*) can be
+#'      used to identify missing values.}
 #'  }
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' ## call an example *{mnirs}* data file
-#' file_path <- example_mnirs("moxy_ramp")
 #'
 #' data_table <- read_mnirs(
-#'     file_path,
+#'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_right = "SmO2 Live",
 #'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
 #'     verbose = FALSE
 #' )
 #'
-#' ## note the hidden plot option to display time values as `hh:mm:ss`
-#' plot(data_table, label_time = TRUE)
+#' ## note the hidden options to display time values as `h:mm:ss` with 8 breaks
+#' plot(data_table, label_time = TRUE, n.breaks = 8)
 #'
 #' @export
 plot.mnirs <- function(x, ...) {
@@ -43,7 +41,7 @@ plot.mnirs <- function(x, ...) {
     args <- list(...)
     na.omit <- args$na.omit %||% FALSE
     label_time <- args$label_time %||% FALSE
-    n <- args$n %||% 5
+    n.breaks <- args$n.breaks %||% 5
 
     nirs_channels <- attr(x, "nirs_channels")
     time_channel <- attr(x, "time_channel")
@@ -55,9 +53,9 @@ plot.mnirs <- function(x, ...) {
         ggplot2::waiver()
     }
     x_breaks <- if (label_time) {
-        breaks_timespan(n = n)
+        breaks_timespan(n = n.breaks)
     } else if (rlang::is_installed("scales")) {
-        scales::breaks_pretty(n = n)
+        scales::breaks_pretty(n = n.breaks)
     } else {
         ggplot2::waiver()
     }
@@ -67,7 +65,7 @@ plot.mnirs <- function(x, ...) {
         ggplot2::waiver()
     }
     y_breaks <- if (rlang::is_installed("scales")) {
-        scales::breaks_pretty(n = n)
+        scales::breaks_pretty(n = n.breaks)
     } else {
         ggplot2::waiver()
     }
@@ -160,7 +158,8 @@ plot.mnirs <- function(x, ...) {
 #' ## plot example data
 #' read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
-#'     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
+#'     nirs_channels = c(smo2_right = "SmO2 Live",
+#'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
 #'     verbose = FALSE
 #' ) |>
@@ -287,16 +286,17 @@ palette_mnirs <- function(n = NULL, names = NULL) {
 #' @seealso [theme_mnirs()] [palette_mnirs()]
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #'
 #' ## plot example data
 #' df <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
-#'     nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
+#'     nirs_channels = c(smo2_right = "SmO2 Live",
+#'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss"),
 #'     verbose = FALSE
 #' )
 #'
+#' library(ggplot2)
 #' ggplot(df, aes(x = time)) +
 #'     theme_mnirs() +
 #'     scale_colour_mnirs(name = NULL) +
@@ -347,12 +347,12 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #' @returns Returns a function for generating breaks.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #' x = 0:120
 #' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 #'
-#' ggplot(data.frame(x, y)) +
-#'     aes(x = x, y = y) +
+#' library(ggplot2)
+#' data.frame(x, y) |> 
+#'     ggplot(aes(x, y)) +
 #'     theme_mnirs() +
 #'     scale_x_continuous(breaks = breaks_timespan()) +
 #'     geom_line()
@@ -422,13 +422,13 @@ breaks_timespan <- function(
 #' @returns A character vector the same length as `x`.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #'
 #' x = 0:120
 #' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 #'
-#' ggplot(data.frame(x, y)) +
-#'     aes(x = x, y = y) +
+#' library(ggplot2)
+#' data.frame(x, y) |> 
+#'     ggplot(aes(x, y)) +
 #'     theme_mnirs() +
 #'     scale_x_continuous(
 #'         breaks = breaks_timespan(),

@@ -11,15 +11,15 @@
 
 \item{...}{Additional arguments:
 \describe{
-\item{\code{na.omit}}{A logical to omit missing (\code{NA}) values for better
-display of connected lines. \code{na.omit = FALSE} (the \emph{default}) can be
-used to identify missing values.}
 \item{\code{label_time}}{A logical to display x-axis time values
 formatted as \emph{"hh:mm:ss"} using \code{\link[scales:label_date]{scales::label_time()}}.
 \code{label_time = FALSE} (the \emph{default}) will display simple numeric
 values on the x-axis.}
-\item{\code{n}}{A numeric value to define the number of breaks in both x-
-and y-axes.}
+\item{\code{n.breaks}}{A numeric value to define the number of breaks in
+both x- and y-axes.}
+\item{\code{na.omit}}{A logical to omit missing (\code{NA}) values for better
+display of connected lines. \code{na.omit = FALSE} (the \emph{default}) can be
+used to identify missing values.}
 }}
 }
 \value{
@@ -30,18 +30,16 @@ Create a simple plot for objects returned from \code{\link[=create_mnirs_data]{c
 }
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-## call an example *{mnirs}* data file
-file_path <- example_mnirs("moxy_ramp")
 
 data_table <- read_mnirs(
-    file_path,
+    file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_right = "SmO2 Live",
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 )
 
-## note the hidden plot option to display time values as `hh:mm:ss`
-plot(data_table, label_time = TRUE)
+## note the hidden options to display time values as `h:mm:ss` with 8 breaks
+plot(data_table, label_time = TRUE, n.breaks = 8)
 \dontshow{\}) # examplesIf}
 }

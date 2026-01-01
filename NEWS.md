@@ -1,3 +1,10 @@
+# mnirs 0.2.0
+
+* Implement tidy evaluation with `{rlang}` and `{tidyselect}`.
+* Update function documentation & examples, `README`, vignette.
+* Fixed `filter_moving_average()` and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
+* Fixed `shift_mnirs()` to correctly use `width` and `span` arguments.
+
 # mnirs 0.1.9
 
 * Create `rolling_slope()` to calculate local linear regression slopes along a vector.

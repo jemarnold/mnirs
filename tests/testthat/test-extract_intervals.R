@@ -1077,7 +1077,7 @@ test_that("extract_intervals respects nirs_channels metadata", {
 })
 
 
-## extract_intervals works on data ===================================
+## integration tests ===================================
 
 test_that("extract_intervals works on Moxy data", {
     data <- read_mnirs(

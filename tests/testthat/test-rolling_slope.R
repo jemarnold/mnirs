@@ -163,27 +163,27 @@ test_that("rolling_lm align options all work", {
     skip_if_not_installed("roll")
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    result_center <- rolling_lm(x, width = 3, align = "center")
+    result_centre <- rolling_lm(x, width = 3, align = "centre")
     result_left <- rolling_lm(x, width = 3, align = "left")
     result_right <- rolling_lm(x, width = 3, align = "right")
 
-    expect_length(result_center, length(x))
+    expect_length(result_centre, length(x))
     expect_length(result_left, length(x))
     expect_length(result_right, length(x))
 
     ## different alignments should produce different NA patterns
     expect_false(identical(
-        which(is.na(result_center)),
+        which(is.na(result_centre)),
         which(is.na(result_left))
     ))
     expect_equal(wrap(result_right, 2), result_left)
-    expect_equal(wrap(result_center, 1), result_left)
+    expect_equal(wrap(result_centre, 1), result_left)
 
     ## irregular t
     t <- c(0.5, 1.5, 3, 3.5, 4, 5.5, 7, 8, 10, 11)
     expect_equal(
         rolling_lm(x, t, width = 3, align = "right"),
-        wrap(rolling_lm(x, t, width = 3, align = "center"), -1)
+        wrap(rolling_lm(x, t, width = 3, align = "centre"), -1)
     )
     expect_equal(
         rolling_lm(x, t, width = 3, align = "right"),
@@ -235,17 +235,17 @@ test_that("rolling_slope handles negative values correctly", {
 test_that("rolling_slope works with width using roll_lm", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    ## width = 3, center aligned
+    ## width = 3, centre aligned
     result <- rolling_slope(
         x,
         width = 3,
-        align = "center",
+        align = "centre",
         verbose = FALSE
     )
     expect_equal(length(result), length(x))
     expect_all_true(is.na(result[c(1, 10)])) ## boundary < width
     expect_all_false(is.na(result[-c(1, 10)]))
-    expect_equal(result[5], slope(x[4:6])) # center window
+    expect_equal(result[5], slope(x[4:6])) # centre window
 
     ## width = 3, left aligned
     result_left <- rolling_slope(
@@ -275,18 +275,18 @@ test_that("rolling_slope works with width using roll_lm", {
 test_that("rolling_slope works with width using compute_local_fun", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    ## width = 3, center aligned
+    ## width = 3, centre aligned
     result <- rolling_slope(
         x,
         width = 3,
         span = 0,
-        align = "center",
+        align = "centre",
         verbose = FALSE
     )
     expect_equal(length(result), length(x))
     expect_all_true(is.na(result[c(1, 10)])) ## boundary < width
     expect_all_false(is.na(result[-c(1, 10)]))
-    expect_equal(result[5], slope(x[4:6])) # center window
+    expect_equal(result[5], slope(x[4:6])) # centre window
 
     ## width = 3, left aligned
     result_left <- rolling_slope(
@@ -318,18 +318,18 @@ test_that("rolling_slope works with width using compute_local_fun", {
 test_that("rolling_slope works with span using compute_local_fun", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
 
-    ## span = 7, center aligned
-    ## TODO span < 7 centered effectively returns partial = TRUE
+    ## span = 7, centre aligned
+    ## TODO span < 7 centred effectively returns partial = TRUE
     result <- rolling_slope(
         x,
         span = 7,
-        align = "center",
+        align = "centre",
         verbose = FALSE
     )
     expect_equal(length(result), length(x))
     expect_all_true(is.na(result[c(1, 10)])) ## boundary < width
     expect_all_false(is.na(result[-c(1, 10)]))
-    expect_equal(result[5], slope(x[2:8])) # center window
+    expect_equal(result[5], slope(x[2:8])) # centre window
 
     ## span = 7, left aligned
     result_left <- rolling_slope(
@@ -516,7 +516,7 @@ test_that("rolling_slope span returns same as lm model", {
     t <- seq_along(x)
     span <- 3
     n <- length(x)
-    lm_result <- sapply(t, \(.x) {
+    lm_result <- vapply(t, \(.x) {
         start_t <- max(t[1], .x - span / 2)
         end_t <- min(t[n], .x + span / 2)
         window_idx <- which(t >= start_t & t <= end_t)
@@ -524,14 +524,14 @@ test_that("rolling_slope span returns same as lm model", {
         if (sum(!is.na(x[window_idx])) > 1) {
             coef(lm(x[window_idx] ~ t[window_idx]))[[2L]]
         } else {NA}
-    })
+    }, numeric(1))
 
     expect_equal(result, lm_result)
 
     ## width roll_lm with NA edges
     result <- rolling_slope(x, width = 3)
     width <- 3
-    lm_result <- sapply(t, \(.x) {
+    lm_result <- vapply(t, \(.x) {
         start_idx <- .x - floor(width / 2)
         end_idx <- .x + floor(width / 2)
         window_idx <- start_idx:end_idx
@@ -541,7 +541,7 @@ test_that("rolling_slope span returns same as lm model", {
         } else {
             NA
         }        
-    })
+    }, numeric(1))
 
     expect_equal(result, lm_result)
 
@@ -563,22 +563,27 @@ test_that("rolling_slope returns same as zoo::rollapply()", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
     coef.fn <- \(x) coef(lm(x ~ seq_along(x)))[[2L]]
 
-    ## align = "center"
-    rolling_slope_center <- rolling_slope(
-        x, width = 3, partial = TRUE, align = "center"
+    ## align = "centre"
+    rolling_slope_centre <- rolling_slope(
+        x, width = 3, partial = TRUE, align = "centre"
     )
-    rollapply_center <- zoo::rollapply(
+    rollapply_centre <- zoo::rollapply(
         x,
         FUN = coef.fn,
         width = 3,
         align = "center",
         partial = TRUE
     )
-    expect_equal(rollapply_center, rolling_slope_center)
-    rolling_slope_center <- rolling_slope(
-        x, width = 3, span = 0, partial = TRUE, align = "center", verbose = FALSE
+    expect_equal(rollapply_centre, rolling_slope_centre)
+    rolling_slope_centre <- rolling_slope(
+        x, width = 3, span = 0, partial = TRUE, align = "centre", verbose = FALSE
     )
-    expect_equal(rollapply_center, rolling_slope_center)
+    expect_equal(rollapply_centre, rolling_slope_centre)
+    ## align = "center"
+    rolling_slope_center <- rolling_slope(
+        x, width = 3, partial = TRUE, align = "center"
+    )
+    expect_equal(rolling_slope_centre, rolling_slope_center)
     
     ## align = "left"
     rolling_slope_left <- rolling_slope(
@@ -684,14 +689,14 @@ test_that("rolling_slope handles span in units of t", {
     span <- 3
     result <- rolling_slope(x, t, span = span, partial = TRUE)
 
-    lm_result <- sapply(seq_len(n), \(.x) {
+    lm_result <- vapply(seq_len(n), \(.x) {
         current_t <- t[.x]
         start_t <- max(t[1L], current_t - span / 2)
         end_t <- min(t[n], current_t + span / 2)
         window_idx <- which(t >= start_t & t <= end_t)
         
         coef(lm(x[window_idx] ~ t[window_idx]))[[2L]]
-    })
+    }, numeric(1))
     
     expect_equal(result, lm_result)
 
@@ -831,7 +836,7 @@ test_that("rolling_slope works visually", {
 
 test_that("rolling_slope works on example_mnirs() data", {
     skip("visual checks")
-    
+
     data <- read_mnirs(
         example_mnirs("moxy_ramp"),
         nirs_channels = c(

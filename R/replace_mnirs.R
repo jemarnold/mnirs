@@ -65,7 +65,6 @@
 #' @seealso [pracma::hampel()], [stats::approx()], [roll::roll_median()]
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #'
 #' ## vectorised operation
 #' x <- c(1, 999, 3, 4, 999, 6)
@@ -86,14 +85,17 @@
 #' ## clean data
 #' data_clean <- replace_mnirs(
 #'     data,
-#'     nirs_channels = NULL,       ## default to all nirs_channels in metadata
-#'     time_channel = NULL,        ## default to time_channel in metadata
-#'     invalid_values = c(0, 100), ## known invalid values in the data
-#'     outlier_cutoff = 3,         ## recommended default value
-#'     width = 10,                 ## local window to detect local outliers and replace missing values
-#'     method = "linear",          ## linear interpolation over `NA`s
+#'     nirs_channels = NULL, ## nirs_channels will be retrieved from metadata
+#'     time_channel = NULL,  ## retrieved from metadata
+#'     invalid_values = 0,   ## known invalid values in the data
+#'     invalid_above = 90,   ## remove data spikes
+#'     outlier_cutoff = 3,   ## recommended default value
+#'     width = 10,           ## window to detect local outliers
+#'     method = "linear",    ## linear interpolation over `NA`s
+#'     verbose = FALSE
 #' )
 #'
+#' library(ggplot2)
 #' ## plot original and and show where values have been replaced
 #' plot(data, label_time = TRUE) +
 #'     scale_colour_manual(
@@ -153,10 +155,9 @@ replace_mnirs <- function(
     metadata <- attributes(data)
     ## verbose = FALSE because grouping irrelevant
     nirs_channels <- validate_nirs_channels(
-        data, nirs_channels, verbose = FALSE
+        enquo(nirs_channels), data, verbose = FALSE
     )
-    # nirs_channels <- unlist(nirs_channels, use.names = FALSE)
-    time_channel <- validate_time_channel(data, time_channel)
+    time_channel <- validate_time_channel(enquo(time_channel), data)
     time_vec <- data[[time_channel]]
 
     if (any(check_conditions[2:3])) {

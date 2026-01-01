@@ -93,30 +93,33 @@ over \code{by}, and \code{width} will be preferred over \code{span}.
 }
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-library(ggplot2)
 
 options(mnirs.verbose = FALSE)
 
 ## read example data
-data_shifted <- read_mnirs(
+data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2 = "SmO2 Live"),
+    nirs_channels = c(smo2_right = "SmO2 Live",
+                      smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss")
 ) |>
     resample_mnirs() |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10
+        width = 10,
+        method = "linear"
     ) |>
     filter_mnirs(na.rm = TRUE) |>
     shift_mnirs(
-        to = 0,             ## NIRS values will be shifted to zero
-        span = 120,         ## shift the first 120 sec of data to zero
+        nirs_channels = list(smo2_right, smo2_left),
+        to = 0,            ## each channel will be shifted to zero
+        span = 120,        ## shift the mean of the first 120 sec
         position = "first"
     )
 
-plot(data_shifted, label_time = TRUE) +
+library(ggplot2)
+plot(data, label_time = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
 \dontshow{\}) # examplesIf}
 }

@@ -47,28 +47,31 @@
 #'   available with `attributes()`.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
 #'
 #' options(mnirs.verbose = FALSE)
-#' 
+#'
 #' ## read example data
-#' data_rescaled <- read_mnirs(
+#' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
-#'     nirs_channels = c(smo2 = "SmO2 Live"),
+#'     nirs_channels = c(smo2_right = "SmO2 Live",
+#'                       smo2_left = "SmO2 Live(2)"),
 #'     time_channel = c(time = "hh:mm:ss")
 #' ) |>
 #'     resample_mnirs() |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10
+#'         width = 10,
+#'         method = "linear"
 #'     ) |>
 #'     filter_mnirs(na.rm = TRUE) |>
 #'     rescale_mnirs(
+#'         nirs_channels = list(c(smo2_right, smo2_left)),
 #'         range = c(0, 100)   ## rescale to a 0-100% functional exercise range
 #'     )
 #'
-#' plot(data_rescaled, label_time = TRUE) +
+#' library(ggplot2)
+#' plot(data, label_time = TRUE) +
 #'     geom_hline(yintercept = c(0, 100), linetype = "dotted")
 #'
 #' @export
@@ -84,7 +87,9 @@ rescale_mnirs <- function(
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(data, nirs_channels, verbose)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose
+    )
     validate_numeric(
         range, 2, 
         msg1 = "two-element", 
