@@ -6,8 +6,9 @@ test_that("slope returns correct structure", {
     expect_type(result, "double")
     expect_equal(length(result), 1)
     expect_gt(result, 0)
-    ## default t works
-    expect_equal(slope(x), slope(x, t = 1:10))
+
+    ## attribute for intercept
+    expect_equal(attr(slope(x, intercept = TRUE), "intercept"), -0.6)
 })
 
 test_that("slope handles negative values correctly", {
@@ -58,7 +59,7 @@ test_that("slope returns same as lm model", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
     t_irreg <- sort(runif(length(x), 0, 10))
     expect_equal(slope(x, t_irreg), unname(coef(lm(x ~ t_irreg))[2]))
-    
+
     x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
     expect_equal(slope(x, na.rm = TRUE), coef(lm(x ~ seq_along(x)))[[2L]])
 
@@ -209,8 +210,12 @@ test_that("rolling_slope returns correct structure", {
 
     expect_type(result, "double")
     expect_equal(length(result), length(x))
-    ## default t works
-    expect_equal(slope(x), slope(x, t = 1:10))
+
+    ## attribute for window_idx
+    expect_equal(
+        attr(rolling_slope(x, width = 3, window_idx = TRUE), "window_idx"),
+        compute_local_windows(t = seq_along(x), width = 3)
+    )
 })
 
 test_that("rolling_slope handles negative values correctly", {
@@ -226,7 +231,13 @@ test_that("rolling_slope handles negative values correctly", {
     x_desc <- c(10, 8, 6, 4, 2)
     expect_all_equal(rolling_slope(x_desc, width = 3, partial = TRUE), -2)
     expect_all_equal(
-        rolling_slope(x_desc, width = 3, span = 0, partial = TRUE, verbose = TRUE),
+        rolling_slope(
+            x_desc,
+            width = 3,
+            span = 0,
+            partial = TRUE,
+            verbose = TRUE
+        ),
         -2
     )
     expect_all_equal(rolling_slope(x_desc, span = 2, partial = TRUE), -2)
@@ -371,7 +382,10 @@ test_that("rolling_slope handles width larger than data", {
 
 test_that("rolling_slope calculates identity", {
     ## roll_lm width
-    expect_all_equal(rolling_slope(x=1:5, t=1:5, width = 3, partial = TRUE), 1)
+    expect_all_equal(
+        rolling_slope(x = 1:5, t = 1:5, width = 3, partial = TRUE),
+        1
+    )
     expect_equal(
         rolling_slope(1:5, 1:5, width = 3),
         c(NA, rep(1, 3), NA)
@@ -389,7 +403,7 @@ test_that("rolling_slope calculates identity", {
         expect_message("width.*span")
     ## compute_local_fun span
     expect_all_equal(rolling_slope(1:5, 1:5, span = 2, partial = TRUE), 1)
-    
+
     expect_warning(rolling_slope(1:5, 1:5, span = 1), "Less than.*2.*valid")
 })
 
@@ -510,7 +524,7 @@ test_that("rolling_slope handles NaN & Inf", {
 
 test_that("rolling_slope span returns same as lm model", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
-    
+
     ## span
     result <- rolling_slope(x, span = 3, partial = TRUE)
     t <- seq_along(x)
@@ -547,7 +561,7 @@ test_that("rolling_slope span returns same as lm model", {
 
     ## visual confirmation
     # library(ggplot2)
-    # tibble(x = t, y = .env$x) |> 
+    # tibble(x = t, y = .env$x) |>
     #     ggplot(aes(x, y)) +
     #     scale_x_continuous(breaks = scales::breaks_pretty(n=10)) +
     #     geom_line() +
@@ -620,29 +634,6 @@ test_that("rolling_slope returns same as zoo::rollapply()", {
     expect_equal(rollapply_right, rolling_slope_right)
 })
 
-# test_that("slope handles NA values correctly", {
-#     x_na <- c(1, NA, 3, 4, 5)
-
-#     # NA propagates by default
-#     expect_true(is.na(slope(x_na)))
-#     # na.rm removes NA observations
-#     expect_equal(slope(x_na, na.rm = TRUE), 1)
-
-#     # NA in t
-#     t_na <- c(1, 2, NA, 4, 5)
-#     expect_true(is.na(slope(1:5, t_na)))
-#     expect_equal(
-#         slope(1:5, t_na, na.rm = TRUE),
-#         unname(coef(lm(1:5 ~ t_na))[2])
-#     )
-
-#     # NA in both - pairwise complete
-#     expect_equal(
-#         slope(x_na, t_na, na.rm = TRUE),
-#         slope(c(1, 4, 5), t = c(1, 4, 5))
-#     )
-# })
-
 
 # fmt: skip
 test_that("rolling_slope handles NA with na.rm", {
@@ -697,7 +688,7 @@ test_that("rolling_slope handles span in units of t", {
         
         coef(lm(x[window_idx] ~ t[window_idx]))[[2L]]
     }, numeric(1))
-    
+
     expect_equal(result, lm_result)
 
     x <- c(1, 3, 2, 5, 8)
@@ -743,13 +734,13 @@ test_that("rolling_slope handles invalid args", {
     expect_all_true(is.na(rolling_slope(1:5, width = 1)))
     ## TODO span results in width = 1 = NA or error?
     expect_all_true(is.na(rolling_slope(1:5, span = 0)))
-    
+
     expect_error(rolling_slope(1:5), "width.*span.*must be defined")
     expect_error(rolling_slope(1:5, span = NA), "valid.*numeric")
     expect_error(rolling_slope(1:5, width = NA), "valid.*integer")
     expect_error(rolling_slope(1:5, span = -1), "valid.*numeric")
     expect_error(rolling_slope(1:5, width = -1), "valid.*integer")
-    
+
     ## invalid align
     expect_error(
         rolling_slope(1:5, width = 3, align = "invalid"),
@@ -767,6 +758,189 @@ test_that("rolling_slope works with partial", {
     ## n < 2 = NA regardless of partial
     expect_true(is.na(rolling_slope(x[1L], width = 3, partial = TRUE)))
 })
+
+## peak_slope ===========================================================
+test_that("peak_slope returns correct structure", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    result <- peak_slope(x, width = 5)
+
+    expect_type(result, "list")
+    expect_named(result, c("slope", "intercept", "y", "t", "idx", "window_idx"))
+    expect_type(result$slope, "double")
+    expect_type(result$intercept, "double")
+    expect_type(result$y, "double")
+    expect_true(is.numeric(result$t))
+    expect_type(result$idx, "integer")
+    expect_type(result$window_idx, "integer")
+    expect_length(result$window_idx, 5L)
+})
+
+test_that("peak_slope auto-detects direction from net trend", {
+    ## positive trend
+    x_pos <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    result_pos <- peak_slope(x_pos, width = 5, verbose = FALSE)
+    expect_gt(result_pos$slope, 0)
+
+    ## negative trend
+    x_neg <- rev(x_pos)
+    result_neg <- peak_slope(x_neg, width = 5, verbose = FALSE)
+    expect_lt(result_neg$slope, 0)
+
+    ## fallback to magnitude when net slope = 0
+    x_sym <- c(1, 3, 5, 3, 1)
+    result_sym <- peak_slope(x_sym, width = 3, verbose = FALSE)
+    expect_true(result_sym$slope != 0)
+})
+
+test_that("peak_slope respects manual direction", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+
+    result_pos <- peak_slope(
+        x,
+        width = 5,
+        direction = "positive",
+        verbose = FALSE
+    )
+    expect_gt(result_pos$slope, 0)
+
+    result_neg <- peak_slope(
+        x,
+        width = 2,
+        direction = "negative",
+        verbose = FALSE
+    )
+    expect_lt(result_neg$slope, 0)
+})
+
+test_that("peak_slope returns NA when no slopes in specified direction", {
+    ## perfectly increasing = no negative slopes
+    x <- 1:10
+    expect_warning(
+        result <- peak_slope(
+            x,
+            width = 3,
+            direction = "negative",
+            verbose = TRUE
+        ),
+        "No negative slopes"
+    )
+
+    expect_all_true(is.na(result))
+
+    ## perfectly decreasing = no positive slopes
+    x <- 10:1
+    expect_warning(
+        peak_slope(x, width = 3, direction = "positive", verbose = TRUE),
+        "No positive slopes"
+    )
+})
+
+test_that("peak_slope calculates correct intercept and y", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    result <- peak_slope(x, width = 5, verbose = FALSE)
+
+    ## verify y = intercept + slope * t
+    expect_equal(result$y, result$intercept + result$slope * result$t)
+
+    ## verify against lm()
+    window_x <- x[result$window_idx]
+    window_t <- result$window_idx
+    lm_fit <- lm(window_x ~ window_t)
+    expect_equal(result$slope, coef(lm_fit)[[2L]])
+    expect_equal(result$intercept, coef(lm_fit)[[1L]])
+})
+
+test_that("peak_slope finds correct peak location", {
+    ## construct data with known peak slope location
+    x <- c(1, 2, 3, 10, 20, 30, 31, 32, 33)
+    result <- peak_slope(x, width = 3, verbose = FALSE)
+
+    ## peak should be at idx 5 (centre of steepest section)
+    expect_equal(result$idx, 5L)
+    expect_equal(result$t, 5)
+    expect_equal(result$window_idx, 4:6)
+})
+
+test_that("peak_slope handles NA values", {
+    x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
+
+    ## na.rm = FALSE propagates NA
+    result <- peak_slope(x, width = 7, na.rm = FALSE, verbose = FALSE)
+    expect_all_true(is.na(result))
+
+    ## na.rm = TRUE removes NA
+    result_na <- peak_slope(x, width = 7, na.rm = TRUE, partial = TRUE, verbose = FALSE)
+    expect_all_false(is.na(result_na))
+})
+
+test_that("peak_slope handles edge cases", {
+    ## single value
+    expect_all_true(is.na(peak_slope(5, width = 3, verbose = FALSE)))
+
+    ## two values
+    result <- peak_slope(c(1, 2), width = 2, partial = TRUE, verbose = FALSE)
+    expect_equal(result$slope, 1)
+
+    ## all identical values = slope 0, no positive/negative
+    x <- rep(5, 10)
+    result <- peak_slope(x, width = 3, verbose = FALSE)
+    expect_all_true(is.na(result))
+
+    ## width > n
+    x <- c(1, 3, 2, 5, 8)
+    result <- peak_slope(x, width = 10, verbose = FALSE)
+    expect_all_true(is.na(result))
+
+    ## width > n but partial = TRUE
+    result <- peak_slope(x, width = 10, partial = TRUE, verbose = FALSE)
+    expect_all_false(is.na(result))
+})
+
+test_that("peak_slope works with span", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+
+    result <- peak_slope(x, span = 5, verbose = FALSE)
+    expect_all_false(is.na(result))
+    expect_gt(result$slope, 0)
+
+    ## irregular t
+    t_irreg <- c(0.5, 1.5, 3, 3.5, 4, 5.5, 7, 8, 10, 11)
+    result_irreg <- peak_slope(x, t_irreg, span = 3, verbose = FALSE)
+    expect_all_false(is.na(result_irreg))
+    expect_gt(result_irreg$slope, result$slope)
+})
+
+test_that("peak_slope align options work", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+
+    result_centre <- peak_slope(x, width = 5, align = "centre", verbose = FALSE)
+    result_left <- peak_slope(x, width = 5, align = "left", verbose = FALSE)
+    result_right <- peak_slope(x, width = 5, align = "right", verbose = FALSE)
+
+    expect_false(is.na(result_centre$slope))
+    expect_false(is.na(result_left$slope))
+    expect_false(is.na(result_right$slope))
+
+    ## should return different peak idx
+    expect_gt(result_centre$idx, result_left$idx)
+    expect_gt(result_right$idx, result_centre$idx)
+    ## should return same length window_idx
+    expect_length(result_centre$window_idx, 5L)
+    expect_length(result_left$window_idx, 5L)
+    expect_length(result_right$window_idx, 5L)
+})
+
+test_that("peak_slope verbose messages work", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+
+    expect_silent(peak_slope(rep(5, 5), width = 5, verbose = FALSE))
+    ## auto-detection message
+    expect_warning(
+        peak_slope(rep(5, 5), width = 5, verbose = TRUE),
+        "No.*slopes detected"
+    )
+})
+
 
 ## integration ============================================================
 test_that("rolling_slope works visually", {
@@ -844,7 +1018,7 @@ test_that("rolling_slope works on example_mnirs() data", {
         ),
         time_channel = c(time = "hh:mm:ss"),
         verbose = FALSE
-    ) |> 
+    ) |>
         filter_mnirs(method = "butterworth", order = 4, W = 0.05)
 
     data$slope <- rolling_slope(
