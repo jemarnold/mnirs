@@ -23,7 +23,7 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Replace outliers, invalid values, and missing values</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v.0.1.9/R/replace_mnirs.R" class="external-link"><code>R/replace_mnirs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/replace_mnirs.R" class="external-link"><code>R/replace_mnirs.R</code></a></small>
       <div class="d-none name"><code>replace_mnirs.Rd</code></div>
     </div>
 
@@ -286,8 +286,7 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## vectorised operation</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">999</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">999</span>, <span class="fl">6</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
@@ -310,14 +309,17 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 <span class="r-in"><span><span class="co">## clean data</span></span></span>
 <span class="r-in"><span><span class="va">data_clean</span> <span class="op">&lt;-</span> <span class="fu">replace_mnirs</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">data</span>,</span></span>
-<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="cn">NULL</span>,       <span class="co">## default to all nirs_channels in metadata</span></span></span>
-<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## default to time_channel in metadata</span></span></span>
-<span class="r-in"><span>    invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="co">## known invalid values in the data</span></span></span>
-<span class="r-in"><span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,         <span class="co">## recommended default value</span></span></span>
-<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">10</span>,                 <span class="co">## local window to detect local outliers and replace missing values</span></span></span>
-<span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>,          <span class="co">## linear interpolation over `NA`s</span></span></span>
+<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="cn">NULL</span>, <span class="co">## nirs_channels will be retrieved from metadata</span></span></span>
+<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,  <span class="co">## retrieved from metadata</span></span></span>
+<span class="r-in"><span>    invalid_values <span class="op">=</span> <span class="fl">0</span>,   <span class="co">## known invalid values in the data</span></span></span>
+<span class="r-in"><span>    invalid_above <span class="op">=</span> <span class="fl">90</span>,   <span class="co">## remove data spikes</span></span></span>
+<span class="r-in"><span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,   <span class="co">## recommended default value</span></span></span>
+<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">10</span>,           <span class="co">## window to detect local outliers</span></span></span>
+<span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>,    <span class="co">## linear interpolation over `NA`s</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co">## plot original and and show where values have been replaced</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span></span>

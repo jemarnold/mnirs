@@ -1,5 +1,19 @@
 # Changelog
 
+## mnirs 0.2.0
+
+- Implement tidy evaluation with [rlang](https://rlang.r-lib.org) and
+  [tidyselect](https://tidyselect.r-lib.org).
+- Update function documentation & examples, `README`, vignette.
+- Fixed
+  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
+  and
+  [`rolling_mean()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+  to correctly use `partial` and `na.rm` arguments.
+- Fixed
+  [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md)
+  to correctly use `width` and `span` arguments.
+
 ## mnirs 0.1.9
 
 - Create

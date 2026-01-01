@@ -223,8 +223,6 @@ included in the interval range (e.g. with `span = c(30, 60)`).
 ## Examples
 
 ``` r
-library(ggplot2)
-
 options(mnirs.verbose = FALSE)
 
 ## read example data
@@ -237,54 +235,61 @@ data <- read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |>
-    filter_mnirs(
-        method = "butterworth",
-        order = 2,
-        W = 0.01
-    )
+    resample_mnirs() ## avoid issues ensemble-averaging irregular samples
 
-## specify intervals to extract by time values
+## extract intervals as a list of data frames
 extract_intervals(
     data,
-    # nirs_channels = NULL,               ## retrieved from metadata
-    # time_channel = NULL,
-    # sample_rate = NULL,
-    event_times = c(368, 1093),           ## specify a series of intervals
-    span = list(c(-20, 120), c(-20, 90)), ## specify the event timespans
-    group_events = "distinct",            ## return all discrete intervals
-    zero_time = TRUE                      ## re-calculate interval times to start from zero
+    nirs_channels = list(c(smo2_left, smo2_right)),
+    event_times = c(368, 1093), ## specify interval events
+    span = list(c(-20, 90)), ## specify the event start-end timespans
+    group_events = "distinct", ## return all unique intervals
+    zero_time = TRUE ## start time from zero
 )
 #> $interval_1
-#> # A tibble: 1,401 × 3
+#> # A tibble: 1,101 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
-#>  1 -20        56.3       60.4
-#>  2 -19.9      56.3       60.4
-#>  3 -19.8      56.3       60.4
+#>  1 -20        55.6       60.9
+#>  2 -19.9      55.8       60.7
+#>  3 -19.8      56.1       60.6
 #>  4 -19.7      56.3       60.4
-#>  5 -19.6      56.3       60.4
-#>  6 -19.5      56.3       60.4
-#>  7 -19.4      56.3       60.4
-#>  8 -19.3      56.3       60.5
-#>  9 -19.2      56.3       60.5
-#> 10 -19.1      56.3       60.5
-#> # ℹ 1,391 more rows
+#>  5 -19.6      56.6       60.3
+#>  6 -19.5      56.8       60.1
+#>  7 -19.4      56.6       60.1
+#>  8 -19.3      56.9       59.8
+#>  9 -19.2      56.7       60.1
+#> 10 -19.1      56.2       59.8
+#> # ℹ 1,091 more rows
 #> 
 #> $interval_2
 #> # A tibble: 1,101 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
-#>  1 -20        56.4       57.4
-#>  2 -19.9      56.4       57.4
-#>  3 -19.8      56.4       57.4
-#>  4 -19.7      56.4       57.4
-#>  5 -19.6      56.4       57.4
-#>  6 -19.5      56.4       57.4
-#>  7 -19.4      56.4       57.4
-#>  8 -19.3      56.4       57.4
-#>  9 -19.2      56.4       57.4
-#> 10 -19.1      56.4       57.4
+#>  1 -20        56.2       57.2
+#>  2 -19.9      55.7       57.4
+#>  3 -19.8      55.3       57.0
+#>  4 -19.7      55.3       58.6
+#>  5 -19.6      55.3       58.8
+#>  6 -19.5      55.3       57.9
+#>  7 -19.4      55.3       59.1
+#>  8 -19.3      55.3       59.0
+#>  9 -19.2      55.3       57.6
+#> 10 -19.1      55.7       57.4
 #> # ℹ 1,091 more rows
 #> 
+
+## ensemble-average across multiple intervals
+interval_list <- extract_intervals(
+    data,
+    nirs_channels = list(c(smo2_left, smo2_right)),
+    event_times = c(368, 1093),
+    span = list(c(-20, 90)),
+    group_events = "ensemble", ## return ensemble-averaged intervals
+    zero_time = TRUE
+)
+
+library(ggplot2)
+plot(interval_list[[1L]], label_time = TRUE) +
+    geom_vline(xintercept = 0, linetype = "dotted")
 ```

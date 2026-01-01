@@ -27,7 +27,7 @@ filter_butter(
 - order:
 
   An integer defining the filter order for `method = "butterworth"`
-  (*default* `order = 1`).
+  (*default* `order = 2`).
 
 - W:
 

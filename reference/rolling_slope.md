@@ -11,7 +11,7 @@ rolling_slope(
   t = seq_along(x),
   width = NULL,
   span = NULL,
-  align = c("center", "left", "right"),
+  align = c("centre", "left", "right"),
   partial = FALSE,
   na.rm = FALSE,
   verbose = TRUE,
@@ -43,7 +43,7 @@ rolling_slope(
 
 - align:
 
-  Window alignment as *"center"* (the *default*), *"left"*, or
+  Window alignment as *"centre"/"center"* (the *default*), *"left"*, or
   *"right"*. Where *"left"* is *forward looking*, and *"right"* is
   *backward looking* from the current sample.
 
@@ -88,11 +88,11 @@ specifying `span`.
 may return slightly different values than the equivalent specifying
 `span`.
 
-`align` defaults to *"center"* the local window around `idx` between
+`align` defaults to *"centre"* the local window around `idx` between
 `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
 specified. Even `width` values will bias `align` to *"left"*, with the
 unequal sample forward of `idx`. When `span` is specified with
-`align = "center"`, the local window is between
+`align = "centre"`, the local window is between
 `[t - span/2, t + span/2]`.
 
 `partial = TRUE` allows calculation of slope over partial windows with

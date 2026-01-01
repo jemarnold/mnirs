@@ -9,7 +9,7 @@ numeric vector."><meta name="twitter:card" content="summary"><meta name="twitter
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@ numeric vector."><meta name="twitter:card" content="summary"><meta name="twitter
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Calculate rolling slope</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v.0.1.9/R/rolling_slope.R" class="external-link"><code>R/rolling_slope.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/rolling_slope.R" class="external-link"><code>R/rolling_slope.R</code></a></small>
       <div class="d-none name"><code>rolling_slope.Rd</code></div>
     </div>
 
@@ -53,7 +53,7 @@ numeric vector.</p>
 <span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"center"</span>, <span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
+<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centre"</span>, <span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
 <span>  partial <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  na.rm <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -86,9 +86,9 @@ in which to perform the operation, according to <code>align</code>. In units of
 
 
 <dt id="arg-align">align<a class="anchor" aria-label="anchor" href="#arg-align"></a></dt>
-<dd><p>Window alignment as <em>"center"</em> (the <em>default</em>), <em>"left"</em>, or
-<em>"right"</em>. Where <em>"left"</em> is <em>forward looking</em>, and <em>"right"</em> is
-<em>backward looking</em> from the current sample.</p></dd>
+<dd><p>Window alignment as <em>"centre"/"center"</em> (the <em>default</em>),
+<em>"left"</em>, or <em>"right"</em>. Where <em>"left"</em> is <em>forward looking</em>, and <em>"right"</em>
+is <em>backward looking</em> from the current sample.</p></dd>
 
 
 <dt id="arg-partial">partial<a class="anchor" aria-label="anchor" href="#arg-partial"></a></dt>
@@ -126,11 +126,11 @@ tries to call <code><a href="https://rdrr.io/pkg/roll/man/roll_lm.html" class="e
 no <code>NA</code>s, which is often <em>much</em> faster than specifying <code>span</code>.</p>
 <p><em><code>&lt;CAUTION&gt;</code></em>, under certain edge-conditions the <code><a href="https://rdrr.io/pkg/roll/man/roll_lm.html" class="external-link">roll::roll_lm()</a></code> method
 may return slightly different values than the equivalent specifying <code>span</code>.</p>
-<p><code>align</code> defaults to <em>"center"</em> the local window around <code>idx</code> between
+<p><code>align</code> defaults to <em>"centre"</em> the local window around <code>idx</code> between
 <code>[idx - floor((width-1)/2),</code> <code>idx + floor(width/2)]</code> when <code>width</code> is
 specified. Even <code>width</code> values will bias <code>align</code> to <em>"left"</em>, with the
 unequal sample forward of <code>idx</code>. When <code>span</code> is specified with
-<code>align = "center"</code>, the local window is between <code>[t - span/2, t + span/2]</code>.</p>
+<code>align = "centre"</code>, the local window is between <code>[t - span/2, t + span/2]</code>.</p>
 <p><code>partial = TRUE</code> allows calculation of slope over partial windows with at
 least <code>2</code> valid samples, such as at edge conditions. However, this can
 return unstable results with noisy data and should not be used for certain

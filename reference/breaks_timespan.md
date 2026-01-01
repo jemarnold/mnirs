@@ -29,12 +29,12 @@ Returns a function for generating breaks.
 ## Examples
 
 ``` r
-library(ggplot2)
 x = 0:120
 y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 
-ggplot(data.frame(x, y)) +
-    aes(x = x, y = y) +
+library(ggplot2)
+data.frame(x, y) |> 
+    ggplot(aes(x, y)) +
     theme_mnirs() +
     scale_x_continuous(breaks = breaks_timespan()) +
     geom_line()

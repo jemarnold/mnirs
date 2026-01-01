@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,7 +35,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Plot <em>mnirs</em> objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v.0.1.9/R/plot.mnirs.R" class="external-link"><code>R/plot.mnirs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/plot.mnirs.R" class="external-link"><code>R/plot.mnirs.R</code></a></small>
       <div class="d-none name"><code>plot.mnirs.Rd</code></div>
     </div>
 
@@ -58,20 +58,20 @@
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments:</p><dl><dt><code>na.omit</code></dt>
-<dd><p>A logical to omit missing (<code>NA</code>) values for better
-display of connected lines. <code>na.omit = FALSE</code> (the <em>default</em>) can be
-used to identify missing values.</p></dd>
-
-<dt><code>label_time</code></dt>
+<dd><p>Additional arguments:</p><dl><dt><code>label_time</code></dt>
 <dd><p>A logical to display x-axis time values
 formatted as <em>"hh:mm:ss"</em> using <code><a href="https://scales.r-lib.org/reference/label_date.html" class="external-link">scales::label_time()</a></code>.
 <code>label_time = FALSE</code> (the <em>default</em>) will display simple numeric
 values on the x-axis.</p></dd>
 
-<dt><code>n</code></dt>
-<dd><p>A numeric value to define the number of breaks in both x-
-and y-axes.</p></dd>
+<dt><code>n.breaks</code></dt>
+<dd><p>A numeric value to define the number of breaks in
+both x- and y-axes.</p></dd>
+
+<dt><code>na.omit</code></dt>
+<dd><p>A logical to omit missing (<code>NA</code>) values for better
+display of connected lines. <code>na.omit = FALSE</code> (the <em>default</em>) can be
+used to identify missing values.</p></dd>
 
 
 </dl></dd>
@@ -84,19 +84,17 @@ and y-axes.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## call an example *{mnirs}* data file</span></span></span>
-<span class="r-in"><span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">file_path</span>,</span></span>
+<span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>,</span></span>
 <span class="r-in"><span>                      smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## note the hidden plot option to display time values as `hh:mm:ss`</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_table</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## note the hidden options to display time values as `h:mm:ss` with 8 breaks</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_table</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span>, n.breaks <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot.mnirs-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>

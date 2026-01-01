@@ -9,7 +9,7 @@ if present, and validates relevant data quality checks."><meta name="twitter:car
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,7 @@ if present, and validates relevant data quality checks."><meta name="twitter:car
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Validate <code>{mnirs}</code> parameters</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v.0.1.9/R/validate_mnirs.R" class="external-link"><code>R/validate_mnirs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/validate_mnirs.R" class="external-link"><code>R/validate_mnirs.R</code></a></small>
       <div class="d-none name"><code>validate_mnirs.Rd</code></div>
     </div>
 
@@ -60,11 +60,21 @@ if present, and validates relevant data quality checks.</p>
 <span></span>
 <span><span class="fu">validate_mnirs_data</span><span class="op">(</span><span class="va">data</span>, ncol <span class="op">=</span> <span class="fl">2L</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_nirs_channels</span><span class="op">(</span><span class="va">data</span>, <span class="va">nirs_channels</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu">validate_nirs_channels</span><span class="op">(</span></span>
+<span>  <span class="va">nirs_channels</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  env <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_time_channel</span><span class="op">(</span><span class="va">data</span>, <span class="va">time_channel</span><span class="op">)</span></span>
+<span><span class="fu">validate_time_channel</span><span class="op">(</span><span class="va">time_channel</span>, <span class="va">data</span>, env <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_event_channel</span><span class="op">(</span><span class="va">data</span>, <span class="va">event_channel</span>, require <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu">validate_event_channel</span><span class="op">(</span></span>
+<span>  <span class="va">event_channel</span>,</span>
+<span>  <span class="va">data</span>,</span>
+<span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  env <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">estimate_sample_rate</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
@@ -137,7 +147,7 @@ name. Must match column names in <code>data</code> exactly. Retrieved from metad
 if not defined explicitly.</p></dd>
 
 
-<dt id="arg-require">require<a class="anchor" aria-label="anchor" href="#arg-require"></a></dt>
+<dt id="arg-required">required<a class="anchor" aria-label="anchor" href="#arg-required"></a></dt>
 <dd><p>A logical specifying whether <code>event_channel</code> is required
 (the <em>default</em>) or optional (<code>event_channel</code> returned as <code>NULL</code>).</p></dd>
 

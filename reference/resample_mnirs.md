@@ -134,13 +134,12 @@ data
 #> # ℹ 2,193 more rows
 
 data_resampled <- resample_mnirs(
-    data,
-    # time_channel = NULL,         ## taken from metadata
-    # sample_rate = NULL,
-    # resample_rate = sample_rate, ## the default will re-sample to sample_rate
-    method = "linear",             ## default linear interpolation across any new samples
-    verbose = FALSE                ## will confirm the output sample rate
+    data,              ## channels retrieved from metadata
+    resample_rate = 2, ## the default `resample_rate = sample_rate` will resample to sample_rate
+    method = "linear", ## linear interpolation across any new samples
+    verbose = TRUE     ## will confirm the output sample rate
 )
+#> ℹ Output is resampled at 2 Hz.
 
 ## note the altered "time" values 👇
 data_resampled

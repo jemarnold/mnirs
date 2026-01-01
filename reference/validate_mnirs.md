@@ -18,11 +18,21 @@ validate_numeric(
 
 validate_mnirs_data(data, ncol = 2L)
 
-validate_nirs_channels(data, nirs_channels, verbose = TRUE)
+validate_nirs_channels(
+  nirs_channels,
+  data,
+  verbose = TRUE,
+  env = rlang::caller_env()
+)
 
-validate_time_channel(data, time_channel)
+validate_time_channel(time_channel, data, env = rlang::caller_env())
 
-validate_event_channel(data, event_channel, require = TRUE)
+validate_event_channel(
+  event_channel,
+  data,
+  required = TRUE,
+  env = rlang::caller_env()
+)
 
 estimate_sample_rate(x)
 
@@ -93,7 +103,7 @@ validate_x_t(x, t = seq_along(x))
   match column names in `data` exactly. Retrieved from metadata if not
   defined explicitly.
 
-- require:
+- required:
 
   A logical specifying whether `event_channel` is required (the
   *default*) or optional (`event_channel` returned as `NULL`).

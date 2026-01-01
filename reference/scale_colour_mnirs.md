@@ -38,16 +38,16 @@ object.
 ## Examples
 
 ``` r
-library(ggplot2)
-
 ## plot example data
 df <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_right = "SmO2 Live",
+                      smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 )
 
+library(ggplot2)
 ggplot(df, aes(x = time)) +
     theme_mnirs() +
     scale_colour_mnirs(name = NULL) +

@@ -20,7 +20,7 @@ filter_mnirs(
   method = c("smooth_spline", "butterworth", "moving_average"),
   spar = NULL,
   type = c("low", "high", "stop", "pass"),
-  order = 1,
+  order = 2,
   W = NULL,
   fc = NULL,
   width = NULL,
@@ -102,7 +102,7 @@ filter_mnirs(
 - order:
 
   An integer defining the filter order for `method = "butterworth"`
-  (*default* `order = 1`).
+  (*default* `order = 2`).
 
 - W:
 
@@ -215,35 +215,31 @@ Then `NA`s will be preserved and passed through in the returned data.
 ## Examples
 
 ``` r
-library(ggplot2)
+options(mnirs.verbose = FALSE)
 
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    time_channel = c(time = "hh:mm:ss")
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10,
-        verbose = FALSE
+        width = 10
     )
 
 data_filtered <- filter_mnirs(
     data,
-    # nirs_channel = NULL,  ## retrieved from metadata
-    # time_channel = NULL,
-    # sample_rate = NULL,
     method = "butterworth", ## Butterworth digital filter is a common choice
     type = "low",           ## specify a low-pass filter
-    order = 2,              ## filter order number
-    W = 0.02,               ## filter fractional critical frequency
-    verbose = FALSE
+    order = 2,              ## order is the number of filter passes
+    W = 0.02,               ## fractional critical frequency
+    na.rm = TRUE            ## explicitly preserve any NAs and avoid errors
 )
 
-## add the non-filtered data back to the plot to compare
+library(ggplot2)
+## plot filtered data and add the raw data back to the plot to compare
 plot(data_filtered, label_time = TRUE) +
     geom_line(
         data = data,

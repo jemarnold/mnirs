@@ -262,8 +262,6 @@ specified by `method`.
 ## Examples
 
 ``` r
-library(ggplot2)
-
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
 replace_invalid(x, invalid_values = 999, width = 2, method = "median")
@@ -286,14 +284,17 @@ data <- read_mnirs(
 ## clean data
 data_clean <- replace_mnirs(
     data,
-    nirs_channels = NULL,       ## default to all nirs_channels in metadata
-    time_channel = NULL,        ## default to time_channel in metadata
-    invalid_values = c(0, 100), ## known invalid values in the data
-    outlier_cutoff = 3,         ## recommended default value
-    width = 10,                 ## local window to detect local outliers and replace missing values
-    method = "linear",          ## linear interpolation over `NA`s
+    nirs_channels = NULL, ## nirs_channels will be retrieved from metadata
+    time_channel = NULL,  ## retrieved from metadata
+    invalid_values = 0,   ## known invalid values in the data
+    invalid_above = 90,   ## remove data spikes
+    outlier_cutoff = 3,   ## recommended default value
+    width = 10,           ## window to detect local outliers
+    method = "linear",    ## linear interpolation over `NA`s
+    verbose = FALSE
 )
 
+library(ggplot2)
 ## plot original and and show where values have been replaced
 plot(data, label_time = TRUE) +
     scale_colour_manual(

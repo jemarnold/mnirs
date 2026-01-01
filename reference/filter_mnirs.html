@@ -19,7 +19,7 @@ A simple moving average.
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,7 +47,7 @@ A simple moving average.
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Filter a data frame</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v.0.1.9/R/filter_mnirs.R" class="external-link"><code>R/filter_mnirs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/filter_mnirs.R" class="external-link"><code>R/filter_mnirs.R</code></a></small>
       <div class="d-none name"><code>filter_mnirs.Rd</code></div>
     </div>
 
@@ -68,7 +68,7 @@ using either:</p><ol><li><p>A cubic smoothing spline.</p></li>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"smooth_spline"</span>, <span class="st">"butterworth"</span>, <span class="st">"moving_average"</span><span class="op">)</span>,</span>
 <span>  spar <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"low"</span>, <span class="st">"high"</span>, <span class="st">"stop"</span>, <span class="st">"pass"</span><span class="op">)</span>,</span>
-<span>  order <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  order <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  W <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  fc <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -147,7 +147,7 @@ from <code>time_channel</code> if not defined explicitly.</p></dd>
 
 <dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
 <dd><p>An integer defining the filter order for
-<code>method = "butterworth"</code> (<em>default</em> <code>order = 1</code>).</p></dd>
+<code>method = "butterworth"</code> (<em>default</em> <code>order = 2</code>).</p></dd>
 
 
 <dt id="arg-w">W<a class="anchor" aria-label="anchor" href="#arg-w"></a></dt>
@@ -256,35 +256,32 @@ Then <code>NA</code>s will be preserved and passed through in the returned data.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## read example data</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2 <span class="op">=</span> <span class="st">"SmO2 Live"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>        width <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>        verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>        width <span class="op">=</span> <span class="fl">10</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu">filter_mnirs</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">data</span>,</span></span>
-<span class="r-in"><span>    <span class="co"># nirs_channel = NULL,  ## retrieved from metadata</span></span></span>
-<span class="r-in"><span>    <span class="co"># time_channel = NULL,</span></span></span>
-<span class="r-in"><span>    <span class="co"># sample_rate = NULL,</span></span></span>
 <span class="r-in"><span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span></span>
 <span class="r-in"><span>    type <span class="op">=</span> <span class="st">"low"</span>,           <span class="co">## specify a low-pass filter</span></span></span>
-<span class="r-in"><span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span></span>
-<span class="r-in"><span>    W <span class="op">=</span> <span class="fl">0.02</span>,               <span class="co">## filter fractional critical frequency</span></span></span>
-<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## order is the number of filter passes</span></span></span>
+<span class="r-in"><span>    W <span class="op">=</span> <span class="fl">0.02</span>,               <span class="co">## fractional critical frequency</span></span></span>
+<span class="r-in"><span>    na.rm <span class="op">=</span> <span class="cn">TRUE</span>            <span class="co">## explicitly preserve any NAs and avoid errors</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## add the non-filtered data back to the plot to compare</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co">## plot filtered data and add the raw data back to the plot to compare</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_filtered</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        data <span class="op">=</span> <span class="va">data</span>,</span></span>

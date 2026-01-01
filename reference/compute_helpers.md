@@ -32,7 +32,7 @@ compute_local_windows(
   idx = seq_along(t),
   width = NULL,
   span = NULL,
-  align = c("center", "left", "right")
+  align = c("centre", "left", "right")
 )
 
 compute_local_fun(x, window_idx, fn, ...)
@@ -47,15 +47,22 @@ compute_valid_neighbours(
   verbose = TRUE
 )
 
-rolling_median(x, width, align = c("center", "left", "right"))
+rolling_median(x, width, align = c("centre", "left", "right"))
 
-rolling_mean(x, width, align = c("center", "left", "right"))
+rolling_mean(
+  x,
+  width,
+  align = c("centre", "left", "right"),
+  min_obs = width,
+  verbose = TRUE,
+  ...
+)
 
 rolling_lm(
   x,
   t = seq_along(x),
   width,
-  align = c("center", "left", "right"),
+  align = c("centre", "left", "right"),
   min_obs = width,
   verbose = TRUE,
   ...
@@ -88,7 +95,7 @@ rolling_lm(
 
 - align:
 
-  Window alignment as *"center"* (the *default*), *"left"*, or
+  Window alignment as *"centre"/"center"* (the *default*), *"left"*, or
   *"right"*. Where *"left"* is *forward looking*, and *"right"* is
   *backward looking* from the current sample.
 
@@ -162,7 +169,7 @@ number of samples, or `span` as the timespan in units of `t`. Specifying
 `width` calls [roll](https://rdrr.io/pkg/roll/man/roll-package.html)
 which is often much faster than specifying `span`.
 
-`align` defaults to *"center"* the local window around `idx` between
+`align` defaults to *"centre"* the local window around `idx` between
 `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
 specified. Even `width` values will bias `align` to *"left"*, with the
 unequal sample forward of `idx`, effectively returning `NA` at the last

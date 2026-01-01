@@ -21,12 +21,6 @@ plot(x, ...)
 
   Additional arguments:
 
-  `na.omit`
-
-  :   A logical to omit missing (`NA`) values for better display of
-      connected lines. `na.omit = FALSE` (the *default*) can be used to
-      identify missing values.
-
   `label_time`
 
   :   A logical to display x-axis time values formatted as *"hh:mm:ss"*
@@ -35,10 +29,16 @@ plot(x, ...)
       `label_time = FALSE` (the *default*) will display simple numeric
       values on the x-axis.
 
-  `n`
+  `n.breaks`
 
   :   A numeric value to define the number of breaks in both x- and
       y-axes.
+
+  `na.omit`
+
+  :   A logical to omit missing (`NA`) values for better display of
+      connected lines. `na.omit = FALSE` (the *default*) can be used to
+      identify missing values.
 
 ## Value
 
@@ -47,17 +47,14 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 ## Examples
 
 ``` r
-## call an example *{mnirs}* data file
-file_path <- example_mnirs("moxy_ramp")
-
 data_table <- read_mnirs(
-    file_path,
+    file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_right = "SmO2 Live",
                       smo2_left = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 )
 
-## note the hidden plot option to display time values as `hh:mm:ss`
-plot(data_table, label_time = TRUE)
+## note the hidden options to display time values as `h:mm:ss` with 8 breaks
+plot(data_table, label_time = TRUE, n.breaks = 8)
 ```

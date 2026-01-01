@@ -15,7 +15,7 @@ to zero."><meta name="twitter:card" content="summary"><meta name="twitter:creato
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@ to zero."><meta name="twitter:card" content="summary"><meta name="twitter:creato
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Shift data range</h1>
-      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/v.0.1.9/R/shift_mnirs.R" class="external-link"><code>R/shift_mnirs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/R/shift_mnirs.R" class="external-link"><code>R/shift_mnirs.R</code></a></small>
       <div class="d-none name"><code>shift_mnirs.Rd</code></div>
     </div>
 
@@ -164,31 +164,35 @@ over <code>by</code>, and <code>width</code> will be preferred over <code>span</
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## read example data</span></span></span>
-<span class="r-in"><span><span class="va">data_shifted</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2 <span class="op">=</span> <span class="st">"SmO2 Live"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>,</span></span>
+<span class="r-in"><span>                      smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>        width <span class="op">=</span> <span class="fl">10</span></span></span>
+<span class="r-in"><span>        width <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>        method <span class="op">=</span> <span class="st">"linear"</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span>na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>    <span class="fu">shift_mnirs</span><span class="op">(</span></span></span>
-<span class="r-in"><span>        to <span class="op">=</span> <span class="fl">0</span>,             <span class="co">## NIRS values will be shifted to zero</span></span></span>
-<span class="r-in"><span>        span <span class="op">=</span> <span class="fl">120</span>,         <span class="co">## shift the first 120 sec of data to zero</span></span></span>
+<span class="r-in"><span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_right</span>, <span class="va">smo2_left</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        to <span class="op">=</span> <span class="fl">0</span>,            <span class="co">## each channel will be shifted to zero</span></span></span>
+<span class="r-in"><span>        span <span class="op">=</span> <span class="fl">120</span>,        <span class="co">## shift the mean of the first 120 sec</span></span></span>
 <span class="r-in"><span>        position <span class="op">=</span> <span class="st">"first"</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> `nirs_channel` = <span style="color: #0000BB;">"smo2"</span>: `smooth.spline(spar = <span style="color: #0000BB;">0.056</span>)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> `nirs_channel` = <span style="color: #0000BB;">"smo2_right"</span>: `smooth.spline(spar = <span style="color: #0000BB;">0.056</span>)`</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> `nirs_channel` = <span style="color: #0000BB;">"smo2_left"</span>: `smooth.spline(spar = <span style="color: #0000BB;">0.056</span>)`</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_shifted</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="shift_mnirs-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
