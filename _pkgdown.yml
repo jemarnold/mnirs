@@ -51,12 +51,18 @@ reference:
   - starts_with("filter")
   - shift_mnirs
   - rescale_mnirs
-- title: Analysis
+- title: Interval detection
   desc: |
     Detect and extract intervals for further analysis
   contents:
   - extract_intervals
+- title: Process kinetics
+  desc: |
+    Estimate response dynamics and kinetic parameters
+  contents:
   - ends_with("slope")
+  - matches("monoexp")
+  - update_fixed_coefs
 - title: Plotting
   desc: |
     Tools for pretty plotting with `{ggplot2}`.
