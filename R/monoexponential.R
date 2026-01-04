@@ -71,7 +71,7 @@ monoexp_init <- function(
 ) {
     ## self-start parameters for nls of monoexponential fit function
     ## https://www.statforbiology.com/2020/stat_nls_selfstarting/#and-what-about-nls
-    xy <- sortedXyData(mCall[["t"]], LHS, data)
+    xy <- stats::sortedXyData(mCall[["t"]], LHS, data)
     y <- xy[["y"]]
     x <- xy[["x"]]
     n <- length(y)
@@ -83,11 +83,11 @@ monoexp_init <- function(
 
     ## A and B as top and bottom quantiles of y
     if (rising) {
-        A <- quantile(y, 0.05, names = FALSE)
-        B <- quantile(y, 0.95, names = FALSE)
+        A <- stats::quantile(y, 0.05, names = FALSE)
+        B <- stats::quantile(y, 0.95, names = FALSE)
     } else {
-        A <- quantile(y, 0.95, names = FALSE)
-        B <- quantile(y, 0.05, names = FALSE)
+        A <- stats::quantile(y, 0.95, names = FALSE)
+        B <- stats::quantile(y, 0.05, names = FALSE)
     }
     amplitude <- B - A
 
@@ -205,7 +205,7 @@ SS_monoexp <- selfStart(
 #' @keywords internal
 #' @export
 fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
-    current_coefs <- coef(model)
+    current_coefs <- stats::coef(model)
     fixed_coefs <- list(...)
 
     ## validate coefs
@@ -220,7 +220,7 @@ fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     ## extract data from the model environment
     if (is.null(data)) {
         data <- tryCatch(
-            eval(model$call$data, envir = environment(formula(model))),
+            eval(model$call$data, envir = environment(stats::formula(model))),
             error = \(e) {
                 ## fallback: try parent frames
                 eval(model$call$data, envir = parent.frame(3))
@@ -246,8 +246,13 @@ fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     }
 
     ## substitute fixed params into model_formula
-    new_formula <- do.call(substitute, list(formula(model), fixed_coefs))
+    new_formula <- do.call(substitute, list(stats::formula(model), fixed_coefs))
 
     ## update the model
-    update(model, formula = new_formula, start = start_coefs, data = data)
+    stats::update(
+        model,
+        formula = new_formula,
+        start = start_coefs,
+        data = data
+    )
 }

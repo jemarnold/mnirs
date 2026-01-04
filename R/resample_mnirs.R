@@ -104,7 +104,7 @@ resample_mnirs <- function(
     sample_range <- floor(range(time_vec, na.rm = TRUE) * sample_rate) /
         sample_rate
     resampled_times <- seq(sample_range[1], sample_range[2], by = resample_time)
-    result <- setNames(tibble::tibble(resampled_times), time_channel)
+    result <- stats::setNames(tibble::tibble(resampled_times), time_channel)
 
     ## identify column types
     numeric_cols <- vapply(data, is.numeric, logical(1))

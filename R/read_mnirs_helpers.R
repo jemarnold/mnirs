@@ -213,7 +213,7 @@ name_channels <- function(x) {
     names <- names(x) %||% character(length(x))
     empty_names <- is_empty(names)
     names[empty_names] <- as.character(x)[empty_names]
-    return(setNames(x, names))
+    return(stats::setNames(x, names))
 }
 
 

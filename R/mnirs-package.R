@@ -11,9 +11,8 @@
 #' @importFrom rlang %||%
 #' @importFrom rlang .data
 #' @importFrom rlang enquo
-#' @importFrom stats approx
+#' @importFrom stats coef
 #' @importFrom stats median
-#' @importFrom stats setNames
 #' @importFrom tibble tibble
 ## usethis namespace: end
 NULL

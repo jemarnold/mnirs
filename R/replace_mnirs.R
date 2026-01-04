@@ -428,7 +428,7 @@ replace_missing <- function(
 
     ## process ==============================================
     if (method %in% c("linear", "constant")) {
-        y <- approx(
+        y <- stats::approx(
             x = t,
             y = x,
             xout = list(...)$xout %||% t, ## = t unless explicitly specified by hidden option

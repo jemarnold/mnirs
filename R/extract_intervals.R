@@ -581,13 +581,13 @@ ensemble_intervals <- function(
     }, numeric(length(nirs_channels)))
 
     result_cols <- if (is.null(dim(result_matrix))) {
-        setNames(as.data.frame(result_matrix), nirs_channels)
+        stats::setNames(as.data.frame(result_matrix), nirs_channels)
     } else {
-        setNames(as.data.frame(t(result_matrix)), nirs_channels)
+        stats::setNames(as.data.frame(t(result_matrix)), nirs_channels)
     }
 
     result <- data.frame(
-        setNames(list(unique_times), time_channel),
+        stats::setNames(list(unique_times), time_channel),
         result_cols
     )
 
