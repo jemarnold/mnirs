@@ -79,3 +79,4 @@ rolling_slope(x, width = 3, partial = TRUE)
 \seealso{
 \code{\link[zoo:rollapply]{zoo::rollapply()}}
 }
+\keyword{internal}

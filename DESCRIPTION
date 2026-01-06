@@ -14,7 +14,7 @@ Depends:
     R (>= 4.1)
 Imports: 
     cli,
-    data.table (>= 1.18.0),
+    data.table,
     lifecycle,
     readxl,
     rlang,

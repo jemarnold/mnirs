@@ -9,7 +9,7 @@
 #'      formatted as *"hh:mm:ss"* using [label_time()].
 #'      `label_time = FALSE` (the *default*) will display simple numeric
 #'      values on the x-axis.}
-#'      \item{`n.breaks`}{A numeric value to define the number of breaks in 
+#'      \item{`n.breaks`}{A numeric value to define the number of breaks in
 #'      both x- and y-axes.}
 #'      \item{`na.omit`}{A logical to omit missing (`NA`) values for better
 #'      display of connected lines. `na.omit = FALSE` (the *default*) can be
@@ -351,7 +351,7 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 #'
 #' library(ggplot2)
-#' data.frame(x, y) |> 
+#' data.frame(x, y) |>
 #'     ggplot(aes(x, y)) +
 #'     theme_mnirs() +
 #'     scale_x_continuous(breaks = breaks_timespan()) +
@@ -427,7 +427,7 @@ breaks_timespan <- function(
 #' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 #'
 #' library(ggplot2)
-#' data.frame(x, y) |> 
+#' data.frame(x, y) |>
 #'     ggplot(aes(x, y)) +
 #'     theme_mnirs() +
 #'     scale_x_continuous(

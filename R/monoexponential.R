@@ -3,19 +3,19 @@
 #' Calculate a four-parameter monoexponential curve.
 #'
 #' @param t A numeric vector of the predictor variable; time or sample number.
-#' @param A A numeric parameter for the starting (baseline) value of the 
+#' @param A A numeric parameter for the starting (baseline) value of the
 #'   response variable.
-#' @param B A numeric parameter for the ending (asymptote) value of the 
+#' @param B A numeric parameter for the ending (asymptote) value of the
 #'   response variable.
 #' @param TD A numeric parameter for the time delay before the onset of
 #'   exponential response, in units of the predictor variable `t`.
 #' @param tau A numeric parameter for the time constant `tau (𝜏)` of the
 #'   exponential curve, in units of the predictor variable `t`.
-#' 
+#'
 #' @details
-#' Uses the equation: 
+#' Uses the equation:
 #'   `ifelse(x <= TD, A, A + (B - A) * (1 - exp((TD - x) / tau)))`
-#' `tau` is equal to the reciprocal of `k` (`tau = 1/k`), where `k` is the 
+#' `tau` is equal to the reciprocal of `k` (`tau = 1/k`), where `k` is the
 #'   rate constant of the same function.
 #'
 #' @return A numeric vector of predicted values the same length as
@@ -24,15 +24,15 @@
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' set.seed(13)
 #' t <- 1:60
-#' 
+#'
 #' ## create an exponential curve with random noise
 #' x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) + rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
-#' 
+#'
 #' (model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data))
-#' 
+#'
 #' y <- predict(model, data)
-#' 
+#'
 #' library(ggplot2)
 #' ggplot(data, aes(t, x)) +
 #'     theme_mnirs() +
@@ -48,8 +48,6 @@ monoexponential <- function(t, A, B, TD, tau) {
 }
 
 
-
-
 #' Initiate self-starting `nls` monoexponential model
 #'
 #' [monoexp_init()]: Returns initial values for the parameters in a `selfStart`
@@ -60,14 +58,17 @@ monoexponential <- function(t, A, B, TD, tau) {
 #' @param LHS The left-hand side expression of the model formula.
 #' @param ... Additional arguments.
 #'
-#' @return [monoexp_init()]: Initial starting estimates for parameters in the 
+#' @return [monoexp_init()]: Initial starting estimates for parameters in the
 #'   model called by [SS_monoexp()].
 #'
 #' @rdname SS_monoexp
 #' @order 2
 #' @export
 monoexp_init <- function(
-        mCall, data, LHS, ...
+    mCall,
+    data,
+    LHS,
+    ...
 ) {
     ## self-start parameters for nls of monoexponential fit function
     ## https://www.statforbiology.com/2020/stat_nls_selfstarting/#and-what-about-nls
@@ -94,7 +95,7 @@ monoexp_init <- function(
     # first x > 0 exceeding 10% amplitude from A
     td_idx <- which(x > 0 & abs(y - A) > abs(amplitude) * 0.1)[1L]
     TD <- if (is.na(td_idx)) 0 else x[td_idx]
-    
+
     # tau: time from TD to 63.2% of amplitude
     target <- A + 0.632 * amplitude
     onset_idx <- which(x > TD)
@@ -108,9 +109,6 @@ monoexp_init <- function(
 
     return(c(A = A, B = B, TD = TD, tau = tau))
 }
-
-
-
 
 
 #' Self-starting four-parameter monoexponential model
@@ -133,15 +131,15 @@ monoexp_init <- function(
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' set.seed(13)
 #' t <- 1:60
-#' 
+#'
 #' ## create an exponential curve with random noise
 #' x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) + rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
-#' 
+#'
 #' (model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data))
-#' 
+#'
 #' y <- predict(model, data)
-#' 
+#'
 #' library(ggplot2)
 #' ggplot(data, aes(t, x)) +
 #'     theme_mnirs() +
@@ -156,7 +154,6 @@ SS_monoexp <- selfStart(
     initial = monoexp_init,
     parameters = c("A", "B", "TD", "tau")
 )
-
 
 
 #' Update a model object with Fixed coefficients
@@ -182,18 +179,18 @@ SS_monoexp <- selfStart(
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' set.seed(13)
 #' t <- 1:60
-#' 
+#'
 #' ## create an exponential curve with random noise
 #' x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) + rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
-#' 
+#'
 #' (model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data))
 #' y <- predict(model, data)
-#' 
+#'
 #' ## update the model with a priori fixed parameter
 #' (model_fixed_TD <- fix_coefs(model, TD = 13))
 #' y2 <- predict(model_fixed_TD, data)
-#' 
+#'
 #' library(ggplot2)
 #' ggplot(data, aes(t, x)) +
 #'     theme_mnirs() +

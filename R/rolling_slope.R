@@ -7,13 +7,13 @@
 #'
 #' @details
 #' Uses the least squares formula on complete case data (ignoring `NA`s).
-#' 
+#'
 #' @returns A numeric slope in units of `x/t`.
-#' 
+#'
 #' @examples
 #' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
 #' mnirs:::slope(x)
-#' 
+#'
 #' @keywords internal
 slope <- function(
     x,
@@ -22,7 +22,7 @@ slope <- function(
 ) {
     ## validation =================================================
     args <- list(...)
-    
+
     if (!(args$bypass_checks %||% FALSE)) {
         if (!is.numeric(x)) {
             abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
@@ -37,13 +37,13 @@ slope <- function(
             ))
         }
     }
-    
+
     ## remove invalid
     complete <- which(is.finite(x) & is.finite(t))
     x <- x[complete]
     t <- t[complete]
-    n <- length(x)   
-    
+    n <- length(x)
+
     if (n < max(args$min_obs, 2L)) {
         return(NA_real_)
     }
@@ -93,8 +93,8 @@ slope <- function(
 #'   samples is estimated for `span` from the sample rate of `t`). If fewer
 #'   than the requires valid samples are present in the local vector, `NA` is
 #'   returned.
-#' 
-#' `partial = TRUE` allows calculation over partial windows with at least `2` 
+#'
+#' `partial = TRUE` allows calculation over partial windows with at least `2`
 #'   valid samples, such as at edge conditions or over missing data `NA`s.
 #'
 #' @seealso [zoo::rollapply()]
@@ -108,6 +108,7 @@ slope <- function(
 #' rolling_slope(x, span = 3, partial = TRUE)
 #' rolling_slope(x, width = 3, partial = TRUE)
 #'
+#' @keywords internal
 #' @export
 rolling_slope <- function(
     x,
@@ -196,12 +197,12 @@ rolling_slope <- function(
 #' @inheritParams rolling_slope
 #'
 #' @details
-#' When `direction = "auto"`, the net slope across all of `x` is calculated 
-#'   to determine the trend direction. If the net slope equals zero, will 
+#' When `direction = "auto"`, the net slope across all of `x` is calculated
+#'   to determine the trend direction. If the net slope equals zero, will
 #'   return the greatest absolute slope.
 #'
-#' When `direction = "positive"` or `"negative"`, returns the greatest 
-#'   respective directional slope. If no positive/negative slopes exist, 
+#' When `direction = "positive"` or `"negative"`, returns the greatest
+#'   respective directional slope. If no positive/negative slopes exist,
 #'   returns `NA` with a warning.
 #'
 #' @returns A named list containing:
@@ -210,7 +211,7 @@ rolling_slope <- function(
 #'   \item{`y`}{The response value predicted from `x` at `t`.}
 #'   \item{`t`}{The time value at the index of the peak slope window.}
 #'   \item{`idx`}{The index position of the peak slope.}
-#'   \item{`window_idx`}{An integer vector of indices for the peak slope 
+#'   \item{`window_idx`}{An integer vector of indices for the peak slope
 #'   window.}
 #'
 #' @examples
@@ -274,11 +275,7 @@ peak_slope <- function(
             ## fallback to magnitude comparison when net slope is zero/NA
             max_pos <- max(slopes, na.rm = TRUE)
             min_neg <- min(slopes, na.rm = TRUE)
-            if (abs(max_pos) >= abs(min_neg)) {
-                "positive"
-            } else {
-                "negative"
-            }
+            if (abs(max_pos) >= abs(min_neg)) "positive" else "negative"
         } else if (net_slope > 0) {
             "positive"
         } else {

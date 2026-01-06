@@ -27,7 +27,7 @@
 #'      \item{`"stop"`}{For a *stop-band* (band-reject) filter.}
 #'      \item{`"pass"`}{For a *pass-band* filter.}
 #'   }
-#' @param order An integer defining the filter order for 
+#' @param order An integer defining the filter order for
 #'   `method = "butterworth"` (*default* `order = 2`).
 #' @param W A one- or two-element numeric vector defining the filter cutoff
 #'   frequency(ies) for `method = "butterworth"`, as a fraction of the
@@ -97,7 +97,7 @@
 #'   as the number of samples around `idx` between `[idx - floor(width/2),`
 #'   `idx + floor(width/2)]`. Or by `span` as the timespan in units of
 #'   `time_channel` between `[t - span/2, t + span/2]`. Specifying `width`
-#'   is often faster than `span`. A partial moving average will be calculated 
+#'   is often faster than `span`. A partial moving average will be calculated
 #'   at the edges of the data.}
 #' }
 #'
@@ -110,7 +110,7 @@
 #'   available with `attributes()`.
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' 
+#'
 #' options(mnirs.verbose = FALSE)
 #'
 #' ## read example data
@@ -369,7 +369,7 @@ filter_mnirs.moving_average <- function(
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
-    
+
     ## processing ==========================================
     time_vec <- data[[time_channel]]
 
@@ -476,7 +476,7 @@ filter_moving_average <- function(
     }
 
     y <- vapply(window_idx, \(.idx) mean(x[.idx], na.rm = na.rm), numeric(1))
-    
+
     ## NaN to NA
     y[!is.finite(y)] <- NA_real_
     return(y)

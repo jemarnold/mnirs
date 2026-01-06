@@ -54,7 +54,7 @@
 #'   the number of samples centred on `idx` between
 #'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
 #'   in units of `time_channel` centred on `idx` between
-#'   `[t - span/2, t + span/2]`. Specifying `width` is often faster than 
+#'   `[t - span/2, t + span/2]`. Specifying `width` is often faster than
 #'   `span`. A partial moving average will be calculated at the edges of the
 #'   data.
 #'
@@ -355,7 +355,7 @@ replace_outliers <- function(
         msg1 = "one-element positive"
     )
     method <- match.arg(method)
-    
+
     ## process =====================================================
     window_idx <- compute_local_windows(
         t, width = width, span = span

@@ -42,11 +42,7 @@ NULL
 #' validate_numeric abort message construction
 #' @keywords internal
 abort_validation <- function(name, integer = FALSE, msg1 = "", msg2 = ".") {
-    type <- if (integer) {
-        "integer"
-    } else {
-        "numeric"
-    }
+    type <- if (integer) "integer" else "numeric"
 
     cli_abort(c(
         "x" = paste0(

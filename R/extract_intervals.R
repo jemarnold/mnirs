@@ -142,7 +142,7 @@
 #'     zero_time = TRUE
 #' ) |>
 #'     resample_mnirs() ## avoid issues ensemble-averaging irregular samples
-#' 
+#'
 #' ## extract intervals as a list of data frames
 #' extract_intervals(
 #'     data,
@@ -152,7 +152,7 @@
 #'     group_events = "distinct", ## return all unique intervals
 #'     zero_time = TRUE ## start time from zero
 #' )
-#' 
+#'
 #' ## ensemble-average across multiple intervals
 #' interval_list <- extract_intervals(
 #'     data,
@@ -162,7 +162,7 @@
 #'     group_events = "ensemble", ## return ensemble-averaged intervals
 #'     zero_time = TRUE
 #' )
-#' 
+#'
 #' library(ggplot2)
 #' plot(interval_list[[1L]], label_time = TRUE) +
 #'     geom_vline(xintercept = 0, linetype = "dotted")
@@ -573,22 +573,20 @@ ensemble_intervals <- function(
         ))
     }
 
+    col_n <- length(nirs_channels)
     ## nirs_channel-wise means per unique time matrix operation
     ## nirs_channel must be vectorised and exist in the interval_data
     channel_matrix <- as.matrix(df_long[, nirs_channels, drop = FALSE])
     result_matrix <- vapply(time_groups, \(.idx) {
         colMeans(channel_matrix[.idx, , drop = FALSE], na.rm = TRUE)
-    }, numeric(length(nirs_channels)))
-
-    result_cols <- if (is.null(dim(result_matrix))) {
-        stats::setNames(as.data.frame(result_matrix), nirs_channels)
-    } else {
-        stats::setNames(as.data.frame(t(result_matrix)), nirs_channels)
-    }
+    }, numeric(col_n))
 
     result <- data.frame(
         stats::setNames(list(unique_times), time_channel),
-        result_cols
+        stats::setNames(
+            as.data.frame(if (col_n == 1L) result_matrix else t(result_matrix)),
+            nirs_channels
+        )
     )
 
     ## add metadata
@@ -620,7 +618,7 @@ group_intervals <- function(
 ) {
     time_channel <- metadata$time_channel
     n_intervals <- length(interval_list)
-    
+
     ## return distinct intervals
     if (n_intervals == 1L || group_events[[1L]][1L] == "distinct") {
         result <- lapply(interval_list, \(.df) {

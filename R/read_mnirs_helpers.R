@@ -22,7 +22,6 @@ read_file <- function(file_path) {
             data.table::tstrsplit(dt[[1L]], ",", fixed = TRUE)
         )
         data_raw <- as.data.frame(data_raw)
-
     } else if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
         ## report error when file is open and cannot be accessed by readxl
         data_raw <- tryCatch(
@@ -46,7 +45,6 @@ read_file <- function(file_path) {
                 }
             }
         )
-
     } else {
         ## validation: check file types
         cli_abort(c(
@@ -272,7 +270,7 @@ select_rename_data <- function(
     result <- stats::setNames(data, data_names)
     result <- result[, selected_cols, drop = FALSE]
     channel_names_idx <- match(channel_vec, names(result))
-    
+
     ## prioritise user input channel names if duplicates with result names
     prioritise_custom <- rename_duplicates(c(renamed_channels, names(result)))
     names(result) <- prioritise_custom[!prioritise_custom %in% renamed_channels]
@@ -311,7 +309,6 @@ clean_invalid <- function(x) {
     }
     return(x)
 }
-
 
 
 #' Remove Empty Rows and Columns

@@ -768,6 +768,38 @@ test_that("ensemble_intervals warns on irregular samples with verbose", {
     )
 })
 
+test_that("ensemble_intervals returns the right number of dims", {
+    interval1 <- create_mock_interval(time_start = 0, n = 5, event_time = 0)
+    interval2 <- create_mock_interval(
+        time_start = 0.05,
+        n = 5,
+        event_time = 0.05
+    )
+    interval_list <- list(interval_1 = interval1, interval_2 = interval2)
+    metadata <- list(time_channel = "time", sample_rate = 10)
+    nirs_channels = c("smo2_left")
+    
+    result <- ensemble_intervals(
+        interval_list = interval_list,
+        nirs_channels = nirs_channels,
+        metadata = metadata,
+        verbose = FALSE
+    )
+    
+    expect_equal(ncol(result), length(nirs_channels) + 1)
+
+    nirs_channels = c("smo2_left", "smo2_right")
+    
+    result <- ensemble_intervals(
+        interval_list = interval_list,
+        nirs_channels = nirs_channels,
+        metadata = metadata,
+        verbose = FALSE
+    )
+    
+    expect_equal(ncol(result), length(nirs_channels) + 1)
+})
+
 
 ## group_intervals() ==================================================
 test_that("group_intervals returns distinct intervals unchanged", {
@@ -1072,7 +1104,7 @@ test_that("extract_intervals respects nirs_channels metadata", {
         group_events = "ensemble",
         verbose = TRUE
     )
-    
+
     expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
 })
 
@@ -1100,7 +1132,7 @@ test_that("extract_intervals works on Moxy data", {
     expect_length(result[[1L]], 3)
     expect_named(result[[1L]], c("hh:mm:ss", "smo2_left", "smo2_right"))
     ## range of time_channel
-    expect_gte(min(result[[1L]][[1]]), 870-30)
+    expect_gte(min(result[[1L]][[1]]), 870 - 30)
     expect_equal(min(result[[1L]][[1]]), 870 - 30, tolerance = 1)
     expect_lte(max(result[[1L]][[1]]), 870 + 180)
     expect_equal(max(result[[1L]][[1]]), 870 + 180, tolerance = 1)
@@ -1118,7 +1150,7 @@ test_that("extract_intervals works on train.red data", {
         nirs_channels = c(smo2_left = "SmO2", smo2_right = "SmO2"),
         time_channel = c(time = "Timestamp (seconds passed)"),
         verbose = FALSE
-    ) |> 
+    ) |>
         resample_mnirs(verbose = FALSE)
 
     result <- extract_intervals(
