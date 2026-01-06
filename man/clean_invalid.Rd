@@ -2,11 +2,13 @@
 % Please edit documentation in R/read_mnirs_helpers.R
 \name{clean_invalid}
 \alias{clean_invalid}
-\title{Standardise invalid to NA values by reference}
+\title{Standardise invalid to NA values and round numeric to avoid float
+precision error}
 \usage{
-clean_invalid(dt)
+clean_invalid(x)
 }
 \description{
-Standardise invalid to NA values by reference
+Standardise invalid to NA values and round numeric to avoid float
+precision error
 }
 \keyword{internal}

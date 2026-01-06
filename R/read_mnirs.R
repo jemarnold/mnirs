@@ -125,17 +125,17 @@ read_mnirs <- function(
     }
 
     ## import data_raw from either excel or csv
-    dt <- read_file(file_path)
+    df <- read_file(file_path)
 
     ## extract the data_table, and name by header row
     table_list <- read_data_table(
-        dt,
+        df,
         nirs_channels,
         time_channel,
         event_channel,
         rows = 200L
     )
-    dt <- table_list$data_table
+    df <- table_list$data_table
     file_header <- table_list$file_header
 
     ## detect mNIRS device. Returns NULL if not found
@@ -143,49 +143,49 @@ read_mnirs <- function(
     nirs_device <- detect_mnirs_device(file_header)
 
     ## attempt to detect `time_channel` automatically
-    time_channel <- detect_time_channel(dt, time_channel, nirs_device, verbose)
+    time_channel <- detect_time_channel(df, time_channel, nirs_device, verbose)
 
     ## rename from channel names, make duplicates unique, keep columns
     ## return list(data_renamed, nirs_renamed, time_renamed, event_renamed)
     renamed_list <- select_rename_data(
-        dt,
+        df,
         nirs_channels,
         time_channel,
         event_channel,
         keep_all,
         verbose
     )
-    dt <- renamed_list$data
+    df <- renamed_list$data
     nirs_renamed <- renamed_list$nirs_channel
     time_renamed <- renamed_list$time_channel
     event_renamed <- renamed_list$event_channel
 
     ## remove empty (NA) columns and rows
-    dt <- remove_empty_rows_cols(dt)
+    df <- remove_empty_rows_cols(df)
     ## convert column types
-    dt <- convert_types(dt)
-    ## standardise invalid to NA by col type
-    dt <- clean_invalid(dt)
+    df <- utils::type.convert(df, na.strings = c("NA", ""), as.is = TRUE)
     ## convert POSIXct to numeric and/or recalc time from zero
-    dt <- parse_time_channel(dt, time_renamed, add_timestamp, zero_time)
+    df <- parse_time_channel(df, time_renamed, add_timestamp, zero_time)
+    ## standardise invalid to NA
+    df[] <- lapply(df, \(.x) clean_invalid(.x))
 
     ## validate and estimate sample rate
     ## will write new "time" column if Oxysoft export rate detected
     ## return list(data_sampled, time_renamed, sample_rate)
     sample_list <- parse_sample_rate(
-        dt,
+        df,
         file_header,
         time_renamed,
         sample_rate,
         nirs_device,
         verbose
     )
-    dt <- sample_list$data
+    df <- sample_list$data
     time_renamed <- sample_list$time_channel
     sample_rate <- sample_list$sample_rate
 
     ## print warnings for irregular samples
-    detect_irregular_samples(dt[[time_renamed]], time_renamed, verbose)
+    detect_irregular_samples(df[[time_renamed]], time_renamed, verbose)
 
     ## assign metadata to attributes(data)
     metadata <- list(
@@ -197,7 +197,7 @@ read_mnirs <- function(
         verbose = verbose
     )
 
-    return(create_mnirs_data(dt, metadata))
+    return(create_mnirs_data(df, metadata))
 }
 
 
@@ -253,11 +253,6 @@ create_mnirs_data <- function(data, ...) {
         args[[1L]]
     } else {
         args
-    }
-
-    ## convert data. table to data. frame for tibble
-    if (data.table::is.data.table(data)) {
-        data <- as.data.frame(data)
     }
 
     metadata <- utils::modifyList(attributes(data), incoming_metadata)

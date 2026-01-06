@@ -706,67 +706,30 @@ test_that("select_rename_data() prioritises custom names over data", {
 })
 
 ## clean_invalid() ==================================================
-## updated to handle data.table modification in place
 test_that("clean_invalid handles character vectors", {
-    expect_equal(
-        clean_invalid(data.table::data.table(c("a", "", "b"))),
-        data.table::data.table(c("a", NA_character_, "b"))
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(c("x", "NA", "y"))),
-        data.table::data.table(c("x", NA_character_, "y"))
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(c("", "NA"))),
-        data.table::data.table(c(NA_character_, NA_character_))
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table("")),
-        data.table::data.table(NA_character_)
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(NA_character_)),
-        data.table::data.table(NA_character_)
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(character(0))),
-        data.table::data.table(character(0))
-    )
+    expect_equal(clean_invalid(c("a", "", "b")), c("a", NA_character_, "b"))
+    expect_equal(clean_invalid(c("x", "NA", "y")), c("x", NA_character_, "y"))
+    expect_equal(clean_invalid(c("", "NA")), c(NA_character_, NA_character_))
+    expect_equal(clean_invalid(""), NA_character_)
+    expect_equal(clean_invalid(NA_character_), NA_character_)
+    expect_equal(clean_invalid(character(0)), character(0))
 })
 
 test_that("clean_invalid handles numeric vectors", {
     ## skip, avoid loss of precision
     # expect_equal(
-    #     clean_invalid(data.table::data.table(c(1.2345678, 2.3, NA))),
-    #     data.table::data.table(c(1.234568, 2.3, NA_real_))
+    #     clean_invalid(c(1.2345678, 2.3, NA)),
+    #     c(1.234568, 2.3, NA_real_)
     # )
-    expect_equal(
-        clean_invalid(data.table::data.table(c(0, -0))),
-        data.table::data.table(c(0, 0))
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(c(Inf, -Inf, NaN))),
-        data.table::data.table(rep(NA_real_, 3))
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(numeric(0))),
-        data.table::data.table(numeric(0))
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(NA_real_)),
-        data.table::data.table(NA_real_)
-    )
+    expect_equal(clean_invalid(c(0, -0)), c(0, 0))
+    expect_equal(clean_invalid(c(Inf, -Inf, NaN)), rep(NA_real_, 3))
+    expect_equal(clean_invalid(numeric(0)), numeric(0))
+    expect_equal(clean_invalid(NA_real_), NA_real_)
 })
 
 test_that("clean_invalid does nothing to other types", {
-    expect_equal(
-        clean_invalid(data.table::data.table(TRUE)),
-        data.table::data.table(TRUE)
-    )
-    expect_equal(
-        clean_invalid(data.table::data.table(list(1, 2))),
-        data.table::data.table(list(1, 2))
-    )
+    expect_equal(clean_invalid(TRUE), TRUE)
+    expect_equal(clean_invalid(list(1, 2)), list(1, 2))
 })
 
 ## remove_empty_rows_cols() ===========================================

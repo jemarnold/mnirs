@@ -15,12 +15,13 @@ read_file <- function(file_path) {
             file_path,
             sep = "", ## read single col to preserve metadata rows
             header = FALSE,
-            colClasses = "character",
-            na.strings = c("", "NA")
+            colClasses = "character"
         )
         ## manual sep rows by "," and construct data.frame
-        data_raw <- data.table::tstrsplit(dt[[1L]], ",", fixed = TRUE)
-        data.table::setDT(data_raw)
+        data_raw <- data.table::setDT(
+            data.table::tstrsplit(dt[[1L]], ",", fixed = TRUE)
+        )
+        data_raw <- as.data.frame(data_raw)
 
     } else if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
         ## report error when file is open and cannot be accessed by readxl
@@ -45,9 +46,6 @@ read_file <- function(file_path) {
                 }
             }
         )
-
-        ## convert to data.table for consistent downstream handling
-        data.table::setDT(data_raw)
 
     } else {
         ## validation: check file types
@@ -93,9 +91,8 @@ read_data_table <- function(
     }
 
     ## extract the data_table, and name by header row
-    col_names <- as.character(data[header_row, ])
-    data_table <- data[(header_row + 1L):nrow(data), ]
-    data.table::setnames(data_table, col_names)
+    rows <- (header_row + 1L):nrow(data)
+    data_table <- stats::setNames(data[rows, ], data[header_row, ])
     file_header <- data[seq_len(header_row - 1L), ]
 
     return(list(
@@ -272,15 +269,14 @@ select_rename_data <- function(
     selected_cols <- if (keep_all) data_names else channel_vec
 
     ## rename columns from specified channel names
-    data.table::setnames(data, data_names)
-    result <- data[, selected_cols, drop = FALSE]
+    result <- stats::setNames(data, data_names)
+    result <- result[, selected_cols, drop = FALSE]
     channel_names_idx <- match(channel_vec, names(result))
     
     ## prioritise user input channel names if duplicates with result names
     prioritise_custom <- rename_duplicates(c(renamed_channels, names(result)))
-    final_names <- prioritise_custom[!prioritise_custom %in% renamed_channels]
-    final_names[channel_names_idx] <- renamed_channels
-    data.table::setnames(result, final_names)
+    names(result) <- prioritise_custom[!prioritise_custom %in% renamed_channels]
+    names(result)[channel_names_idx] <- renamed_channels
 
     renamed <- !names(result)[channel_names_idx] %in% channel_inputs
 
@@ -304,79 +300,26 @@ select_rename_data <- function(
 }
 
 
-#' Remove empty rows and columns
+#' Standardise invalid to NA values and round numeric to avoid float
+#' precision error
 #' @keywords internal
-remove_empty_rows_cols <- function(dt) {
-    col_names <- names(dt)
-
-    ## row-wise: count non-empty values per row
-    row_non_empty <- Reduce(
-        `+`,
-        lapply(col_names, \(.col) !is_empty(dt[[.col]]))
-    )
-    dt <- dt[row_non_empty > 0L, ]
-
-    ## column-wise: identify columns with at least one non-empty value
-    col_has_data <- vapply(col_names, \(.col) {
-        any(!is_empty(dt[[.col]]))
-    }, logical(1))
-
-    cols_to_keep <- col_names[col_has_data]
-
-    return(dt[, cols_to_keep, drop = FALSE])
-}
-
-
-#' Convert character columns to appropriate types
-#' @keywords internal
-convert_types <- function(dt) {
-    col_names <- names(dt)
-
-    ## identify character columns
-    is_char <- vapply(col_names, \(.col) is.character(dt[[.col]]), logical(1))
-    char_cols <- col_names[is_char]
-
-    if (length(char_cols) == 0L) {
-        return(dt)
+clean_invalid <- function(x) {
+    if (is.character(x)) {
+        x[x %in% c("", "NA")] <- NA_character_
+    } else if (is.numeric(x)) {
+        x[!is.finite(x)] <- NA_real_
     }
-
-    ## identify which can be converted to numeric
-    can_be_numeric <- vapply(char_cols, \(.col) {
-        x <- dt[[.col]]
-        non_na <- suppressWarnings(as.numeric(x[!is.na(x) & x != ""]))
-        length(non_na) == 0L || !any(is.na(non_na))
-    }, logical(1))
-
-    num_cols <- char_cols[can_be_numeric]
-
-    ## convert by reference
-    lapply(num_cols, \(.col) {
-        data.table::set(dt, j = .col, value = as.numeric(dt[[.col]]))
-        NULL
-    })
-
-    return(dt)
+    return(x)
 }
 
 
-#' Standardise invalid to NA values by reference
+
+#' Remove Empty Rows and Columns
 #' @keywords internal
-clean_invalid <- function(dt) {
-    ## process each column by reference
-    lapply(names(dt), \(.col) {
-        x <- dt[[.col]]
-        if (is.character(x)) {
-            idx <- which(x %in% c("", "NA"))
-            data.table::set(dt, i = idx, j = .col, value = NA_character_)
-        } else if (is.numeric(x)) {
-            idx <- which(!is.finite(x))
-            data.table::set(dt, i = idx, j = .col, value = NA_real_)
-        }
-    })
-
-    return(dt)
+remove_empty_rows_cols <- function(data) {
+    data <- data[rowSums(!is_empty(data)) > 0, , drop = FALSE]
+    return(data[, colSums(!is_empty(data)) > 0, drop = FALSE])
 }
-
 
 #' Parse time_channel character or dttm to numeric
 #' @keywords internal
@@ -417,29 +360,15 @@ parse_time_channel <- function(
         time_vec <- as.numeric(difftime(time_vec, time_vec[1L], units = "secs"))
     }
 
-    # if (exists("timestamp_vec") && add_timestamp) {
-    #     col_names <- names(data)
-    #     ## add_timestamp preserves dttm column or adds
-    #     time_idx <- match(time_channel, col_names)
-    #     data_names <- append(col_names, "timestamp", time_idx)
-    #     data[["timestamp"]] <- timestamp_vec
-    #     data <- data[data_names]
-    # }
-
-    # data[[time_channel]] <- time_vec
-
-    data.table::set(data, j = time_channel, value = time_vec)
-    col_names <- names(data)
+    data[[time_channel]] <- time_vec
 
     if (!is.null(timestamp_vec) && add_timestamp) {
+        col_names <- names(data)
+        ## add_timestamp preserves dttm column or adds
         time_idx <- match(time_channel, col_names)
+        data_names <- append(col_names, "timestamp", time_idx)
         data[["timestamp"]] <- timestamp_vec
-        col_order <- c(
-            col_names[seq_len(time_idx)],
-            "timestamp",
-            setdiff(col_names, c(col_names[seq_len(time_idx)], "timestamp"))
-        )
-        data.table::setcolorder(data, col_order)
+        data <- data[data_names]
     }
 
     return(data)

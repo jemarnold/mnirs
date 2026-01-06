@@ -2,11 +2,11 @@
 % Please edit documentation in R/read_mnirs_helpers.R
 \name{remove_empty_rows_cols}
 \alias{remove_empty_rows_cols}
-\title{Remove empty rows and columns}
+\title{Remove Empty Rows and Columns}
 \usage{
-remove_empty_rows_cols(dt)
+remove_empty_rows_cols(data)
 }
 \description{
-Remove empty rows and columns
+Remove Empty Rows and Columns
 }
 \keyword{internal}
