@@ -54,8 +54,8 @@ test_that("filter_moving_average() handles NA values correctly", {
     result <- filter_moving_average(
         x,
         width = 3,
-        partial = FALSE,
-        na.rm = TRUE,
+        partial = FALSE, ## min 3 valid obs
+        na.rm = TRUE, ## mean excludes NA
     )
     expect_equal(result, c(rep(NA, 3), 4, NA))
     
@@ -177,6 +177,14 @@ test_that("filter_moving_average() handles edge cases", {
         filter_moving_average(c(NA, NA, NA), width = 3, verbose = FALSE),
         "x.*numeric"
     )
+})
+
+test_that("moving_average with insufficient width returns NA with warning", {
+    t <- 1:10
+    x <- c(1, NA, 3, NA, 5, NA, 7, NA, 9, NA)
+
+    expect_all_equal(filter_moving_average(x, t, width = 2), NA_real_) |> 
+        expect_warning("Less than.*2.*valid samples")
 })
 
 ## filter_butter() =========================================

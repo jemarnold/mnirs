@@ -54,15 +54,15 @@
 #'   the number of samples centred on `idx` between
 #'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
 #'   in units of `time_channel` centred on `idx` between
-#'   `[t - span/2, t + span/2]`. Specifying `width` calls [roll::roll_median()] 
-#'   which is often much faster than specifying `span`. A partial moving 
-#'   average will be calculated at the edges of the data.
+#'   `[t - span/2, t + span/2]`. Specifying `width` is often faster than
+#'   `span`. A partial moving average will be calculated at the edges of the
+#'   data.
 #'
 #' @returns
 #' `replace_mnirs()` returns a [tibble][tibble::tibble-package] of class
 #'   *"mnirs"* with metadata available with `attributes()`.
 #'
-#' @seealso [pracma::hampel()], [stats::approx()], [roll::roll_median()]
+#' @seealso [pracma::hampel()], [stats::approx()]
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #'
@@ -309,8 +309,7 @@ replace_invalid <- function(
 #' @details
 #' `replace_outliers()` will compute rolling local median values across `x`,
 #'   defined by either `width` number of samples, or `span` timespan in units
-#'   of `t`. Specifying `width` calls [roll::roll_median()] which is often
-#'   much faster than specifying `span`.
+#'   of `t`. Specifying `width` is often faster than `span`.
 #'
 #' - Outliers are detected with robust median absolute deviation (MAD) method
 #'   adapted from [pracma::hampel()]. Outliers equal to or less than the
@@ -356,30 +355,14 @@ replace_outliers <- function(
         msg1 = "one-element positive"
     )
     method <- match.arg(method)
-    
-    ## process =====================================================
-    if (!is.null(width) && is.null(span)) {
-        ## use {roll} for fast rolling
-        validate_numeric(
-            width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
-        )
-        rlang::check_installed(
-            c("roll", "RcppParallel"),
-            reason = "to use fast rolling functions"
-        )
-        if (rlang::is_installed("roll")) {
-            local_medians <- rolling_median(x, width)
-        }
-    }
 
+    ## process =====================================================
     window_idx <- compute_local_windows(
         t, width = width, span = span
     )
-    if (!exists("local_medians")) {
-        local_medians <- compute_local_fun(
-            x, window_idx, median, na.rm = TRUE
-        )
-    }
+    local_medians <- compute_local_fun(
+        x, window_idx, median, na.rm = TRUE
+    )
     is_outlier <- compute_outliers(
         x, window_idx, local_medians, outlier_cutoff
     )
@@ -445,7 +428,7 @@ replace_missing <- function(
 
     ## process ==============================================
     if (method %in% c("linear", "constant")) {
-        y <- approx(
+        y <- stats::approx(
             x = t,
             y = x,
             xout = list(...)$xout %||% t, ## = t unless explicitly specified by hidden option

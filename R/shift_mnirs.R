@@ -79,7 +79,7 @@
 #'         span = 120,        ## shift the mean of the first 120 sec
 #'         position = "first"
 #'     )
-#' 
+#'
 #' library(ggplot2)
 #' plot(data, label_time = TRUE) +
 #'     geom_hline(yintercept = 0, linetype = "dotted")
@@ -96,8 +96,6 @@ shift_mnirs <- function(
     position = c("min", "max", "first"),
     verbose = TRUE
 ) {
-    ## TODO need to fix edges where only half width/span included
-
     ## validation =============================================
     ## do nothing condition
     if (is.null(c(to, by))) {

@@ -42,11 +42,7 @@ NULL
 #' validate_numeric abort message construction
 #' @keywords internal
 abort_validation <- function(name, integer = FALSE, msg1 = "", msg2 = ".") {
-    type <- if (integer) {
-        "integer"
-    } else {
-        "numeric"
-    }
+    type <- if (integer) "integer" else "numeric"
 
     cli_abort(c(
         "x" = paste0(
@@ -448,53 +444,4 @@ make_list <- function(x) {
     } else {
         return(list(x))
     }
-}
-
-
-#' Detect if numeric values fall within range of a vector
-#'
-#' Vectorised check for `x %in% vec`, inclusive or exclusive of left and right
-#' boundary values, specified independently.
-#'
-#' @param x A numeric vector.
-#' @param vec A numeric vector from which `left` and `right` boundary values
-#'   for `x` will be taken.
-#' @param inclusive A character vector to specify which of `left` and/or
-#'   `right` boundary values should be included in the range, or both (the
-#'   default), or excluded if `FALSE`.
-#'
-#' @details
-#' `inclusive = FALSE` can be used to test for positive non-zero values:
-#'   `within(x, c(0, Inf), inclusive = FALSE)`.
-#'
-#' @returns A logical vector the same length as `x`.
-#'
-#' @seealso [dplyr::between()]
-#'
-#' @keywords internal
-within <- function(x, vec, inclusive = c("left", "right")) {
-    if (!is.numeric(x)) {
-        abort_validation(substitute(x))
-    }
-    if (!is.numeric(vec)) {
-        abort_validation(substitute(vec))
-    }
-    inclusive <- match.arg(
-        as.character(inclusive),
-        choices = c("left", "right", "FALSE"),
-        several.ok = TRUE
-    )
-
-    ## extract bounds from vec
-    left <- min(vec, na.rm = TRUE)
-    right <- max(vec, na.rm = TRUE)
-
-    if ("FALSE" %in% inclusive) {
-        return(x > left & x < right)
-    }
-
-    left_op <- if ("left" %in% inclusive) `>=` else `>`
-    right_op <- if ("right" %in% inclusive) `<=` else `<`
-
-    return(left_op(x, left) & right_op(x, right))
 }

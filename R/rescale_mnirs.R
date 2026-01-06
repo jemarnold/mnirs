@@ -3,17 +3,17 @@
 #' Expand or reduce the range (min and max values) of data channels to a new
 #' amplitude/dynamic range, e.g. re-scale the range of NIRS data to `c(0, 100)`.
 #'
-#' @param nirs_channels A `list()` of character vectors indicating grouping 
-#'   structure of mNIRS channel names to operate on (see *Details*). Must 
-#'   match column names in `data` exactly. Retrieved from metadata if not 
+#' @param nirs_channels A `list()` of character vectors indicating grouping
+#'   structure of mNIRS channel names to operate on (see *Details*). Must
+#'   match column names in `data` exactly. Retrieved from metadata if not
 #'   defined explicitly.
 #'   \describe{
 #'      \item{`list("A", "B", "C")`}{Will operate on each channel independently,
 #'      losing the relative scaling between channels.}
 #'      \item{`list(c("A", "B", "C"))`}{Will operate on all channels together,
 #'      preserving the relative scaling between channels.}
-#'      \item{`list(c("A", "B"), c("C", "D"))`}{Will operate on channels `A` 
-#'      & `B` in one group, and `C` & `D` in another group, preserving 
+#'      \item{`list(c("A", "B"), c("C", "D"))`}{Will operate on channels `A`
+#'      & `B` in one group, and `C` & `D` in another group, preserving
 #'      relative scaling within, but not between groups.}
 #'   }
 #' @param range A numeric vector in the form `c(min, max)`, indicating the
@@ -21,16 +21,16 @@
 #' @inheritParams validate_mnirs
 #'
 #' @details
-#' `nirs_channels = list()` can be used to group data channels (column names) 
+#' `nirs_channels = list()` can be used to group data channels (column names)
 #'   to preserve absolute or relative scaling.
 #'
-#' - Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will be 
-#'   re-scaled to a common range, and the relative scaling within that group 
+#' - Channels grouped together in a vector (e.g. `list(c("A", "B"))`) will be
+#'   re-scaled to a common range, and the relative scaling within that group
 #'   will be preserved.
 #'
-#' - Channels in separate list vectors (e.g. `list("A", "B")`) will be 
+#' - Channels in separate list vectors (e.g. `list("A", "B")`) will be
 #'   re-scaled independently, and relative scaling between groups will be lost.
-#' 
+#'
 #' - A single vector of channel names (e.g. `c("A", "B")`) will group
 #'   channels together.
 #'
@@ -38,8 +38,8 @@
 #'   will be passed through untouched to the output data frame.
 #'
 #' `nirs_channels` can be retrieved automatically from `data` of class
-#'   *"mnirs"* which has been processed with `{mnirs}`, if not defined 
-#'   explicitly. This will default to returning all `nirs_channels` grouped 
+#'   *"mnirs"* which has been processed with `{mnirs}`, if not defined
+#'   explicitly. This will default to returning all `nirs_channels` grouped
 #'   together, and should be defined explicitly for other grouping arrangements.
 #'
 #' @returns

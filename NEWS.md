@@ -1,9 +1,23 @@
+# mnirs 0.3.0
+
+* Create `peak_slope()`. `slope()` and `rolling_slope()` become internal.
+* Remove `na.rm` arg from `slope()`, `rolling_slope()`, `peak_slope()` in favour of opinionated `na.rm = TRUE` behaviour.
+    * `partial = FALSE` effectively covers `na.rm = FALSE` where fewer than `width` number valid samples exist in local vector.
+    * `na.rm` arg currently remains in `filter_mnirs()` functions, but this may be removed in the future.
+* Fix `read_mnirs()` internally `read_file()` to better handle .csv files.
+    * Implement `data.table::fread()` to handle .csv with empty rows and long string metadata in the header above the data table.
+    * Awaiting future expanded `{data.table}` implementation across `{mnirs}`, i.e. for `data.table::froll*` functions.
+* Fix `filter_moving_average()` to correctly identify windows where `partial = FALSE` was not met due to `NA`s.
+* Remove internal `{roll}` dependency.
+* Update documentation in expectation of CRAN submission.
+    * Remove internal function examples to minimise `\donttest()` issues.
+
 # mnirs 0.2.0
 
 * Implement tidy evaluation with `{rlang}` and `{tidyselect}`.
 * Update function documentation & examples, `README`, vignette.
-* Fixed `filter_moving_average()` and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
-* Fixed `shift_mnirs()` to correctly use `width` and `span` arguments.
+* Fix `filter_moving_average()` and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
+* Fix `shift_mnirs()` to correctly use `width` and `span` arguments.
 
 # mnirs 0.1.9
 
