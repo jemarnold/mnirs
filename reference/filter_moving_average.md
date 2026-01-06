@@ -73,9 +73,7 @@ defined by either `width` as the number of samples around `idx` between
 `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
 timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
 
-Specifying `width` calls
-[`roll::roll_mean()`](https://rdrr.io/pkg/roll/man/roll_mean.html) which
-is often much faster than specifying `span`.
+Specifying `width` is often faster than `span`.
 
 If there are no valid values within the calculation window, will return
 `NA`. A partial moving average will be calculated at the edges of the
@@ -83,8 +81,7 @@ data.
 
 ## See also
 
-[`zoo::rollmean()`](https://rdrr.io/pkg/zoo/man/rollmean.html),
-[`roll::roll_mean()`](https://rdrr.io/pkg/roll/man/roll_mean.html)
+[`zoo::rollmean()`](https://rdrr.io/pkg/zoo/man/rollmean.html)
 
 ## Examples
 

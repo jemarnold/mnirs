@@ -1,16 +1,53 @@
 # Changelog
 
+## mnirs 0.3.0
+
+- Create
+  [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md).
+  [`slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md)
+  and
+  [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md)
+  become internal.
+- Remove `na.rm` arg from
+  [`slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
+  [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
+  [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+  in favour of opinionated `na.rm = TRUE` behaviour.
+  - `partial = FALSE` effectively covers `na.rm = FALSE` where fewer
+    than `width` number valid samples exist in local vector.
+  - `na.rm` arg currently remains in
+    [`filter_mnirs()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
+    functions, but this may be removed in the future.
+- Fix
+  [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+  internally
+  [`read_file()`](https://jemarnold.github.io/mnirs/reference/read_file.md)
+  to better handle .csv files.
+  - Implement
+    [`data.table::fread()`](https://rdatatable.gitlab.io/data.table/reference/fread.html)
+    to handle .csv with empty rows and long string metadata in the
+    header above the data table.
+  - Awaiting future expanded [data.table](https://r-datatable.com)
+    implementation across [mnirs](https://jemarnold.github.io/mnirs/),
+    i.e. for `data.table::froll*` functions.
+- Fix
+  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
+  to correctly identify windows where `partial = FALSE` was not met due
+  to `NA`s.
+- Remove internal [roll](https://github.com/jasonjfoster/roll)
+  dependency.
+- Update documentation in expectation of CRAN submission.
+  - Remove internal function examples to minimise `\donttest()` issues.
+
 ## mnirs 0.2.0
 
 - Implement tidy evaluation with [rlang](https://rlang.r-lib.org) and
   [tidyselect](https://tidyselect.r-lib.org).
 - Update function documentation & examples, `README`, vignette.
-- Fixed
+- Fix
   [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
-  and
-  [`rolling_mean()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
-  to correctly use `partial` and `na.rm` arguments.
-- Fixed
+  and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
+- Fix
   [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md)
   to correctly use `width` and `span` arguments.
 
@@ -60,7 +97,7 @@
     [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
     [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md),
     new functions
-    [`slope()`](https://jemarnold.github.io/mnirs/reference/slope.md),
+    [`slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
     [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md).
 - Update
   [`validate_numeric()`](https://jemarnold.github.io/mnirs/reference/validate_mnirs.md)

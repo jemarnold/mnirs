@@ -193,10 +193,9 @@ detection and median interpolation. This window can be specified by
 either `width` as the number of samples centred on `idx` between
 `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the
 timespan in units of `time_channel` centred on `idx` between
-`[t - span/2, t + span/2]`. Specifying `width` calls
-[`roll::roll_median()`](https://rdrr.io/pkg/roll/man/roll_median.html)
-which is often much faster than specifying `span`. A partial moving
-average will be calculated at the edges of the data.
+`[t - span/2, t + span/2]`. Specifying `width` is often faster than
+`span`. A partial moving average will be calculated at the edges of the
+data.
 
 `replace_invalid()` can be used to remove known invalid values in
 exported data.
@@ -209,9 +208,7 @@ exported data.
 
 `replace_outliers()` will compute rolling local median values across
 `x`, defined by either `width` number of samples, or `span` timespan in
-units of `t`. Specifying `width` calls
-[`roll::roll_median()`](https://rdrr.io/pkg/roll/man/roll_median.html)
-which is often much faster than specifying `span`.
+units of `t`. Specifying `width` is often faster than `span`.
 
 - Outliers are detected with robust median absolute deviation (MAD)
   method adapted from `pracma::hampel()`. Outliers equal to or less than
@@ -256,8 +253,7 @@ specified by `method`.
 ## See also
 
 `pracma::hampel()`,
-[`stats::approx()`](https://rdrr.io/r/stats/approxfun.html),
-[`roll::roll_median()`](https://rdrr.io/pkg/roll/man/roll_median.html)
+[`stats::approx()`](https://rdrr.io/r/stats/approxfun.html)
 
 ## Examples
 

@@ -6,26 +6,14 @@ rolling sample windows.
 compute_outliers(): Computes a vector of logicals indicating local
 outliers of x within a list of rolling sample windows window_idx.
 compute_valid_neighbours(): Compute a list of rolling window indices along
-x to either side of NAs.
-rolling_median(): Compute rolling median using roll
-with configurable alignment
-rolling_mean(): Compute rolling mean using roll
-with configurable alignment
-rolling_lm(): Compute rolling linear regression slopes using
-roll with configurable alignment"><meta property="og:description" content="compute_local_windows(): Compute a list of rolling window indices along a
+x to either side of NAs."><meta property="og:description" content="compute_local_windows(): Compute a list of rolling window indices along a
 time variable t.
 compute_local_fun(): Compute a rolling function along x from a list of
 rolling sample windows.
 compute_outliers(): Computes a vector of logicals indicating local
 outliers of x within a list of rolling sample windows window_idx.
 compute_valid_neighbours(): Compute a list of rolling window indices along
-x to either side of NAs.
-rolling_median(): Compute rolling median using roll
-with configurable alignment
-rolling_mean(): Compute rolling mean using roll
-with configurable alignment
-rolling_lm(): Compute rolling linear regression slopes using
-roll with configurable alignment"><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@jem_arnold"><meta name="twitter:site" content="@jem_arnold"></head><body>
+x to either side of NAs."><meta name="twitter:card" content="summary"><meta name="twitter:creator" content="@jem_arnold"><meta name="twitter:site" content="@jem_arnold"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -33,7 +21,7 @@ roll with configurable alignment"><meta name="twitter:card" content="summary"><m
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,12 +62,6 @@ rolling sample windows.</p>
 outliers of <code>x</code> within a list of rolling sample windows <code>window_idx</code>.</p>
 <p><code>compute_valid_neighbours()</code>: Compute a list of rolling window indices along
 <code>x</code> to either side of <code>NA</code>s.</p>
-<p><code>rolling_median()</code>: Compute rolling median using <a href="https://rdrr.io/pkg/roll/man/roll-package.html" class="external-link">roll</a>
-with configurable alignment</p>
-<p><code>rolling_mean()</code>: Compute rolling mean using <a href="https://rdrr.io/pkg/roll/man/roll-package.html" class="external-link">roll</a>
-with configurable alignment</p>
-<p><code>rolling_lm()</code>: Compute rolling linear regression slopes using
-<a href="https://rdrr.io/pkg/roll/man/roll-package.html" class="external-link">roll</a> with configurable alignment</p>
     </div>
 
     <div class="section level2">
@@ -102,27 +84,6 @@ with configurable alignment</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">rolling_median</span><span class="op">(</span><span class="va">x</span>, <span class="va">width</span>, align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centre"</span>, <span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">rolling_mean</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  <span class="va">width</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centre"</span>, <span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
-<span>  min_obs <span class="op">=</span> <span class="va">width</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">rolling_lm</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,</span>
-<span>  <span class="va">width</span>,</span>
-<span>  align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centre"</span>, <span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
-<span>  min_obs <span class="op">=</span> <span class="va">width</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -192,11 +153,6 @@ Pearson's rule.</p></dd>
 <dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
 warnings and information messages used for troubleshooting.</p></dd>
 
-
-<dt id="arg-min-obs">min_obs<a class="anchor" aria-label="anchor" href="#arg-min-obs"></a></dt>
-<dd><p>An integer specifying the minimum number of valid samples
-required to return a value within a window, otherwise will return <code>NA</code>.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -209,80 +165,20 @@ shorter length as <code>t</code> with numeric vectors of sample indices of lengt
 <code>x</code> with numeric vectors of sample indices of length <code>width</code> samples or
 <code>span</code> units of time <code>t</code> for valid values neighbouring split to either
 side of the invalid <code>NA</code>s.</p>
-<p><code>rolling_median()</code>: A numeric vector of local median values, the same length
-as <code>x</code>.</p>
-<p><code>rolling_mean()</code>: A numeric vector of local mean values, the same length as
-<code>x</code>.</p>
-<p><code>rolling_lm()</code>: A numeric vector of local linear regression slopes, the same
-length as <code>x</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The local rolling window can be specified by either <code>width</code> as the number of
 samples, or <code>span</code> as the timespan in units of <code>t</code>. Specifying <code>width</code>
-calls <a href="https://rdrr.io/pkg/roll/man/roll-package.html" class="external-link">roll</a> which is often much faster than
-specifying <code>span</code>.</p>
+is often faster than <code>span</code>.</p>
 <p><code>align</code> defaults to <em>"centre"</em> the local window around <code>idx</code> between
 <code>[idx - floor((width-1)/2),</code> <code>idx + floor(width/2)]</code> when <code>width</code> is
 specified. Even <code>width</code> values will bias <code>align</code> to <em>"left"</em>, with the
 unequal sample forward of <code>idx</code>, effectively returning <code>NA</code> at the last
 sample index. When <code>span</code> is specified, the local window is between
 <code>[t - span/2, t + span/2]</code>.</p>
-<p>Currently used functions are <code>c([stats::median()], [base::mean], [slope()])</code>.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">100</span>, <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## a list of numeric vectors of rolling local windows along `t`</span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">window_idx</span> <span class="op">&lt;-</span> <span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">compute_local_windows</span><span class="op">(</span><span class="va">t</span>, width <span class="op">=</span> <span class="fl">2</span>, span <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## a numeric vector of local medians of `x`</span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">local_medians</span> <span class="op">&lt;-</span> <span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">compute_local_fun</span><span class="op">(</span><span class="va">x</span>, <span class="va">window_idx</span>, <span class="va">median</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1.5  2.5 51.5 52.5  5.0</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## a logical vector of local outliers of `x`</span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">is.outlier</span> <span class="op">&lt;-</span> <span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">compute_outliers</span><span class="op">(</span><span class="va">x</span>, <span class="va">window_idx</span>, <span class="va">local_medians</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3L</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE FALSE FALSE FALSE</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">window_idx</span> <span class="op">&lt;-</span> <span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">compute_valid_neighbours</span><span class="op">(</span><span class="va">x</span>, width <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 3 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">local_medians</span> <span class="op">&lt;-</span> <span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">compute_local_fun</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">x</span>, <span class="va">window_idx</span>, <span class="va">median</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.5 4.5</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">local_medians</span></span></span>
-<span class="r-in"><span><span class="va">x</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.0 2.0 3.0 4.5 4.5 6.0</span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

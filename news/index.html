@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,11 +39,30 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="mnirs-030">mnirs 0.3.0<a class="anchor" aria-label="anchor" href="#mnirs-030"></a></h2>
+<ul><li>Create <code><a href="../reference/peak_slope.html">peak_slope()</a></code>. <code><a href="../reference/rolling_slope.html">slope()</a></code> and <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code> become internal.</li>
+<li>Remove <code>na.rm</code> arg from <code><a href="../reference/rolling_slope.html">slope()</a></code>, <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>, <code><a href="../reference/peak_slope.html">peak_slope()</a></code> in favour of opinionated <code>na.rm = TRUE</code> behaviour.
+<ul><li>
+<code>partial = FALSE</code> effectively covers <code>na.rm = FALSE</code> where fewer than <code>width</code> number valid samples exist in local vector.</li>
+<li>
+<code>na.rm</code> arg currently remains in <code><a href="../reference/filter_mnirs.html">filter_mnirs()</a></code> functions, but this may be removed in the future.</li>
+</ul></li>
+<li>Fix <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> internally <code><a href="../reference/read_file.html">read_file()</a></code> to better handle .csv files.
+<ul><li>Implement <code><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">data.table::fread()</a></code> to handle .csv with empty rows and long string metadata in the header above the data table.</li>
+<li>Awaiting future expanded <a href="https://r-datatable.com" class="external-link">data.table</a> implementation across <a href="https://jemarnold.github.io/mnirs/">mnirs</a>, i.e. for <code>data.table::froll*</code> functions.</li>
+</ul></li>
+<li>Fix <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code> to correctly identify windows where <code>partial = FALSE</code> was not met due to <code>NA</code>s.</li>
+<li>Remove internal <a href="https://github.com/jasonjfoster/roll" class="external-link">roll</a> dependency.</li>
+<li>Update documentation in expectation of CRAN submission.
+<ul><li>Remove internal function examples to minimise <code>\donttest()</code> issues.</li>
+</ul></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="mnirs-020">mnirs 0.2.0<a class="anchor" aria-label="anchor" href="#mnirs-020"></a></h2>
 <ul><li>Implement tidy evaluation with <a href="https://rlang.r-lib.org" class="external-link">rlang</a> and <a href="https://tidyselect.r-lib.org" class="external-link">tidyselect</a>.</li>
 <li>Update function documentation &amp; examples, <code>README</code>, vignette.</li>
-<li>Fixed <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code> and <code><a href="../reference/compute_helpers.html">rolling_mean()</a></code> to correctly use <code>partial</code> and <code>na.rm</code> arguments.</li>
-<li>Fixed <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code> to correctly use <code>width</code> and <code>span</code> arguments.</li>
+<li>Fix <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code> and <code>rolling_mean()</code> to correctly use <code>partial</code> and <code>na.rm</code> arguments.</li>
+<li>Fix <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code> to correctly use <code>width</code> and <code>span</code> arguments.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.9" id="mnirs-019">mnirs 0.1.9<a class="anchor" aria-label="anchor" href="#mnirs-019"></a></h2>
@@ -60,7 +79,7 @@
 <ul><li>Affects: <code><a href="../reference/filter_mnirs.html">filter_mnirs.smooth_spline()</a></code>, <code><a href="../reference/filter_mnirs.html">filter_mnirs.moving_average()</a></code>, <code><a href="../reference/parse_sample_rate.html">parse_sample_rate()</a></code> and <code><a href="../reference/clean_invalid.html">clean_invalid()</a></code> for <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code>, <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/validate_mnirs.html">validate_sample_rate()</a></code>.</li>
 </ul></li>
 <li>Add hidden <code>bypass_check</code> argument to reduce overhead from validation redundancy.
-<ul><li>Affects: <code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_missing()</a></code>, <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code>, new functions <code><a href="../reference/slope.html">slope()</a></code>, <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>.</li>
+<ul><li>Affects: <code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_missing()</a></code>, <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code>, new functions <code><a href="../reference/rolling_slope.html">slope()</a></code>, <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>.</li>
 </ul></li>
 <li>Update <code><a href="../reference/validate_mnirs.html">validate_numeric()</a></code> logic to reduce overhead.</li>
 </ul></div>

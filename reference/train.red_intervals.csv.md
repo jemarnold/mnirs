@@ -8,7 +8,7 @@ sites.
 
 .csv file with header metadata and with 18 columns and 12001 rows.
 
-- `nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
+- `nirs_channels = c("SmO2", "SmO2 unfiltered", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
 
 - `time_channel = c("Timestamp (seconds passed)")`
 

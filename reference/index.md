@@ -41,7 +41,7 @@ Clean, filter, and process data.
 - [`rescale_mnirs()`](https://jemarnold.github.io/mnirs/reference/rescale_mnirs.md)
   : Re-scale data range
 
-## Analysis
+## Interval detection
 
 Detect and extract intervals for further analysis
 
@@ -50,11 +50,12 @@ Detect and extract intervals for further analysis
 
   Extract intervals from *mnirs* data
 
-- [`slope()`](https://jemarnold.github.io/mnirs/reference/slope.md) :
-  Calculate linear slope
+## Process kinetics
 
-- [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md)
-  : Calculate rolling slope
+Estimate response dynamics and kinetic parameters
+
+- [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+  : Find peak linear slope
 
 ## Plotting
 

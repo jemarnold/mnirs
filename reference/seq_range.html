@@ -11,7 +11,7 @@ generating the sequence."><meta name="twitter:card" content="summary"><meta name
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,22 +93,6 @@ endpoints, or <code>NA</code> (the <em>default</em>) for no rounding.</p></dd>
     <div class="dont-index"><p><code><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq()</a></code>, <code><a href="https://rdrr.io/r/base/range.html" class="external-link">range()</a></code></p></div>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.2</span>, <span class="fl">3.7</span>, <span class="fl">2.1</span>, <span class="fl">4.9</span>, <span class="fl">2.8</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">seq_range</span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.2 2.2 3.2 4.2</span>
-<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">seq_range</span><span class="op">(</span><span class="va">data</span>, by <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.2 1.7 2.2 2.7 3.2 3.7 4.2 4.7</span>
-<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">seq_range</span><span class="op">(</span><span class="va">data</span>, by <span class="op">=</span> <span class="fl">0.5</span>, direction <span class="op">=</span> <span class="st">"down"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.7 4.2 3.7 3.2 2.7 2.2 1.7 1.2</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## with rounding</span></span></span>
-<span class="r-in"><span><span class="fu">mnirs</span><span class="fu">:::</span><span class="fu">seq_range</span><span class="op">(</span><span class="va">data</span>, by <span class="op">=</span> <span class="fl">0.2</span>, digits <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 1.2 1.4 1.6 1.8 2.0 2.2 2.4 2.6 2.8 3.0 3.2 3.4 3.6 3.8 4.0 4.2 4.4 4.6 4.8</span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

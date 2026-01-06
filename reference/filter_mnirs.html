@@ -19,7 +19,7 @@ A simple moving average.
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -244,9 +244,8 @@ moving average filter in a local window, defined by either <code>width</code>
 as the number of samples around <code>idx</code> between <code>[idx - floor(width/2),</code>
 <code>idx + floor(width/2)]</code>. Or by <code>span</code> as the timespan in units of
 <code>time_channel</code> between <code>[t - span/2, t + span/2]</code>. Specifying <code>width</code>
-calls <code><a href="https://rdrr.io/pkg/roll/man/roll_median.html" class="external-link">roll::roll_median()</a></code> which is often much faster than specifying
-<code>span</code>.A partial moving average will be calculated at the edges of
-the data.</p></dd>
+is often faster than <code>span</code>. A partial moving average will be calculated
+at the edges of the data.</p></dd>
 
 
 </dl><p>Missing values (<code>NA</code>) in <code>nirs_channels</code> will cause an error for

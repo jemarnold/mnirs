@@ -38,6 +38,7 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/parse_channel_name.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/parse_sample_rate.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/parse_time_channel.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/peak_slope.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/plot.mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/preserve_na.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/read_data_table.html</loc></url>
@@ -56,7 +57,6 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/seq_range.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/shift_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/signif_trailing.html</loc></url>
-<url><loc>https://jemarnold.github.io/mnirs/reference/slope.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/specify_intervals.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/theme_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/train.red_intervals.csv.html</loc></url>

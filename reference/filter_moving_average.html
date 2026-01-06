@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,14 +114,13 @@ warnings and information messages used for troubleshooting.</p></dd>
 defined by either <code>width</code> as the number of samples around <code>idx</code> between
 <code>[idx - floor(width/2),</code> <code>idx + floor(width/2)]</code>. Or by <code>span</code> as the
 timespan in units of <code>time_channel</code> between <code>[t - span/2, t + span/2]</code>.</p>
-<p>Specifying <code>width</code> calls <code><a href="https://rdrr.io/pkg/roll/man/roll_mean.html" class="external-link">roll::roll_mean()</a></code> which is often much faster
-than specifying <code>span</code>.</p>
+<p>Specifying <code>width</code> is often faster than <code>span</code>.</p>
 <p>If there are no valid values within the calculation window, will return <code>NA</code>.
 A partial moving average will be calculated at the edges of the data.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/zoo/man/rollmean.html" class="external-link">zoo::rollmean()</a></code>, <code><a href="https://rdrr.io/pkg/roll/man/roll_mean.html" class="external-link">roll::roll_mean()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/zoo/man/rollmean.html" class="external-link">zoo::rollmean()</a></code></p></div>
     </div>
 
     <div class="section level2">
