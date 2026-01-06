@@ -34,20 +34,4 @@ values for later restoration with \code{restore_na()}.
 \code{restore_na()} restores \code{NA} values to their original vector positions
 after processing valid non-\code{NA} values returned from \code{preserve_na()}.
 }
-\examples{
-x <- c(1, NA, 3, NA, 5)
-(na_info <- mnirs:::preserve_na(x))#'
-
-## process with a function that would normally fail on NA
-y <- na_info$x_valid * 2
-(result <- mnirs:::restore_na(y, na_info))
-
-x <- c("A", "B", "C", NA, NA)
-(na_info <- mnirs:::preserve_na(x))
-
-## process with a function that would normally fail on NA
-y <- tolower(na_info$x_valid)
-(result <- mnirs:::restore_na(y, na_info))
-
-}
 \keyword{internal}

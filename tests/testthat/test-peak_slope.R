@@ -529,7 +529,7 @@ test_that("rolling_slope handles irregular time series with span", {
         idx <- t >= t_idx & t <= t_idx + span
         idx_list[[i]] <- which(idx)
         coef_result[i] <- coef(lm(x[idx] ~ t[idx]))[[2L]]
-        slope_result[i] <- mnirs:::slope(x[idx], t[idx])
+        slope_result[i] <- slope(x[idx], t[idx])
     }
 
     result <- rolling_slope(
@@ -545,10 +545,10 @@ test_that("rolling_slope handles irregular time series with span", {
 })
 
 test_that("rolling_slope handles invalid args", {
-    ## TODO width = 1 = NA or error?
-    expect_all_true(is.na(rolling_slope(1:5, width = 1)))
-    ## TODO span results in width = 1 = NA or error?
-    expect_all_true(is.na(rolling_slope(1:5, span = 0)))
+    expect_all_true(is.na(rolling_slope(1:5, width = 1))) |> 
+        expect_warning("Less than.*2.*valid samples")
+    expect_all_true(is.na(rolling_slope(1:5, span = 0))) |>
+        expect_warning("Less than.*2.*valid samples")
 
     expect_error(rolling_slope(1:5), "width.*span.*must be defined")
     expect_error(rolling_slope(1:5, span = NA), "valid.*numeric")
@@ -605,6 +605,11 @@ test_that("peak_slope auto-detects direction from net trend", {
     x_sym <- c(1, 3, 5, 3, 1)
     result_sym <- peak_slope(x_sym, width = 3, verbose = FALSE)
     expect_true(result_sym$slope != 0)
+
+    ## detect slope from max abs local slope
+    x <- c(0, 1, 3, 0, 0.5)
+    result <- peak_slope(x, width = 2, verbose = FALSE)
+    expect_lt(result$slope, 0)
 })
 
 test_that("peak_slope respects manual direction", {

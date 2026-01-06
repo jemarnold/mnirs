@@ -179,6 +179,14 @@ test_that("filter_moving_average() handles edge cases", {
     )
 })
 
+test_that("moving_average with insufficient width returns NA with warning", {
+    t <- 1:10
+    x <- c(1, NA, 3, NA, 5, NA, 7, NA, 9, NA)
+
+    expect_all_equal(filter_moving_average(x, t, width = 2), NA_real_) |> 
+        expect_warning("Less than.*2.*valid samples")
+})
+
 ## filter_butter() =========================================
 test_that("filter_butter validates inputs correctly", {
     expect_error(

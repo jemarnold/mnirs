@@ -33,30 +33,6 @@
 #'   sample index. When `span` is specified, the local window is between
 #'   `[t - span/2, t + span/2]`.
 #'
-#' @examples
-#' x <- c(1, 2, 3, 100, 5)
-#' t <- seq_along(x)
-#'
-#' ## a list of numeric vectors of rolling local windows along `t`
-#' (window_idx <- mnirs:::compute_local_windows(t, width = 2, span = NULL))
-#'
-#' ## a numeric vector of local medians of `x`
-#' (local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
-#'
-#' ## a logical vector of local outliers of `x`
-#' (is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3L))
-#'
-#' ## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.
-#' x <- c(1, 2, 3, NA, NA, 6)
-#' (window_idx <- mnirs:::compute_valid_neighbours(x, width = 2))
-#'
-#' (local_medians <- mnirs:::compute_local_fun(
-#'     x, window_idx, median, na.rm = TRUE)
-#' )
-#'
-#' x[is.na(x)] <- local_medians
-#' x
-#'
 #' @rdname compute_helpers
 #' @keywords internal
 compute_local_windows <- function(
@@ -109,9 +85,6 @@ compute_local_windows <- function(
 #'   vectors for the sample indices of local rolling windows.
 #' @param fn A function to pass through for local rolling calculation.
 #' @param ... Additional arguments.
-#'
-#' @details
-#' Currently used functions are `c([stats::median()], [base::mean], [slope()])`.
 #'
 #' @returns
 #' `compute_local_fun()`: A numeric vector the same length as `x`.
@@ -242,21 +215,6 @@ compute_valid_neighbours <- function(
 #'
 #' `restore_na()` returns a vector `y` the same length as the original
 #'   input vector `x` with `NA` values restored to their original positions.
-#'
-#' @examples
-#' x <- c(1, NA, 3, NA, 5)
-#' (na_info <- mnirs:::preserve_na(x))#'
-#'
-#' ## process with a function that would normally fail on NA
-#' y <- na_info$x_valid * 2
-#' (result <- mnirs:::restore_na(y, na_info))
-#'
-#' x <- c("A", "B", "C", NA, NA)
-#' (na_info <- mnirs:::preserve_na(x))
-#'
-#' ## process with a function that would normally fail on NA
-#' y <- tolower(na_info$x_valid)
-#' (result <- mnirs:::restore_na(y, na_info))
 #'
 #' @keywords internal
 preserve_na <- function(x) {

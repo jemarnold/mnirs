@@ -33,4 +33,3 @@ data.frame(x, y) |>
     geom_line()
 \dontshow{\}) # examplesIf}
 }
-\keyword{internal}

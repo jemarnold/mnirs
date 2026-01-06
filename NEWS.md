@@ -1,16 +1,16 @@
 # mnirs 0.3.0
 
-* Create `peak_slope()`.
-* Initial implementation of `{data.table}` in `read_mnirs()`.
-    * Fixes a bug reading .csv with empty rows and long string metadata in the header above the data table.
-    * Awaiting future implementation and optimisation across `{mnirs}`.
-
-# mnirs 0.2.1
-
+* Create `peak_slope()`. `slope()` and `rolling_slope()` become internal.
 * Remove `na.rm` arg from `slope()`, `rolling_slope()`, `peak_slope()` in favour of opinionated `na.rm = TRUE` behaviour.
+    * `partial = FALSE` effectively covers `na.rm = FALSE` where fewer than `width` number valid samples exist in local vector.
     * `na.rm` arg currently remains in `filter_mnirs()` functions, but this may be removed in the future.
+* Fix `read_mnirs()` internally `read_file()` to better handle .csv files.
+    * Implement `data.table::fread()` to handle .csv with empty rows and long string metadata in the header above the data table.
+    * Awaiting future expanded `{data.table}` implementation across `{mnirs}`, i.e. for `data.table::froll*` functions.
 * Fix `filter_moving_average()` to correctly identify windows where `partial = FALSE` was not met due to `NA`s.
-* Remove internal `{roll}` functionality from external functions in expectation of moving to `data.table::froll_*()`
+* Remove internal `{roll}` dependency.
+* Update documentation in expectation of CRAN submission.
+    * Remove internal function examples to minimise `\donttest()` issues.
 
 # mnirs 0.2.0
 

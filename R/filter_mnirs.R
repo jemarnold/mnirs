@@ -399,7 +399,7 @@ filter_mnirs.moving_average <- function(
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
 #' @inheritParams filter_mnirs
-#' @inheritParams rolling_slope
+#' @inheritParams peak_slope
 #'
 #' @details
 #' Applies a centred (symmetrical) moving average filter in a local window
@@ -459,9 +459,7 @@ filter_moving_average <- function(
     }
 
     ## processing ==============================================
-    window_idx <- compute_local_windows(
-        t, width = width, span = span
-    )
+    window_idx <- compute_local_windows(t, width = width, span = span)
 
     ## check for min_obs
     window_valid <- lapply(window_idx, \(.idx) which(is.finite(x)[.idx]))

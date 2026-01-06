@@ -36,16 +36,6 @@ The function:
 \item Reverses the sequence if \code{direction = "down"}.
 }
 }
-\examples{
-data <- c(1.2, 3.7, 2.1, 4.9, 2.8)
-mnirs:::seq_range(data)
-mnirs:::seq_range(data, by = 0.5)
-mnirs:::seq_range(data, by = 0.5, direction = "down")
-
-## with rounding
-mnirs:::seq_range(data, by = 0.2, digits = 1)
-
-}
 \seealso{
 \code{\link[=seq]{seq()}}, \code{\link[=range]{range()}}
 }

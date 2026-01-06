@@ -60,9 +60,8 @@ reference:
   desc: |
     Estimate response dynamics and kinetic parameters
   contents:
-  - ends_with("slope")
+  - peak_slope
   - matches("monoexp")
-  - fix_coefs
 - title: Plotting
   desc: |
     Tools for pretty plotting with `{ggplot2}`.

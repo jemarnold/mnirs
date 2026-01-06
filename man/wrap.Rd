@@ -28,19 +28,4 @@ The function:
 \item If \code{n} is larger than \code{length(x)}, positions wrap around.
 }
 }
-\examples{
-x <- 1:5
-mnirs:::wrap(x, 2)
-mnirs:::wrap(x, 0)
-
-## wrapping with n larger than vector length
-mnirs:::wrap(x, 7)  ## same as wrap(x, 2)
-
-## negative wrapping (move from end to start)
-mnirs:::wrap(x, -1)
-
-## works with any vector type
-mnirs:::wrap(letters[1:4], 1)
-
-}
 \keyword{internal}

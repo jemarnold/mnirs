@@ -1,19 +1,13 @@
 #' Calculate linear slope
 #'
-#' Calculates the linear regression slope of a numeric vector.
+#' `slope()`: Calculates the linear regression slope of a numeric vector.
 #'
-#' @param ... Additional arguments.
-#' @inheritParams replace_invalid
+#' @inheritParams peak_slope
 #'
-#' @details
-#' Uses the least squares formula on complete case data (ignoring `NA`s).
+#' @returns `slope()` returns a numeric slope in units of `x/t`.
 #'
-#' @returns A numeric slope in units of `x/t`.
-#'
-#' @examples
-#' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-#' mnirs:::slope(x)
-#'
+#' @rdname rolling_slope
+#' @order 2
 #' @keywords internal
 slope <- function(
     x,
@@ -66,50 +60,38 @@ slope <- function(
     return(slope_val)
 }
 
-#' Calculate rolling slope
+#' Calculate rolling linear slope
 #'
-#' Computes rolling linear regression slopes within a local window along a
-#' numeric vector.
+#' `rolling_slope()`: Computes rolling linear regression slopes within a
+#' local window along a numeric vector.
 #'
-#' @param partial A logical specifying whether to perform the operation over a
-#'   subset of available data within the local rolling window (`TRUE`), or
-#'   requiring a complete window of valid samples (`FALSE`, by *default*). See
-#'   *Details*.
-#' @inheritParams slope
-#' @inheritParams compute_local_windows
+#' @inheritParams peak_slope
 #'
 #' @details
-#' The local rolling window can be specified by either `width` as the number of
-#'   samples, or `span` as the timespan in units of `t`.
+#' See details in [peak_slope()].
 #'
-#' `align` defaults to *"centre"* the local window around `idx` between
-#'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
-#'   specified. Even `width` values will bias `align` to *"left"*, with the
-#'   unequal sample forward of `idx`. When `span` is specified with
-#'   `align = "centre"`, the local window is between `[t - span/2, t + span/2]`.
-#'
-#' The default `partial = FALSE` requires complete case data with the same
-#'   number of valid samples as specified by `width` or `span` (number of
-#'   samples is estimated for `span` from the sample rate of `t`). If fewer
-#'   than the requires valid samples are present in the local vector, `NA` is
-#'   returned.
-#'
-#' `partial = TRUE` allows calculation over partial windows with at least `2`
-#'   valid samples, such as at edge conditions or over missing data `NA`s.
+#' Additional args (`...`) accepts:
+#' \describe{
+#'   \item{`bypass_checks`}{Logical; Speeds operation by bypassing validation
+#'   checks. These checks should be performed upstream.}
+#'   \item{`min_obs`}{Integer; The minimum number of observations required
+#'   to calculate `slope()`. Defined by either `width` or `span`, or equal to
+#'   `2` when `partial = TRUE`}
+#'   \item{`intercept`}{Logical; When `TRUE`, `slope()` will also return a
+#'   numeric intercept value retrievable with `attr(slope, "intercept")`.}
+#'   \item{`window_idx`}{Logical; When `TRUE`, `rolling_slope()` will also
+#'   return a list of numeric window indices retrievable with
+#'   `attr(rolling_slope, "window_idx")`.}
+#' }
 #'
 #' @seealso [zoo::rollapply()]
 #'
-#' @returns A numeric vector of rolling local slopes in units of `x/t` the
-#'   same length as `x`.
+#' @returns `rolling_slope()` returns a numeric vector of rolling local slopes
+#'   in units of `x/t` the same length as `x`.
 #'
-#' @examples
-#' x <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-#' rolling_slope(x, span = 3)
-#' rolling_slope(x, span = 3, partial = TRUE)
-#' rolling_slope(x, width = 3, partial = TRUE)
-#'
+#' @rdname rolling_slope
+#' @order 1
 #' @keywords internal
-#' @export
 rolling_slope <- function(
     x,
     t = seq_along(x),
@@ -186,24 +168,51 @@ rolling_slope <- function(
 }
 
 
-#' Find peak slope
+#' Find peak linear slope
 #'
-#' Identifies the maximum positive or negative local linear slope within a
-#' numeric vector and returns regression parameters
+#' Identifies the maximum positive or negative local linear
+#' slope within a numeric vector and returns regression parameters
 #'
 #' @param direction A character string to detect either the peak
 #'   `"positive"` or `"negative"` slope, or `"auto"` detect (the *default*)
 #'   based on the overal trend of the signal (see *Details*).
-#' @inheritParams rolling_slope
+#' @param partial A logical specifying whether to perform the operation over a
+#'   subset of available data within the local rolling window (`TRUE`), or
+#'   requiring a complete window of valid samples (`FALSE`, by *default*). See
+#'   *Details*.
+#' @param ... Additional arguments.
+#' @inheritParams replace_invalid
+#' @inheritParams compute_local_windows
 #'
 #' @details
-#' When `direction = "auto"`, the net slope across all of `x` is calculated
-#'   to determine the trend direction. If the net slope equals zero, will
-#'   return the greatest absolute slope.
+#' Uses rolling slope calculations via the least squares formula on complete
+#'   case data. The local rolling window can be specified by either `width`
+#'   as the number of samples, or `span` as the timespan in units of `t`.
 #'
-#' When `direction = "positive"` or `"negative"`, returns the greatest
+#' `align` defaults to *"centre"* the local window around `idx` between
+#'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
+#'   specified. Even `width` values will bias `align` to *"left"*, with the
+#'   unequal sample forward of `idx`. When `span` is specified with
+#'   `align = "centre"`, the local window is between `[t - span/2, t + span/2]`.
+#'
+#' When `direction = "auto"`, the net slope across all of `x` is calculated
+#'   to determine the trend direction (positive or negative), then the
+#'   greatest local slope in that direction is returned. If the net slope
+#'   equals zero, will return the greatest absolute local slope. When
+#'   `direction = "positive"` or `"negative"`, returns the greatest
 #'   respective directional slope. If no positive/negative slopes exist,
 #'   returns `NA` with a warning.
+#'
+#' The default `partial = FALSE` requires complete case data with the same
+#'   number of valid samples as specified by `width` or `span` (number of
+#'   samples is estimated for `span` from the sample rate of `t`). If fewer
+#'   than the requires valid samples are present in the local vector, `NA` is
+#'   returned.
+#'
+#' `partial = TRUE` allows calculation over partial windows with at least `2`
+#'   valid samples, such as at edge conditions or over missing data `NA`s.
+#'   However, these slope values will be sensitive to noisy data, so use
+#'   with caution.
 #'
 #' @returns A named list containing:
 #'   \item{`slope`}{The peak slope value in units of `x/t`.}

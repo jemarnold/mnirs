@@ -176,31 +176,7 @@ SS_monoexp <- selfStart(
 #'
 #' @return An updated model object with remaining free coefficients.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' set.seed(13)
-#' t <- 1:60
-#'
-#' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) + rnorm(length(t), 0, 3)
-#' data <- data.frame(t, x)
-#'
-#' (model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data))
-#' y <- predict(model, data)
-#'
-#' ## update the model with a priori fixed parameter
-#' (model_fixed_TD <- fix_coefs(model, TD = 13))
-#' y2 <- predict(model_fixed_TD, data)
-#'
-#' library(ggplot2)
-#' ggplot(data, aes(t, x)) +
-#'     theme_mnirs() +
-#'     scale_colour_mnirs(name = NULL) +
-#'     geom_point() +
-#'     geom_line(aes(y = y, colour = "free")) +
-#'     geom_line(aes(y = y2, colour = "fixed TD"))
-#'
 #' @keywords internal
-#' @export
 fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     current_coefs <- stats::coef(model)
     fixed_coefs <- list(...)

@@ -357,7 +357,6 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #'     scale_x_continuous(breaks = breaks_timespan()) +
 #'     geom_line()
 #'
-#' @keywords internal
 #' @export
 breaks_timespan <- function(
     unit = c("secs", "mins", "hours", "days", "weeks"),
@@ -436,7 +435,6 @@ breaks_timespan <- function(
 #'     ) +
 #'     geom_line()
 #'
-#' @keywords internal
 #' @export
 format_hmmss <- function(x) {
     # validate_numeric(x)

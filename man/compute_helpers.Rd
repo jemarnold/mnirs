@@ -105,32 +105,5 @@ specified. Even \code{width} values will bias \code{align} to \emph{"left"}, wit
 unequal sample forward of \code{idx}, effectively returning \code{NA} at the last
 sample index. When \code{span} is specified, the local window is between
 \verb{[t - span/2, t + span/2]}.
-
-Currently used functions are \verb{c([stats::median()], [base::mean], [slope()])}.
-}
-\examples{
-x <- c(1, 2, 3, 100, 5)
-t <- seq_along(x)
-
-## a list of numeric vectors of rolling local windows along `t`
-(window_idx <- mnirs:::compute_local_windows(t, width = 2, span = NULL))
-
-## a numeric vector of local medians of `x`
-(local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
-
-## a logical vector of local outliers of `x`
-(is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3L))
-
-## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.
-x <- c(1, 2, 3, NA, NA, 6)
-(window_idx <- mnirs:::compute_valid_neighbours(x, width = 2))
-
-(local_medians <- mnirs:::compute_local_fun(
-    x, window_idx, median, na.rm = TRUE)
-)
-
-x[is.na(x)] <- local_medians
-x
-
 }
 \keyword{internal}

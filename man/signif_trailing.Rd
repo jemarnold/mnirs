@@ -93,34 +93,6 @@ symbols based on thresholds
 otherwise empty string.
 }
 }
-\examples{
-x <- c(123, 123.4, 123.45)
-
-mnirs:::signif_trailing(x, digits = 1, format = "digits")
-mnirs:::signif_trailing(x, digits = -1, format = "digits")
-mnirs:::signif_trailing(x, digits = 5, format = "signif")
-mnirs:::signif_trailing(x, digits = 0, format = "signif")
-
-x <- c(123, 123.4, 123.45)
-
-mnirs:::signif_whole(x, digits = 5)
-mnirs:::signif_whole(x, digits = 2)
-mnirs:::signif_whole(x, digits = -1)
-
-p_vals <- c(0.0001, 0.003, 0.02, 0.08, 0.15)
-
-## format as numeric
-mnirs:::signif_pvalue(p_vals)
-mnirs:::signif_pvalue(p_vals, digits = 1)
-
-## format as symbols
-mnirs:::signif_pvalue(p_vals, display = "symbol")
-mnirs:::signif_pvalue(p_vals, display = "symbol", symbol_repeat = TRUE)
-
-## custom alpha and symbol
-mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol_repeat = TRUE)
-
-}
 \seealso{
 \code{\link[=formatC]{formatC()}} \code{\link[=round]{round()}} \code{\link[=signif]{signif()}}
 }
