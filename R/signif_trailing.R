@@ -11,24 +11,16 @@
 #'   decimal places (`format = "digits"`, the *default*) or significant figures
 #'   after the decimal place (`format = "signif"`).
 #'
-#' @returns `signif_trailing()` returns a character vector of formatted numbers
-#'   the same length as `x`.
-#'
 #' @details
 #' `signif_trailing()`
 #'
 #' - Negative `digits` round to the respective integer place, e.g.
 #'   `signif_trailing(123, digits = -1)` returns `"120"`.
 #'
+#' @returns `signif_trailing()` returns a character vector of formatted numbers
+#'   the same length as `x`.
+#'
 #' @seealso [formatC()] [round()] [signif()]
-#'
-#' @examples
-#' x <- c(123, 123.4, 123.45)
-#'
-#' mnirs:::signif_trailing(x, digits = 1, format = "digits")
-#' mnirs:::signif_trailing(x, digits = -1, format = "digits")
-#' mnirs:::signif_trailing(x, digits = 5, format = "signif")
-#' mnirs:::signif_trailing(x, digits = 0, format = "signif")
 #'
 #' @rdname signif_trailing
 #' @order 1
@@ -66,8 +58,6 @@ signif_trailing <- function(x, digits = 2L, format = c("digits", "signif")) {
 #' figures, or the nearest whole value if the number of digits of `x` are
 #' greater than `digits`.
 #'
-#' @returns `signif_whole()` returns a numeric vector the same length as `x`.
-#'
 #' @details
 #' Decimal rounding is based on the "banker's rounding" default behaviour of
 #'   `signif()` and `round()`, where `signif(123.45, 4)` or `round(123.45, 1)`
@@ -78,12 +68,7 @@ signif_trailing <- function(x, digits = 2L, format = c("digits", "signif")) {
 #' - Negative `digits` round to the nearest whole value as if `digits = 0`,
 #'   e.g. `signif_whole(123, digits = -5)` still returns `123`.
 #'
-#' @examples
-#' x <- c(123, 123.4, 123.45)
-#'
-#' mnirs:::signif_whole(x, digits = 5)
-#' mnirs:::signif_whole(x, digits = 2)
-#' mnirs:::signif_whole(x, digits = -1)
+#' @returns `signif_whole()` returns a numeric vector the same length as `x`.
 #'
 #' @rdname signif_trailing
 #' @order 2
@@ -116,9 +101,6 @@ signif_whole <- function(x, digits = 5L) {
 #' @param alpha A numeric value specifying significance threshold.
 #'   *Default* is `0.05`.
 #'
-#' @returns `signif_pvalue()` returns a character vector of formatted p-values
-#'   or significance symbols the same length as `x`.
-#'
 #' @details
 #' `signif_pvalue()`
 #'
@@ -132,19 +114,8 @@ signif_whole <- function(x, digits = 5L) {
 #' - If `symbol_repeat = FALSE`: Shows one symbol `"*"` for p < alpha,
 #'   otherwise empty string.
 #'
-#' @examples
-#' p_vals <- c(0.0001, 0.003, 0.02, 0.08, 0.15)
-#'
-#' ## format as numeric
-#' mnirs:::signif_pvalue(p_vals)
-#' mnirs:::signif_pvalue(p_vals, digits = 1)
-#'
-#' ## format as symbols
-#' mnirs:::signif_pvalue(p_vals, display = "symbol")
-#' mnirs:::signif_pvalue(p_vals, display = "symbol", symbol_repeat = TRUE)
-#'
-#' ## custom alpha and symbol
-#' mnirs:::signif_pvalue(p_vals, display = "symbol", alpha = 0.01, symbol = "†", symbol_repeat = TRUE)
+#' @returns `signif_pvalue()` returns a character vector of formatted p-values
+#'   or significance symbols the same length as `x`.
 #'
 #' @rdname signif_trailing
 #' @order 3
@@ -202,8 +173,6 @@ signif_pvalue <- function(
 #' @param digits An integer specifying number of decimal places to round range
 #'   endpoints, or `NA` (the *default*) for no rounding.
 #'
-#' @returns A numeric vector spanning the range of the input data.
-#'
 #' @details
 #' The output vector will likely be a different length than the input vector.
 #'
@@ -213,14 +182,7 @@ signif_pvalue <- function(
 #' - Generates a sequence with the specified step size.
 #' - Reverses the sequence if `direction = "down"`.
 #'
-#' @examples
-#' data <- c(1.2, 3.7, 2.1, 4.9, 2.8)
-#' mnirs:::seq_range(data)
-#' mnirs:::seq_range(data, by = 0.5)
-#' mnirs:::seq_range(data, by = 0.5, direction = "down")
-#'
-#' ## with rounding
-#' mnirs:::seq_range(data, by = 0.2, digits = 1)
+#' @returns A numeric vector spanning the range of the input data.
 #'
 #' @seealso [seq()], [range()]
 #'
@@ -254,8 +216,6 @@ seq_range <- function(x, by = 1, direction = c("up", "down"), digits = NA) {
 #'   *Default* is `0` (no wrapping). Negative values move elements from end
 #'   to start.
 #'
-#' @returns A vector with all the same elements as `x`.
-#'
 #' @details
 #' The function:
 #' - Returns `x` unchanged if `n = 0`.
@@ -263,19 +223,7 @@ seq_range <- function(x, by = 1, direction = c("up", "down"), digits = NA) {
 #' - For negative `n`, effectively moves elements from end to start.
 #' - If `n` is larger than `length(x)`, positions wrap around.
 #'
-#' @examples
-#' x <- 1:5
-#' mnirs:::wrap(x, 2)
-#' mnirs:::wrap(x, 0)
-#'
-#' ## wrapping with n larger than vector length
-#' mnirs:::wrap(x, 7)  ## same as wrap(x, 2)
-#'
-#' ## negative wrapping (move from end to start)
-#' mnirs:::wrap(x, -1)
-#'
-#' ## works with any vector type
-#' mnirs:::wrap(letters[1:4], 1)
+#' @returns A vector with all the same elements as `x`.
 #'
 #' @keywords internal
 wrap <- function(x, n = 0L) {
@@ -291,4 +239,53 @@ wrap <- function(x, n = 0L) {
     }
 
     return(c(x[-(1:n)], x[1:n]))
+}
+
+
+#' Detect if numeric values fall within range of a vector
+#'
+#' Vectorised check for `x %in% vec`, inclusive or exclusive of left and right
+#' boundary values, specified independently.
+#'
+#' @param x A numeric vector.
+#' @param vec A numeric vector from which `left` and `right` boundary values
+#'   for `x` will be taken.
+#' @param inclusive A character vector to specify which of `left` and/or
+#'   `right` boundary values should be included in the range, or both (the
+#'   default), or excluded if `FALSE`.
+#'
+#' @details
+#' `inclusive = FALSE` can be used to test for positive non-zero values:
+#'   `within(x, c(0, Inf), inclusive = FALSE)`.
+#'
+#' @returns A logical vector the same length as `x`.
+#'
+#' @seealso [dplyr::between()]
+#'
+#' @keywords internal
+within <- function(x, vec, inclusive = c("left", "right")) {
+    if (!is.numeric(x)) {
+        abort_validation(substitute(x))
+    }
+    if (!is.numeric(vec)) {
+        abort_validation(substitute(vec))
+    }
+    inclusive <- match.arg(
+        as.character(inclusive),
+        choices = c("left", "right", "FALSE"),
+        several.ok = TRUE
+    )
+
+    ## extract bounds from vec
+    left <- min(vec, na.rm = TRUE)
+    right <- max(vec, na.rm = TRUE)
+
+    if ("FALSE" %in% inclusive) {
+        return(x > left & x < right)
+    }
+
+    left_op <- if ("left" %in% inclusive) `>=` else `>`
+    right_op <- if ("right" %in% inclusive) `<=` else `<`
+
+    return(left_op(x, left) & right_op(x, right))
 }

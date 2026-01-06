@@ -26,11 +26,10 @@ x = 0:120
 y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 
 library(ggplot2)
-data.frame(x, y) |> 
+data.frame(x, y) |>
     ggplot(aes(x, y)) +
     theme_mnirs() +
     scale_x_continuous(breaks = breaks_timespan()) +
     geom_line()
 \dontshow{\}) # examplesIf}
 }
-\keyword{internal}

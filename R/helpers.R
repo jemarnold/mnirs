@@ -24,8 +24,7 @@
 #' @details
 #' The local rolling window can be specified by either `width` as the number of
 #'   samples, or `span` as the timespan in units of `t`. Specifying `width`
-#'   calls [roll][roll::roll-package] which is often much faster than
-#'   specifying `span`.
+#'   is often faster than `span`.
 #'
 #' `align` defaults to *"centre"* the local window around `idx` between
 #'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
@@ -33,30 +32,6 @@
 #'   unequal sample forward of `idx`, effectively returning `NA` at the last
 #'   sample index. When `span` is specified, the local window is between
 #'   `[t - span/2, t + span/2]`.
-#'
-#' @examples
-#' x <- c(1, 2, 3, 100, 5)
-#' t <- seq_along(x)
-#'
-#' ## a list of numeric vectors of rolling local windows along `t`
-#' (window_idx <- mnirs:::compute_local_windows(t, width = 2, span = NULL))
-#'
-#' ## a numeric vector of local medians of `x`
-#' (local_medians <- mnirs:::compute_local_fun(x, window_idx, median))
-#'
-#' ## a logical vector of local outliers of `x`
-#' (is.outlier <- mnirs:::compute_outliers(x, window_idx, local_medians, outlier_cutoff = 3L))
-#'
-#' ## a list of numeric vectors of local windows of valid values of `x` neighbouring `NA`s.
-#' x <- c(1, 2, 3, NA, NA, 6)
-#' (window_idx <- mnirs:::compute_valid_neighbours(x, width = 2))
-#'
-#' (local_medians <- mnirs:::compute_local_fun(
-#'     x, window_idx, median, na.rm = TRUE)
-#' )
-#'
-#' x[is.na(x)] <- local_medians
-#' x
 #'
 #' @rdname compute_helpers
 #' @keywords internal
@@ -110,9 +85,6 @@ compute_local_windows <- function(
 #'   vectors for the sample indices of local rolling windows.
 #' @param fn A function to pass through for local rolling calculation.
 #' @param ... Additional arguments.
-#'
-#' @details
-#' Currently used functions are `c([stats::median()], [base::mean], [slope()])`.
 #'
 #' @returns
 #' `compute_local_fun()`: A numeric vector the same length as `x`.
@@ -228,235 +200,6 @@ compute_valid_neighbours <- function(
 }
 
 
-#' @description
-#' `rolling_median()`: Compute rolling median using [roll][roll::roll-package]
-#' with configurable alignment
-#'
-#' @returns
-#' `rolling_median()`: A numeric vector of local median values, the same length
-#'   as `x`.
-#'
-#' @rdname compute_helpers
-#' @keywords internal
-rolling_median <- function(
-    x,
-    width,
-    align = c("centre", "left", "right")
-) {
-    align <- sub("^center$", "centre", align)
-    align <- match.arg(align)
-
-    ## centre = left-biased
-    if (align == "centre") {
-        n <- length(x)
-        shift <- floor(width / 2L)
-        x_padded <- c(x, rep_len(x[n], shift))
-        rolled <- roll::roll_median(
-            x_padded,
-            width,
-            min_obs = 1L,
-            na_restore = TRUE
-        )
-
-        return(rolled[seq_len(n) + shift])
-    }
-
-    ## roll::roll_lm is right-aligned: result[i] uses x[(i-width+1):i]
-    if (align == "right") {
-        rolled <- roll::roll_median(
-            x,
-            width,
-            min_obs = 1L,
-            na_restore = TRUE
-        )
-        return(rolled)
-    }
-
-    ## right = backward looking; left = forward looking
-    rolled <- roll::roll_median(
-        rev(x),
-        width,
-        min_obs = 1L,
-        na_restore = TRUE
-    )
-
-    return(rev(rolled))
-}
-
-
-#' @description
-#' `rolling_mean()`: Compute rolling mean using [roll][roll::roll-package]
-#' with configurable alignment
-#'
-#' @returns
-#' `rolling_mean()`: A numeric vector of local mean values, the same length as
-#'   `x`.
-#'
-#' @rdname compute_helpers
-#' @keywords internal
-rolling_mean <- function(
-    x,
-    width,
-    align = c("centre", "left", "right"),
-    min_obs = width,
-    verbose = TRUE,
-    ...
-) {
-    align <- sub("^center$", "centre", align)
-    align <- match.arg(align)
-
-    bypass_checks <- list(...)$bypass_checks %||% FALSE
-    if (!bypass_checks) {
-        if (missing(verbose)) {
-            verbose <- getOption("mnirs.verbose", default = TRUE)
-        }
-        validate_numeric(
-            width, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"
-        )
-        # if (min_obs < 1L || min_obs > width) {
-        #     min_obs <- max(1L, min(min_obs, width))
-        #     if (verbose) {
-        #         cli_warn(c(
-        #             "!" = "{.arg min_obs} must be an {.cls integer} between \\
-        #         {.val {2}} and {.val {width}}.",
-        #             "i" = "{.arg min_obs} set to {.val {min_obs}}."
-        #         ))
-        #     }
-        # }
-    }
-
-    ## centre = left-biased
-    if (align == "centre") {
-        n <- length(x)
-        shift <- floor(width / 2L)
-        x_padded <- c(x, rep_len(NA_real_, shift))
-        rolled <- roll::roll_mean(
-            x_padded,
-            width,
-            min_obs = min_obs
-        )
-    
-        return(rolled[seq_len(n) + shift])
-    }
-
-    ## roll::roll_lm is right-aligned: result[i] uses x[(i-width+1):i]
-    if (align == "right") {
-        rolled <- roll::roll_mean(
-            x,
-            width,
-            min_obs = min_obs
-        )
-        return(rolled)
-    }
-
-    ## right = backward looking; left = forward looking
-    rolled <- roll::roll_mean(
-        rev(x),
-        width,
-        min_obs = min_obs
-    )
- 
-    return(rev(rolled))
-}
-
-
-#' @description
-#' `rolling_lm()`: Compute rolling linear regression slopes using
-#' [roll][roll::roll-package] with configurable alignment
-#'
-#' @param min_obs An integer specifying the minimum number of valid samples
-#'   required to return a value within a window, otherwise will return `NA`.
-#' @inheritParams slope
-#' @param ... Additional arguments.
-#'
-#' @returns
-#' `rolling_lm()`: A numeric vector of local linear regression slopes, the same
-#'   length as `x`.
-#'
-#' @rdname compute_helpers
-#' @keywords internal
-rolling_lm <- function(
-    x,
-    t = seq_along(x),
-    width,
-    align = c("centre", "left", "right"),
-    min_obs = width,
-    verbose = TRUE,
-    ...
-) {
-    bypass_checks <- list(...)$bypass_checks %||% FALSE
-    if (!bypass_checks) {
-        align <- sub("^center$", "centre", align)
-        align <- match.arg(align)
-        if (!is.numeric(x)) {
-            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (!is.numeric(t)) {
-            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (length(x) != length(t)) {
-            cli_abort(c(
-                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
-                of equal length."
-            ))
-        }
-        validate_numeric(
-            width, 1, c(2, Inf), integer = TRUE, msg1 = "one-element positive"
-        )
-        if (min_obs < 2L || min_obs > width) {
-            min_obs <- max(2L, min(min_obs, width))
-            if (verbose) {
-                cli_warn(c(
-                    "!" = "{.arg min_obs} must be an {.cls integer} between \\
-                    {.val {2}} and {.val {width}}.",
-                    "i" = "{.arg min_obs} set to {.val {min_obs}}."
-                ))
-            }
-        }
-    }
-
-    ## centre = left-biased
-    if (align == "centre") {
-        n <- length(x)
-        shift <- floor(width / 2L)
-        x_padded <- c(x, rep_len(NA_real_, shift))
-        t_padded <- c(t, seq(t[n] + 1L, length.out = shift))
-
-        slopes <- roll::roll_lm(
-            x = t_padded,
-            y = x_padded,
-            width = width,
-            min_obs = min_obs
-        )$coefficients[, 2L]
-
-        return(slopes[seq_len(n) + shift])
-    }
-
-    ## roll::roll_lm is right-aligned: result[i] uses x[(i-width+1):i]
-    if (align == "right") {
-        slopes <- roll::roll_lm(
-            x = t,
-            y = x,
-            width = width,
-            min_obs = min_obs
-        )$coefficients[, 2L]
-        return(slopes)
-    }
-
-    ## right = backward looking; left = forward looking
-    slopes <- rev(
-        roll::roll_lm(
-            x = rev(t),
-            y = rev(x),
-            width = width,
-            min_obs = min_obs
-        )$coefficients[, 2L]
-    )
-
-    return(slopes)
-}
-
-
 #' Preserve and Restore NA Information Within a Vector
 #'
 #' `preserve_na()` stores `NA` vector positions and extracts valid non-`NA`
@@ -472,21 +215,6 @@ rolling_lm <- function(
 #'
 #' `restore_na()` returns a vector `y` the same length as the original
 #'   input vector `x` with `NA` values restored to their original positions.
-#'
-#' @examples
-#' x <- c(1, NA, 3, NA, 5)
-#' (na_info <- mnirs:::preserve_na(x))#'
-#'
-#' ## process with a function that would normally fail on NA
-#' y <- na_info$x_valid * 2
-#' (result <- mnirs:::restore_na(y, na_info))
-#'
-#' x <- c("A", "B", "C", NA, NA)
-#' (na_info <- mnirs:::preserve_na(x))
-#'
-#' ## process with a function that would normally fail on NA
-#' y <- tolower(na_info$x_valid)
-#' (result <- mnirs:::restore_na(y, na_info))
 #'
 #' @keywords internal
 preserve_na <- function(x) {

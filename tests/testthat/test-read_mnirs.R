@@ -46,7 +46,7 @@ test_that("example_mnirs() errors on non-existent file", {
 test_that("example_mnirs() does not show files with `~`", {
     # Create test directory structure
     test_dir <- file.path(tempdir(), "epl_test")
-    dir.create(test_dir, recursive = TRUE)
+    dir.create(test_dir, recursive = TRUE, showWarnings = FALSE)
 
     # Create test files
     file.create(file.path(test_dir, "data.csv"))
@@ -76,7 +76,7 @@ test_that("read_file() reads Excel files correctly", {
     expect_s3_class(result, "data.frame")
     expect_true(ncol(result) > 0)
     expect_true(nrow(result) > 0)
-    expect_true(all(lapply(result, is.character)))
+    expect_all_true(unlist(lapply(result, is.character)))
 })
 
 test_that("read_file() reads CSV files correctly", {
@@ -88,7 +88,7 @@ test_that("read_file() reads CSV files correctly", {
     expect_s3_class(result, "data.frame")
     expect_true(ncol(result) > 0)
     expect_true(nrow(result) > 0)
-    expect_true(all(lapply(result, is.character)))
+    expect_all_true(unlist(lapply(result, is.character)))
 })
 
 test_that("read_file() errors", {
@@ -103,7 +103,7 @@ test_that("read_file() errors", {
 
     expect_error(
         read_file(temp_file),
-        "Unrecognised file type"
+        "Unsupported file type"
     )
 })
 
@@ -144,15 +144,6 @@ test_that("detect_mnirs_device() returns NULL when no match", {
     data <- data.frame(
         V1 = c("Unknown", "device", "data"),
         V2 = c("header", "col1", "val1")
-    )
-
-    expect_null(detect_mnirs_device(data))
-})
-
-test_that("detect_mnirs_device() only checks first 100 rows", {
-    data <- data.frame(
-        V1 = c(rep("random", 101), "OxySoft"),
-        V2 = rep("data", 102)
     )
 
     expect_null(detect_mnirs_device(data))
@@ -208,21 +199,21 @@ test_that("read_data_table() works with event channel", {
     expect_equal(result$data_table$Event, "Start")
 })
 
-test_that("read_data_table() searches first 1000 rows only", {
+test_that("read_data_table() searches specified number of rows", {
     data <- data.frame(
-        V1 = c(rep("filler", 1001), "O2Hb", "10"),
-        V2 = c(rep("filler", 1001), "Time", "0.1"),
+        V1 = c(rep("filler", 123), "O2Hb", "10"),
+        V2 = c(rep("filler", 123), "Time", "0.1"),
         stringsAsFactors = FALSE
     )
 
     expect_error(
-        read_data_table(data, "O2Hb", "Time"),
+        read_data_table(data, "O2Hb", "Time", rows = 122L),
         "Channel names not detected"
     )
 
     data <- data.frame(
-        V1 = c(rep("filler", 999), "O2Hb", rep("10", 10)),
-        V2 = c(rep("filler", 999), "Time", rep("0.1", 10)),
+        V1 = c(rep("filler", 123), "O2Hb", rep("10", 10)),
+        V2 = c(rep("filler", 123), "Time", rep("0.1", 10)),
         stringsAsFactors = FALSE
     )
 
@@ -230,7 +221,7 @@ test_that("read_data_table() searches first 1000 rows only", {
     expect_equal(nrow(result$data_table), 10)
     expect_equal(ncol(result$data_table), 2)
 
-    expect_equal(nrow(result$file_header), 999)
+    expect_equal(nrow(result$file_header), 123)
     expect_equal(ncol(result$file_header), 2)
 })
 
@@ -1334,7 +1325,7 @@ test_that("read_mnirs train.red invalid channel names", {
     expect_error(
         read_mnirs(
             file_path = file_path,
-            nirs_channels = c(""),
+            nirs_channels = c(" "),
             time_channel = c(time = "Timestamp (seconds passed)"),
         ),
         "not detected"

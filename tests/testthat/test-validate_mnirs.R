@@ -109,8 +109,8 @@ test_that("parse_channel_name() returns NULL for NULL input", {
 
 test_that("parse_channel_name() handles already-evaluated character", {
     data <- data.frame(a = 1, b = 2)
-    ch <- "a"
-    result <- parse_channel_name(rlang::enquo(ch), data)
+    channel <- "a"
+    result <- parse_channel_name(channel = rlang::enquo(channel), data)
     expect_equal(result, "a")
 })
 
@@ -215,6 +215,16 @@ test_that("parse_channel_name() returns non-existent colname symbol", {
     expect_equal(result, "nonexistent")
 })
 
+test_that("parse_channel_name returns NULL on logical channel", {
+    data <- data.frame(a = 1, b = 2)
+    env <- rlang::new_environment()
+    expect_null(parse_channel_name(rlang::quo(TRUE), data, env))
+    list_null <- parse_channel_name(rlang::quo(list(TRUE)), data, env)
+    expect_true(is.list(list_null))
+    expect_null(unlist(list_null))
+})
+
+
 
 ## validate_nirs_channels() ========================================
 test_that("validate_nirs_channels() uses metadata when NULL", {
@@ -235,6 +245,9 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
     result <- validate_nirs_channels(nirs_vec, data)
     expect_equal(result, nirs_vec)
 
+    result <- validate_nirs_channels(enquo(nirs_vec), data)
+    expect_equal(result, nirs_vec)
+
     attr(data, "nirs_channels") <- nirs_vec
     expect_message(
         result <- validate_nirs_channels(NULL, data, verbose = TRUE),
@@ -244,6 +257,9 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
 
     nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
     result <- validate_nirs_channels(nirs_list, data)
+    expect_equal(result, nirs_list)
+
+    result <- validate_nirs_channels(enquo(nirs_list), data)
     expect_equal(result, nirs_list)
 })
 
@@ -356,6 +372,12 @@ test_that("validate_event_channel() errors when all NA", {
         validate_event_channel("event", data_na),
         "must contain valid"
     )
+})
+
+test_that("validate_event_channel() works for quosures", {
+    data <- create_test_data()
+    result <- validate_event_channel(rlang::quo("event"), data)
+    expect_equal(result, "event")
 })
 
 

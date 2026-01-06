@@ -51,13 +51,16 @@ reference:
   - starts_with("filter")
   - shift_mnirs
   - rescale_mnirs
-- title: Analysis
+- title: Interval detection
   desc: |
     Detect and extract intervals for further analysis
   contents:
   - extract_intervals
-  - slope
-  - rolling_slope
+- title: Process kinetics
+  desc: |
+    Estimate response dynamics and kinetic parameters
+  contents:
+  - peak_slope
 - title: Plotting
   desc: |
     Tools for pretty plotting with `{ggplot2}`.

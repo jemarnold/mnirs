@@ -70,7 +70,7 @@ NULL
 #'
 #' @format .csv file with header metadata and with 18 columns and 12001 rows.
 #'
-#'   - `nirs_channels = c("SmO2", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
+#'   - `nirs_channels = c("SmO2", "SmO2 unfiltered", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
 #'   - `time_channel = c("Timestamp (seconds passed)")`
 #'   - `event_channel = c("Lap/Event")`
 #'   - `event_times = c(2455, 3166)` ## c(371, 1082) from zero_time
