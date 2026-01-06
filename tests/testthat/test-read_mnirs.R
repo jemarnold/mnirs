@@ -103,7 +103,7 @@ test_that("read_file() errors", {
 
     expect_error(
         read_file(temp_file),
-        "Unrecognised file type"
+        "Unsupported file type"
     )
 })
 
@@ -144,15 +144,6 @@ test_that("detect_mnirs_device() returns NULL when no match", {
     data <- data.frame(
         V1 = c("Unknown", "device", "data"),
         V2 = c("header", "col1", "val1")
-    )
-
-    expect_null(detect_mnirs_device(data))
-})
-
-test_that("detect_mnirs_device() only checks first 100 rows", {
-    data <- data.frame(
-        V1 = c(rep("random", 101), "OxySoft"),
-        V2 = rep("data", 102)
     )
 
     expect_null(detect_mnirs_device(data))
@@ -208,21 +199,21 @@ test_that("read_data_table() works with event channel", {
     expect_equal(result$data_table$Event, "Start")
 })
 
-test_that("read_data_table() searches first 1000 rows only", {
+test_that("read_data_table() searches specified number of rows", {
     data <- data.frame(
-        V1 = c(rep("filler", 1001), "O2Hb", "10"),
-        V2 = c(rep("filler", 1001), "Time", "0.1"),
+        V1 = c(rep("filler", 123), "O2Hb", "10"),
+        V2 = c(rep("filler", 123), "Time", "0.1"),
         stringsAsFactors = FALSE
     )
 
     expect_error(
-        read_data_table(data, "O2Hb", "Time"),
+        read_data_table(data, "O2Hb", "Time", rows = 122L),
         "Channel names not detected"
     )
 
     data <- data.frame(
-        V1 = c(rep("filler", 999), "O2Hb", rep("10", 10)),
-        V2 = c(rep("filler", 999), "Time", rep("0.1", 10)),
+        V1 = c(rep("filler", 123), "O2Hb", rep("10", 10)),
+        V2 = c(rep("filler", 123), "Time", rep("0.1", 10)),
         stringsAsFactors = FALSE
     )
 
@@ -230,7 +221,7 @@ test_that("read_data_table() searches first 1000 rows only", {
     expect_equal(nrow(result$data_table), 10)
     expect_equal(ncol(result$data_table), 2)
 
-    expect_equal(nrow(result$file_header), 999)
+    expect_equal(nrow(result$file_header), 123)
     expect_equal(ncol(result$file_header), 2)
 })
 
@@ -715,30 +706,67 @@ test_that("select_rename_data() prioritises custom names over data", {
 })
 
 ## clean_invalid() ==================================================
+## updated to handle data.table modification in place
 test_that("clean_invalid handles character vectors", {
-    expect_equal(clean_invalid(c("a", "", "b")), c("a", NA_character_, "b"))
-    expect_equal(clean_invalid(c("x", "NA", "y")), c("x", NA_character_, "y"))
-    expect_equal(clean_invalid(c("", "NA")), c(NA_character_, NA_character_))
-    expect_equal(clean_invalid(""), NA_character_)
-    expect_equal(clean_invalid(NA_character_), NA_character_)
-    expect_equal(clean_invalid(character(0)), character(0))
+    expect_equal(
+        clean_invalid(data.table::data.table(c("a", "", "b"))),
+        data.table::data.table(c("a", NA_character_, "b"))
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(c("x", "NA", "y"))),
+        data.table::data.table(c("x", NA_character_, "y"))
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(c("", "NA"))),
+        data.table::data.table(c(NA_character_, NA_character_))
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table("")),
+        data.table::data.table(NA_character_)
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(NA_character_)),
+        data.table::data.table(NA_character_)
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(character(0))),
+        data.table::data.table(character(0))
+    )
 })
 
 test_that("clean_invalid handles numeric vectors", {
     ## skip, avoid loss of precision
     # expect_equal(
-    #     clean_invalid(c(1.2345678, 2.3, NA)),
-    #     c(1.234568, 2.3, NA_real_)
+    #     clean_invalid(data.table::data.table(c(1.2345678, 2.3, NA))),
+    #     data.table::data.table(c(1.234568, 2.3, NA_real_))
     # )
-    expect_equal(clean_invalid(c(0, -0)), c(0, 0))
-    expect_equal(clean_invalid(c(Inf, -Inf, NaN)), rep(NA_real_, 3))
-    expect_equal(clean_invalid(numeric(0)), numeric(0))
-    expect_equal(clean_invalid(NA_real_), NA_real_)
+    expect_equal(
+        clean_invalid(data.table::data.table(c(0, -0))),
+        data.table::data.table(c(0, 0))
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(c(Inf, -Inf, NaN))),
+        data.table::data.table(rep(NA_real_, 3))
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(numeric(0))),
+        data.table::data.table(numeric(0))
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(NA_real_)),
+        data.table::data.table(NA_real_)
+    )
 })
 
 test_that("clean_invalid does nothing to other types", {
-    expect_equal(clean_invalid(TRUE), TRUE)
-    expect_equal(clean_invalid(list(1, 2)), list(1, 2))
+    expect_equal(
+        clean_invalid(data.table::data.table(TRUE)),
+        data.table::data.table(TRUE)
+    )
+    expect_equal(
+        clean_invalid(data.table::data.table(list(1, 2))),
+        data.table::data.table(list(1, 2))
+    )
 })
 
 ## remove_empty_rows_cols() ===========================================
@@ -1334,7 +1362,7 @@ test_that("read_mnirs train.red invalid channel names", {
     expect_error(
         read_mnirs(
             file_path = file_path,
-            nirs_channels = c(""),
+            nirs_channels = c(" "),
             time_channel = c(time = "Timestamp (seconds passed)"),
         ),
         "not detected"

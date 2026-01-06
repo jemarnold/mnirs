@@ -1,20 +1,23 @@
 # mnirs 0.3.0
 
 * Create `peak_slope()`.
+* Initial implementation of `{data.table}` in `read_mnirs()`.
+    * Fixes a bug reading .csv with empty rows and long string metadata in the header above the data table.
+    * Awaiting future implementation and optimisation across `{mnirs}`.
 
 # mnirs 0.2.1
 
 * Remove `na.rm` arg from `slope()`, `rolling_slope()`, `peak_slope()` in favour of opinionated `na.rm = TRUE` behaviour.
     * `na.rm` arg currently remains in `filter_mnirs()` functions, but this may be removed in the future.
-* Fixed `filter_moving_average()` to correctly identify windows where `partial = FALSE` was not met due to `NA`s.
+* Fix `filter_moving_average()` to correctly identify windows where `partial = FALSE` was not met due to `NA`s.
 * Remove internal `{roll}` functionality from external functions in expectation of moving to `data.table::froll_*()`
 
 # mnirs 0.2.0
 
 * Implement tidy evaluation with `{rlang}` and `{tidyselect}`.
 * Update function documentation & examples, `README`, vignette.
-* Fixed `filter_moving_average()` and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
-* Fixed `shift_mnirs()` to correctly use `width` and `span` arguments.
+* Fix `filter_moving_average()` and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
+* Fix `shift_mnirs()` to correctly use `width` and `span` arguments.
 
 # mnirs 0.1.9
 

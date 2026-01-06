@@ -26,10 +26,10 @@
 #'   column with date-time values of class *POSIXct*, if present in the
 #'   data file. Currently only functions if the existing `time_channel` data
 #'   are in timestamp format (see *Details*).
-#' @param zero_time A logical to re-calculate `time_channel` from zero or 
+#' @param zero_time A logical to re-calculate `time_channel` from zero or
 #'   preserve the original `time_channel` values (`FALSE`, the *default*).
 #' @param keep_all A logical to include all columns detected from the file
-#'   or only include the explicitly specified data columns (`FALSE`, the 
+#'   or only include the explicitly specified data columns (`FALSE`, the
 #'   *default*).
 #' @param verbose A logical to display (the *default*) or silence (`FALSE`)
 #'   warnings and information messages used for troubleshooting.
@@ -59,15 +59,15 @@
 #'   sample rate is detected in the file metadata, a `"time"` column will be
 #'   added converting the sample indices to time values in seconds.
 #'
-#' When the `time_channel` is provided in date-time (*POSIXct*) format, it 
-#'   will be converted to numeric values and re-calculated from zero, 
+#' When the `time_channel` is provided in date-time (*POSIXct*) format, it
+#'   will be converted to numeric values and re-calculated from zero,
 #'   even when `zero_time = FALSE`.
-#' 
+#'
 #' With `add_timestamp = TRUE`, an additional *"timestamp "* column will be
 #'   added with the original date-time values. This functionality is currently
 #'   `<under development>` to recognise start-time values in the file and
 #'   return absolute unix timestamps if available.
-#' 
+#'
 #' Setting `zero_time = TRUE` will re-calculate numeric `time_channel` values
 #'   to start from zero.
 #'
@@ -125,80 +125,67 @@ read_mnirs <- function(
     }
 
     ## import data_raw from either excel or csv
-    data_raw <- read_file(file_path)
-
-    ## detect mNIRS device. Returns NULL if not found
-    ## TODO expand detection algorithms for other devices
-    nirs_device <- detect_mnirs_device(data_raw)
+    dt <- read_file(file_path)
 
     ## extract the data_table, and name by header row
     table_list <- read_data_table(
-        data_raw,
+        dt,
         nirs_channels,
         time_channel,
-        event_channel
+        event_channel,
+        rows = 200L
     )
-    data_table <- table_list$data_table
+    dt <- table_list$data_table
     file_header <- table_list$file_header
 
+    ## detect mNIRS device. Returns NULL if not found
+    ## TODO expand detection algorithms for other devices
+    nirs_device <- detect_mnirs_device(file_header)
+
     ## attempt to detect `time_channel` automatically
-    time_channel <- detect_time_channel(
-        data_table,
-        time_channel,
-        nirs_device,
-        verbose
-    )
+    time_channel <- detect_time_channel(dt, time_channel, nirs_device, verbose)
 
     ## rename from channel names, make duplicates unique, keep columns
     ## return list(data_renamed, nirs_renamed, time_renamed, event_renamed)
     renamed_list <- select_rename_data(
-        data_table,
+        dt,
         nirs_channels,
         time_channel,
         event_channel,
         keep_all,
         verbose
     )
+    dt <- renamed_list$data
     nirs_renamed <- renamed_list$nirs_channel
     time_renamed <- renamed_list$time_channel
     event_renamed <- renamed_list$event_channel
 
-    ## prepare data
-    data_prepared <- renamed_list$data |>
-        ## remove empty (NA) columns and rows
-        remove_empty_rows_cols() |>
-        ## convert column types
-        utils::type.convert(na.strings = c("NA", ""), as.is = TRUE) |>
-        ## convert POSIXct to numeric and/or recalc time from zero
-        parse_time_channel(time_renamed, add_timestamp, zero_time)
-
-    ## standardise invalid to NA and
-    ## round numeric cols to avoid float precision errors
-    data_prepared[] <- lapply(data_prepared, \(.x) {
-        clean_invalid(.x)
-    })
+    ## remove empty (NA) columns and rows
+    dt <- remove_empty_rows_cols(dt)
+    ## convert column types
+    dt <- convert_types(dt)
+    ## standardise invalid to NA by col type
+    dt <- clean_invalid(dt)
+    ## convert POSIXct to numeric and/or recalc time from zero
+    dt <- parse_time_channel(dt, time_renamed, add_timestamp, zero_time)
 
     ## validate and estimate sample rate
     ## will write new "time" column if Oxysoft export rate detected
     ## return list(data_sampled, time_renamed, sample_rate)
     sample_list <- parse_sample_rate(
-        data_prepared,
+        dt,
         file_header,
         time_renamed,
         sample_rate,
         nirs_device,
         verbose
     )
-    data_sampled <- sample_list$data
+    dt <- sample_list$data
     time_renamed <- sample_list$time_channel
     sample_rate <- sample_list$sample_rate
 
     ## print warnings for irregular samples
-    detect_irregular_samples(
-        data_sampled[[time_renamed]],
-        time_renamed,
-        verbose
-    )
+    detect_irregular_samples(dt[[time_renamed]], time_renamed, verbose)
 
     ## assign metadata to attributes(data)
     metadata <- list(
@@ -210,7 +197,7 @@ read_mnirs <- function(
         verbose = verbose
     )
 
-    return(create_mnirs_data(data_sampled, metadata))
+    return(create_mnirs_data(dt, metadata))
 }
 
 
@@ -257,7 +244,7 @@ read_mnirs <- function(
 create_mnirs_data <- function(data, ...) {
     ## from https://github.com/fmmattioni/whippr/blob/master/R/tbl.R
 
-    validate_mnirs_data(data, 1)
+    validate_mnirs_data(data, 1L)
 
     ## overwrite existing attributes and add from incoming metadata
     ## incoming metadata from `...` can be either listed or un-listed
@@ -267,6 +254,12 @@ create_mnirs_data <- function(data, ...) {
     } else {
         args
     }
+
+    ## convert data. table to data. frame for tibble
+    if (data.table::is.data.table(data)) {
+        data <- as.data.frame(data)
+    }
+
     metadata <- utils::modifyList(attributes(data), incoming_metadata)
 
     nirs_data <- tibble::new_tibble(
@@ -317,7 +310,7 @@ example_mnirs <- function(file = NULL) {
     }
 
     matches <- grep(file, dir_files, fixed = TRUE, value = TRUE)
-    if (length(matches) > 1) {
+    if (length(matches) > 1L) {
         cli_abort(c(
             "x" = "Multiple files match {.val {file}}:",
             "i" = "Matching files: {.val {matches}}"
