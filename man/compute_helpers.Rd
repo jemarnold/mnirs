@@ -5,9 +5,6 @@
 \alias{compute_local_fun}
 \alias{compute_outliers}
 \alias{compute_valid_neighbours}
-\alias{rolling_median}
-\alias{rolling_mean}
-\alias{rolling_lm}
 \title{Computes rolling local values}
 \usage{
 compute_local_windows(
@@ -28,27 +25,6 @@ compute_valid_neighbours(
   width = NULL,
   span = NULL,
   verbose = TRUE
-)
-
-rolling_median(x, width, align = c("centre", "left", "right"))
-
-rolling_mean(
-  x,
-  width,
-  align = c("centre", "left", "right"),
-  min_obs = width,
-  verbose = TRUE,
-  ...
-)
-
-rolling_lm(
-  x,
-  t = seq_along(x),
-  width,
-  align = c("centre", "left", "right"),
-  min_obs = width,
-  verbose = TRUE,
-  ...
 )
 }
 \arguments{
@@ -90,9 +66,6 @@ Pearson's rule.}
 
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
-
-\item{min_obs}{An integer specifying the minimum number of valid samples
-required to return a value within a window, otherwise will return \code{NA}.}
 }
 \value{
 \code{compute_local_windows()}: A list the same length as \code{idx} and the same or
@@ -107,15 +80,6 @@ shorter length as \code{t} with numeric vectors of sample indices of length
 \code{x} with numeric vectors of sample indices of length \code{width} samples or
 \code{span} units of time \code{t} for valid values neighbouring split to either
 side of the invalid \code{NA}s.
-
-\code{rolling_median()}: A numeric vector of local median values, the same length
-as \code{x}.
-
-\code{rolling_mean()}: A numeric vector of local mean values, the same length as
-\code{x}.
-
-\code{rolling_lm()}: A numeric vector of local linear regression slopes, the same
-length as \code{x}.
 }
 \description{
 \code{compute_local_windows()}: Compute a list of rolling window indices along a
@@ -129,15 +93,6 @@ outliers of \code{x} within a list of rolling sample windows \code{window_idx}.
 
 \code{compute_valid_neighbours()}: Compute a list of rolling window indices along
 \code{x} to either side of \code{NA}s.
-
-\code{rolling_median()}: Compute rolling median using \link[roll:roll-package]{roll}
-with configurable alignment
-
-\code{rolling_mean()}: Compute rolling mean using \link[roll:roll-package]{roll}
-with configurable alignment
-
-\code{rolling_lm()}: Compute rolling linear regression slopes using
-\link[roll:roll-package]{roll} with configurable alignment
 }
 \details{
 The local rolling window can be specified by either \code{width} as the number of
