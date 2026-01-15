@@ -1,5 +1,5 @@
 Package: mnirs
-Title: Muscle Near-Infrared Spectroscopy Processing & Analysis
+Title: Muscle Near-Infrared Spectroscopy Processing and Analysis
 Version: 0.3.0
 Authors@R: 
     person("Jem", "Arnold", , "jem.arnold@ubc.ca", role = c("aut", "cre", "cph"),
