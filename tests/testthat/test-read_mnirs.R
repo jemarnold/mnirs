@@ -175,9 +175,9 @@ test_that("read_data_table() extracts data with valid channels", {
     expect_equal(names(result$data_table), c("O2Hb", "HHb", "Time"))
     expect_true(all(result$data_table == data[4:5, ]))
 
-    expect_equal(nrow(result$file_header), 2)
+    expect_equal(nrow(result$file_header), 3)
     expect_equal(ncol(result$file_header), 3)
-    expect_true(all(result$file_header == data[1:2, ]))
+    expect_true(all(result$file_header == data[1:3, ]))
 })
 
 test_that("read_data_table() works with event channel", {
@@ -221,7 +221,7 @@ test_that("read_data_table() searches specified number of rows", {
     expect_equal(nrow(result$data_table), 10)
     expect_equal(ncol(result$data_table), 2)
 
-    expect_equal(nrow(result$file_header), 123)
+    expect_equal(nrow(result$file_header), 124)
     expect_equal(ncol(result$file_header), 2)
 })
 
@@ -494,8 +494,7 @@ test_that("name_channels() handles all empty names", {
 
 
 ## select_rename_data() ===========================================
-test_that("select_rename_data() selects and renames channels \\
-          in correct order", {
+test_that("select_rename_data() selects and renames channels in order", {
     data <- data.frame(
         O2Hb = c("10", "20"),
         HHb = c("5", "15"),
@@ -1465,6 +1464,59 @@ test_that("read_mnirs Oxysoft invalid channel names", {
         expect_warning("Duplicate")
 
     expect_true(all(c("HHb", "HHb_1") %in% names(df)))
+})
+
+## VO2master app ========================================================
+test_that("read_mnirs VO2master with ',' decimals returns numeric", {
+    file_path <- example_mnirs("vo2master")
+    nirs_channels <- c(
+        smo2_1 = "SmO2[%]",
+        smo2_2 = "SmO2 -  2[%]",
+        smo2_3 = "SmO2 -  3[%]"
+    )
+    time_channel <- c(time = "Time[s]")
+
+    df_raw <- tibble::as_tibble(
+        data.table::fread(
+            file_path,
+            header = TRUE,
+            colClasses = "character"
+        )
+    )
+
+    expect_all_true(sapply(df_raw, is.character))
+
+    ## should convert decimal "," to numeric
+    df <- convert_type(df_raw, time_channel)
+    expect_all_true(sapply(df[, -c(1:2)], is.numeric))
+
+    ## integrated test
+    expect_message(
+        df <- read_mnirs(
+            file_path = example_mnirs("vo2master"),
+            nirs_channels = c(
+                smo2_1 = "SmO2[%]",
+                smo2_2 = "SmO2 -  2[%]",
+                smo2_3 = "SmO2 -  3[%]"
+            ),
+            time_channel = c(time = "Time[s]"),
+            verbose = TRUE
+        ),
+        "Estimated.*sample_rate.*1"
+    )
+
+    expect_equal(class(df$time), "numeric")
+    expect_equal(sum(diff(df$time[1:100]) == 1), 99)
+    ## smo2 should be numeric from "27,90"
+    expect_equal(class(df$smo2_1), "numeric")
+    expect_equal(class(df$smo2_2), "numeric")
+    expect_equal(class(df$smo2_3), "numeric")
+
+    expect_true(all(
+        c("nirs_channels", "time_channel", "sample_rate") %in%
+            names(attributes(df))
+    ))
+    expect_equal(attr(df, "sample_rate"), 1)
 })
 
 ## create_mnirs_data() ==================================================

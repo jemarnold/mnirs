@@ -293,3 +293,18 @@ test_that("fix_coefs() predictions differ from original model", {
     # Should differ if fixed value differs from estimated
     expect_false(identical(pred_orig, pred_fixed))
 })
+
+## integration tests =============================================
+
+test_that("extract model coefs", {
+    set.seed(1111)
+    t <- 1:60
+    x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) +
+        rnorm(length(t), 0, 3)
+    data <- data.frame(t, x)
+
+    model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data)
+    tau <- coef(model)[["tau"]]
+    expect_equal(tau, 8, tolerance = 1)
+
+})

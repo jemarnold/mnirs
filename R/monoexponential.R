@@ -9,8 +9,8 @@
 #'   response variable.
 #' @param TD A numeric parameter for the time delay before the onset of
 #'   exponential response, in units of the predictor variable `t`.
-#' @param tau A numeric parameter for the time constant `tau (𝜏)` of the
-#'   exponential curve, in units of the predictor variable `t`.
+#' @param tau A numeric parameter for the time constant `tau (\eqn{\tau})` 
+#'   of the exponential curve, in units of the predictor variable `t`.
 #'
 #' @details
 #' Uses the equation:

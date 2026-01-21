@@ -1,3 +1,9 @@
+# mnirs 0.4.0
+
+* Add `vo2master.csv` example file recorded with VO2 Master Manager app.
+* Update `read_mnirs()` to correctly convert "," decimal values to numeric.
+* Simplify `data.table::fread()` for .csv files.
+
 # mnirs 0.3.0
 
 * Create `peak_slope()`. `slope()` and `rolling_slope()` become internal.

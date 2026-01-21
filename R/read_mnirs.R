@@ -162,8 +162,8 @@ read_mnirs <- function(
 
     ## remove empty (NA) columns and rows
     df <- remove_empty_rows_cols(df)
-    ## convert column types
-    df <- utils::type.convert(df, na.strings = c("NA", ""), as.is = TRUE)
+    ## convert char decimal "," to "." and convert column types
+    df <- convert_type(df, time_channel)
     ## convert POSIXct to numeric and/or recalc time from zero
     df <- parse_time_channel(df, time_renamed, add_timestamp, zero_time)
     ## standardise invalid to NA

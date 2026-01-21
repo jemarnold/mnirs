@@ -97,7 +97,7 @@ data_resampled <- resample_mnirs(
     verbose = TRUE     ## will confirm the output sample rate
 )
 
-## note the altered "time" values 👇
+## note the altered "time" values
 data_resampled
 
 }

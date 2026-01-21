@@ -18,8 +18,8 @@ response variable.}
 \item{TD}{A numeric parameter for the time delay before the onset of
 exponential response, in units of the predictor variable \code{t}.}
 
-\item{tau}{A numeric parameter for the time constant \verb{tau (𝜏)} of the
-exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the time constant \verb{tau (\eqn{\tau})}
+of the exponential curve, in units of the predictor variable \code{t}.}
 }
 \value{
 A numeric vector of predicted values the same length as

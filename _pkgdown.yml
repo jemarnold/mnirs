@@ -79,4 +79,5 @@ reference:
   - starts_with("moxy")
   - starts_with("train.red")
   - starts_with("artinis")
+  - starts_with("vo2master")
 
