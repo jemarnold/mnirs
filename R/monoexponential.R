@@ -77,35 +77,21 @@ monoexp_init <- function(
     x <- xy[["x"]]
     n <- length(y)
 
-    # Detect direction from quartile means
-    ## TRUE == UP, FALSE == DOWN
-    q <- n %/% 4
-    rising <- mean(y[seq_len(q)]) < mean(y[seq(n - q + 1, n)])
-
-    ## A and B as top and bottom quantiles of y
-    if (rising) {
-        A <- stats::quantile(y, 0.05, names = FALSE)
-        B <- stats::quantile(y, 0.95, names = FALSE)
-    } else {
-        A <- stats::quantile(y, 0.95, names = FALSE)
-        B <- stats::quantile(y, 0.05, names = FALSE)
-    }
+    ## A & B as first and last fraction of y sorted by x
+    n_frac <- ceiling(n / 20)
+    A <- stats::median(y[seq_len(n_frac)])
+    B <- stats::median(y[seq(n - n_frac + 1, n)])
     amplitude <- B - A
 
-    # first x > 0 exceeding 10% amplitude from A
-    td_idx <- which(x > 0 & abs(y - A) > abs(amplitude) * 0.1)[1L]
-    TD <- if (is.na(td_idx)) 0 else x[td_idx]
-
-    # tau: time from TD to 63.2% of amplitude
+    ## tau: time from TD to 63.2% of amplitude
+    ## fall back to 10% x range if target is NA
     target <- A + 0.632 * amplitude
-    onset_idx <- which(x > TD)
+    tau <- c(x[which.min(abs(y - target))], diff(range(x)) / 10)
+    tau <- tau[!is.na(tau)][1L]
 
-    if (length(onset_idx) > 0) {
-        near_tau_idx <- onset_idx[which.min(abs(y[onset_idx] - target))]
-        tau <- max(x[near_tau_idx] - TD, 1)
-    } else {
-        tau <- (max(x) - TD) / 3
-    }
+    ## time-delay changepoint in derivative
+    td_idx <- which.max(abs(diff(y) / diff(x)))
+    TD <- max(x[td_idx] - tau * 0.1, 0)
 
     return(c(A = A, B = B, TD = TD, tau = tau))
 }
