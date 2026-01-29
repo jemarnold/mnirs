@@ -2,10 +2,14 @@
 % Please edit documentation in R/monoexponential.R
 \name{SS_monoexp}
 \alias{SS_monoexp}
+\alias{SS_monoexp3}
+\alias{SS_monoexp4}
 \alias{monoexp_init}
-\title{Self-starting four-parameter monoexponential model}
+\title{Self-starting monoexponential models}
 \usage{
-SS_monoexp(t, A, B, TD, tau)
+SS_monoexp3(t, A, B, tau, TD = NULL)
+
+SS_monoexp4(t, A, B, tau, TD = NULL)
 
 monoexp_init(mCall, data, LHS, ...)
 }
@@ -18,11 +22,12 @@ response variable.}
 \item{B}{A numeric parameter for the ending (asymptote) value of the
 response variable.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
-exponential response, in units of the predictor variable \code{t}.}
-
-\item{tau}{A numeric parameter for the time constant \verb{tau (\eqn{\tau})}
+\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
 of the exponential curve, in units of the predictor variable \code{t}.}
+
+\item{TD}{A numeric parameter for the time delay before the onset of
+exponential response, in units of the predictor variable \code{t}. If \code{NULL}
+(\emph{default}), a 3-parameter model without time delay is used.}
 
 \item{mCall}{A matched call to the function \code{model}.}
 
@@ -33,23 +38,29 @@ of the exponential curve, in units of the predictor variable \code{t}.}
 \item{...}{Additional arguments.}
 }
 \value{
-\code{\link[=SS_monoexp]{SS_monoexp()}}: A numeric vector of predicted values the same
+\code{\link[=SS_monoexp3]{SS_monoexp3()}} and \code{\link[=SS_monoexp4]{SS_monoexp4()}}: A numeric vector of predicted values the same
 length as the predictor variable \code{t}.
 
 \code{\link[=monoexp_init]{monoexp_init()}}: Initial starting estimates for parameters in the
-model called by \code{\link[=SS_monoexp]{SS_monoexp()}}.
+model called by \code{\link[=SS_monoexp3]{SS_monoexp3()}} and \code{\link[=SS_monoexp4]{SS_monoexp4()}}.
 }
 \description{
-\code{\link[=SS_monoexp]{SS_monoexp()}}: Creates initial coefficient estimates for a \code{selfStart}
-model for the four-parameter \code{\link[=monoexponential]{monoexponential()}} function. For the
-parameters \code{A}, \code{B}, \code{TD}, and \code{tau}.
+\code{\link[=SS_monoexp3]{SS_monoexp3()}}: Creates initial coefficient estimates for a \code{selfStart}
+model for a 3-parameter \code{\link[=monoexponential]{monoexponential()}} function (A, B, tau).
+
+\code{\link[=SS_monoexp4]{SS_monoexp4()}} supports a 4-parameter \code{\link[=monoexponential]{monoexponential()}} function
+(A, B, tau, TD).
 
 \code{\link[=monoexp_init]{monoexp_init()}}: Returns initial values for the parameters in a \code{selfStart}
 model.
 }
 \details{
-Uses the equation:
-\code{ifelse(x <= TD, A, A + (B - A) * (1 - exp((TD - x) / tau)))}
+For 3-parameter model: \code{y ~ SS_monoexp3(t, A, B, tau)}
+
+For 4-parameter model: \code{y ~ SS_monoexp4(t, A, B, tau, TD)}
+
+The 3-parameter model is recommended for small samples or when no obvious
+time delay exists, as it converges more reliably.
 }
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
@@ -57,10 +68,10 @@ set.seed(13)
 t <- 1:60
 
 ## create an exponential curve with random noise
-x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) + rnorm(length(t), 0, 3)
+x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 
-(model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data))
+(model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data))
 
 y <- predict(model, data)
 
@@ -72,5 +83,6 @@ ggplot(data, aes(t, x)) +
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=monoexponential]{monoexponential()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}}
+\code{\link[=monoexponential]{monoexponential()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
+\code{\link[=SSasymp]{SSasymp()}}
 }

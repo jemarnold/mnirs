@@ -35,7 +35,6 @@ read_file <- function(file_path) {
                         "x" = "File cannot be opened.",
                         "i" = "Check the file is not in use by another \\
                         application.",
-                        "i" = "{.arg file_path} = {.path {file_path}}"
                     ))
                 } else {
                     cli_abort(e$message)

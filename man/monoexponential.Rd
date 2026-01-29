@@ -4,7 +4,7 @@
 \alias{monoexponential}
 \title{Monoexponential function with 4 parameters}
 \usage{
-monoexponential(t, A, B, TD, tau)
+monoexponential(t, A, B, tau, TD = NULL)
 }
 \arguments{
 \item{t}{A numeric vector of the predictor variable; time or sample number.}
@@ -15,11 +15,12 @@ response variable.}
 \item{B}{A numeric parameter for the ending (asymptote) value of the
 response variable.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
-exponential response, in units of the predictor variable \code{t}.}
-
-\item{tau}{A numeric parameter for the time constant \verb{tau (\eqn{\tau})}
+\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
 of the exponential curve, in units of the predictor variable \code{t}.}
+
+\item{TD}{A numeric parameter for the time delay before the onset of
+exponential response, in units of the predictor variable \code{t}. If \code{NULL}
+(\emph{default}), a 3-parameter model without time delay is used.}
 }
 \value{
 A numeric vector of predicted values the same length as
@@ -29,10 +30,14 @@ the predictor variable \code{t}.
 Calculate a four-parameter monoexponential curve.
 }
 \details{
-Uses the equation:
-\code{ifelse(x <= TD, A, A + (B - A) * (1 - exp((TD - x) / tau)))}
-\code{tau} is equal to the reciprocal of \code{k} (\code{tau = 1/k}), where \code{k} is the
-rate constant of the same function.
+3-parameter model equation:
+\code{A + (B - A) * (1 - exp(-t / tau))}
+
+4-parameter model equation:
+\code{ifelse(t <= TD, A, A + (B - A) * (1 - exp(-(t - TD) / tau)))}
+
+\code{tau} is the time constant and equal to the reciprocal of \code{k}, the rate
+constant (\code{k = 1/tau}).
 }
 \examples{
 \dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
@@ -40,10 +45,10 @@ set.seed(13)
 t <- 1:60
 
 ## create an exponential curve with random noise
-x <- monoexponential(t, A = 10, B = 100, TD = 15, tau = 8) + rnorm(length(t), 0, 3)
+x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 
-(model <- nls(x ~ SS_monoexp(t, A, B, TD, tau), data = data))
+(model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data))
 
 y <- predict(model, data)
 
