@@ -1,5 +1,40 @@
 # Changelog
 
+## mnirs 0.4.0
+
+- Create
+  [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md),
+  [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md),
+  and
+  [`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+  self-starting model functions.
+  - [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
+    is the equation for a 4-parameter monoexponential function with
+    parametera “A”, “B”, “tau”, and “TD”.
+  - `SS_monoexp*()` are self-starting functions for
+    [`nls()`](https://rdrr.io/r/stats/nls.html) or other curve fitting
+    functions, for either the 4-parameter monoexponential function, or a
+    reduced 3-parameter function without a time delay (“TD”).
+  - `fix_coef()` is used to update a model with any number of parameters
+    set to fixed values, e.g. if the starting or ending values are known
+    a priori. By entering fixed values, the remaining parameters are
+    left free to be optimised (experimental function, may not work when
+    called from within nested function conditions, need to further
+    validate).  
+- Add `vo2master.csv` example file recorded with VO2 Master Manager app
+  (thanks Philip Skotzke).
+- Update
+  [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+  to correctly convert “,” decimal values to numeric (thanks Philip
+  Skotzke).
+- Simplify
+  [`data.table::fread()`](https://rdrr.io/pkg/data.table/man/fread.html)
+  for .csv files with multiple regional formats.
+- [`replace_invalid()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
+  and
+  [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
+  now inform the number of samples replaced (thanks Philip Skotzke).
+
 ## mnirs 0.3.0
 
 - Create
@@ -24,7 +59,7 @@
   [`read_file()`](https://jemarnold.github.io/mnirs/reference/read_file.md)
   to better handle .csv files.
   - Implement
-    [`data.table::fread()`](https://rdatatable.gitlab.io/data.table/reference/fread.html)
+    [`data.table::fread()`](https://rdrr.io/pkg/data.table/man/fread.html)
     to handle .csv with empty rows and long string metadata in the
     header above the data table.
   - Awaiting future expanded [data.table](https://r-datatable.com)

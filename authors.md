@@ -8,16 +8,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/jemarnold/mnirs/blob/v0.3.0/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/jemarnold/mnirs/blob/main/DESCRIPTION)
 
-Arnold J (2026). *mnirs: Muscle Near-Infrared Spectroscopy Processing &
-Analysis*. R package version 0.3.0,
+Arnold J (2026). *mnirs: Muscle Near-Infrared Spectroscopy Processing
+and Analysis*. R package version 0.4.0,
 <https://jemarnold.github.io/mnirs/>.
 
     @Manual{,
-      title = {mnirs: Muscle Near-Infrared Spectroscopy Processing & Analysis},
+      title = {mnirs: Muscle Near-Infrared Spectroscopy Processing and Analysis},
       author = {Jem Arnold},
       year = {2026},
-      note = {R package version 0.3.0},
+      note = {R package version 0.4.0},
       url = {https://jemarnold.github.io/mnirs/},
     }

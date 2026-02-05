@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -35,9 +35,25 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/v0.3.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="mnirs-040">mnirs 0.4.0<a class="anchor" aria-label="anchor" href="#mnirs-040"></a></h2>
+<ul><li>Create <code><a href="../reference/monoexponential.html">monoexponential()</a></code>, <code><a href="../reference/SS_monoexp.html">SS_monoexp3()</a></code>, and <code><a href="../reference/SS_monoexp.html">SS_monoexp4()</a></code> self-starting model functions.
+<ul><li>
+<code><a href="../reference/monoexponential.html">monoexponential()</a></code> is the equation for a 4-parameter monoexponential function with parametera “A”, “B”, “tau”, and “TD”.</li>
+<li>
+<code>SS_monoexp*()</code> are self-starting functions for <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">nls()</a></code> or other curve fitting functions, for either the 4-parameter monoexponential function, or a reduced 3-parameter function without a time delay (“TD”).</li>
+<li>
+<code>fix_coef()</code> is used to update a model with any number of parameters set to fixed values, e.g. if the starting or ending values are known a priori. By entering fixed values, the remaining parameters are left free to be optimised (experimental function, may not work when called from within nested function conditions, need to further validate).<br></li>
+</ul></li>
+<li>Add <code>vo2master.csv</code> example file recorded with VO2 Master Manager app (thanks Philip Skotzke).</li>
+<li>Update <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> to correctly convert “,” decimal values to numeric (thanks Philip Skotzke).</li>
+<li>Simplify <code><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">data.table::fread()</a></code> for .csv files with multiple regional formats.</li>
+<li>
+<code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code> and <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code> now inform the number of samples replaced (thanks Philip Skotzke).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.0" id="mnirs-030">mnirs 0.3.0<a class="anchor" aria-label="anchor" href="#mnirs-030"></a></h2>
 <ul><li>Create <code><a href="../reference/peak_slope.html">peak_slope()</a></code>. <code><a href="../reference/rolling_slope.html">slope()</a></code> and <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code> become internal.</li>
@@ -48,7 +64,7 @@
 <code>na.rm</code> arg currently remains in <code><a href="../reference/filter_mnirs.html">filter_mnirs()</a></code> functions, but this may be removed in the future.</li>
 </ul></li>
 <li>Fix <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> internally <code><a href="../reference/read_file.html">read_file()</a></code> to better handle .csv files.
-<ul><li>Implement <code><a href="https://rdatatable.gitlab.io/data.table/reference/fread.html" class="external-link">data.table::fread()</a></code> to handle .csv with empty rows and long string metadata in the header above the data table.</li>
+<ul><li>Implement <code><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">data.table::fread()</a></code> to handle .csv with empty rows and long string metadata in the header above the data table.</li>
 <li>Awaiting future expanded <a href="https://r-datatable.com" class="external-link">data.table</a> implementation across <a href="https://jemarnold.github.io/mnirs/">mnirs</a>, i.e. for <code>data.table::froll*</code> functions.</li>
 </ul></li>
 <li>Fix <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code> to correctly identify windows where <code>partial = FALSE</code> was not met due to <code>NA</code>s.</li>

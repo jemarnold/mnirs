@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   reading-mnirs-data: reading-mnirs-data.html
-last_built: 2026-01-06T21:23Z
+last_built: 2026-02-05T03:51Z
 urls:
   reference: https://jemarnold.github.io/mnirs/reference
   article: https://jemarnold.github.io/mnirs/articles

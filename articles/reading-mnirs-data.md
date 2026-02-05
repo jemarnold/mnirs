@@ -7,7 +7,7 @@ devices it is growing ever easier to collect local muscle oxygenation
 data during dynamic activities. The real challenge comes with deciding
 how to clean, filter, process, and eventually interpret those data.
 
-[mnirs](https://jemarnold.github.io/mnirs/) package aims to provide
+The [mnirs](https://jemarnold.github.io/mnirs/) package aims to provide
 standardised, reproducible methods for processing and analysing NIRS
 data, helping practitioners detect meaningful signals from noise and
 improve our confidence in interpreting information and applying that
@@ -168,6 +168,7 @@ nirs_channels = c(new_name1 = "original_name1",
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
 #> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
+#> [5] "vo2master.csv"
 
 ## partial matching will error if matches multiple
 try(example_mnirs("moxy"))
@@ -713,7 +714,7 @@ condition in both legs.
 
 For example, this may be appropriate when we are more interested in the
 relative change (delta) in each leg during an intervention or exposure
-(often referred to as `"∇SmO[2]"`).
+(often referred to as `"∇SmO2"`).
 
 ### `rescale_mnirs()`
 

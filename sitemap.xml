@@ -7,11 +7,13 @@
 <url><loc>https://jemarnold.github.io/mnirs/authors.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/index.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/news/index.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/SS_monoexp.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/abort_validation.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/breaks_timespan.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/clean_invalid.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/compute_helpers.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/convert_type.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/create_mnirs_data.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/detect_events.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/detect_irregular_samples.html</loc></url>
@@ -25,12 +27,14 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/filter_butter.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/filter_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/filter_moving_average.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/fix_coefs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/format_hmmss.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/group_intervals.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/index.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/is_empty.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/make_list.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/mnirs-package.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/monoexponential.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/moxy_intervals.csv.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/name_channels.html</loc></url>
@@ -61,6 +65,7 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/theme_mnirs.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/train.red_intervals.csv.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/validate_mnirs.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/vo2master.csv.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/within.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/wrap.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/zero_offset_data.html</loc></url>

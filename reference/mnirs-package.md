@@ -1,4 +1,4 @@
-# mnirs: Muscle Near-Infrared Spectroscopy Processing & Analysis
+# mnirs: Muscle Near-Infrared Spectroscopy Processing and Analysis
 
 Methods for reading, processing, and analysing data from muscle
 near-infrared spectroscopy (mNIRS) devices.

@@ -141,7 +141,7 @@ data_resampled <- resample_mnirs(
 )
 #> ℹ Output is resampled at 2 Hz.
 
-## note the altered "time" values 👇
+## note the altered "time" values
 data_resampled
 #> # A tibble: 2,419 × 2
 #>     time  smo2

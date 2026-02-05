@@ -56,6 +56,12 @@ Estimate response dynamics and kinetic parameters
 
 - [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
   : Find peak linear slope
+- [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+  [`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+  [`monoexp_init()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+  : Self-starting monoexponential models
+- [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
+  : Monoexponential function with 4 parameters
 
 ## Plotting
 
@@ -101,3 +107,5 @@ Example data files included in the package
   : 10 Hz Train.Red App export
 - [`artinis_intervals.xlsx`](https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.md)
   : 10 Hz Artinis Oxysoft export
+- [`vo2master.csv`](https://jemarnold.github.io/mnirs/reference/vo2master.csv.md)
+  : 1 Hz VO2master app recording from Moxy
