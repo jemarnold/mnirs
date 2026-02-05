@@ -61,6 +61,7 @@ reference:
     Estimate response dynamics and kinetic parameters
   contents:
   - peak_slope
+  - matches("monoexp")
 - title: Plotting
   desc: |
     Tools for pretty plotting with `{ggplot2}`.
@@ -78,4 +79,5 @@ reference:
   - starts_with("moxy")
   - starts_with("train.red")
   - starts_with("artinis")
+  - starts_with("vo2master")
 

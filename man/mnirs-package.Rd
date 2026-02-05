@@ -4,7 +4,7 @@
 \name{mnirs-package}
 \alias{mnirs}
 \alias{mnirs-package}
-\title{mnirs: Muscle Near-Infrared Spectroscopy Processing & Analysis}
+\title{mnirs: Muscle Near-Infrared Spectroscopy Processing and Analysis}
 \description{
 Methods for reading, processing, and analysing data from muscle near-infrared spectroscopy (mNIRS) devices.
 }

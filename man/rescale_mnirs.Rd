@@ -4,7 +4,12 @@
 \alias{rescale_mnirs}
 \title{Re-scale data range}
 \usage{
-rescale_mnirs(data, nirs_channels = list(NULL), range, verbose = TRUE)
+rescale_mnirs(
+  data,
+  nirs_channels = list(NULL),
+  range,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{data}{A data frame of class \emph{"mnirs"} containing time series data

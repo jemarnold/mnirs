@@ -11,17 +11,14 @@ read_file <- function(file_path) {
 
     ## import data_raw from either excel or csv
     if (grepl("\\.csv$", file_path, ignore.case = TRUE)) {
-        dt <- data.table::fread(
-            file_path,
-            sep = "", ## read single col to preserve metadata rows
-            header = FALSE,
-            colClasses = "character"
+        data_raw <- as.data.frame(
+            data.table::fread(
+                file_path,
+                header = FALSE,
+                colClasses = "character"
+            )
         )
-        ## manual sep rows by "," and construct data.frame
-        data_raw <- data.table::setDT(
-            data.table::tstrsplit(dt[[1L]], ",", fixed = TRUE)
-        )
-        data_raw <- as.data.frame(data_raw)
+        
     } else if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
         ## report error when file is open and cannot be accessed by readxl
         data_raw <- tryCatch(
@@ -37,8 +34,7 @@ read_file <- function(file_path) {
                         "{e}",
                         "x" = "File cannot be opened.",
                         "i" = "Check the file is not in use by another \\
-                        application.",
-                        "i" = "{.arg file_path} = {.path {file_path}}"
+                        application."
                     ))
                 } else {
                     cli_abort(e$message)
@@ -70,8 +66,8 @@ read_data_table <- function(
     search_df <- data[seq_len(min(rows, nrow(data))), ]
 
     ## detect header row where channels exists
-    header_row <- which(apply(search_df, 1L, \(.row) {
-        all(nirs_channels %in% .row)
+    header_row <- which(apply(search_df, 1L, \(.row_vec) {
+        all(nirs_channels %in% .row_vec)
     }))
 
     ## validation: all channels must be detected to extract the data frame
@@ -90,8 +86,8 @@ read_data_table <- function(
 
     ## extract the data_table, and name by header row
     rows <- (header_row + 1L):nrow(data)
-    data_table <- stats::setNames(data[rows, ], data[header_row, ])
-    file_header <- data[seq_len(header_row - 1L), ]
+    data_table <- stats::setNames(data[rows, ], search_df[header_row, ])
+    file_header <- search_df[seq_len(header_row), ]
 
     return(list(
         data_table = data_table,
@@ -106,7 +102,8 @@ detect_mnirs_device <- function(data) {
     devices <- list(
         Artinis = "OxySoft",
         Train.Red = "Train.Red",
-        Moxy = "LUT Part Number"
+        Moxy = "LUT Part Number",
+        Moxy = "SmO2 Live"
     )
 
     matches <- vapply(devices, \(.pattern) {
@@ -295,6 +292,31 @@ select_rename_data <- function(
         time_channel = time_renamed,
         event_channel = event_renamed
     ))
+}
+
+
+#' Standardise comma decimals to periods in character columns
+#' @keywords internal
+convert_type <- function(data, time_channel) {
+    ## convert decimal "," to "."
+    char_cols <- setdiff(names(data)[sapply(data, is.character)], time_channel)
+    for (col in char_cols) {
+        data.table::set(
+            data,
+            j = col,
+            value = gsub(",", ".", data[[col]], fixed = TRUE)
+        )
+    }
+
+    ## convert column types
+    data <- utils::type.convert(
+        data,
+        na.strings = c("NA", ""),
+        dec = ".",
+        as.is = TRUE
+    )
+
+    return(data)
 }
 
 

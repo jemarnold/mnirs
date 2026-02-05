@@ -68,7 +68,7 @@
 #'     verbose = TRUE     ## will confirm the output sample rate
 #' )
 #'
-#' ## note the altered "time" values 👇
+#' ## note the altered "time" values
 #' data_resampled
 #'
 #' @export

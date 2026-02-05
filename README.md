@@ -62,6 +62,7 @@ library(mnirs)
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
 #> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
+#> [5] "vo2master.csv"
 
 ## call an example mNIRS data file
 file_path <- example_mnirs("moxy_ramp") 
