@@ -22,7 +22,7 @@ knitr:
 
 With modern wearable **muscle near-infrared spectroscopy (mNIRS)** devices it is growing ever easier to collect local muscle oxygenation data during dynamic activities. The real challenge comes with deciding how to clean, filter, process, and eventually interpret those data.
 
-`{mnirs}` package aims to provide standardised, reproducible methods for processing and analysing NIRS data, helping practitioners detect meaningful signals from noise and improve our confidence in interpreting information and applying that information to the clients we work with.
+The `{mnirs}` package aims to provide standardised, reproducible methods for processing and analysing NIRS data, helping practitioners detect meaningful signals from noise and improve our confidence in interpreting information and applying that information to the clients we work with.
 
 In this vignette we will demonstrate how to:
 
@@ -463,7 +463,7 @@ Whereas when we shift both baseline values to zero, we can see that the *smo2_ri
 
 We have to consider how our assumptions and processing decisions will influence our interpretations; by shifting both starting values, we are normalising for the starting condition of the two tissue sites and implicitly assuming that the baseline represents the same starting condition in both legs. 
 
-For example, this may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as `"∇SmO[2]"`).
+For example, this may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as `"∇SmO2"`).
 
 
 

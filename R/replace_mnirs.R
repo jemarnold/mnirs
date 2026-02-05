@@ -277,16 +277,18 @@ replace_invalid <- function(
     )
     invalid_length <- length(invalid_idx)
 
-    if (verbose) {
-        cli_inform(c(
-            "!" = "{.val {invalid_length}} invalid samples replaced.",
-        ))
-    }
-    
+    ## TODO immature, need way to specify name of channels being replaced
+    # if (verbose) {
+    #     ## inform replacement, including if zero replacements
+    #     cli_inform(c(
+    #         "!" = "{.val {invalid_length}} invalid samples replaced."
+    #     ))
+    # }
+
     if (invalid_length == 0) {
         return(x)
     }
-    
+
     y <- x
     y[invalid_idx] <- NA_real_
 
@@ -368,6 +370,15 @@ replace_outliers <- function(
     window_idx <- compute_local_windows(t, width = width, span = span)
     local_medians <- compute_local_fun(x, window_idx, median, na.rm = TRUE)
     is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+    outlier_length <- length(is_outlier)
+    
+    ## TODO immature, need way to specify name of channels being replaced
+    # if (verbose) {
+    #     ## inform replacement, including if zero replacements
+    #     cli_inform(c(
+    #         "!" = "{.val {outlier_length}} outliers replaced."
+    #     ))
+    # }
 
     ## fill outliers with median or NA
     y <- x
@@ -376,6 +387,7 @@ replace_outliers <- function(
     } else {
         NA_real_
     }
+    
     return(y)
 }
 

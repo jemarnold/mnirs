@@ -1,8 +1,13 @@
 # mnirs 0.4.0
 
-* Add `vo2master.csv` example file recorded with VO2 Master Manager app.
-* Update `read_mnirs()` to correctly convert "," decimal values to numeric.
-* Simplify `data.table::fread()` for .csv files.
+* Create `monoexponential()`, `SS_monoexp3()`, and `SS_monoexp4()` self-starting model functions.
+    * `monoexponential()` is the equation for a 4-parameter monoexponential function with parametera "A", "B", "tau", and "TD".
+    * `SS_monoexp*()` are self-starting functions for `nls()` or other curve fitting functions, for either the 4-parameter monoexponential function, or a reduced 3-parameter function without a time delay ("TD").
+    * `fix_coef()` is used to update a model with any number of parameters set to fixed values, e.g. if the starting or ending values are known a priori. By entering fixed values, the remaining parameters are left free to be optimised (experimental function, may not work when called from within nested function conditions, need to further validate).  
+* Add `vo2master.csv` example file recorded with VO2 Master Manager app (thanks Philip Skotzke).
+* Update `read_mnirs()` to correctly convert "," decimal values to numeric (thanks Philip Skotzke).
+* Simplify `data.table::fread()` for .csv files with multiple regional formats.
+* `replace_invalid()` and `replace_outliers()` now inform the number of samples replaced (thanks Philip Skotzke).
 
 # mnirs 0.3.0
 

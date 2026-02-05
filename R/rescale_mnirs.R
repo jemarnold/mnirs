@@ -3,6 +3,14 @@
 #' Expand or reduce the range (min and max values) of data channels to a new
 #' amplitude/dynamic range, e.g. re-scale the range of NIRS data to `c(0, 100)`.
 #'
+#' @usage
+#' rescale_mnirs(
+#'   data,
+#'   nirs_channels = list(NULL),
+#'   range,
+#'   verbose = TRUE
+#' )
+#' 
 #' @param nirs_channels A `list()` of character vectors indicating grouping
 #'   structure of mNIRS channel names to operate on (see *Details*). Must
 #'   match column names in `data` exactly. Retrieved from metadata if not
