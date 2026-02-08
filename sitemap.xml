@@ -3,6 +3,7 @@
 <url><loc>https://jemarnold.github.io/mnirs/LICENSE-text.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/LICENSE.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/articles/index.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/articles/oxcap-analysis.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/authors.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/index.html</loc></url>
@@ -34,6 +35,7 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/is_empty.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/make_list.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/mnirs-package.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/monoexp_init.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/monoexponential.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/moxy_intervals.csv.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.html</loc></url>
@@ -44,6 +46,7 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/parse_time_channel.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/peak_slope.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/plot.mnirs.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/portamon-oxcap.xlsx.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/preserve_na.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/read_data_table.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/read_file.html</loc></url>

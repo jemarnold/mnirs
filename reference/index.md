@@ -58,7 +58,6 @@ Estimate response dynamics and kinetic parameters
   : Find peak linear slope
 - [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
   [`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  [`monoexp_init()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
   : Self-starting monoexponential models
 - [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
   : Monoexponential function with 4 parameters
@@ -101,11 +100,13 @@ Example data files included in the package
 
 - [`moxy_intervals.csv`](https://jemarnold.github.io/mnirs/reference/moxy_intervals.csv.md)
   : 0.5 Hz Moxy onboard export
-- [`moxy_ramp.xlsx`](https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.md)
-  : 2 Hz PerfPro export of Moxy data
 - [`train.red_intervals.csv`](https://jemarnold.github.io/mnirs/reference/train.red_intervals.csv.md)
   : 10 Hz Train.Red App export
-- [`artinis_intervals.xlsx`](https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.md)
-  : 10 Hz Artinis Oxysoft export
 - [`vo2master.csv`](https://jemarnold.github.io/mnirs/reference/vo2master.csv.md)
   : 1 Hz VO2master app recording from Moxy
+- [`artinis_intervals.xlsx`](https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.md)
+  : 10 Hz Artinis Oxysoft export recorded with Oxymon MKIII
+- [`moxy_ramp.xlsx`](https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.md)
+  : 2 Hz PerfPro export of Moxy data
+- [`portamon-oxcap.xlsx`](https://jemarnold.github.io/mnirs/reference/portamon-oxcap.xlsx.md)
+  : 10 Hz Artinis Oxysoft export recorded with Portamon

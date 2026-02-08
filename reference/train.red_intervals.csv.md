@@ -2,13 +2,13 @@
 
 Exported from Train.Red app, recorded at 10 Hz. Containing two 5-minute
 cycling work intervals, placed on bilateral vastus lateralis muscle
-sites.
+sites. Some data channels have been omitted to keep file size down.
 
 ## Format
 
-.csv file with header metadata and with 18 columns and 12001 rows.
+.csv file with header metadata and with 10 eolumns and 12001 rows.
 
-- `nirs_channels = c("SmO2", "SmO2 unfiltered", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")`
+- `nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")`
 
 - `time_channel = c("Timestamp (seconds passed)")`
 

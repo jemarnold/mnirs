@@ -26,8 +26,8 @@ package.
 ## lists all files
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
-#> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
-#> [5] "vo2master.csv"          
+#> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
+#> [5] "train.red_intervals.csv" "vo2master.csv"          
 
 ## partial matching will error if matches multiple
 try(example_mnirs("moxy"))

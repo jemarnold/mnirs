@@ -1,5 +1,20 @@
 # Changelog
 
+## mnirs 0.4.1
+
+- Create article “Analysing muscle oxidative capacity with {mnirs}”.
+- Add `portamon-oxcap.xlsx` example file (thanks to Dr. Thomas Tripp and
+  Dr. Martin MacInnis).
+- Update `train.red_intervals.csv`, delete redundant NIRS channels to
+  reduce file size.
+- Minors updates to `monoexponential` family of functions.
+  - Fix
+    [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+    to not internally look for `TD` parameter.
+  - Remove
+    [`monoexp_init()`](https://jemarnold.github.io/mnirs/reference/monoexp_init.md)
+    from exported to internal.
+
 ## mnirs 0.4.0
 
 - Create
@@ -143,7 +158,8 @@
 - Create
   [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
   to detect events and extract surrounding data frames.
-- Replace internal `between()` with
+- Replace internal
+  [`between()`](https://dplyr.tidyverse.org/reference/between.html) with
   [`within()`](https://jemarnold.github.io/mnirs/reference/within.md) to
   differentiate from
   [`dplyr::between()`](https://dplyr.tidyverse.org/reference/between.html).

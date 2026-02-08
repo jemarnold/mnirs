@@ -167,8 +167,8 @@ nirs_channels = c(new_name1 = "original_name1",
 ## {mnirs} includes sample files from a few NIRS devices
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
-#> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
-#> [5] "vo2master.csv"
+#> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
+#> [5] "train.red_intervals.csv" "vo2master.csv"
 
 ## partial matching will error if matches multiple
 try(example_mnirs("moxy"))
@@ -681,7 +681,9 @@ protocol.
 > (`"smo2"`), or as a direct symbol (`smo2`).
 >
 > [tidyselect](https://tidyselect.r-lib.org) support functions
-> (e.g. `starts_with()`, `matches()`) can also be used.
+> (e.g. [`starts_with()`](https://tidyselect.r-lib.org/reference/starts_with.html),
+> [`matches()`](https://tidyselect.r-lib.org/reference/starts_with.html))
+> can also be used.
 
 ``` r
 data_shifted <- shift_mnirs(

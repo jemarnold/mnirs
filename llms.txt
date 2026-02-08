@@ -49,8 +49,8 @@ library(mnirs)
 ## {mnirs} includes sample files from a few mNIRS devices
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
-#> [3] "moxy_ramp.xlsx"          "train.red_intervals.csv"
-#> [5] "vo2master.csv"
+#> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
+#> [5] "train.red_intervals.csv" "vo2master.csv"
 
 ## call an example mNIRS data file
 file_path <- example_mnirs("moxy_ramp") 
@@ -366,7 +366,6 @@ Estimate response dynamics and kinetic parameters
   : Find peak linear slope
 - [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
   [`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  [`monoexp_init()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
   : Self-starting monoexponential models
 - [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
   : Monoexponential function with 4 parameters
@@ -409,18 +408,22 @@ Example data files included in the package
 
 - [`moxy_intervals.csv`](https://jemarnold.github.io/mnirs/reference/moxy_intervals.csv.md)
   : 0.5 Hz Moxy onboard export
-- [`moxy_ramp.xlsx`](https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.md)
-  : 2 Hz PerfPro export of Moxy data
 - [`train.red_intervals.csv`](https://jemarnold.github.io/mnirs/reference/train.red_intervals.csv.md)
   : 10 Hz Train.Red App export
-- [`artinis_intervals.xlsx`](https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.md)
-  : 10 Hz Artinis Oxysoft export
 - [`vo2master.csv`](https://jemarnold.github.io/mnirs/reference/vo2master.csv.md)
   : 1 Hz VO2master app recording from Moxy
+- [`artinis_intervals.xlsx`](https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.md)
+  : 10 Hz Artinis Oxysoft export recorded with Oxymon MKIII
+- [`moxy_ramp.xlsx`](https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.md)
+  : 2 Hz PerfPro export of Moxy data
+- [`portamon-oxcap.xlsx`](https://jemarnold.github.io/mnirs/reference/portamon-oxcap.xlsx.md)
+  : 10 Hz Artinis Oxysoft export recorded with Portamon
 
 # Articles
 
 ### All vignettes
 
+- [Analysing muscle oxidative capacity with
+  {mnirs}](https://jemarnold.github.io/mnirs/articles/oxcap-analysis.md):
 - [Reading and Cleaning Data with
   {mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.md):

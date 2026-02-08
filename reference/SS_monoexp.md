@@ -9,17 +9,12 @@ function (A, B, tau).
 [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
 function (A, B, tau, TD).
 
-`monoexp_init()`: Returns initial values for the parameters in a
-`selfStart` model.
-
 ## Usage
 
 ``` r
-SS_monoexp3(t, A, B, tau, TD = NULL)
+SS_monoexp3(t, A, B, tau)
 
-SS_monoexp4(t, A, B, tau, TD = NULL)
-
-monoexp_init(mCall, data, LHS, ...)
+SS_monoexp4(t, A, B, tau, TD)
 ```
 
 ## Arguments
@@ -46,32 +41,12 @@ monoexp_init(mCall, data, LHS, ...)
 - TD:
 
   A numeric parameter for the time delay before the onset of exponential
-  response, in units of the predictor variable `t`. If `NULL`
-  (*default*), a 3-parameter model without time delay is used.
-
-- mCall:
-
-  A matched call to the function `model`.
-
-- data:
-
-  A data frame with time `t` and the response variable.
-
-- LHS:
-
-  The left-hand side expression of the model formula.
-
-- ...:
-
-  Additional arguments.
+  response, in units of the predictor variable `t`.
 
 ## Value
 
 `SS_monoexp3()` and `SS_monoexp4()`: A numeric vector of predicted
 values the same length as the predictor variable `t`.
-
-`monoexp_init()`: Initial starting estimates for parameters in the model
-called by `SS_monoexp3()` and `SS_monoexp4()`.
 
 ## Details
 

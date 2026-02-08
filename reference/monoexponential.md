@@ -50,6 +50,10 @@ variable `t`.
 `tau` is the time constant and equal to the reciprocal of `k`, the rate
 constant (`k = 1/tau`).
 
+## See also
+
+[`SS_monoexp()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+
 ## Examples
 
 ``` r

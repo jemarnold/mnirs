@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,7 +17,8 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+    <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -35,9 +36,19 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/v0.4.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.1" id="mnirs-041">mnirs 0.4.1<a class="anchor" aria-label="anchor" href="#mnirs-041"></a></h2>
+<ul><li>Create article “Analysing muscle oxidative capacity with {mnirs}”.</li>
+<li>Add <code>portamon-oxcap.xlsx</code> example file (thanks to Dr. Thomas Tripp and Dr. Martin MacInnis).</li>
+<li>Update <code>train.red_intervals.csv</code>, delete redundant NIRS channels to reduce file size.</li>
+<li>Minors updates to <code>monoexponential</code> family of functions.
+<ul><li>Fix <code><a href="../reference/SS_monoexp.html">SS_monoexp3()</a></code> to not internally look for <code>TD</code> parameter.</li>
+<li>Remove <code><a href="../reference/monoexp_init.html">monoexp_init()</a></code> from exported to internal.</li>
+</ul></li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.0" id="mnirs-040">mnirs 0.4.0<a class="anchor" aria-label="anchor" href="#mnirs-040"></a></h2>
 <ul><li>Create <code><a href="../reference/monoexponential.html">monoexponential()</a></code>, <code><a href="../reference/SS_monoexp.html">SS_monoexp3()</a></code>, and <code><a href="../reference/SS_monoexp.html">SS_monoexp4()</a></code> self-starting model functions.
@@ -102,7 +113,7 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.8" id="mnirs-018">mnirs 0.1.8<a class="anchor" aria-label="anchor" href="#mnirs-018"></a></h2>
 <ul><li>Create <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> to detect events and extract surrounding data frames.</li>
-<li>Replace internal <code>between()</code> with <code><a href="../reference/within.html">within()</a></code> to differentiate from <code><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">dplyr::between()</a></code>.</li>
+<li>Replace internal <code><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">between()</a></code> with <code><a href="../reference/within.html">within()</a></code> to differentiate from <code><a href="https://dplyr.tidyverse.org/reference/between.html" class="external-link">dplyr::between()</a></code>.</li>
 <li>Update <code>README</code> with image of <a href="https://jemarnold.github.io/mnirs/">mnirs</a> shiny app.</li>
 <li>Update <code><a href="../reference/filter_mnirs.html">filter_mnirs()</a></code> with error message when <code>fc</code> outside 0 Hz and Nyquist frequency.</li>
 </ul></div>
