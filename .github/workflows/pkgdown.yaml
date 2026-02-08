@@ -31,12 +31,13 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: quarto-dev/quarto-actions/install-quarto@v1
-
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
+
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)

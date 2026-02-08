@@ -1,7 +1,7 @@
 ---
 title: "Analysing muscle oxidative capacity with {mnirs}"
 author:
-    - name: "Jem Arnold  [{{< fa brands github >}}](https://github.com/jemarnold/mnirs) [{{< fa brands bluesky >}}](https://bsky.app/profile/jemarnold.bsky.social) [{{< ai researchgate >}}](https://researchgate.net/profile/Jem-Arnold) [{{< ai orcid >}}](https://orcid.org/0000-0003-3908-9447)"
+    - name: "Jem Arnold"
 date: last-modified
 format:
     html:
