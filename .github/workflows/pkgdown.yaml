@@ -31,13 +31,33 @@ jobs:
         with:
           use-public-rspm: true
 
+      - name: Setup Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Debug PATH after Quarto setup
+        run: |
+          echo "Shell PATH:"
+          echo $PATH
+          echo ""
+          which quarto || echo "quarto not found in shell"
+          echo ""
+          echo "R PATH:"
+          Rscript -e "cat(Sys.getenv('PATH'), '\n')"
+          echo ""
+          echo "Quarto from R:"
+          Rscript -e "system('which quarto')" || echo "quarto not found from R"
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
           needs: website
 
-      - name: Setup Quarto
-        uses: quarto-dev/quarto-actions/setup@v2
+      - name: Debug PATH after R dependencies
+        run: |
+          echo "R PATH:"
+          Rscript -e "cat(Sys.getenv('PATH'), '\n')"
+          echo ""
+          Rscript -e "quarto::quarto_path()"
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
