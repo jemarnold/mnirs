@@ -9,7 +9,6 @@ format:
         toc: true
 bibliography: oxcap-citations.bib
 csl: vancouver.csl
-link-citations: true
 knitr:
     opts_chunk:
         collapse: true
