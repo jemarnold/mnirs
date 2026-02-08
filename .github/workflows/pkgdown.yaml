@@ -31,6 +31,8 @@ jobs:
         with:
           use-public-rspm: true
 
+      - uses: quarto-dev/quarto-actions/install-quarto@v1
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::pkgdown, local::.
