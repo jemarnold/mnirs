@@ -76,8 +76,5 @@ reference:
   desc: |
     Example data files included in the package
   contents:
-  - starts_with("moxy")
-  - starts_with("train.red")
-  - starts_with("artinis")
-  - starts_with("vo2master")
-
+  - ends_with("csv")
+  - ends_with("xlsx")

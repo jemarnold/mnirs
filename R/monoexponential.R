@@ -25,6 +25,8 @@
 #'
 #' @return A numeric vector of predicted values the same length as
 #'  the predictor variable `t`.
+#' 
+#' @seealso [SS_monoexp()]
 #'
 #' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
 #' set.seed(13)
@@ -59,6 +61,12 @@ monoexponential <- function(t, A, B, tau, TD = NULL) {
 }
 
 
+#' @keywords internal
+monoexp3 <- function(t, A, B, tau) {
+    A + (B - A) * (1 - exp(-t / tau))
+}
+
+
 #' Initiate self-starting monoexponential model
 #'
 #' [monoexp_init()]: Returns initial values for the parameters in a `selfStart`
@@ -72,10 +80,7 @@ monoexponential <- function(t, A, B, tau, TD = NULL) {
 #' @return [monoexp_init()]: Initial starting estimates for parameters in the
 #'   model called by [SS_monoexp3()] and [SS_monoexp4()].
 #'
-#' @name SS_monoexp
-#' @rdname SS_monoexp
-#' @order 3
-#' @export
+#' @keywords internal
 monoexp_init <- function(mCall, data, LHS, ...) {
     ## self-start parameters for nls of monoexponential fit function
     ## uses base R `SSasymp()` initialisation approach
@@ -138,6 +143,9 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' [SS_monoexp3()]: Creates initial coefficient estimates for a `selfStart`
 #' model for a 3-parameter [monoexponential()] function (A, B, tau).
 #'
+#' @usage
+#' SS_monoexp3(t, A, B, tau)
+#'
 #' @inheritParams monoexponential
 #'
 #' @details
@@ -177,7 +185,7 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' @order 1
 #' @export
 SS_monoexp3 <- selfStart(
-    model = monoexponential,
+    model = monoexp3,
     initial = monoexp_init,
     parameters = c("A", "B", "tau")
 )
@@ -188,6 +196,12 @@ SS_monoexp3 <- selfStart(
 #'
 #' [SS_monoexp4()] supports a 4-parameter [monoexponential()] function
 #' (A, B, tau, TD).
+#' 
+#' @param TD A numeric parameter for the time delay before the onset of 
+#'   exponential response, in units of the predictor variable `t`.
+#' 
+#' @usage
+#' SS_monoexp4(t, A, B, tau, TD)
 #' 
 #' @name SS_monoexp
 #' @rdname SS_monoexp

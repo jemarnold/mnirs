@@ -4,14 +4,11 @@
 \alias{SS_monoexp}
 \alias{SS_monoexp3}
 \alias{SS_monoexp4}
-\alias{monoexp_init}
 \title{Self-starting monoexponential models}
 \usage{
-SS_monoexp3(t, A, B, tau, TD = NULL)
+SS_monoexp3(t, A, B, tau)
 
-SS_monoexp4(t, A, B, tau, TD = NULL)
-
-monoexp_init(mCall, data, LHS, ...)
+SS_monoexp4(t, A, B, tau, TD)
 }
 \arguments{
 \item{t}{A numeric vector of the predictor variable; time or sample number.}
@@ -26,23 +23,11 @@ response variable.}
 of the exponential curve, in units of the predictor variable \code{t}.}
 
 \item{TD}{A numeric parameter for the time delay before the onset of
-exponential response, in units of the predictor variable \code{t}. If \code{NULL}
-(\emph{default}), a 3-parameter model without time delay is used.}
-
-\item{mCall}{A matched call to the function \code{model}.}
-
-\item{data}{A data frame with time \code{t} and the response variable.}
-
-\item{LHS}{The left-hand side expression of the model formula.}
-
-\item{...}{Additional arguments.}
+exponential response, in units of the predictor variable \code{t}.}
 }
 \value{
 \code{\link[=SS_monoexp3]{SS_monoexp3()}} and \code{\link[=SS_monoexp4]{SS_monoexp4()}}: A numeric vector of predicted values the same
 length as the predictor variable \code{t}.
-
-\code{\link[=monoexp_init]{monoexp_init()}}: Initial starting estimates for parameters in the
-model called by \code{\link[=SS_monoexp3]{SS_monoexp3()}} and \code{\link[=SS_monoexp4]{SS_monoexp4()}}.
 }
 \description{
 \code{\link[=SS_monoexp3]{SS_monoexp3()}}: Creates initial coefficient estimates for a \code{selfStart}
@@ -50,9 +35,6 @@ model for a 3-parameter \code{\link[=monoexponential]{monoexponential()}} functi
 
 \code{\link[=SS_monoexp4]{SS_monoexp4()}} supports a 4-parameter \code{\link[=monoexponential]{monoexponential()}} function
 (A, B, tau, TD).
-
-\code{\link[=monoexp_init]{monoexp_init()}}: Returns initial values for the parameters in a \code{selfStart}
-model.
 }
 \details{
 For 3-parameter model: \code{y ~ SS_monoexp3(t, A, B, tau)}

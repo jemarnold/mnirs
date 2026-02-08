@@ -1,3 +1,11 @@
+# mnirs 0.4.1
+
+* Create article "Analysing muscle oxidative capacity with {mnirs}".
+* Add `portamon-oxcap.xlsx` example file (thanks to Dr. Thomas Tripp and Dr. Martin MacInnis).
+* Minors updates to `monoexponential` family of functions.
+    * Fix `SS_monoexp3()` to not internally look for `TD` parameter. 
+    * Revert `monoexp_init()` from exported to internal.
+
 # mnirs 0.4.0
 
 * Create `monoexponential()`, `SS_monoexp3()`, and `SS_monoexp4()` self-starting model functions.
