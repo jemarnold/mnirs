@@ -5,9 +5,9 @@
 \alias{train.red_intervals.csv}
 \title{10 Hz Train.Red App export}
 \format{
-.csv file with header metadata and with 18 columns and 12001 rows.
+.csv file with header metadata and with 10 eolumns and 12001 rows.
 \itemize{
-\item \code{nirs_channels = c("SmO2", "SmO2 unfiltered", "HBDiff", "O2HB unfiltered", "HHb unfiltered", "THb unfiltered")}
+\item \code{nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")}
 \item \code{time_channel = c("Timestamp (seconds passed)")}
 \item \code{event_channel = c("Lap/Event")}
 \item \code{event_times = c(2455, 3166)} ## c(371, 1082) from zero_time
@@ -16,5 +16,5 @@
 \description{
 Exported from Train.Red app, recorded at 10 Hz. Containing
 two 5-minute cycling work intervals, placed on bilateral vastus lateralis
-muscle sites.
+muscle sites. Some data channels have been omitted to keep file size down.
 }

@@ -59,3 +59,6 @@ ggplot(data, aes(t, x)) +
     geom_line(aes(y = y))
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[=SS_monoexp]{SS_monoexp()}}
+}

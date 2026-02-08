@@ -3,13 +3,13 @@
 \docType{data}
 \name{artinis_intervals.xlsx}
 \alias{artinis_intervals.xlsx}
-\title{10 Hz Artinis Oxysoft export}
+\title{10 Hz Artinis Oxysoft export recorded with Oxymon MKIII}
 \format{
-.xlsx file with header metadata and with four columns and 20919 rows.
+.xlsx file with header metadata and with five columns and 20919 rows.
 \itemize{
 \item \code{nirs_channels = c(O2Hb = 2, HHb = 3)}
 \item \code{time_channel = c(sample = 1)}
-\item \code{event_channel = c(event = 4)}
+\item \code{event_channel = c(event = 4, label = "col_5")}
 }
 }
 \description{

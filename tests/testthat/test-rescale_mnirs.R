@@ -189,10 +189,10 @@ test_that("rescale_mnirs works on Train.Red", {
     df <- read_mnirs(
         file_path = file_path,
         nirs_channels = c(
-            smo2_left = "SmO2",
-            smo2_right = "SmO2",
-            dhb_left = "HBDiff",
-            dhb_right = "HBDiff"
+            smo2_left = "SmO2 unfiltered",
+            smo2_right = "SmO2 unfiltered",
+            dhb_left = "HBDiff unfiltered",
+            dhb_right = "HBDiff unfiltered"
         ),
         time_channel = c(time = "Timestamp (seconds passed)"),
         verbose = FALSE,

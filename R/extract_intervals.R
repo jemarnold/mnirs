@@ -189,9 +189,7 @@ extract_intervals <- function(
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     ## avoid floating point precision issues downstream with findIntervals()
     time_vec <- round(data[[time_channel]], 6)
