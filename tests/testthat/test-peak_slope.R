@@ -88,7 +88,7 @@ test_that("slope works with min_obs", {
     expect_true(is.na(slope(x, min_obs = 20)))
     ## n < min_obs = NA
     expect_true(is.na(slope(x[1:2], min_obs = 3, partial = TRUE)))
-    ## min_obs < 2 ## TODO silent argument, no warning
+    ## min_obs < 2 ## silent argument, no warning
     # expect_warning(
     #     expect_gt(slope(x, min_obs = 1, verbose = TRUE), 1),
     #     "set to .*2"
@@ -332,11 +332,13 @@ test_that("rolling_slope calculates invalid", {
     expect_error(rolling_slope(x = rep(NA, 5), width = 3), "valid.*numeric")
     ## NA_real_ = NA_real_
     expect_all_true(is.na(rolling_slope(x = rep(NA_real_, 5), width = 3)))
-    ## TODO empty returns empty or NA?
-    expect_equal(length(rolling_slope(numeric(0), width = 3)), 0)
+    ## empty input returns empty output for input == output length consistency
+    expect_equal(length(rolling_slope(x = numeric(0), width = 3)), 0) |> 
+        expect_warning("empty")
     ## invalid type = error
     expect_error(rolling_slope(list(), width = 3), "valid.*numeric")
     expect_error(rolling_slope(NULL, width = 3), "valid.*numeric")
+    expect_equal(rolling_slope(c(1, 2, NULL, 3), width = 3), c(NA, 1, NA))
     ## NA_real_, NaN, Inf = NA_real_
     expect_all_true(is.na(rolling_slope(rep(NA_real_, 4), width = 3)))
     expect_all_true(is.na(

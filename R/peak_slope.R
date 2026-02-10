@@ -124,6 +124,13 @@ rolling_slope <- function(
                 of equal length."
             ))
         }
+        ## informative warning message for length zero without aborting
+        if (n == 0L) {
+            cli_warn(c(
+                "!" = "Slopes cannot be calculated over an empty vector."
+            ))
+            return(numeric(0))
+        }
         ## validate all t values identical
         if (all(diff(t) == 0)) {
             return(rep(NA_real_, n))
@@ -249,16 +256,6 @@ peak_slope <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
-    ## pre-return NA
-    na_result <- list(
-        t = NA_real_,
-        y = NA_real_,
-        slope = NA_real_,
-        intercept = NA_real_,
-        idx = NA_integer_,
-        window_idx = NA_integer_
-    )
-
     ## calculate all rolling slopes
     slopes <- rolling_slope(
         x,
@@ -269,7 +266,17 @@ peak_slope <- function(
         partial,
         verbose,
         window_idx = TRUE,
-        bypass_checks = TRUE
+        bypass_checks = FALSE ## use validations
+    )
+
+    ## pre-return NA
+    na_result <- list(
+        t = NA_real_,
+        y = NA_real_,
+        slope = NA_real_,
+        intercept = NA_real_,
+        idx = NA_integer_,
+        window_idx = NA_integer_
     )
 
     if (all(is.na(slopes))) {

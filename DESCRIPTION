@@ -29,7 +29,6 @@ Suggests:
     scales,
     signal,
     testthat (>= 3.0.0),
-    tidyr,
     zoo
 VignetteBuilder: 
     quarto

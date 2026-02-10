@@ -1,3 +1,7 @@
+# mnirs 0.4.2
+
+* Remove `{tidyr}` dependency from `plot.mnirs()`, and from `{mnirs}` package dependencies.
+
 # mnirs 0.4.1
 
 * Create article "Analysing muscle oxidative capacity with {mnirs}".

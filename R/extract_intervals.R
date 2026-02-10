@@ -183,7 +183,6 @@ extract_intervals <- function(
     verbose = TRUE
 ) {
     ## validation ==============================================
-    ## TODO can I be more efficient with metadata?
     validate_mnirs_data(data)
     metadata <- attributes(data)
     if (missing(verbose)) {
@@ -221,18 +220,19 @@ extract_intervals <- function(
         )
     )
 
-    ## TODO validate event_labels as numeric or character?
     ## if `event_labels` provided, `event_channel` must be provided
     if (!is.null(event_labels)) {
-        event_channel <- validate_event_channel(
-            event_channel, data, required = TRUE
+        event_channel <- tryCatch(
+            validate_event_channel(event_channel, data, required = TRUE),
+            error = function(e) {
+                ## more informative error message when event_labels present
+                cli_abort(c(
+                    "x" = "{.arg event_channel} is required when using \\
+                    {.arg event_labels}.",
+                    "i" = "Specify column name containing event labels."
+                ))
+            }
         )
-        ## TODO redundant check but better error message
-        # cli_abort(c(
-        #     "x" = "{.arg event_channel} is required when using \\
-        #     {.arg event_labels}.",
-        #     "i" = "Specify column name containing event labels."
-        # ))
         event_vec <- data[[event_channel]]
     } else {
         event_channel <- validate_event_channel(
@@ -588,7 +588,6 @@ ensemble_intervals <- function(
     )
 
     ## add metadata
-    ## TODO necessary to sort by time?
     result <- create_mnirs_data(
         result,
         nirs_device = attr(df_long, "nirs_device"),
