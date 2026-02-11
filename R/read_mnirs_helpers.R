@@ -86,7 +86,7 @@ read_data_table <- function(
 
     ## extract the data_table, and name by header row
     rows <- (header_row + 1L):nrow(data)
-    data_table <- stats::setNames(data[rows, ], search_df[header_row, ])
+    data_table <- setNames(data[rows, ], search_df[header_row, ])
     file_header <- search_df[seq_len(header_row), ]
 
     return(list(
@@ -211,7 +211,7 @@ name_channels <- function(x) {
     names <- names(x) %||% character(length(x))
     empty_names <- is_empty(names)
     names[empty_names] <- as.character(x)[empty_names]
-    return(stats::setNames(x, names))
+    return(setNames(x, names))
 }
 
 
@@ -264,7 +264,7 @@ select_rename_data <- function(
     selected_cols <- if (keep_all) data_names else channel_vec
 
     ## rename columns from specified channel names
-    result <- stats::setNames(data, data_names)
+    result <- setNames(data, data_names)
     result <- result[, selected_cols, drop = FALSE]
     channel_names_idx <- match(channel_vec, names(result))
 

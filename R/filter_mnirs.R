@@ -109,20 +109,19 @@
 #' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
 #'   available with `attributes()`.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#'
-#' options(mnirs.verbose = FALSE)
-#'
+#' @examples
 #' ## read example data
 #' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
-#'     time_channel = c(time = "hh:mm:ss")
+#'     time_channel = c(time = "hh:mm:ss"),
+#'     verbose = FALSE
 #' ) |>
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10
+#'         width = 10,
+#'         verbose = FALSE
 #'     )
 #'
 #' data_filtered <- filter_mnirs(
@@ -131,16 +130,22 @@
 #'     type = "low",           ## specify a low-pass filter
 #'     order = 2,              ## order is the number of filter passes
 #'     W = 0.02,               ## fractional critical frequency
-#'     na.rm = TRUE            ## explicitly preserve any NAs and avoid errors
+#'     na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
+#'     verbose = FALSE
 #' )
+#' 
+#' data_filtered
 #'
-#' library(ggplot2)
-#' ## plot filtered data and add the raw data back to the plot to compare
-#' plot(data_filtered, label_time = TRUE) +
-#'     geom_line(
-#'         data = data,
-#'         aes(y = smo2, colour = "smo2"), alpha = 0.4
-#'     )
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ## plot filtered data and add the raw data back to the plot to compare
+#'         plot(data_filtered, label_time = TRUE) +
+#'             ggplot2::geom_line(
+#'                 data = data,
+#'                 ggplot2::aes(y = smo2, colour = "smo2"), alpha = 0.4
+#'             )
+#'     }
+#' }
 #'
 #' @rdname filter_mnirs
 #' @export
@@ -528,24 +533,40 @@ filter_moving_average <- function(
 #'
 #' @returns A numeric vector the same length as `x`.
 #'
-#' @seealso [signal::filtfilt()] [signal::butter()]
+#' @seealso [signal::filtfilt()], [signal::butter()]
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
-#'
+#' @examples
 #' set.seed(13)
 #' sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 #' noise <- rnorm(150, mean = 0, sd = 6)
 #' noisy_sin <- sin + noise
-#' filt_without_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "none")
-#' filt_with_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "rep1")
+#' filt_without_edge <- filter_butter(
+#'     x = noisy_sin,
+#'     order = 2,
+#'     W = 0.1,
+#'     edges = "none"
+#' )
+#' filt_with_edge <- filter_butter(
+#'     x = noisy_sin,
+#'     order = 2,
+#'     W = 0.1,
+#'     edges = "rep1"
+#' )
 #'
-#' ggplot(data.frame(), aes(x = seq_along(noise))) +
-#'     theme_mnirs() +
-#'     scale_colour_mnirs(name = NULL) +
-#'     geom_line(aes(y = noisy_sin)) +
-#'     geom_line(aes(y = filt_without_edge, colour = "filt_without_edge")) +
-#'     geom_line(aes(y = filt_with_edge, colour = "filt_with_edge"))
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
+#'             theme_mnirs() +
+#'             scale_colour_mnirs(name = NULL) +
+#'             ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
+#'             ggplot2::geom_line(
+#'                 ggplot2::aes(y = filt_without_edge, colour = "filt_without_edge")
+#'             ) +
+#'             ggplot2::geom_line(
+#'                 ggplot2::aes(y = filt_with_edge, colour = "filt_with_edge")
+#'             )
+#'     }
+#' }
 #'
 #' @export
 filter_butter <- function(

@@ -40,25 +40,28 @@ Calculate a four-parameter monoexponential curve.
 constant (\code{k = 1/tau}).
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
 set.seed(13)
 t <- 1:60
 
 ## create an exponential curve with random noise
-x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + rnorm(length(t), 0, 3)
+x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+    rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 
-(model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data))
+model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
 
 y <- predict(model, data)
 
-library(ggplot2)
-ggplot(data, aes(t, x)) +
-    theme_mnirs() +
-    geom_point() +
-    geom_line(aes(y = y))
-\dontshow{\}) # examplesIf}
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ggplot2::ggplot(data, ggplot2::aes(t, x)) +
+            theme_mnirs() +
+            ggplot2::geom_point() +
+            ggplot2::geom_line(ggplot2::aes(y = y))
+    }
+}
+
 }
 \seealso{
-\code{\link[=SS_monoexp]{SS_monoexp()}}
+\code{\link[=SS_monoexp3]{SS_monoexp3()}}, \code{\link[=SS_monoexp4]{SS_monoexp4()}}
 }

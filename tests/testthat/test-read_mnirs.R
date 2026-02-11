@@ -946,7 +946,10 @@ test_that("parse_time_channel() handles milliseconds in timestamps", {
 
 ## parse_sample_rate() ================================================
 test_that("parse_sample_rate returns correct structure", {
-    data <- data.frame(time = seq(0, 10, by = 0.1), value = rnorm(101, 10, 1))
+    data <- data.frame(
+        time = seq(0, 10, by = 0.1),
+        value = rnorm(101, 10, 1)
+    )
     file_header <- matrix(NA, nrow = 5, ncol = 5)
 
     result <- parse_sample_rate(

@@ -82,24 +82,39 @@ Missing values (\code{NA}) in \code{x} will cause an error unless \code{na.rm = 
 Then \code{NA}s will be preserved and passed through in the returned vector.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-library(ggplot2)
-
 set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
 noisy_sin <- sin + noise
-filt_without_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "none")
-filt_with_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "rep1")
+filt_without_edge <- filter_butter(
+    x = noisy_sin,
+    order = 2,
+    W = 0.1,
+    edges = "none"
+)
+filt_with_edge <- filter_butter(
+    x = noisy_sin,
+    order = 2,
+    W = 0.1,
+    edges = "rep1"
+)
 
-ggplot(data.frame(), aes(x = seq_along(noise))) +
-    theme_mnirs() +
-    scale_colour_mnirs(name = NULL) +
-    geom_line(aes(y = noisy_sin)) +
-    geom_line(aes(y = filt_without_edge, colour = "filt_without_edge")) +
-    geom_line(aes(y = filt_with_edge, colour = "filt_with_edge"))
-\dontshow{\}) # examplesIf}
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
+            theme_mnirs() +
+            scale_colour_mnirs(name = NULL) +
+            ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
+            ggplot2::geom_line(
+                ggplot2::aes(y = filt_without_edge, colour = "filt_without_edge")
+            ) +
+            ggplot2::geom_line(
+                ggplot2::aes(y = filt_with_edge, colour = "filt_with_edge")
+            )
+    }
+}
+
 }
 \seealso{
-\code{\link[signal:filtfilt]{signal::filtfilt()}} \code{\link[signal:butter]{signal::butter()}}
+\code{\link[signal:filtfilt]{signal::filtfilt()}}, \code{\link[signal:butter]{signal::butter()}}
 }

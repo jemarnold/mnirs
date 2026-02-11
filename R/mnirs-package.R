@@ -13,6 +13,8 @@
 #' @importFrom rlang enquo
 #' @importFrom stats coef
 #' @importFrom stats median
+#' @importFrom stats rnorm
+#' @importFrom stats setNames
 #' @importFrom tibble tibble
 ## usethis namespace: end
 NULL

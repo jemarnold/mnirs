@@ -23,28 +23,32 @@
 #' `tau` is the time constant and equal to the reciprocal of `k`, the rate
 #'   constant (`k = 1/tau`).
 #'
-#' @return A numeric vector of predicted values the same length as
+#' @returns A numeric vector of predicted values the same length as
 #'  the predictor variable `t`.
 #' 
-#' @seealso [SS_monoexp()]
+#' @seealso [SS_monoexp3()], [SS_monoexp4()]
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' @examples
 #' set.seed(13)
 #' t <- 1:60
 #'
 #' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + rnorm(length(t), 0, 3)
+#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+#'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
-#' (model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data))
+#' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
 #'
 #' y <- predict(model, data)
 #'
-#' library(ggplot2)
-#' ggplot(data, aes(t, x)) +
-#'     theme_mnirs() +
-#'     geom_point() +
-#'     geom_line(aes(y = y))
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ggplot2::ggplot(data, ggplot2::aes(t, x)) +
+#'             theme_mnirs() +
+#'             ggplot2::geom_point() +
+#'             ggplot2::geom_line(ggplot2::aes(y = y))
+#'     }
+#' }
 #'
 #' @export
 monoexponential <- function(t, A, B, tau, TD = NULL) {
@@ -77,14 +81,13 @@ monoexp3 <- function(t, A, B, tau) {
 #' @param LHS The left-hand side expression of the model formula.
 #' @param ... Additional arguments.
 #'
-#' @return [monoexp_init()]: Initial starting estimates for parameters in the
+#' @returns [monoexp_init()]: Initial starting estimates for parameters in the
 #'   model called by [SS_monoexp3()] and [SS_monoexp4()].
 #'
 #' @keywords internal
 monoexp_init <- function(mCall, data, LHS, ...) {
     ## self-start parameters for nls of monoexponential fit function
     ## uses base R `SSasymp()` initialisation approach
-    ## https://www.statforbiology.com/2020/stat_nls_selfstarting/#and-what-about-nls
     xy <- stats::sortedXyData(mCall[["t"]], LHS, data)
     y <- xy[["y"]]
     x <- xy[["x"]]
@@ -110,7 +113,7 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 
     if (sum(y_shifted > 0) >= 3) {
         lm_fit <- stats::lm(log(y_shifted) ~ x)
-        rate <- -stats::coef(lm_fit)[2L]
+        rate <- -coef(lm_fit)[2L]
         tau_init <- if (is.finite(rate) && rate > 0) {
             1 / rate
         } else {
@@ -156,29 +159,33 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' The 3-parameter model is recommended for small samples or when no obvious
 #'   time delay exists, as it converges more reliably.
 #'
-#' @return [SS_monoexp3()] and [SS_monoexp4()]: A numeric vector of predicted values the same
-#'   length as the predictor variable `t`.
+#' @returns [SS_monoexp3()] and [SS_monoexp4()]: A numeric vector of predicted 
+#'   values the same length as the predictor variable `t`.
 #'
 #' @seealso [monoexponential()], [stats::nls()], [stats::selfStart()],
 #'   [SSasymp()]
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' @examples
 #' set.seed(13)
 #' t <- 1:60
 #'
 #' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + rnorm(length(t), 0, 3)
+#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+#'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
-#' (model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data))
+#' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
 #'
 #' y <- predict(model, data)
 #'
-#' library(ggplot2)
-#' ggplot(data, aes(t, x)) +
-#'     theme_mnirs() +
-#'     geom_point() +
-#'     geom_line(aes(y = y))
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ggplot2::ggplot(data, ggplot2::aes(t, x)) +
+#'             theme_mnirs() +
+#'             ggplot2::geom_point() +
+#'             ggplot2::geom_line(ggplot2::aes(y = y))
+#'     }
+#' }
 #'
 #' @name SS_monoexp
 #' @rdname SS_monoexp
@@ -234,11 +241,11 @@ SS_monoexp4 <- selfStart(
 #' The function cannot update if all model coefficients are supplied as fixed,
 #'   and will abort.
 #'
-#' @return An updated model object with remaining free coefficients.
+#' @returns An updated model object with remaining free coefficients.
 #'
 #' @keywords internal
 fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
-    current_coefs <- stats::coef(model)
+    current_coefs <- coef(model)
     fixed_coefs <- list(...)
 
     ## validate coefs

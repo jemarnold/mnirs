@@ -33,7 +33,7 @@ or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{idx}{A numeric vector of indices of \code{t} at which to calculate local
 windows. All indices of \code{t} by \emph{default}, or can be used to only calculate
-for known indicies, such as invalid values of \code{x}.}
+for known indices, such as invalid values of \code{x}.}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}

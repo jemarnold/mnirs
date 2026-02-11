@@ -68,7 +68,7 @@ NULL
 #'
 #' @docType data
 #'
-#' @format .csv file with header metadata and with 10 eolumns and 12001 rows.
+#' @format .csv file with header metadata and with 10 columns and 12001 rows.
 #'
 #'   - `nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")`
 #'   - `time_channel = c("Timestamp (seconds passed)")`

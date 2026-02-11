@@ -18,12 +18,15 @@ Named or unnamed character vector of hex colours.
 Custom \emph{{mnirs}} colour palette
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-scales::show_col(palette_mnirs())
-scales::show_col(palette_mnirs(n = 2))
-scales::show_col(palette_mnirs(names = c("red", "orange")))
-\dontshow{\}) # examplesIf}
+\donttest{
+    if (requireNamespace("scales", quietly = TRUE)) {
+        scales::show_col(palette_mnirs())
+        scales::show_col(palette_mnirs(n = 2))
+        scales::show_col(palette_mnirs(names = c("red", "orange")))
+    }
+}
+
 }
 \seealso{
-\code{\link[=theme_mnirs]{theme_mnirs()}} \code{\link[=scale_colour_mnirs]{scale_colour_mnirs()}}
+\code{\link[=theme_mnirs]{theme_mnirs()}}, \code{\link[=scale_colour_mnirs]{scale_colour_mnirs()}}
 }

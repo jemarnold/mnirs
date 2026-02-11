@@ -5,7 +5,7 @@
 #'
 #' @param idx A numeric vector of indices of `t` at which to calculate local
 #'   windows. All indices of `t` by *default*, or can be used to only calculate
-#'   for known indicies, such as invalid values of `x`.
+#'   for known indices, such as invalid values of `x`.
 #' @param width An integer defining the local window in number of samples
 #'   around `idx` in which to perform the operation, according to `align`.
 #' @param span A numeric value defining the local window timespan around `idx`

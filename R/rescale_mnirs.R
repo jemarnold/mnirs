@@ -54,33 +54,29 @@
 #' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
 #'   available with `attributes()`.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#'
-#' options(mnirs.verbose = FALSE)
-#'
+#' @examples
 #' ## read example data
 #' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_right = "SmO2 Live",
 #'                       smo2_left = "SmO2 Live(2)"),
-#'     time_channel = c(time = "hh:mm:ss")
+#'     time_channel = c(time = "hh:mm:ss"),
+#'     verbose = FALSE
 #' ) |>
-#'     resample_mnirs() |>
-#'     replace_mnirs(
-#'         invalid_values = c(0, 100),
-#'         outlier_cutoff = 3,
-#'         width = 10,
-#'         method = "linear"
-#'     ) |>
-#'     filter_mnirs(na.rm = TRUE) |>
 #'     rescale_mnirs(
 #'         nirs_channels = list(c(smo2_right, smo2_left)),
-#'         range = c(0, 100)   ## rescale to a 0-100% functional exercise range
+#'         range = c(0, 10), ## rescale to a 0-10 arbitrary units
+#'         verbose = FALSE
 #'     )
+#' 
+#' data
 #'
-#' library(ggplot2)
-#' plot(data, label_time = TRUE) +
-#'     geom_hline(yintercept = c(0, 100), linetype = "dotted")
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         plot(data, label_time = TRUE) +
+#'             ggplot2::geom_hline(yintercept = c(0, 100), linetype = "dotted")
+#'     }
+#' }
 #'
 #' @export
 rescale_mnirs <- function(

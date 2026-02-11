@@ -172,10 +172,6 @@ return unexpected time values when the event marker itself is not
 included in the interval range (e.g. with \code{span = c(30, 60)}).
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     example_mnirs("train.red"),
@@ -184,18 +180,20 @@ data <- read_mnirs(
         smo2_right = "SmO2 unfiltered"
     ),
     time_channel = c(time = "Timestamp (seconds passed)"),
-    zero_time = TRUE
+    zero_time = TRUE,
+    verbose = FALSE
 ) |>
-    resample_mnirs() ## avoid issues ensemble-averaging irregular samples
+    resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 
 ## extract intervals as a list of data frames
 extract_intervals(
     data,
     nirs_channels = list(c(smo2_left, smo2_right)),
     event_times = c(368, 1093), ## specify interval events
-    span = list(c(-20, 90)), ## specify the event start-end timespans
-    group_events = "distinct", ## return all unique intervals
-    zero_time = TRUE ## start time from zero
+    span = list(c(-20, 90)),    ## specify the event start-end timespans
+    group_events = "distinct",  ## return all unique intervals
+    zero_time = TRUE,           ## start time from zero
+    verbose = FALSE
 )
 
 ## ensemble-average across multiple intervals
@@ -205,11 +203,17 @@ interval_list <- extract_intervals(
     event_times = c(368, 1093),
     span = list(c(-20, 90)),
     group_events = "ensemble", ## return ensemble-averaged intervals
-    zero_time = TRUE
+    zero_time = TRUE,
+    verbose = FALSE
 )
 
-library(ggplot2)
-plot(interval_list[[1L]], label_time = TRUE) +
-    geom_vline(xintercept = 0, linetype = "dotted")
-\dontshow{\}) # examplesIf}
+interval_list[[1L]]
+
+\donttest{
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    plot(interval_list[[1L]], label_time = TRUE) +
+      ggplot2::geom_vline(xintercept = 0, linetype = "dotted")
+  }
+}
+
 }

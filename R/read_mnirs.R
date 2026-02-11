@@ -100,8 +100,10 @@
 #'
 #' read_mnirs(
 #'     file_path,
-#'     nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
-#'                       smo2_left = "SmO2 Live(2)"),
+#'     nirs_channels = c(                   ## identify and rename channels
+#'         smo2_right = "SmO2 Live",
+#'         smo2_left = "SmO2 Live(2)"
+#'     ),
 #'     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
 #'     sample_rate = NULL,                  ## sample_rate will be estimated from time_channel
 #'     verbose = FALSE                      ## silence warnings & messages
@@ -242,8 +244,6 @@ read_mnirs <- function(
 #'
 #' @export
 create_mnirs_data <- function(data, ...) {
-    ## from https://github.com/fmmattioni/whippr/blob/master/R/tbl.R
-
     validate_mnirs_data(data, 1L)
 
     ## overwrite existing attributes and add from incoming metadata

@@ -18,8 +18,7 @@
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#'
+#' @examples
 #' data_table <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_right = "SmO2 Live",
@@ -28,8 +27,12 @@
 #'     verbose = FALSE
 #' )
 #'
-#' ## note the hidden options to display time values as `h:mm:ss` with 8 breaks
-#' plot(data_table, label_time = TRUE, n.breaks = 8)
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ## note the hidden options to display time values as `h:mm:ss` with 8 breaks
+#'         plot(data_table, label_time = TRUE, n.breaks = 8)
+#'     }
+#' }
 #'
 #' @export
 plot.mnirs <- function(x, ...) {
@@ -70,7 +73,7 @@ plot.mnirs <- function(x, ...) {
         ggplot2::waiver()
     }
 
-    plot_data <- stats::setNames(
+    plot_data <- setNames(
         utils::stack(x[nirs_channels]),
         c("y", "nirs_channels")
     )
@@ -121,7 +124,7 @@ plot.mnirs <- function(x, ...) {
 #' @param ink Colour for text and lines. *Default* is *"black"*.
 #' @param paper Background colour. *Default* is *"white"*.
 #' @param accent Accent colour for highlights. *Default* is *"#0080ff"*.
-#' @param ... Additional arguments to add to `[theme()][ggplot2::theme()]`.
+#' @param ... Additional arguments to add to `[ggplot2::theme()]`.
 #'
 #' @details
 #' - `axis.title = element_text(face = "bold")` by *default* Modify to *"plain"*.
@@ -138,29 +141,28 @@ plot.mnirs <- function(x, ...) {
 #' - `border = "full"` uses `panel.border = element_rect(colour = "black",`
 #'   `linewidth = 1)` and `axis.line = element_line()`.
 #'
-#' - `base_family = "sans"` by *default*. `"Merriweather Sans"` is a nice
-#'   alternative font which can be installed from
-#'   <https://fonts.google.com/specimen/Merriweather+Sans>.
+#' - `base_family = "sans"` by *default*.
 #'
-#' @returns A [ggplot2][ggplot2::ggplot()] object.
+#' @returns A [ggplot2][ggplot2::ggplot()] theme object.
 #'
-#' @seealso [palette_mnirs()] [scale_colour_mnirs()]
+#' @seealso [palette_mnirs()], [scale_colour_mnirs()]
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' library(ggplot2)
-#'
-#' ## set theme for the current script
-#' theme_set(theme_mnirs())
-#'
-#' ## plot example data
-#' read_mnirs(
-#'     file_path = example_mnirs("moxy_ramp"),
-#'     nirs_channels = c(smo2_right = "SmO2 Live",
-#'                       smo2_left = "SmO2 Live(2)"),
-#'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
-#' ) |>
-#'     plot(label_time = TRUE)
+#' @examples
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ## plot example data
+#'         read_mnirs(
+#'             file_path = example_mnirs("moxy_ramp"),
+#'             nirs_channels = c(
+#'                 smo2_right = "SmO2 Live",
+#'                 smo2_left = "SmO2 Live(2)"
+#'             ),
+#'             time_channel = c(time = "hh:mm:ss"),
+#'             verbose = FALSE
+#'         ) |>
+#'             plot(label_time = TRUE)
+#'     }
+#' }
 #'
 #' @export
 theme_mnirs <- function(
@@ -225,12 +227,16 @@ theme_mnirs <- function(
 #'
 #' @returns Named or unnamed character vector of hex colours.
 #'
-#' @seealso [theme_mnirs()] [scale_colour_mnirs()]
+#' @seealso [theme_mnirs()], [scale_colour_mnirs()]
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' scales::show_col(palette_mnirs())
-#' scales::show_col(palette_mnirs(n = 2))
-#' scales::show_col(palette_mnirs(names = c("red", "orange")))
+#' @examples
+#' \donttest{
+#'     if (requireNamespace("scales", quietly = TRUE)) {
+#'         scales::show_col(palette_mnirs())
+#'         scales::show_col(palette_mnirs(n = 2))
+#'         scales::show_col(palette_mnirs(names = c("red", "orange")))
+#'     }
+#' }
 #'
 #' @export
 palette_mnirs <- function(n = NULL, names = NULL) {
@@ -280,25 +286,29 @@ palette_mnirs <- function(n = NULL, names = NULL) {
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] scale object.
 #'
-#' @seealso [theme_mnirs()] [palette_mnirs()]
+#' @seealso [theme_mnirs()], [palette_mnirs()]
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' @examples
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE) &&
+#'         requireNamespace("scales", quietly = TRUE)) {
 #'
-#' ## plot example data
-#' df <- read_mnirs(
-#'     file_path = example_mnirs("moxy_ramp"),
-#'     nirs_channels = c(smo2_right = "SmO2 Live",
-#'                       smo2_left = "SmO2 Live(2)"),
-#'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
-#' )
+#'         ## plot example data
+#'         df <- read_mnirs(
+#'             file_path = example_mnirs("moxy_ramp"),
+#'             nirs_channels = c(smo2_right = "SmO2 Live",
+#'                               smo2_left = "SmO2 Live(2)"),
+#'             time_channel = c(time = "hh:mm:ss"),
+#'             verbose = FALSE
+#'         )
 #'
-#' library(ggplot2)
-#' ggplot(df, aes(x = time)) +
-#'     theme_mnirs() +
-#'     scale_colour_mnirs(name = NULL) +
-#'     geom_line(aes(y = smo2_left, colour = "smo2_left")) +
-#'     geom_line(aes(y = smo2_right, colour = "smo2_right"))
+#'         ggplot2::ggplot(df, ggplot2::aes(x = time)) +
+#'             theme_mnirs() +
+#'             scale_colour_mnirs(name = NULL) +
+#'             ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +
+#'             ggplot2::geom_line(ggplot2::aes(y = smo2_right, colour = "smo2_right"))
+#'     }
+#' }
 #'
 #' @rdname scale_colour_mnirs
 #' @export
@@ -343,16 +353,18 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 #'
 #' @returns Returns a function for generating breaks.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#' x = 0:120
-#' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+#' @examples
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         x <- 0:120
+#'         y <- sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 #'
-#' library(ggplot2)
-#' data.frame(x, y) |>
-#'     ggplot(aes(x, y)) +
-#'     theme_mnirs() +
-#'     scale_x_continuous(breaks = breaks_timespan()) +
-#'     geom_line()
+#'         ggplot2::ggplot(data.frame(x, y), ggplot2::aes(x, y)) +
+#'             theme_mnirs() +
+#'             ggplot2::scale_x_continuous(breaks = breaks_timespan()) +
+#'             ggplot2::geom_line()
+#'     }
+#' }
 #'
 #' @export
 breaks_timespan <- function(
@@ -417,20 +429,21 @@ breaks_timespan <- function(
 #'
 #' @returns A character vector the same length as `x`.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
+#' @examples
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         x <- 0:120
+#'         y <- sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 #'
-#' x = 0:120
-#' y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
-#'
-#' library(ggplot2)
-#' data.frame(x, y) |>
-#'     ggplot(aes(x, y)) +
-#'     theme_mnirs() +
-#'     scale_x_continuous(
-#'         breaks = breaks_timespan(),
-#'         labels = format_hmmss
-#'     ) +
-#'     geom_line()
+#'         ggplot2::ggplot(data.frame(x, y), ggplot2::aes(x, y)) +
+#'             theme_mnirs() +
+#'             ggplot2::scale_x_continuous(
+#'                 breaks = breaks_timespan(),
+#'                 labels = format_hmmss
+#'             ) +
+#'             ggplot2::geom_line()
+#'     }
+#' }
 #'
 #' @export
 format_hmmss <- function(x) {

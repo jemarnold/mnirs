@@ -127,10 +127,7 @@
 #' @returns A named `list()` of [tibbles][tibble::tibble-package] of class
 #'   *"mnirs"* with metadata available with `attributes()`.
 #'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#'
-#' options(mnirs.verbose = FALSE)
-#'
+#' @examples
 #' ## read example data
 #' data <- read_mnirs(
 #'     example_mnirs("train.red"),
@@ -139,18 +136,20 @@
 #'         smo2_right = "SmO2 unfiltered"
 #'     ),
 #'     time_channel = c(time = "Timestamp (seconds passed)"),
-#'     zero_time = TRUE
+#'     zero_time = TRUE,
+#'     verbose = FALSE
 #' ) |>
-#'     resample_mnirs() ## avoid issues ensemble-averaging irregular samples
+#'     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 #'
 #' ## extract intervals as a list of data frames
 #' extract_intervals(
 #'     data,
 #'     nirs_channels = list(c(smo2_left, smo2_right)),
 #'     event_times = c(368, 1093), ## specify interval events
-#'     span = list(c(-20, 90)), ## specify the event start-end timespans
-#'     group_events = "distinct", ## return all unique intervals
-#'     zero_time = TRUE ## start time from zero
+#'     span = list(c(-20, 90)),    ## specify the event start-end timespans
+#'     group_events = "distinct",  ## return all unique intervals
+#'     zero_time = TRUE,           ## start time from zero
+#'     verbose = FALSE
 #' )
 #'
 #' ## ensemble-average across multiple intervals
@@ -160,12 +159,18 @@
 #'     event_times = c(368, 1093),
 #'     span = list(c(-20, 90)),
 #'     group_events = "ensemble", ## return ensemble-averaged intervals
-#'     zero_time = TRUE
+#'     zero_time = TRUE,
+#'     verbose = FALSE
 #' )
+#' 
+#' interval_list[[1L]]
 #'
-#' library(ggplot2)
-#' plot(interval_list[[1L]], label_time = TRUE) +
-#'     geom_vline(xintercept = 0, linetype = "dotted")
+#' \donttest{
+#'   if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'     plot(interval_list[[1L]], label_time = TRUE) +
+#'       ggplot2::geom_vline(xintercept = 0, linetype = "dotted")
+#'   }
+#' }
 #'
 #' @export
 extract_intervals <- function(
@@ -580,8 +585,8 @@ ensemble_intervals <- function(
     }, numeric(col_n))
 
     result <- data.frame(
-        stats::setNames(list(unique_times), time_channel),
-        stats::setNames(
+        setNames(list(unique_times), time_channel),
+        setNames(
             as.data.frame(if (col_n == 1L) result_matrix else t(result_matrix)),
             nirs_channels
         )

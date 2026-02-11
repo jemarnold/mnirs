@@ -62,10 +62,7 @@
 #' `replace_mnirs()` returns a [tibble][tibble::tibble-package] of class
 #'   *"mnirs"* with metadata available with `attributes()`.
 #'
-#' @seealso [pracma::hampel()], [stats::approx()]
-#'
-#' @examplesIf (identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))
-#'
+#' @examples
 #' ## vectorised operation
 #' x <- c(1, 999, 3, 4, 999, 6)
 #' replace_invalid(x, invalid_values = 999, width = 2, method = "median")
@@ -94,27 +91,33 @@
 #'     method = "linear",    ## linear interpolation over `NA`s
 #'     verbose = FALSE
 #' )
-#'
-#' library(ggplot2)
-#' ## plot original and and show where values have been replaced
-#' plot(data, label_time = TRUE) +
-#'     scale_colour_manual(
-#'         name = NULL,
-#'         breaks = c("smo2", "replaced"),
-#'         values = palette_mnirs(2)
-#'     ) +
-#'     geom_point(
-#'         data = data[data_clean$smo2 != data$smo2, ],
-#'         aes(y = smo2, colour = "replaced"), na.rm = TRUE
-#'     ) +
-#'     geom_line(
-#'         data = {
-#'             data_clean[!is.na(data$smo2), "smo2"] <- NA
-#'             data_clean
-#'         },
-#'         aes(y = smo2, colour = "replaced"), linewidth = 1, na.rm = TRUE
-#'     )
-#'
+#' 
+#' data_clean
+#' 
+#' \donttest{
+#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'         ## plot original and show where values have been replaced
+#'         plot(data, label_time = TRUE) +
+#'             ggplot2::scale_colour_manual(
+#'                 name = NULL,
+#'                 breaks = c("smo2", "replaced"),
+#'                 values = palette_mnirs(2)
+#'             ) +
+#'             ggplot2::geom_point(
+#'                 data = data[data_clean$smo2 != data$smo2, ],
+#'                 ggplot2::aes(y = smo2, colour = "replaced"), na.rm = TRUE
+#'             ) +
+#'             ggplot2::geom_line(
+#'                 data = {
+#'                     data_clean[!is.na(data$smo2), "smo2"] <- NA
+#'                     data_clean
+#'                 },
+#'                 ggplot2::aes(y = smo2, colour = "replaced"), 
+#'                 linewidth = 1, na.rm = TRUE
+#'             )
+#'     }
+#' }
+#' 
 #' @rdname replace_mnirs
 #' @order 1
 #' @export
@@ -322,7 +325,7 @@ replace_invalid <- function(
 #'   of `t`. Specifying `width` is often faster than `span`.
 #'
 #' - Outliers are detected with robust median absolute deviation (MAD) method
-#'   adapted from [pracma::hampel()]. Outliers equal to or less than the
+#'   adapted from `pracma::hampel()`. Outliers equal to or less than the
 #'   smallest absolute time series difference in `x` will be excluded, to
 #'   avoid detecting negligible differences as outliers where local data have
 #'   minimal or zero variation.

@@ -22,19 +22,19 @@ If all values are less than 3600 (1 hour), then format is returned as
 \code{h:mm:ss} with leading zeroes.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        x <- 0:120
+        y <- sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 
-x = 0:120
-y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+        ggplot2::ggplot(data.frame(x, y), ggplot2::aes(x, y)) +
+            theme_mnirs() +
+            ggplot2::scale_x_continuous(
+                breaks = breaks_timespan(),
+                labels = format_hmmss
+            ) +
+            ggplot2::geom_line()
+    }
+}
 
-library(ggplot2)
-data.frame(x, y) |>
-    ggplot(aes(x, y)) +
-    theme_mnirs() +
-    scale_x_continuous(
-        breaks = breaks_timespan(),
-        labels = format_hmmss
-    ) +
-    geom_line()
-\dontshow{\}) # examplesIf}
 }

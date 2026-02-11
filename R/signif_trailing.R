@@ -20,7 +20,7 @@
 #' @returns `signif_trailing()` returns a character vector of formatted numbers
 #'   the same length as `x`.
 #'
-#' @seealso [formatC()] [round()] [signif()]
+#' @seealso [formatC()], [round()], [signif()]
 #'
 #' @rdname signif_trailing
 #' @order 1
@@ -47,7 +47,7 @@ signif_trailing <- function(x, digits = 2L, format = c("digits", "signif")) {
         flag = "#"
     )
 
-    ## remove trailing `.` or "NA" https://stackoverflow.com/a/35280610/15389854
+    ## remove trailing `.` or "NA"
     return(gsub("\\.$|NA| ", "", result))
 }
 

@@ -161,20 +161,18 @@ Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
 Then \code{NA}s will be preserved and passed through in the returned data.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss")
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10
+        width = 10,
+        verbose = FALSE
     )
 
 data_filtered <- filter_mnirs(
@@ -183,15 +181,21 @@ data_filtered <- filter_mnirs(
     type = "low",           ## specify a low-pass filter
     order = 2,              ## order is the number of filter passes
     W = 0.02,               ## fractional critical frequency
-    na.rm = TRUE            ## explicitly preserve any NAs and avoid errors
+    na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
+    verbose = FALSE
 )
 
-library(ggplot2)
-## plot filtered data and add the raw data back to the plot to compare
-plot(data_filtered, label_time = TRUE) +
-    geom_line(
-        data = data,
-        aes(y = smo2, colour = "smo2"), alpha = 0.4
-    )
-\dontshow{\}) # examplesIf}
+data_filtered
+
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot filtered data and add the raw data back to the plot to compare
+        plot(data_filtered, label_time = TRUE) +
+            ggplot2::geom_line(
+                data = data,
+                ggplot2::aes(y = smo2, colour = "smo2"), alpha = 0.4
+            )
+    }
+}
+
 }

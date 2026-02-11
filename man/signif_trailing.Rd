@@ -94,6 +94,6 @@ otherwise empty string.
 }
 }
 \seealso{
-\code{\link[=formatC]{formatC()}} \code{\link[=round]{round()}} \code{\link[=signif]{signif()}}
+\code{\link[=formatC]{formatC()}}, \code{\link[=round]{round()}}, \code{\link[=signif]{signif()}}
 }
 \keyword{internal}

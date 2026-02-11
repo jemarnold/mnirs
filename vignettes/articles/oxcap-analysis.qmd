@@ -125,7 +125,7 @@ theme_set(theme_mnirs(legend.position = "none")) ## set ggplot2 theme for plotti
 
 
 ::: {.callout-note}
-I received this example file from [Dr. Thomas Tripp](https://scholar.google.com/citations?user=A9JwQbYAAAAJ&hl=en), Postdoctoral fellow in Dr. [Martin MacInnis](https://scholar.google.com/citations?hl=en&user=tJepNIQAAAAJ)' lab at the University of Calgary. They have kindly allowed me to include this file with the *{mnirs}* package for users to examine themselves.
+I received this example file from [Dr. Thomas Tripp](https://scholar.google.com/citations?user=A9JwQbYAAAAJ&hl=en), Postdoctoral fellow in [Dr. Martin MacInnis](https://scholar.google.com/citations?hl=en&user=tJepNIQAAAAJ)' lab at the University of Calgary. They have kindly allowed me to include this file with the *{mnirs}* package for users to examine themselves.
 
 It can be accessed by calling `example_mnirs("portamon-oxcap")`.
 :::

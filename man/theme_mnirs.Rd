@@ -27,10 +27,10 @@ theme_mnirs(
 
 \item{accent}{Accent colour for highlights. \emph{Default} is \emph{"#0080ff"}.}
 
-\item{...}{Additional arguments to add to \verb{[theme()][ggplot2::theme()]}.}
+\item{...}{Additional arguments to add to \verb{[ggplot2::theme()]}.}
 }
 \value{
-A \link[ggplot2:ggplot]{ggplot2} object.
+A \link[ggplot2:ggplot]{ggplot2} theme object.
 }
 \description{
 A \verb{[ggplot2][ggplot2::ggplot2-package]} theme for display.
@@ -46,29 +46,27 @@ entirely.
 \code{axis.line = element_line()}.
 \item \code{border = "full"} uses \verb{panel.border = element_rect(colour = "black",}
 \verb{linewidth = 1)} and \code{axis.line = element_line()}.
-\item \code{base_family = "sans"} by \emph{default}. \code{"Merriweather Sans"} is a nice
-alternative font which can be installed from
-\url{https://fonts.google.com/specimen/Merriweather+Sans}.
+\item \code{base_family = "sans"} by \emph{default}.
 }
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-library(ggplot2)
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot example data
+        read_mnirs(
+            file_path = example_mnirs("moxy_ramp"),
+            nirs_channels = c(
+                smo2_right = "SmO2 Live",
+                smo2_left = "SmO2 Live(2)"
+            ),
+            time_channel = c(time = "hh:mm:ss"),
+            verbose = FALSE
+        ) |>
+            plot(label_time = TRUE)
+    }
+}
 
-## set theme for the current script
-theme_set(theme_mnirs())
-
-## plot example data
-read_mnirs(
-    file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
-    time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
-) |>
-    plot(label_time = TRUE)
-\dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=palette_mnirs]{palette_mnirs()}} \code{\link[=scale_colour_mnirs]{scale_colour_mnirs()}}
+\code{\link[=palette_mnirs]{palette_mnirs()}}, \code{\link[=scale_colour_mnirs]{scale_colour_mnirs()}}
 }
