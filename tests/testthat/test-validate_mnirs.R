@@ -660,8 +660,9 @@ test_that("validate_width_span() validates inputs", {
 
 ## validate_x_t =================================
 test_that("validate_x_t() validates inputs", {
-    expect_error(
-        validate_x_t(x = 1:10, t = 1:5),
-        "numeric.*equal length"
-    )
+    expect_error(validate_x_t(x = 1:10, t = 1:5), "numeric.*equal length")
+    expect_error(validate_x_t(x = NULL, t = 1:10), "valid.*numeric")
+    expect_error(validate_x_t(x = 1:10, t = NULL), "valid.*numeric")
+    expect_error(validate_x_t(x = NA_real_, t = 1), "valid.*numeric")
+    expect_silent(validate_x_t(x = NA_real_, t = 1, invalid = TRUE))
 })

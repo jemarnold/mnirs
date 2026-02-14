@@ -62,6 +62,7 @@ validate_numeric <- function(
     range = NULL,
     inclusive = c("left", "right"),
     integer = FALSE,
+    invalid = FALSE,
     msg1 = "",
     msg2 = "."
 ) {
@@ -78,10 +79,15 @@ validate_numeric <- function(
     }
 
     valid <- !is.na(x)
-    n_valid <- sum(valid)
+
+    ## valid elements length
+    n_valid <- if (!invalid) sum(valid) else length(x)
+    if (!invalid && n_valid == 0L) {
+        abort_validation(name, integer, msg1, msg2)
+    }
 
     ## elements check
-    if (n_valid == 0L || (is.finite(elements) && n_valid != elements)) {
+    if (is.finite(elements) && n_valid != elements) {
         abort_validation(name, integer, msg1, msg2)
     }
     ## range check
@@ -424,9 +430,12 @@ validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
 
 
 #' @rdname validate_mnirs
-validate_x_t <- function(x, t = seq_along(x)) {
-    validate_numeric(x)
-    validate_numeric(t)
+validate_x_t <- function(x, t, invalid = FALSE) {
+    ## exclude NULL by defaulting to invalid character
+    x <- x %||% character()
+    t <- t %||% character()
+    validate_numeric(x, invalid = invalid)
+    validate_numeric(t, invalid = invalid)
     if (length(x) != length(t)) {
         cli_abort(c(
             "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\

@@ -18,18 +18,7 @@ slope <- function(
     args <- list(...)
 
     if (!(args$bypass_checks %||% FALSE)) {
-        if (!is.numeric(x)) {
-            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (!is.numeric(t)) {
-            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (length(x) != length(t)) {
-            cli_abort(c(
-                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
-                of equal length."
-            ))
-        }
+        validate_x_t(x, t, invalid = TRUE)
     }
 
     ## remove invalid
@@ -112,18 +101,9 @@ rolling_slope <- function(
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
-        if (!is.numeric(x)) {
-            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (!is.numeric(t)) {
-            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (n != length(t)) {
-            cli_abort(c(
-                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
-                of equal length."
-            ))
-        }
+
+        validate_x_t(x, t, invalid = TRUE)
+
         ## informative warning message for length zero without aborting
         if (n == 0L) {
             cli_warn(c(

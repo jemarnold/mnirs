@@ -42,9 +42,9 @@ test_that("slope calculates edge cases correctly", {
     ## unequal length = error
     expect_error(slope(x = 1:5, t = 1:3), "equal length")
     ## all invalid = NA
-    expect_error(is.na(slope(list())), "valid.*numeric")
+    expect_error(slope(list()), "valid.*numeric")
     expect_true(is.na(slope(numeric(0))))
-    expect_error(is.na(slope(NULL)), "valid.*numeric")
+    expect_error(slope(NULL), "valid.*numeric")
     expect_true(is.na(slope(rep(NA_real_, 4))))
     expect_true(is.na(slope(rep(NaN, 4))))
     expect_true(is.na(slope(rep(Inf, 4))))
