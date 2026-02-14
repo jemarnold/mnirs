@@ -168,8 +168,8 @@ rolling_slope <- function(
 #'   requiring a complete window of valid samples (`FALSE`, by *default*). See
 #'   *Details*.
 #' @param ... Additional arguments.
-#' @inheritParams replace_invalid
 #' @inheritParams compute_local_windows
+#' @inheritParams replace_invalid
 #'
 #' @details
 #' Uses rolling slope calculations via the least squares formula on complete
@@ -231,8 +231,6 @@ peak_slope <- function(
     verbose = TRUE,
     ...
 ) {
-    align <- sub("^center$", "centre", align)
-    align <- match.arg(align)
     direction <- match.arg(direction)
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
@@ -331,4 +329,111 @@ peak_slope <- function(
         fitted = fitted,
         window_idx = window_idx
     )
+}
+
+
+#' Analyse peak linear slope
+#'
+#' Processes the maximum positive or negative local linear slope for each
+#' `nirs_channel` within a data frame and return a data frame of regression
+#' parameters.
+#'
+#' @param channel_args An *optional* `list()` named by `nirs_channels` with 
+#'   unique per-channel arguments to override global default arguments (see
+#'   *Details*).
+#' @inheritParams peak_slope
+#' @inheritParams validate_mnirs
+#' 
+#' @details
+#' ## `channel_args` per `nirs_channel`
+#'
+#' Arguments in `analyse_peak_slope()` apply to all `nirs_channels` by default.
+#'   `channel_args` allows overriding defaults with unique values per 
+#'   `nirs_channel`. e.g.:
+#'
+#' ```
+#' analyse_peak_slope(
+#'     data = df,
+#'     nirs_channels = c(hhb, smo2),
+#'     span = 3, 
+#'     direction = "positive",
+#'     channel_args = list(
+#'         hhb = list(span = 5),
+#'         smo2 = list(direction = "negative")
+#'     )
+#' )
+#' ```
+#' 
+#' @returns A data frame of model results with rows for each `nirs_channel`,
+#'   and metadata containing named lists for `"fitted"` and `"window_idx"` 
+#'   values named by `nirs_channels`.
+#' 
+#' @keywords internal
+analyse_peak_slope <- function(
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    width = NULL,
+    span = NULL,
+    align = c("centre", "left", "right"),
+    direction = c("auto", "positive", "negative"),
+    partial = FALSE,
+    channel_args = list(NULL),
+    verbose = TRUE,
+    ...
+) {
+    ## validation ==============================================
+    validate_mnirs_data(data)
+    metadata <- attributes(data)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose = FALSE
+    )
+    time_channel <- validate_time_channel(enquo(time_channel), data)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
+    }
+
+    time_vec <- data[[time_channel]]
+    default_args <- list(
+        width = width,
+        span = span,
+        align = align,
+        direction = direction,
+        partial = partial,
+        ...
+    )
+
+    ## process =================================
+    results_df <- do.call(
+        rbind,
+        lapply(nirs_channels, \(.nirs) {
+            ## override defaults with per channel args
+            nirs_args <- utils::modifyList(
+                default_args,
+                channel_args[[.nirs]] %||% list()
+            )
+            
+            ## iterate peak_slope per channel 
+            result <- do.call(
+                peak_slope,
+                c(list(x = data[[.nirs]], t = time_vec), nirs_args)
+            )
+            
+            ## extract scalar results into a data frame
+            tibble::tibble(
+                nirs_channels = .nirs,
+                slope         = result$slope,
+                intercept     = result$intercept,
+                y             = result$y,
+                t             = result$t,
+                idx           = result$idx,
+                fitted        = list(result$fitted),
+                window_idx    = list(result$window_idx)
+            )
+        })
+    )
+
+    ## ! do I need to export channel_args as metadata or in the tibble?
+
+    return(results_df)
 }

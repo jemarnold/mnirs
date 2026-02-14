@@ -23,12 +23,11 @@ peak_slope(
 or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{width}{An integer defining the local window in number of samples
-around \code{idx} in which to perform the operation., between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
+around \code{idx} in which to perform the operation, according to \code{align}.}
 
 \item{span}{A numeric value defining the local window timespan around \code{idx}
-in which to perform the operation. In units of \code{time_channel} or \code{t},
-between \verb{[t - span/2, t + span/2]}.}
+in which to perform the operation, according to \code{align}. In units of
+\code{time_channel} or \code{t}.}
 
 \item{align}{Window alignment as \emph{"centre"/"center"} (the \emph{default}),
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
