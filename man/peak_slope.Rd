@@ -55,6 +55,8 @@ A named list containing:
 \item{\code{y}}{The response value predicted from \code{x} at \code{t}.}
 \item{\code{t}}{The time value at the index of the peak slope window.}
 \item{\code{idx}}{The index position of the peak slope.}
+\item{\code{fitted}}{A numeric vector of predicted values from \code{x} over
+\code{t[window_idx]} from the peak slope and intercept.}
 \item{\code{window_idx}}{An integer vector of indices for the peak slope
 window.}
 }

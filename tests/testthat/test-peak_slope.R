@@ -582,7 +582,10 @@ test_that("peak_slope returns correct structure", {
     result <- peak_slope(x, width = 5)
 
     expect_type(result, "list")
-    expect_named(result, c("slope", "intercept", "y", "t", "idx", "window_idx"))
+    expect_named(
+        result,
+        c("slope", "intercept", "y", "t", "idx", "fitted", "window_idx")
+    )
     expect_type(result$slope, "double")
     expect_type(result$intercept, "double")
     expect_type(result$y, "double")
@@ -756,6 +759,14 @@ test_that("peak_slope verbose messages work", {
         peak_slope(rep(5, 5), width = 5, verbose = TRUE),
         "No.*slopes detected"
     )
+})
+
+test_that("peak_slope returns fitted values", {
+    ## ! add test
+    expect_true(FALSE)
+
+    # x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    # peak_slope(x)
 })
 
 
