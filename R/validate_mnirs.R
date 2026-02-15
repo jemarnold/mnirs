@@ -201,8 +201,7 @@ validate_nirs_channels <- function(
         nirs_unlisted <- nirs_channels
         if (verbose && !is.null(nirs_unlisted)) {
             cli_inform(c(
-                "i" = "{.arg nirs_channels} grouped together by default." #,
-                # "i" = "{.arg nirs_channels} groups can be defined explicitly."
+                "i" = "{.arg nirs_channels} grouped together by default."
             ))
         }
     }

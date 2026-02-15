@@ -761,16 +761,33 @@ test_that("peak_slope verbose messages work", {
     )
 })
 
-test_that("peak_slope returns fitted values", {
-    ## ! add test
-    expect_true(FALSE)
 
-    # x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
-    # peak_slope(x)
+test_that("peak_slope fitted values match window", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+    t <- seq_along(x)
+
+    results_df <- peak_slope(x, t, width = 5)
+
+    fitted <- results_df$fitted
+    window_idx <- results_df$window_idx
+
+    expect_length(fitted, length(window_idx))
+
+    # Verify fitted values match slope * t + intercept
+    expect_equal(
+        fitted,
+        results_df$intercept + results_df$slope * t[window_idx]
+    )
+    ## verify fitted values match lm predictions
+    expect_equal(
+        fitted,
+        predict(lm(x[window_idx] ~ t[window_idx])),
+        ignore_attr = TRUE
+    )
 })
 
 
-## analyse_peak_slope ===========================================================
+## analyse_peak_slope ====================================================
 test_that("analyse_peak_slope returns correct structure", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
     q <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
@@ -784,6 +801,8 @@ test_that("analyse_peak_slope returns correct structure", {
 
     results_df <- analyse_peak_slope(df, width = 5)
 
+    results_df$channel_args
+
     expect_s3_class(results_df, "data.frame")
     expect_equal(nrow(results_df), 2)
     expect_named(
@@ -796,7 +815,8 @@ test_that("analyse_peak_slope returns correct structure", {
             "t",
             "idx",
             "fitted",
-            "window_idx"
+            "window_idx",
+            "channel_args"
         )
     )
 
@@ -809,6 +829,115 @@ test_that("analyse_peak_slope returns correct structure", {
     expect_type(results_df$idx, "integer")
     expect_type(results_df$fitted, "list")
     expect_type(results_df$window_idx, "list")
+    expect_type(results_df$channel_args, "list")
+})
+
+test_that("analyse_peak_slope handles edge cases", {
+    ## single value per channel errors because validate_nirs_channels wants >=2 valid values
+    df <- create_mnirs_data(
+        data = data.frame(t = 1, x = 5, q = 10),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+    expect_error(analyse_peak_slope(df, width = 3), "valid.*numeric")
+
+    ## all identical values = NA (no positive/negative slopes)
+    df <- create_mnirs_data(
+        data = data.frame(t = 1:10, x = rep(5, 10), q = rep(10, 10)),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+    results_df <- analyse_peak_slope(df, width = 3, verbose = FALSE)
+    expect_all_true(is.na(results_df$slope))
+
+    ## all NA_real_ values errors because validate_nirs_channels wants >=2 valid values
+    df <- create_mnirs_data(
+        data = data.frame(t = 1:5, x = rep(NA_real_, 5), q = rep(NA_real_, 5)),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+    expect_error(analyse_peak_slope(df, width = 3), "valid.*numeric")
+
+    ## all t values identical = NA
+    df <- create_mnirs_data(
+        data = data.frame(t = rep(1, 5), x = 1:5, q = 1:5),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+    results_df <- analyse_peak_slope(df, width = 3, verbose = FALSE)
+    expect_all_true(is.na(results_df$slope))
+
+    ## NaN & Inf removed, valid slopes calculated
+    x <- c(1, NaN, 3, Inf, 5, 7, 9)
+    q <- c(2, 4, Inf, 6, NaN, 8, 10)
+    df <- create_mnirs_data(
+        data = data.frame(t = seq_along(x), x = x, q = q),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+    results_df <- analyse_peak_slope(
+        df,
+        width = 3,
+        partial = TRUE,
+        verbose = FALSE
+    )
+    expect_all_false(is.na(results_df$slope))
+    expect_all_true(results_df$slope > 0)
+})
+
+test_that("analyse_peak_slope validates data structure", {
+    ## non-data frame input errors
+    expect_error(
+        analyse_peak_slope(1:5, width = 3),
+        "data frame"
+    )
+
+    ## missing nirs_channels
+    df <- data.frame(t = 1:5, x = 1:5)
+    expect_error(
+        analyse_peak_slope(df, width = 3),
+        "nirs_channels"
+    )
+
+    ## missing time_channel
+    df <- create_mnirs_data(
+        data = data.frame(t = 1:5, x = 1:5),
+        nirs_channels = "x",
+        time_channel = "t"
+    )
+    attr(df, "time_channel") <- NULL
+    expect_error(
+        analyse_peak_slope(df, width = 3),
+        "time_channel"
+    )
+})
+
+test_that("analyse_peak_slope handles width/span validation", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+    df <- create_mnirs_data(
+        data = data.frame(t = seq_along(x), x = x),
+        nirs_channels = "x",
+        time_channel = "t"
+    )
+
+    ## missing both width and span
+    expect_error(
+        analyse_peak_slope(df),
+        "width.*span"
+    )
+
+    ## width > n without partial = NA
+    results_df <- analyse_peak_slope(df, width = 50, verbose = FALSE)
+    expect_all_true(is.na(results_df$slope))
+
+    ## width > n with partial = valid slope
+    results_df <- analyse_peak_slope(
+        df,
+        width = 50,
+        partial = TRUE,
+        verbose = FALSE
+    )
+    expect_all_false(is.na(results_df$slope))
 })
 
 test_that("analyse_peak_slope processes multiple channels independently", {
@@ -938,8 +1067,87 @@ test_that("analyse_peak_slope fitted values match window", {
     expect_length(fitted, length(window_idx))
 
     # Verify fitted values match slope * t + intercept
-    expected_fitted <- results_df$intercept + results_df$slope * t[window_idx]
-    expect_equal(fitted, expected_fitted)
+    expect_equal(
+        fitted,
+        results_df$intercept + results_df$slope * t[window_idx]
+    )
+    ## verify fitted values match lm predictions
+    expect_equal(
+        fitted,
+        predict(lm(x[window_idx] ~ t[window_idx])),
+        ignore_attr = TRUE
+    )
+})
+
+test_that("analyse_peak_slope channel_args stores used arguments", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+    q <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+    t <- seq_along(x)
+
+    df <- create_mnirs_data(
+        data = data.frame(t, x, q),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+
+    results_df <- analyse_peak_slope(
+        df,
+        width = 5,
+        direction = "positive",
+        verbose = FALSE
+    )
+
+    # channel_args is a list column
+    expect_type(results_df$channel_args, "list")
+    expect_length(results_df$channel_args, 2)
+
+    # Each element contains the arguments used
+    x_args <- results_df$channel_args[[1]]
+    expect_named(
+        x_args,
+        c("width", "span", "align", "direction", "partial", "verbose")
+    )
+    expect_equal(x_args$width, 5)
+    expect_null(x_args$span)
+    expect_equal(x_args$align, "centre")
+    expect_equal(x_args$direction, "positive")
+    expect_false(x_args$partial)
+})
+
+test_that("analyse_peak_slope channel_args reflects overrides", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+    q <- rev(x)
+    t <- seq_along(x)
+
+    df <- create_mnirs_data(
+        data = data.frame(t, x, q),
+        nirs_channels = c("x", "q"),
+        time_channel = "t"
+    )
+
+    results_df <- analyse_peak_slope(
+        df,
+        width = 3,
+        direction = "positive",
+        channel_args = list(
+            q = list(width = 7, direction = "negative")
+        ),
+        verbose = FALSE
+    )
+
+    # x uses defaults
+    x_args <- results_df$channel_args[[1]]
+    expect_equal(x_args$width, 3)
+    expect_equal(x_args$align, "centre")
+    expect_equal(x_args$direction, "positive")
+    expect_false(x_args$partial)
+
+    # q uses overrides
+    q_args <- results_df$channel_args[[2]]
+    expect_equal(q_args$width, 7)
+    expect_equal(q_args$align, "centre")
+    expect_equal(q_args$direction, "negative")
+    expect_false(q_args$partial)
 })
 
 
@@ -1005,43 +1213,8 @@ test_that("rolling_slope works visually", {
     #     })
 })
 
-test_that("analyse_peak_slope works visually", {
-    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
-    q <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-    t <- seq_along(x)
-    
-    df <- create_mnirs_data(
-        data = data.frame(t, x, q),
-        nirs_channels = c("x", "q"),
-        time_channel = "t"
-    )
-    attributes(df)
-
-    (results_df <- analyse_peak_slope(df, width = 5))
-    attributes(results_df)
-    attr(results_df, "fitted")
-
-    expect_named(
-        results_df,
-        c(
-            "nirs_channels",
-            "slope",
-            "intercept",
-            "y",
-            "t",
-            "idx",
-            "fitted",
-            "window_idx"
-        )
-    )
-
-    expect_type(results_df$fitted, "list")
-    expect_type(results_df$window_idx, "list")
-
-})
-
 test_that("rolling_slope works on example_mnirs() data", {
-    skip("visual checks")
+    skip("rolling_slope visual checks")
 
     data <- read_mnirs(
         example_mnirs("moxy_ramp"),
@@ -1060,13 +1233,14 @@ test_that("rolling_slope works on example_mnirs() data", {
         partial = FALSE,
     )
 
+    library(ggplot2)
     plot(data) +
         ggplot2::geom_hline(
             yintercept = 50,
             linetype = "dotted",
             colour = "red"
         ) +
-        ggplot2::geom_line(ggplot2::aes(y = 50 + slope * 10), colour = "red")
+        ggplot2::geom_line(ggplot2::aes(y = 50 + data$slope * 10), colour = "red")
 
     data <- read_mnirs(
         example_mnirs("train.red"),
@@ -1091,5 +1265,5 @@ test_that("rolling_slope works on example_mnirs() data", {
             linetype = "dotted",
             colour = "red"
         ) +
-        ggplot2::geom_line(ggplot2::aes(y = 65 + slope * 10), colour = "red")
+        ggplot2::geom_line(ggplot2::aes(y = 65 + data$slope * 10), colour = "red")
 })

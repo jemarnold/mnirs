@@ -6,8 +6,8 @@
 \usage{
 analyse_peak_slope(
   data,
-  nirs_channels,
-  time_channel,
+  nirs_channels = NULL,
+  time_channel = NULL,
   width = NULL,
   span = NULL,
   align = c("centre", "left", "right"),
@@ -50,7 +50,7 @@ subset of available data within the local rolling window (\code{TRUE}), or
 requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
 \emph{Details}.}
 
-\item{channel_args}{An \emph{optional} \code{list()} named by \code{nirs_channel} with
+\item{channel_args}{An \emph{optional} \code{list()} named by \code{nirs_channels} with
 unique per-channel arguments to override global default arguments (see
 \emph{Details}).}
 
@@ -59,13 +59,18 @@ warnings and information messages used for troubleshooting.}
 
 \item{...}{Additional arguments.}
 }
+\value{
+A data frame of model results with rows for each \code{nirs_channel},
+and metadata containing named lists for \code{"fitted"} and \code{"window_idx"}
+values named by \code{nirs_channels}.
+}
 \description{
 Processes the maximum positive or negative local linear slope for each
 \code{nirs_channel} within a data frame and return a data frame of regression
 parameters.
 }
 \details{
-\subsection{Per-channel arguments}{
+\subsection{\code{channel_args} per \code{nirs_channel}}{
 
 Arguments in \code{analyse_peak_slope()} apply to all \code{nirs_channels} by default.
 \code{channel_args} allows overriding defaults with unique values per

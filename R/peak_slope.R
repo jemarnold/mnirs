@@ -115,6 +115,7 @@ rolling_slope <- function(
         if (all(diff(t) == 0)) {
             return(rep(NA_real_, n))
         }
+        validate_x_t(x, t, invalid = TRUE)
         validate_width_span(width, span, verbose)
     }
 
@@ -231,9 +232,12 @@ peak_slope <- function(
     verbose = TRUE,
     ...
 ) {
-    direction <- match.arg(direction)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
+    args <- list(...)
+    if (!(args$bypass_checks %||% FALSE)) {
+        direction <- match.arg(direction)
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
     }
 
     ## calculate all rolling slopes
@@ -246,7 +250,7 @@ peak_slope <- function(
         partial,
         verbose,
         window_idx = TRUE,
-        bypass_checks = FALSE ## use validations
+        bypass_checks = args$bypass_checks %||% FALSE ## use validations
     )
 
     ## pre-return NA
@@ -389,6 +393,10 @@ analyse_peak_slope <- function(
         enquo(nirs_channels), data, verbose = FALSE
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
+    validate_width_span(width, span, verbose)
+    align <- sub("^center$", "centre", align)
+    align <- match.arg(align)
+    direction <- match.arg(direction)
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
@@ -400,10 +408,12 @@ analyse_peak_slope <- function(
         align = align,
         direction = direction,
         partial = partial,
+        verbose = verbose,
         ...
     )
 
     ## process =================================
+    ## iterate peak_slope per channel, bind results by row
     results_df <- do.call(
         rbind,
         lapply(nirs_channels, \(.nirs) {
@@ -413,13 +423,16 @@ analyse_peak_slope <- function(
                 channel_args[[.nirs]] %||% list()
             )
             
-            ## iterate peak_slope per channel 
+            ## call peak_slope with per channel args
             result <- do.call(
                 peak_slope,
-                c(list(x = data[[.nirs]], t = time_vec), nirs_args)
+                c(
+                    list(x = data[[.nirs]], t = time_vec, bypass_checks = TRUE),
+                    nirs_args
+                )
             )
             
-            ## extract scalar results into a data frame
+            ## return results as a data frame
             tibble::tibble(
                 nirs_channels = .nirs,
                 slope         = result$slope,
@@ -428,12 +441,11 @@ analyse_peak_slope <- function(
                 t             = result$t,
                 idx           = result$idx,
                 fitted        = list(result$fitted),
-                window_idx    = list(result$window_idx)
+                window_idx    = list(result$window_idx),
+                channel_args  = list(nirs_args)
             )
         })
     )
-
-    ## ! do I need to export channel_args as metadata or in the tibble?
 
     return(results_df)
 }
