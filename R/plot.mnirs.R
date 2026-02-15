@@ -73,11 +73,16 @@ plot.mnirs <- function(x, ...) {
         ggplot2::waiver()
     }
 
+    ## pivot_longer all `nirs_channels` to `y`
     plot_data <- setNames(
         utils::stack(x[nirs_channels]),
         c("y", "nirs_channels")
     )
-    plot_data$time <- rep(x[[time_channel]], length(nirs_channels))
+    ## preserve other columns, repeat to long format
+    other_cols <- setdiff(names(x), nirs_channels)
+    plot_data[other_cols] <- lapply(
+        x[other_cols], rep, times = length(nirs_channels)
+    )
 
     if (na.omit) {
         plot_data <- plot_data[stats::complete.cases(plot_data["y"]), ]

@@ -183,7 +183,7 @@ test_that("format_hmmss handles NA values", {
 })
 
 
-## plot.mnirs() ===============================
+## plot.mnirs() ===============================================
 # Helper to create mock mNIRS object
 mock_mnirs <- function() {
     df <- data.frame(
@@ -242,6 +242,51 @@ test_that("n controls number of breaks", {
 
     # More n should generally produce more breaks
     expect_true(length(breaks2) >= length(breaks1))
+})
+
+test_that("plot.mnirs preserves non-NIRS columns", {
+    x <- mock_mnirs()
+
+    # Add a grouping column that we want to facet by
+    x$group <- rep(c("A", "B"), each = 5)
+
+    # Create plot
+    p <- plot(x)
+
+    # Check that the group column exists in plot data
+    expect_true("group" %in% names(p$data))
+
+    # Check that group column has correct length (rows × channels)
+    expect_equal(nrow(p$data), 20L) # 10 rows × 2 channels
+
+    # Check that group values are correctly repeated
+    expect_equal(
+        p$data$group,
+        rep(x$group, times = length(attr(x, "nirs_channels")))
+    )
+
+    # Verify faceting works without error
+    expect_no_error(p + ggplot2::facet_wrap(~group))
+})
+
+test_that("plot.mnirs works with extract_intervals and faceting", {
+    x <- mock_mnirs()
+
+    # Simulate extract_intervals output with interval column
+    x$interval <- factor(rep(1:2, each = 5))
+
+    p <- plot(x)
+
+    # Verify interval column preserved as factor
+    expect_true("interval" %in% names(p$data))
+    expect_s3_class(p$data$interval, "factor")
+
+    # Test faceting works
+    p_facet <- p + ggplot2::facet_wrap(~interval)
+    expect_s3_class(p_facet, "ggplot")
+
+    # Build plot to ensure no errors during rendering
+    expect_no_error(ggplot2::ggplot_build(p_facet))
 })
 
 test_that("plot.mnirs moxy.perfpro works", {
