@@ -25,8 +25,26 @@
 #' @rdname signif_trailing
 #' @order 1
 #' @keywords internal
-signif_trailing <- function(x, digits = 2L, format = c("digits", "signif")) {
+signif_trailing <- function(
+    x,
+    digits = 2L,
+    format = c("digits", "signif", "max_digits", "max_signif")
+) {
     format <- match.arg(format)
+
+    if (format == "max_digits") {
+        validate_numeric(x)
+        validate_numeric(digits, 1, c(0, Inf), integer = TRUE)
+        digits <- min(digits, count_max_decimals(x))
+        format <- "digits"
+    }
+
+    if (format == "max_signif") {
+        validate_numeric(x)
+        validate_numeric(digits, 1, c(0, Inf), FALSE, TRUE)
+        digits <- min(digits, count_max_sigfigs(x))
+        format <- "signif"
+    }
 
     if (format == "digits") {
         validate_numeric(x)
@@ -49,6 +67,68 @@ signif_trailing <- function(x, digits = 2L, format = c("digits", "signif")) {
 
     ## remove trailing `.` or "NA"
     return(gsub("\\.$|NA| ", "", result))
+}
+
+
+#' Count maximum decimal places across a numeric vector
+#'
+#' Returns the largest number of decimal places present in any finite,
+#' non-NA element of `x`. Used internally by `signif_trailing()` for
+#' `format = "max_digits"`.
+#'
+#' @param x A numeric vector.
+#'
+#' @returns A single non-negative integer.
+#'
+#' @keywords internal
+count_max_decimals <- function(x) {
+    ## handle non-finite elements where nchar shouldn't apply
+    x <- x[is.finite(x)]
+    if (length(x) == 0L) {
+        return(0L)
+    }
+
+    ## format with enough precision to capture true decimal places
+    txt <- format(x, scientific = FALSE, trim = TRUE)
+    decimals <- vapply(strsplit(txt, ".", fixed = TRUE), \(.s) {
+        if (length(.s) < 2L) 0L else nchar(.s[[2L]])
+    }, integer(1))
+
+    return(max(decimals))
+}
+
+
+#' Count maximum significant figures across a numeric vector
+#'
+#' Returns the largest number of significant figures present in any finite,
+#' non-NA element of `x`. Used internally by `signif_trailing()` for
+#' `format = "max_signif"`.
+#'
+#' @param x A numeric vector.
+#'
+#' @returns A single positive integer (minimum 1).
+#'
+#' @keywords internal
+count_max_sigfigs <- function(x) {
+    ## handle non-finite elements where nchar shouldn't apply
+    x <- x[is.finite(x) & x != 0]
+    if (length(x) == 0L) {
+        return(1L)
+    }
+
+    ## format with enough precision, strip sign and leading/trailing zeros
+    txt <- format(abs(x), scientific = FALSE, trim = TRUE)
+    sigfigs <- vapply(txt, \(.s) {
+        ## remove decimal point
+        .s <- gsub(".", "", .s, fixed = TRUE)
+        ## remove leading zeros
+        .s <- sub("^0+", "", .s)
+        ## remove trailing zeros only for values without a decimal
+        ## (integers represented exactly)
+        nchar(.s)
+    }, integer(1), USE.NAMES = FALSE)
+
+    return(max(sigfigs))
 }
 
 

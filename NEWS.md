@@ -1,6 +1,8 @@
 # mnirs 0.4.2
 
 * Remove `{tidyr}` dependency from `plot.mnirs()`, and from `{mnirs}` package dependencies.
+* Update `signif_trailing()` to avoid overprinting digits. Used internally for display.
+    * `format = c("max_digits", "max_signif")` will print the lesser of either `digits`, or the maximum decimals/sigfigs in the data.
 
 # mnirs 0.4.1
 

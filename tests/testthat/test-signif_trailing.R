@@ -66,6 +66,132 @@ test_that("signif_trailing handles special numeric values", {
     expect_equal(signif_trailing(c(1, NaN), digits = 2), c("1.00", "NaN"))
 })
 
+## count_max_decimals() ======================================================
+test_that("count_max_decimals returns correct counts", {
+    expect_equal(count_max_decimals(c(1, 2, 3)), 0L)
+    expect_equal(count_max_decimals(c(1.1, 222.2)), 1L)
+    expect_equal(count_max_decimals(c(1, -22.25, 3333.1)), 2L)
+    expect_equal(count_max_decimals(c(0.001, 111.111)), 3L)
+})
+
+test_that("count_max_decimals handles special values", {
+    expect_equal(count_max_decimals(c(NA, 1.5)), 1L)
+    expect_equal(count_max_decimals(c(Inf, -Inf, 1.5)), 1L)
+    expect_equal(count_max_decimals(c(NA, Inf)), 0L)
+    expect_equal(count_max_decimals(numeric(0)), 0L)
+    expect_equal(count_max_decimals(1.399999999999999911182), 1L)
+    expect_equal(count_max_decimals(c(3.14e-5, 0.0000314)), 7L)
+})
+
+## count_max_sigfigs() =======================================================
+test_that("count_max_sigfigs returns correct counts", {
+    expect_equal(count_max_sigfigs(c(0.3, -0.4, 0.5)), 1L)
+    expect_equal(count_max_sigfigs(c(1.23, 4.5)), 3L)
+    expect_equal(count_max_sigfigs(c(100, -123)), 3L)
+    expect_equal(count_max_sigfigs(c(0.001234)), 4L)
+})
+
+test_that("count_max_sigfigs handles special values", {
+    expect_equal(count_max_sigfigs(c(0, 0, 0)), 1L)
+    expect_equal(count_max_sigfigs(c(NA, 1.5)), 2L)
+    expect_equal(count_max_sigfigs(c(Inf, -Inf)), 1L)
+    expect_equal(count_max_sigfigs(numeric(0)), 1L)
+    expect_equal(count_max_sigfigs(1.399999999999999911182), 2L)
+    expect_equal(count_max_sigfigs(c(3.14e-5, 0.0000314)), 3L)
+})
+
+## signif_trailing() max_digits ==============================================
+test_that("max_digits reduces to observed decimal places", {
+    ## all values have 1 dp, so digits = 5 should reduce to 1
+    expect_equal(
+        signif_trailing(c(0.3, 0.4, 0.5), digits = 5, format = "max_digits"),
+        signif_trailing(c(0.3, 0.4, 0.5), digits = 1, format = "digits")
+    )
+    ## mixed dp: max observed is 2
+    expect_equal(
+        signif_trailing(c(1.1, 2.25, 3), digits = 5, format = "max_digits"),
+        signif_trailing(c(1.1, 2.25, 3), digits = 2, format = "digits")
+    )
+})
+
+test_that("max_digits caps at digits when data has more dp", {
+    ## data has 3 dp but digits = 2 caps it
+    expect_equal(
+        signif_trailing(c(1.123, 2.456), digits = 2, format = "max_digits"),
+        signif_trailing(c(1.123, 2.456), digits = 2, format = "digits")
+    )
+})
+
+test_that("max_digits handles whole numbers", {
+    expect_equal(
+        signif_trailing(c(1, 2, 3), digits = 5, format = "max_digits"),
+        signif_trailing(c(1, 2, 3), digits = 0, format = "digits")
+    )
+    ## digits = 0 always gives whole numbers
+    expect_equal(
+        signif_trailing(c(1.5, 2.75), digits = 0, format = "max_digits"),
+        signif_trailing(c(1.5, 2.75), digits = 0, format = "digits")
+    )
+})
+
+test_that("max_digits handles NA and special values", {
+    ## NA and Inf are ignored for counting; finite values have 1 dp
+    expect_equal(
+        signif_trailing(c(1.5, NA, Inf), digits = 5, format = "max_digits"),
+        signif_trailing(c(1.5, NA, Inf), digits = 1, format = "digits")
+    )
+    ## all non-finite: 0 dp
+    expect_equal(
+        signif_trailing(c(NA, Inf), digits = 5, format = "max_digits"),
+        signif_trailing(c(NA, Inf), digits = 0, format = "digits")
+    )
+})
+
+
+## signif_trailing() max_signif ==============================================
+test_that("max_signif reduces to observed significant figures", {
+    ## c(0.3, 0.4, 0.5) each have 1 sigfig
+    expect_equal(
+        signif_trailing(c(0.3, -0.4, 0.5), digits = 5, format = "max_signif"),
+        signif_trailing(c(0.3, -0.4, 0.5), digits = 1, format = "signif")
+    )
+    ## c(1.23, 4.5) max sigfigs = 3
+    expect_equal(
+        signif_trailing(c(1.23, 4.5), digits = 5, format = "max_signif"),
+        signif_trailing(c(1.23, 4.5), digits = 3, format = "signif")
+    )
+})
+
+test_that("max_signif caps at digits when data has more sigfigs", {
+    expect_equal(
+        signif_trailing(c(1.2345, 6.789), digits = 3, format = "max_signif"),
+        signif_trailing(c(1.2345, 6.789), digits = 3, format = "signif")
+    )
+})
+
+test_that("max_signif handles whole numbers", {
+    ## 123 has 3 sigfigs
+    expect_equal(
+        signif_trailing(c(100, 123), digits = 5, format = "max_signif"),
+        signif_trailing(c(100, 123), digits = 3, format = "signif")
+    )
+})
+
+test_that("max_signif handles NA and special values", {
+    expect_equal(
+        signif_trailing(c(1.5, NA, Inf), digits = 5, format = "max_signif"),
+        signif_trailing(c(1.5, NA, Inf), digits = 2, format = "signif")
+    )
+})
+
+test_that("max_signif handles zero-only finite values", {
+    ## all zeros: sigfigs default to 1
+    expect_equal(
+        signif_trailing(c(0, 0, 0), digits = 5, format = "max_signif"),
+        signif_trailing(c(0, 0, 0), digits = 1, format = "signif")
+    )
+})
+
 ## signif_whole() =========================================================
 test_that("signif_whole returns correct significant figures", {
     x <- c(123, 123.4, 123.45, 123.456)
