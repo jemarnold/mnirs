@@ -382,7 +382,7 @@ analyse_peak_slope <- function(
     align = c("centre", "left", "right"),
     direction = c("auto", "positive", "negative"),
     partial = FALSE,
-    channel_args = list(NULL),
+    channel_args = list(),
     verbose = TRUE,
     ...
 ) {
@@ -409,43 +409,38 @@ analyse_peak_slope <- function(
         direction = direction,
         partial = partial,
         verbose = verbose,
+        bypass_checks = TRUE,
         ...
     )
 
     ## process =================================
     ## iterate peak_slope per channel, bind results by row
-    results_df <- do.call(
-        rbind,
-        lapply(nirs_channels, \(.nirs) {
-            ## override defaults with per channel args
-            nirs_args <- utils::modifyList(
-                default_args,
-                channel_args[[.nirs]] %||% list()
-            )
-            
-            ## call peak_slope with per channel args
-            result <- do.call(
-                peak_slope,
-                c(
-                    list(x = data[[.nirs]], t = time_vec, bypass_checks = TRUE),
-                    nirs_args
-                )
-            )
-            
-            ## return results as a data frame
-            tibble::tibble(
-                nirs_channels = .nirs,
-                slope         = result$slope,
-                intercept     = result$intercept,
-                y             = result$y,
-                t             = result$t,
-                idx           = result$idx,
-                fitted        = list(result$fitted),
-                window_idx    = list(result$window_idx),
-                channel_args  = list(nirs_args)
-            )
-        })
-    )
+    results_df <- do.call(rbind, lapply(nirs_channels, \(.nirs) {
+        ## override defaults with per channel args
+        nirs_args <- utils::modifyList(
+            default_args,
+            channel_args[[.nirs]] %||% list()
+        )
+        
+        ## call peak_slope with per channel args
+        result <- do.call(peak_slope, c(
+                list(x = data[[.nirs]], t = time_vec),
+                nirs_args
+        ))
+        
+        ## return results as a data frame
+        tibble::tibble(
+            nirs_channels = .nirs,
+            slope         = result$slope,
+            intercept     = result$intercept,
+            y             = result$y,
+            t             = result$t,
+            idx           = result$idx,
+            fitted        = list(result$fitted),
+            window_idx    = list(result$window_idx),
+            channel_args  = list(nirs_args)
+        )
+    }))
 
     return(results_df)
 }

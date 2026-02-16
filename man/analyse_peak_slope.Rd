@@ -13,7 +13,7 @@ analyse_peak_slope(
   align = c("centre", "left", "right"),
   direction = c("auto", "positive", "negative"),
   partial = FALSE,
-  channel_args = list(NULL),
+  channel_args = list(),
   verbose = TRUE,
   ...
 )

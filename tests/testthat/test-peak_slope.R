@@ -1103,10 +1103,15 @@ test_that("analyse_peak_slope channel_args stores used arguments", {
 
     # Each element contains the arguments used
     x_args <- results_df$channel_args[[1]]
-    expect_named(
-        x_args,
-        c("width", "span", "align", "direction", "partial", "verbose")
-    )
+    expect_named(x_args, c(
+            "width",
+            "span",
+            "align",
+            "direction",
+            "partial",
+            "verbose",
+            "bypass_checks"
+    ))
     expect_equal(x_args$width, 5)
     expect_null(x_args$span)
     expect_equal(x_args$align, "centre")
