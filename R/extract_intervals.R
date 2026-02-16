@@ -525,11 +525,11 @@ extract_interval_list <- function(
 }
 
 
-#' Recalculate time_channel values with zero offset at event time (x0)
+#' Recalculate time_channel values with zero offset at event time (t0)
 #' @keywords internal
-zero_offset_data <- function(data, time_channel, x0) {
-    ## zero time channel to event_time `x0`
-    data[[time_channel]] <- data[[time_channel]] - x0
+zero_offset_data <- function(data, time_channel, t0) {
+    ## zero time channel to event_time `t0`
+    data[[time_channel]] <- data[[time_channel]] - t0
     return(data)
 }
 

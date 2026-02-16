@@ -48,11 +48,11 @@ analyse_kinetics.peak_slope <- function(
 
     ## normalise input to named list of data frames
     data_list <- as_data_list(data)
-    names <- names(data_list)
+    interval_names <- names(data_list)
 
     ## iterate over each data frame in the list
     result_list <- lapply(seq_along(data_list), \(.i) {
-        id <- names[[.i]]
+        id <- interval_names[[.i]]
         df <- data_list[[.i]]
 
         result <- analyse_peak_slope(
@@ -68,7 +68,30 @@ analyse_kinetics.peak_slope <- function(
             verbose = verbose
         )
         result$interval <- id
-        result$x0 <- attr(df, "event_times")
+        result$t0 <- attr(df, "event_times")
+
+        ## convert each row's channel_args list to a 1-row data frame
+        ## replace NULL values with NA to keep consistent columns
+        result$channel_args <- Map(\(.nirs, .arg) {
+            .arg <- lapply(.arg, \(.x) if (is.null(.x)) NA else .x)
+            data.frame(interval = id, nirs_channels = .nirs, .arg)
+        }, result$nirs_channels, result$channel_args)
+
+        ## append `*_fitted` cols to data for `nirs_channels` at `window_idx`
+        fitted_cols <- Map(\(.nirs, .fitted, .idx) {
+            fitted_vec <- rep(NA_real_, nrow(df))
+            fitted_vec[.idx] <- .fitted
+            fitted_vec
+        }, result$nirs_channels, result$fitted, result$window_idx)
+        names(fitted_cols) <- paste0(result$nirs_channels, "_fitted")
+        augmented_df <- cbind(df, as.data.frame(fitted_cols))
+
+        ## store as single-element list; attach only to the first row
+        result$data <- vector("list", nrow(result))
+        result$data[[1L]] <- augmented_df
+
+        ## remove lists from results
+        result[c("fitted", "window_idx")] <- NULL
 
         ## return 1-row tibble of results for each data_list
         result
@@ -77,63 +100,39 @@ analyse_kinetics.peak_slope <- function(
     ## combine output
     results <- do.call(rbind, result_list)
 
-    ## remove lists from results
-    fitted_list <- results$fitted
-    window_idx_list <- results$window_idx
-    channel_args_list <- results$channel_args
-    x0_list <- results$x0
-    results[c("fitted", "window_idx", "channel_args", "x0")] <- NULL
+    ## extract channel_args into single data frame
+    channel_args_df <- do.call(
+        rbind,
+        c(results$channel_args, make.row.names = FALSE)
+    )
 
-    ## relocate cols
+    ## extract data_list from the first item in each `interval`
+    data_list <- Filter(Negate(is.null), results$data)
+    names(data_list) <- interval_names
+
+    ## extract data frame of `event_times` 
+    t0_df <- as.data.frame(results[c("interval", "nirs_channels", "t0")])
+
+    ## remove lists from results & relocate interval col
+    results[c("channel_args", "data", "t0")] <- NULL
     results <- results[, c("interval", setdiff(names(results), "interval"))]
 
-    ## ! add fitted to data_list data frames
-    ## ! add data.frame of channel_args
     ## ! add fit diagnostics
     ## ! implement find_first_extreme
     ## ! add test_that
-    ## add fitted data to data frames in data_list
-    # data_list <- lapply(seq_along(data_list), \(.i) {
-    #     df <- data_list[[.i]]
-    #     interval_name <- names(data_list)[[.i]]
-        
-    #     ## get all rows for this interval from results
-    #     interval_results <- results[results$interval == interval_name, ]
-        
-    #     ## create list of fitted_cols for all nirs_channels
-    #     fitted_cols <- lapply(seq_len(nrow(interval_results)), \(.j) {
-    #         nirs_col <- interval_results$nirs_channels[.j]
-    #         idx <- which(
-    #             results$interval == interval_name &
-    #                 results$nirs_channels == nirs_col
-    #         )
-            
-    #         ## initialize fitted column with NAs
-    #         fitted_vec <- rep(NA_real_, nrow(df))
-            
-    #         ## assign fitted values at window indices
-    #         fitted_vec[window_idx_list[[idx]]] <- fitted_list[[idx]]
-            
-    #         fitted_vec
-    #     })
-        
-    #     ## name the columns `*_fitted` and bind to data frame
-    #     names(fitted_cols) <- paste0(interval_results$nirs_channels, "_fitted")
-    #     cbind(df, as.data.frame(fitted_cols))
-    # })
-    
+
+    ## return
     structure(
         list(
-            method = method,             ## method = "peak_slope"
-            results = results,           ## tibble of scalar results
-            # data = data_list,            ## list of data frames
-            # x0 = x0_list,                ## vec of `event_times` `t` values
-            # channel_args = channel_args_list, ## list of channel args provided to `analyse_slope`
+            method = method,   ## method = "peak_slope"
+            results = results, ## tibble of scalar results
+            data = data_list,  ## df of data frames
+            t0 = t0_df,        ## df of `event_times` `t` values
+            channel_args = channel_args_df, ## df of channel args provided to `analyse_slope`
             call = match.call()
         ),
         class = "mnirs_kinetics"
     )
-    # return(results)
 }
 
 

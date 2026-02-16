@@ -685,13 +685,13 @@ test_that("extract_interval_list preserves metadata attributes", {
 ## zero_offset_data() ===============================================
 test_that("zero_offset_data shifts time channel by event time", {
     df <- tibble::tibble(time = c(5, 6, 7, 8, 9), value = 1:5)
-    result <- zero_offset_data(df, time_channel = "time", x0 = 7)
+    result <- zero_offset_data(df, time_channel = "time", t0 = 7)
     expect_equal(result$time, c(-2, -1, 0, 1, 2))
     expect_equal(result$value, 1:5) # other columns unchanged
 
     ## negative event times
     df <- tibble::tibble(time = c(-5, -4, -3, -2, -1), value = 1:5)
-    result <- zero_offset_data(df, time_channel = "time", x0 = -3)
+    result <- zero_offset_data(df, time_channel = "time", t0 = -3)
     expect_equal(result$time, c(-2, -1, 0, 1, 2))
 })
 

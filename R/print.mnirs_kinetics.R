@@ -68,12 +68,7 @@ print.mnirs_kinetics <- function(x, ...) {
             cat(bottom_lines, sep = "\n")
 
 
-            # # Show first and last 5 rows
-            # cat(utils::capture.output(print(results[1:5, ])), sep = "\n")
-            # cat(sprintf("   --- %d rows omitted", nrows - 10), "\n")
-
-            # tail_rows <- results[(nrows - 4):nrows, ]
-            # cat(utils::capture.output(print(tail_rows))[-1], sep = "\n")
+            ## ! add instructions how to retrieve returned objec
         }
         cat("\n\n")
 

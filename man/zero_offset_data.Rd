@@ -2,11 +2,11 @@
 % Please edit documentation in R/extract_intervals.R
 \name{zero_offset_data}
 \alias{zero_offset_data}
-\title{Recalculate time_channel values with zero offset at event time (x0)}
+\title{Recalculate time_channel values with zero offset at event time (t0)}
 \usage{
-zero_offset_data(data, time_channel, x0)
+zero_offset_data(data, time_channel, t0)
 }
 \description{
-Recalculate time_channel values with zero offset at event time (x0)
+Recalculate time_channel values with zero offset at event time (t0)
 }
 \keyword{internal}
