@@ -176,7 +176,7 @@ filter_mnirs <- function(
     ## create object with class for method dispatch
     data <- structure(
         list(data = data),
-        class = c(method, "mnirs.filtered")
+        class = c(method, "mnirs_filtered")
     )
 
     UseMethod("filter_mnirs", data)
@@ -204,7 +204,6 @@ filter_mnirs.smooth_spline <- function(
     ...
 ) {
     ## validation ==========================================
-    rlang::check_installed("stats", reason = "to use stats::smooth.spline()")
     metadata <- attributes(data)
     ## verbose = FALSE because grouping irrelevant
     nirs_channels <- validate_nirs_channels(

@@ -596,7 +596,8 @@ ensemble_intervals <- function(
     result <- create_mnirs_data(
         result,
         nirs_device = attr(df_long, "nirs_device"),
-        nirs_channels = unique(c(metadata$nirs_channels, nirs_channels)),
+        # nirs_channels = unique(c(metadata$nirs_channels, nirs_channels)),
+        nirs_channels = unique(nirs_channels),
         time_channel = time_channel,
         event_channel = attr(df_long, "event_channel"),
         sample_rate = sample_rate,
@@ -632,10 +633,11 @@ group_intervals <- function(
             create_mnirs_data(
                 .df,
                 nirs_device = metadata$nirs_device,
-                nirs_channels = unique(c(
-                    metadata$nirs_channels,
-                    attr(.df, "nirs_channels")
-                )),
+                # nirs_channels = unique(c(
+                #     metadata$nirs_channels,
+                #     attr(.df, "nirs_channels")
+                # )),
+                nirs_channels = unique(attr(.df, "nirs_channels")),
                 time_channel = time_channel,
                 event_channel = metadata$event_channel,
                 sample_rate = metadata$sample_rate,

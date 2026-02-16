@@ -233,6 +233,8 @@ validate_nirs_channels <- function(
         ))
     }
 
+    ## returns explicitly grouped nirs_channels 
+    ## or nirs_unlisted if retrieved from metadata
     return(nirs_channels)
 }
 
