@@ -1023,7 +1023,8 @@ test_that("extract_intervals handles grouping", {
         data = data,
         event_times = c(2, 4, 6, 8),
         span = list(c(-0.3, 0.3), c(-0.5, 0.5)),
-        group_events = list(c(1, 3), c(2, 4))
+        group_events = list(c(1, 3), c(2, 4)),
+        verbose = FALSE
     )
 
     expect_length(result, 2)
@@ -1092,8 +1093,11 @@ test_that("extract_intervals respects nirs_channels metadata", {
         verbose = FALSE
     )
 
-    expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
-    expect_equal(attr(result[[2]], "nirs_channels"), all_channels)
+    ## TODO 2026-02-15 changed to overwrite nirs_channels
+    # expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
+    # expect_equal(attr(result[[2]], "nirs_channels"), all_channels)
+    expect_equal(attr(result[[1]], "nirs_channels"), "smo2_left")
+    expect_equal(attr(result[[2]], "nirs_channels"), "smo2_left")
 
     result <- extract_intervals(
         data = data,
@@ -1105,7 +1109,8 @@ test_that("extract_intervals respects nirs_channels metadata", {
         verbose = TRUE
     )
 
-    expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
+    # expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
+    expect_equal(attr(result[[1]], "nirs_channels"), "smo2_left")
 })
 
 

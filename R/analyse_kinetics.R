@@ -77,6 +77,11 @@ analyse_kinetics.peak_slope <- function(
             data.frame(interval = id, nirs_channels = .nirs, .arg)
         }, result$nirs_channels, result$channel_args)
 
+        ## convert each row's diagnostics into a 1-row data frame
+        result$diagnostics <- Map(\(.nirs, .diag) {
+            data.frame(interval = id, nirs_channels = .nirs, .diag)
+        }, result$nirs_channels, result$diagnostics)
+
         ## append `*_fitted` cols to data for `nirs_channels` at `window_idx`
         fitted_cols <- Map(\(.nirs, .fitted, .idx) {
             fitted_vec <- rep(NA_real_, nrow(df))
@@ -105,6 +110,13 @@ analyse_kinetics.peak_slope <- function(
         rbind,
         c(results$channel_args, make.row.names = FALSE)
     )
+    
+    
+    ## extract diagnostics into single data frame
+    diagnostics_df <- do.call(
+        rbind,
+        c(results$diagnostics, make.row.names = FALSE)
+    )
 
     ## extract data_list from the first item in each `interval`
     data_list <- Filter(Negate(is.null), results$data)
@@ -114,10 +126,9 @@ analyse_kinetics.peak_slope <- function(
     t0_df <- as.data.frame(results[c("interval", "nirs_channels", "t0")])
 
     ## remove lists from results & relocate interval col
-    results[c("channel_args", "data", "t0")] <- NULL
+    results[c("channel_args", "data", "t0", "diagnostics")] <- NULL
     results <- results[, c("interval", setdiff(names(results), "interval"))]
 
-    ## ! add fit diagnostics
     ## ! implement find_first_extreme
     ## ! add test_that
 
@@ -128,6 +139,7 @@ analyse_kinetics.peak_slope <- function(
             results = results, ## tibble of scalar results
             data = data_list,  ## df of data frames
             t0 = t0_df,        ## df of `event_times` `t` values
+            diagnostics = diagnostics_df,   ## df of model diagnostics
             channel_args = channel_args_df, ## df of channel args provided to `analyse_slope`
             call = match.call()
         ),
@@ -147,14 +159,27 @@ as_data_list <- function(data) {
                 "i" = "Install with {.code install.packages(\"dplyr\")}."
             ))
         }
-        key_labels <- do.call(paste, c(
-            dplyr::group_keys(data), list(sep = "_")
-        ))
-        data_list <- dplyr::group_split(data, .keep = TRUE)
+
+        ## refactor grouping variables to order of appearance
+        ## TODO should I convert this to Base R if dplyr is required 
+        ## TODO for grouping anyway?
+        group_vars <- dplyr::group_vars(data)
+        df_grp <- data |>
+            dplyr::ungroup() |>
+            dplyr::mutate(
+                dplyr::across(dplyr::all_of(group_vars), \(.x) {
+                    factor(.x, levels = unique(.x))
+                })
+            ) |>
+            dplyr::group_by(dplyr::across(dplyr::all_of(group_vars)))
+        keys <- do.call(paste, c(dplyr::group_keys(df_grp), list(sep = "_")))
+        data_list <- dplyr::group_split(df_grp, .keep = TRUE)
+
+        ## copy mnirs metadata down to each df in the list
+        ## TODO need to test when a list has been rbinded and has vectors from original list
         data_list <- lapply(data_list, \(.df) {
             create_mnirs_data(
                 .df,
-    ## TODO need to test when a list has been rbinded and has vectors from original list
                 attributes(data)[c(
                     "nirs_channels",
                     "time_channel",
@@ -165,8 +190,8 @@ as_data_list <- function(data) {
                 )]
             )
         })
-        names(data_list) <- key_labels
-        
+        names(data_list) <- keys
+
         return(data_list)
     }
 
@@ -190,3 +215,61 @@ as_data_list <- function(data) {
     return(data)
 }
 
+
+#' Compute model diagnostics
+#'
+#' @param fitted A numeric vector of the predicted values.
+#' @inheritParams peak_slope
+#'
+#' @returns A named list with `n_obs`, `r2`, `adj_r2`, and `rmse`.
+#'
+#' @keywords internal
+compute_diagnostics <- function(x, t, fitted, verbose = TRUE) {
+    complete_cases <- which(is.finite(x) & is.finite(t))
+    x <- x[complete_cases]
+    t <- t[complete_cases]
+    fitted <- fitted[is.finite(fitted)]
+    n_obs <- length(fitted)
+    
+    return_na <- list(
+        n_obs = n_obs,
+        r2 = NA_real_,
+        adj_r2 = NA_real_,
+        rmse = NA_real_
+    )
+
+    if (length(x) != length(t) || length(x) != n_obs) {
+        if (verbose) {
+            cli_warn(c(
+                "!" = "{.arg x}, {.arg t}, and {.arg fitted} must be \\
+                {.cls numeric} vectors of equal lengths to return model \\ 
+                diagnostics."
+            ))
+        }
+        return(return_na)
+    }
+
+    if (n_obs < 2L) {
+        return(return_na)
+    }
+
+    resid <- x - fitted
+    ss_res <- sum(resid^2)
+    ss_tot <- sum((x - mean(x))^2)
+
+    r2 <- if (ss_tot == 0) NA_real_ else 1 - ss_res / ss_tot
+    adj_r2 <- if (is.na(r2) || n_obs <= 2L) {
+        NA_real_
+    } else {
+        1 - (1 - r2) * (n_obs - 1) / (n_obs - 2) ## TODO check for multivariate models
+    }
+
+    rmse <- sqrt(mean(resid^2))
+
+    list(
+        n_obs = n_obs,
+        r2 = r2,
+        adj_r2 = adj_r2,
+        rmse = rmse
+    )
+}

@@ -417,7 +417,7 @@ analyse_peak_slope <- function(
     ## iterate peak_slope per channel, bind results by row
     results_df <- do.call(rbind, lapply(nirs_channels, \(.nirs) {
         ## override defaults with per channel args
-        nirs_args <- utils::modifyList(
+        all_args <- utils::modifyList(
             default_args,
             channel_args[[.nirs]] %||% list()
         )
@@ -425,8 +425,15 @@ analyse_peak_slope <- function(
         ## call peak_slope with per channel args
         result <- do.call(peak_slope, c(
                 list(x = data[[.nirs]], t = time_vec),
-                nirs_args
+                all_args
         ))
+
+        diag <- compute_diagnostics(
+            x = data[[.nirs]][result$window_idx],
+            t = time_vec[result$window_idx],
+            fitted = result$fitted,
+            verbose = verbose
+        )
         
         ## return results as a data frame
         tibble::tibble(
@@ -438,7 +445,8 @@ analyse_peak_slope <- function(
             idx           = result$idx,
             fitted        = list(result$fitted),
             window_idx    = list(result$window_idx),
-            channel_args  = list(nirs_args)
+            channel_args  = list(all_args),
+            diagnostics   = list(diag)
         )
     }))
 

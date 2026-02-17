@@ -159,7 +159,7 @@ test_that("rolling_slope handles negative values correctly", {
             width = 3,
             span = 0,
             partial = TRUE,
-            verbose = TRUE
+            verbose = FALSE
         ),
         -2
     )
@@ -816,7 +816,8 @@ test_that("analyse_peak_slope returns correct structure", {
             "idx",
             "fitted",
             "window_idx",
-            "channel_args"
+            "channel_args",
+            "diagnostics"
         )
     )
 
@@ -883,6 +884,10 @@ test_that("analyse_peak_slope handles edge cases", {
     )
     expect_all_false(is.na(results_df$slope))
     expect_all_true(results_df$slope > 0)
+    expect_equal(results_df$window_idx[[1]], c(4, 5, 6))
+    expect_equal(results_df$window_idx[[2]], c(1, 2))
+    expect_equal(results_df$fitted[[1]], c(3, 5, 7))
+    expect_equal(results_df$fitted[[2]], c(2, 4))
 })
 
 test_that("analyse_peak_slope validates data structure", {

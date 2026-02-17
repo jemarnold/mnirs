@@ -60,11 +60,12 @@ reference:
   desc: |
     Estimate response dynamics and kinetic parameters
   contents:
+  - analyse_kinetics
   - peak_slope
   - matches("monoexp")
-- title: Plotting
+- title: Printing & plotting
   desc: |
-    Tools for pretty plotting with `{ggplot2}`.
+    Tools for printing functions and pretty plotting with `{ggplot2}`.
   contents:
   - plot.mnirs
   - theme_mnirs
@@ -72,6 +73,7 @@ reference:
   - starts_with("scale")
   - breaks_timespan
   - format_hmmss
+  - print.mnirs_kinetics
 - title: Files
   desc: |
     Example data files included in the package
