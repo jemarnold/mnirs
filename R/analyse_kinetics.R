@@ -130,7 +130,7 @@ analyse_kinetics.peak_slope <- function(
     results <- results[, c("interval", setdiff(names(results), "interval"))]
 
     ## ! implement find_first_extreme
-    ## ! add test_that
+    ## ! rename `t` to `time_channel`
 
     ## return
     structure(

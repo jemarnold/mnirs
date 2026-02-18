@@ -264,29 +264,25 @@ For repeated occlusion testing, the original time information for each occlusion
 ## re-join the returned list of data frames with each occlusion interval labelled as "interval"
 df_list <- extract_intervals(
     df,
-    nirs_channels = hhb,        ## only required to specify nirs_channels when ensemble-averaging
     event_labels = "Occlusion", ## event label used in file, must match string exactly
-    span = c(1, 5),             ## occlusion interval c(start, end) with reference to the event time value
-    group_events = "distinct",  ## return each occlusion event separately
-    zero_time = FALSE           ## preserve original time values at each event
-) |>
-    ## join back into a single grouped data frame, mostly for easier plotting below
+    span = c(1, 5), ## occlusion interval c(start, end) with reference to the event time value
+    group_events = "distinct", ## return each occlusion event separately
+    zero_time = FALSE ## preserve original time values at each event
+)
+
+## join back into a single grouped data frame, mostly for easier plotting below
+df_grouped <- df_list |>
     purrr::list_rbind(names_to = "interval") |>
     ## convert the "interval" column to a categorical factor
     mutate(interval = factor(interval, levels = unique(interval))) |>
     ## add `mnirs` metadata back to the combined data frame, for plotting
     create_mnirs_data(
-        attributes(df)[c(
-            "nirs_channels",
-            "time_channel",
-            "event_channel",
-            "sample_rate"
-        )]
+        attributes(df_list[[1L]])[c("nirs_channels", "time_channel")]
     )
 
 ## visualise facet plot with all occlusion intervals for error checking
 ## the steepest facets will be the first occlusions from the two trials
-plot(df_list) +
+plot(df_grouped) +
     theme(
         strip.text = element_blank(),
         strip.background = element_blank(),
@@ -333,31 +329,40 @@ For processing deoxyhaeme, we will specify that the peak slope during occlusion 
 A window with fewer samples will tend to return steeper slope values, which may or may not be relevant to our interpretations. e.g., as an edge-case (literally at the edges of the data) in a noisy data set there may be two samples with an extreme local slope between them. We usually would want to ignore this outlier slope value.
 
 
-
 ```{r}
 #| label: find peak slopes
 
 ## iteratively find peak local slopes within each occlusion interval
 ## return summary values for each factor level of "interval" grouping column
-slopes_df <- df_list |>
-    reframe(
-        .by = interval,
-        {
-            slope_params <- peak_slope(
-                x = hhb, ## response variable: deoxyhaeme
-                t = time, ## predictor variable: time in seconds
-                span = 3, ## steepest 3 sec slope
-                align = "left", ## forward-looking from index sample
-                direction = "positive", ## upward slope for hhb
-                partial = FALSE ## allow only complete 3-sec segments, no NAs
-            )
-            ## return time value (start time of 3-sec period) and slope value (μM/sec)
-            data.frame(
-                time = slope_params$t,
-                slope = slope_params$slope
-            )
-        }
-    ) |>
+# slopes_df <- df_list |>
+#     reframe(
+#         .by = interval,
+#         {
+#             slope_params <- peak_slope(
+#                 x = hhb, ## response variable: deoxyhaeme
+#                 t = time, ## predictor variable: time in seconds
+#                 span = 3, ## steepest 3 sec slope
+#                 align = "left", ## forward-looking from index sample
+#                 direction = "positive", ## upward slope for hhb
+#                 partial = FALSE ## allow only complete 3-sec segments, no NAs
+#             )
+#             ## return time value (start time of 3-sec period) and slope value (μM/sec)
+#             data.frame(
+#                 time = slope_params$t,
+#                 slope = slope_params$slope
+#             )
+#         }
+#     ) |>
+slopes_df <- analyse_kinetics(
+    df_list,
+    nirs_channel = hhb,
+    time_channel = time,
+    method = "peak_slope",
+    span = 3,
+    align = "left",
+    direction = "positive",
+    partial = FALSE,
+)$results |> 
     mutate(
         ## manual factor by occlusions in each trial
         trial = factor(if_else(row_number() %in% seq_len(n_occlusions), 1L, 2L))
@@ -365,7 +370,7 @@ slopes_df <- df_list |>
     mutate(
         ## recalculate time as starting from zero for each trial
         .by = trial,
-        time = time - time[1L],
+        time = t - t[1L],
     ) |>
     select(trial, time, slope)
 
