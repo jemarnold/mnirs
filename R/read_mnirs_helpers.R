@@ -11,11 +11,38 @@ read_file <- function(file_path) {
 
     ## import data_raw from either excel or csv
     if (grepl("\\.csv$", file_path, ignore.case = TRUE)) {
+        # data_raw <- as.data.frame(
+        #     data.table::fread(
+        #         file_path,
+        #         header = FALSE,
+        #         fill = Inf,
+        #         colClasses = "character"
+        #     )
+        # )
+
+        lines <- readLines(file_path, warn = FALSE)
+        nrows <- length(lines)
+
+        ## detect separator: comma vs tab
+        sep <- if (any(grepl("\t", lines[seq_len(min(10L, nrows))]))) {
+            "\t"
+        } else {
+            ","
+        }
+
+        ## find the max number of separators across all lines
+        n_seps <- max(lengths(gregexpr(sep, lines, fixed = TRUE)))
+
+        ## pad the first line so fread infers the correct column count
+        pad <- paste(rep("", n_seps), collapse = sep)
+        lines <- c(pad, lines)
+
         data_raw <- as.data.frame(
             data.table::fread(
-                file_path,
+                text = lines,
                 header = FALSE,
-                colClasses = "character"
+                fill = Inf,
+                colClasses = "character",
             )
         )
         

@@ -40,7 +40,7 @@ print.mnirs_kinetics <- function(x, ...) {
             display <- rbind(results[top_idx, ], results[bottom_idx, ])
 
             ## format data frame with row numbers
-            output <- capture.output(print(display, row.names = FALSE))
+            output <- utils::capture.output(print(display, row.names = FALSE))
 
             ## insert row numbers and spacer
             header <- output[1L]
