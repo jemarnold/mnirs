@@ -352,6 +352,7 @@ test_that("resample_mnirs works on Moxy", {
         file_path = file_path,
         nirs_channels = c(smo2 = "SmO2 Live(2)"),
         time_channel = c(time = "hh:mm:ss"),
+        keep_all = FALSE,
         verbose = FALSE
     )[1:15, ]
 

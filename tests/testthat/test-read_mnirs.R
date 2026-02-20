@@ -138,6 +138,12 @@ test_that("detect_mnirs_device works on example files", {
             detect_mnirs_device(),
         "Artinis"
     )
+
+    expect_equal(
+        read_file(example_mnirs("vo2master")) |>
+            detect_mnirs_device(),
+        "VO2master-Moxy"
+    )
 })
 
 test_that("detect_mnirs_device() returns NULL when no match", {
@@ -148,6 +154,203 @@ test_that("detect_mnirs_device() returns NULL when no match", {
 
     expect_null(detect_mnirs_device(data))
 })
+
+test_that("detect_mnirs_device() respects frac_row parameter", {
+    ## device signature in row 5 of 10 rows — within top 33%
+    data <- data.frame(
+        V1 = c(rep("x", 2), "OxySoft", rep("y", 7)),
+        V2 = rep("z", 10),
+        stringsAsFactors = FALSE
+    )
+
+    expect_equal(detect_mnirs_device(data, frac_row = 0.333), "Artinis")
+
+    ## device signature in row 3 of 10 — outside top 10%
+    expect_null(detect_mnirs_device(data, frac_row = 0.1))
+})
+
+
+## detect_device_channels() ============================================
+test_that("detect_device_channels() returns user channels when provided", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, c(smo2 = "SmO2 Live"))
+    expect_equal(result$time_channel, c(time = "hh:mm:ss"))
+})
+
+test_that("detect_device_channels() returns user channels even with NULL device", {
+    result <- detect_device_channels(
+        nirs_device = NULL,
+        nirs_channels = "O2Hb",
+        time_channel = "Time",
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, "O2Hb")
+    expect_equal(result$time_channel, "Time")
+})
+
+test_that("detect_device_channels() detects known channels for device", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = NULL,
+        time_channel = NULL,
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, device_channels$Moxy$nirs_channels)
+    expect_equal(result$time_channel, device_channels$Moxy$time_channel)
+})
+
+test_that("detect_device_channels() user time_channel overrides device default", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = NULL,
+        time_channel = c(time = "custom_time"),
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, device_channels$Moxy$nirs_channels)
+    expect_equal(result$time_channel, c(time = "custom_time"))
+})
+
+test_that("detect_device_channels() errors when device is NULL and no channels", {
+    expect_error(
+        detect_device_channels(
+            nirs_device = NULL,
+            nirs_channels = NULL,
+            verbose = FALSE
+        ),
+        "not detected"
+    )
+})
+
+test_that("detect_device_channels() errors for device with empty known channels", {
+    expect_error(
+        detect_device_channels(
+            nirs_device = "Artinis",
+            nirs_channels = NULL,
+            verbose = FALSE
+        ),
+        "cannot be determined"
+    )
+})
+
+test_that("detect_device_channels() verbose messages for detection", {
+    expect_message(
+        detect_device_channels(
+            nirs_device = "Moxy",
+            nirs_channels = NULL,
+            verbose = TRUE
+        ),
+        "Moxy.*detected"
+    )
+
+    ## no message when user provides channels
+    expect_no_message(
+        detect_device_channels(
+            nirs_device = "Moxy",
+            nirs_channels = c("SmO2 Live"),
+            verbose = TRUE
+        )
+    )
+})
+
+
+## read_mnirs() auto-detection =========================================
+test_that("read_mnirs auto-detects Moxy channels when nirs_channels = NULL", {
+    skip_if(
+        length(device_channels$Moxy$nirs_channels) == 0L,
+        "Moxy device_channels not populated"
+    )
+
+    file_path <- example_mnirs("moxy_ramp")
+
+    expect_message(
+        df <- read_mnirs(
+            file_path = file_path,
+            nirs_channels = NULL,
+            time_channel = NULL,
+            verbose = TRUE
+        ),
+        "Moxy.*detected"
+    ) |>
+        expect_warning("irregular") |>
+        expect_message("Estimated.*sample_rate.*2")
+
+    expect_s3_class(df, "mnirs")
+    expect_equal(attr(df, "nirs_device"), "Moxy")
+    expect_equal(attr(df, "nirs_channels"), device_channels$Moxy$nirs_channels)
+    expect_equal(attr(df, "time_channel"), device_channels$Moxy$time_channel)
+    ## auto-detected channels should keep original names (not renamed)
+    expect_true(all(
+        device_channels$Moxy$nirs_channels %in% names(df)
+    ))
+})
+
+test_that("read_mnirs auto-detects Train.Red channels when nirs_channels = NULL", {
+    skip_if(
+        length(device_channels$Train.Red$nirs_channels) == 0L,
+        "Train.Red device_channels not populated"
+    )
+
+    file_path <- example_mnirs("train.red")
+
+    expect_message(
+        df <- read_mnirs(
+            file_path = file_path,
+            nirs_channels = NULL,
+            time_channel = NULL,
+            verbose = TRUE
+        ),
+        "Train.Red.*detected"
+    ) |>
+        expect_warning("irregular") |>
+        expect_message("Estimated.*sample_rate.*10")
+
+    expect_s3_class(df, "mnirs")
+    expect_equal(attr(df, "nirs_device"), "Train.Red")
+    expect_equal(attr(df, "nirs_channels"), device_channels$Train.Red$nirs_channels)
+    expect_equal(attr(df, "time_channel"), device_channels$Train.Red$time_channel)
+    expect_true(all(
+        device_channels$Train.Red$nirs_channels %in% names(df)
+    ))
+})
+
+test_that("read_mnirs errors for Artinis with nirs_channels = NULL", {
+    file_path <- example_mnirs("artinis_intervals")
+
+    expect_error(
+        read_mnirs(
+            file_path = file_path,
+            nirs_channels = NULL,
+            verbose = FALSE
+        ),
+        "cannot be determined"
+    )
+})
+
+test_that("read_mnirs keep_all = TRUE returns all columns by default", {
+    file_path <- example_mnirs("moxy_ramp")
+
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        verbose = FALSE
+    )
+
+    ## default keep_all = TRUE returns more columns than just smo2 + time
+    expect_gt(ncol(df), 2)
+    expect_true("smo2" %in% names(df))
+    expect_true("time" %in% names(df))
+})
+
 
 
 ## read_data_table() ===================================================
@@ -197,32 +400,6 @@ test_that("read_data_table() works with event channel", {
 
     expect_equal(names(result$data_table), c("O2Hb", "Time", "Event"))
     expect_equal(result$data_table$Event, "Start")
-})
-
-test_that("read_data_table() searches specified number of rows", {
-    data <- data.frame(
-        V1 = c(rep("filler", 123), "O2Hb", "10"),
-        V2 = c(rep("filler", 123), "Time", "0.1"),
-        stringsAsFactors = FALSE
-    )
-
-    expect_error(
-        read_data_table(data, "O2Hb", "Time", rows = 122L),
-        "Channel names not detected"
-    )
-
-    data <- data.frame(
-        V1 = c(rep("filler", 123), "O2Hb", rep("10", 10)),
-        V2 = c(rep("filler", 123), "Time", rep("0.1", 10)),
-        stringsAsFactors = FALSE
-    )
-
-    expect_silent(result <- read_data_table(data, "O2Hb", "Time"))
-    expect_equal(nrow(result$data_table), 10)
-    expect_equal(ncol(result$data_table), 2)
-
-    expect_equal(nrow(result$file_header), 124)
-    expect_equal(ncol(result$file_header), 2)
 })
 
 test_that("read_data_table() errors when channels not found", {
@@ -588,6 +765,7 @@ test_that("select_rename_data() handles duplicate data columns", {
         data,
         nirs_channels = c(oxy1 = "O2Hb", oxy2 = "O2Hb"),
         time_channel = "Time",
+        keep_all = FALSE,
         verbose = FALSE
     )
 
@@ -617,7 +795,7 @@ test_that("select_rename_data() keeps all columns with keep_all", {
     ))
 })
 
-test_that("select_rename_data() drops extra columns by default", {
+test_that("select_rename_data() drops extra columns with keep_all = FALSE", {
     data <- data.frame(
         O2Hb = c("10"),
         HHb = c("5"),
@@ -978,6 +1156,7 @@ test_that("parse_sample_rate handles Artinis device", {
         nirs_channels = c(HHb = 2, O2Hb = 3),
         time_channel = c(sample = 1),
         event_channel = NULL,
+        keep_all = FALSE,
         verbose = FALSE
     ) |>
         dplyr::select(-time)
@@ -1223,9 +1402,8 @@ test_that("read_mnirs moxy invalid channel names", {
             time_channel = NULL,
             verbose = TRUE
         ),
-        "Detected.*time_channel"
+        "Estimated.*sample_rate.*2"
     ) |>
-        expect_message("Estimated.*sample_rate.*2") |>
         expect_warning("irregular")
 
     expect_equal(attr(df, "time_channel"), "hh:mm:ss")
@@ -1352,9 +1530,8 @@ test_that("read_mnirs train.red invalid channel names", {
             time_channel = NULL,
             verbose = TRUE
         ),
-        "Detected.*time_channel"
+        "Estimated.*sample_rate.*10"
     ) |>
-        expect_message("Estimated.*sample_rate.*10") |>
         expect_warning("irregular")
 
     expect_equal(attr(df, "time_channel"), "Timestamp (seconds passed)")

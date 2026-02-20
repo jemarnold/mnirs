@@ -9,7 +9,7 @@ select_rename_data(
   nirs_channels,
   time_channel,
   event_channel = NULL,
-  keep_all = FALSE,
+  keep_all = TRUE,
   verbose = TRUE
 )
 }

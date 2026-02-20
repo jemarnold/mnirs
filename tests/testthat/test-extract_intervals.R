@@ -1120,6 +1120,7 @@ test_that("extract_intervals works on Moxy data", {
     data <- read_mnirs(
         example_mnirs("moxy_ramp"),
         nirs_channels = c(smo2_left = "SmO2 Live", smo2_right = "SmO2 Live(2)"),
+        keep_all = FALSE,
         verbose = FALSE
     )
 
@@ -1157,6 +1158,7 @@ test_that("extract_intervals works on train.red data", {
             smo2_right = "SmO2 unfiltered"
         ),
         time_channel = c(time = "Timestamp (seconds passed)"),
+        keep_all = FALSE,
         verbose = FALSE
     ) |>
         resample_mnirs(verbose = FALSE)

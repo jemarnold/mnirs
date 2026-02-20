@@ -11,15 +11,6 @@ read_file <- function(file_path) {
 
     ## import data_raw from either excel or csv
     if (grepl("\\.csv$", file_path, ignore.case = TRUE)) {
-        # data_raw <- as.data.frame(
-        #     data.table::fread(
-        #         file_path,
-        #         header = FALSE,
-        #         fill = Inf,
-        #         colClasses = "character"
-        #     )
-        # )
-
         lines <- readLines(file_path, warn = FALSE)
         nrows <- length(lines)
 
@@ -30,12 +21,15 @@ read_file <- function(file_path) {
             ","
         }
 
-        ## find the max number of separators across all lines
-        n_seps <- max(lengths(gregexpr(sep, lines, fixed = TRUE)))
+        ## find the max number of separators from the end of the data file
+        n_seps <- max(lengths(gregexpr(
+            sep,
+            lines[seq(to = nrows, by = 1L, len = min(50, nrows))],
+            fixed = TRUE
+        )))
 
         ## pad the first line so fread infers the correct column count
-        pad <- paste(rep("", n_seps), collapse = sep)
-        lines <- c(pad, lines)
+        lines <- c(strrep(sep, n_seps), lines)
 
         data_raw <- as.data.frame(
             data.table::fread(
@@ -81,16 +75,117 @@ read_file <- function(file_path) {
 }
 
 
+#' Known channel names for supported mNIRS devices
+#' @keywords internal
+device_channels <- list(
+    Artinis = list(
+        time_channel = c(),
+        nirs_channels = c()
+    ),
+    Train.Red = list(
+        time_channel = c("Timestamp (seconds passed)"),
+        nirs_channels = c("SmO2 unfiltered")
+    ),
+    Moxy = list(
+        time_channel = c("hh:mm:ss"),
+        nirs_channels = c("SmO2 Live")
+    ),
+    `VO2master-Moxy` = list(
+        time_channel = c("Time[s]"),
+        nirs_channels = c("SmO2[%]")
+    )
+)
+
+
+#' Detect mnirs device from file metadata
+#' @keywords internal
+detect_mnirs_device <- function(data, frac_row = 0.333) {
+    device_patterns <- lapply(
+        list(
+            Artinis = "OxySoft",
+            Train.Red = c(device_channels$Train.Red), ## "Train.Red", 
+            Moxy = c(device_channels$Moxy), ## "LUT Part Number", 
+            `VO2master-Moxy` = device_channels$`VO2master-Moxy`
+        ), unlist, use.names = FALSE
+    )
+
+    ## only search for metadata in the top fraction of rows
+    search_rows <- data[seq_len(floor(nrow(data) * frac_row)), ]
+    search_str <- paste(unlist(search_rows, use.names = FALSE), collapse = "\n")
+
+    ## check each device: any pattern match in the collapsed string
+    matches <- vapply(device_patterns, \(.patterns) {
+        all(vapply(.patterns, grepl, logical(1), x = search_str, fixed = TRUE))
+    }, logical(1))
+
+    if (any(matches)) {
+        return(names(device_patterns)[which.max(matches)])
+    }
+
+    return(NULL)
+}
+
+
+#' Detect known channels for a device
+#' @keywords internal
+detect_device_channels <- function(
+    nirs_device,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    verbose = TRUE
+) {
+    ## return both if specified explicitly
+    if (!is.null(nirs_channels) && !is.null(time_channel)) {
+        return(list(
+            time_channel = time_channel,
+            nirs_channels = nirs_channels
+        ))
+    }
+
+    ## NULL channels and unrecognised device returns error
+    if (is.null(nirs_device) && is.null(nirs_channels)) {
+        cli_abort(c(
+            "x" = "mNIRS device file format not detected.",
+            "i" = "Define {.arg nirs_channels} explicitly."
+        ))
+    }
+
+    channel_list <- device_channels[[nirs_device]]
+    ## user-specified channels always take priority
+    channel_list$time_channel <- time_channel %||% channel_list$time_channel
+    channel_list$nirs_channels <- nirs_channels %||% channel_list$nirs_channels
+
+    ## catch for no standard channel names (e.g. Artinis Oxysoft)
+    if (is.null(channel_list) || length(channel_list$nirs_channels) == 0L) {
+        cli_abort(c(
+            "x" = "{.arg nirs_channels} cannot be determined automatically \\
+            for {.val {nirs_device}} file format.",
+            "i" = "Define {.arg nirs_channels} explicitly."
+        ))
+    }
+
+    if (is.null(nirs_channels) && verbose) {
+        cli_inform(c(
+            "!" = "{.val {nirs_device}} file format detected. \\
+            {.arg nirs_channels} set to known channel names.",
+            "i" = "Override by specifying {.arg nirs_channels} explicitly."
+        ))
+    }
+
+    ## use device defaults; user time_channel overrides device default
+    return(channel_list)
+}
+
+
 #' Read data table from raw data
 #' @keywords internal
 read_data_table <- function(
     data,
     nirs_channels,
     time_channel = NULL,
-    event_channel = NULL,
-    rows = 200L
+    event_channel = NULL
 ) {
-    search_df <- data[seq_len(min(rows, nrow(data))), ]
+    search_df <- data[seq_len(nrow(data)), ]
 
     ## detect header row where channels exists
     header_row <- which(apply(search_df, 1L, \(.row_vec) {
@@ -123,28 +218,6 @@ read_data_table <- function(
 }
 
 
-#' Detect mnirs device from file metadata
-#' @keywords internal
-detect_mnirs_device <- function(data) {
-    devices <- list(
-        Artinis = "OxySoft",
-        Train.Red = "Train.Red",
-        Moxy = "LUT Part Number",
-        Moxy = "SmO2 Live"
-    )
-
-    matches <- vapply(devices, \(.pattern) {
-        any(grepl(.pattern, unlist(data), ignore.case = TRUE))
-    }, logical(1))
-
-    if (any(matches)) {
-        return(names(devices)[which.max(matches)])
-    }
-
-    return(NULL)
-}
-
-
 #' Detect time_channel from header row
 #' @keywords internal
 detect_time_channel <- function(
@@ -153,6 +226,7 @@ detect_time_channel <- function(
     nirs_device = NULL,
     verbose = TRUE
 ) {
+    ## TODO there is redundancy with `detect_time_channel()` and `detect_mnirs_device()`
     if (!is.null(time_channel)) {
         return(time_channel)
     }
@@ -249,7 +323,7 @@ select_rename_data <- function(
     nirs_channels,
     time_channel,
     event_channel = NULL,
-    keep_all = FALSE,
+    keep_all = TRUE,
     verbose = TRUE
 ) {
     ## if channels not named, names from object
@@ -288,7 +362,11 @@ select_rename_data <- function(
     }
 
     ## keep all columns or only specified channels
-    selected_cols <- if (keep_all) data_names else channel_vec
+    selected_cols <- if (keep_all) {
+        c(channel_vec, setdiff(data_names, channel_vec))
+    } else {
+        channel_vec
+    }
 
     ## rename columns from specified channel names
     result <- setNames(data, data_names)

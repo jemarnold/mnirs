@@ -6,8 +6,10 @@
 #'
 #' @param file_path The file path including extension (either *`".xlsx"`*,
 #'   *`".xls"`*, or *`".csv"`*) to import.
-#' @param nirs_channels A character vector indicating the mNIRS column names
-#'   to import from the file. Must match column names in the data file exactly.
+#' @param nirs_channels An *optional* character vector indicating the mNIRS
+#'   column names to import from the file. Must match column names in the data
+#'   file exactly. If left blank (`NULL`, the *default*), the function will
+#'   attempt to detect the device and use known channel names automatically.
 #'   A named character vector can be used to rename columns in the form:
 #'   `c(new_name = "original_name")` (see *Details*).
 #' @param time_channel An *optional* character string indicating the time or
@@ -29,12 +31,18 @@
 #' @param zero_time A logical to re-calculate `time_channel` from zero or
 #'   preserve the original `time_channel` values (`FALSE`, the *default*).
 #' @param keep_all A logical to include all columns detected from the file
-#'   or only include the explicitly specified data columns (`FALSE`, the
-#'   *default*).
+#'   (`TRUE`, the *default*) or only include the explicitly specified data
+#'   columns.
 #' @param verbose A logical to display (the *default*) or silence (`FALSE`)
 #'   warnings and information messages used for troubleshooting.
 #'
 #' @details
+#' If `nirs_channels` is not specified, `read_mnirs()` will attempt to detect
+#'   the mNIRS device from the file contents and use known channel names for
+#'   that device to locate the data automatically. If the device cannot be
+#'   detected, an error will be returned prompting the user to specify 
+#'   `nirs_channels` explicitly.
+#'
 #' Channel names are matched to a single row, representing the header row for
 #'   data columns anywhere in the data file, not necessarily the top row of
 #'   the file.
@@ -48,7 +56,7 @@
 #'   confirm that the correct columns have been assigned to each channel as
 #'   intended.
 #'
-#' `nirs_channels` must be defined explicitly and match column names exactly.
+#' `nirs_channels` should match column names exactly when specified explicitly.
 #'   If `time_channel` is left blank, the function will attempt to identify a
 #'   time column automatically based on column names or values containing time
 #'   (`POSIXct`) data or time-formatted character strings (e.g. *"hh:mm:ss"*).
@@ -112,13 +120,13 @@
 #' @export
 read_mnirs <- function(
     file_path,
-    nirs_channels,
+    nirs_channels = NULL,
     time_channel = NULL,
     event_channel = NULL,
     sample_rate = NULL,
     add_timestamp = FALSE,
     zero_time = FALSE,
-    keep_all = FALSE,
+    keep_all = TRUE,
     verbose = TRUE
 ) {
     ## global options overrides implicit but not explicit `verbose`
@@ -129,20 +137,29 @@ read_mnirs <- function(
     ## import data_raw from either excel or csv
     df <- read_file(file_path)
 
+    ## detect mNIRS device from raw data. Returns NULL if not found
+    nirs_device <- detect_mnirs_device(df, frac_row = 0.333)
+
+    ## resolve channels: use user input if provided, otherwise detect from
+    ## known device channel names. Errors if neither available.
+    channels <- detect_device_channels(
+        nirs_device,
+        nirs_channels,
+        time_channel,
+        verbose
+    )
+    nirs_channels <- channels$nirs_channels
+    time_channel <- channels$time_channel
+
     ## extract the data_table, and name by header row
     table_list <- read_data_table(
         df,
         nirs_channels,
         time_channel,
-        event_channel,
-        rows = 200L
+        event_channel
     )
     df <- table_list$data_table
     file_header <- table_list$file_header
-
-    ## detect mNIRS device. Returns NULL if not found
-    ## TODO expand detection algorithms for other devices
-    nirs_device <- detect_mnirs_device(file_header)
 
     ## attempt to detect `time_channel` automatically
     time_channel <- detect_time_channel(df, time_channel, nirs_device, verbose)
@@ -215,6 +232,8 @@ read_mnirs <- function(
 #'   - time_channel
 #'   - event_channel
 #'   - sample_rate
+#'   - event_times 
+#'   - interval_span 
 #'
 #' @details
 #' Typically will only be called internally, but can be used to inject *{mnirs}*

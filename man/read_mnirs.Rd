@@ -6,13 +6,13 @@
 \usage{
 read_mnirs(
   file_path,
-  nirs_channels,
+  nirs_channels = NULL,
   time_channel = NULL,
   event_channel = NULL,
   sample_rate = NULL,
   add_timestamp = FALSE,
   zero_time = FALSE,
-  keep_all = FALSE,
+  keep_all = TRUE,
   verbose = TRUE
 )
 }
@@ -20,8 +20,10 @@ read_mnirs(
 \item{file_path}{The file path including extension (either \emph{\code{".xlsx"}},
 \emph{\code{".xls"}}, or \emph{\code{".csv"}}) to import.}
 
-\item{nirs_channels}{A character vector indicating the mNIRS column names
-to import from the file. Must match column names in the data file exactly.
+\item{nirs_channels}{An \emph{optional} character vector indicating the mNIRS
+column names to import from the file. Must match column names in the data
+file exactly. If left blank (\code{NULL}, the \emph{default}), the function will
+attempt to detect the device and use known channel names automatically.
 A named character vector can be used to rename columns in the form:
 \code{c(new_name = "original_name")} (see \emph{Details}).}
 
@@ -49,8 +51,8 @@ are in timestamp format (see \emph{Details}).}
 preserve the original \code{time_channel} values (\code{FALSE}, the \emph{default}).}
 
 \item{keep_all}{A logical to include all columns detected from the file
-or only include the explicitly specified data columns (\code{FALSE}, the
-\emph{default}).}
+(\code{TRUE}, the \emph{default}) or only include the explicitly specified data
+columns.}
 
 \item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
 warnings and information messages used for troubleshooting.}
@@ -65,6 +67,12 @@ return a data frame of class \emph{"mnirs"} with recorded time series data
 and metadata.
 }
 \details{
+If \code{nirs_channels} is not specified, \code{read_mnirs()} will attempt to detect
+the mNIRS device from the file contents and use known channel names for
+that device to locate the data automatically. If the device cannot be
+detected, an error will be returned prompting the user to specify
+\code{nirs_channels} explicitly.
+
 Channel names are matched to a single row, representing the header row for
 data columns anywhere in the data file, not necessarily the top row of
 the file.
@@ -78,7 +86,7 @@ attempt to match them in the order in which they appear. You may want to
 confirm that the correct columns have been assigned to each channel as
 intended.
 
-\code{nirs_channels} must be defined explicitly and match column names exactly.
+\code{nirs_channels} should match column names exactly when specified explicitly.
 If \code{time_channel} is left blank, the function will attempt to identify a
 time column automatically based on column names or values containing time
 (\code{POSIXct}) data or time-formatted character strings (e.g. \emph{"hh:mm:ss"}).
