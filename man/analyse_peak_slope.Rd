@@ -54,8 +54,9 @@ requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). 
 unique per-channel arguments to override global default arguments (see
 \emph{Details}).}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
 }

@@ -32,8 +32,9 @@ relative scaling within, but not between groups.}
 \item{range}{A numeric vector in the form \code{c(min, max)}, indicating the
 range of output values to which data channels will be re-scaled.}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata

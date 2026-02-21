@@ -136,6 +136,9 @@ attributes(data_table)[-2]
 #> 
 #> $sample_rate
 #> [1] 2
+#> 
+#> $start_timestamp
+#> [1] "2026-02-20 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values

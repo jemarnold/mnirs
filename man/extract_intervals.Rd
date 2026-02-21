@@ -37,9 +37,8 @@ lap channel name. Required if \code{event_labels} are specified. Must
 match column names in \code{data} exactly. Retrieved from metadata if not
 defined explicitly.}
 
-\item{sample_rate}{An \emph{optional} numeric value for the exported sample rate
-in Hz. If not defined explicitly, will be estimated from the data (see
-\emph{Details}).}
+\item{sample_rate}{An \emph{optional} numeric sample rate (Hz). If left blank
+(\code{NULL}), the sample rate is estimated from \code{time_channel} (see \emph{Details}).}
 
 \item{event_times}{A numeric vector of \code{time_channel} values indicating
 event starts (see \emph{Details}).}
@@ -67,11 +66,12 @@ data frame.}
 intervals within each group and return a data frame for each group.}
 }}
 
-\item{zero_time}{A logical to re-calculate \code{time_channel} from zero or
-preserve the original \code{time_channel} values (\code{FALSE}, the \emph{default}).}
+\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, will re-zero
+\code{time_channel} to start from \code{0}.}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A named \code{list()} of \link[tibble:tibble-package]{tibbles} of class

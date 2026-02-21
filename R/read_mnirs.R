@@ -1,106 +1,98 @@
 #' Read *{mnirs}* data from file
 #'
-#' Read files exported from most commercially available mNIRS devices and
-#' return a data frame of class *"mnirs"* with recorded time series data
-#' and metadata.
+#' Import time-series data exported from common muscle NIRS (mNIRS) devices and
+#' return a tibble of class `"mnirs"` with the selected signal channels and
+#' metadata.
 #'
-#' @param file_path The file path including extension (either *`".xlsx"`*,
-#'   *`".xls"`*, or *`".csv"`*) to import.
-#' @param nirs_channels An *optional* character vector indicating the mNIRS
-#'   column names to import from the file. Must match column names in the data
-#'   file exactly. If left blank (`NULL`, the *default*), the function will
-#'   attempt to detect the device and use known channel names automatically.
-#'   A named character vector can be used to rename columns in the form:
-#'   `c(new_name = "original_name")` (see *Details*).
-#' @param time_channel An *optional* character string indicating the time or
-#'   sample column name to import from the file. Must match column names in the
-#'   data file exactly. A named character vector can be used to rename columns
-#'   in the form: `c(new_name = "original_name")`. Time will be converted to
-#'   *numeric* format (see *Details*).
-#' @param event_channel An *optional* character string indicating the event or
-#'   lap column name to import from the file. Must match column names in the
-#'   data file exactly. A named character vector can be used to rename columns
-#'   in the form: `c(new_name = "original_name")` (see *Details*).
-#' @param sample_rate An *optional* numeric value for the exported sample rate
-#'   in Hz. If not defined explicitly, will be estimated from the data (see
-#'   *Details*).
-#' @param add_timestamp `<under development>` A logical to add a *"timestamp"*
-#'   column with date-time values of class *POSIXct*, if present in the
-#'   data file. Currently only functions if the existing `time_channel` data
-#'   are in timestamp format (see *Details*).
-#' @param zero_time A logical to re-calculate `time_channel` from zero or
-#'   preserve the original `time_channel` values (`FALSE`, the *default*).
-#' @param keep_all A logical to include all columns detected from the file
-#'   (`TRUE`, the *default*) or only include the explicitly specified data
-#'   columns.
-#' @param verbose A logical to display (the *default*) or silence (`FALSE`)
-#'   warnings and information messages used for troubleshooting.
+#' @param file_path Path of the data file to import. Supported file extensions 
+#'   are `".xlsx"`, `".xls"`, and `".csv"`.
+#' 
+#' @param nirs_channels A character vector of one or more column names 
+#'   containing mNIRS signals to import. Names must match the file header 
+#'   exactly.
+#'
+#'   - If `NULL` (default), `read_mnirs()` attempts to detect the device from
+#'     the file contents and use a known `nirs_channel` name.
+#'   - A *named* character vector can be used to rename columns on import, in
+#'     the form `c(new_name = "original_name")`.
+#' 
+#' @param time_channel A character scalar giving the name of the time 
+#'   (or sample) column to import. The name must match the file header exactly.
+#'
+#'   - If `NULL` (default), `read_mnirs()` attempts to identify a time-like
+#'     column automatically (by known device defaults and/or time-formatted
+#'     values).
+#'   - A *named* character vector can be used to rename the column on import,
+#'     in the form `c(time = "original_name")`.
+#' 
+#' @param event_channel An *optional* character scalar giving the name of an 
+#'   event/marker column to import. Names must match the file header exactly. 
+#'   A named character vector can be used to rename the column on import in 
+#'   the form `c(event = "original_name")`.
+#' 
+#' @param sample_rate An *optional* numeric sample rate (Hz). If left blank
+#'   (`NULL`), the sample rate is estimated from `time_channel` (see *Details*).
+#' 
+#' @param add_timestamp A logical. Default is `FALSE`. If `TRUE` and if the 
+#'   source data contain an absolute date-time (POSIXct) time value, will add 
+#'   a `"timestamp"` column in addition to the specified `time_channel` as a 
+#'   numeric time column.
+#' 
+#' @param zero_time Logical. Default is `FALSE`. If `TRUE`, will re-zero 
+#'   `time_channel` to start from `0`.
+#' 
+#' @param keep_all Logical. Default is `TRUE`. Will keep all columns found in
+#'   the file data table. If `FALSE`, will keep only the explicitly specified
+#'   `nirs_channels`, `time_channel`, and `event_channel`.
+#' 
+#' @param verbose Logical. Default is `TRUE`. Will display or silence (if 
+#'   `FALSE`) warnings and information messages helpful for troubleshooting. A 
+#'   global default can be set via `options(mnirs.verbose = FALSE)`.
 #'
 #' @details
-#' If `nirs_channels` is not specified, `read_mnirs()` will attempt to detect
-#'   the mNIRS device from the file contents and use known channel names for
-#'   that device to locate the data automatically. If the device cannot be
-#'   detected, an error will be returned prompting the user to specify
-#'   `nirs_channels` explicitly.
+#'## Header detection
+#' `read_mnirs()` searches the file for a header row containing the requested
+#' channel names. The header row does not need to be the first row in the file.
+#' 
+#' - If duplicate column names exist, columns are matched in the order they
+#'   appear and renamed with unique strings.
+#' - Columns without a header name in the source file will be renamed to 
+#'   `col_*`, where `*` is the numeric column number in which they appear in
+#'   the file (e.g. `col_6`). This applies to *Artinis Oxysoft* event label
+#'   columns, which do not have a column header and must be identified manually.
+#' 
+#' ## Renaming channels
+#' A named character vector can be specified to rename `nirs_channels`, 
+#' `time_channel`, and `event_channel`, in the form 
+#' `c(new_name = "original_name")`. The `"original_name"` must match the 
+#' contents of the file data table header row exactly.
+#' 
+#' ## Time parsing
+#' `time_channel` will be converted to numeric for analysis.
 #'
-#' Channel names are matched to a single row, representing the header row for
-#'   data columns anywhere in the data file, not necessarily the top row of
-#'   the file.
-#'
-#' Channels can be renamed in the format `c(new_name = "original_name")`,
-#'   where `*"original_name"*` should exactly match the column names found in
-#'   the file.
-#'
-#' If there are duplicate column names in the file, the channel names will
-#'   attempt to match them in the order in which they appear. You may want to
-#'   confirm that the correct columns have been assigned to each channel as
-#'   intended.
-#'
-#' `nirs_channels` should match column names exactly when specified explicitly.
-#'   If `time_channel` is left blank, the function will attempt to identify a
-#'   time column automatically based on column names or values containing time
-#'   (`POSIXct`) data or time-formatted character strings (e.g. *"hh:mm:ss"*).
-#'
-#' `time_channel` will typically contain time values in seconds. However,
-#'   some NIRS devices (for example, *Artinis* devices recorded with *Oxysoft*)
-#'   export the sample index (i.e. integer row numbers). If *Oxysoft* export
-#'   sample rate is detected in the file metadata, a `"time"` column will be
-#'   added converting the sample indices to time values in seconds.
-#'
-#' When the `time_channel` is provided in date-time (*POSIXct*) format, it
-#'   will be converted to numeric values and re-calculated from zero,
-#'   even when `zero_time = FALSE`.
-#'
-#' With `add_timestamp = TRUE`, an additional *"timestamp "* column will be
-#'   added with the original date-time values. This functionality is currently
-#'   `<under development>` to recognise start-time values in the file and
-#'   return absolute unix timestamps if available.
-#'
-#' Setting `zero_time = TRUE` will re-calculate numeric `time_channel` values
-#'   to start from zero.
-#'
-#' If `time_channel` contains irregular sampling (i.e., non-sequential,
-#'   repeated, or unordered values) a warning will be displayed (if
-#'   `verbose = TRUE`) suggesting that the user confirm the file data manually.
-#'
-#' `sample_rate` is required for certain `{mnirs}` functions to work properly
-#'   and can be carried forward in the data frame metadata. If it is not
-#'   defined explicitly, it will be estimated from the differences between
-#'   values in the `time_channel`. As above, in certain cases where the
-#'   `time_channel` represents sample indices rather than time values,
-#'   `sample_rate` will be inaccurately estimated to be 1 Hz. In such cases,
-#'   `sample_rate` should be defined explicitly.
-#'
-#' Columns and rows which contain entirely missing data (`NA`) are omitted.
-#'
-#' `verbose = TRUE` will display warnings and information messages which can be
-#'   useful for troubleshooting. Errors causing abort messages will always be
-#'   displayed. Messages can be silenced globally with
-#'   `options(mnirs.verbose = FALSE)`.
+#' - If `time_channel` is a date-time (POSIXct) format, it will be converted 
+#'   to numeric and re-based to start from 0, regardless of `zero_time`.
+#' - Some devices export a sample index rather than time values. In those 
+#'   cases, if an export `sample_rate` is detected in the file metadata (e.g. 
+#'   *Artinis Oxysoft* exports), `read_mnirs()` will create or overwrite a 
+#'   `"time"` column in seconds derived from the sample index and the detected
+#'   `sample_rate`.
+#' 
+#' ## Sample rate
+#' If `sample_rate` is not specified, it is estimated from differences in 
+#' `time_channel`. If `time_channel` is actually a sample index, as described 
+#' above, this may erroneously be estimated at 1 Hz. `sample_rate` should be
+#' specified explicitly in this case.
+#' 
+#' ## Data cleaning
+#' Entirely empty rows and columns are removed. Invalid values (e.g. 
+#' `c(NaN, Inf)`) are standardized to `NA`. A warning will be displayed when
+#' irregular sampling is detected (e.g. non-monotonic, repeated, or unequal 
+#' time values), if `verbose = TRUE`.
 #'
 #' @returns
-#' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
-#'   available with `attributes()`.
+#' A [tibble][tibble::tibble-package] of class `"mnirs"`. Metadata are stored
+#'   as attributes and can be accessed with `attributes(data)`.
 #'
 #' @examples
 #' ## call an example mNIRS data file
@@ -239,9 +231,11 @@ read_mnirs <- function(
 
 #' Create an *{mnirs}* data frame with metadata
 #'
-#' Manually add class *"mnirs"* and metadata to an existing data frame.
+#' Manually add class `"mnirs"` and metadata to an existing data frame.
 #'
-#' @param data A data frame with existing metadata (`attributes(data)`).
+#' @param data A data frame with existing metadata (accessed with 
+#'   `attributes(data)`).
+#' 
 #' @param ... Additional arguments with metadata to add to the data frame.
 #'   Can be either seperate named arguments or a list of named values.
 #'   - nirs_device
@@ -254,11 +248,12 @@ read_mnirs <- function(
 #'   - interval_span 
 #'
 #' @details
-#' Typically will only be called internally, but can be used to inject *{mnirs}*
-#'   metadata into any data frame.
+#' Typically will only be called internally, but can be used to inject 
+#'   *{mnirs}* metadata into any data frame.
 #'
-#' @returns A [tibble][tibble::tibble-package] of class *"mnirs"* with
-#'   metadata available with `attributes()`.
+#' @returns 
+#' A [tibble][tibble::tibble-package] of class `"mnirs"`. Metadata are stored
+#'   as attributes and can be accessed with `attributes(data)`.
 #'
 #' @examples
 #' df <- data.frame(

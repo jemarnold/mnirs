@@ -14,8 +14,9 @@ or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{fitted}{A numeric vector of the predicted values.}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A named list with \code{n_obs}, \code{r2}, \code{adj_r2}, and \code{rmse}.

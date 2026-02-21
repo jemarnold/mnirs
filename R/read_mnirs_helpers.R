@@ -102,7 +102,8 @@ device_channels <- list(
 detect_mnirs_device <- function(data, frac_row = 0.333) {
     device_patterns <- lapply(
         list(
-            Artinis = c("Oxysoft", "OxySoft"),
+            Artinis = c("Oxysoft"),
+            Artinis = c("OxySoft"),
             Train.Red = c(device_channels$Train.Red), ## "Train.Red", 
             Moxy = c(device_channels$Moxy), ## "LUT Part Number", 
             `VO2master-Moxy` = device_channels$`VO2master-Moxy`
@@ -115,11 +116,11 @@ detect_mnirs_device <- function(data, frac_row = 0.333) {
 
     ## check each device: any pattern match in the collapsed string
     matches <- vapply(device_patterns, \(.patterns) {
-        any(vapply(.patterns, grepl, logical(1), x = search_str, fixed = TRUE))
+        all(vapply(.patterns, grepl, logical(1), x = search_str, fixed = TRUE))
     }, logical(1))
 
     if (any(matches)) {
-        return(names(device_patterns)[which.max(matches)])
+        return(names(device_patterns)[which(matches)[1L]])
     }
 
     return(NULL)
@@ -129,50 +130,50 @@ detect_mnirs_device <- function(data, frac_row = 0.333) {
 #' Detect known channels for a device
 #' @keywords internal
 detect_device_channels <- function(
-    nirs_device,
+    nirs_device = NULL,
     nirs_channels = NULL,
     time_channel = NULL,
     verbose = TRUE
 ) {
-    ## return both if specified explicitly
-    if (!is.null(nirs_channels) && !is.null(time_channel)) {
+    ## user-specified channels always take priority
+    if (!is.null(nirs_channels)) {
         return(list(
             time_channel = time_channel,
             nirs_channels = nirs_channels
         ))
     }
 
-    ## NULL channels and unrecognised device returns error
-    if (is.null(nirs_device) && is.null(nirs_channels)) {
-        cli_abort(c(
-            "x" = "mNIRS device file format not detected.",
-            "i" = "Define {.arg nirs_channels} explicitly."
-        ))
+    abort_msg <- c(
+        "x" = "{.arg nirs_channels} cannot be determined automatically.",
+        "i" = "Define {.arg nirs_channels} explicitly."
+    )
+
+    ## need device detection when is.null(nirs_channel)
+    if (is.null(nirs_device)) {
+        cli_abort(abort_msg)
     }
 
     channel_list <- device_channels[[nirs_device]]
-    ## user-specified channels always take priority
-    channel_list$time_channel <- time_channel %||% channel_list$time_channel
-    channel_list$nirs_channels <- nirs_channels %||% channel_list$nirs_channels
 
-    ## catch for no standard channel names (e.g. Artinis Oxysoft)
-    if (is.null(channel_list) || length(channel_list$nirs_channels) == 0L) {
-        cli_abort(c(
-            "x" = "{.arg nirs_channels} cannot be determined automatically \\
-            for {.val {nirs_device}} file format.",
-            "i" = "Define {.arg nirs_channels} explicitly."
-        ))
+    ## user inputs take priority over device defaults
+    channel_list <- list(
+        time_channel = time_channel %||% channel_list$time_channel,
+        nirs_channels = nirs_channels %||% channel_list$nirs_channels
+    )
+
+    ## error when nirs_channels cannot be resolved
+    if (length(channel_list$nirs_channels) == 0L) {
+        cli_abort(abort_msg)
     }
 
-    if (is.null(nirs_channels) && verbose) {
+    if (verbose) {
         cli_inform(c(
             "!" = "{.val {nirs_device}} file format detected. \\
-            {.arg nirs_channels} set to known channel names.",
+            {.arg nirs_channels} set to {.val {channel_list$nirs_channels}}.",
             "i" = "Override by specifying {.arg nirs_channels} explicitly."
         ))
     }
 
-    ## use device defaults; user time_channel overrides device default
     return(channel_list)
 }
 
@@ -455,7 +456,8 @@ extract_start_timestamp <- function(file_header) {
         "%Y-%m-%d %H:%M:%OS",
         "%Y/%m/%d %H:%M:%OS",
         "%d-%m-%Y %H:%M:%OS",
-        "%d/%m/%Y %H:%M:%OS"
+        "%d/%m/%Y %H:%M:%OS",
+        "%H:%M:%OS"
     )
 
     header_values <- unlist(file_header, use.names = FALSE)
@@ -526,6 +528,8 @@ parse_time_channel <- function(
         ## add_timestamp preserves dttm column or adds
         time_idx <- match(time_channel, col_names)
         data_names <- append(col_names, "timestamp", time_idx)
+        data$timestamp <- NA_real_
+        data <- data[data_names]
 
         ## if neither header start_timestamp or timestamp_vec exist
         ## then return NULL and don't append column
@@ -536,17 +540,16 @@ parse_time_channel <- function(
                 optional = TRUE
             )
             data$timestamp <- start_time + time_vec
-            start_timestamp <- start_timestamp
         } else if (!is.null(timestamp_vec)) {
             data$timestamp <- timestamp_vec
-            ## extract earliest POSIXct value as start_timestamp
-            start_timestamp <- min(timestamp_vec, na.rm = TRUE)
         } else {
             data$timestamp <- NULL
-            start_timestamp <- start_timestamp
         }
+    }
 
-        data <- data[data_names]
+    if (is.null(start_timestamp) && !is.null(timestamp_vec)) {
+        ## extract earliest POSIXct value as start_timestamp
+        start_timestamp <- min(timestamp_vec, na.rm = TRUE)
     }
 
     return(list(data = data, start_timestamp = start_timestamp))
