@@ -40,7 +40,7 @@
 #' If `nirs_channels` is not specified, `read_mnirs()` will attempt to detect
 #'   the mNIRS device from the file contents and use known channel names for
 #'   that device to locate the data automatically. If the device cannot be
-#'   detected, an error will be returned prompting the user to specify 
+#'   detected, an error will be returned prompting the user to specify
 #'   `nirs_channels` explicitly.
 #'
 #' Channel names are matched to a single row, representing the header row for
@@ -161,6 +161,9 @@ read_mnirs <- function(
     df <- table_list$data_table
     file_header <- table_list$file_header
 
+    ## extract start time from file header
+    start_timestamp <- extract_start_timestamp(file_header)
+
     ## attempt to detect `time_channel` automatically
     time_channel <- detect_time_channel(df, time_channel, nirs_device, verbose)
 
@@ -184,7 +187,20 @@ read_mnirs <- function(
     ## convert char decimal "," to "." and convert column types
     df <- convert_type(df, time_channel)
     ## convert POSIXct to numeric and/or recalc time from zero
-    df <- parse_time_channel(df, time_renamed, add_timestamp, zero_time)
+    ## return list(data, start_timestamp) — start_timestamp from time_channel POSIXct
+    time_list <- parse_time_channel(
+        df,
+        time_renamed,
+        start_timestamp,
+        add_timestamp,
+        zero_time
+    )
+    df <- time_list$data
+    ## extract start_timestamp from df if not already found in header
+    if (is.null(start_timestamp)) {
+        start_timestamp <- time_list$start_timestamp
+    }
+
     ## standardise invalid to NA
     df[] <- lapply(df, \(.x) clean_invalid(.x))
 
@@ -213,6 +229,7 @@ read_mnirs <- function(
         time_channel = time_renamed,
         event_channel = event_renamed,
         sample_rate = sample_rate,
+        start_timestamp = start_timestamp,
         verbose = verbose
     )
 
@@ -232,6 +249,7 @@ read_mnirs <- function(
 #'   - time_channel
 #'   - event_channel
 #'   - sample_rate
+#'   - start_timestamp
 #'   - event_times 
 #'   - interval_span 
 #'
@@ -284,6 +302,7 @@ create_mnirs_data <- function(data, ...) {
         time_channel = metadata$time_channel,
         event_channel = metadata$event_channel,
         sample_rate = metadata$sample_rate,
+        start_timestamp = metadata$start_timestamp,
         event_times = metadata$event_times,
         interval_span = metadata$interval_span,
     )

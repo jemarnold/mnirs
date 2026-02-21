@@ -994,7 +994,7 @@ test_that("parse_time_channel() parses numeric time from zero", {
 
     result <- parse_time_channel(data, "time", zero_time = TRUE)
 
-    expect_equal(result$time, c(0, 10, 20))
+    expect_equal(result$data$time, c(0, 10, 20))
 })
 
 test_that("parse_time_channel() parses fractional unix time", {
@@ -1010,8 +1010,8 @@ test_that("parse_time_channel() parses fractional unix time", {
     )
 
     result <- parse_time_channel(data, "time")
-    expect_setequal(result$time / 60 / 60, hrs_vec)
-    expect_type(result$time, "double")
+    expect_setequal(result$data$time / 60 / 60, hrs_vec)
+    expect_type(result$data$time, "double")
 })
 
 test_that("parse_time_channel() parses ISO 8601 timestamps", {
@@ -1023,8 +1023,8 @@ test_that("parse_time_channel() parses ISO 8601 timestamps", {
 
     result <- parse_time_channel(data, "time")
 
-    expect_type(result$time, "double")
-    expect_equal(result$time, c(0, 1))
+    expect_type(result$data$time, "double")
+    expect_equal(result$data$time, c(0, 1))
 })
 
 test_that("parse_time_channel() parses various date formats", {
@@ -1042,7 +1042,7 @@ test_that("parse_time_channel() parses various date formats", {
             stringsAsFactors = FALSE
         )
         result <- parse_time_channel(data, "time")
-        expect_type(result$time, "double")
+        expect_type(result$data$time, "double")
     }
 })
 
@@ -1055,7 +1055,7 @@ test_that("parse_time_channel() parses time only format", {
 
     result <- parse_time_channel(data, "time")
 
-    expect_type(result$time, "double")
+    expect_type(result$data$time, "double")
 })
 
 test_that("parse_time_channel() preserves timestamp with add_timestamp=TRUE", {
@@ -1067,10 +1067,10 @@ test_that("parse_time_channel() preserves timestamp with add_timestamp=TRUE", {
 
     result <- parse_time_channel(data, "time", add_timestamp = TRUE)
 
-    expect_true("timestamp" %in% names(result))
-    expect_s3_class(result$timestamp, "POSIXct")
-    expect_type(result$time, "double")
-    expect_equal(which(names(result) == "timestamp"), 2)
+    expect_true("timestamp" %in% names(result$data))
+    expect_s3_class(result$data$timestamp, "POSIXct")
+    expect_type(result$data$time, "double")
+    expect_equal(which(names(result$data) == "timestamp"), 2)
 })
 
 test_that("parse_time_channel() converts POSIXct with add_timestamp=FALSE", {
@@ -1081,9 +1081,9 @@ test_that("parse_time_channel() converts POSIXct with add_timestamp=FALSE", {
 
     result <- parse_time_channel(data, "time", add_timestamp = FALSE)
 
-    expect_type(result$time, "double")
-    expect_false("timestamp" %in% names(result))
-    expect_equal(result$time, c(0, 1))
+    expect_type(result$data$time, "double")
+    expect_false("timestamp" %in% names(result$data))
+    expect_equal(result$data$time, c(0, 1))
 })
 
 test_that("parse_time_channel() recalculates from zero with POSIXct", {
@@ -1094,8 +1094,8 @@ test_that("parse_time_channel() recalculates from zero with POSIXct", {
 
     result <- parse_time_channel(data, "time", zero_time = FALSE)
 
-    expect_type(result$time, "double")
-    expect_equal(result$time, c(0, 1))
+    expect_type(result$data$time, "double")
+    expect_equal(result$data$time, c(0, 1))
 })
 
 test_that("parse_time_channel() preserves numeric time", {
@@ -1106,7 +1106,7 @@ test_that("parse_time_channel() preserves numeric time", {
 
     result <- parse_time_channel(data, "time", zero_time = FALSE)
 
-    expect_equal(result$time, data$time)
+    expect_equal(result$data$time, data$time)
 })
 
 test_that("parse_time_channel() handles milliseconds in timestamps", {
@@ -1118,8 +1118,8 @@ test_that("parse_time_channel() handles milliseconds in timestamps", {
 
     result <- parse_time_channel(data, "time")
 
-    expect_type(result$time, "double")
-    expect_true(result$time[2] > 1)
+    expect_type(result$data$time, "double")
+    expect_true(result$data$time[2] > 1)
 })
 
 ## parse_sample_rate() ================================================

@@ -17,6 +17,9 @@ Can be either seperate named arguments or a list of named values.
 \item time_channel
 \item event_channel
 \item sample_rate
+\item start_timestamp
+\item event_times
+\item interval_span
 }}
 }
 \value{

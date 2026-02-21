@@ -102,7 +102,7 @@ device_channels <- list(
 detect_mnirs_device <- function(data, frac_row = 0.333) {
     device_patterns <- lapply(
         list(
-            Artinis = "OxySoft",
+            Artinis = c("Oxysoft", "OxySoft"),
             Train.Red = c(device_channels$Train.Red), ## "Train.Red", 
             Moxy = c(device_channels$Moxy), ## "LUT Part Number", 
             `VO2master-Moxy` = device_channels$`VO2master-Moxy`
@@ -115,7 +115,7 @@ detect_mnirs_device <- function(data, frac_row = 0.333) {
 
     ## check each device: any pattern match in the collapsed string
     matches <- vapply(device_patterns, \(.patterns) {
-        all(vapply(.patterns, grepl, logical(1), x = search_str, fixed = TRUE))
+        any(vapply(.patterns, grepl, logical(1), x = search_str, fixed = TRUE))
     }, logical(1))
 
     if (any(matches)) {
@@ -445,29 +445,64 @@ remove_empty_rows_cols <- function(data) {
     return(data[, colSums(!is_empty(data)) > 0, drop = FALSE])
 }
 
+
+#' Extract earliest POSIXct value from file header metadata
+#' @keywords internal
+extract_start_timestamp <- function(file_header) {
+    formats <- c(
+        "%Y-%m-%dT%H:%M:%OS",
+        "%Y-%m-%dT%H:%M:%OS%z",
+        "%Y-%m-%d %H:%M:%OS",
+        "%Y/%m/%d %H:%M:%OS",
+        "%d-%m-%Y %H:%M:%OS",
+        "%d/%m/%Y %H:%M:%OS"
+    )
+
+    header_values <- unlist(file_header, use.names = FALSE)
+    header_values <- header_values[!is.na(header_values) & header_values != ""]
+
+    ## search for POSIXct values, return the earliest time value
+    ## TODO fragile for misinterpreted formats for invalid "early" timestamps
+    parsed <- vapply(header_values, \(.x) {
+        as.POSIXct(.x, tryFormats = formats, optional = TRUE)
+    }, numeric(1L))
+    parsed <- which(!is.na(parsed))
+    
+    if (length(parsed) == 0L) {
+        return(NULL)
+    }
+
+    ## return the character string timestamp
+    return(min(header_values[parsed]))
+}
+
+
+
 #' Parse time_channel character or dttm to numeric
 #' @keywords internal
 parse_time_channel <- function(
     data,
     time_channel,
+    start_timestamp = NULL,
     add_timestamp = FALSE,
     zero_time = FALSE
 ) {
+    ## character to POSIXct
+    formats <- c(
+        "%Y-%m-%dT%H:%M:%OS",
+        "%Y-%m-%dT%H:%M:%OS%z",
+        "%Y-%m-%d %H:%M:%OS",
+        "%Y/%m/%d %H:%M:%OS",
+        "%d-%m-%Y %H:%M:%OS",
+        "%d/%m/%Y %H:%M:%OS",
+        "%H:%M:%OS"
+    )
+
     time_vec <- data[[time_channel]]
     ## fractional unix time to POSIXct
     if (is.numeric(time_vec) && all(time_vec <= 1, na.rm = TRUE)) {
         time_vec <- as.POSIXct(time_vec * 86400)
     } else if (is.character(time_vec)) {
-        ## character to POSIXct
-        formats <- c(
-            "%Y-%m-%dT%H:%M:%OS",
-            "%Y-%m-%dT%H:%M:%OS%z",
-            "%Y-%m-%d %H:%M:%OS",
-            "%Y/%m/%d %H:%M:%OS",
-            "%d-%m-%Y %H:%M:%OS",
-            "%d/%m/%Y %H:%M:%OS",
-            "%H:%M:%OS"
-        )
         time_vec <- as.POSIXct(time_vec, tryFormats = formats, optional = TRUE)
     }
 
@@ -486,16 +521,35 @@ parse_time_channel <- function(
 
     data[[time_channel]] <- time_vec
 
-    if (!is.null(timestamp_vec) && add_timestamp) {
+    if (add_timestamp) {
         col_names <- names(data)
         ## add_timestamp preserves dttm column or adds
         time_idx <- match(time_channel, col_names)
         data_names <- append(col_names, "timestamp", time_idx)
-        data[["timestamp"]] <- timestamp_vec
+
+        ## if neither header start_timestamp or timestamp_vec exist
+        ## then return NULL and don't append column
+        if (!is.null(start_timestamp)) {
+            start_time <- as.POSIXct(
+                start_timestamp,
+                tryFormats = formats,
+                optional = TRUE
+            )
+            data$timestamp <- start_time + time_vec
+            start_timestamp <- start_timestamp
+        } else if (!is.null(timestamp_vec)) {
+            data$timestamp <- timestamp_vec
+            ## extract earliest POSIXct value as start_timestamp
+            start_timestamp <- min(timestamp_vec, na.rm = TRUE)
+        } else {
+            data$timestamp <- NULL
+            start_timestamp <- start_timestamp
+        }
+
         data <- data[data_names]
     }
 
-    return(data)
+    return(list(data = data, start_timestamp = start_timestamp))
 }
 
 
