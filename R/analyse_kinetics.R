@@ -1,9 +1,150 @@
 #' Analyse mNIRS kinetics across intervals
-#' 
+#'
 #' Perform kinetics analysis with parametric curve fitting or non-parametric
-#' estimation for `nirs_channels` within an *"mnirs"* data frame or a list of 
+#' estimation for `nirs_channels` within an *"mnirs"* data frame or a list of
 #' data frames.
+#'
+#' @param data A data frame of class *"mnirs"* containing time series data and
+#'   metadata, a list of data frames, or a grouped data frame (see *Details*).
+#' @param method A character string specifying the kinetics analysis method
+#'   `<under development>`. Additional arguments must be specified for each
+#'   method. See *Details*.
+#'   \describe{
+#'      \item{`"half_time"`}{`<under development>`.}
+#'      \item{`"peak_slope"`}{Peak local linear regression slope. Additional
+#'      arguments: `width` or `span`, `align`, `direction`, `partial`.}
+#'      \item{`"monoexponential"`}{`<under development>`.}
+#'      \item{`"sigmoidal"`}{`<under development>`.}
+#'   }
+#' @param channel_args An *optional* `list()` with names corresponding to
+#'   `nirs_channels` for unique per-channel arguments to override global
+#'   default arguments (see *Details*).
+#' @param ... Additional arguments passed to the underlying method function
+#'   (e.g. [peak_slope()]). See *Details*.
+#' @inheritParams validate_mnirs
+#'
+#' @details
+#' ## `data` input formats
+#'
+#' `analyse_kinetics()` can accept `data` in multiple formats:
+#'
+#' - A **single *"mnirs"* data frame** will be processed as a single interval.
+#' - A **list of *"mnirs"* data frames** — each interval data frame will be
+#'   processed seperately
+#' - A **grouped *"mnirs"* data frame**, e.g. with `dplyr::group_by()` —
+#'   the data frame will be split by grouping levels and processed as
+#'   separate intervals.
+#'
+#' ## `method`
+#'
+#' #### `method = "half_time"`
 #' 
+#' `<under development>`
+#'
+#' #### `method = "peak_slope"`
+#'
+#' The `"peak_slope"` method identifies the maximum local linear slope within
+#' each `nirs_channel` using rolling least-squares regression. The local window
+#' is defined by `width` (number of samples) or by `span` (time units of
+#' `time_channel`). See [peak_slope()] for details.
+#'
+#' Additional arguments (`...`) accepted when `method = "peak_slope"`:
+#'
+#' \describe{
+#'   \item{`width` or `span`}{Either the number of samples (integer), or the
+#'       time duration in units of `time_channel` (numeric) in the local
+#'       rolling window. One of either `width` or `span` must be specified.}
+#'   \item{`align`}{Character; window alignment — `"centre"` (default),
+#'       `"left"`, or `"right"`.}
+#'   \item{`direction`}{Character; slope direction to detect — `"auto"`
+#'       (default), `"positive"`, or `"negative"`. See [peak_slope()].}
+#'   \item{`partial`}{Logical; `FALSE` by default, only returns slope values
+#'       where all samples are valid (no `NA`s and no fewer samples than
+#'       `width` or `span` in the local window). If `TRUE`, allows slope
+#'       calculation over partial windows with at least 2 valid samples.}
+#' }
+#'
+#' #### `method = "monoexponential"`
+#' 
+#' `<under development>`
+#'
+#' #### `method = "sigmoidal"`
+#' 
+#' `<under development>`
+#'
+#' ## `channel_args` per `nirs_channel`
+#'
+#' Arguments in `analyse_kinetics()` apply to all `nirs_channels` by default.
+#' `channel_args` allows overriding defaults with unique values per channel,
+#' e.g.:
+#'
+#' ```r
+#' analyse_kinetics(
+#'     data,
+#'     nirs_channels = c(hhb, smo2),
+#'     span = 3,
+#'     direction = "positive",
+#'     channel_args = list(
+#'         hhb  = list(span = 5),
+#'         smo2 = list(direction = "negative")
+#'     )
+#' )
+#' ```
+#'
+#' @returns A formatted table of printed results, with individual elements
+#'   accessable as a list of class *"mnirs_kinetics"* containing:
+#'
+#'   \item{`method`}{The method used, e.g. `"half_time"`.}
+#'   \item{`results`}{A [tibble][tibble::tibble-package] of results with
+#'       one row per `nirs_channel` and per interval, containing columns
+#'       `interval`, `nirs_channels`, and individual method parameters.}
+#'   \item{`data`}{A list of the original input data frames augmented with a
+#'       `*_fitted` column of model predicted values for each `nirs_channel`.}
+#'   \item{`t0`}{A data frame of event times (`t0`) for each `nirs_channel`
+#'       per interval, sourced from `event_times` supplied from
+#'       `extract_intervals`, if present in the metadata.}
+#'   \item{`diagnostics`}{A data frame of model diagnostics (`n_obs`, `r2`,
+#'       `adj_r2`, `rmse`) with one row per `nirs_channel` and interval.}
+#'   \item{`channel_args`}{A data frame of the resolved arguments used for
+#'       each `nirs_channel` with one row per `nirs_channel` and interval.}
+#'   \item{`call`}{The matched call.}
+#'
+#' @seealso [extract_intervals()], [monoexponential()], [peak_slope()]
+#'
+#' @examples
+#' result <- read_mnirs(
+#'     example_mnirs("train.red"),
+#'     nirs_channels = c(
+#'         smo2_left = "SmO2 unfiltered",
+#'         smo2_right = "SmO2 unfiltered"
+#'     ),
+#'     time_channel = c(time = "Timestamp (seconds passed)"),
+#'     verbose = FALSE
+#' ) |>
+#'     resample_mnirs(verbose = FALSE) |>
+#'     extract_intervals(
+#'         event_times = c(2455, 3166),
+#'         group_events = "distinct",
+#'         zero_time = TRUE,
+#'         verbose = FALSE
+#'     ) |>
+#'     analyse_kinetics(
+#'         nirs_channels = c(smo2_left, smo2_right),
+#'         method = "peak_slope",
+#'         span = 10, ## 10-second rolling window
+#'         direction = "auto", ## auto-detect slope direction
+#'         verbose = FALSE
+#'     )
+#' 
+#' ## formatted table of results
+#' result
+#' 
+#' ## results are accessible from the results list
+#' result$results
+#' 
+#' ## along with diagnostics and other results
+#' result$diagnostics
+#'
 #' @export
 analyse_kinetics <- function(
     data,
@@ -68,7 +209,7 @@ analyse_kinetics.peak_slope <- function(
             verbose = verbose
         )
         result$interval <- id
-        result$t0 <- attr(df, "event_times")
+        result$t0 <- attr(df, "event_times") %||% NA_real_ ## if not present
 
         ## convert each row's channel_args list to a 1-row data frame
         ## replace NULL values with NA to keep consistent columns

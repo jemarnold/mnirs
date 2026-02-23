@@ -15,8 +15,174 @@ analyse_kinetics(
   ...
 )
 }
+\arguments{
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata, a list of data frames, or a grouped data frame (see \emph{Details}).}
+
+\item{nirs_channels}{A character vector of mNIRS channel names to operate
+on. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
+
+\item{time_channel}{A character string indicating the time or sample channel
+name. Must match column names in \code{data} exactly. Retrieved from metadata
+if not defined explicitly.}
+
+\item{method}{A character string specifying the kinetics analysis method
+\verb{<under development>}. Additional arguments must be specified for each
+method. See \emph{Details}.
+\describe{
+\item{\code{"half_time"}}{\verb{<under development>}.}
+\item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
+arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}.}
+\item{\code{"monoexponential"}}{\verb{<under development>}.}
+\item{\code{"sigmoidal"}}{\verb{<under development>}.}
+}}
+
+\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
+\code{nirs_channels} for unique per-channel arguments to override global
+default arguments (see \emph{Details}).}
+
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
+
+\item{...}{Additional arguments passed to the underlying method function
+(e.g. \code{\link[=peak_slope]{peak_slope()}}). See \emph{Details}.}
+}
+\value{
+A formatted table of printed results, with individual elements
+accessable as a list of class \emph{"mnirs_kinetics"} containing:
+
+\item{\code{method}}{The method used, e.g. \code{"half_time"}.}
+\item{\code{results}}{A \link[tibble:tibble-package]{tibble} of results with
+one row per \code{nirs_channel} and per interval, containing columns
+\code{interval}, \code{nirs_channels}, and individual method parameters.}
+\item{\code{data}}{A list of the original input data frames augmented with a
+\verb{*_fitted} column of model predicted values for each \code{nirs_channel}.}
+\item{\code{t0}}{A data frame of event times (\code{t0}) for each \code{nirs_channel}
+per interval, sourced from \code{event_times} supplied from
+\code{extract_intervals}, if present in the metadata.}
+\item{\code{diagnostics}}{A data frame of model diagnostics (\code{n_obs}, \code{r2},
+\code{adj_r2}, \code{rmse}) with one row per \code{nirs_channel} and interval.}
+\item{\code{channel_args}}{A data frame of the resolved arguments used for
+each \code{nirs_channel} with one row per \code{nirs_channel} and interval.}
+\item{\code{call}}{The matched call.}
+}
 \description{
 Perform kinetics analysis with parametric curve fitting or non-parametric
 estimation for \code{nirs_channels} within an \emph{"mnirs"} data frame or a list of
 data frames.
+}
+\details{
+\subsection{\code{data} input formats}{
+
+\code{analyse_kinetics()} can accept \code{data} in multiple formats:
+\itemize{
+\item A \strong{single \emph{"mnirs"} data frame} will be processed as a single interval.
+\item A \strong{list of \emph{"mnirs"} data frames} — each interval data frame will be
+processed seperately
+\item A \strong{grouped \emph{"mnirs"} data frame}, e.g. with \code{dplyr::group_by()} —
+the data frame will be split by grouping levels and processed as
+separate intervals.
+}
+}
+
+\subsection{\code{method}}{
+\subsection{\code{method = "half_time"}}{
+
+\verb{<under development>}
+}
+
+\subsection{\code{method = "peak_slope"}}{
+
+The \code{"peak_slope"} method identifies the maximum local linear slope within
+each \code{nirs_channel} using rolling least-squares regression. The local window
+is defined by \code{width} (number of samples) or by \code{span} (time units of
+\code{time_channel}). See \code{\link[=peak_slope]{peak_slope()}} for details.
+
+Additional arguments (\code{...}) accepted when \code{method = "peak_slope"}:
+
+\describe{
+\item{\code{width} or \code{span}}{Either the number of samples (integer), or the
+time duration in units of \code{time_channel} (numeric) in the local
+rolling window. One of either \code{width} or \code{span} must be specified.}
+\item{\code{align}}{Character; window alignment — \code{"centre"} (default),
+\code{"left"}, or \code{"right"}.}
+\item{\code{direction}}{Character; slope direction to detect — \code{"auto"}
+(default), \code{"positive"}, or \code{"negative"}. See \code{\link[=peak_slope]{peak_slope()}}.}
+\item{\code{partial}}{Logical; \code{FALSE} by default, only returns slope values
+where all samples are valid (no \code{NA}s and no fewer samples than
+\code{width} or \code{span} in the local window). If \code{TRUE}, allows slope
+calculation over partial windows with at least 2 valid samples.}
+}
+}
+
+\subsection{\code{method = "monoexponential"}}{
+
+\verb{<under development>}
+}
+
+\subsection{\code{method = "sigmoidal"}}{
+
+\verb{<under development>}
+}
+
+}
+
+\subsection{\code{channel_args} per \code{nirs_channel}}{
+
+Arguments in \code{analyse_kinetics()} apply to all \code{nirs_channels} by default.
+\code{channel_args} allows overriding defaults with unique values per channel,
+e.g.:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_kinetics(
+    data,
+    nirs_channels = c(hhb, smo2),
+    span = 3,
+    direction = "positive",
+    channel_args = list(
+        hhb  = list(span = 5),
+        smo2 = list(direction = "negative")
+    )
+)
+}\if{html}{\out{</div>}}
+}
+}
+\examples{
+result <- read_mnirs(
+    example_mnirs("train.red"),
+    nirs_channels = c(
+        smo2_left = "SmO2 unfiltered",
+        smo2_right = "SmO2 unfiltered"
+    ),
+    time_channel = c(time = "Timestamp (seconds passed)"),
+    verbose = FALSE
+) |>
+    resample_mnirs(verbose = FALSE) |>
+    extract_intervals(
+        event_times = c(2455, 3166),
+        group_events = "distinct",
+        zero_time = TRUE,
+        verbose = FALSE
+    ) |>
+    analyse_kinetics(
+        nirs_channels = c(smo2_left, smo2_right),
+        method = "peak_slope",
+        span = 10, ## 10-second rolling window
+        direction = "auto", ## auto-detect slope direction
+        verbose = FALSE
+    )
+
+## formatted table of results
+result
+
+## results are accessible from the results list
+result$results
+
+## along with diagnostics and other results
+result$diagnostics
+
+}
+\seealso{
+\code{\link[=extract_intervals]{extract_intervals()}}, \code{\link[=monoexponential]{monoexponential()}}, \code{\link[=peak_slope]{peak_slope()}}
 }
