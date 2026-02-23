@@ -133,13 +133,15 @@ detect_device_channels <- function(
     nirs_device = NULL,
     nirs_channels = NULL,
     time_channel = NULL,
+    keep_all = FALSE,
     verbose = TRUE
 ) {
     ## user-specified channels always take priority
     if (!is.null(nirs_channels)) {
         return(list(
             time_channel = time_channel,
-            nirs_channels = nirs_channels
+            nirs_channels = nirs_channels,
+            keep_all = keep_all
         ))
     }
 
@@ -158,7 +160,8 @@ detect_device_channels <- function(
     ## user inputs take priority over device defaults
     channel_list <- list(
         time_channel = time_channel %||% channel_list$time_channel,
-        nirs_channels = nirs_channels %||% channel_list$nirs_channels
+        nirs_channels = channel_list$nirs_channels, ## NULL at this point
+        keep_all = TRUE
     )
 
     ## error when nirs_channels cannot be resolved

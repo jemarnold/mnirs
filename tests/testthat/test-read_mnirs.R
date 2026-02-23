@@ -261,6 +261,26 @@ test_that("detect_device_channels() verbose messages for detection", {
     )
 })
 
+test_that("detect_device_channels() returns appropriate keep_all", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = NULL,
+        time_channel = c(time = "custom_time"),
+        verbose = FALSE
+    )
+
+    expect_true(result$keep_all)
+
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = "SmO2",
+        time_channel = c(time = "custom_time"),
+        verbose = FALSE
+    )
+
+    expect_false(result$keep_all)
+})
+
 
 ## read_data_table() ===================================================
 test_that("read_data_table() extracts data with valid channels", {
@@ -1448,6 +1468,24 @@ test_that("read_mnirs keep_all = TRUE returns all columns", {
     expect_true("smo2" %in% names(df))
     expect_true("time" %in% names(df))
 })
+
+test_that("read_mnirs returns all columns when auto-detecting nirs_channels", {
+    file_path <- example_mnirs("moxy_ramp")
+
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = NULL,
+        time_channel = NULL,
+        keep_all = FALSE, ## explicitly FALSE should be overridden
+        verbose = FALSE
+    )
+
+    ## default keep_all = TRUE returns more columns than just smo2 + time
+    expect_gt(ncol(df), 2)
+    expect_true("SmO2 Live" %in% names(df))
+    expect_true("hh:mm:ss" %in% names(df))
+})
+
 
 
 

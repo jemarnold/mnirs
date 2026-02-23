@@ -194,9 +194,9 @@ data_resampled
 data_filtered <- filter_mnirs(
     data_resampled,         ## channels retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
-    type = "low",           ## specify a low-pass filter
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency
+    type = "low",           ## specify a low-pass filter
     na.rm = TRUE            ## explicitly preserve any NAs
 )
 

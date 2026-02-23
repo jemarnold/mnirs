@@ -143,10 +143,12 @@ read_mnirs <- function(
         nirs_device,
         nirs_channels,
         time_channel,
+        keep_all,
         verbose
     )
     nirs_channels <- channels$nirs_channels
     time_channel <- channels$time_channel
+    keep_all <- channels$keep_all ## TRUE when `nirs_channels` unspecified
 
     ## extract the data_table, and name by header row
     table_list <- read_data_table(
