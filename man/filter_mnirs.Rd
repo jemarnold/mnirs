@@ -14,10 +14,10 @@ filter_mnirs(
   sample_rate = NULL,
   method = c("smooth_spline", "butterworth", "moving_average"),
   spar = NULL,
-  type = c("low", "high", "stop", "pass"),
   order = 2,
   W = NULL,
   fc = NULL,
+  type = c("low", "high", "stop", "pass"),
   width = NULL,
   span = NULL,
   na.rm = FALSE,
@@ -53,15 +53,6 @@ from \code{time_channel} if not defined explicitly.}
 \item{spar}{A numeric value defining the smoothing parameter for
 \code{method = "smooth_spline"}.}
 
-\item{type}{A character string indicating the digital filter type for
-\code{method = "butterworth"} (see \emph{Details}).
-\describe{
-\item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
-\item{\code{"high"}}{For a \emph{high-pass} filter.}
-\item{\code{"stop"}}{For a \emph{stop-band} (band-reject) filter.}
-\item{\code{"pass"}}{For a \emph{pass-band} filter.}
-}}
-
 \item{order}{An integer defining the filter order for
 \code{method = "butterworth"} (\emph{default} \code{order = 2}).}
 
@@ -71,6 +62,15 @@ Nyquist frequency (see \emph{Details}).}
 
 \item{fc}{A one- or two-element numeric vector defining the filter cutoff
 frequency(ies) for \code{method = "butterworth"}, in Hz (see \emph{Details}).}
+
+\item{type}{A character string indicating the digital filter type for
+\code{method = "butterworth"} (see \emph{Details}).
+\describe{
+\item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
+\item{\code{"high"}}{For a \emph{high-pass} filter.}
+\item{\code{"stop"}}{For a \emph{stop-band} (band-reject) filter.}
+\item{\code{"pass"}}{For a \emph{pass-band} filter.}
+}}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation for
@@ -179,9 +179,9 @@ data <- read_mnirs(
 data_filtered <- filter_mnirs(
     data,
     method = "butterworth", ## Butterworth digital filter is a common choice
-    type = "low",           ## specify a low-pass filter
     order = 2,              ## order is the number of filter passes
     W = 0.02,               ## fractional critical frequency
+    type = "low",           ## specify a low-pass filter
     na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
     verbose = FALSE
 )

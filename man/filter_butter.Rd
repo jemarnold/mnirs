@@ -6,7 +6,7 @@
 \usage{
 filter_butter(
   x,
-  order = 1,
+  order = 2,
   W,
   type = c("low", "high", "stop", "pass"),
   edges = c("rev", "rep1", "none"),

@@ -365,10 +365,6 @@ We will discuss the process of choosing a digital filter more in depth in anothe
 
     A Butterworth low-pass digital filter (specified by `type = "low"`) is probably the most common method used in mNIRS research (whether appropriately or not). For certain applications such as identifying a signal with a known frequency (e.g. cycling/running cadence or heart rate), a pass-band or a different filter type may be better suited.
 
-* `type`
-
-    The filter type is specified as either `c("low", "high", "stop", "pass")`.
-
 * `order`
 
     The filter order number, specifying the number of passes the filter performs over the data. The default `order = 2` will often noticably improve the filter over a single pass, however higher orders above ~`4` can begin to introduce artefacts, particularly at sharp transition points.
@@ -376,6 +372,11 @@ We will discuss the process of choosing a digital filter more in depth in anothe
 * `W` or `fc`
 
     The cutoff frequency can be specified either as `W`; a fraction (between `[0, 1]`) of the [*Nyquist frequency*](https://www.youtube.com/watch?v=IZJQXlbm2dU), which is equal to half of the `sample_rate` of the data. Or as `fc`; the cutoff frequency in Hz, where this absolute frequency should still be between 0 Hz and the Nyquist frequency.
+    
+* `type`
+
+    The filter type is specified as either `c("low", "high", "stop", "pass")`.
+
 
 For filtering vector data and more details about Butterworth filter parameters, see `filter_butter()`.
 
@@ -402,9 +403,9 @@ Let's try a *Butterworth low-pass* filter, and we'll specify some empirically ch
 data_filtered <- filter_mnirs(
     data_resampled,         ## channels retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
-    type = "low",           ## specify a low-pass filter
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency
+    type = "low",           ## specify a low-pass filter
     na.rm = TRUE            ## explicitly preserve any NAs
 )
 

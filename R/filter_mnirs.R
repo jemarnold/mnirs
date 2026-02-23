@@ -19,6 +19,13 @@
 #'   }
 #' @param spar A numeric value defining the smoothing parameter for
 #'   `method = "smooth_spline"`.
+#' @param order An integer defining the filter order for
+#'   `method = "butterworth"` (*default* `order = 2`).
+#' @param W A one- or two-element numeric vector defining the filter cutoff
+#'   frequency(ies) for `method = "butterworth"`, as a fraction of the
+#'   Nyquist frequency (see *Details*).
+#' @param fc A one- or two-element numeric vector defining the filter cutoff
+#'   frequency(ies) for `method = "butterworth"`, in Hz (see *Details*).
 #' @param type A character string indicating the digital filter type for
 #'   `method = "butterworth"` (see *Details*).
 #'   \describe{
@@ -27,13 +34,6 @@
 #'      \item{`"stop"`}{For a *stop-band* (band-reject) filter.}
 #'      \item{`"pass"`}{For a *pass-band* filter.}
 #'   }
-#' @param order An integer defining the filter order for
-#'   `method = "butterworth"` (*default* `order = 2`).
-#' @param W A one- or two-element numeric vector defining the filter cutoff
-#'   frequency(ies) for `method = "butterworth"`, as a fraction of the
-#'   Nyquist frequency (see *Details*).
-#' @param fc A one- or two-element numeric vector defining the filter cutoff
-#'   frequency(ies) for `method = "butterworth"`, in Hz (see *Details*).
 #' @param width An integer defining the local window in number of samples
 #'   around `idx` in which to perform the operation for
 #'   `method = "moving_average"`. Between
@@ -127,9 +127,9 @@
 #' data_filtered <- filter_mnirs(
 #'     data,
 #'     method = "butterworth", ## Butterworth digital filter is a common choice
-#'     type = "low",           ## specify a low-pass filter
 #'     order = 2,              ## order is the number of filter passes
 #'     W = 0.02,               ## fractional critical frequency
+#'     type = "low",           ## specify a low-pass filter
 #'     na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
 #'     verbose = FALSE
 #' )
@@ -156,10 +156,10 @@ filter_mnirs <- function(
     sample_rate = NULL,
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
-    type = c("low", "high", "stop", "pass"),
     order = 2,
     W = NULL,
     fc = NULL,
+    type = c("low", "high", "stop", "pass"),
     width = NULL,
     span = NULL,
     na.rm = FALSE,
@@ -193,10 +193,10 @@ filter_mnirs.smooth_spline <- function(
     sample_rate = NULL,
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
-    type = c("low", "high", "stop", "pass"),
-    order = 1,
+    order = 2,
     W = NULL,
     fc = NULL,
+    type = c("low", "high", "stop", "pass"),
     width = NULL,
     span = NULL,
     na.rm = FALSE,
@@ -273,10 +273,10 @@ filter_mnirs.butterworth <- function(
     sample_rate = NULL,
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
-    type = c("low", "high", "stop", "pass"),
-    order = 1,
+    order = 2,
     W = NULL,
     fc = NULL,
+    type = c("low", "high", "stop", "pass"),
     width = NULL,
     span = NULL,
     na.rm = FALSE,
@@ -355,10 +355,10 @@ filter_mnirs.moving_average <- function(
     sample_rate = NULL,
     method = c("smooth_spline", "butterworth", "moving_average"),
     spar = NULL,
-    type = c("low", "high", "stop", "pass"),
-    order = 1,
+    order = 2,
     W = NULL,
     fc = NULL,
+    type = c("low", "high", "stop", "pass"),
     width = NULL,
     span = NULL,
     na.rm = FALSE,
@@ -570,7 +570,7 @@ filter_moving_average <- function(
 #' @export
 filter_butter <- function(
     x,
-    order = 1,
+    order = 2,
     W,
     type = c("low", "high", "stop", "pass"),
     edges = c("rev", "rep1", "none"),
