@@ -62,7 +62,7 @@ entirely.
             time_channel = c(time = "hh:mm:ss"),
             verbose = FALSE
         ) |>
-            plot(label_time = TRUE)
+            plot(time_labels = TRUE)
     }
 }
 

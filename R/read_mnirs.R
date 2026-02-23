@@ -14,7 +14,7 @@
 #'   - If `NULL` (default), `read_mnirs()` attempts to detect the device from
 #'     the file contents and use a known `nirs_channel` name.
 #'   - A *named* character vector can be used to rename columns on import, in
-#'     the form `c(new_name = "original_name")`.
+#'     the form `c(renamed = "original_name")`.
 #' 
 #' @param time_channel A character scalar giving the name of the time 
 #'   (or sample) column to import. The name must match the file header exactly.
@@ -41,16 +41,21 @@
 #' @param zero_time Logical. Default is `FALSE`. If `TRUE`, will re-zero 
 #'   `time_channel` to start from `0`.
 #' 
-#' @param keep_all Logical. Default is `TRUE`. Will keep all columns found in
-#'   the file data table. If `FALSE`, will keep only the explicitly specified
-#'   `nirs_channels`, `time_channel`, and `event_channel`.
+#' @param keep_all Logical. Default is `FALSE`. Will keep only the channels 
+#'   explicitly specified in `nirs_channels`, `time_channel`, and 
+#'   `event_channel`. If `TRUE` will keep all columns found in the file 
+#'   data table.
+#' 
+#'   - If no `nirs_channels` are specified and the file format is recognised,
+#'     all columns in the file data table will be returned, as an exploratory
+#'     option.
 #' 
 #' @param verbose Logical. Default is `TRUE`. Will display or silence (if 
 #'   `FALSE`) warnings and information messages helpful for troubleshooting. A 
 #'   global default can be set via `options(mnirs.verbose = FALSE)`.
 #'
 #' @details
-#'## Header detection
+#' ## Header detection
 #' `read_mnirs()` searches the file for a header row containing the requested
 #' channel names. The header row does not need to be the first row in the file.
 #' 
@@ -64,7 +69,7 @@
 #' ## Renaming channels
 #' A named character vector can be specified to rename `nirs_channels`, 
 #' `time_channel`, and `event_channel`, in the form 
-#' `c(new_name = "original_name")`. The `"original_name"` must match the 
+#' `c(renamed = "original_name")`. The `"original_name"` must match the 
 #' contents of the file data table header row exactly.
 #' 
 #' ## Time parsing
@@ -118,7 +123,7 @@ read_mnirs <- function(
     sample_rate = NULL,
     add_timestamp = FALSE,
     zero_time = FALSE,
-    keep_all = TRUE,
+    keep_all = FALSE,
     verbose = TRUE
 ) {
     ## global options overrides implicit but not explicit `verbose`

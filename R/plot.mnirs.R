@@ -3,18 +3,15 @@
 #' Create a simple plot for objects returned from [create_mnirs_data()].
 #'
 #' @param x Object of class *"mnirs"* returned from [create_mnirs_data()]
-#' @param ... Additional arguments:
-#'  \describe{
-#'      \item{`label_time`}{A logical to display x-axis time values
-#'      formatted as *"hh:mm:ss"* using [label_time()].
-#'      `label_time = FALSE` (the *default*) will display simple numeric
-#'      values on the x-axis.}
-#'      \item{`n.breaks`}{A numeric value to define the number of breaks in
-#'      both x- and y-axes.}
-#'      \item{`na.omit`}{A logical to omit missing (`NA`) values for better
-#'      display of connected lines. `na.omit = FALSE` (the *default*) can be
-#'      used to identify missing values.}
-#'  }
+#' @param time_labels A logical to display x-axis time values formatted as
+#'   *"hh:mm:ss"* using [format_hmmss()]. `time_labels = FALSE` (the
+#'   *default*) will display simple numeric values on the x-axis.
+#' @param n.breaks A numeric value to define the number of breaks in both
+#'   x- and y-axes.
+#' @param na.omit A logical to omit missing (`NA`) values for better display
+#'   of connected lines. `na.omit = FALSE` (the *default*) can be used to
+#'   identify missing values.
+#' @param ... Additional arguments (currently unused).
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
@@ -29,40 +26,35 @@
 #'
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {
-#'         ## note the hidden options to display time values as `h:mm:ss` with 8 breaks
-#'         plot(data_table, label_time = TRUE, n.breaks = 8)
+#'         ## note the options to display time values as `h:mm:ss` with 8 breaks
+#'         plot(data_table, time_labels = TRUE, n.breaks = 8)
 #'     }
 #' }
 #'
 #' @export
-plot.mnirs <- function(x, ...) {
+plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...) {
     rlang::check_installed(
         c("ggplot2", "scales"),
         reason = "to plot mNIRS data"
     )
 
-    args <- list(...)
-    na.omit <- args$na.omit %||% FALSE
-    label_time <- args$label_time %||% FALSE
-    n.breaks <- args$n.breaks %||% 5
-
     nirs_channels <- attr(x, "nirs_channels")
     time_channel <- attr(x, "time_channel")
 
     ## pre-compute conditionals
-    x_name <- if (label_time) {
+    x_name <- if (time_labels) {
         paste(time_channel, "(mm:ss)")
     } else {
         ggplot2::waiver()
     }
-    x_breaks <- if (label_time) {
+    x_breaks <- if (time_labels) {
         breaks_timespan(n = n.breaks)
     } else if (rlang::is_installed("scales")) {
         scales::breaks_pretty(n = n.breaks)
     } else {
         ggplot2::waiver()
     }
-    x_labels <- if (label_time) {
+    x_labels <- if (time_labels) {
         format_hmmss
     } else {
         ggplot2::waiver()
@@ -165,7 +157,7 @@ plot.mnirs <- function(x, ...) {
 #'             time_channel = c(time = "hh:mm:ss"),
 #'             verbose = FALSE
 #'         ) |>
-#'             plot(label_time = TRUE)
+#'             plot(time_labels = TRUE)
 #'     }
 #' }
 #'

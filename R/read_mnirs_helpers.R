@@ -324,7 +324,7 @@ select_rename_data <- function(
     nirs_channels,
     time_channel,
     event_channel = NULL,
-    keep_all = TRUE,
+    keep_all = FALSE,
     verbose = TRUE
 ) {
     ## if channels not named, names from object
@@ -384,10 +384,10 @@ select_rename_data <- function(
     if (verbose && any(renamed)) {
         ## warn about renamed names
         old_names <- channel_inputs[renamed]
-        new_names <- names(result)[channel_names_idx][renamed]
+        renamed <- names(result)[channel_names_idx][renamed]
         cli_warn(c(
             "!" = "Duplicate channel names detected.",
-            "i" = "Renamed: {.val {paste(old_names, new_names, sep = ' = ')}}",
+            "i" = "Renamed: {.val {paste(old_names, renamed, sep = ' = ')}}",
             "i" = "Unique channel names can be defined explicitly."
         ))
     }

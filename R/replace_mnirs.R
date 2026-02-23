@@ -97,7 +97,7 @@
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {
 #'         ## plot original and show where values have been replaced
-#'         plot(data, label_time = TRUE) +
+#'         plot(data, time_labels = TRUE) +
 #'             ggplot2::scale_colour_manual(
 #'                 name = NULL,
 #'                 breaks = c("smo2", "replaced"),

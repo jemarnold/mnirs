@@ -674,7 +674,6 @@ test_that("select_rename_data() handles duplicate data columns", {
         data,
         nirs_channels = c(oxy1 = "O2Hb", oxy2 = "O2Hb"),
         time_channel = "Time",
-        keep_all = FALSE,
         verbose = FALSE
     )
 
@@ -704,7 +703,7 @@ test_that("select_rename_data() keeps all columns with keep_all", {
     ))
 })
 
-test_that("select_rename_data() drops extra columns with keep_all = FALSE", {
+test_that("select_rename_data() drops extra columns with default keep_all = FALSE", {
     data <- data.frame(
         O2Hb = c("10"),
         HHb = c("5"),
@@ -717,7 +716,7 @@ test_that("select_rename_data() drops extra columns with keep_all = FALSE", {
         data,
         nirs_channels = "O2Hb",
         time_channel = "Time",
-        keep_all = FALSE,
+        # keep_all = FALSE,
         verbose = FALSE
     )
 
@@ -1203,7 +1202,6 @@ test_that("parse_sample_rate handles Artinis device", {
         nirs_channels = c(HHb = 2, O2Hb = 3),
         time_channel = c(sample = 1),
         event_channel = NULL,
-        keep_all = FALSE,
         verbose = FALSE
     ) |>
         dplyr::select(-time)
@@ -1417,13 +1415,31 @@ test_that("read_mnirs errors for Artinis with nirs_channels = NULL", {
     )
 })
 
-test_that("read_mnirs keep_all = TRUE returns all columns by default", {
+test_that("read_mnirs keep_all = FALSE returns only specified columns by default", {
     file_path <- example_mnirs("moxy_ramp")
 
     df <- read_mnirs(
         file_path = file_path,
         nirs_channels = c(smo2 = "SmO2 Live"),
         time_channel = c(time = "hh:mm:ss"),
+        # keep_all = FALSE,
+        verbose = FALSE
+    )
+
+    ## default keep_all = FALSE returns only smo2 + time
+    expect_equal(ncol(df), 2)
+    expect_true("smo2" %in% names(df))
+    expect_true("time" %in% names(df))
+})
+
+test_that("read_mnirs keep_all = TRUE returns all columns", {
+    file_path <- example_mnirs("moxy_ramp")
+
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        keep_all = TRUE,
         verbose = FALSE
     )
 
@@ -1446,7 +1462,6 @@ test_that("read_mnirs moxy .xlsx works with timestamp", {
             ),
             time_channel = c(time = "hh:mm:ss"),
             add_timestamp = TRUE,
-            keep_all = FALSE,
             verbose = TRUE
         ),
         "irregular"

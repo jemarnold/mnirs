@@ -191,7 +191,7 @@ data_filtered
 \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {
         ## plot filtered data and add the raw data back to the plot to compare
-        plot(data_filtered, label_time = TRUE) +
+        plot(data_filtered, time_labels = TRUE) +
             ggplot2::geom_line(
                 data = data,
                 ggplot2::aes(y = smo2, colour = "smo2"), alpha = 0.4

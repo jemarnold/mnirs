@@ -211,21 +211,21 @@ test_that("na.omit removes rows with any NA in nirs_channels", {
     expect_equal(nrow(p2$data), 16L) # 8 rows × 2 channels
 })
 
-test_that("label_time controls x-axis name and formatting", {
+test_that("time_labels controls x-axis name and formatting", {
     x <- mock_mnirs()
 
-    # With label_time = FALSE (default)
+    # With time_labels = FALSE (default)
     p1 <- plot(x)
     expect_true(ggplot2::is_waiver(p1$scales$get_scales("x")$name))
     expect_true(ggplot2::is_waiver(p1$scales$get_scales("x")$labels))
 
-    # With label_time = TRUE
-    p2 <- plot(x, label_time = TRUE)
+    # With time_labels = TRUE
+    p2 <- plot(x, time_labels = TRUE)
     expect_equal(p2$labels$x, "time (mm:ss)")
     expect_false(ggplot2::is_waiver(p2$scales$get_scales("x")$labels))
 })
 
-test_that("n controls number of breaks", {
+test_that("n.breaks controls number of breaks", {
     x <- mock_mnirs()
 
     # Extract breaks by building plot
@@ -234,8 +234,8 @@ test_that("n controls number of breaks", {
         built$layout$panel_params[[1]]$x$breaks
     }
 
-    p1 <- plot(x, n = 3)
-    p2 <- plot(x, n = 10)
+    p1 <- plot(x, n.breaks = 3)
+    p2 <- plot(x, n.breaks = 10)
 
     breaks1 <- get_breaks(p1)
     breaks2 <- get_breaks(p2)
@@ -298,6 +298,6 @@ test_that("plot.mnirs moxy.perfpro works", {
     )
 
     ## visual check
-    plot <- plot(df, na.omit = TRUE, label_time = TRUE, n = 8)
+    plot <- plot(df, na.omit = TRUE, time_labels = TRUE, n.breaks = 8)
     expect_s3_class(plot, "ggplot")
 })

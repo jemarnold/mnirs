@@ -75,7 +75,7 @@
 #'
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {
-#'         plot(data, label_time = TRUE) +
+#'         plot(data, time_labels = TRUE) +
 #'             ggplot2::geom_hline(yintercept = 0, linetype = "dotted")
 #'     }
 #' }  

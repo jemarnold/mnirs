@@ -20,9 +20,11 @@ knitr:
 
 # Introduction
 
-With modern wearable **muscle near-infrared spectroscopy (mNIRS)** devices it is growing ever easier to collect local muscle oxygenation data during dynamic activities. The real challenge comes with deciding how to clean, filter, process, and eventually interpret those data.
+With modern wearable **muscle near-infrared spectroscopy (mNIRS)** devices it is growing ever easier to collect local muscle oxygenation data during dynamic activities. 
 
-The `{mnirs}` package aims to provide standardised, reproducible methods for processing and analysing NIRS data, helping practitioners detect meaningful signals from noise and improve our confidence in interpreting information and applying that information to the clients we work with.
+The real challenge comes with deciding how to clean, filter, process, and eventually interpret those data.
+
+The `{mnirs}` package aims to provide standardised, reproducible methods for processing and analysing NIRS data. The goal is to help practitioners detect meaningful signal from noise, and improve our confidence in interpreting and applying information to the clients we work with.
 
 In this vignette we will demonstrate how to:
 
@@ -42,11 +44,11 @@ In this vignette we will demonstrate how to:
 
 * 🔀 Demonstrate a complete data wrangling process using pipe-friendly functions.
 
-::: {.callout-note}
+
 *`mnirs`* is currently [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental). Functionality may change! Stay updated on development and follow releases at [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
 
-*{mnirs}* is designed to process NIRS data, but it can be used to read, clean, and process other time series datasets which require many of the same processing steps. Enjoy!
-:::
+*{mnirs}* is designed to process NIRS data, but it can be used to read, clean, and process other time series data which require many of the same processing steps. Enjoy!
+
 
 # 📂 Read data from file
 
@@ -65,7 +67,9 @@ library(ggplot2) ## load for plotting
 library(mnirs) 
 ```
 
-The first function to call will almost always be `read_mnirs()`. This is used to read data from *.csv* or *.xls(x)* files exported from common wearable NIRS devices. It will extract and return the data table and metadata for further processing and analysis.
+The first function called will often be `read_mnirs()`. This is used to read data from *.csv* or *.xls(x)* files exported from common wearable NIRS devices.
+
+Exported data files will often have multiple rows of file header metadata before the data table with NIRS recordings begins. `read_mnirs` can extract and return this data table along with the file metadata for further processing and analysis.
 
 See `read_mnirs()` for more details.
 
@@ -84,44 +88,49 @@ A few example data files are included in the *`mnirs`* package. File paths can b
 
 * `nirs_channels`
     
-    At least one *NIRS* channel name must be specified from the data table in the file. Multiple channel names can be entered as a vector.
+    Multiple *NIRS* channels can be specified from the data file as a vector of names. If no `nirs_channels` are specified, `read_mnirs()` will attempt to recognise the NIRS device file format, and return the full data frame with
+    all detected columns. This can be useful for file exploration, to find the target channel names. However, best practice is to specify the desired `nirs_channels` explicitly
 
 * `time_channel`
 
-    A *time* or *sample* channel name from the data table can be specified. If left blank, the function will attempt to identify the time column automatically, however the best practice is to specify the time_channel column explicitly.
+    A *time* or *sample* channel name from the data table can be specified. If left blank, the function will attempt to identify the time column automatically, however, best practice is to specify the `time_channel` explicitly.
 
 * `event_channel`
 
-    Optionally, A channel can be specified which indicates *events* or *laps* in the data table.\
+    Optionally, A channel can be specified which indicates *events* or other marker in the data table.\
 \
 These channel names are used to detect the data table within the file, and must match exactly with text strings in the file on the same row. We can rename these channels when reading data by specifying a named character vector: 
 
 ```{r}
-nirs_channels = c(new_name1 = "original_name1", 
-                  new_name2 = "original_name2")
+nirs_channels = c(renamed1 = "original_name1", 
+                  renamed2 = "original_name2")
 ```
 
 * `sample_rate`
 
-    The sample rate of the exported data file (in Hz) can either be specified explicitly, or it will be estimated from `time_channel`.\
+    The sample rate (in Hz) of the exported data can either be specified explicitly, or it will be estimated from `time_channel`.\
 \
-Automatic detection usually works well unless there is irregular sampling, or the `time_channel` is a count of samples rather than a time value. For example, *Oxysoft* exports a sample number rather than time values. In this specific case, the function will recognise and read the correct sample rate from the file metadata. However, in most cases sample_rate should be defined explicitly if known.
+Automatic detection usually works well unless there is irregular sampling, or the `time_channel` is a count of samples rather than a time value. For example, *Oxysoft* exports a column of sample numbers rather than time values. For *Ozysoft* files specifically, the function will recognise and read the correct sample rate from the file metadata. However, in most cases `sample_rate` should be defined explicitly if known.
 
 * `add_timestamp`
 
-    If the `time_channel` is detected as date-time format (e.g.; *hh:mm:ss*), by default it will be converted to numeric time in seconds. If specified, this option will preserve a seperate timestamp column of those date-time values.
+    `FALSE` by default; if `time_channel` is in date-time (POSIXct) format (e.g.; *hh:mm:ss*), by default it will be converted to numeric time in seconds.\
+\
+If `add_timestamp = TRUE`, the date-time start time value in `time_channel` or in the file metadata will be extracted and a `"timestamp"` column will be added to the returned data frame. This can be useful for synchronising devices based on system time.
 
 * `zero_time`
 
-    If `time_channel` values start at a non-zero value, this option will re-calculate time starting from zero. If `time_channel` was converted from date-time format, it will always be re-calculated from zero regardless of this option.
+    `FALSE` by default; if `time_channel` values start at a non-zero value, `zero_time = TRUE` will re-calculate time starting from zero. If `time_channel` was converted from date-time format, it will always be re-calculated from zero regardless of this option.
 
 * `keep_all`
 
-    By default, only the channels explicitly specified above will be returned in a data frame. This option will return all columns detected from the data table in the file. Blank/empty columns will be omitted and duplicated or invalid column names will be repaired. Columns should be checked to confirm correct naming if duplicates are present.
+    `FALSE` by default; only the channels explicitly specified will be returned in a data frame. `keep_all = TRUE` will return all columns detected from the data table in the file.\
+\
+Blank/empty columns will be omitted. Duplicate column names will be repaired by appending a suffix `"_n"`, and empty column names will be renamed as `col_n`; where `n` is equal to the column number in the data file. Renamed columns should be checked to confirm correct naming if duplicates are present.
 
 * `verbose`
 
-    This and many other *`mnirs`* functions may return warnings and informational messages which are useful for troubleshooting and data validation. This option can be used to silence those messages. *`mnirs`* messages can be silenced globally for a session by setting `options(mnirs.verbose = FALSE)`.
+    `TRUE` by default; this and most *`mnirs`* functions will return warnings and informational messages which are useful for troubleshooting and data validation. This option can be used to silence those messages. *`mnirs`* messages can be silenced globally for a session by setting `options(mnirs.verbose = FALSE)`.
 
 ```{r}
 ## {mnirs} includes sample files from a few NIRS devices
@@ -159,9 +168,28 @@ data_table
 
 *`mnirs`* data can be easily viewed by calling `plot()`. This generic plot function uses `{ggplot2}` and will work on data frames generated or read by *`mnirs`* functions where the metadata contain `class = *"mnirs"*`.
 
+## `plot.mnirs`
+
+* `time_labels`
+
+    `FALSE` by default; time values on the x-axis will be plotted as numeric by default. `time_labels = TRUE` will instead plot time values as `h:mm:ss` format.
+
+* `n.breaks`
+
+    Defines the number of breaks plotted on the x-axis, passed to the `{ggplot2}` settings.
+
+* `na.omit`
+
+    `FALSE` by default; missing data (`NA`s) will be plotted as gaps in the time-series data. If `na.omit = TRUE`, `NA`s will be omitted from the plotted data, effectively plotting across these gaps, making them less visible, but making the general data trend easier to see if there are lots of missing data.
+
 ```{r}
-## note the hidden plot option to display time values as `h:mm:ss`
-plot(data_table, label_time = TRUE)
+## note the `time_labels` plot argument to display time values as `h:mm:ss`
+plot(
+    data_table,
+    time_labels = TRUE,
+    n.breaks = 5,
+    na.omit = FALSE
+)
 ```
 
 *`mnirs`* includes a custom `*ggplot2*` theme and colour palette available with `theme_mnirs()` and `palette_mnirs()`. See those documentation references for more details.
@@ -185,14 +213,16 @@ attributes(data_table)[-2]
 
 We can see some data issues in the plot above, so let's clean those with a single wrangling function `replace_mnirs()`, to prepare our data for digital filtering and smoothing.
 
-*`mnirs`* tries to include basic functions which work on vector data, and convenience wrappers which combine functionality and can be used on multiple channels in a data frame at once. Let's explain the functionality of this data-wide function, and for more details about the vector-specific functions see `replace_mnirs()`.
+*`mnirs`* tries to include basic functions which work on vector data, and convenience wrappers which combine functionality and can be used on multiple channels in a data frame at once.
+
+Let's explain the functionality of this data-wide function, and for more details about the vector-specific functions see `replace_mnirs()`.
 
 
 ## `replace_mnirs()`
 
 * `data`
 
-    Data-wide functions take in a data frame, apply processing to all channels specified, then return the processed data frame. *`mnirs`* metadata will be passed to and from this function.\
+    Data-wide functions take in a data frame, apply processing to all channels specified explicity or implicitly from *`mnirs`* metadata, then return the processed data frame. *`mnirs`* metadata will be passed to and from this function.\
 \
 *`mnirs`* functions are also pipe-friendly for Base R 4.1+ (`|>`) or `{magrittr}` (`%>%`) pipes to chain operations together (see below).
 
@@ -210,7 +240,7 @@ We can see some data issues in the plot above, so let's clean those with a singl
 
 * `outlier_cutoff`
 
-    Local outliers can be detected using a cutoff calculated from the local median value. A default value of `3` is recommended (i.e., ± 3 SD about the local median). If left as `NULL`, no outliers will be replaced.
+    Local outliers can be detected using a cutoff calculated from the local median value. A default value of `3` is recommended and correspond's to Pearson's rule (i.e., ± 3 SD about the local median). If left as `NULL`, no outliers will be replaced.
 
 * `width` or `span`
 
@@ -218,7 +248,7 @@ We can see some data issues in the plot above, so let's clean those with a singl
 
 * `method`
 
-    Missing data (`NA`), invalid values, and local outliers specified above can be replaced via interpolation or fill methods; either `"linear"` interpolation, fill with local `"median"`, or `"locf"` (*"last observation carried forward"*).\
+    Missing data (`NA`), invalid values, and local outliers specified above can be replaced via interpolation or fill methods; either `"linear"` interpolation (the default), fill with local `"median"`, or `"locf"` (*"last observation carried forward"*).\
 \
 `NA`s can be passed through to the returned data frame with `method = "none"`. However, subsequent processing & analysis steps may return errors when `NA`s are present. Therefore, it is good practice to deal with missing data early during data processing.
 
@@ -237,7 +267,7 @@ data_cleaned <- replace_mnirs(
     verbose = TRUE
 )
 
-plot(data_cleaned, label_time = TRUE)
+plot(data_cleaned, time_labels = TRUE)
 ```
 
 That cleaned up all the obvious data issues.
@@ -281,6 +311,8 @@ data_resampled
 ## Use `resample_mnirs()` to smooth over irregular or skipped samples
 
 If we see a warning from `read_mnirs()` about duplicated or irregular samples like we saw above, we can use `resample_mnirs()` to restore `time_channel` to a regular sample rate and interpolate across skipped samples.
+
+Note: if we perform both of these steps in a piped function call, we will still see the warning appear about irregular sampling at the end of the pipe. This warning is returned by `read_mnirs()`. But viewing the data frame can confirm that `resample_mnirs()` has resolved the issue.
 :::
 
 
@@ -292,13 +324,13 @@ To improve the signal-to-noise ratio in our dataset without losing information, 
 
 ## Choosing a digital filter
 
-There are a few digital filtering methods available in *`mnirs`*. Which option is best for *you* will depend in large part on the sample rate of the data and the frequency of the response/phenomena being observed.
+There are a few digital filtering methods available in *`mnirs`*. Which option is best for *you* will depend in large part on the sample rate of your data and the frequency of the response signal/phenomena you are interested in observing.
 
-Choosing filter parameters is an important processing step to improve signal-to-noise ratio and enhance our subsequent interpretations. Over-filtering the data can introduce data artefacts which can negatively influence the signal analysis and interpretations just as much as trying to analyse overly-noisy raw data.
+Choosing filter parameters is an important processing step to improve signal-to-noise ratio and enhance our subsequent interpretations. Over-filtering the data can introduce data artefacts which can negatively influence signal analysis and interpretations, just as much as trying to analyse overly-noisy raw data.
 
 It is perfectly valid to choose a digital filter by iteratively testing filter parameters until the signal or response of interest appears to be visually optimised with minimal data artefacts, to your satisfaction.
 
-We will discuss the process of choosing a digital filter more in depth in another vignette `<currently under development>`.
+We will discuss the process of choosing a digital filter more in depth in another article `<currently under development>`.
 
 
 ## `filter_mnirs()`
@@ -313,7 +345,7 @@ We will discuss the process of choosing a digital filter more in depth in anothe
 
 * `na.rm`
 
-    This important argument is left as `FALSE` by default. This function will return an error if any missing data (`NA`) are detected in the response variables (`nirs_channels`). Setting `na.rm = TRUE` will bypass these `NA`s and preserve them in the returned data frame, but this must be opted into explicitly in this function and elsewhere.
+    This important argument is left as `FALSE` by default. `filter_mnirs()` will return an error if any missing data (`NA`) are detected in the response variables (`nirs_channels`). Setting `na.rm = TRUE` will bypass these `NA`s and preserve them in the returned data frame, but this must be opted into explicitly in this function and elsewhere.
 
 
 ### Smoothing-spline
@@ -377,7 +409,7 @@ data_filtered <- filter_mnirs(
 )
 
 ## we will add the non-filtered data back to the plot to compare
-plot(data_filtered, label_time = TRUE) +
+plot(data_filtered, time_labels = TRUE) +
     geom_line(
         data = data_cleaned, 
         aes(y = smo2_left, colour = "smo2_left"), alpha = 0.4
@@ -393,7 +425,7 @@ That did a nice job reducing the high-frequency noise in our data, while preserv
 
 # ⚖️ Shift and rescale data
 
-NIRS values are not measured on an absolute scale (even, arguably percent (%) saturation). Therefore, we may need to adjust or calibrate our data to normalise NIRS signal values between muscle sites, individuals, trials, etc. depending on our intended comparison.
+NIRS values are not measured on an absolute scale (arguably not even percent (%) saturation/SmO<sub>2</sub>). Therefore, we may need to adjust or calibrate our data to normalise NIRS signal values between muscle sites, individuals, trials, etc. depending on our intended comparison.
 
 For example, we may want to set our mean baseline value to zero for all NIRS signals at the start of a recording. Or we may want to compare signal kinetics (the rate of change or time course of a response) after rescaling signal amplitudes to a common dynamic range.
 
@@ -441,7 +473,7 @@ For this data set, we want to shift each NIRS channel so that the mean of the 2-
 
 This is a good time to note that here and in most `*mnirs*` functions, data channels can be specified using `{tidyverse}`-style naming; Data frame column names can be specified either with quotes as a character string (`"smo2"`), or as a direct symbol (`smo2`).
 
-`{tidyselect}` support functions (e.g. `starts_with()`, `matches()`) can also be used.
+`{tidyselect}` support functions such as `starts_with()`, `matches()` can also be used.
 :::
 
 ```{r}
@@ -453,7 +485,7 @@ data_shifted <- shift_mnirs(
     position = "first"
 )
 
-plot(data_shifted, label_time = TRUE) +
+plot(data_shifted, time_labels = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
@@ -492,7 +524,7 @@ data_rescaled <- rescale_mnirs(
     range = c(0, 100) ## rescale to a 0-100% functional exercise range
 )
 
-plot(data_rescaled, label_time = TRUE) +
+plot(data_rescaled, time_labels = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")
 ```
 
@@ -546,7 +578,7 @@ read_mnirs(
         nirs_channels = list(c(smo2_left, smo2_right)), ## 👈 channels grouped together
         range = c(0, 100)
     ) |>
-    plot(label_time = TRUE)
+    plot(time_labels = TRUE)
 ```
 
 

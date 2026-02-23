@@ -12,7 +12,7 @@ read_mnirs(
   sample_rate = NULL,
   add_timestamp = FALSE,
   zero_time = FALSE,
-  keep_all = TRUE,
+  keep_all = FALSE,
   verbose = TRUE
 )
 }
@@ -27,7 +27,7 @@ exactly.
 \item If \code{NULL} (default), \code{read_mnirs()} attempts to detect the device from
 the file contents and use a known \code{nirs_channel} name.
 \item A \emph{named} character vector can be used to rename columns on import, in
-the form \code{c(new_name = "original_name")}.
+the form \code{c(renamed = "original_name")}.
 }}
 
 \item{time_channel}{A character scalar giving the name of the time
@@ -56,9 +56,15 @@ numeric time column.}
 \item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, will re-zero
 \code{time_channel} to start from \code{0}.}
 
-\item{keep_all}{Logical. Default is \code{TRUE}. Will keep all columns found in
-the file data table. If \code{FALSE}, will keep only the explicitly specified
-\code{nirs_channels}, \code{time_channel}, and \code{event_channel}.}
+\item{keep_all}{Logical. Default is \code{FALSE}. Will keep only the channels
+explicitly specified in \code{nirs_channels}, \code{time_channel}, and
+\code{event_channel}. If \code{TRUE} will keep all columns found in the file
+data table.
+\itemize{
+\item If no \code{nirs_channels} are specified and the file format is recognised,
+all columns in the file data table will be returned, as an exploratory
+option.
+}}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
@@ -92,7 +98,7 @@ columns, which do not have a column header and must be identified manually.
 
 A named character vector can be specified to rename \code{nirs_channels},
 \code{time_channel}, and \code{event_channel}, in the form
-\code{c(new_name = "original_name")}. The \code{"original_name"} must match the
+\code{c(renamed = "original_name")}. The \code{"original_name"} must match the
 contents of the file data table header row exactly.
 }
 

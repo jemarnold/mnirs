@@ -67,7 +67,7 @@ example_mnirs()
 ## call an example mNIRS data file
 file_path <- example_mnirs("moxy_ramp") 
 
-## rename channels in the format `new_name1 = "original_name1"`
+## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
 data_table <- read_mnirs(
     file_path,
@@ -109,7 +109,7 @@ data_table
 #> # ℹ 2,193 more rows
 
 ## note the hidden plot option to display time values as `h:mm:ss`
-plot(data_table, label_time = TRUE)
+plot(data_table, time_labels = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" alt="" width="100%" />
@@ -138,7 +138,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-02-20 00:29:00 PST"
+#> [1] "2026-02-23 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
@@ -154,7 +154,7 @@ data_cleaned <- replace_mnirs(
     verbose = TRUE
 )
 
-plot(data_cleaned, label_time = TRUE)
+plot(data_cleaned, time_labels = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
@@ -201,7 +201,7 @@ data_filtered <- filter_mnirs(
 )
 
 ## we will add the non-filtered data back to the plot to compare
-plot(data_filtered, label_time = TRUE) +
+plot(data_filtered, time_labels = TRUE) +
     geom_line(
         data = data_cleaned, 
         aes(y = smo2_left, colour = "smo2_left"), alpha = 0.4
@@ -225,7 +225,7 @@ data_shifted <- shift_mnirs(
     position = "first"
 )
 
-plot(data_shifted, label_time = TRUE) +
+plot(data_shifted, time_labels = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
@@ -238,7 +238,7 @@ data_rescaled <- rescale_mnirs(
     range = c(0, 100) ## rescale to a 0-100% functional exercise range
 )
 
-plot(data_rescaled, label_time = TRUE) +
+plot(data_rescaled, time_labels = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")
 ```
 
@@ -282,7 +282,7 @@ read_mnirs(
         nirs_channels = list(c(smo2_left, smo2_right)), ## 👈 channels grouped together
         range = c(0, 100)
     ) |>
-    plot(label_time = TRUE)
+    plot(time_labels = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />

@@ -167,7 +167,7 @@
 #'
 #' \donttest{
 #'   if (requireNamespace("ggplot2", quietly = TRUE)) {
-#'     plot(interval_list[[1L]], label_time = TRUE) +
+#'     plot(interval_list[[1L]], time_labels = TRUE) +
 #'       ggplot2::geom_vline(xintercept = 0, linetype = "dotted")
 #'   }
 #' }
