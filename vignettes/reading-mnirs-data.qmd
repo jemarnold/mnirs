@@ -139,11 +139,9 @@ example_mnirs()
 ## partial matching will error if matches multiple
 try(example_mnirs("moxy"))
 
-## call an example mNIRS data file
-file_path <- example_mnirs("moxy_ramp") 
-
 data_table <- read_mnirs(
-    file_path,
+    file_path = example_mnirs("moxy_ramp"), ## call an example mNIRS data file
+
     nirs_channels = c(
         smo2_right = "SmO2 Live",        ## identify and rename channels
         smo2_left = "SmO2 Live(2)"
@@ -170,6 +168,10 @@ data_table
 
 ## `plot.mnirs`
 
+* `data`
+
+    This function takes in a data frame of class *`mnirs`* and returns a formatted `{ggplot2}` plot.
+
 * `time_labels`
 
     `FALSE` by default; time values on the x-axis will be plotted as numeric by default. `time_labels = TRUE` will instead plot time values as `h:mm:ss` format.
@@ -180,7 +182,7 @@ data_table
 
 * `na.omit`
 
-    `FALSE` by default; missing data (`NA`s) will be plotted as gaps in the time-series data. If `na.omit = TRUE`, `NA`s will be omitted from the plotted data, effectively plotting across these gaps, making them less visible, but making the general data trend easier to see if there are lots of missing data.
+    `FALSE` by default; missing data (`NA`s) will be plotted as gaps in the time-series data. If `na.omit = TRUE`, `NA`s will be omitted from the plotted data, effectively plotting across these gaps, making them less visible, but making the general data trend easier to see if there are lots of missing values.
 
 ```{r}
 ## note the `time_labels` plot argument to display time values as `h:mm:ss`
@@ -444,7 +446,7 @@ We can group NIRS channels together to preserve the absolute and relative scalin
 
 * `nirs_channels`
 
-    In these functions, channels should be grouped by providing a list (e.g. `list(c(A, B), c(C))`) where each group will be shifted to a common scale, and separate scales between groups. The relative scaling between channels will be preserved within each group, but lost between groups.\
+    Channels should be grouped by providing a list (e.g. `list(c(A, B), c(C))`) where each group will be shifted to a common scale, and separate scales between groups. The relative scaling between channels will be preserved within each group, but lost between groups.\
 \
 `nirs_channels` should be specified explicitly to ensure the intended grouping structure is returned. The default *`mnirs`* metadata will group all NIRS channels together.
 
@@ -557,7 +559,7 @@ read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |> ## default will resample to fix irregular samples
+    resample_mnirs() |> ## default settings will resample to the same `sample_rate`
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,
@@ -570,7 +572,7 @@ read_mnirs(
         na.rm = TRUE
     ) |>
     shift_mnirs(
-        nirs_channels = list(smo2_left, smo2_right),
+        nirs_channels = list(smo2_left, smo2_right), ## 👈 channels grouped separately
         to = 0,
         span = 60,
         position = "first"

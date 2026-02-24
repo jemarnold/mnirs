@@ -1,131 +1,139 @@
 #' Extract intervals from *{mnirs}* data
 #'
-#' Detects and extracts intervals around specified events from time series
-#' data for analysis.
+#' Detect and extract intervals around specified events from *"mnirs"* time
+#' series data.
 #'
-#' @param nirs_channels A `list()` of character vectors indicating mNIRS
-#'   channel names to operate on within each interval (see *Details*). Must
+#' @param data A data frame of class *"mnirs"* containing time series data and
+#'   metadata.
+#'
+#' @param nirs_channels A character vector or a `list()` of character vectors 
+#'   of mNIRS channel names to operate on within each interval (see *Details*). 
+#'   Names must match column names in `data` exactly.
+#'   - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
+#'   - Use multiple list items to include or exclude specific `nirs_channels`
+#'     per interval.
+#'
+#' @param event_channel An *optional* character string giving the name of an
+#'   event/marker column to import. Required to specify `event_labels`. Must
 #'   match column names in `data` exactly. Retrieved from metadata if not
 #'   defined explicitly.
-#' @param time_channel A character string indicating the time or sample channel
-#'   name. Must match column names in `data` exactly. Retrieved from metadata
-#'   if not defined explicitly.
-#' @param event_channel An *optional* character string indicating the event or
-#'   lap channel name. Required if `event_labels` are specified. Must
-#'   match column names in `data` exactly. Retrieved from metadata if not
-#'   defined explicitly.
-#' @param event_times A numeric vector of `time_channel` values indicating
-#'   event starts (see *Details*).
-#' @param event_labels A character vector of strings to match from
-#'   `event_channel`, indicating event starts.
-#' @param event_samples An integer vector with sample indices (row numbers)
-#'   indicating event starts.
-#' @param span A `list()` of two-element numeric vectors specifying the
-#'   interval around each event as `c(before, after)`, in units of
+#'
+#' @param sample_rate An *optional* numeric sample rate (Hz) used to bin time
+#'   values for ensemble-averaging. If `NULL`, will be estimated from
 #'   `time_channel` (see *Details*).
-#' @param group_events Either a character string or a `list()` of numeric
-#'   vectors specifying how to group intervals. Interval numbers are sorted
-#'   in order of appearance within `data`.
+#'
+#' @param event_times A numeric vector of `time_channel` values indicating event
+#'   start times (see *Details*).
+#'
+#' @param event_labels A character vector of strings to match in
+#'   `event_channel`, indicating event starts. Matching is case-sensitive and
+#'   must match exactly.
+#'
+#' @param event_samples an integer vector of sample indices (row numbers)
+#'   indicating event starts.
+#'
+#' @param span A `list()` of two-element numeric vectors specifying the window
+#'   around each event as `c(before, after)`, in units of `time_channel`.
+#'
+#' @param group_events Either a character string or a `list()` of integer
+#'   vectors specifying how to group intervals (see *Details*).
 #'   \describe{
-#'      \item{`"distinct"`}{Will extract each interval as an independent
-#'      data frame (the *default*).}
-#'      \item{`"ensemble"`}{Will perform ensemble-averaging across all
-#'      detected intervals for each `nirs_channel`, and return a single
-#'      data frame.}
-#'      \item{`list(c(1, 2), c(3, 4))`}{Will perform ensemble-averaging across
-#'      intervals within each group and return a data frame for each group.}
+#'     \item{`"distinct"`}{The default. Extract each interval as an independent
+#'     data frame.}
+#'     \item{`"ensemble"`}{Ensemble-average each specified `nirs_channel` across
+#'     all detected intervals, returning a single data frame.}
+#'     \item{`list(c(1, 2), c(3, 4))`}{Ensemble-average each specified
+#'     `nirs_channel` within each group and return one data frame per group.}
 #'   }
-#' @inheritParams read_mnirs
+#'
+#' @param zero_time Logical. Default is `FALSE`. If `TRUE`, re-calculates
+#'   numeric `time_channel` values to start from zero within each interval
+#'   data frame.
+#'
 #' @inheritParams validate_mnirs
 #'
 #' @details
-#' `nirs_channels = list()` can be used to specify unique data channels
-#'   (column names) to operate on within intervals, according to `group_events`
-#'   (see below).
+#' ## Event specification
 #'
-#' - Channels can be specified in seperate list items (e.g.
-#'   `list(c("A", "B", "C"), "B", c("A", "C"))`) to include or exclude from
-#'   specific intervals. In this way, bad data channels in a single interval
-#'   can be excluded from contaminating the ensemble-averaging.
-#'
-#' `event_*` arguments can be used to identify intervals of interest in `data`,
-#'   and can be specified three ways (methods can be combined):
+#' Interval events can be identified in three ways, in combination:
 #'
 #' \describe{
-#'   \item{`event_times`}{Numeric time values in units of `time_channel`.}
+#'   \item{`event_times`}{Numeric time valuess in units of `time_channel`.}
 #'   \item{`event_samples`}{Integer sample indices (row numbers).}
-#'   \item{`event_labels`}{Character patterns to match in `event_channel`,
-#'   case-sensitive and must match exactly.}
+#'   \item{`event_labels`}{Character strings to match exactly in
+#'   `event_channel`.}
 #' }
 #'
-#' - Every unique event detected in `data` will be extracted according to the
-#'   `span` interval window around it (see below). Events can be specified in
-#'   any order. The detected intervals will be extracted and returned in the
-#'   order in which they appear.
+#' Events can be specified in any order, and will always be returned in the
+#' order in which they appear in `data`.
 #'
-#' `span = list()` will accept two-element numeric vectors indicating the
-#'   interval time window around each detected event, in units of
-#'   `time_channel`, e.g. seconds.
+#' ## Per-interval `nirs_channels` for ensemble-averaging
 #'
-#' - `span = c(before, after)` will typically have a *negative* `before` value,
-#'   extending the interval window *before* the target event, and a *positive*
-#'   `after` value, extending the interval window *after* the target event,
-#'   resulting in an interval window between
-#'   `[event - span[1], event + span[2]]`. However, `span` will accept any
-#'   positive or negative values with reference to the target event, as long
-#'   as the range is contained within the bounds of the available `data`.
+#' When `group_events = "ensemble"` or a list of numeric grouped intervals,
+#' `nirs_channels` can be specified as a list of column names to override
+#' ensemble-averaging across interval. For example, to exclude a bad channel
+#' in one interval:
 #'
-#' - Example for three intervals:
-#'   \describe{
-#'      \item{`event_times = list(60, 120, 300)`}{}
-#'      \item{`span = list(c(-30, 30), c(30, 90), c(-60, 0))`}{
-#'      - Interval 1 would range from `30` to `90` seconds.
-#'      - Interval 2 would range from `150` to `210` seconds.
-#'      - Interval 3 would range from `240` to `300` seconds.}
-#'   }
+#' ```r
+#' nirs_channels = list(
+#'   c("A", "B", "C"),
+#'   c("A", "C") ## channel "B" is excluded
+#' )
+#' ```
+#' 
+#' If all grouped intervals can include all `nirs_channels`, or if 
+#' `group_events = "distinct"`, a single `nirs_channels` character vector can 
+#' be supplied and recycled to all groups, or left as `NULL` for channels to
+#' be taken from *"mnirs"* metadata.
 #'
-#' `group_events = list()` can be used to specify the grouping structure of
-#'   intervals and return either discrete or ensemble-averaged intervals.
+#' ## Interval time `span` windows
+#'
+#' Each interval is defined relative to its event time in units of
+#' `time_channel` as `[event_times + before, event_times + after]`.
+#'
+#' - `before` is typically a negative value (window can extend before the
+#'   event).
+#' - `after` is typically a positive value (window can extend after the event).
+#' - Both values can be either positive or negative to reference an interval
+#'   window either completely before, or completely after the indicated event,
+#'   respectively.
+#'
+#' If an interval time span is partially out of bounds, available in-bounds
+#' data are returned with a warning. Interval time spans entirely out of bounds
+#' returns an error.
+#'
+#' ## Grouping (`group_events`)
+#'
+#' `group_events` controls whether extracted intervals are returned as distinct
+#' data frames or ensemble-averaged.
 #'
 #' \describe{
-#'   \item{`"distinct"`}{Will extract each interval as an independent
-#'   data frame.}
-#'   \item{`"ensemble"`}{Will perform ensemble-averaging across all
-#'   detected intervals for each `nirs_channel`, and return a single
-#'   data frame.}
-#'   \item{`list(c(1, 2), c(3, 4))`}{Will perform ensemble-averaging across
-#'   intervals within each group and return a data frame for each group.}
+#'    \item{`"distinct"`}{The default. Extract each interval and return a
+#'    list of independent data frames.}
+#'    \item{`"ensemble"`}{Ensemble-average each specified `nirs_channel` across
+#'    all detected intervals and return a one-item list with a single data
+#'    frame.}
+#'    \item{`list(c(1, 2), c(3, 4))`}{Ensemble-average each specified
+#'    `nirs_channel` within each group and return a list with one data frame
+#'    for each group. Any intervals detected but not specified in
+#'    `group_events` are returned as distinct.}
 #' }
+#' 
+#' `group_events` lists canned be named (e.g. 
+#' `list(low = c(1, 2), high = c(3, 4))`) and will pass those names to the 
+#' returned list of data frames. Otherwise, the return list will be named
+#' `c("interval_1", "interval_2")` etc. for distinct intervals; `"ensemble"`
+#' for ensemble-averaged; or `c("group_1_2", "group_3_4")` etc. for custom
+#' grouping structure.
 #'
-#' - Any interval numbers omitted from `group_events` will be extracted as a
-#'   distinct data frame. Interval numbers beyond the number of detected
-#'   intervals will be ignored.
-#'
-#' - `group_events` will accept a named list and pass on those names to the
-#'   list of returned data frames `<under development>`, e.g.
-#'   \describe{
-#'      \item{`group_events = list(low = c(1, 2), high = c(3, 4))`}{}
-#'   }
-#'   Otherwise, default names will be returned as `"interval_1"`,
-#'   `"interval_2"`, etc. for distinct intervals; `"ensemble"` for
-#'   ensemble-averaging across all intervals; or `"group_1_2"` etc. for
-#'   custom grouping structure.
-#'
-#' List items or a single vector (e.g. `nirs_channels = list(c("A", "B"))` or
-#'   `span = c(-30, 30)`) will be recycled forward for all intervals. If the
-#'   number of intervals detected exceeds the number of list items, the last
-#'   specified list item will be recycled forward to the additional intervals.
-#'   List items beyond the number of detected intervals will be ignored.
-#'
-#' `zero_time = TRUE` will re-calculate numeric `time_channel` values
-#'   to start from zero at the target event, for each interval. Ensemble-
-#'   averaged interval times will always be zeroed. Effectively, this works best
-#'   when the event marker indicates the start of the interval. This can
-#'   return unexpected time values when the event marker itself is not
-#'   included in the interval range (e.g. with `span = c(30, 60)`).
+#' When `group_events` is a list of numeric interval numbers, list items in
+#' `nirs_channels` and `span` are recycled to the number of groups. If lists
+#' are only partially specified (if there are more intervals or groups detected
+#' than there are argument list items) The final argument item is recycled
+#' forward as needed. Extra argument items are ignored.
 #'
 #' @returns A named `list()` of [tibbles][tibble::tibble-package] of class
-#'   *"mnirs"* with metadata available with `attributes()`.
+#'   *"mnirs"*, with metadata available via `attributes()`.
 #'
 #' @examples
 #' ## read example data
@@ -162,7 +170,7 @@
 #'     zero_time = TRUE,
 #'     verbose = FALSE
 #' )
-#' 
+#'
 #' interval_list[[1L]]
 #'
 #' \donttest{
@@ -175,7 +183,7 @@
 #' @export
 extract_intervals <- function(
     data,
-    nirs_channels = list(NULL),
+    nirs_channels = NULL,
     time_channel = NULL,
     event_channel = NULL,
     sample_rate = NULL,

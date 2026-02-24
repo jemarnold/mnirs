@@ -19,16 +19,22 @@ analyse_peak_slope(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names to operate
-on. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{nirs_channels}{A character vector giving the names of mNIRS columns to
+operate on. Must match column names in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{nirs_channels} metadata attribute of \code{data} is
+used.
+}}
 
-\item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{time_channel}{A character string giving the name of the time or sample
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
+used.
+}}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}

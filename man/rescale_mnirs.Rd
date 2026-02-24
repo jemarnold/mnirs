@@ -12,8 +12,8 @@ rescale_mnirs(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
 \item{nirs_channels}{A \code{list()} of character vectors indicating grouping
 structure of mNIRS channel names to operate on (see \emph{Details}). Must

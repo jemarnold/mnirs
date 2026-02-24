@@ -30,7 +30,7 @@ the file contents and use a known \code{nirs_channel} name.
 the form \code{c(renamed = "original_name")}.
 }}
 
-\item{time_channel}{A character scalar giving the name of the time
+\item{time_channel}{A character string giving the name of the time
 (or sample) column to import. The name must match the file header exactly.
 \itemize{
 \item If \code{NULL} (default), \code{read_mnirs()} attempts to identify a time-like
@@ -40,12 +40,12 @@ values).
 in the form \code{c(time = "original_name")}.
 }}
 
-\item{event_channel}{An \emph{optional} character scalar giving the name of an
+\item{event_channel}{An \emph{optional} character string giving the name of an
 event/marker column to import. Names must match the file header exactly.
 A named character vector can be used to rename the column on import in
 the form \code{c(event = "original_name")}.}
 
-\item{sample_rate}{An \emph{optional} numeric sample rate (Hz). If left blank
+\item{sample_rate}{An \emph{optional} numeric sample rate in Hz. If left blank
 (\code{NULL}), the sample rate is estimated from \code{time_channel} (see \emph{Details}).}
 
 \item{add_timestamp}{A logical. Default is \code{FALSE}. If \code{TRUE} and if the
@@ -53,8 +53,8 @@ source data contain an absolute date-time (POSIXct) time value, will add
 a \code{"timestamp"} column in addition to the specified \code{time_channel} as a
 numeric time column.}
 
-\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, will re-zero
-\code{time_channel} to start from \code{0}.}
+\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-calculates
+numeric \code{time_channel} values to start from zero.}
 
 \item{keep_all}{Logical. Default is \code{FALSE}. Will keep only the channels
 explicitly specified in \code{nirs_channels}, \code{time_channel}, and

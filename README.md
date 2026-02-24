@@ -44,12 +44,13 @@ A more detailed vignette for common usage can be found here: [Reading
 and Cleaning Data with
 {mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
 
-> *{mnirs}* is currently in experimental development and functionality
-> may change! Stay updated on development and follow releases at
-> [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
-> *{mnirs}* is designed to process NIRS data, but it can be used to
-> read, clean, and process other time series datasets which require many
-> of the same processing steps. Enjoy!
+*{mnirs}* is currently in experimental development and functionality may
+change! Stay updated on development and follow releases at
+[github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
+
+*{mnirs}* is designed to process NIRS data, but it can be used to read,
+clean, and process other time series datasets which require many of the
+same processing steps. Enjoy!
 
 ### `read_mnirs()` Read data from file
 
@@ -64,13 +65,10 @@ example_mnirs()
 #> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
 #> [5] "train.red_intervals.csv" "vo2master.csv"
 
-## call an example mNIRS data file
-file_path <- example_mnirs("moxy_ramp") 
-
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
 data_table <- read_mnirs(
-    file_path,
+    file_path = example_mnirs("moxy_ramp"), ## call an example mNIRS data file
     nirs_channels = c(
         smo2_right = "SmO2 Live",        ## identify and rename channels
         smo2_left = "SmO2 Live(2)"
@@ -260,7 +258,7 @@ read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |> ## default will resample to fix irregular samples
+    resample_mnirs() |> ## default settings will resample to the same `sample_rate`
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,
@@ -273,7 +271,7 @@ read_mnirs(
         na.rm = TRUE
     ) |>
     shift_mnirs(
-        nirs_channels = list(smo2_left, smo2_right),
+        nirs_channels = list(smo2_left, smo2_right), ## 👈 channels grouped separately
         to = 0,
         span = 60,
         position = "first"

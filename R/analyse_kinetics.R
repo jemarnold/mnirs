@@ -24,7 +24,7 @@
 #' @inheritParams validate_mnirs
 #'
 #' @details
-#' ## `data` input formats
+#' ## data input formats
 #'
 #' `analyse_kinetics()` can accept `data` in multiple formats:
 #'
@@ -35,7 +35,7 @@
 #'   the data frame will be split by grouping levels and processed as
 #'   separate intervals.
 #'
-#' ## `method`
+#' ## kinetics analysis method
 #'
 #' #### `method = "half_time"`
 #' 
@@ -72,7 +72,7 @@
 #' 
 #' `<under development>`
 #'
-#' ## `channel_args` per `nirs_channel`
+#' ## channel_args per nirs_channel
 #'
 #' Arguments in `analyse_kinetics()` apply to all `nirs_channels` by default.
 #' `channel_args` allows overriding defaults with unique values per channel,

@@ -53,53 +53,77 @@ validate_x_t(x, t, invalid = FALSE)
 \arguments{
 \item{x}{A numeric vector.}
 
-\item{elements}{A numeric value for the number of numeric elements in \code{arg}.}
+\item{elements}{An integer. Default is \code{Inf}. The number of numeric elements
+expected in \code{x}.}
 
-\item{range}{A two-element numeric vector for the range of valid numeric
-values in \code{arg}.}
+\item{range}{A two-element numeric vector giving the valid range for \code{x}.}
 
-\item{inclusive}{A character vector to specify which of \code{left} and/or
-\code{right} boundary values should be included in the range, or both
-(the \emph{default}), or excluded if \code{FALSE}.}
+\item{inclusive}{A character vector specifying which boundaries of \code{range}
+are included. Any of \code{"left"}, \code{"right"} (default is both). Use \code{FALSE} to
+exclude both endpoints.}
 
-\item{integer}{A logical indicating whether to test \code{arg} as an integer
-using \code{rlang::is_integerish()}, rather than a numeric (\code{FALSE} by
-\emph{default}).}
+\item{integer}{Logical. Default is \code{FALSE}. If \code{TRUE}, validate \code{x} as
+integer-like values using \code{\link[rlang:is_integerish]{rlang::is_integerish()}}. Otherwise tested as a
+numeric value.}
 
-\item{msg1, msg2}{A character string detailing the \code{cli_abort} error message
-returned for invalid numeric values passed to \code{arg}.}
+\item{msg1, msg2}{A character string appended to the \code{\link[cli:cli_abort]{cli::cli_abort()}}
+message when numeric validation fails.}
 
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names to operate
-on. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{nirs_channels}{A character vector giving the names of mNIRS columns to
+operate on. Must match column names in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{nirs_channels} metadata attribute of \code{data} is
+used.
+}}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
-\item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{time_channel}{A character string giving the name of the time or sample
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
+used.
+}}
 
-\item{event_channel}{A character string indicating the event or lap channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{event_channel}{A character string giving the name of the event/marker
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{event_channel} metadata attribute of \code{data} is
+used.
+}}
 
-\item{required}{A logical specifying whether \code{event_channel} is required
-(the \emph{default}) or optional (\code{event_channel} returned as \code{NULL}).}
+\item{required}{Logical. Default is \code{TRUE}. \code{event_channel} must be
+present or detected in metadata. If \code{FALSE}, \code{event_channel} may be \code{NULL}.}
 
-\item{sample_rate}{A numeric value for the exported data sample rate in Hz.
-Retrieved from metadata or estimated from \code{time_channel} if not defined
-explicitly.}
+\item{sample_rate}{A numeric sample rate in Hz.
+\itemize{
+\item If \code{NULL} (default), the \code{sample_rate} metadata attribute of \code{data} will
+be used if detected, or the sample rate will be estimated from
+\code{time_channel}.
+}}
 }
 \value{
-The validated object or an error message with \code{\link[cli:cli_abort]{cli::cli_abort()}}.
+Returns the validated object (e.g. a resolved \code{time_channel}
+string), or invisibly returns \code{NULL} for successful validations. On
+failure, an error is thrown via \code{\link[cli:cli_abort]{cli::cli_abort()}}.
 }
 \description{
-Passes through manually defined parameters, or defines them from metadata
-if present, and validates relevant data quality checks.
+Resolve and validate \emph{{mnirs}} metadata and perform basic data quality
+checks.
+}
+\details{
+\code{validate_mnirs()} is an internal documentation topic for a set of
+validators used throughout the package. These validators:
+\itemize{
+\item Prefer explicit user-supplied arguments.
+\item Fall back to \emph{"mnirs"} metadata attributes when available.
+\item Fail fast with informative \code{\link[cli:cli_abort]{cli::cli_abort()}} messages when values are
+missing or invalid.
+}
 }
 \keyword{internal}

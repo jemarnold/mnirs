@@ -16,7 +16,7 @@
 #'   - A *named* character vector can be used to rename columns on import, in
 #'     the form `c(renamed = "original_name")`.
 #' 
-#' @param time_channel A character scalar giving the name of the time 
+#' @param time_channel A character string giving the name of the time 
 #'   (or sample) column to import. The name must match the file header exactly.
 #'
 #'   - If `NULL` (default), `read_mnirs()` attempts to identify a time-like
@@ -25,12 +25,12 @@
 #'   - A *named* character vector can be used to rename the column on import,
 #'     in the form `c(time = "original_name")`.
 #' 
-#' @param event_channel An *optional* character scalar giving the name of an 
+#' @param event_channel An *optional* character string giving the name of an 
 #'   event/marker column to import. Names must match the file header exactly. 
 #'   A named character vector can be used to rename the column on import in 
 #'   the form `c(event = "original_name")`.
 #' 
-#' @param sample_rate An *optional* numeric sample rate (Hz). If left blank
+#' @param sample_rate An *optional* numeric sample rate in Hz. If left blank
 #'   (`NULL`), the sample rate is estimated from `time_channel` (see *Details*).
 #' 
 #' @param add_timestamp A logical. Default is `FALSE`. If `TRUE` and if the 
@@ -38,8 +38,8 @@
 #'   a `"timestamp"` column in addition to the specified `time_channel` as a 
 #'   numeric time column.
 #' 
-#' @param zero_time Logical. Default is `FALSE`. If `TRUE`, will re-zero 
-#'   `time_channel` to start from `0`.
+#' @param zero_time Logical. Default is `FALSE`. If `TRUE`, re-calculates 
+#'   numeric `time_channel` values to start from zero.
 #' 
 #' @param keep_all Logical. Default is `FALSE`. Will keep only the channels 
 #'   explicitly specified in `nirs_channels`, `time_channel`, and 
