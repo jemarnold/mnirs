@@ -32,10 +32,7 @@
 #' @param event_samples an integer vector of sample indices (row numbers)
 #'   indicating event starts.
 #'
-#' @param span A `list()` of two-element numeric vectors specifying the window
-#'   around each event as `c(before, after)`, in units of `time_channel`.
-#'
-#' @param group_events Either a character string or a `list()` of integer
+#' @param event_groups Either a character string or a `list()` of integer
 #'   vectors specifying how to group intervals (see *Details*).
 #'   \describe{
 #'     \item{`"distinct"`}{The default. Extract each interval as an independent
@@ -45,6 +42,9 @@
 #'     \item{`list(c(1, 2), c(3, 4))`}{Ensemble-average each specified
 #'     `nirs_channel` within each group and return one data frame per group.}
 #'   }
+#'
+#' @param span A `list()` of two-element numeric vectors specifying the window
+#'   around each event as `c(before, after)`, in units of `time_channel`.
 #'
 #' @param zero_time Logical. Default is `FALSE`. If `TRUE`, re-calculates
 #'   numeric `time_channel` values to start from zero within each interval
@@ -69,7 +69,7 @@
 #'
 #' ## Per-interval `nirs_channels` for ensemble-averaging
 #'
-#' When `group_events = "ensemble"` or a list of numeric grouped intervals,
+#' When `event_groups = "ensemble"` or a list of numeric grouped intervals,
 #' `nirs_channels` can be specified as a list of column names to override
 #' ensemble-averaging across interval. For example, to exclude a bad channel
 #' in one interval:
@@ -82,7 +82,7 @@
 #' ```
 #' 
 #' If all grouped intervals can include all `nirs_channels`, or if 
-#' `group_events = "distinct"`, a single `nirs_channels` character vector can 
+#' `event_groups = "distinct"`, a single `nirs_channels` character vector can 
 #' be supplied and recycled to all groups, or left as `NULL` for channels to
 #' be taken from *"mnirs"* metadata.
 #'
@@ -102,9 +102,9 @@
 #' data are returned with a warning. Interval time spans entirely out of bounds
 #' returns an error.
 #'
-#' ## Grouping (`group_events`)
+#' ## Grouping events
 #'
-#' `group_events` controls whether extracted intervals are returned as distinct
+#' `event_groups` controls whether extracted intervals are returned as distinct
 #' data frames or ensemble-averaged.
 #'
 #' \describe{
@@ -116,17 +116,17 @@
 #'    \item{`list(c(1, 2), c(3, 4))`}{Ensemble-average each specified
 #'    `nirs_channel` within each group and return a list with one data frame
 #'    for each group. Any intervals detected but not specified in
-#'    `group_events` are returned as distinct.}
+#'    `event_groups` are returned as distinct.}
 #' }
 #' 
-#' `group_events` lists canned be named (e.g. 
+#' `event_groups` lists canned be named (e.g. 
 #' `list(low = c(1, 2), high = c(3, 4))`) and will pass those names to the 
 #' returned list of data frames. Otherwise, the return list will be named
 #' `c("interval_1", "interval_2")` etc. for distinct intervals; `"ensemble"`
 #' for ensemble-averaged; or `c("group_1_2", "group_3_4")` etc. for custom
 #' grouping structure.
 #'
-#' When `group_events` is a list of numeric interval numbers, list items in
+#' When `event_groups` is a list of numeric interval numbers, list items in
 #' `nirs_channels` and `span` are recycled to the number of groups. If lists
 #' are only partially specified (if there are more intervals or groups detected
 #' than there are argument list items) The final argument item is recycled
@@ -154,8 +154,8 @@
 #'     data,
 #'     nirs_channels = list(c(smo2_left, smo2_right)),
 #'     event_times = c(368, 1093), ## specify interval events
+#'     event_groups = "distinct",  ## return all unique intervals
 #'     span = list(c(-20, 90)),    ## specify the event start-end timespans
-#'     group_events = "distinct",  ## return all unique intervals
 #'     zero_time = TRUE,           ## start time from zero
 #'     verbose = FALSE
 #' )
@@ -165,8 +165,8 @@
 #'     data,
 #'     nirs_channels = list(c(smo2_left, smo2_right)),
 #'     event_times = c(368, 1093),
+#'     event_groups = "ensemble", ## return ensemble-averaged intervals
 #'     span = list(c(-20, 90)),
-#'     group_events = "ensemble", ## return ensemble-averaged intervals
 #'     zero_time = TRUE,
 #'     verbose = FALSE
 #' )
@@ -190,8 +190,8 @@ extract_intervals <- function(
     event_times = NULL,
     event_labels = NULL,
     event_samples = NULL,
+    event_groups = list("distinct", "ensemble"),
     span = list(c(-30, 180)),
-    group_events = list("distinct", "ensemble"),
     zero_time = FALSE,
     verbose = TRUE
 ) {
@@ -268,16 +268,16 @@ extract_intervals <- function(
     ## expand parameters ====================================
     ## n_events accounts for grouping structure of identified events
     n_events <- length(event_indices)
-    group_events <- make_list(group_events)
+    event_groups <- make_list(event_groups)
 
     ## validate params are lists and expand last to fill any missing events
     nirs_channels <- recycle_param(
         nirs_channels,
         n_events,
-        group_events,
+        event_groups,
         verbose
     )
-    span <- recycle_param(span, n_events, group_events, verbose)
+    span <- recycle_param(span, n_events, event_groups, verbose)
 
     ## specify interval metadata =======================================
     ## return a data frame of metadata for each interval
@@ -303,7 +303,7 @@ extract_intervals <- function(
         interval_list,
         nirs_channels,
         metadata,
-        group_events,
+        event_groups,
         zero_time,
         verbose
     )
@@ -400,7 +400,7 @@ recycle_to_length <- function(
 #' the number of events.
 #'
 #' @keywords internal
-recycle_param <- function(param, n_events, group_events, verbose = TRUE) {
+recycle_param <- function(param, n_events, event_groups, verbose = TRUE) {
     ## flatten nested lists to single-depth list
     param <- if (is.list(param)) {
         lapply(param, \(.x) if (is.list(.x)) unlist(.x) else .x)
@@ -409,16 +409,16 @@ recycle_param <- function(param, n_events, group_events, verbose = TRUE) {
     }
 
     ## custom grouping: recycle per group, then map to event order
-    if (is.numeric(group_events[[1L]])) {
-        n_groups <- length(group_events)
-        groups_unlisted <- unlist(group_events)
+    if (is.numeric(event_groups[[1L]])) {
+        n_groups <- length(event_groups)
+        groups_unlisted <- unlist(event_groups)
 
         ## recycle param to number of groups
         param <- recycle_to_length(param, n_groups, "group", verbose)
 
         ## create mapping:  event_id -> group_id
-        ## rep(1:n_groups, lengths(group_events)) gives group index per event in group_events
-        group_for_event <- rep(seq_len(n_groups), lengths(group_events))
+        ## rep(1:n_groups, lengths(event_groups)) gives group index per event in event_groups
+        group_for_event <- rep(seq_len(n_groups), lengths(event_groups))
 
         ## build lookup:  position i holds group index for event i (NA if ungrouped)
         event_to_group <- integer(n_events)
@@ -623,7 +623,7 @@ group_intervals <- function(
     interval_list,
     nirs_channels,
     metadata,
-    group_events,
+    event_groups,
     zero_time = TRUE,
     verbose = TRUE
 ) {
@@ -631,7 +631,7 @@ group_intervals <- function(
     n_intervals <- length(interval_list)
 
     ## return distinct intervals
-    if (n_intervals == 1L || group_events[[1L]][1L] == "distinct") {
+    if (n_intervals == 1L || event_groups[[1L]][1L] == "distinct") {
         result <- lapply(interval_list, \(.df) {
             if (zero_time) {
                 event_time <- attr(.df, "event_times")
@@ -658,7 +658,7 @@ group_intervals <- function(
     }
 
     ## return ensembled intervals
-    if (group_events[[1L]][1L] == "ensemble") {
+    if (event_groups[[1L]][1L] == "ensemble") {
         all_nirs <- unique(unlist(nirs_channels))
         result <- list(
             ensemble = ensemble_intervals(
@@ -674,20 +674,20 @@ group_intervals <- function(
 
     ## custom grouping ===================================
     ## find ungrouped intervals
-    grouped_ids <- unlist(group_events)
+    grouped_ids <- unlist(event_groups)
     ungrouped_ids <- setdiff(seq_len(n_intervals), grouped_ids)
 
     ## add ungrouped ids as individual groups and fuzzy sort list
     if (length(ungrouped_ids) > 0) {
-        group_events <- c(group_events, as.list(ungrouped_ids))
-        group_events <- group_events[
-            order(vapply(group_events, \(.x) {
+        event_groups <- c(event_groups, as.list(ungrouped_ids))
+        event_groups <- event_groups[
+            order(vapply(event_groups, \(.x) {
                 median(.x, na.rm = TRUE)
             }, FUN.VALUE = numeric(1))) ## TODO confirm length == 0 always
         ]
         if (verbose) {
             cli_inform(c(
-                "!" = "Intervals detected not in {.arg group_events}.",
+                "!" = "Intervals detected not in {.arg event_groups}.",
                 "i" = "Ungrouped intervals included as discrete."
             ))
         }
@@ -699,12 +699,12 @@ group_intervals <- function(
         cli_warn(c(
             "!" = "Duplicates detected of {qty(length(dup))} \\
             interval{?s} {.val {dup}}.",
-            "i" = "Re-specify {.arg group_events} to remove duplicates."
+            "i" = "Re-specify {.arg event_groups} to remove duplicates."
         ))
     }
 
     ## process by group
-    result <- lapply(group_events, \(.g) {
+    result <- lapply(event_groups, \(.g) {
         if (length(.g) == 1L) {
             ## single interval return as-is
             df <- interval_list[[.g]]
@@ -726,7 +726,7 @@ group_intervals <- function(
     })
 
     ## TODO do I want to name by interval or by group?
-    names(result) <- vapply(group_events, \(.g) {
+    names(result) <- vapply(event_groups, \(.g) {
         paste0("interval_", paste(.g, collapse = "_"))
     }, character(1))
 

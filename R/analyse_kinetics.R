@@ -124,7 +124,7 @@
 #'     resample_mnirs(verbose = FALSE) |>
 #'     extract_intervals(
 #'         event_times = c(2455, 3166),
-#'         group_events = "distinct",
+#'         event_groups = "distinct",
 #'         zero_time = TRUE,
 #'         verbose = FALSE
 #'     ) |>

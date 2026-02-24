@@ -14,7 +14,7 @@ extract_intervals(
   event_labels = NULL,
   event_samples = NULL,
   span = list(c(-30, 180)),
-  group_events = list("distinct", "ensemble"),
+  event_groups = list("distinct", "ensemble"),
   zero_time = FALSE,
   verbose = TRUE
 )
@@ -61,7 +61,7 @@ indicating event starts.}
 \item{span}{A \code{list()} of two-element numeric vectors specifying the window
 around each event as \code{c(before, after)}, in units of \code{time_channel}.}
 
-\item{group_events}{Either a character string or a \code{list()} of integer
+\item{event_groups}{Either a character string or a \code{list()} of integer
 vectors specifying how to group intervals (see \emph{Details}).
 \describe{
 \item{\code{"distinct"}}{The default. Extract each interval as an independent
@@ -106,7 +106,7 @@ order in which they appear in \code{data}.
 
 \subsection{Per-interval \code{nirs_channels} for ensemble-averaging}{
 
-When \code{group_events = "ensemble"} or a list of numeric grouped intervals,
+When \code{event_groups = "ensemble"} or a list of numeric grouped intervals,
 \code{nirs_channels} can be specified as a list of column names to override
 ensemble-averaging across interval. For example, to exclude a bad channel
 in one interval:
@@ -118,7 +118,7 @@ in one interval:
 }\if{html}{\out{</div>}}
 
 If all grouped intervals can include all \code{nirs_channels}, or if
-\code{group_events = "distinct"}, a single \code{nirs_channels} character vector can
+\code{event_groups = "distinct"}, a single \code{nirs_channels} character vector can
 be supplied and recycled to all groups, or left as \code{NULL} for channels to
 be taken from \emph{"mnirs"} metadata.
 }
@@ -141,9 +141,9 @@ data are returned with a warning. Interval time spans entirely out of bounds
 returns an error.
 }
 
-\subsection{Grouping (\code{group_events})}{
+\subsection{Grouping events}{
 
-\code{group_events} controls whether extracted intervals are returned as distinct
+\code{event_groups} controls whether extracted intervals are returned as distinct
 data frames or ensemble-averaged.
 
 \describe{
@@ -155,17 +155,17 @@ frame.}
 \item{\code{list(c(1, 2), c(3, 4))}}{Ensemble-average each specified
 \code{nirs_channel} within each group and return a list with one data frame
 for each group. Any intervals detected but not specified in
-\code{group_events} are returned as distinct.}
+\code{event_groups} are returned as distinct.}
 }
 
-\code{group_events} lists canned be named (e.g.
+\code{event_groups} lists canned be named (e.g.
 \code{list(low = c(1, 2), high = c(3, 4))}) and will pass those names to the
 returned list of data frames. Otherwise, the return list will be named
 \code{c("interval_1", "interval_2")} etc. for distinct intervals; \code{"ensemble"}
 for ensemble-averaged; or \code{c("group_1_2", "group_3_4")} etc. for custom
 grouping structure.
 
-When \code{group_events} is a list of numeric interval numbers, list items in
+When \code{event_groups} is a list of numeric interval numbers, list items in
 \code{nirs_channels} and \code{span} are recycled to the number of groups. If lists
 are only partially specified (if there are more intervals or groups detected
 than there are argument list items) The final argument item is recycled
@@ -190,10 +190,10 @@ data <- read_mnirs(
 extract_intervals(
     data,
     nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093),
-    span = list(c(-20, 90)),
-    group_events = "distinct",
-    zero_time = TRUE,
+    event_times = c(368, 1093), ## specify interval events
+    span = list(c(-20, 90)),    ## specify the event start-end timespans
+    event_groups = "distinct",  ## return all unique intervals
+    zero_time = TRUE,           ## start time from zero
     verbose = FALSE
 )
 
@@ -203,7 +203,7 @@ interval_list <- extract_intervals(
     nirs_channels = list(c(smo2_left, smo2_right)),
     event_times = c(368, 1093),
     span = list(c(-20, 90)),
-    group_events = "ensemble",
+    event_groups = "ensemble", ## return ensemble-averaged intervals
     zero_time = TRUE,
     verbose = FALSE
 )

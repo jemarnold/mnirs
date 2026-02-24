@@ -244,7 +244,7 @@ All occlusion bouts were held for 5-seconds in this protocol. If the occlusion d
 \
 From visual investigation of the plots, we were able to see that in the first ~0.5 sec after the occlusion label, the deoxyhaeme signal was disrupted by the inflation of the cuff, which might produce invalid slope values. So we will specify a time span of `c(1, 5)`, i.e. from 1 to 5 seconds after each `"Occlusion"` event label. If we wanted to include an interval before the event label, we could specify a negative numeric value, e.g. `c(-2.5, 2.5)` to include a 5-sec span centred on the label itself.
 
-* `group_events`
+* `event_groups`
 
     Multiple events can be extracted for analysis as `"distinct"` intervals, or `"ensemble"`-averaged together. Different groupings of intervals can be ensemble-averaged by providing a list of numeric vectors specifying event intervals by number to ensemble-average or return as distinct; e.g. `list(c(1, 2), c(3, 4))`.\
 \
@@ -265,8 +265,8 @@ For repeated occlusion testing, the original time information for each occlusion
 df_list <- extract_intervals(
     df,
     event_labels = "Occlusion", ## event label used in file, must match string exactly
+    event_groups = "distinct", ## return each occlusion event separately
     span = c(1, 5), ## occlusion interval c(start, end) with reference to the event time value
-    group_events = "distinct", ## return each occlusion event separately
     zero_time = FALSE ## preserve original time values at each event
 )
 

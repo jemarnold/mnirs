@@ -80,7 +80,7 @@ estimation for \code{nirs_channels} within an \emph{"mnirs"} data frame or a lis
 data frames.
 }
 \details{
-\subsection{\code{data} input formats}{
+\subsection{data input formats}{
 
 \code{analyse_kinetics()} can accept \code{data} in multiple formats:
 \itemize{
@@ -93,7 +93,7 @@ separate intervals.
 }
 }
 
-\subsection{\code{method}}{
+\subsection{kinetics analysis method}{
 \subsection{\code{method = "half_time"}}{
 
 \verb{<under development>}
@@ -135,7 +135,7 @@ calculation over partial windows with at least 2 valid samples.}
 
 }
 
-\subsection{\code{channel_args} per \code{nirs_channel}}{
+\subsection{channel_args per nirs_channel}{
 
 Arguments in \code{analyse_kinetics()} apply to all \code{nirs_channels} by default.
 \code{channel_args} allows overriding defaults with unique values per channel,
@@ -167,7 +167,7 @@ result <- read_mnirs(
     resample_mnirs(verbose = FALSE) |>
     extract_intervals(
         event_times = c(2455, 3166),
-        group_events = "distinct",
+        event_groups = "distinct",
         zero_time = TRUE,
         verbose = FALSE
     ) |>
