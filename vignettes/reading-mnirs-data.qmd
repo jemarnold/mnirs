@@ -63,7 +63,7 @@ First, install and load the *`mnirs`* package and other required libraries.
 #| warning: false
 
 # remotes::install_github("jemarnold/mnirs") ## install development version
-library(ggplot2) ## load for plotting
+library(ggplot2)   ## load for plotting
 library(mnirs) 
 ```
 
@@ -590,3 +590,92 @@ read_mnirs(
 After the NIRS signal has been cleaned and filtered, it should be ready for further processing and analysis. 
 
 *`mnirs`* is being developed to include functionality for processing discrete intervals and events, e.g. reoxygenation kinetics, slope calculations for post-occlusion microvascular responsiveness, and critical oxygenation breakpoints.
+
+
+
+## `extract_intervals()`
+
+Often we will need to locate and extract smaller intervals from a NIRS recording, for further processing and analysis. For example, if we want to extract the last two minutes from repeated exercise trials.
+
+We may have marked interval events in the specified `event_channel`, or we may simply have to manually specify the event markers by `time_channel` value or row number in the data frame.
+
+* `data`
+
+    This function takes in a data frame, applies processing to all channels specified, then returns a list of processed data frames. *`mnirs`* metadata will be passed to and from this function.
+
+* `nirs_channels`
+
+    When ensemble-averaging (see `event_groups` below), channels should be grouped by providing a list (e.g. `list(c(A, B), c(C))`) where each group will be shifted to a common scale, and separate scales between groups. The relative scaling between channels will be preserved within each group, but lost between groups.\
+\
+`nirs_channels` should be specified explicitly to ensure the intended grouping structure is returned. The default *`mnirs`* metadata will group all NIRS channels together.
+
+* `time_channel`, `event_channel`, & `sample_rate`
+
+    If the data contain *`mnirs`* metadata, these channels will be detected automatically. Or they can be specified explicitly.
+
+* `event_times`, `event_labels`, `event_samples`
+
+    `<under development>`
+
+* `span`
+
+    The interval to be extracted around each event is specified as a time span window in units of `time_channel` in the form `c(start, end)` or `c(before, after)`. Positive numeric values indicate time *after* the specified event. Negative values indicate time *before* the specified event.
+
+* `event_groups`
+
+    `<under development>`
+
+* `zero_time`
+
+    `FALSE` by default; because `time_channel` values within each returned interval likely start at a non-zero value, `zero_time = TRUE` will re-calculate time starting from zero at the specified event. Meaning the `event_time` (or however an event is specified) will become `0`.\
+\
+When ensemble-averaging across intervals, time will always be re-calculated from `0`, since the time values have lost their meaning.
+
+```{r}
+nirs_data <- read_mnirs(
+    example_mnirs("train.red"),
+    nirs_channels = c(
+        smo2_left = "SmO2 unfiltered",
+        smo2_right = "SmO2 unfiltered"
+    ),
+    time_channel = c(time = "Timestamp (seconds passed)")
+) |>
+    resample_mnirs() ## important step for ensemble-averaging with irregular sampling
+
+## return each interval independently with `event_groups = "distinct"`
+distinct_list <- extract_intervals(
+    nirs_data,
+    nirs_channels = c(smo2_left, smo2_right), ## recycled to all intervals by default
+    event_times = c(2455, 3166),              ## manually identified event times
+    event_groups = "distinct",                ## return a list of two data frames
+    span = c(-30, 90),                        ## 30 sec before to 90 sec after each event
+    zero_time = FALSE                         ## return original time values
+)
+
+## use `{patchwork}` package to plot intervals side by side
+library(patchwork)
+
+## note the section of missing data in interval two
+## ensemble-averaging can help mitigate this kind of data quality issue
+plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
+```
+
+```{r}
+## ensemble average both intervals with `event_groups = "ensemble"`
+ensemble_list <- extract_intervals(
+    nirs_data,
+    nirs_channels = c(smo2_left, smo2_right),
+    event_times = c(2455, 3166),
+    event_groups = "ensemble", ## ensemble-average across two intervals
+    span = c(-30, 90),
+    zero_time = TRUE           ## re-calculate common time to start from `0`
+)
+
+plot(ensemble_list[[1L]])
+
+```
+
+
+## `peak_slope()`
+
+`<under development>`

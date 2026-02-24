@@ -163,7 +163,7 @@ replace_mnirs <- function(
     time_channel <- validate_time_channel(enquo(time_channel), data)
     time_vec <- data[[time_channel]]
 
-    if (any(check_conditions[2:3])) {
+    if (check_conditions[2L] || method == "median") {
         validate_width_span(width, span, verbose)
     }
 
