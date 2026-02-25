@@ -13,8 +13,8 @@ extract_intervals(
   event_times = NULL,
   event_labels = NULL,
   event_samples = NULL,
-  span = list(c(-30, 180)),
   event_groups = list("distinct", "ensemble"),
+  span = list(c(-30, 180)),
   zero_time = FALSE,
   verbose = TRUE
 )
@@ -58,9 +58,6 @@ must match exactly.}
 \item{event_samples}{an integer vector of sample indices (row numbers)
 indicating event starts.}
 
-\item{span}{A \code{list()} of two-element numeric vectors specifying the window
-around each event as \code{c(before, after)}, in units of \code{time_channel}.}
-
 \item{event_groups}{Either a character string or a \code{list()} of integer
 vectors specifying how to group intervals (see \emph{Details}).
 \describe{
@@ -71,6 +68,9 @@ all detected intervals, returning a single data frame.}
 \item{\code{list(c(1, 2), c(3, 4))}}{Ensemble-average each specified
 \code{nirs_channel} within each group and return one data frame per group.}
 }}
+
+\item{span}{A \code{list()} of two-element numeric vectors specifying the window
+around each event as \code{c(before, after)}, in units of \code{time_channel}.}
 
 \item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-calculates
 numeric \code{time_channel} values to start from zero within each interval
@@ -191,8 +191,8 @@ extract_intervals(
     data,
     nirs_channels = list(c(smo2_left, smo2_right)),
     event_times = c(368, 1093), ## specify interval events
-    span = list(c(-20, 90)),    ## specify the event start-end timespans
     event_groups = "distinct",  ## return all unique intervals
+    span = list(c(-20, 90)),    ## specify the event start-end timespans
     zero_time = TRUE,           ## start time from zero
     verbose = FALSE
 )
@@ -202,8 +202,8 @@ interval_list <- extract_intervals(
     data,
     nirs_channels = list(c(smo2_left, smo2_right)),
     event_times = c(368, 1093),
-    span = list(c(-20, 90)),
     event_groups = "ensemble", ## return ensemble-averaged intervals
+    span = list(c(-20, 90)),
     zero_time = TRUE,
     verbose = FALSE
 )

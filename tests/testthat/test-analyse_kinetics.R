@@ -270,6 +270,92 @@ test_that("analyse_kinetics returns correct structure", {
     expect_s3_class(result$channel_args, "data.frame")
 })
 
+test_that("analyse_kinetics$data elements are mnirs tibbles with metadata", {
+    data <- create_kinetics_data(
+        sample_rate = 10,
+        channels = c("smo2_left", "smo2_right")
+    )
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = c("smo2_left", "smo2_right"),
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+
+    expect_type(result$data, "list")
+    expect_length(result$data, 1L)
+
+    aug <- result$data[[1]]
+    expect_s3_class(aug, "mnirs")
+    expect_equal(attr(aug, "nirs_channels"), c("smo2_left", "smo2_right"))
+    expect_equal(attr(aug, "time_channel"), "time")
+    expect_equal(attr(aug, "sample_rate"), 10)
+})
+
+test_that("analyse_kinetics$data preserves mnirs metadata across multiple intervals", {
+    df1 <- create_kinetics_data(sample_rate = 10, channels = "smo2_left")
+    df2 <- create_kinetics_data(sample_rate = 10, channels = "smo2_left")
+
+    result <- analyse_kinetics(
+        list(baseline = df1, exercise = df2),
+        nirs_channels = "smo2_left",
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+
+    expect_length(result$data, 2L)
+    for (nm in c("baseline", "exercise")) {
+        aug <- result$data[[nm]]
+        expect_s3_class(aug, "mnirs")
+        expect_equal(attr(aug, "nirs_channels"), "smo2_left")
+        expect_equal(attr(aug, "time_channel"), "time")
+        expect_equal(attr(aug, "sample_rate"), 10)
+    }
+})
+
+test_that("analyse_kinetics$data preserves mnirs metadata with grouped input", {
+    skip_if_not_installed("dplyr")
+
+    df <- data.frame(
+        time = rep(seq(0, 4.9, by = 0.1), 2),
+        smo2 = c(
+            sin(seq(0, 4.9, by = 0.1)) * 10 + 50,
+            cos(seq(0, 4.9, by = 0.1)) * 10 + 50
+        ),
+        group = rep(c("A", "B"), each = 50)
+    )
+    df <- create_mnirs_data(
+        df,
+        nirs_channels = "smo2",
+        time_channel = "time",
+        sample_rate = 10,
+        event_times = sample(df$time, 1L)
+    )
+    grouped_df <- dplyr::group_by(df, group)
+
+    result <- analyse_kinetics(
+        grouped_df,
+        nirs_channels = "smo2",
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+
+    expect_length(result$data, 2L)
+    for (nm in c("A", "B")) {
+        aug <- result$data[[nm]]
+        expect_s3_class(aug, "mnirs")
+        expect_equal(attr(aug, "nirs_channels"), "smo2")
+        expect_equal(attr(aug, "time_channel"), "time")
+        expect_equal(attr(aug, "sample_rate"), 10)
+    }
+})
+
+
+## analyse_kinetics.peak_slope =========================================
 test_that("analyse_kinetics.peak_slope works with single data frame", {
     data <- create_kinetics_data()
 

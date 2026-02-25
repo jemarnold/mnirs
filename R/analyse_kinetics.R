@@ -232,9 +232,16 @@ analyse_kinetics.peak_slope <- function(
         names(fitted_cols) <- paste0(result$nirs_channels, "_fitted")
         augmented_df <- cbind(df, as.data.frame(fitted_cols))
 
+        
         ## store as single-element list; attach only to the first row
         result$data <- vector("list", nrow(result))
         result$data[[1L]] <- augmented_df
+        
+        ## add mnirs metadata back to result$data
+        result$data[[1L]] <- create_mnirs_data(
+            result$data[[1L]],
+            attributes(df)
+        )
 
         ## remove lists from results
         result[c("fitted", "window_idx")] <- NULL
