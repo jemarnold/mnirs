@@ -110,10 +110,8 @@ detect_mnirs_device <- function(data) {
         ), unlist, use.names = FALSE
     )
 
-    ## only search for metadata in the lesser of top 1/3 or 100 rows
-    search_limits <- min(c(floor(nrow(data) * 1/3), 100), na.rm = TRUE)
-    search_rows <- data[seq_len(search_limits), ]
-    search_str <- paste(unlist(search_rows, use.names = FALSE), collapse = "\n")
+    ## TODO redundant with channel search in read_data_table
+    search_str <- paste(unlist(data, use.names = FALSE), collapse = "\n")
 
     ## check each device: any pattern match in the collapsed string
     matches <- vapply(device_patterns, \(.patterns) {
@@ -190,8 +188,10 @@ read_data_table <- function(
     time_channel = NULL,
     event_channel = NULL
 ) {
-    search_df <- data[seq_len(nrow(data)), ]
+    nrows <- nrow(data)
+    search_df <- data[seq_len(nrows), ]
 
+    ## TODO redundant with detect_mnirs_device
     ## detect header row where channels exists
     header_row <- which(apply(search_df, 1L, \(.row_vec) {
         all(nirs_channels %in% .row_vec)
@@ -212,8 +212,8 @@ read_data_table <- function(
     }
 
     ## extract the data_table, and name by header row
-    rows <- (header_row + 1L):nrow(data)
-    data_table <- setNames(data[rows, ], search_df[header_row, ])
+    table_rows <- (header_row + 1L):nrows
+    data_table <- setNames(data[table_rows, ], search_df[header_row, ])
     file_header <- search_df[seq_len(header_row), ]
 
     return(list(
