@@ -155,20 +155,6 @@ test_that("detect_mnirs_device() returns NULL when no match", {
     expect_null(detect_mnirs_device(data))
 })
 
-test_that("detect_mnirs_device() respects frac_row parameter", {
-    ## device signature in row 5 of 10 rows — within top 33%
-    data <- data.frame(
-        V1 = c(rep("x", 2), "OxySoft", rep("y", 7)),
-        V2 = rep("z", 10),
-        stringsAsFactors = FALSE
-    )
-
-    expect_equal(detect_mnirs_device(data, frac_row = 0.333), "Artinis")
-
-    ## device signature in row 3 of 10 — outside top 10%
-    expect_null(detect_mnirs_device(data, frac_row = 0.1))
-})
-
 
 ## detect_device_channels() ============================================
 test_that("detect_device_channels() returns user channels when provided", {

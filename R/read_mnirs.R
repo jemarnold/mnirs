@@ -135,7 +135,7 @@ read_mnirs <- function(
     df <- read_file(file_path)
 
     ## detect mNIRS device from raw data. Returns NULL if not found
-    nirs_device <- detect_mnirs_device(df, frac_row = 0.333)
+    nirs_device <- detect_mnirs_device(df)
 
     ## resolve channels: use user input if provided, otherwise detect from
     ## known device channel names. Errors if neither available.

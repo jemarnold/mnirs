@@ -99,7 +99,7 @@ device_channels <- list(
 
 #' Detect mnirs device from file metadata
 #' @keywords internal
-detect_mnirs_device <- function(data, frac_row = 0.333) {
+detect_mnirs_device <- function(data) {
     device_patterns <- lapply(
         list(
             Artinis = c("Oxysoft"),
@@ -110,8 +110,9 @@ detect_mnirs_device <- function(data, frac_row = 0.333) {
         ), unlist, use.names = FALSE
     )
 
-    ## only search for metadata in the top fraction of rows
-    search_rows <- data[seq_len(floor(nrow(data) * frac_row)), ]
+    ## only search for metadata in the lesser of top 1/3 or 100 rows
+    search_limits <- min(c(floor(nrow(data) * 1/3), 100), na.rm = TRUE)
+    search_rows <- data[seq_len(search_limits), ]
     search_str <- paste(unlist(search_rows, use.names = FALSE), collapse = "\n")
 
     ## check each device: any pattern match in the collapsed string
