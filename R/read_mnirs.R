@@ -132,17 +132,12 @@ read_mnirs <- function(
     }
 
     ## import data_raw from either excel or csv
-    df <- read_file(file_path)
+    data <- read_file(file_path)
 
-    nirs_device <- detect_mnirs_device(df)
-
-    # ## collapse each row to a single string — searched once, reused per device
-    # data_strings <- apply(df, 1L, paste, collapse = " ")
-
-    # ## detect mNIRS device from raw data. Returns NULL if not found
-    # detected_list <- detect_mnirs_device(data_strings)
-    # nirs_device <- detected_list$nirs_device
-    # header_row <- detected_list$header_row
+    ## detect mNIRS device from raw data. Returns NULL if not found
+    detected_list <- detect_mnirs_device(data)
+    nirs_device <- detected_list$nirs_device
+    header_row <- detected_list$header_row
 
     ## resolve channels: use user input if provided, otherwise detect from
     ## known device channel names. Errors if neither available.
@@ -159,77 +154,75 @@ read_mnirs <- function(
 
     ## extract the data_table, and name by header row
     table_list <- read_data_table(
-        df,
+        data,
         nirs_channels,
         time_channel,
-        event_channel
-        # event_channel,
-        # data_strings,
-        # header_row
+        event_channel,
+        header_row
     )
-    df <- table_list$data_table
+    data <- table_list$data_table
     file_header <- table_list$file_header
 
     ## extract start time from file header
     start_timestamp <- extract_start_timestamp(file_header)
 
     ## attempt to detect `time_channel` automatically
-    time_channel <- detect_time_channel(df, time_channel, nirs_device, verbose)
+    time_channel <- detect_time_channel(data, time_channel, nirs_device, verbose)
 
     ## rename from channel names, make duplicates unique, keep columns
     ## return list(data_renamed, nirs_renamed, time_renamed, event_renamed)
     renamed_list <- select_rename_data(
-        df,
+        data,
         nirs_channels,
         time_channel,
         event_channel,
         keep_all,
         verbose
     )
-    df <- renamed_list$data
+    data <- renamed_list$data
     nirs_renamed <- renamed_list$nirs_channel
     time_renamed <- renamed_list$time_channel
     event_renamed <- renamed_list$event_channel
 
     ## remove empty (NA) columns and rows
-    df <- remove_empty_rows_cols(df)
+    data <- remove_empty_rows_cols(data)
     ## convert char decimal "," to "." and convert column types
-    df <- convert_type(df, time_channel)
+    data <- convert_type(data, time_channel)
     ## convert POSIXct to numeric and/or recalc time from zero
     ## return list(data, start_timestamp) — start_timestamp from time_channel POSIXct
     time_list <- parse_time_channel(
-        df,
+        data,
         time_renamed,
         start_timestamp,
         add_timestamp,
         zero_time
     )
-    df <- time_list$data
-    ## extract start_timestamp from df if not already found in header
+    data <- time_list$data
+    ## extract start_timestamp from data if not already found in header
     if (is.null(start_timestamp)) {
         start_timestamp <- time_list$start_timestamp
     }
 
     ## standardise invalid to NA
-    df[] <- lapply(df, \(.x) clean_invalid(.x))
+    data[] <- lapply(data, \(.x) clean_invalid(.x))
 
     ## validate and estimate sample rate
     ## will write new "time" column if Oxysoft export rate detected
     ## return list(data_sampled, time_renamed, sample_rate)
     sample_list <- parse_sample_rate(
-        df,
+        data,
         file_header,
         time_renamed,
         sample_rate,
         nirs_device,
         verbose
     )
-    df <- sample_list$data
+    data <- sample_list$data
     time_renamed <- sample_list$time_channel
     sample_rate <- sample_list$sample_rate
 
     ## print warnings for irregular samples
-    detect_irregular_samples(df[[time_renamed]], time_renamed, verbose)
+    detect_irregular_samples(data[[time_renamed]], time_renamed, verbose)
 
     ## assign metadata to attributes(data)
     metadata <- list(
@@ -242,7 +235,7 @@ read_mnirs <- function(
         verbose = verbose
     )
 
-    return(create_mnirs_data(df, metadata))
+    return(create_mnirs_data(data, metadata))
 }
 
 

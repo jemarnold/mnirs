@@ -121,28 +121,46 @@ test_that("read_file() handles locked Excel files", {
 
 ## detect_mnirs_device() ===============================================
 test_that("detect_mnirs_device works on example files", {
+    ## xlsx files
     expect_equal(
         read_file(example_mnirs("moxy_ramp")) |>
+            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
-        "Moxy"
-    )
-
-    expect_equal(
-        read_file(example_mnirs("train.red")) |>
-            detect_mnirs_device(),
-        "Train.Red"
+        list(
+            nirs_device = "Moxy",
+            header_row = 6
+        )
     )
 
     expect_equal(
         read_file(example_mnirs("artinis_intervals")) |>
+            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
-        "Artinis"
+        list(
+            nirs_device = "Artinis",
+            header_row = 1
+        )
+    )
+
+    ## csv files
+    expect_equal(
+        read_file(example_mnirs("train.red")) |>
+            # apply(1L, paste, collapse = " ") |>
+            detect_mnirs_device(),
+        list(
+            nirs_device = "Train.Red",
+            header_row = 40
+        )
     )
 
     expect_equal(
-        read_file(example_mnirs("vo2master")) |>
+        read_file(file_path = example_mnirs("vo2master")) |>
+            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
-        "VO2master-Moxy"
+        list(
+            nirs_device = "VO2master-Moxy",
+            header_row = 1
+        )
     )
 })
 
@@ -152,7 +170,10 @@ test_that("detect_mnirs_device() returns NULL when no match", {
         V2 = c("header", "col1", "val1")
     )
 
-    expect_null(detect_mnirs_device(data))
+    expect_equal(
+        detect_mnirs_device(data),
+        list(nirs_device = NULL, header_row = 1)
+    )
 })
 
 
@@ -327,20 +348,6 @@ test_that("read_data_table() errors when channels not found", {
     expect_error(
         read_data_table(data, "O2Hb", "Time"),
         "Channel names not detected"
-    )
-})
-
-test_that("read_data_table() errors with duplicate headers", {
-    data <- data.frame(
-        V1 = c("O2Hb", "O2Hb", "10", "0.1"),
-        V2 = c("HHb", "HHb", "5", "Start"),
-        V3 = c("Time", "Time", "0", "1"),
-        stringsAsFactors = FALSE
-    )
-
-    expect_error(
-        read_data_table(data, c("O2Hb", "HHb"), "Time"),
-        "Channel names detected at multiple rows"
     )
 })
 
