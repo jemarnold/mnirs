@@ -99,7 +99,41 @@ device_channels <- list(
 
 #' Detect mnirs device from file metadata
 #' @keywords internal
+#' Find the first row in `data_strings` where all `patterns` match
+#' @keywords internal
+find_header_row <- function(data_strings, patterns, mode = "all") {
+    Find(\(.i) {
+        hits <- grepl(patterns, data_strings[.i], fixed = TRUE)
+        if (mode == "any") any(hits) else all(hits)
+    }, seq_along(data_strings))
+}
+
+
+#' Detect mnirs device from file metadata
+#' @keywords internal
 detect_mnirs_device <- function(data) {
+    # device_patterns <- list(
+    #     Artinis = list(
+    #         pattern = c("Oxysoft", "OxySoft"),
+    #         mode = "any"
+    #     ),
+    #     Train.Red = list(
+    #         pattern = unlist(device_channels$Train.Red, use.names = FALSE),
+    #         mode = "all"
+    #     ),
+    #     Moxy = list(
+    #         pattern = unlist(device_channels$Moxy, use.names = FALSE),
+    #         mode = "all"
+    #     ),
+    #     `VO2master-Moxy` = list(
+    #         pattern = unlist(
+    #             device_channels$`VO2master-Moxy`,
+    #             use.names = FALSE
+    #         ),
+    #         mode = "all"
+    #     )
+    # )
+
     device_patterns <- lapply(
         list(
             Artinis = c("Oxysoft"),
@@ -107,10 +141,8 @@ detect_mnirs_device <- function(data) {
             Train.Red = c(device_channels$Train.Red), ## "Train.Red", 
             Moxy = c(device_channels$Moxy), ## "LUT Part Number", 
             `VO2master-Moxy` = device_channels$`VO2master-Moxy`
-        ), unlist, use.names = FALSE
-    )
+        ), unlist, use.names = FALSE)
 
-    ## TODO redundant with channel search in read_data_table
     search_str <- paste(unlist(data, use.names = FALSE), collapse = "\n")
 
     ## check each device: any pattern match in the collapsed string
@@ -123,6 +155,55 @@ detect_mnirs_device <- function(data) {
     }
 
     return(NULL)
+
+    # ## find the first row matching any device, then identify which device
+    # matched_row <- Find(\(.i) {
+    #     any(vapply(device_patterns, \(.d) {
+    #         !is.null(find_header_row(data_strings[.i], .d$pattern, .d$mode))
+    #     }, logical(1)))
+    # }, seq_along(data_strings))
+
+    # if (is.null(matched_row)) {
+    #     return(list(nirs_device = NULL, header_row = 1L))
+    # }
+
+    # device_name <- Find(\(.nm) {
+    #     .d <- device_patterns[[.nm]]
+    #     !is.null(
+    #         find_header_row(data_strings[matched_row], .d$pattern, .d$mode)
+    #     )
+    # }, names(device_patterns))
+
+    # ## function to match device from `device_patterns`
+    # matches_device <- function(x, device) {
+    #     pattern <- paste(device$pattern, collapse = "|")
+    #     if (device$mode == "any") {
+    #         return(any(grepl(pattern, x)))
+    #     } else {
+    #         return(all(grepl(pattern, x)))
+    #     }
+    # }
+
+    # ## for each device, find the first row where ALL patterns match
+    # matched_row <- Find(\(.nrow) {
+    #     any(
+    #         vapply(device_patterns, \(.d) {
+    #             matches_device(data_strings[.nrow], .d)
+    #         }, logical(1))
+    #     )
+    # }, seq_along(data_strings))
+
+    # ## default to row 1
+    # if (is.null(matched_row)) {
+    #     return(list(nirs_device = NULL, header_row = 1L))
+    # }
+
+    # ## return the device name that matches `matched_row`
+    # device_name <- Find(\(.nm) {
+    #     matches_device(data_strings[matched_row], device_patterns[[.nm]])
+    # }, names(device_patterns))
+
+    # return(list(nirs_device = device_name, header_row = matched_row))
 }
 
 
@@ -186,14 +267,18 @@ read_data_table <- function(
     data,
     nirs_channels,
     time_channel = NULL,
-    event_channel = NULL
+    event_channel = NULL,
+    data_strings,
+    header_row = 1L
 ) {
-    nrows <- nrow(data)
-    search_df <- data[seq_len(nrows), ]
+    ## find the first row where ALL nirs_channels match
 
-    ## TODO redundant with detect_mnirs_device
+
+
+    nrows <- nrow(data)
+
     ## detect header row where channels exists
-    header_row <- which(apply(search_df, 1L, \(.row_vec) {
+    header_row <- which(apply(data, 1L, \(.row_vec) {
         all(nirs_channels %in% .row_vec)
     }))
 
@@ -213,8 +298,8 @@ read_data_table <- function(
 
     ## extract the data_table, and name by header row
     table_rows <- (header_row + 1L):nrows
-    data_table <- setNames(data[table_rows, ], search_df[header_row, ])
-    file_header <- search_df[seq_len(header_row), ]
+    data_table <- setNames(data[table_rows, ], data[header_row, ])
+    file_header <- data[seq_len(header_row), ]
 
     return(list(
         data_table = data_table,
