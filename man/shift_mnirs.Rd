@@ -17,16 +17,22 @@ shift_mnirs(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names to operate
-on. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{nirs_channels}{A character vector giving the names of mNIRS columns to
+operate on. Must match column names in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{nirs_channels} metadata attribute of \code{data} is
+used.
+}}
 
-\item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{time_channel}{A character string giving the name of the time or sample
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
+used.
+}}
 
 \item{to}{A numeric value in units of \code{nirs_channels} to which the data
 channels will be shifted, e.g. shift the minimum value to zero.}
@@ -52,8 +58,9 @@ specified values.}
 values.}
 }}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
@@ -92,34 +99,29 @@ be defined. If both of either pairing are defined, \code{to} will be preferred
 over \code{by}, and \code{width} will be preferred over \code{span}.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_right = "SmO2 Live",
                       smo2_left = "SmO2 Live(2)"),
-    time_channel = c(time = "hh:mm:ss")
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 ) |>
-    resample_mnirs() |>
-    replace_mnirs(
-        invalid_values = c(0, 100),
-        outlier_cutoff = 3,
-        width = 10,
-        method = "linear"
-    ) |>
-    filter_mnirs(na.rm = TRUE) |>
     shift_mnirs(
         nirs_channels = list(smo2_right, smo2_left),
         to = 0,            ## each channel will be shifted to zero
         span = 120,        ## shift the mean of the first 120 sec
-        position = "first"
+        position = "first",
+        verbose = FALSE
     )
 
-library(ggplot2)
-plot(data, label_time = TRUE) +
-    geom_hline(yintercept = 0, linetype = "dotted")
-\dontshow{\}) # examplesIf}
+data
+
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        plot(data, time_labels = TRUE) +
+            ggplot2::geom_hline(yintercept = 0, linetype = "dotted")
+    }
+}  
+
 }

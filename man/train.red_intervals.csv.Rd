@@ -5,7 +5,7 @@
 \alias{train.red_intervals.csv}
 \title{10 Hz Train.Red App export}
 \format{
-.csv file with header metadata and with 10 eolumns and 12001 rows.
+.csv file with header metadata and with 10 columns and 12001 rows.
 \itemize{
 \item \code{nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")}
 \item \code{time_channel = c("Timestamp (seconds passed)")}

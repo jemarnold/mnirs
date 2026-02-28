@@ -23,12 +23,11 @@ peak_slope(
 or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{width}{An integer defining the local window in number of samples
-around \code{idx} in which to perform the operation., between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
+around \code{idx} in which to perform the operation, according to \code{align}.}
 
 \item{span}{A numeric value defining the local window timespan around \code{idx}
-in which to perform the operation. In units of \code{time_channel} or \code{t},
-between \verb{[t - span/2, t + span/2]}.}
+in which to perform the operation, according to \code{align}. In units of
+\code{time_channel} or \code{t}.}
 
 \item{align}{Window alignment as \emph{"centre"/"center"} (the \emph{default}),
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
@@ -43,8 +42,9 @@ subset of available data within the local rolling window (\code{TRUE}), or
 requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
 \emph{Details}.}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
 }
@@ -55,6 +55,7 @@ A named list containing:
 \item{\code{y}}{The response value predicted from \code{x} at \code{t}.}
 \item{\code{t}}{The time value at the index of the peak slope window.}
 \item{\code{idx}}{The index position of the peak slope.}
+\code{t[window_idx]} from the peak slope and intercept.}
 \item{\code{window_idx}}{An integer vector of indices for the peak slope
 window.}
 }

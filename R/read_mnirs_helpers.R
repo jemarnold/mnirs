@@ -11,12 +11,33 @@ read_file <- function(file_path) {
 
     ## import data_raw from either excel or csv
     if (grepl("\\.csv$", file_path, ignore.case = TRUE)) {
+        lines <- readLines(file_path, warn = FALSE)
+        nrows <- length(lines)
+
+        ## detect separator: comma vs tab
+        sep <- if (any(grepl("\t", lines[seq_len(min(10L, nrows))]))) {
+            "\t"
+        } else {
+            ","
+        }
+
+        ## find the max number of separators from the end of the data file
+        n_seps <- max(lengths(gregexpr(
+            sep,
+            lines[seq(to = nrows, by = 1L, len = min(50, nrows))],
+            fixed = TRUE
+        )))
+
+        ## pad the first line so fread infers the correct column count
+        lines <- c(strrep(sep, n_seps), lines)
+
         data_raw <- as.data.frame(
             data.table::fread(
-                file_path,
+                text = lines,
                 header = FALSE,
-                colClasses = "character"
-            )
+                fill = Inf,
+                colClasses = "character",
+            )[-1, ]
         )
         
     } else if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
@@ -54,6 +75,142 @@ read_file <- function(file_path) {
 }
 
 
+#' Known channel names for supported mNIRS devices
+#' @keywords internal
+device_channels <- list(
+    Artinis = list(
+        time_channel = c(),
+        nirs_channels = c()
+    ),
+    Train.Red = list(
+        time_channel = c("Timestamp (seconds passed)"),
+        nirs_channels = c("SmO2 unfiltered")
+    ),
+    Moxy = list(
+        time_channel = c("hh:mm:ss"),
+        nirs_channels = c("SmO2 Live")
+    ),
+    `VO2master-Moxy` = list(
+        time_channel = c("Time[s]"),
+        nirs_channels = c("SmO2[%]")
+    )
+)
+
+
+#' Detect mnirs device from file metadata
+#' @keywords internal
+detect_mnirs_device <- function(data) {
+    device_patterns <- list(
+        Artinis = list(
+            pattern = c("Oxysoft", "OxySoft"),
+            mode = any
+        ),
+        Train.Red = list(
+            pattern = unlist(device_channels$Train.Red, use.names = FALSE),
+            mode = all
+        ),
+        Moxy = list(
+            pattern = unlist(device_channels$Moxy, use.names = FALSE),
+            mode = all
+        ),
+        `VO2master-Moxy` = list(
+            pattern = unlist(
+                device_channels$`VO2master-Moxy`,
+                use.names = FALSE
+            ),
+            mode = all
+        )
+    )
+
+    ## Find the first row in `data_strings` where all `patterns` match
+    ## keywords internal
+    find_header_row <- function(data_strings, patterns, mode = all) {
+        Find(\(.i) {
+            mode(
+                vapply(patterns, grepl, logical(1L), 
+                x = data_strings[.i], fixed = TRUE)
+            )
+        }, seq_along(data_strings))
+    }
+
+    ## collapse each row to a single string — searched once, reused per device
+    data_strings <- apply(data, 1L, paste, collapse = " ")
+
+    matched_row <- Find(\(.i) {
+        any(vapply(device_patterns, \(.d) {
+            !is.null(find_header_row(data_strings[.i], .d$pattern, .d$mode))
+        }, logical(1L)))
+    }, seq_along(data_strings))
+
+    if (is.null(matched_row)) {
+        return(list(nirs_device = NULL, header_row = 1L))
+    }
+
+    device_name <- Find(\(.nm) {
+        .d <- device_patterns[[.nm]]
+        !is.null(
+            find_header_row(data_strings[matched_row], .d$pattern, .d$mode)
+        )
+    }, names(device_patterns))
+
+    return(list(nirs_device = device_name, header_row = matched_row))
+}
+
+
+#' Detect known channels for a device
+#' @keywords internal
+detect_device_channels <- function(
+    nirs_device = NULL,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    keep_all = FALSE,
+    verbose = TRUE
+) {
+    ## user-specified channels always take priority
+    if (!is.null(nirs_channels)) {
+        return(list(
+            time_channel = time_channel,
+            nirs_channels = nirs_channels,
+            keep_all = keep_all
+        ))
+    }
+
+    abort_msg <- c(
+        "x" = "{.arg nirs_channels} cannot be determined automatically.",
+        "i" = "Define {.arg nirs_channels} explicitly."
+    )
+
+    ## need device detection when is.null(nirs_channel)
+    if (is.null(nirs_device)) {
+        cli_abort(abort_msg)
+    }
+
+    channel_list <- device_channels[[nirs_device]]
+
+    ## user inputs take priority over device defaults
+    channel_list <- list(
+        time_channel = time_channel %||% channel_list$time_channel,
+        nirs_channels = channel_list$nirs_channels, ## NULL at this point
+        keep_all = TRUE
+    )
+
+    ## error when nirs_channels cannot be resolved
+    if (length(channel_list$nirs_channels) == 0L) {
+        cli_abort(abort_msg)
+    }
+
+    if (verbose) {
+        cli_inform(c(
+            "!" = "{.val {nirs_device}} file format detected. \\
+            {.arg nirs_channels} set to {.val {channel_list$nirs_channels}}.",
+            "i" = "Override by specifying {.arg nirs_channels} explicitly."
+        ))
+    }
+
+    return(channel_list)
+}
+
+
 #' Read data table from raw data
 #' @keywords internal
 read_data_table <- function(
@@ -61,14 +218,13 @@ read_data_table <- function(
     nirs_channels,
     time_channel = NULL,
     event_channel = NULL,
-    rows = 200L
+    header_row = 1L
 ) {
-    search_df <- data[seq_len(min(rows, nrow(data))), ]
-
-    ## detect header row where channels exists
-    header_row <- which(apply(search_df, 1L, \(.row_vec) {
-        all(nirs_channels %in% .row_vec)
-    }))
+    nrows <- nrow(data)
+    ## find the first row where ALL nirs_channels match
+    header_row <- Find(\(.i) {
+        all(nirs_channels %in% data[.i, ])
+    }, c(header_row, seq_len(nrows)))
 
     ## validation: all channels must be detected to extract the data frame
     ## return error if channels string is detected at multiple rows
@@ -77,44 +233,17 @@ read_data_table <- function(
             "x" = "Channel names not detected.",
             "i" = "Column names are case sensitive and must match exactly."
         ))
-    } else if (length(header_row) > 1) {
-        cli_abort(c(
-            "x" = "Channel names detected at multiple rows.",
-            "i" = "Ensure column names in data file are unique."
-        ))
     }
 
     ## extract the data_table, and name by header row
-    rows <- (header_row + 1L):nrow(data)
-    data_table <- stats::setNames(data[rows, ], search_df[header_row, ])
-    file_header <- search_df[seq_len(header_row), ]
+    table_rows <- (header_row + 1L):nrows
+    data_table <- setNames(data[table_rows, ], data[header_row, ])
+    file_header <- data[seq_len(header_row), ]
 
     return(list(
         data_table = data_table,
         file_header = file_header
     ))
-}
-
-
-#' Detect mnirs device from file metadata
-#' @keywords internal
-detect_mnirs_device <- function(data) {
-    devices <- list(
-        Artinis = "OxySoft",
-        Train.Red = "Train.Red",
-        Moxy = "LUT Part Number",
-        Moxy = "SmO2 Live"
-    )
-
-    matches <- vapply(devices, \(.pattern) {
-        any(grepl(.pattern, unlist(data), ignore.case = TRUE))
-    }, logical(1))
-
-    if (any(matches)) {
-        return(names(devices)[which.max(matches)])
-    }
-
-    return(NULL)
 }
 
 
@@ -126,6 +255,7 @@ detect_time_channel <- function(
     nirs_device = NULL,
     verbose = TRUE
 ) {
+    ## TODO there is redundancy with `detect_time_channel()` and `detect_mnirs_device()`
     if (!is.null(time_channel)) {
         return(time_channel)
     }
@@ -211,7 +341,7 @@ name_channels <- function(x) {
     names <- names(x) %||% character(length(x))
     empty_names <- is_empty(names)
     names[empty_names] <- as.character(x)[empty_names]
-    return(stats::setNames(x, names))
+    return(setNames(x, names))
 }
 
 
@@ -261,10 +391,14 @@ select_rename_data <- function(
     }
 
     ## keep all columns or only specified channels
-    selected_cols <- if (keep_all) data_names else channel_vec
+    selected_cols <- if (keep_all) {
+        c(channel_vec, setdiff(data_names, channel_vec))
+    } else {
+        channel_vec
+    }
 
     ## rename columns from specified channel names
-    result <- stats::setNames(data, data_names)
+    result <- setNames(data, data_names)
     result <- result[, selected_cols, drop = FALSE]
     channel_names_idx <- match(channel_vec, names(result))
 
@@ -278,10 +412,10 @@ select_rename_data <- function(
     if (verbose && any(renamed)) {
         ## warn about renamed names
         old_names <- channel_inputs[renamed]
-        new_names <- names(result)[channel_names_idx][renamed]
+        renamed <- names(result)[channel_names_idx][renamed]
         cli_warn(c(
             "!" = "Duplicate channel names detected.",
-            "i" = "Renamed: {.val {paste(old_names, new_names, sep = ' = ')}}",
+            "i" = "Renamed: {.val {paste(old_names, renamed, sep = ' = ')}}",
             "i" = "Unique channel names can be defined explicitly."
         ))
     }
@@ -340,29 +474,65 @@ remove_empty_rows_cols <- function(data) {
     return(data[, colSums(!is_empty(data)) > 0, drop = FALSE])
 }
 
+
+#' Extract earliest POSIXct value from file header metadata
+#' @keywords internal
+extract_start_timestamp <- function(file_header) {
+    formats <- c(
+        "%Y-%m-%dT%H:%M:%OS",
+        "%Y-%m-%dT%H:%M:%OS%z",
+        "%Y-%m-%d %H:%M:%OS",
+        "%Y/%m/%d %H:%M:%OS",
+        "%d-%m-%Y %H:%M:%OS",
+        "%d/%m/%Y %H:%M:%OS",
+        "%H:%M:%OS"
+    )
+
+    header_values <- unlist(file_header, use.names = FALSE)
+    header_values <- header_values[!is.na(header_values) & header_values != ""]
+
+    ## search for POSIXct values, return the earliest time value
+    ## TODO fragile for misinterpreted formats for invalid "early" timestamps
+    parsed <- vapply(header_values, \(.x) {
+        as.POSIXct(.x, tryFormats = formats, optional = TRUE)
+    }, numeric(1L))
+    parsed <- which(!is.na(parsed))
+    
+    if (length(parsed) == 0L) {
+        return(NULL)
+    }
+
+    ## return the character string timestamp
+    return(min(header_values[parsed]))
+}
+
+
+
 #' Parse time_channel character or dttm to numeric
 #' @keywords internal
 parse_time_channel <- function(
     data,
     time_channel,
+    start_timestamp = NULL,
     add_timestamp = FALSE,
     zero_time = FALSE
 ) {
+    ## character to POSIXct
+    formats <- c(
+        "%Y-%m-%dT%H:%M:%OS",
+        "%Y-%m-%dT%H:%M:%OS%z",
+        "%Y-%m-%d %H:%M:%OS",
+        "%Y/%m/%d %H:%M:%OS",
+        "%d-%m-%Y %H:%M:%OS",
+        "%d/%m/%Y %H:%M:%OS",
+        "%H:%M:%OS"
+    )
+
     time_vec <- data[[time_channel]]
     ## fractional unix time to POSIXct
     if (is.numeric(time_vec) && all(time_vec <= 1, na.rm = TRUE)) {
         time_vec <- as.POSIXct(time_vec * 86400)
     } else if (is.character(time_vec)) {
-        ## character to POSIXct
-        formats <- c(
-            "%Y-%m-%dT%H:%M:%OS",
-            "%Y-%m-%dT%H:%M:%OS%z",
-            "%Y-%m-%d %H:%M:%OS",
-            "%Y/%m/%d %H:%M:%OS",
-            "%d-%m-%Y %H:%M:%OS",
-            "%d/%m/%Y %H:%M:%OS",
-            "%H:%M:%OS"
-        )
         time_vec <- as.POSIXct(time_vec, tryFormats = formats, optional = TRUE)
     }
 
@@ -381,16 +551,36 @@ parse_time_channel <- function(
 
     data[[time_channel]] <- time_vec
 
-    if (!is.null(timestamp_vec) && add_timestamp) {
+    if (add_timestamp) {
         col_names <- names(data)
         ## add_timestamp preserves dttm column or adds
         time_idx <- match(time_channel, col_names)
         data_names <- append(col_names, "timestamp", time_idx)
-        data[["timestamp"]] <- timestamp_vec
+        data$timestamp <- NA_real_
         data <- data[data_names]
+
+        ## if neither header start_timestamp or timestamp_vec exist
+        ## then return NULL and don't append column
+        if (!is.null(start_timestamp)) {
+            start_time <- as.POSIXct(
+                start_timestamp,
+                tryFormats = formats,
+                optional = TRUE
+            )
+            data$timestamp <- start_time + time_vec
+        } else if (!is.null(timestamp_vec)) {
+            data$timestamp <- timestamp_vec
+        } else {
+            data$timestamp <- NULL
+        }
     }
 
-    return(data)
+    if (is.null(start_timestamp) && !is.null(timestamp_vec)) {
+        ## extract earliest POSIXct value as start_timestamp
+        start_timestamp <- min(timestamp_vec, na.rm = TRUE)
+    }
+
+    return(list(data = data, start_timestamp = start_timestamp))
 }
 
 

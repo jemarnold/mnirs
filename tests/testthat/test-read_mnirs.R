@@ -121,22 +121,46 @@ test_that("read_file() handles locked Excel files", {
 
 ## detect_mnirs_device() ===============================================
 test_that("detect_mnirs_device works on example files", {
+    ## xlsx files
     expect_equal(
         read_file(example_mnirs("moxy_ramp")) |>
+            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
-        "Moxy"
-    )
-
-    expect_equal(
-        read_file(example_mnirs("train.red")) |>
-            detect_mnirs_device(),
-        "Train.Red"
+        list(
+            nirs_device = "Moxy",
+            header_row = 6
+        )
     )
 
     expect_equal(
         read_file(example_mnirs("artinis_intervals")) |>
+            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
-        "Artinis"
+        list(
+            nirs_device = "Artinis",
+            header_row = 1
+        )
+    )
+
+    ## csv files
+    expect_equal(
+        read_file(example_mnirs("train.red")) |>
+            # apply(1L, paste, collapse = " ") |>
+            detect_mnirs_device(),
+        list(
+            nirs_device = "Train.Red",
+            header_row = 40
+        )
+    )
+
+    expect_equal(
+        read_file(file_path = example_mnirs("vo2master")) |>
+            # apply(1L, paste, collapse = " ") |>
+            detect_mnirs_device(),
+        list(
+            nirs_device = "VO2master-Moxy",
+            header_row = 1
+        )
     )
 })
 
@@ -146,7 +170,122 @@ test_that("detect_mnirs_device() returns NULL when no match", {
         V2 = c("header", "col1", "val1")
     )
 
-    expect_null(detect_mnirs_device(data))
+    expect_equal(
+        detect_mnirs_device(data),
+        list(nirs_device = NULL, header_row = 1)
+    )
+})
+
+
+## detect_device_channels() ============================================
+test_that("detect_device_channels() returns user channels when provided", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, c(smo2 = "SmO2 Live"))
+    expect_equal(result$time_channel, c(time = "hh:mm:ss"))
+})
+
+test_that("detect_device_channels() returns user channels even with NULL device", {
+    result <- detect_device_channels(
+        nirs_device = NULL,
+        nirs_channels = "O2Hb",
+        time_channel = "Time",
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, "O2Hb")
+    expect_equal(result$time_channel, "Time")
+})
+
+test_that("detect_device_channels() detects known channels for device", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = NULL,
+        time_channel = NULL,
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, device_channels$Moxy$nirs_channels)
+    expect_equal(result$time_channel, device_channels$Moxy$time_channel)
+})
+
+test_that("detect_device_channels() user time_channel overrides device default", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = NULL,
+        time_channel = c(time = "custom_time"),
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, device_channels$Moxy$nirs_channels)
+    expect_equal(result$time_channel, c(time = "custom_time"))
+})
+
+test_that("detect_device_channels() errors when device is NULL and no channels", {
+    expect_error(
+        detect_device_channels(
+            nirs_device = NULL,
+            nirs_channels = NULL,
+            verbose = FALSE
+        ),
+        "cannot be determined"
+    )
+})
+
+test_that("detect_device_channels() errors for device with empty known channels", {
+    expect_error(
+        detect_device_channels(
+            nirs_device = "Artinis",
+            nirs_channels = NULL,
+            verbose = FALSE
+        ),
+        "cannot be determined"
+    )
+})
+
+test_that("detect_device_channels() verbose messages for detection", {
+    expect_message(
+        detect_device_channels(
+            nirs_device = "Moxy",
+            nirs_channels = NULL,
+            verbose = TRUE
+        ),
+        "Moxy.*detected"
+    )
+
+    ## no message when user provides channels
+    expect_no_message(
+        detect_device_channels(
+            nirs_device = "Moxy",
+            nirs_channels = c("SmO2 Live"),
+            verbose = TRUE
+        )
+    )
+})
+
+test_that("detect_device_channels() returns appropriate keep_all", {
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = NULL,
+        time_channel = c(time = "custom_time"),
+        verbose = FALSE
+    )
+
+    expect_true(result$keep_all)
+
+    result <- detect_device_channels(
+        nirs_device = "Moxy",
+        nirs_channels = "SmO2",
+        time_channel = c(time = "custom_time"),
+        verbose = FALSE
+    )
+
+    expect_false(result$keep_all)
 })
 
 
@@ -199,32 +338,6 @@ test_that("read_data_table() works with event channel", {
     expect_equal(result$data_table$Event, "Start")
 })
 
-test_that("read_data_table() searches specified number of rows", {
-    data <- data.frame(
-        V1 = c(rep("filler", 123), "O2Hb", "10"),
-        V2 = c(rep("filler", 123), "Time", "0.1"),
-        stringsAsFactors = FALSE
-    )
-
-    expect_error(
-        read_data_table(data, "O2Hb", "Time", rows = 122L),
-        "Channel names not detected"
-    )
-
-    data <- data.frame(
-        V1 = c(rep("filler", 123), "O2Hb", rep("10", 10)),
-        V2 = c(rep("filler", 123), "Time", rep("0.1", 10)),
-        stringsAsFactors = FALSE
-    )
-
-    expect_silent(result <- read_data_table(data, "O2Hb", "Time"))
-    expect_equal(nrow(result$data_table), 10)
-    expect_equal(ncol(result$data_table), 2)
-
-    expect_equal(nrow(result$file_header), 124)
-    expect_equal(ncol(result$file_header), 2)
-})
-
 test_that("read_data_table() errors when channels not found", {
     data <- data.frame(
         V1 = c("header", "WrongChannel", "10"),
@@ -235,20 +348,6 @@ test_that("read_data_table() errors when channels not found", {
     expect_error(
         read_data_table(data, "O2Hb", "Time"),
         "Channel names not detected"
-    )
-})
-
-test_that("read_data_table() errors with duplicate headers", {
-    data <- data.frame(
-        V1 = c("O2Hb", "O2Hb", "10", "0.1"),
-        V2 = c("HHb", "HHb", "5", "Start"),
-        V3 = c("Time", "Time", "0", "1"),
-        stringsAsFactors = FALSE
-    )
-
-    expect_error(
-        read_data_table(data, c("O2Hb", "HHb"), "Time"),
-        "Channel names detected at multiple rows"
     )
 })
 
@@ -617,7 +716,7 @@ test_that("select_rename_data() keeps all columns with keep_all", {
     ))
 })
 
-test_that("select_rename_data() drops extra columns by default", {
+test_that("select_rename_data() drops extra columns with default keep_all = FALSE", {
     data <- data.frame(
         O2Hb = c("10"),
         HHb = c("5"),
@@ -630,7 +729,7 @@ test_that("select_rename_data() drops extra columns by default", {
         data,
         nirs_channels = "O2Hb",
         time_channel = "Time",
-        keep_all = FALSE,
+        # keep_all = FALSE,
         verbose = FALSE
     )
 
@@ -807,8 +906,90 @@ test_that("remove_empty_rows_cols() handles all empty data", {
     expect_equal(ncol(result), 0)
 })
 
+## extract_start_timestamp() ==========================================
+test_that("extract_start_timestamp() returns NULL when no timestamps present", {
+    data <- data.frame(
+        V1 = c("device", "sensor"),
+        V2 = c("model_x", "ch1"),
+        stringsAsFactors = FALSE
+    )
+    expect_null(extract_start_timestamp(data))
+})
+
+test_that("extract_start_timestamp() detects ISO 8601 timestamp", {
+    data <- data.frame(
+        V1 = c("Start", "2025-03-01T08:30:00"),
+        V2 = c("Device", "Moxy"),
+        stringsAsFactors = FALSE
+    )
+    result <- extract_start_timestamp(data)
+    expect_type(result, "character")
+    expect_match(result, "2025-03-01T08:30:00")
+})
+
+test_that("extract_start_timestamp() detects yyyy-mm-dd HH:MM:SS format", {
+    data <- data.frame(
+        V1 = c("Start", "2025-06-15 14:22:10"),
+        V2 = c("Device", "Moxy"),
+        stringsAsFactors = FALSE
+    )
+    result <- extract_start_timestamp(data)
+    expect_type(result, "character")
+    expect_match(result, "2025-06-15 14:22:10")
+})
+
+test_that("extract_start_timestamp() returns earliest timestamp when multiple present", {
+    data <- data.frame(
+        V1 = c("2025-01-01 10:00:00", "2025-01-01 11:00:00"),
+        V2 = c("2025-01-01 09:00:00", "metadata"),
+        stringsAsFactors = FALSE
+    )
+    result <- extract_start_timestamp(data)
+    expect_match(result, "2025-01-01 09:00:00")
+})
+
+test_that("extract_start_timestamp() ignores NA and empty strings", {
+    data <- data.frame(
+        V1 = c(NA, ""),
+        V2 = c("2025-05-10T07:00:00", NA),
+        stringsAsFactors = FALSE
+    )
+    result <- extract_start_timestamp(data)
+    expect_type(result, "character")
+    expect_match(result, "2025-05-10T07:00:00")
+})
+
+test_that("extract_start_timestamp() works with real example file header", {
+    file_header <- read_file(example_mnirs("moxy_ramp.xlsx"))[1:20, ]
+    result <- extract_start_timestamp(file_header)
+    expect_false(is.null(result))
+    expect_type(result, "character")
+})
+
+
 ## parse_time_channel() ================================================
-test_that("parse_time_channel() parses numeric time from zero", {
+test_that("parse_time_channel() returns a list with $data and $start_timestamp", {
+    data <- data.frame(time = c(0, 1, 2), value = c(1, 2, 3))
+    result <- parse_time_channel(data, "time")
+
+    expect_type(result, "list")
+    expect_named(result, c("data", "start_timestamp"))
+    expect_s3_class(result$data, "data.frame")
+})
+
+test_that("parse_time_channel() preserves numeric time (zero_time = FALSE)", {
+    data <- data.frame(
+        time = c(10.5, 20.5, 30.5),
+        value = c(1, 2, 3)
+    )
+
+    result <- parse_time_channel(data, "time", zero_time = FALSE)
+
+    expect_equal(result$data$time, data$time)
+    expect_null(result$start_timestamp)
+})
+
+test_that("parse_time_channel() recalculates numeric time from zero", {
     data <- data.frame(
         time = c(10, 20, 30),
         value = c(1, 2, 3)
@@ -816,7 +997,7 @@ test_that("parse_time_channel() parses numeric time from zero", {
 
     result <- parse_time_channel(data, "time", zero_time = TRUE)
 
-    expect_equal(result$time, c(0, 10, 20))
+    expect_equal(result$data$time, c(0, 10, 20))
 })
 
 test_that("parse_time_channel() parses fractional unix time", {
@@ -832,11 +1013,11 @@ test_that("parse_time_channel() parses fractional unix time", {
     )
 
     result <- parse_time_channel(data, "time")
-    expect_setequal(result$time / 60 / 60, hrs_vec)
-    expect_type(result$time, "double")
+    expect_setequal(result$data$time / 60 / 60, hrs_vec)
+    expect_type(result$data$time, "double")
 })
 
-test_that("parse_time_channel() parses ISO 8601 timestamps", {
+test_that("parse_time_channel() parses ISO 8601 character timestamps to numeric", {
     data <- data.frame(
         time = c("2025-01-01T10:00:00", "2025-01-01T10:00:01"),
         value = c(1, 2),
@@ -845,11 +1026,11 @@ test_that("parse_time_channel() parses ISO 8601 timestamps", {
 
     result <- parse_time_channel(data, "time")
 
-    expect_type(result$time, "double")
-    expect_equal(result$time, c(0, 1))
+    expect_type(result$data$time, "double")
+    expect_equal(result$data$time, c(0, 1))
 })
 
-test_that("parse_time_channel() parses various date formats", {
+test_that("parse_time_channel() parses various date-time formats to numeric", {
     formats <- list(
         c("2025-01-01 10:00:00", "2025-01-01 10:00:01"),
         c("2025/01/01 10:00:00", "2025/01/01 10:00:01"),
@@ -864,11 +1045,11 @@ test_that("parse_time_channel() parses various date formats", {
             stringsAsFactors = FALSE
         )
         result <- parse_time_channel(data, "time")
-        expect_type(result$time, "double")
+        expect_type(result$data$time, "double")
     }
 })
 
-test_that("parse_time_channel() parses time only format", {
+test_that("parse_time_channel() parses time-only H:MM:SS character format", {
     data <- data.frame(
         time = c("10:00:00", "10:00:01"),
         value = c(1, 2),
@@ -877,58 +1058,8 @@ test_that("parse_time_channel() parses time only format", {
 
     result <- parse_time_channel(data, "time")
 
-    expect_type(result$time, "double")
-})
-
-test_that("parse_time_channel() preserves timestamp with add_timestamp=TRUE", {
-    data <- data.frame(
-        time = c("2025-01-01T10:00:00", "2025-01-01T10:00:01"),
-        value = c(1, 2),
-        stringsAsFactors = FALSE
-    )
-
-    result <- parse_time_channel(data, "time", add_timestamp = TRUE)
-
-    expect_true("timestamp" %in% names(result))
-    expect_s3_class(result$timestamp, "POSIXct")
-    expect_type(result$time, "double")
-    expect_equal(which(names(result) == "timestamp"), 2)
-})
-
-test_that("parse_time_channel() converts POSIXct with add_timestamp=FALSE", {
-    data <- data.frame(
-        time = as.POSIXct(c("2025-01-01 10:00:00", "2025-01-01 10:00:01")),
-        value = c(1, 2)
-    )
-
-    result <- parse_time_channel(data, "time", add_timestamp = FALSE)
-
-    expect_type(result$time, "double")
-    expect_false("timestamp" %in% names(result))
-    expect_equal(result$time, c(0, 1))
-})
-
-test_that("parse_time_channel() recalculates from zero with POSIXct", {
-    data <- data.frame(
-        time = as.POSIXct(c("2025-01-01 10:00:00", "2025-01-01 10:00:01")),
-        value = c(1, 2)
-    )
-
-    result <- parse_time_channel(data, "time", zero_time = FALSE)
-
-    expect_type(result$time, "double")
-    expect_equal(result$time, c(0, 1))
-})
-
-test_that("parse_time_channel() preserves numeric time", {
-    data <- data.frame(
-        time = c(10.5, 20.5, 30.5),
-        value = c(1, 2, 3)
-    )
-
-    result <- parse_time_channel(data, "time", zero_time = FALSE)
-
-    expect_equal(result$time, data$time)
+    expect_type(result$data$time, "double")
+    expect_equal(result$data$time, c(0, 1))
 })
 
 test_that("parse_time_channel() handles milliseconds in timestamps", {
@@ -940,13 +1071,122 @@ test_that("parse_time_channel() handles milliseconds in timestamps", {
 
     result <- parse_time_channel(data, "time")
 
-    expect_type(result$time, "double")
-    expect_true(result$time[2] > 1)
+    expect_type(result$data$time, "double")
+    expect_true(result$data$time[2] > 1 & result$data$time[2] < 2)
+    expect_equal(result$data$time[1], 0)
+})
+
+test_that("parse_time_channel() converts POSIXct to numeric seconds from zero", {
+    data <- data.frame(
+        time = as.POSIXct(c("2025-01-01 10:00:00", "2025-01-01 10:00:01")),
+        value = c(1, 2)
+    )
+
+    result <- parse_time_channel(data, "time", add_timestamp = FALSE)
+
+    expect_type(result$data$time, "double")
+    expect_false("timestamp" %in% names(result$data))
+    expect_equal(result$data$time, c(0, 1))
+})
+
+test_that("parse_time_channel() always zeros POSIXct regardless of zero_time", {
+    data <- data.frame(
+        time = as.POSIXct(c("2025-01-01 10:00:00", "2025-01-01 10:00:01")),
+        value = c(1, 2)
+    )
+
+    result <- parse_time_channel(data, "time", zero_time = FALSE)
+
+    expect_type(result$data$time, "double")
+    ## POSIXct is always relative — always starts from 0
+    expect_equal(result$data$time, c(0, 1))
+})
+
+test_that("parse_time_channel() returns start_timestamp from POSIXct time_channel", {
+    t0 <- as.POSIXct("2025-03-15 08:00:00")
+    data <- data.frame(
+        time = t0 + c(0, 1, 2),
+        value = c(1, 2, 3)
+    )
+
+    result <- parse_time_channel(data, "time")
+
+    ## start_timestamp is extracted from the POSIXct column when not in header
+    expect_false(is.null(result$start_timestamp))
+})
+
+test_that("parse_time_channel() add_timestamp=TRUE adds POSIXct column after time_channel", {
+    t0 <- as.POSIXct("2025-01-01 10:00:00")
+    data <- data.frame(
+        time = t0 + c(0, 1),
+        value = c(1, 2)
+    )
+
+    result <- parse_time_channel(data, "time", add_timestamp = TRUE)
+
+    expect_true("timestamp" %in% names(result$data))
+    expect_s3_class(result$data$timestamp, "POSIXct")
+    expect_type(result$data$time, "double")
+    ## timestamp column inserted immediately after time_channel
+    expect_equal(which(names(result$data) == "timestamp"), 2)
+    expect_equal(
+        result$data$timestamp[1L],
+        result$start_timestamp,
+        ignore_attr = TRUE
+    )
+    expect_equal(as.numeric(result$data$timestamp), as.numeric(t0 + c(0, 1)))
+})
+
+
+test_that("parse_time_channel() add_timestamp=TRUE with start_timestamp reconstructs absolute timestamps", {
+    data <- data.frame(
+        time = c(0, 1, 2),
+        value = c(1, 2, 3)
+    )
+    start_ts <- "2025-06-01T09:00:00"
+
+    result <- parse_time_channel(
+        data, "time",
+        start_timestamp = start_ts,
+        add_timestamp = TRUE
+    )
+
+    expect_true("timestamp" %in% names(result$data))
+    expect_s3_class(result$data$timestamp, "POSIXct")
+
+    expected_t0 <- as.POSIXct(start_ts, format = "%Y-%m-%dT%H:%M:%OS")
+    expect_equal(
+        as.numeric(result$data$timestamp),
+        as.numeric(expected_t0 + c(0, 1, 2))
+    )
+    ## start_timestamp is passed through unchanged
+    expect_equal(result$start_timestamp, start_ts)
+})
+
+test_that("parse_time_channel() add_timestamp=TRUE with no timestamps skips column silently", {
+    data <- data.frame(
+        time = c(10, 20, 30),
+        value = c(1, 2, 3)
+    )
+
+    result <- parse_time_channel(
+        data, 
+        time_channel = "time",
+        start_timestamp = NULL,
+        add_timestamp = TRUE
+    )
+
+    ## no timestamp available — column not added
+    expect_false("timestamp" %in% names(result$data))
+    expect_null(result$start_timestamp)
 })
 
 ## parse_sample_rate() ================================================
 test_that("parse_sample_rate returns correct structure", {
-    data <- data.frame(time = seq(0, 10, by = 0.1), value = rnorm(101, 10, 1))
+    data <- data.frame(
+        time = seq(0, 10, by = 0.1),
+        value = rnorm(101, 10, 1)
+    )
     file_header <- matrix(NA, nrow = 5, ncol = 5)
 
     result <- parse_sample_rate(
@@ -1115,6 +1355,133 @@ test_that("detect_irregular_samples uses correct time_channel name", {
 })
 
 ## read_mnirs() =======================================================
+## read_mnirs() auto-detection =========================================
+test_that("read_mnirs auto-detects Moxy channels when nirs_channels = NULL", {
+    skip_if(
+        length(device_channels$Moxy$nirs_channels) == 0L,
+        "Moxy device_channels not populated"
+    )
+
+    file_path <- example_mnirs("moxy_ramp")
+
+    expect_message(
+        df <- read_mnirs(
+            file_path = file_path,
+            nirs_channels = NULL,
+            time_channel = NULL,
+            verbose = TRUE
+        ),
+        "Moxy.*detected"
+    ) |>
+        expect_warning("irregular") |>
+        expect_message("Estimated.*sample_rate.*2")
+
+    expect_s3_class(df, "mnirs")
+    expect_equal(attr(df, "nirs_device"), "Moxy")
+    expect_equal(attr(df, "nirs_channels"), device_channels$Moxy$nirs_channels)
+    expect_equal(attr(df, "time_channel"), device_channels$Moxy$time_channel)
+    ## auto-detected channels should keep original names (not renamed)
+    expect_true(all(
+        device_channels$Moxy$nirs_channels %in% names(df)
+    ))
+})
+
+test_that("read_mnirs auto-detects Train.Red channels when nirs_channels = NULL", {
+    skip_if(
+        length(device_channels$Train.Red$nirs_channels) == 0L,
+        "Train.Red device_channels not populated"
+    )
+
+    file_path <- example_mnirs("train.red")
+
+    expect_message(
+        df <- read_mnirs(
+            file_path = file_path,
+            nirs_channels = NULL,
+            time_channel = NULL,
+            verbose = TRUE
+        ),
+        "Train.Red.*detected"
+    ) |>
+        expect_warning("irregular") |>
+        expect_message("Estimated.*sample_rate.*10")
+
+    expect_s3_class(df, "mnirs")
+    expect_equal(attr(df, "nirs_device"), "Train.Red")
+    expect_equal(attr(df, "nirs_channels"), device_channels$Train.Red$nirs_channels)
+    expect_equal(attr(df, "time_channel"), device_channels$Train.Red$time_channel)
+    expect_true(all(
+        device_channels$Train.Red$nirs_channels %in% names(df)
+    ))
+})
+
+test_that("read_mnirs errors for Artinis with nirs_channels = NULL", {
+    file_path <- example_mnirs("artinis_intervals")
+
+    expect_error(
+        read_mnirs(
+            file_path = file_path,
+            nirs_channels = NULL,
+            verbose = FALSE
+        ),
+        "cannot be determined"
+    )
+})
+
+test_that("read_mnirs keep_all = FALSE returns only specified columns by default", {
+    file_path <- example_mnirs("moxy_ramp")
+
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        # keep_all = FALSE,
+        verbose = FALSE
+    )
+
+    ## default keep_all = FALSE returns only smo2 + time
+    expect_equal(ncol(df), 2)
+    expect_true("smo2" %in% names(df))
+    expect_true("time" %in% names(df))
+})
+
+test_that("read_mnirs keep_all = TRUE returns all columns", {
+    file_path <- example_mnirs("moxy_ramp")
+
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = c(smo2 = "SmO2 Live"),
+        time_channel = c(time = "hh:mm:ss"),
+        keep_all = TRUE,
+        verbose = FALSE
+    )
+
+    ## default keep_all = TRUE returns more columns than just smo2 + time
+    expect_gt(ncol(df), 2)
+    expect_true("smo2" %in% names(df))
+    expect_true("time" %in% names(df))
+})
+
+test_that("read_mnirs returns all columns when auto-detecting nirs_channels", {
+    file_path <- example_mnirs("moxy_ramp")
+
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = NULL,
+        time_channel = NULL,
+        keep_all = FALSE, ## explicitly FALSE should be overridden
+        verbose = FALSE
+    )
+
+    ## default keep_all = TRUE returns more columns than just smo2 + time
+    expect_gt(ncol(df), 2)
+    expect_true("SmO2 Live" %in% names(df))
+    expect_true("hh:mm:ss" %in% names(df))
+})
+
+
+
+
 ## moxy ===============================================================
 test_that("read_mnirs moxy .xlsx works with timestamp", {
     expect_warning(
@@ -1126,7 +1493,6 @@ test_that("read_mnirs moxy .xlsx works with timestamp", {
             ),
             time_channel = c(time = "hh:mm:ss"),
             add_timestamp = TRUE,
-            keep_all = FALSE,
             verbose = TRUE
         ),
         "irregular"
@@ -1220,9 +1586,8 @@ test_that("read_mnirs moxy invalid channel names", {
             time_channel = NULL,
             verbose = TRUE
         ),
-        "Detected.*time_channel"
+        "Estimated.*sample_rate.*2"
     ) |>
-        expect_message("Estimated.*sample_rate.*2") |>
         expect_warning("irregular")
 
     expect_equal(attr(df, "time_channel"), "hh:mm:ss")
@@ -1349,9 +1714,8 @@ test_that("read_mnirs train.red invalid channel names", {
             time_channel = NULL,
             verbose = TRUE
         ),
-        "Detected.*time_channel"
+        "Estimated.*sample_rate.*10"
     ) |>
-        expect_message("Estimated.*sample_rate.*10") |>
         expect_warning("irregular")
 
     expect_equal(attr(df, "time_channel"), "Timestamp (seconds passed)")

@@ -21,15 +21,16 @@ Pretty timespan breaks for plotting in units of 5, 15, 30, 60 sec, etc.
 Modified from \code{\link[scales:breaks_timespan]{scales::breaks_timespan()}}.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-x = 0:120
-y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        x <- 0:120
+        y <- sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 
-library(ggplot2)
-data.frame(x, y) |>
-    ggplot(aes(x, y)) +
-    theme_mnirs() +
-    scale_x_continuous(breaks = breaks_timespan()) +
-    geom_line()
-\dontshow{\}) # examplesIf}
+        ggplot2::ggplot(data.frame(x, y), ggplot2::aes(x, y)) +
+            theme_mnirs() +
+            ggplot2::scale_x_continuous(breaks = breaks_timespan()) +
+            ggplot2::geom_line()
+    }
+}
+
 }

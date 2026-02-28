@@ -42,9 +42,9 @@ test_that("slope calculates edge cases correctly", {
     ## unequal length = error
     expect_error(slope(x = 1:5, t = 1:3), "equal length")
     ## all invalid = NA
-    expect_error(is.na(slope(list())), "valid.*numeric")
+    expect_error(slope(list()), "valid.*numeric")
     expect_true(is.na(slope(numeric(0))))
-    expect_error(is.na(slope(NULL)), "valid.*numeric")
+    expect_error(slope(NULL), "valid.*numeric")
     expect_true(is.na(slope(rep(NA_real_, 4))))
     expect_true(is.na(slope(rep(NaN, 4))))
     expect_true(is.na(slope(rep(Inf, 4))))
@@ -88,7 +88,7 @@ test_that("slope works with min_obs", {
     expect_true(is.na(slope(x, min_obs = 20)))
     ## n < min_obs = NA
     expect_true(is.na(slope(x[1:2], min_obs = 3, partial = TRUE)))
-    ## min_obs < 2 ## TODO silent argument, no warning
+    ## min_obs < 2 ## silent argument, no warning
     # expect_warning(
     #     expect_gt(slope(x, min_obs = 1, verbose = TRUE), 1),
     #     "set to .*2"
@@ -159,7 +159,7 @@ test_that("rolling_slope handles negative values correctly", {
             width = 3,
             span = 0,
             partial = TRUE,
-            verbose = TRUE
+            verbose = FALSE
         ),
         -2
     )
@@ -332,11 +332,13 @@ test_that("rolling_slope calculates invalid", {
     expect_error(rolling_slope(x = rep(NA, 5), width = 3), "valid.*numeric")
     ## NA_real_ = NA_real_
     expect_all_true(is.na(rolling_slope(x = rep(NA_real_, 5), width = 3)))
-    ## TODO empty returns empty or NA?
-    expect_equal(length(rolling_slope(numeric(0), width = 3)), 0)
+    ## empty input returns empty output for input == output length consistency
+    expect_equal(length(rolling_slope(x = numeric(0), width = 3)), 0) |> 
+        expect_warning("empty")
     ## invalid type = error
     expect_error(rolling_slope(list(), width = 3), "valid.*numeric")
     expect_error(rolling_slope(NULL, width = 3), "valid.*numeric")
+    expect_equal(rolling_slope(c(1, 2, NULL, 3), width = 3), c(NA, 1, NA))
     ## NA_real_, NaN, Inf = NA_real_
     expect_all_true(is.na(rolling_slope(rep(NA_real_, 4), width = 3)))
     expect_all_true(is.na(
@@ -798,8 +800,7 @@ test_that("rolling_slope works visually", {
     #     df
     # })[2:12]
 
-    # data.frame(t, x) |>
-    #     ggplot(aes(t, x)) +
+    # ggplot(data.frame(t, x), aes(t, x)) +
     #     theme_mnirs() +
     #     geom_line(linewidth = 2) +
     #     lapply(predicted, \(.df) {
@@ -821,7 +822,7 @@ test_that("rolling_slope works visually", {
 })
 
 test_that("rolling_slope works on example_mnirs() data", {
-    skip("visual checks")
+    skip("rolling_slope visual checks")
 
     data <- read_mnirs(
         example_mnirs("moxy_ramp"),
@@ -840,13 +841,14 @@ test_that("rolling_slope works on example_mnirs() data", {
         partial = FALSE,
     )
 
+    library(ggplot2)
     plot(data) +
         ggplot2::geom_hline(
             yintercept = 50,
             linetype = "dotted",
             colour = "red"
         ) +
-        ggplot2::geom_line(ggplot2::aes(y = 50 + slope * 10), colour = "red")
+        ggplot2::geom_line(ggplot2::aes(y = 50 + data$slope * 10), colour = "red")
 
     data <- read_mnirs(
         example_mnirs("train.red"),
@@ -871,5 +873,5 @@ test_that("rolling_slope works on example_mnirs() data", {
             linetype = "dotted",
             colour = "red"
         ) +
-        ggplot2::geom_line(ggplot2::aes(y = 65 + slope * 10), colour = "red")
+        ggplot2::geom_line(ggplot2::aes(y = 65 + data$slope * 10), colour = "red")
 })

@@ -1,39 +1,65 @@
 #' Validate `{mnirs}` parameters
 #'
-#' Passes through manually defined parameters, or defines them from metadata
-#' if present, and validates relevant data quality checks.
+#' Resolve and validate *{mnirs}* metadata and perform basic data quality 
+#' checks.
 #'
-#' @param data A data frame of class *"mnirs"* containing time series data
-#'   and metadata.
-#' @param nirs_channels A character vector of mNIRS channel names to operate
-#'   on. Must match column names in `data` exactly. Retrieved from metadata
-#'   if not defined explicitly.
-#' @param time_channel A character string indicating the time or sample channel
-#'   name. Must match column names in `data` exactly. Retrieved from metadata
-#'   if not defined explicitly.
-#' @param event_channel A character string indicating the event or lap channel
-#'   name. Must match column names in `data` exactly. Retrieved from metadata
-#'   if not defined explicitly.
-#' @param required A logical specifying whether `event_channel` is required
-#'   (the *default*) or optional (`event_channel` returned as `NULL`).
+#' @param data A data frame of class *"mnirs"* containing time series data and
+#'   metadata.
+#' 
+#' @param nirs_channels A character vector giving the names of mNIRS columns to 
+#'   operate on. Must match column names in `data` exactly.
+#'   - If `NULL` (default), the `nirs_channels` metadata attribute of `data` is 
+#'     used.
+#' 
+#' @param time_channel A character string giving the name of the time or sample
+#'   column. Must match a column name in `data` exactly.
+#'   - If `NULL` (default), the `time_channel` metadata attribute of `data` is 
+#'     used.
+#' 
+#' @param event_channel A character string giving the name of the event/marker
+#'   column. Must match a column name in `data` exactly.
+#'   - If `NULL` (default), the `event_channel` metadata attribute of `data` is
+#'     used.
+#' 
+#' @param required Logical. Default is `TRUE`. `event_channel` must be
+#'   present or detected in metadata. If `FALSE`, `event_channel` may be `NULL`.
+#' 
 #' @param x A numeric vector.
-#' @param sample_rate A numeric value for the exported data sample rate in Hz.
-#'   Retrieved from metadata or estimated from `time_channel` if not defined
-#'   explicitly.
-#' @param elements A numeric value for the number of numeric elements in `arg`.
-#' @param range A two-element numeric vector for the range of valid numeric
-#'   values in `arg`.
-#' @param inclusive A character vector to specify which of `left` and/or
-#'   `right` boundary values should be included in the range, or both
-#'   (the *default*), or excluded if `FALSE`.
-#' @param integer A logical indicating whether to test `arg` as an integer
-#'   using `rlang::is_integerish()`, rather than a numeric (`FALSE` by
-#'   *default*).
-#' @param msg1,msg2 A character string detailing the `cli_abort` error message
-#'   returned for invalid numeric values passed to `arg`.
+#' 
+#' @param sample_rate A numeric sample rate in Hz.
+#'   - If `NULL` (default), the `sample_rate` metadata attribute of `data` will
+#'     be used if detected, or the sample rate will be estimated from 
+#'     `time_channel`.
+#' 
+#' @param elements An integer. Default is `Inf`. The number of numeric elements 
+#'   expected in `x`.
+#' 
+#' @param range A two-element numeric vector giving the valid range for `x`.
+#' 
+#' @param inclusive A character vector specifying which boundaries of `range` 
+#'   are included. Any of `"left"`, `"right"` (default is both). Use `FALSE` to
+#'   exclude both endpoints.
+#' 
+#' @param integer Logical. Default is `FALSE`. If `TRUE`, validate `x` as 
+#'   integer-like values using [rlang::is_integerish()]. Otherwise tested as a
+#'   numeric value.
+#' 
+#' @param msg1,msg2 A character string appended to the [cli::cli_abort()] 
+#'   message when numeric validation fails.
 #' @inheritParams read_mnirs
 #'
-#' @returns The validated object or an error message with [cli::cli_abort()].
+#' @details
+#' `validate_mnirs()` is an internal documentation topic for a set of
+#' validators used throughout the package. These validators:
+#'
+#' - Prefer explicit user-supplied arguments.
+#' - Fall back to *"mnirs"* metadata attributes when available.
+#' - Fail fast with informative [cli::cli_abort()] messages when values are
+#'   missing or invalid.
+#'
+#' @returns Returns the validated object (e.g. a resolved `time_channel` 
+#'   string), or invisibly returns `NULL` for successful validations. On
+#'   failure, an error is thrown via [cli::cli_abort()].
 #'
 #' @name validate_mnirs
 #' @keywords internal
@@ -62,6 +88,7 @@ validate_numeric <- function(
     range = NULL,
     inclusive = c("left", "right"),
     integer = FALSE,
+    invalid = FALSE,
     msg1 = "",
     msg2 = "."
 ) {
@@ -78,10 +105,15 @@ validate_numeric <- function(
     }
 
     valid <- !is.na(x)
-    n_valid <- sum(valid)
+
+    ## valid elements length
+    n_valid <- if (!invalid) sum(valid) else length(x)
+    if (!invalid && n_valid == 0L) {
+        abort_validation(name, integer, msg1, msg2)
+    }
 
     ## elements check
-    if (n_valid == 0L || (is.finite(elements) && n_valid != elements)) {
+    if (is.finite(elements) && n_valid != elements) {
         abort_validation(name, integer, msg1, msg2)
     }
     ## range check
@@ -195,8 +227,7 @@ validate_nirs_channels <- function(
         nirs_unlisted <- nirs_channels
         if (verbose && !is.null(nirs_unlisted)) {
             cli_inform(c(
-                "i" = "{.arg nirs_channels} grouped together by default." #,
-                # "i" = "{.arg nirs_channels} groups can be defined explicitly."
+                "i" = "{.arg nirs_channels} grouped together by default."
             ))
         }
     }
@@ -228,6 +259,8 @@ validate_nirs_channels <- function(
         ))
     }
 
+    ## returns explicitly grouped nirs_channels 
+    ## or nirs_unlisted if retrieved from metadata
     return(nirs_channels)
 }
 
@@ -424,9 +457,12 @@ validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
 
 
 #' @rdname validate_mnirs
-validate_x_t <- function(x, t = seq_along(x)) {
-    validate_numeric(x)
-    validate_numeric(t)
+validate_x_t <- function(x, t, invalid = FALSE) {
+    ## exclude NULL by defaulting to invalid character
+    x <- x %||% character()
+    t <- t %||% character()
+    validate_numeric(x, invalid = invalid)
+    validate_numeric(t, invalid = invalid)
     if (length(x) != length(t)) {
         cli_abort(c(
             "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\

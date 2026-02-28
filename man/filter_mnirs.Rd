@@ -14,10 +14,10 @@ filter_mnirs(
   sample_rate = NULL,
   method = c("smooth_spline", "butterworth", "moving_average"),
   spar = NULL,
-  type = c("low", "high", "stop", "pass"),
   order = 2,
   W = NULL,
   fc = NULL,
+  type = c("low", "high", "stop", "pass"),
   width = NULL,
   span = NULL,
   na.rm = FALSE,
@@ -26,16 +26,22 @@ filter_mnirs(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names to operate
-on. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{nirs_channels}{A character vector giving the names of mNIRS columns to
+operate on. Must match column names in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{nirs_channels} metadata attribute of \code{data} is
+used.
+}}
 
-\item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{time_channel}{A character string giving the name of the time or sample
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
+used.
+}}
 
 \item{sample_rate}{A numeric value for the sample rate in Hz for
 \code{method = "butterworth"}. Will be taken from metadata or estimated
@@ -53,15 +59,6 @@ from \code{time_channel} if not defined explicitly.}
 \item{spar}{A numeric value defining the smoothing parameter for
 \code{method = "smooth_spline"}.}
 
-\item{type}{A character string indicating the digital filter type for
-\code{method = "butterworth"} (see \emph{Details}).
-\describe{
-\item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
-\item{\code{"high"}}{For a \emph{high-pass} filter.}
-\item{\code{"stop"}}{For a \emph{stop-band} (band-reject) filter.}
-\item{\code{"pass"}}{For a \emph{pass-band} filter.}
-}}
-
 \item{order}{An integer defining the filter order for
 \code{method = "butterworth"} (\emph{default} \code{order = 2}).}
 
@@ -71,6 +68,15 @@ Nyquist frequency (see \emph{Details}).}
 
 \item{fc}{A one- or two-element numeric vector defining the filter cutoff
 frequency(ies) for \code{method = "butterworth"}, in Hz (see \emph{Details}).}
+
+\item{type}{A character string indicating the digital filter type for
+\code{method = "butterworth"} (see \emph{Details}).
+\describe{
+\item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
+\item{\code{"high"}}{For a \emph{high-pass} filter.}
+\item{\code{"stop"}}{For a \emph{stop-band} (band-reject) filter.}
+\item{\code{"pass"}}{For a \emph{pass-band} filter.}
+}}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation for
@@ -85,8 +91,9 @@ In units of \code{time_channel} or \code{t}, between \verb{[t - span/2, t + span
 and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
 will throw an error if there are any \code{NA}s (see \emph{Details}).}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
 }
@@ -161,37 +168,41 @@ Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
 Then \code{NA}s will be preserved and passed through in the returned data.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss")
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10
+        width = 10,
+        verbose = FALSE
     )
 
 data_filtered <- filter_mnirs(
     data,
     method = "butterworth", ## Butterworth digital filter is a common choice
-    type = "low",           ## specify a low-pass filter
     order = 2,              ## order is the number of filter passes
     W = 0.02,               ## fractional critical frequency
-    na.rm = TRUE            ## explicitly preserve any NAs and avoid errors
+    type = "low",           ## specify a low-pass filter
+    na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
+    verbose = FALSE
 )
 
-library(ggplot2)
-## plot filtered data and add the raw data back to the plot to compare
-plot(data_filtered, label_time = TRUE) +
-    geom_line(
-        data = data,
-        aes(y = smo2, colour = "smo2"), alpha = 0.4
-    )
-\dontshow{\}) # examplesIf}
+data_filtered
+
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot filtered data and add the raw data back to the plot to compare
+        plot(data_filtered, time_labels = TRUE) +
+            ggplot2::geom_line(
+                data = data,
+                ggplot2::aes(y = smo2, colour = "smo2"), alpha = 0.4
+            )
+    }
+}
+
 }

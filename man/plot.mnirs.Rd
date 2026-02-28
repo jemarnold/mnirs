@@ -4,23 +4,23 @@
 \alias{plot.mnirs}
 \title{Plot \emph{{mnirs}} objects}
 \usage{
-\method{plot}{mnirs}(x, ...)
+\method{plot}{mnirs}(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...)
 }
 \arguments{
 \item{x}{Object of class \emph{"mnirs"} returned from \code{\link[=create_mnirs_data]{create_mnirs_data()}}}
 
-\item{...}{Additional arguments:
-\describe{
-\item{\code{label_time}}{A logical to display x-axis time values
-formatted as \emph{"hh:mm:ss"} using \code{\link[scales:label_date]{scales::label_time()}}.
-\code{label_time = FALSE} (the \emph{default}) will display simple numeric
-values on the x-axis.}
-\item{\code{n.breaks}}{A numeric value to define the number of breaks in
-both x- and y-axes.}
-\item{\code{na.omit}}{A logical to omit missing (\code{NA}) values for better
-display of connected lines. \code{na.omit = FALSE} (the \emph{default}) can be
-used to identify missing values.}
-}}
+\item{time_labels}{A logical to display x-axis time values formatted as
+\emph{"hh:mm:ss"} using \code{\link[=format_hmmss]{format_hmmss()}}. \code{time_labels = FALSE} (the
+\emph{default}) will display simple numeric values on the x-axis.}
+
+\item{n.breaks}{A numeric value to define the number of breaks in both
+x- and y-axes.}
+
+\item{na.omit}{A logical to omit missing (\code{NA}) values for better display
+of connected lines. \code{na.omit = FALSE} (the \emph{default}) can be used to
+identify missing values.}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2} object.
@@ -29,8 +29,6 @@ A \link[ggplot2:ggplot]{ggplot2} object.
 Create a simple plot for objects returned from \code{\link[=create_mnirs_data]{create_mnirs_data()}}.
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
 data_table <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_right = "SmO2 Live",
@@ -39,7 +37,11 @@ data_table <- read_mnirs(
     verbose = FALSE
 )
 
-## note the hidden options to display time values as `h:mm:ss` with 8 breaks
-plot(data_table, label_time = TRUE, n.breaks = 8)
-\dontshow{\}) # examplesIf}
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## note the options to display time values as `h:mm:ss` with 8 breaks
+        plot(data_table, time_labels = TRUE, n.breaks = 8)
+    }
+}
+
 }

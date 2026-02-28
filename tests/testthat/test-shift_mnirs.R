@@ -759,8 +759,7 @@ test_that("shift_mnirs works on Train.Red", {
             dhb_right = "HBDiff unfiltered"
         ),
         time_channel = c(time = "Timestamp (seconds passed)"),
-        verbose = FALSE,
-        keep_all = TRUE,
+        verbose = FALSE
     )
 
     data_shifted <- shift_mnirs(

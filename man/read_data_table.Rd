@@ -9,7 +9,7 @@ read_data_table(
   nirs_channels,
   time_channel = NULL,
   event_channel = NULL,
-  rows = 200L
+  header_row = 1L
 )
 }
 \description{

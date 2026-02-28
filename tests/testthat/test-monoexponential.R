@@ -206,8 +206,7 @@ test_that("SS_monoexp3() handles data with TD near zero", {
     expect_disjoint(names(coef(model)), "TD")
 })
 
-## TODO add repeated occlusion tests with few data samples
-
+## OxCap modelling ===================================================
 test_that("SS_monoexp3() handles OxCap with few data points same as SSasymp", {
     # fmt: skip
     df <- data.frame(
@@ -354,7 +353,7 @@ test_that("fix_coefs() warns for invalid parameter names", {
     )
 })
 
-## TODO I need to verify tryCatch fall-back in real-world first
+## ! I need to verify tryCatch fall-back in real-world first
 # test_that("fix_coefs() errors when data unavailable and not supplied", {
 #     set.seed(909)
 #     t <- 1:60

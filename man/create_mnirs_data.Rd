@@ -7,7 +7,8 @@
 create_mnirs_data(data, ...)
 }
 \arguments{
-\item{data}{A data frame with existing metadata (\code{attributes(data)}).}
+\item{data}{A data frame with existing metadata (accessed with
+\code{attributes(data)}).}
 
 \item{...}{Additional arguments with metadata to add to the data frame.
 Can be either seperate named arguments or a list of named values.
@@ -17,18 +18,21 @@ Can be either seperate named arguments or a list of named values.
 \item time_channel
 \item event_channel
 \item sample_rate
+\item start_timestamp
+\item event_times
+\item interval_span
 }}
 }
 \value{
-A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with
-metadata available with \code{attributes()}.
+A \link[tibble:tibble-package]{tibble} of class \code{"mnirs"}. Metadata are stored
+as attributes and can be accessed with \code{attributes(data)}.
 }
 \description{
-Manually add class \emph{"mnirs"} and metadata to an existing data frame.
+Manually add class \code{"mnirs"} and metadata to an existing data frame.
 }
 \details{
-Typically will only be called internally, but can be used to inject \emph{{mnirs}}
-metadata into any data frame.
+Typically will only be called internally, but can be used to inject
+\emph{{mnirs}} metadata into any data frame.
 }
 \examples{
 df <- data.frame(

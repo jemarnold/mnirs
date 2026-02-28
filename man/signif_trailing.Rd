@@ -6,7 +6,11 @@
 \alias{signif_pvalue}
 \title{Format numbers for display as character strings}
 \usage{
-signif_trailing(x, digits = 2L, format = c("digits", "signif"))
+signif_trailing(
+  x,
+  digits = 2L,
+  format = c("digits", "signif", "max_digits", "max_signif")
+)
 
 signif_whole(x, digits = 5L)
 
@@ -94,6 +98,6 @@ otherwise empty string.
 }
 }
 \seealso{
-\code{\link[=formatC]{formatC()}} \code{\link[=round]{round()}} \code{\link[=signif]{signif()}}
+\code{\link[=formatC]{formatC()}}, \code{\link[=round]{round()}}, \code{\link[=signif]{signif()}}
 }
 \keyword{internal}

@@ -6,7 +6,7 @@
 \usage{
 read_mnirs(
   file_path,
-  nirs_channels,
+  nirs_channels = NULL,
   time_channel = NULL,
   event_channel = NULL,
   sample_rate = NULL,
@@ -17,108 +17,120 @@ read_mnirs(
 )
 }
 \arguments{
-\item{file_path}{The file path including extension (either \emph{\code{".xlsx"}},
-\emph{\code{".xls"}}, or \emph{\code{".csv"}}) to import.}
+\item{file_path}{Path of the data file to import. Supported file extensions
+are \code{".xlsx"}, \code{".xls"}, and \code{".csv"}.}
 
-\item{nirs_channels}{A character vector indicating the mNIRS column names
-to import from the file. Must match column names in the data file exactly.
-A named character vector can be used to rename columns in the form:
-\code{c(new_name = "original_name")} (see \emph{Details}).}
+\item{nirs_channels}{A character vector of one or more column names
+containing mNIRS signals to import. Names must match the file header
+exactly.
+\itemize{
+\item If \code{NULL} (default), \code{read_mnirs()} attempts to detect the device from
+the file contents and use a known \code{nirs_channel} name.
+\item A \emph{named} character vector can be used to rename columns on import, in
+the form \code{c(renamed = "original_name")}.
+}}
 
-\item{time_channel}{An \emph{optional} character string indicating the time or
-sample column name to import from the file. Must match column names in the
-data file exactly. A named character vector can be used to rename columns
-in the form: \code{c(new_name = "original_name")}. Time will be converted to
-\emph{numeric} format (see \emph{Details}).}
+\item{time_channel}{A character string giving the name of the time
+(or sample) column to import. The name must match the file header exactly.
+\itemize{
+\item If \code{NULL} (default), \code{read_mnirs()} attempts to identify a time-like
+column automatically (by known device defaults and/or time-formatted
+values).
+\item A \emph{named} character vector can be used to rename the column on import,
+in the form \code{c(time = "original_name")}.
+}}
 
-\item{event_channel}{An \emph{optional} character string indicating the event or
-lap column name to import from the file. Must match column names in the
-data file exactly. A named character vector can be used to rename columns
-in the form: \code{c(new_name = "original_name")} (see \emph{Details}).}
+\item{event_channel}{An \emph{optional} character string giving the name of an
+event/marker column to import. Names must match the file header exactly.
+A named character vector can be used to rename the column on import in
+the form \code{c(event = "original_name")}.}
 
-\item{sample_rate}{An \emph{optional} numeric value for the exported sample rate
-in Hz. If not defined explicitly, will be estimated from the data (see
-\emph{Details}).}
+\item{sample_rate}{An \emph{optional} numeric sample rate in Hz. If left blank
+(\code{NULL}), the sample rate is estimated from \code{time_channel} (see \emph{Details}).}
 
-\item{add_timestamp}{\verb{<under development>} A logical to add a \emph{"timestamp"}
-column with date-time values of class \emph{POSIXct}, if present in the
-data file. Currently only functions if the existing \code{time_channel} data
-are in timestamp format (see \emph{Details}).}
+\item{add_timestamp}{A logical. Default is \code{FALSE}. If \code{TRUE} and if the
+source data contain an absolute date-time (POSIXct) time value, will add
+a \code{"timestamp"} column in addition to the specified \code{time_channel} as a
+numeric time column.}
 
-\item{zero_time}{A logical to re-calculate \code{time_channel} from zero or
-preserve the original \code{time_channel} values (\code{FALSE}, the \emph{default}).}
+\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-calculates
+numeric \code{time_channel} values to start from zero.}
 
-\item{keep_all}{A logical to include all columns detected from the file
-or only include the explicitly specified data columns (\code{FALSE}, the
-\emph{default}).}
+\item{keep_all}{Logical. Default is \code{FALSE}. Will keep only the channels
+explicitly specified in \code{nirs_channels}, \code{time_channel}, and
+\code{event_channel}. If \code{TRUE} will keep all columns found in the file
+data table.
+\itemize{
+\item If no \code{nirs_channels} are specified and the file format is recognised,
+all columns in the file data table will be returned, as an exploratory
+option.
+}}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
-A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
-available with \code{attributes()}.
+A \link[tibble:tibble-package]{tibble} of class \code{"mnirs"}. Metadata are stored
+as attributes and can be accessed with \code{attributes(data)}.
 }
 \description{
-Read files exported from most commercially available mNIRS devices and
-return a data frame of class \emph{"mnirs"} with recorded time series data
-and metadata.
+Import time-series data exported from common muscle NIRS (mNIRS) devices and
+return a tibble of class \code{"mnirs"} with the selected signal channels and
+metadata.
 }
 \details{
-Channel names are matched to a single row, representing the header row for
-data columns anywhere in the data file, not necessarily the top row of
-the file.
+\subsection{Header detection}{
 
-Channels can be renamed in the format \code{c(new_name = "original_name")},
-where \verb{*"original_name"*} should exactly match the column names found in
-the file.
+\code{read_mnirs()} searches the file for a header row containing the requested
+channel names. The header row does not need to be the first row in the file.
+\itemize{
+\item If duplicate column names exist, columns are matched in the order they
+appear and renamed with unique strings.
+\item Columns without a header name in the source file will be renamed to
+\verb{col_*}, where \code{*} is the numeric column number in which they appear in
+the file (e.g. \code{col_6}). This applies to \emph{Artinis Oxysoft} event label
+columns, which do not have a column header and must be identified manually.
+}
+}
 
-If there are duplicate column names in the file, the channel names will
-attempt to match them in the order in which they appear. You may want to
-confirm that the correct columns have been assigned to each channel as
-intended.
+\subsection{Renaming channels}{
 
-\code{nirs_channels} must be defined explicitly and match column names exactly.
-If \code{time_channel} is left blank, the function will attempt to identify a
-time column automatically based on column names or values containing time
-(\code{POSIXct}) data or time-formatted character strings (e.g. \emph{"hh:mm:ss"}).
+A named character vector can be specified to rename \code{nirs_channels},
+\code{time_channel}, and \code{event_channel}, in the form
+\code{c(renamed = "original_name")}. The \code{"original_name"} must match the
+contents of the file data table header row exactly.
+}
 
-\code{time_channel} will typically contain time values in seconds. However,
-some NIRS devices (for example, \emph{Artinis} devices recorded with \emph{Oxysoft})
-export the sample index (i.e. integer row numbers). If \emph{Oxysoft} export
-sample rate is detected in the file metadata, a \code{"time"} column will be
-added converting the sample indices to time values in seconds.
+\subsection{Time parsing}{
 
-When the \code{time_channel} is provided in date-time (\emph{POSIXct}) format, it
-will be converted to numeric values and re-calculated from zero,
-even when \code{zero_time = FALSE}.
+\code{time_channel} will be converted to numeric for analysis.
+\itemize{
+\item If \code{time_channel} is a date-time (POSIXct) format, it will be converted
+to numeric and re-based to start from 0, regardless of \code{zero_time}.
+\item Some devices export a sample index rather than time values. In those
+cases, if an export \code{sample_rate} is detected in the file metadata (e.g.
+\emph{Artinis Oxysoft} exports), \code{read_mnirs()} will create or overwrite a
+\code{"time"} column in seconds derived from the sample index and the detected
+\code{sample_rate}.
+}
+}
 
-With \code{add_timestamp = TRUE}, an additional \emph{"timestamp "} column will be
-added with the original date-time values. This functionality is currently
-\verb{<under development>} to recognise start-time values in the file and
-return absolute unix timestamps if available.
+\subsection{Sample rate}{
 
-Setting \code{zero_time = TRUE} will re-calculate numeric \code{time_channel} values
-to start from zero.
+If \code{sample_rate} is not specified, it is estimated from differences in
+\code{time_channel}. If \code{time_channel} is actually a sample index, as described
+above, this may erroneously be estimated at 1 Hz. \code{sample_rate} should be
+specified explicitly in this case.
+}
 
-If \code{time_channel} contains irregular sampling (i.e., non-sequential,
-repeated, or unordered values) a warning will be displayed (if
-\code{verbose = TRUE}) suggesting that the user confirm the file data manually.
+\subsection{Data cleaning}{
 
-\code{sample_rate} is required for certain \code{{mnirs}} functions to work properly
-and can be carried forward in the data frame metadata. If it is not
-defined explicitly, it will be estimated from the differences between
-values in the \code{time_channel}. As above, in certain cases where the
-\code{time_channel} represents sample indices rather than time values,
-\code{sample_rate} will be inaccurately estimated to be 1 Hz. In such cases,
-\code{sample_rate} should be defined explicitly.
-
-Columns and rows which contain entirely missing data (\code{NA}) are omitted.
-
-\code{verbose = TRUE} will display warnings and information messages which can be
-useful for troubleshooting. Errors causing abort messages will always be
-displayed. Messages can be silenced globally with
-\code{options(mnirs.verbose = FALSE)}.
+Entirely empty rows and columns are removed. Invalid values (e.g.
+\code{c(NaN, Inf)}) are standardized to \code{NA}. A warning will be displayed when
+irregular sampling is detected (e.g. non-monotonic, repeated, or unequal
+time values), if \code{verbose = TRUE}.
+}
 }
 \examples{
 ## call an example mNIRS data file
@@ -126,8 +138,10 @@ file_path <- example_mnirs("moxy_ramp")
 
 read_mnirs(
     file_path,
-    nirs_channels = c(smo2_right = "SmO2 Live", ## identify and rename channels
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(                   ## identify and rename channels
+        smo2_right = "SmO2 Live",
+        smo2_left = "SmO2 Live(2)"
+    ),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
     sample_rate = NULL,                  ## sample_rate will be estimated from time_channel
     verbose = FALSE                      ## silence warnings & messages

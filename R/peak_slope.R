@@ -18,18 +18,7 @@ slope <- function(
     args <- list(...)
 
     if (!(args$bypass_checks %||% FALSE)) {
-        if (!is.numeric(x)) {
-            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (!is.numeric(t)) {
-            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (length(x) != length(t)) {
-            cli_abort(c(
-                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
-                of equal length."
-            ))
-        }
+        validate_x_t(x, t, invalid = TRUE)
     }
 
     ## remove invalid
@@ -112,22 +101,21 @@ rolling_slope <- function(
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
-        if (!is.numeric(x)) {
-            abort_validation("x", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (!is.numeric(t)) {
-            abort_validation("t", integer = FALSE, msg1 = "", msg2 = ".")
-        }
-        if (n != length(t)) {
-            cli_abort(c(
-                "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\
-                of equal length."
+
+        validate_x_t(x, t, invalid = TRUE)
+
+        ## informative warning message for length zero without aborting
+        if (n == 0L) {
+            cli_warn(c(
+                "!" = "Slopes cannot be calculated over an empty vector."
             ))
+            return(numeric(0))
         }
         ## validate all t values identical
         if (all(diff(t) == 0)) {
             return(rep(NA_real_, n))
         }
+        validate_x_t(x, t, invalid = TRUE)
         validate_width_span(width, span, verbose)
     }
 
@@ -181,8 +169,8 @@ rolling_slope <- function(
 #'   requiring a complete window of valid samples (`FALSE`, by *default*). See
 #'   *Details*.
 #' @param ... Additional arguments.
-#' @inheritParams replace_invalid
 #' @inheritParams compute_local_windows
+#' @inheritParams replace_invalid
 #'
 #' @details
 #' Uses rolling slope calculations via the least squares formula on complete
@@ -242,22 +230,13 @@ peak_slope <- function(
     verbose = TRUE,
     ...
 ) {
-    align <- sub("^center$", "centre", align)
-    align <- match.arg(align)
-    direction <- match.arg(direction)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
+    args <- list(...)
+    if (!(args$bypass_checks %||% FALSE)) {
+        direction <- match.arg(direction)
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
     }
-
-    ## pre-return NA
-    na_result <- list(
-        t = NA_real_,
-        y = NA_real_,
-        slope = NA_real_,
-        intercept = NA_real_,
-        idx = NA_integer_,
-        window_idx = NA_integer_
-    )
 
     ## calculate all rolling slopes
     slopes <- rolling_slope(
@@ -269,7 +248,17 @@ peak_slope <- function(
         partial,
         verbose,
         window_idx = TRUE,
-        bypass_checks = TRUE
+        bypass_checks = args$bypass_checks %||% FALSE ## use validations
+    )
+
+    ## pre-return NA
+    na_result <- list(
+        t = NA_real_,
+        y = NA_real_,
+        slope = NA_real_,
+        intercept = NA_real_,
+        idx = NA_integer_,
+        window_idx = NA_integer_
     )
 
     if (all(is.na(slopes))) {

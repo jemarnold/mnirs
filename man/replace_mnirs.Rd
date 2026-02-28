@@ -57,16 +57,22 @@ replace_missing(
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
-\item{nirs_channels}{A character vector of mNIRS channel names to operate
-on. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{nirs_channels}{A character vector giving the names of mNIRS columns to
+operate on. Must match column names in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{nirs_channels} metadata attribute of \code{data} is
+used.
+}}
 
-\item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
+\item{time_channel}{A character string giving the name of the time or sample
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
+used.
+}}
 
 \item{invalid_values}{A numeric vector of invalid values to be replaced,
 e.g. \code{invalid_values = c(0, 100, 102.3)}. The \emph{default} \code{NULL} will not
@@ -104,8 +110,9 @@ trailing \code{NA}s or to the right for leading \code{NA}s, using
 \item{\code{"none"}}{Returns \code{NA}s without replacement.}
 }}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{x}{A numeric vector of the response variable.}
 
@@ -173,7 +180,7 @@ defined by either \code{width} number of samples, or \code{span} timespan in uni
 of \code{t}. Specifying \code{width} is often faster than \code{span}.
 \itemize{
 \item Outliers are detected with robust median absolute deviation (MAD) method
-adapted from \code{\link[pracma:hampel]{pracma::hampel()}}. Outliers equal to or less than the
+adapted from \code{pracma::hampel()}. Outliers equal to or less than the
 smallest absolute time series difference in \code{x} will be excluded, to
 avoid detecting negligible differences as outliers where local data have
 minimal or zero variation.
@@ -206,8 +213,6 @@ equivalent to \code{replace_missing(x, width = 1)}).
 }
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
 replace_invalid(x, invalid_values = 999, width = 2, method = "median")
@@ -237,27 +242,30 @@ data_clean <- replace_mnirs(
     verbose = FALSE
 )
 
-library(ggplot2)
-## plot original and and show where values have been replaced
-plot(data, label_time = TRUE) +
-    scale_colour_manual(
-        name = NULL,
-        breaks = c("smo2", "replaced"),
-        values = palette_mnirs(2)
-    ) +
-    geom_point(
-        data = data[data_clean$smo2 != data$smo2, ],
-        aes(y = smo2, colour = "replaced"), na.rm = TRUE
-    ) +
-    geom_line(
-        data = {
-            data_clean[!is.na(data$smo2), "smo2"] <- NA
-            data_clean
-        },
-        aes(y = smo2, colour = "replaced"), linewidth = 1, na.rm = TRUE
-    )
-\dontshow{\}) # examplesIf}
+data_clean
+
+\donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot original and show where values have been replaced
+        plot(data, time_labels = TRUE) +
+            ggplot2::scale_colour_manual(
+                name = NULL,
+                breaks = c("smo2", "replaced"),
+                values = palette_mnirs(2)
+            ) +
+            ggplot2::geom_point(
+                data = data[data_clean$smo2 != data$smo2, ],
+                ggplot2::aes(y = smo2, colour = "replaced"), na.rm = TRUE
+            ) +
+            ggplot2::geom_line(
+                data = {
+                    data_clean[!is.na(data$smo2), "smo2"] <- NA
+                    data_clean
+                },
+                ggplot2::aes(y = smo2, colour = "replaced"), 
+                linewidth = 1, na.rm = TRUE
+            )
+    }
 }
-\seealso{
-\code{\link[pracma:hampel]{pracma::hampel()}}, \code{\link[stats:approxfun]{stats::approx()}}
+
 }

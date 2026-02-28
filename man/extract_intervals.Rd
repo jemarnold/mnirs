@@ -6,176 +6,173 @@
 \usage{
 extract_intervals(
   data,
-  nirs_channels = list(NULL),
+  nirs_channels = NULL,
   time_channel = NULL,
   event_channel = NULL,
   sample_rate = NULL,
   event_times = NULL,
   event_labels = NULL,
   event_samples = NULL,
+  event_groups = list("distinct", "ensemble"),
   span = list(c(-30, 180)),
-  group_events = list("distinct", "ensemble"),
   zero_time = FALSE,
   verbose = TRUE
 )
 }
 \arguments{
-\item{data}{A data frame of class \emph{"mnirs"} containing time series data
-and metadata.}
+\item{data}{A data frame of class \emph{"mnirs"} containing time series data and
+metadata.}
 
-\item{nirs_channels}{A \code{list()} of character vectors indicating mNIRS
-channel names to operate on within each interval (see \emph{Details}). Must
-match column names in \code{data} exactly. Retrieved from metadata if not
-defined explicitly.}
-
-\item{time_channel}{A character string indicating the time or sample channel
-name. Must match column names in \code{data} exactly. Retrieved from metadata
-if not defined explicitly.}
-
-\item{event_channel}{An \emph{optional} character string indicating the event or
-lap channel name. Required if \code{event_labels} are specified. Must
-match column names in \code{data} exactly. Retrieved from metadata if not
-defined explicitly.}
-
-\item{sample_rate}{An \emph{optional} numeric value for the exported sample rate
-in Hz. If not defined explicitly, will be estimated from the data (see
-\emph{Details}).}
-
-\item{event_times}{A numeric vector of \code{time_channel} values indicating
-event starts (see \emph{Details}).}
-
-\item{event_labels}{A character vector of strings to match from
-\code{event_channel}, indicating event starts.}
-
-\item{event_samples}{An integer vector with sample indices (row numbers)
-indicating event starts.}
-
-\item{span}{A \code{list()} of two-element numeric vectors specifying the
-interval around each event as \code{c(before, after)}, in units of
-\code{time_channel} (see \emph{Details}).}
-
-\item{group_events}{Either a character string or a \code{list()} of numeric
-vectors specifying how to group intervals. Interval numbers are sorted
-in order of appearance within \code{data}.
-\describe{
-\item{\code{"distinct"}}{Will extract each interval as an independent
-data frame (the \emph{default}).}
-\item{\code{"ensemble"}}{Will perform ensemble-averaging across all
-detected intervals for each \code{nirs_channel}, and return a single
-data frame.}
-\item{\code{list(c(1, 2), c(3, 4))}}{Will perform ensemble-averaging across
-intervals within each group and return a data frame for each group.}
+\item{nirs_channels}{A character vector or a \code{list()} of character vectors
+of mNIRS channel names to operate on within each interval (see \emph{Details}).
+Names must match column names in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), channels are retrieved from \emph{"mnirs"} metadata.
+\item Use multiple list items to include or exclude specific \code{nirs_channels}
+per interval.
 }}
 
-\item{zero_time}{A logical to re-calculate \code{time_channel} from zero or
-preserve the original \code{time_channel} values (\code{FALSE}, the \emph{default}).}
+\item{time_channel}{A character string giving the name of the time or sample
+column. Must match a column name in \code{data} exactly.
+\itemize{
+\item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
+used.
+}}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{event_channel}{An \emph{optional} character string giving the name of an
+event/marker column to import. Required to specify \code{event_labels}. Must
+match column names in \code{data} exactly. Retrieved from metadata if not
+defined explicitly.}
+
+\item{sample_rate}{An \emph{optional} numeric sample rate (Hz) used to bin time
+values for ensemble-averaging. If \code{NULL}, will be estimated from
+\code{time_channel} (see \emph{Details}).}
+
+\item{event_times}{A numeric vector of \code{time_channel} values indicating event
+start times (see \emph{Details}).}
+
+\item{event_labels}{A character vector of strings to match in
+\code{event_channel}, indicating event starts. Matching is case-sensitive and
+must match exactly.}
+
+\item{event_samples}{an integer vector of sample indices (row numbers)
+indicating event starts.}
+
+\item{event_groups}{Either a character string or a \code{list()} of integer
+vectors specifying how to group intervals (see \emph{Details}).
+\describe{
+\item{\code{"distinct"}}{The default. Extract each interval as an independent
+data frame.}
+\item{\code{"ensemble"}}{Ensemble-average each specified \code{nirs_channel} across
+all detected intervals, returning a single data frame.}
+\item{\code{list(c(1, 2), c(3, 4))}}{Ensemble-average each specified
+\code{nirs_channel} within each group and return one data frame per group.}
+}}
+
+\item{span}{A \code{list()} of two-element numeric vectors specifying the window
+around each event as \code{c(before, after)}, in units of \code{time_channel}.}
+
+\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-calculates
+numeric \code{time_channel} values to start from zero within each interval
+data frame.}
+
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A named \code{list()} of \link[tibble:tibble-package]{tibbles} of class
-\emph{"mnirs"} with metadata available with \code{attributes()}.
+\emph{"mnirs"}, with metadata available via \code{attributes()}.
 }
 \description{
-Detects and extracts intervals around specified events from time series
-data for analysis.
+Detect and extract intervals around specified events from \emph{"mnirs"} time
+series data.
 }
 \details{
-\code{nirs_channels = list()} can be used to specify unique data channels
-(column names) to operate on within intervals, according to \code{group_events}
-(see below).
-\itemize{
-\item Channels can be specified in seperate list items (e.g.
-\code{list(c("A", "B", "C"), "B", c("A", "C"))}) to include or exclude from
-specific intervals. In this way, bad data channels in a single interval
-can be excluded from contaminating the ensemble-averaging.
-}
+\subsection{Event specification}{
 
-\verb{event_*} arguments can be used to identify intervals of interest in \code{data},
-and can be specified three ways (methods can be combined):
+Interval events can be identified in three ways, in combination:
 
 \describe{
-\item{\code{event_times}}{Numeric time values in units of \code{time_channel}.}
+\item{\code{event_times}}{Numeric time valuess in units of \code{time_channel}.}
 \item{\code{event_samples}}{Integer sample indices (row numbers).}
-\item{\code{event_labels}}{Character patterns to match in \code{event_channel},
-case-sensitive and must match exactly.}
-}
-\itemize{
-\item Every unique event detected in \code{data} will be extracted according to the
-\code{span} interval window around it (see below). Events can be specified in
-any order. The detected intervals will be extracted and returned in the
-order in which they appear.
+\item{\code{event_labels}}{Character strings to match exactly in
+\code{event_channel}.}
 }
 
-\code{span = list()} will accept two-element numeric vectors indicating the
-interval time window around each detected event, in units of
-\code{time_channel}, e.g. seconds.
+Events can be specified in any order, and will always be returned in the
+order in which they appear in \code{data}.
+}
+
+\subsection{Per-interval \code{nirs_channels} for ensemble-averaging}{
+
+When \code{event_groups = "ensemble"} or a list of numeric grouped intervals,
+\code{nirs_channels} can be specified as a list of column names to override
+ensemble-averaging across interval. For example, to exclude a bad channel
+in one interval:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{nirs_channels = list(
+  c("A", "B", "C"),
+  c("A", "C") ## channel "B" is excluded
+)
+}\if{html}{\out{</div>}}
+
+If all grouped intervals can include all \code{nirs_channels}, or if
+\code{event_groups = "distinct"}, a single \code{nirs_channels} character vector can
+be supplied and recycled to all groups, or left as \code{NULL} for channels to
+be taken from \emph{"mnirs"} metadata.
+}
+
+\subsection{Interval time \code{span} windows}{
+
+Each interval is defined relative to its event time in units of
+\code{time_channel} as \verb{[event_times + before, event_times + after]}.
 \itemize{
-\item \code{span = c(before, after)} will typically have a \emph{negative} \code{before} value,
-extending the interval window \emph{before} the target event, and a \emph{positive}
-\code{after} value, extending the interval window \emph{after} the target event,
-resulting in an interval window between
-\verb{[event - span[1], event + span[2]]}. However, \code{span} will accept any
-positive or negative values with reference to the target event, as long
-as the range is contained within the bounds of the available \code{data}.
-\item Example for three intervals:
+\item \code{before} is typically a negative value (window can extend before the
+event).
+\item \code{after} is typically a positive value (window can extend after the event).
+\item Both values can be either positive or negative to reference an interval
+window either completely before, or completely after the indicated event,
+respectively.
+}
+
+If an interval time span is partially out of bounds, available in-bounds
+data are returned with a warning. Interval time spans entirely out of bounds
+returns an error.
+}
+
+\subsection{Grouping events}{
+
+\code{event_groups} controls whether extracted intervals are returned as distinct
+data frames or ensemble-averaged.
+
 \describe{
-\item{\code{event_times = list(60, 120, 300)}}{}
-\item{\code{span = list(c(-30, 30), c(30, 90), c(-60, 0))}}{
-\itemize{
-\item Interval 1 would range from \code{30} to \code{90} seconds.
-\item Interval 2 would range from \code{150} to \code{210} seconds.
-\item Interval 3 would range from \code{240} to \code{300} seconds.}
-}
-}
-}
-
-\code{group_events = list()} can be used to specify the grouping structure of
-intervals and return either discrete or ensemble-averaged intervals.
-
-\describe{
-\item{\code{"distinct"}}{Will extract each interval as an independent
-data frame.}
-\item{\code{"ensemble"}}{Will perform ensemble-averaging across all
-detected intervals for each \code{nirs_channel}, and return a single
-data frame.}
-\item{\code{list(c(1, 2), c(3, 4))}}{Will perform ensemble-averaging across
-intervals within each group and return a data frame for each group.}
-}
-\itemize{
-\item Any interval numbers omitted from \code{group_events} will be extracted as a
-distinct data frame. Interval numbers beyond the number of detected
-intervals will be ignored.
-\item \code{group_events} will accept a named list and pass on those names to the
-list of returned data frames \verb{<under development>}, e.g.
-\describe{
-\item{\code{group_events = list(low = c(1, 2), high = c(3, 4))}}{}
-}
-Otherwise, default names will be returned as \code{"interval_1"},
-\code{"interval_2"}, etc. for distinct intervals; \code{"ensemble"} for
-ensemble-averaging across all intervals; or \code{"group_1_2"} etc. for
-custom grouping structure.
+\item{\code{"distinct"}}{The default. Extract each interval and return a
+list of independent data frames.}
+\item{\code{"ensemble"}}{Ensemble-average each specified \code{nirs_channel} across
+all detected intervals and return a one-item list with a single data
+frame.}
+\item{\code{list(c(1, 2), c(3, 4))}}{Ensemble-average each specified
+\code{nirs_channel} within each group and return a list with one data frame
+for each group. Any intervals detected but not specified in
+\code{event_groups} are returned as distinct.}
 }
 
-List items or a single vector (e.g. \code{nirs_channels = list(c("A", "B"))} or
-\code{span = c(-30, 30)}) will be recycled forward for all intervals. If the
-number of intervals detected exceeds the number of list items, the last
-specified list item will be recycled forward to the additional intervals.
-List items beyond the number of detected intervals will be ignored.
+\code{event_groups} lists canned be named (e.g.
+\code{list(low = c(1, 2), high = c(3, 4))}) and will pass those names to the
+returned list of data frames. Otherwise, the return list will be named
+\code{c("interval_1", "interval_2")} etc. for distinct intervals; \code{"ensemble"}
+for ensemble-averaged; or \code{c("group_1_2", "group_3_4")} etc. for custom
+grouping structure.
 
-\code{zero_time = TRUE} will re-calculate numeric \code{time_channel} values
-to start from zero at the target event, for each interval. Ensemble-
-averaged interval times will always be zeroed. Effectively, this works best
-when the event marker indicates the start of the interval. This can
-return unexpected time values when the event marker itself is not
-included in the interval range (e.g. with \code{span = c(30, 60)}).
+When \code{event_groups} is a list of numeric interval numbers, list items in
+\code{nirs_channels} and \code{span} are recycled to the number of groups. If lists
+are only partially specified (if there are more intervals or groups detected
+than there are argument list items) The final argument item is recycled
+forward as needed. Extra argument items are ignored.
+}
 }
 \examples{
-\dontshow{if ((identical(Sys.getenv("NOT_CRAN"), "true") || identical(Sys.getenv("IN_PKGDOWN"), "true"))) withAutoprint(\{ # examplesIf}
-
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     example_mnirs("train.red"),
@@ -184,18 +181,20 @@ data <- read_mnirs(
         smo2_right = "SmO2 unfiltered"
     ),
     time_channel = c(time = "Timestamp (seconds passed)"),
-    zero_time = TRUE
+    zero_time = TRUE,
+    verbose = FALSE
 ) |>
-    resample_mnirs() ## avoid issues ensemble-averaging irregular samples
+    resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 
 ## extract intervals as a list of data frames
 extract_intervals(
     data,
     nirs_channels = list(c(smo2_left, smo2_right)),
     event_times = c(368, 1093), ## specify interval events
-    span = list(c(-20, 90)), ## specify the event start-end timespans
-    group_events = "distinct", ## return all unique intervals
-    zero_time = TRUE ## start time from zero
+    event_groups = "distinct",  ## return all unique intervals
+    span = list(c(-20, 90)),    ## specify the event start-end timespans
+    zero_time = TRUE,           ## start time from zero
+    verbose = FALSE
 )
 
 ## ensemble-average across multiple intervals
@@ -203,13 +202,19 @@ interval_list <- extract_intervals(
     data,
     nirs_channels = list(c(smo2_left, smo2_right)),
     event_times = c(368, 1093),
+    event_groups = "ensemble", ## return ensemble-averaged intervals
     span = list(c(-20, 90)),
-    group_events = "ensemble", ## return ensemble-averaged intervals
-    zero_time = TRUE
+    zero_time = TRUE,
+    verbose = FALSE
 )
 
-library(ggplot2)
-plot(interval_list[[1L]], label_time = TRUE) +
-    geom_vline(xintercept = 0, linetype = "dotted")
-\dontshow{\}) # examplesIf}
+interval_list[[1L]]
+
+\donttest{
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    plot(interval_list[[1L]], time_labels = TRUE) +
+      ggplot2::geom_vline(xintercept = 0, linetype = "dotted")
+  }
+}
+
 }

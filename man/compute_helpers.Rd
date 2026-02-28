@@ -33,7 +33,7 @@ or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{idx}{A numeric vector of indices of \code{t} at which to calculate local
 windows. All indices of \code{t} by \emph{default}, or can be used to only calculate
-for known indicies, such as invalid values of \code{x}.}
+for known indices, such as invalid values of \code{x}.}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}
@@ -64,8 +64,9 @@ number of standard deviations above and below the local median. The
 \code{outlier_cutoff = 3} is the standard replacement threshold following
 Pearson's rule.}
 
-\item{verbose}{A logical to display (the \emph{default}) or silence (\code{FALSE})
-warnings and information messages used for troubleshooting.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 \code{compute_local_windows()}: A list the same length as \code{idx} and the same or
