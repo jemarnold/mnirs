@@ -10,11 +10,11 @@
     * Fix internal `read_file()` to better recognise .csv formats where the header has fewer columns than the data table.
     * If `nirs_channels` is left blank (now default), `read_mnirs()` will attempt to recognise the NIRS device file format by searching for known data table column headers, and return the entire data table as if `keep_all = TRUE`, as a data exploration option.
     * Update `add_timestamp` to recognise date-time (POSIXct) values in the file header or `time_channel` and add `timestamp` column, and metadata `attr(df, "start_timestamp")`.
-* Rename `extract_intervals()` argument to `event_groups` from `group_events` for more consistent naming convention.
 * Update `plot.mnirs()`
     * Rename argument to `time_labels` from `label_time` for more consistent naming convention.
     * Better label arguments `time_labels`, `n.breaks`, `na.omit`.
     * Remove `tidyr` dependency.
+* Rename `extract_intervals()` argument to `event_groups` from `group_events` for more consistent naming convention.
 * Fix bug with `replace_mnirs(method = "linear")` unnecessarily calling for `width` or `span` to be specified.
 * Update `signif_trailing()` to avoid overprinting digits. Used internally for display.
     * `format = c("max_digits", "max_signif")` will print the lesser of either `digits`, or the maximum decimals/sigfigs in the data.
