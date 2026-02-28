@@ -196,7 +196,7 @@ test_that("SS_monoexp3() handles data with TD near zero", {
     #     theme_mnirs() +
     #     ggplot2::geom_point()
 
-    ## ! SS_monoexp4() fails for this test. Would a better initialisation succeed?
+    ## TODO SS_monoexp4() fails for this test. Would a better initialisation succeed?
     expect_no_error(
         model <- nls(x ~ SS_monoexp3(t, A, B, tau), data = data)
     )
@@ -256,7 +256,6 @@ test_that("SS_monoexp3() handles OxCap with few data points better than SSasymp"
         )
     )
 
-    ## ! SSasymp returns singular gradient
     expect_error(
         model_asym <- nls(
             slope ~ SSasymp(time, Asym, R0, lrc),

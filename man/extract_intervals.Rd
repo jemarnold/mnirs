@@ -27,9 +27,10 @@ metadata.}
 of mNIRS channel names to operate on within each interval (see \emph{Details}).
 Names must match column names in \code{data} exactly.
 \itemize{
+\item Only needs to be specified when \code{event_groups} contains \emph{"ensemble"}-
+averaged intervals. If \code{event_groups = "distinct"} no channel processing
+occurs.
 \item If \code{NULL} (default), channels are retrieved from \emph{"mnirs"} metadata.
-\item Use multiple list items to include or exclude specific \code{nirs_channels}
-per interval.
 }}
 
 \item{time_channel}{A character string giving the name of the time or sample
@@ -112,8 +113,8 @@ ensemble-averaging across interval. For example, to exclude a bad channel
 in one interval:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{nirs_channels = list(
-  c("A", "B", "C"),
-  c("A", "C") ## channel "B" is excluded
+  c(A, B, C),
+  c(A, C) ## channel "B" is excluded
 )
 }\if{html}{\out{</div>}}
 
