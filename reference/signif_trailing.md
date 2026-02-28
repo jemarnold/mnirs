@@ -13,7 +13,11 @@ or significance symbols.
 ## Usage
 
 ``` r
-signif_trailing(x, digits = 2L, format = c("digits", "signif"))
+signif_trailing(
+  x,
+  digits = 2L,
+  format = c("digits", "signif", "max_digits", "max_signif")
+)
 
 signif_whole(x, digits = 5L)
 
@@ -110,6 +114,6 @@ of [`signif()`](https://rdrr.io/r/base/Round.html) and
 
 ## See also
 
-[`formatC()`](https://rdrr.io/r/base/formatc.html)
-[`round()`](https://rdrr.io/r/base/Round.html)
+[`formatC()`](https://rdrr.io/r/base/formatc.html),
+[`round()`](https://rdrr.io/r/base/Round.html),
 [`signif()`](https://rdrr.io/r/base/Round.html)

@@ -1,6 +1,6 @@
 # Create an *mnirs* data frame with metadata
 
-Manually add class *"mnirs"* and metadata to an existing data frame.
+Manually add class `"mnirs"` and metadata to an existing data frame.
 
 ## Usage
 
@@ -12,7 +12,8 @@ create_mnirs_data(data, ...)
 
 - data:
 
-  A data frame with existing metadata (`attributes(data)`).
+  A data frame with existing metadata (accessed with
+  `attributes(data)`).
 
 - ...:
 
@@ -29,11 +30,17 @@ create_mnirs_data(data, ...)
 
   - sample_rate
 
+  - start_timestamp
+
+  - event_times
+
+  - interval_span
+
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)
-of class *"mnirs"* with metadata available with
-[`attributes()`](https://rdrr.io/r/base/attributes.html).
+of class `"mnirs"`. Metadata are stored as attributes and can be
+accessed with `attributes(data)`.
 
 ## Details
 

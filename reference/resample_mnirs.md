@@ -25,15 +25,19 @@ resample_mnirs(
 
 - time_channel:
 
-  A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Retrieved from metadata if not
-  defined explicitly.
+  A character string giving the name of the time or sample column. Must
+  match a column name in `data` exactly.
+
+  - If `NULL` (default), the `time_channel` metadata attribute of `data`
+    is used.
 
 - sample_rate:
 
-  A numeric value for the exported data sample rate in Hz. Retrieved
-  from metadata or estimated from `time_channel` if not defined
-  explicitly.
+  A numeric sample rate in Hz.
+
+  - If `NULL` (default), the `sample_rate` metadata attribute of `data`
+    will be used if detected, or the sample rate will be estimated from
+    `time_channel`.
 
 - resample_rate:
 
@@ -69,8 +73,9 @@ resample_mnirs(
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 

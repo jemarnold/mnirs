@@ -6,5 +6,5 @@ match the number of events.
 ## Usage
 
 ``` r
-recycle_param(param, n_events, group_events, verbose = TRUE)
+recycle_param(param, n_events, event_groups, verbose = TRUE)
 ```

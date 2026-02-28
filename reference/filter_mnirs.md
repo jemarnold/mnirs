@@ -19,10 +19,10 @@ filter_mnirs(
   sample_rate = NULL,
   method = c("smooth_spline", "butterworth", "moving_average"),
   spar = NULL,
-  type = c("low", "high", "stop", "pass"),
   order = 2,
   W = NULL,
   fc = NULL,
+  type = c("low", "high", "stop", "pass"),
   width = NULL,
   span = NULL,
   na.rm = FALSE,
@@ -40,15 +40,19 @@ filter_mnirs(
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names to operate on. Must match
-  column names in `data` exactly. Retrieved from metadata if not defined
-  explicitly.
+  A character vector giving the names of mNIRS columns to operate on.
+  Must match column names in `data` exactly.
+
+  - If `NULL` (default), the `nirs_channels` metadata attribute of
+    `data` is used.
 
 - time_channel:
 
-  A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Retrieved from metadata if not
-  defined explicitly.
+  A character string giving the name of the time or sample column. Must
+  match a column name in `data` exactly.
+
+  - If `NULL` (default), the `time_channel` metadata attribute of `data`
+    is used.
 
 - sample_rate:
 
@@ -78,6 +82,22 @@ filter_mnirs(
   A numeric value defining the smoothing parameter for
   `method = "smooth_spline"`.
 
+- order:
+
+  An integer defining the filter order for `method = "butterworth"`
+  (*default* `order = 2`).
+
+- W:
+
+  A one- or two-element numeric vector defining the filter cutoff
+  frequency(ies) for `method = "butterworth"`, as a fraction of the
+  Nyquist frequency (see *Details*).
+
+- fc:
+
+  A one- or two-element numeric vector defining the filter cutoff
+  frequency(ies) for `method = "butterworth"`, in Hz (see *Details*).
+
 - type:
 
   A character string indicating the digital filter type for
@@ -99,22 +119,6 @@ filter_mnirs(
 
   :   For a *pass-band* filter.
 
-- order:
-
-  An integer defining the filter order for `method = "butterworth"`
-  (*default* `order = 2`).
-
-- W:
-
-  A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = "butterworth"`, as a fraction of the
-  Nyquist frequency (see *Details*).
-
-- fc:
-
-  A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = "butterworth"`, in Hz (see *Details*).
-
 - width:
 
   An integer defining the local window in number of samples around `idx`
@@ -135,8 +139,9 @@ filter_mnirs(
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
 
@@ -214,34 +219,55 @@ Then `NA`s will be preserved and passed through in the returned data.
 ## Examples
 
 ``` r
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
-    time_channel = c(time = "hh:mm:ss")
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 ) |>
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10
+        width = 10,
+        verbose = FALSE
     )
 
 data_filtered <- filter_mnirs(
     data,
     method = "butterworth", ## Butterworth digital filter is a common choice
-    type = "low",           ## specify a low-pass filter
     order = 2,              ## order is the number of filter passes
     W = 0.02,               ## fractional critical frequency
-    na.rm = TRUE            ## explicitly preserve any NAs and avoid errors
+    type = "low",           ## specify a low-pass filter
+    na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
+    verbose = FALSE
 )
 
-library(ggplot2)
-## plot filtered data and add the raw data back to the plot to compare
-plot(data_filtered, label_time = TRUE) +
-    geom_line(
-        data = data,
-        aes(y = smo2, colour = "smo2"), alpha = 0.4
-    )
+data_filtered
+#> # A tibble: 2,203 × 2
+#>     time  smo2
+#>    <dbl> <dbl>
+#>  1 0      54.4
+#>  2 0.400  54.4
+#>  3 0.960  54.4
+#>  4 1.51   54.4
+#>  5 2.06   54.4
+#>  6 2.61   54.4
+#>  7 3.16   54.4
+#>  8 3.71   54.4
+#>  9 4.26   54.4
+#> 10 4.81   54.4
+#> # ℹ 2,193 more rows
+
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot filtered data and add the raw data back to the plot to compare
+        plot(data_filtered, time_labels = TRUE) +
+            ggplot2::geom_line(
+                data = data,
+                ggplot2::aes(y = smo2, colour = "smo2"), alpha = 0.4
+            )
+    }
+
+# }
 ```

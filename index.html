@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,9 +87,8 @@
 <h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
 </h2>
 <p>A more detailed vignette for common usage can be found here: <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></p>
-<blockquote>
-<p><em>{mnirs}</em> is currently in experimental development and functionality may change! Stay updated on development and follow releases at <a href="https://github.com/jemarnold/mnirs" class="external-link">github.com/jemarnold/mnirs</a>. <em>{mnirs}</em> is designed to process NIRS data, but it can be used to read, clean, and process other time series datasets which require many of the same processing steps. Enjoy!</p>
-</blockquote>
+<p><em>{mnirs}</em> is currently in experimental development and functionality may change! Stay updated on development and follow releases at <a href="https://github.com/jemarnold/mnirs" class="external-link">github.com/jemarnold/mnirs</a>.</p>
+<p><em>{mnirs}</em> is designed to process NIRS data, but it can be used to read, clean, and process other time series datasets which require many of the same processing steps. Enjoy!</p>
 <div class="section level3">
 <h3 id="read_mnirs-read-data-from-file">
 <code>read_mnirs()</code> Read data from file<a class="anchor" aria-label="anchor" href="#read_mnirs-read-data-from-file"></a>
@@ -105,13 +104,10 @@
 <span><span class="co">#&gt; [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    </span></span>
 <span><span class="co">#&gt; [5] "train.red_intervals.csv" "vo2master.csv"</span></span>
 <span></span>
-<span><span class="co">## call an example mNIRS data file</span></span>
-<span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span> </span>
-<span></span>
-<span><span class="co">## rename channels in the format `new_name1 = "original_name1"`</span></span>
+<span><span class="co">## rename channels in the format `renamed = "original_name"`</span></span>
 <span><span class="co">## where "original_name1" should match the file column name exactly</span></span>
 <span><span class="va">data_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">file_path</span>,</span>
+<span>    file_path <span class="op">=</span> <span class="fu"><a href="reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>, <span class="co">## call an example mNIRS data file</span></span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>,        <span class="co">## identify and rename channels</span></span>
 <span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span></span>
@@ -150,7 +146,7 @@
 <span><span class="co">#&gt; # ℹ 2,193 more rows</span></span>
 <span></span>
 <span><span class="co">## note the hidden plot option to display time values as `h:mm:ss`</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_table</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_table</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-2-1.png" alt="" width="100%"></p>
 </div>
 <div class="section level3">
@@ -175,7 +171,10 @@
 <span><span class="co">#&gt; [1] "time"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $sample_rate</span></span>
-<span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $start_timestamp</span></span>
+<span><span class="co">#&gt; [1] "2026-02-28 00:29:00 PST"</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="replace_mnirs-replace-local-outliers-invalid-values-and-missing-values">
@@ -192,7 +191,7 @@
 <span>    verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_cleaned</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_cleaned</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-4-1.png" alt="" width="100%"></p>
 </div>
 <div class="section level3">
@@ -233,14 +232,14 @@
 <code class="sourceCode R"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_resampled</span>,         <span class="co">## channels retrieved from metadata</span></span>
 <span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span>
-<span>    type <span class="op">=</span> <span class="st">"low"</span>,           <span class="co">## specify a low-pass filter</span></span>
 <span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span>
 <span>    W <span class="op">=</span> <span class="fl">0.02</span>,               <span class="co">## filter fractional critical frequency</span></span>
+<span>    type <span class="op">=</span> <span class="st">"low"</span>,           <span class="co">## specify a low-pass filter</span></span>
 <span>    na.rm <span class="op">=</span> <span class="cn">TRUE</span>            <span class="co">## explicitly preserve any NAs</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## we will add the non-filtered data back to the plot to compare</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_filtered</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_filtered</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span>
 <span>        data <span class="op">=</span> <span class="va">data_cleaned</span>, </span>
 <span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">smo2_left</span>, colour <span class="op">=</span> <span class="st">"smo2_left"</span><span class="op">)</span>, alpha <span class="op">=</span> <span class="fl">0.4</span></span>
@@ -264,7 +263,7 @@
 <span>    position <span class="op">=</span> <span class="st">"first"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_shifted</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_shifted</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-7-1.png" alt="" width="100%"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -274,7 +273,7 @@
 <span>    range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span> <span class="co">## rescale to a 0-100% functional exercise range</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_rescaled</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_rescaled</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-8-1.png" alt="" width="100%"></p>
 </div>
@@ -295,7 +294,7 @@
 <span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"Timestamp (seconds passed)"</span><span class="op">)</span>,</span>
 <span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co">## default will resample to fix irregular samples</span></span>
+<span>    <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co">## default settings will resample to the same `sample_rate`</span></span>
 <span>    <span class="fu"><a href="reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
 <span>        invalid_above <span class="op">=</span> <span class="fl">73</span>,</span>
 <span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span>
@@ -308,7 +307,7 @@
 <span>        na.rm <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="reference/shift_mnirs.html">shift_mnirs</a></span><span class="op">(</span></span>
-<span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>,</span>
+<span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>, <span class="co">## 👈 channels grouped separately</span></span>
 <span>        to <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>        span <span class="op">=</span> <span class="fl">60</span>,</span>
 <span>        position <span class="op">=</span> <span class="st">"first"</span></span>
@@ -317,7 +316,7 @@
 <span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span><span class="op">)</span>, <span class="co">## 👈 channels grouped together</span></span>
 <span>        range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span>
 <span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-9-1.png" alt="" width="100%"></p>
 </div>
 </div>

@@ -1,7 +1,7 @@
 # Validate `{mnirs}` parameters
 
-Passes through manually defined parameters, or defines them from
-metadata if present, and validates relevant data quality checks.
+Resolve and validate *mnirs* metadata and perform basic data quality
+checks.
 
 ## Usage
 
@@ -12,6 +12,7 @@ validate_numeric(
   range = NULL,
   inclusive = c("left", "right"),
   integer = FALSE,
+  invalid = FALSE,
   msg1 = "",
   msg2 = "."
 )
@@ -40,7 +41,7 @@ validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
 
 validate_width_span(width = NULL, span = NULL, verbose = TRUE)
 
-validate_x_t(x, t = seq_along(x))
+validate_x_t(x, t, invalid = FALSE)
 ```
 
 ## Arguments
@@ -51,29 +52,31 @@ validate_x_t(x, t = seq_along(x))
 
 - elements:
 
-  A numeric value for the number of numeric elements in `arg`.
+  An integer. Default is `Inf`. The number of numeric elements expected
+  in `x`.
 
 - range:
 
-  A two-element numeric vector for the range of valid numeric values in
-  `arg`.
+  A two-element numeric vector giving the valid range for `x`.
 
 - inclusive:
 
-  A character vector to specify which of `left` and/or `right` boundary
-  values should be included in the range, or both (the *default*), or
-  excluded if `FALSE`.
+  A character vector specifying which boundaries of `range` are
+  included. Any of `"left"`, `"right"` (default is both). Use `FALSE` to
+  exclude both endpoints.
 
 - integer:
 
-  A logical indicating whether to test `arg` as an integer using
-  [`rlang::is_integerish()`](https://rlang.r-lib.org/reference/is_integerish.html),
-  rather than a numeric (`FALSE` by *default*).
+  Logical. Default is `FALSE`. If `TRUE`, validate `x` as integer-like
+  values using
+  [`rlang::is_integerish()`](https://rlang.r-lib.org/reference/is_integerish.html).
+  Otherwise tested as a numeric value.
 
 - msg1, msg2:
 
-  A character string detailing the `cli_abort` error message returned
-  for invalid numeric values passed to `arg`.
+  A character string appended to the
+  [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
+  message when numeric validation fails.
 
 - data:
 
@@ -82,39 +85,63 @@ validate_x_t(x, t = seq_along(x))
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names to operate on. Must match
-  column names in `data` exactly. Retrieved from metadata if not defined
-  explicitly.
+  A character vector giving the names of mNIRS columns to operate on.
+  Must match column names in `data` exactly.
+
+  - If `NULL` (default), the `nirs_channels` metadata attribute of
+    `data` is used.
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 - time_channel:
 
-  A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Retrieved from metadata if not
-  defined explicitly.
+  A character string giving the name of the time or sample column. Must
+  match a column name in `data` exactly.
+
+  - If `NULL` (default), the `time_channel` metadata attribute of `data`
+    is used.
 
 - event_channel:
 
-  A character string indicating the event or lap channel name. Must
-  match column names in `data` exactly. Retrieved from metadata if not
-  defined explicitly.
+  A character string giving the name of the event/marker column. Must
+  match a column name in `data` exactly.
+
+  - If `NULL` (default), the `event_channel` metadata attribute of
+    `data` is used.
 
 - required:
 
-  A logical specifying whether `event_channel` is required (the
-  *default*) or optional (`event_channel` returned as `NULL`).
+  Logical. Default is `TRUE`. `event_channel` must be present or
+  detected in metadata. If `FALSE`, `event_channel` may be `NULL`.
 
 - sample_rate:
 
-  A numeric value for the exported data sample rate in Hz. Retrieved
-  from metadata or estimated from `time_channel` if not defined
-  explicitly.
+  A numeric sample rate in Hz.
+
+  - If `NULL` (default), the `sample_rate` metadata attribute of `data`
+    will be used if detected, or the sample rate will be estimated from
+    `time_channel`.
 
 ## Value
 
-The validated object or an error message with
+Returns the validated object (e.g. a resolved `time_channel` string), or
+invisibly returns `NULL` for successful validations. On failure, an
+error is thrown via
 [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html).
+
+## Details
+
+`validate_mnirs()` is an internal documentation topic for a set of
+validators used throughout the package. These validators:
+
+- Prefer explicit user-supplied arguments.
+
+- Fall back to *"mnirs"* metadata attributes when available.
+
+- Fail fast with informative
+  [`cli::cli_abort()`](https://cli.r-lib.org/reference/cli_abort.html)
+  messages when values are missing or invalid.

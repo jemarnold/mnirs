@@ -11,7 +11,7 @@ slope(): Calculates the linear regression slope of a numeric vector."><meta name
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,14 +81,13 @@ or sample number. <em>Defaults</em> to indices of <code>t = seq_along(x)</code>.
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
 <dd><p>An integer defining the local window in number of samples
-around <code>idx</code> in which to perform the operation., between
-<code>[idx - floor(width/2), idx + floor(width/2)]</code>.</p></dd>
+around <code>idx</code> in which to perform the operation, according to <code>align</code>.</p></dd>
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
 <dd><p>A numeric value defining the local window timespan around <code>idx</code>
-in which to perform the operation. In units of <code>time_channel</code> or <code>t</code>,
-between <code>[t - span/2, t + span/2]</code>.</p></dd>
+in which to perform the operation, according to <code>align</code>. In units of
+<code>time_channel</code> or <code>t</code>.</p></dd>
 
 
 <dt id="arg-align">align<a class="anchor" aria-label="anchor" href="#arg-align"></a></dt>
@@ -105,8 +104,9 @@ requiring a complete window of valid samples (<code>FALSE</code>, by <em>default
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
-warnings and information messages used for troubleshooting.</p></dd>
+<dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
+<code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
+global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

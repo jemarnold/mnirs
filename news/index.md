@@ -1,5 +1,48 @@
 # Changelog
 
+## mnirs 0.4.2
+
+- Update
+  [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+  - Fix internal
+    [`read_file()`](https://jemarnold.github.io/mnirs/reference/read_file.md)
+    to better recognise .csv formats where the header has fewer columns
+    than the data table.
+  - If `nirs_channels` is left blank (now default),
+    [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+    will attempt to recognise the NIRS device file format by searching
+    for known data table column headers, and return the entire data
+    table as if `keep_all = TRUE`, as a data exploration option.
+  - Update `add_timestamp` to recognise date-time (POSIXct) values in
+    the file header or `time_channel` and add `timestamp` column, and
+    metadata `attr(df, "start_timestamp")`.
+- Update
+  [`plot.mnirs()`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)
+  - Rename argument to `time_labels` from `label_time` for more
+    consistent naming convention.
+  - Better label arguments `time_labels`, `n.breaks`, `na.omit`.
+  - Remove `tidyr` dependency.
+- Rename
+  [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  argument to `event_groups` from `group_events` for more consistent
+  naming convention.
+- Fix bug with `replace_mnirs(method = "linear")` unnecessarily calling
+  for `width` or `span` to be specified.
+- Update
+  [`signif_trailing()`](https://jemarnold.github.io/mnirs/reference/signif_trailing.md)
+  to avoid overprinting digits. Used internally for display.
+  - `format = c("max_digits", "max_signif")` will print the lesser of
+    either `digits`, or the maximum decimals/sigfigs in the data.
+- Update function documentation.
+- Update `README.Rmd` for updated function args.
+- Update `reading-mnirs-data.qmd` vignette for updated function calls
+  and some editing.
+- Update `oxcap-analysis.qmd` with small edits.
+- Remove [tidyr](https://tidyr.tidyverse.org) dependency from
+  [`plot.mnirs()`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md),
+  and from [mnirs](https://jemarnold.github.io/mnirs/) package
+  dependencies.
+
 ## mnirs 0.4.1
 
 - Create article “Analysing muscle oxidative capacity with {mnirs}”.

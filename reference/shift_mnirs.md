@@ -31,15 +31,19 @@ shift_mnirs(
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names to operate on. Must match
-  column names in `data` exactly. Retrieved from metadata if not defined
-  explicitly.
+  A character vector giving the names of mNIRS columns to operate on.
+  Must match column names in `data` exactly.
+
+  - If `NULL` (default), the `nirs_channels` metadata attribute of
+    `data` is used.
 
 - time_channel:
 
-  A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Retrieved from metadata if not
-  defined explicitly.
+  A character string giving the name of the time or sample column. Must
+  match a column name in `data` exactly.
+
+  - If `NULL` (default), the `time_channel` metadata attribute of `data`
+    is used.
 
 - to:
 
@@ -82,8 +86,9 @@ shift_mnirs(
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
@@ -123,33 +128,43 @@ preferred over `by`, and `width` will be preferred over `span`.
 ## Examples
 
 ``` r
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_right = "SmO2 Live",
                       smo2_left = "SmO2 Live(2)"),
-    time_channel = c(time = "hh:mm:ss")
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 ) |>
-    resample_mnirs() |>
-    replace_mnirs(
-        invalid_values = c(0, 100),
-        outlier_cutoff = 3,
-        width = 10,
-        method = "linear"
-    ) |>
-    filter_mnirs(na.rm = TRUE) |>
     shift_mnirs(
         nirs_channels = list(smo2_right, smo2_left),
         to = 0,            ## each channel will be shifted to zero
         span = 120,        ## shift the mean of the first 120 sec
-        position = "first"
+        position = "first",
+        verbose = FALSE
     )
-#> ℹ `nirs_channel` = "smo2_right": `smooth.spline(spar = 0.056)`
-#> ℹ `nirs_channel` = "smo2_left": `smooth.spline(spar = 0.056)`
 
-library(ggplot2)
-plot(data, label_time = TRUE) +
-    geom_hline(yintercept = 0, linetype = "dotted")
+data
+#> # A tibble: 2,203 × 3
+#>     time smo2_right smo2_left
+#>    <dbl>      <dbl>     <dbl>
+#>  1 0          -1.55     2.21 
+#>  2 0.400      -1.55     2.21 
+#>  3 0.960      -1.55     2.21 
+#>  4 1.51       -1.55     0.215
+#>  5 2.06       -1.55     0.215
+#>  6 2.61       -1.55     0.215
+#>  7 3.16       -1.55     0.215
+#>  8 3.71        1.45     1.21 
+#>  9 4.26        1.45     1.21 
+#> 10 4.81        1.45     1.21 
+#> # ℹ 2,193 more rows
+
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        plot(data, time_labels = TRUE) +
+            ggplot2::geom_hline(yintercept = 0, linetype = "dotted")
+    }
+
+# }  
 ```

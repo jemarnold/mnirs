@@ -21,7 +21,7 @@ x to either side of NAs."><meta name="twitter:card" content="summary"><meta name
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,7 +100,7 @@ or sample number. <em>Defaults</em> to indices of <code>t = seq_along(x)</code>.
 <dt id="arg-idx">idx<a class="anchor" aria-label="anchor" href="#arg-idx"></a></dt>
 <dd><p>A numeric vector of indices of <code>t</code> at which to calculate local
 windows. All indices of <code>t</code> by <em>default</em>, or can be used to only calculate
-for known indicies, such as invalid values of <code>x</code>.</p></dd>
+for known indices, such as invalid values of <code>x</code>.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
@@ -151,8 +151,9 @@ Pearson's rule.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>A logical to display (the <em>default</em>) or silence (<code>FALSE</code>)
-warnings and information messages used for troubleshooting.</p></dd>
+<dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
+<code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
+global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

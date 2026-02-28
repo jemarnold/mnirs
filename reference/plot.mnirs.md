@@ -7,7 +7,7 @@ Create a simple plot for objects returned from
 
 ``` r
 # S3 method for class 'mnirs'
-plot(x, ...)
+plot(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...)
 ```
 
 ## Arguments
@@ -17,28 +17,27 @@ plot(x, ...)
   Object of class *"mnirs"* returned from
   [`create_mnirs_data()`](https://jemarnold.github.io/mnirs/reference/create_mnirs_data.md)
 
+- time_labels:
+
+  A logical to display x-axis time values formatted as *"hh:mm:ss"*
+  using
+  [`format_hmmss()`](https://jemarnold.github.io/mnirs/reference/format_hmmss.md).
+  `time_labels = FALSE` (the *default*) will display simple numeric
+  values on the x-axis.
+
+- n.breaks:
+
+  A numeric value to define the number of breaks in both x- and y-axes.
+
+- na.omit:
+
+  A logical to omit missing (`NA`) values for better display of
+  connected lines. `na.omit = FALSE` (the *default*) can be used to
+  identify missing values.
+
 - ...:
 
-  Additional arguments:
-
-  `label_time`
-
-  :   A logical to display x-axis time values formatted as *"hh:mm:ss"*
-      using
-      [`scales::label_time()`](https://scales.r-lib.org/reference/label_date.html).
-      `label_time = FALSE` (the *default*) will display simple numeric
-      values on the x-axis.
-
-  `n.breaks`
-
-  :   A numeric value to define the number of breaks in both x- and
-      y-axes.
-
-  `na.omit`
-
-  :   A logical to omit missing (`NA`) values for better display of
-      connected lines. `na.omit = FALSE` (the *default*) can be used to
-      identify missing values.
+  Additional arguments (currently unused).
 
 ## Value
 
@@ -55,6 +54,11 @@ data_table <- read_mnirs(
     verbose = FALSE
 )
 
-## note the hidden options to display time values as `h:mm:ss` with 8 breaks
-plot(data_table, label_time = TRUE, n.breaks = 8)
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## note the options to display time values as `h:mm:ss` with 8 breaks
+        plot(data_table, time_labels = TRUE, n.breaks = 8)
+    }
+
+# }
 ```

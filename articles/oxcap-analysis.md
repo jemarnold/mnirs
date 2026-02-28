@@ -203,7 +203,7 @@ theme_set(theme_mnirs(legend.position = "none")) ## set ggplot2 theme for plotti
 >
 > I received this example file from [Dr. Thomas
 > Tripp](https://scholar.google.com/citations?user=A9JwQbYAAAAJ&hl=en),
-> Postdoctoral fellow in Dr. [Martin
+> Postdoctoral fellow in [Dr. Martin
 > MacInnis](https://scholar.google.com/citations?hl=en&user=tJepNIQAAAAJ)’
 > lab at the University of Calgary. They have kindly allowed me to
 > include this file with the *{mnirs}* package for users to examine
@@ -394,7 +394,7 @@ to analyse iteratively.
   a negative numeric value, e.g. `c(-2.5, 2.5)` to include a 5-sec span
   centred on the label itself.
 
-- `group_events`
+- `event_groups`
 
   Multiple events can be extracted for analysis as `"distinct"`
   intervals, or `"ensemble"`-averaged together. Different groupings of
@@ -423,29 +423,25 @@ to analyse iteratively.
 ## re-join the returned list of data frames with each occlusion interval labelled as "interval"
 df_list <- extract_intervals(
     df,
-    nirs_channels = hhb,        ## only required to specify nirs_channels when ensemble-averaging
     event_labels = "Occlusion", ## event label used in file, must match string exactly
-    span = c(1, 5),             ## occlusion interval c(start, end) with reference to the event time value
-    group_events = "distinct",  ## return each occlusion event separately
-    zero_time = FALSE           ## preserve original time values at each event
-) |>
-    ## join back into a single grouped data frame, mostly for easier plotting below
+    event_groups = "distinct", ## return each occlusion event separately
+    span = c(1, 5), ## occlusion interval c(start, end) with reference to the event time value
+    zero_time = FALSE ## preserve original time values at each event
+)
+
+## join back into a single grouped data frame, mostly for easier plotting below
+df_grouped <- df_list |>
     purrr::list_rbind(names_to = "interval") |>
     ## convert the "interval" column to a categorical factor
     mutate(interval = factor(interval, levels = unique(interval))) |>
     ## add `mnirs` metadata back to the combined data frame, for plotting
     create_mnirs_data(
-        attributes(df)[c(
-            "nirs_channels",
-            "time_channel",
-            "event_channel",
-            "sample_rate"
-        )]
+        attributes(df_list[[1L]])[c("nirs_channels", "time_channel")]
     )
 
 ## visualise facet plot with all occlusion intervals for error checking
 ## the steepest facets will be the first occlusions from the two trials
-plot(df_list) +
+plot(df_grouped) +
     theme(
         strip.text = element_blank(),
         strip.background = element_blank(),
@@ -521,7 +517,7 @@ occlusion intervals.
 ``` r
 ## iteratively find peak local slopes within each occlusion interval
 ## return summary values for each factor level of "interval" grouping column
-slopes_df <- df_list |>
+slopes_df <- df_grouped |>
     reframe(
         .by = interval,
         {

@@ -47,7 +47,7 @@ compute_valid_neighbours(
 
   A numeric vector of indices of `t` at which to calculate local
   windows. All indices of `t` by *default*, or can be used to only
-  calculate for known indicies, such as invalid values of `x`.
+  calculate for known indices, such as invalid values of `x`.
 
 - width:
 
@@ -97,8 +97,9 @@ compute_valid_neighbours(
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 

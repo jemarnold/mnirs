@@ -75,15 +75,19 @@ replace_missing(
 
 - nirs_channels:
 
-  A character vector of mNIRS channel names to operate on. Must match
-  column names in `data` exactly. Retrieved from metadata if not defined
-  explicitly.
+  A character vector giving the names of mNIRS columns to operate on.
+  Must match column names in `data` exactly.
+
+  - If `NULL` (default), the `nirs_channels` metadata attribute of
+    `data` is used.
 
 - time_channel:
 
-  A character string indicating the time or sample channel name. Must
-  match column names in `data` exactly. Retrieved from metadata if not
-  defined explicitly.
+  A character string giving the name of the time or sample column. Must
+  match a column name in `data` exactly.
+
+  - If `NULL` (default), the `time_channel` metadata attribute of `data`
+    is used.
 
 - invalid_values:
 
@@ -145,8 +149,9 @@ replace_missing(
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 - x:
 
@@ -250,11 +255,6 @@ specified by `method`.
   either side of `span`, the first valid sample on either side will be
   used (i.e. equivalent to `replace_missing(x, width = 1)`).
 
-## See also
-
-`pracma::hampel()`,
-[`stats::approx()`](https://rdrr.io/r/stats/approxfun.html)
-
 ## Examples
 
 ``` r
@@ -290,25 +290,46 @@ data_clean <- replace_mnirs(
     verbose = FALSE
 )
 
-library(ggplot2)
-## plot original and and show where values have been replaced
-plot(data, label_time = TRUE) +
-    scale_colour_manual(
-        name = NULL,
-        breaks = c("smo2", "replaced"),
-        values = palette_mnirs(2)
-    ) +
-    geom_point(
-        data = data[data_clean$smo2 != data$smo2, ],
-        aes(y = smo2, colour = "replaced"), na.rm = TRUE
-    ) +
-    geom_line(
-        data = {
-            data_clean[!is.na(data$smo2), "smo2"] <- NA
-            data_clean
-        },
-        aes(y = smo2, colour = "replaced"), linewidth = 1, na.rm = TRUE
-    )
+data_clean
+#> # A tibble: 2,203 × 2
+#>     time  smo2
+#>    <dbl> <dbl>
+#>  1 0        54
+#>  2 0.400    54
+#>  3 0.960    54
+#>  4 1.51     54
+#>  5 2.06     54
+#>  6 2.61     54
+#>  7 3.16     54
+#>  8 3.71     57
+#>  9 4.26     57
+#> 10 4.81     57
+#> # ℹ 2,193 more rows
+
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot original and show where values have been replaced
+        plot(data, time_labels = TRUE) +
+            ggplot2::scale_colour_manual(
+                name = NULL,
+                breaks = c("smo2", "replaced"),
+                values = palette_mnirs(2)
+            ) +
+            ggplot2::geom_point(
+                data = data[data_clean$smo2 != data$smo2, ],
+                ggplot2::aes(y = smo2, colour = "replaced"), na.rm = TRUE
+            ) +
+            ggplot2::geom_line(
+                data = {
+                    data_clean[!is.na(data$smo2), "smo2"] <- NA
+                    data_clean
+                },
+                ggplot2::aes(y = smo2, colour = "replaced"), 
+                linewidth = 1, na.rm = TRUE
+            )
+    }
 #> Scale for colour is already present.
 #> Adding another scale for colour, which will replace the existing scale.
+
+# }
 ```

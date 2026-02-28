@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,30 @@
       <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.2" id="mnirs-042">mnirs 0.4.2<a class="anchor" aria-label="anchor" href="#mnirs-042"></a></h2>
+<ul><li>Update <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>
+<ul><li>Fix internal <code><a href="../reference/read_file.html">read_file()</a></code> to better recognise .csv formats where the header has fewer columns than the data table.</li>
+<li>If <code>nirs_channels</code> is left blank (now default), <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> will attempt to recognise the NIRS device file format by searching for known data table column headers, and return the entire data table as if <code>keep_all = TRUE</code>, as a data exploration option.</li>
+<li>Update <code>add_timestamp</code> to recognise date-time (POSIXct) values in the file header or <code>time_channel</code> and add <code>timestamp</code> column, and metadata <code>attr(df, "start_timestamp")</code>.</li>
+</ul></li>
+<li>Update <code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>
+<ul><li>Rename argument to <code>time_labels</code> from <code>label_time</code> for more consistent naming convention.</li>
+<li>Better label arguments <code>time_labels</code>, <code>n.breaks</code>, <code>na.omit</code>.</li>
+<li>Remove <code>tidyr</code> dependency.</li>
+</ul></li>
+<li>Rename <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> argument to <code>event_groups</code> from <code>group_events</code> for more consistent naming convention.</li>
+<li>Fix bug with <code>replace_mnirs(method = "linear")</code> unnecessarily calling for <code>width</code> or <code>span</code> to be specified.</li>
+<li>Update <code><a href="../reference/signif_trailing.html">signif_trailing()</a></code> to avoid overprinting digits. Used internally for display.
+<ul><li>
+<code>format = c("max_digits", "max_signif")</code> will print the lesser of either <code>digits</code>, or the maximum decimals/sigfigs in the data.</li>
+</ul></li>
+<li>Update function documentation.</li>
+<li>Update <code>README.Rmd</code> for updated function args.</li>
+<li>Update <code>reading-mnirs-data.qmd</code> vignette for updated function calls and some editing.</li>
+<li>Update <code>oxcap-analysis.qmd</code> with small edits.</li>
+<li>Remove <a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a> dependency from <code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>, and from <a href="https://jemarnold.github.io/mnirs/">mnirs</a> package dependencies.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.1" id="mnirs-041">mnirs 0.4.1<a class="anchor" aria-label="anchor" href="#mnirs-041"></a></h2>
 <ul><li>Create article “Analysing muscle oxidative capacity with {mnirs}”.</li>

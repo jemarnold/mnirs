@@ -29,16 +29,19 @@ If all values are less than 3600 (1 hour), then format is returned as
 ## Examples
 
 ``` r
-x = 0:120
-y = sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        x <- 0:120
+        y <- sin(2 * pi * x / 15) + rnorm(length(x), 0, 0.2)
 
-library(ggplot2)
-data.frame(x, y) |>
-    ggplot(aes(x, y)) +
-    theme_mnirs() +
-    scale_x_continuous(
-        breaks = breaks_timespan(),
-        labels = format_hmmss
-    ) +
-    geom_line()
+        ggplot2::ggplot(data.frame(x, y), ggplot2::aes(x, y)) +
+            theme_mnirs() +
+            ggplot2::scale_x_continuous(
+                breaks = breaks_timespan(),
+                labels = format_hmmss
+            ) +
+            ggplot2::geom_line()
+    }
+
+# }
 ```

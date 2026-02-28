@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@
     </div>
 
     <div class="ref-description section level2">
-    <p>Manually add class <em>"mnirs"</em> and metadata to an existing data frame.</p>
+    <p>Manually add class <code>"mnirs"</code> and metadata to an existing data frame.</p>
     </div>
 
     <div class="section level2">
@@ -54,7 +54,8 @@
 
 
 <dl><dt id="arg-data">data<a class="anchor" aria-label="anchor" href="#arg-data"></a></dt>
-<dd><p>A data frame with existing metadata (<code>attributes(data)</code>).</p></dd>
+<dd><p>A data frame with existing metadata (accessed with
+<code>attributes(data)</code>).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -64,18 +65,21 @@ Can be either seperate named arguments or a list of named values.</p><ul><li><p>
 <li><p>time_channel</p></li>
 <li><p>event_channel</p></li>
 <li><p>sample_rate</p></li>
+<li><p>start_timestamp</p></li>
+<li><p>event_times</p></li>
+<li><p>interval_span</p></li>
 </ul></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <a href="https://tibble.tidyverse.org/reference/tibble-package.html" class="external-link">tibble</a> of class <em>"mnirs"</em> with
-metadata available with <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes()</a></code>.</p>
+    <p>A <a href="https://tibble.tidyverse.org/reference/tibble-package.html" class="external-link">tibble</a> of class <code>"mnirs"</code>. Metadata are stored
+as attributes and can be accessed with <code>attributes(data)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Typically will only be called internally, but can be used to inject <em>mnirs</em>
-metadata into any data frame.</p>
+    <p>Typically will only be called internally, but can be used to inject
+<em>mnirs</em> metadata into any data frame.</p>
     </div>
 
     <div class="section level2">

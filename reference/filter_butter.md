@@ -10,7 +10,7 @@ which handles 'edges' better at the start and end of the data.
 ``` r
 filter_butter(
   x,
-  order = 1,
+  order = 2,
   W,
   type = c("low", "high", "stop", "pass"),
   edges = c("rev", "rep1", "none"),
@@ -118,25 +118,42 @@ Then `NA`s will be preserved and passed through in the returned vector.
 
 ## See also
 
-[`signal::filtfilt()`](https://rdrr.io/pkg/signal/man/filtfilt.html)
+[`signal::filtfilt()`](https://rdrr.io/pkg/signal/man/filtfilt.html),
 [`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html)
 
 ## Examples
 
 ``` r
-library(ggplot2)
-
 set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
 noisy_sin <- sin + noise
-filt_without_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "none")
-filt_with_edge <- filter_butter(x = noisy_sin, order = 2, W = 0.1, edges = "rep1")
+filt_without_edge <- filter_butter(
+    x = noisy_sin,
+    order = 2,
+    W = 0.1,
+    edges = "none"
+)
+filt_with_edge <- filter_butter(
+    x = noisy_sin,
+    order = 2,
+    W = 0.1,
+    edges = "rep1"
+)
 
-ggplot(data.frame(), aes(x = seq_along(noise))) +
-    theme_mnirs() +
-    scale_colour_mnirs(name = NULL) +
-    geom_line(aes(y = noisy_sin)) +
-    geom_line(aes(y = filt_without_edge, colour = "filt_without_edge")) +
-    geom_line(aes(y = filt_with_edge, colour = "filt_with_edge"))
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
+            theme_mnirs() +
+            scale_colour_mnirs(name = NULL) +
+            ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
+            ggplot2::geom_line(
+                ggplot2::aes(y = filt_without_edge, colour = "filt_without_edge")
+            ) +
+            ggplot2::geom_line(
+                ggplot2::aes(y = filt_with_edge, colour = "filt_with_edge")
+            )
+    }
+
+# }
 ```

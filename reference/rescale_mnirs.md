@@ -52,8 +52,9 @@ rescale_mnirs(
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
@@ -89,31 +90,41 @@ arrangements.
 ## Examples
 
 ``` r
-options(mnirs.verbose = FALSE)
-
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_right = "SmO2 Live",
                       smo2_left = "SmO2 Live(2)"),
-    time_channel = c(time = "hh:mm:ss")
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
 ) |>
-    resample_mnirs() |>
-    replace_mnirs(
-        invalid_values = c(0, 100),
-        outlier_cutoff = 3,
-        width = 10,
-        method = "linear"
-    ) |>
-    filter_mnirs(na.rm = TRUE) |>
     rescale_mnirs(
         nirs_channels = list(c(smo2_right, smo2_left)),
-        range = c(0, 100)   ## rescale to a 0-100% functional exercise range
+        range = c(0, 10), ## rescale to a 0-10 arbitrary units
+        verbose = FALSE
     )
-#> ℹ `nirs_channel` = "smo2_right": `smooth.spline(spar = 0.056)`
-#> ℹ `nirs_channel` = "smo2_left": `smooth.spline(spar = 0.056)`
 
-library(ggplot2)
-plot(data, label_time = TRUE) +
-    geom_hline(yintercept = c(0, 100), linetype = "dotted")
+data
+#> # A tibble: 2,203 × 3
+#>     time smo2_right smo2_left
+#>    <dbl>      <dbl>     <dbl>
+#>  1 0            5.4       6.8
+#>  2 0.400        5.4       6.8
+#>  3 0.960        5.4       6.8
+#>  4 1.51         5.4       6.6
+#>  5 2.06         5.4       6.6
+#>  6 2.61         5.4       6.6
+#>  7 3.16         5.4       6.6
+#>  8 3.71         5.7       6.7
+#>  9 4.26         5.7       6.7
+#> 10 4.81         5.7       6.7
+#> # ℹ 2,193 more rows
+
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        plot(data, time_labels = TRUE) +
+            ggplot2::geom_hline(yintercept = c(0, 100), linetype = "dotted")
+    }
+
+# }
 ```

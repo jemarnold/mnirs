@@ -6,7 +6,7 @@ sites. Some data channels have been omitted to keep file size down.
 
 ## Format
 
-.csv file with header metadata and with 10 eolumns and 12001 rows.
+.csv file with header metadata and with 10 columns and 12001 rows.
 
 - `nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")`
 

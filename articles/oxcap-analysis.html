@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
       <h1>Analysing muscle oxidative capacity with {mnirs}</h1>
 
       <p class="author">Jem Arnold</p>
-      <p class="date">2026-02-08</p>
+      <p class="date">2026-02-28</p>
 
       <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/vignettes/articles/oxcap-analysis.qmd" class="external-link"><code>vignettes/articles/oxcap-analysis.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -152,7 +152,7 @@ Calling these functions in non-linear curve fitting functions (e.g. <code><a hr
 <div>
 <blockquote>
 <p><strong>Note</strong></p>
-<p>I received this example file from <a href="https://scholar.google.com/citations?user=A9JwQbYAAAAJ&amp;hl=en" class="external-link">Dr. Thomas Tripp</a>, Postdoctoral fellow in Dr. <a href="https://scholar.google.com/citations?hl=en&amp;user=tJepNIQAAAAJ" class="external-link">Martin MacInnis</a>’ lab at the University of Calgary. They have kindly allowed me to include this file with the <em>{mnirs}</em> package for users to examine themselves.</p>
+<p>I received this example file from <a href="https://scholar.google.com/citations?user=A9JwQbYAAAAJ&amp;hl=en" class="external-link">Dr. Thomas Tripp</a>, Postdoctoral fellow in <a href="https://scholar.google.com/citations?hl=en&amp;user=tJepNIQAAAAJ" class="external-link">Dr. Martin MacInnis</a>’ lab at the University of Calgary. They have kindly allowed me to include this file with the <em>{mnirs}</em> package for users to examine themselves.</p>
 <p>It can be accessed by calling <code>example_mnirs("portamon-oxcap")</code>.</p>
 </blockquote>
 </div>
@@ -269,7 +269,7 @@ All occlusion bouts were held for 5-seconds in this protocol. If the occlusion d
 From visual investigation of the plots, we were able to see that in the first ~0.5 sec after the occlusion label, the deoxyhaeme signal was disrupted by the inflation of the cuff, which might produce invalid slope values. So we will specify a time span of <code>c(1, 5)</code>, i.e. from 1 to 5 seconds after each <code>"Occlusion"</code> event label. If we wanted to include an interval before the event label, we could specify a negative numeric value, e.g. <code>c(-2.5, 2.5)</code> to include a 5-sec span centred on the label itself.</p>
 </li>
 <li>
-<p><code>group_events</code></p>
+<p><code>event_groups</code></p>
 <p>Multiple events can be extracted for analysis as <code>"distinct"</code> intervals, or <code>"ensemble"</code>-averaged together. Different groupings of intervals can be ensemble-averaged by providing a list of numeric vectors specifying event intervals by number to ensemble-average or return as distinct; e.g. <code>list(c(1, 2), c(3, 4))</code>.<br><br>
 The interval numbers need to be known ahead of time and always refer to their order of occurrence in the data frame (i.e., sorted by <code>time_channel</code>). Any event intervals detected but not supplied by number will be included as distinct data frames.</p>
 </li>
@@ -285,29 +285,25 @@ For repeated occlusion testing, the original time information for each occlusion
 <span><span class="co">## re-join the returned list of data frames with each occlusion interval labelled as "interval"</span></span>
 <span><span class="va">df_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
 <span>    <span class="va">df</span>,</span>
-<span>    nirs_channels <span class="op">=</span> <span class="va">hhb</span>,        <span class="co">## only required to specify nirs_channels when ensemble-averaging</span></span>
 <span>    event_labels <span class="op">=</span> <span class="st">"Occlusion"</span>, <span class="co">## event label used in file, must match string exactly</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>,             <span class="co">## occlusion interval c(start, end) with reference to the event time value</span></span>
-<span>    group_events <span class="op">=</span> <span class="st">"distinct"</span>,  <span class="co">## return each occlusion event separately</span></span>
-<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>           <span class="co">## preserve original time values at each event</span></span>
-<span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co">## join back into a single grouped data frame, mostly for easier plotting below</span></span>
+<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>, <span class="co">## return each occlusion event separately</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="co">## occlusion interval c(start, end) with reference to the event time value</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span> <span class="co">## preserve original time values at each event</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## join back into a single grouped data frame, mostly for easier plotting below</span></span>
+<span><span class="va">df_grouped</span> <span class="op">&lt;-</span> <span class="va">df_list</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"interval"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co">## convert the "interval" column to a categorical factor</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">interval</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">interval</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co">## add `mnirs` metadata back to the combined data frame, for plotting</span></span>
 <span>    <span class="fu"><a href="../reference/create_mnirs_data.html">create_mnirs_data</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>            <span class="st">"nirs_channels"</span>,</span>
-<span>            <span class="st">"time_channel"</span>,</span>
-<span>            <span class="st">"event_channel"</span>,</span>
-<span>            <span class="st">"sample_rate"</span></span>
-<span>        <span class="op">)</span><span class="op">]</span></span>
+<span>        <span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">df_list</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nirs_channels"</span>, <span class="st">"time_channel"</span><span class="op">)</span><span class="op">]</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
 <span><span class="co">## visualise facet plot with all occlusion intervals for error checking</span></span>
 <span><span class="co">## the steepest facets will be the first occlusions from the two trials</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df_list</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df_grouped</span><span class="op">)</span> <span class="op">+</span></span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>        strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>        strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
@@ -358,7 +354,7 @@ A window with fewer samples will tend to return steeper slope values, which may 
 <div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## iteratively find peak local slopes within each occlusion interval</span></span>
 <span><span class="co">## return summary values for each factor level of "interval" grouping column</span></span>
-<span><span class="va">slopes_df</span> <span class="op">&lt;-</span> <span class="va">df_list</span> <span class="op">|&gt;</span></span>
+<span><span class="va">slopes_df</span> <span class="op">&lt;-</span> <span class="va">df_grouped</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span></span>
 <span>        .by <span class="op">=</span> <span class="va">interval</span>,</span>
 <span>        <span class="op">{</span></span>

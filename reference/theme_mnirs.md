@@ -44,11 +44,12 @@ theme_mnirs(
 
 - ...:
 
-  Additional arguments to add to `[theme()][ggplot2::theme()]`.
+  Additional arguments to add to `[ggplot2::theme()]`.
 
 ## Value
 
-A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
+A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) theme
+object.
 
 ## Details
 
@@ -67,30 +68,30 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 - `border = "full"` uses `panel.border = element_rect(colour = "black",`
   `linewidth = 1)` and `axis.line = element_line()`.
 
-- `base_family = "sans"` by *default*. `"Merriweather Sans"` is a nice
-  alternative font which can be installed from
-  <https://fonts.google.com/specimen/Merriweather+Sans>.
+- `base_family = "sans"` by *default*.
 
 ## See also
 
-[`palette_mnirs()`](https://jemarnold.github.io/mnirs/reference/palette_mnirs.md)
+[`palette_mnirs()`](https://jemarnold.github.io/mnirs/reference/palette_mnirs.md),
 [`scale_colour_mnirs()`](https://jemarnold.github.io/mnirs/reference/scale_colour_mnirs.md)
 
 ## Examples
 
 ``` r
-library(ggplot2)
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ## plot example data
+        read_mnirs(
+            file_path = example_mnirs("moxy_ramp"),
+            nirs_channels = c(
+                smo2_right = "SmO2 Live",
+                smo2_left = "SmO2 Live(2)"
+            ),
+            time_channel = c(time = "hh:mm:ss"),
+            verbose = FALSE
+        ) |>
+            plot(time_labels = TRUE)
+    }
 
-## set theme for the current script
-theme_set(theme_mnirs())
-
-## plot example data
-read_mnirs(
-    file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
-    time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
-) |>
-    plot(label_time = TRUE)
+# }
 ```

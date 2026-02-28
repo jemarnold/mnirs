@@ -71,25 +71,21 @@ set.seed(13)
 t <- 1:60
 
 ## create an exponential curve with random noise
-x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + rnorm(length(t), 0, 3)
+x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+    rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 
-(model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data))
-#> Nonlinear regression model
-#>   model: x ~ SS_monoexp4(t, A, B, tau, TD)
-#>    data: data
-#>       A       B     tau      TD 
-#>  10.461 100.233   8.313  14.884 
-#>  residual sum-of-squares: 455.5
-#> 
-#> Number of iterations to convergence: 5 
-#> Achieved convergence tolerance: 7.481e-07
+model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
 
 y <- predict(model, data)
 
-library(ggplot2)
-ggplot(data, aes(t, x)) +
-    theme_mnirs() +
-    geom_point() +
-    geom_line(aes(y = y))
+# \donttest{
+    if (requireNamespace("ggplot2", quietly = TRUE)) {
+        ggplot2::ggplot(data, ggplot2::aes(t, x)) +
+            theme_mnirs() +
+            ggplot2::geom_point() +
+            ggplot2::geom_line(ggplot2::aes(y = y))
+    }
+
+# }
 ```

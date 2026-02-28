@@ -36,14 +36,13 @@ slope(x, t = seq_along(x), ...)
 - width:
 
   An integer defining the local window in number of samples around `idx`
-  in which to perform the operation., between
-  `[idx - floor(width/2), idx + floor(width/2)]`.
+  in which to perform the operation, according to `align`.
 
 - span:
 
   A numeric value defining the local window timespan around `idx` in
-  which to perform the operation. In units of `time_channel` or `t`,
-  between `[t - span/2, t + span/2]`.
+  which to perform the operation, according to `align`. In units of
+  `time_channel` or `t`.
 
 - align:
 
@@ -60,8 +59,9 @@ slope(x, t = seq_along(x), ...)
 
 - verbose:
 
-  A logical to display (the *default*) or silence (`FALSE`) warnings and
-  information messages used for troubleshooting.
+  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
+  warnings and information messages helpful for troubleshooting. A
+  global default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
 
