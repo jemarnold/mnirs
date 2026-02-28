@@ -641,10 +641,6 @@ group_intervals <- function(
             create_mnirs_data(
                 .df,
                 nirs_device = metadata$nirs_device,
-                # nirs_channels = unique(c(
-                #     metadata$nirs_channels,
-                #     attr(.df, "nirs_channels")
-                # )),
                 nirs_channels = unique(attr(.df, "nirs_channels")),
                 time_channel = time_channel,
                 event_channel = metadata$event_channel,
