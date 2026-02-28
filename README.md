@@ -249,7 +249,7 @@ plot(data_rescaled, time_labels = TRUE) +
 options(mnirs.verbose = FALSE)
 
 ## read, process, and plot an mNIRS file in one pipeline
-read_mnirs(
+nirs_data <- read_mnirs(
     example_mnirs("train.red"),
     nirs_channels = c(
         smo2_left = "SmO2 unfiltered",
@@ -279,11 +279,63 @@ read_mnirs(
     rescale_mnirs(
         nirs_channels = list(c(smo2_left, smo2_right)), ## 👈 channels grouped together
         range = c(0, 100)
-    ) |>
-    plot(time_labels = TRUE)
+    )
+
+plot(nirs_data, time_labels = TRUE)
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
+
+### `extract_intervals()`: detect events and extract intervals
+
+``` r
+## return each interval independently with `event_groups = "distinct"`
+distinct_list <- extract_intervals(
+    nirs_data,
+    nirs_channels = NULL,        ## no channel processing occurs with "distinct" groups
+    event_times = c(371, 1082),  ## manually identified end-interval times
+    event_groups = "distinct",   ## return a list of two data frames
+    span = c(-180, 0),           ## include the last 180-sec of each interval
+    zero_time = FALSE            ## return original time values
+)
+
+## use `{patchwork}` package to plot intervals side by side
+library(patchwork)
+
+plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
+```
+
+<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" />
+
+``` r
+## ensemble average both intervals with `event_groups = "ensemble"`
+ensemble_list <- extract_intervals(
+    nirs_data,
+    nirs_channels = c(smo2_left, smo2_right), ## recycled to all intervals by default
+    event_times = c(371, 1082),
+    event_groups = "ensemble", ## ensemble-average across two intervals
+    span = c(-180, 0),         ## recycled to all intervals by default
+    zero_time = TRUE           ## re-calculate common time to start from `0`
+)
+
+plot(ensemble_list[[1L]])
+```
+
+<img src="man/figures/README-unnamed-chunk-11-1.png" alt="" width="100%" />
+
+## Future *{mnirs}* development
+
+- Process oxygenation kinetics
+
+  - Monoexponential & sigmoidal curve fitting
+
+  - non-parametric kinetics & slope analysis
+
+- Critical oxygenation breakpoint analysis
+
+  - Manual selection and automation-assisted breakpoint detection
+    (combine expert evaluation with robust probabilistic breakpoint
+    detection)
 
 ## mNIRS device compatibility
 
@@ -300,18 +352,6 @@ the following devices and apps:
 - [PerfPro](https://perfprostudio.com/) PC software (.xlsx)
 - [Train.Red](https://train.red/) app (.csv)
 - [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
-
-## Future *{mnirs}* development
-
-- Discrete interval processing
-
-- Process oxygenation kinetics
-
-  - Monoexponential & sigmoidal curve fitting
-
-  - non-parametric kinetics & slope analysis
-
-- Critical oxygenation breakpoint analysis
 
 ------------------------------------------------------------------------
 

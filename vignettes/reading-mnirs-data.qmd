@@ -44,6 +44,10 @@ In this vignette we will demonstrate how to:
 
 * 🔀 Demonstrate a complete data wrangling process using pipe-friendly functions.
 
+* 📉 Detect and extract intervals for further analysis.
+
+* 🧮 Analyse signal descriptive data and kinetics. `<under development>`
+
 
 *`mnirs`* is currently [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental). Functionality may change! Stay updated on development and follow releases at [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
 
