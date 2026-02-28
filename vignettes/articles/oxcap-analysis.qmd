@@ -334,25 +334,6 @@ A window with fewer samples will tend to return steeper slope values, which may 
 
 ## iteratively find peak local slopes within each occlusion interval
 ## return summary values for each factor level of "interval" grouping column
-# slopes_df <- df_list |>
-#     reframe(
-#         .by = interval,
-#         {
-#             slope_params <- peak_slope(
-#                 x = hhb, ## response variable: deoxyhaeme
-#                 t = time, ## predictor variable: time in seconds
-#                 span = 3, ## steepest 3 sec slope
-#                 align = "left", ## forward-looking from index sample
-#                 direction = "positive", ## upward slope for hhb
-#                 partial = FALSE ## allow only complete 3-sec segments, no NAs
-#             )
-#             ## return time value (start time of 3-sec period) and slope value (μM/sec)
-#             data.frame(
-#                 time = slope_params$t,
-#                 slope = slope_params$slope
-#             )
-#         }
-#     ) |>
 slopes_df <- analyse_kinetics(
     df_list,
     nirs_channel = hhb,

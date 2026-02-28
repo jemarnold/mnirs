@@ -355,7 +355,7 @@ test_that("rolling_slope calculates invalid", {
 
 test_that("rolling_slope handles NaN & Inf", {
     x <- c(1, 2, NaN, 4, 5, Inf, 7, 8)
-    ## ! reconcile different results between methods
+    ## reconcile different results between methods?
     ## differences are that centred `span` is divided by two
     ## so 2/1 = ±1 sample on each side
     ## whereas `width` is left-biased forward looking c(idx, idx+1)

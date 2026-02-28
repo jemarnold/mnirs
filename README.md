@@ -70,8 +70,8 @@ example_mnirs()
 data_table <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example mNIRS data file
     nirs_channels = c(
-        smo2_right = "SmO2 Live",        ## identify and rename channels
-        smo2_left = "SmO2 Live(2)"
+        smo2_left = "SmO2 Live",        ## identify and rename channels
+        smo2_right = "SmO2 Live(2)"
     ),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
     event_channel = NULL,                ## left blank, not currently used in analysis
@@ -92,18 +92,18 @@ data_table <- read_mnirs(
 
 data_table
 #> # A tibble: 2,203 × 3
-#>     time smo2_right smo2_left
-#>    <dbl>      <dbl>     <dbl>
-#>  1 0             54        68
-#>  2 0.400         54        68
-#>  3 0.960         54        68
-#>  4 1.51          54        66
-#>  5 2.06          54        66
-#>  6 2.61          54        66
-#>  7 3.16          54        66
-#>  8 3.71          57        67
-#>  9 4.26          57        67
-#> 10 4.81          57        67
+#>     time smo2_left smo2_right
+#>    <dbl>     <dbl>      <dbl>
+#>  1 0            54         68
+#>  2 0.400        54         68
+#>  3 0.960        54         68
+#>  4 1.51         54         66
+#>  5 2.06         54         66
+#>  6 2.61         54         66
+#>  7 3.16         54         66
+#>  8 3.71         57         67
+#>  9 4.26         57         67
+#> 10 4.81         57         67
 #> # ℹ 2,193 more rows
 
 ## note the hidden plot option to display time values as `h:mm:ss`
@@ -121,13 +121,13 @@ attributes(data_table)[-2]
 #> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
 #> 
 #> $names
-#> [1] "time"       "smo2_right" "smo2_left" 
+#> [1] "time"       "smo2_left"  "smo2_right"
 #> 
 #> $nirs_device
 #> [1] "Moxy"
 #> 
 #> $nirs_channels
-#> [1] "smo2_right" "smo2_left" 
+#> [1] "smo2_left"  "smo2_right"
 #> 
 #> $time_channel
 #> [1] "time"
@@ -136,7 +136,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-02-27 00:29:00 PST"
+#> [1] "2026-02-28 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
@@ -171,18 +171,18 @@ data_resampled <- resample_mnirs(
 ## note the altered "time" values from the original data frame 👇
 data_resampled
 #> # A tibble: 2,419 × 3
-#>     time smo2_right smo2_left
-#>    <dbl>      <dbl>     <dbl>
-#>  1   0         54        68  
-#>  2   0.5       54        68  
-#>  3   1         54        67.9
-#>  4   1.5       54        66.0
-#>  5   2         54        66  
-#>  6   2.5       54        66  
-#>  7   3         54        66  
-#>  8   3.5       55.9      66.6
-#>  9   4         57        67  
-#> 10   4.5       57        67  
+#>     time smo2_left smo2_right
+#>    <dbl>     <dbl>      <dbl>
+#>  1   0        54         68  
+#>  2   0.5      54         68  
+#>  3   1        54         67.9
+#>  4   1.5      54         66.0
+#>  5   2        54         66  
+#>  6   2.5      54         66  
+#>  7   3        54         66  
+#>  8   3.5      55.9       66.6
+#>  9   4        57         67  
+#> 10   4.5      57         67  
 #> # ℹ 2,409 more rows
 ```
 
@@ -315,6 +315,5 @@ the following devices and apps:
 
 ------------------------------------------------------------------------
 
-*Generative codebots were used to assist with code optimisation. All
-code was thoroughly reviewed, revised, and validated by the package
-author.*
+*Generative chatbots are used to assist with code optimisation. All code
+is thoroughly reviewed and validated by the package author.*

@@ -143,8 +143,8 @@ data_table <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example mNIRS data file
 
     nirs_channels = c(
-        smo2_right = "SmO2 Live",        ## identify and rename channels
-        smo2_left = "SmO2 Live(2)"
+        smo2_left = "SmO2 Live",        ## identify and rename channels
+        smo2_right = "SmO2 Live(2)"
     ),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
     event_channel = NULL,                ## left blank, not currently used in analysis
@@ -494,11 +494,11 @@ plot(data_shifted, time_labels = TRUE) +
 
 Before shifting, the minimum (end of exercise) values for *smo2_left* and *smo2_right* were similar, but the starting baseline values were different. 
 
-Whereas when we shift both baseline values to zero, we can see that the *smo2_right* signal has a smaller deoxygenation amplitude compared to the *smo2_left* signal.
+Whereas when we shift both baseline values to zero, we can see that the *smo2_left* signal has a smaller deoxygenation amplitude compared to the *smo2_right* signal, and a (slightly) greater hyperaemic reoxygenation peak.
 
-We have to consider how our assumptions and processing decisions will influence our interpretations; by shifting both starting values, we are normalising for the starting condition of the two tissue sites and implicitly assuming that the baseline represents the same starting condition in both legs. 
+We have to consider how our assumptions and processing decisions will influence our interpretations; by shifting both starting values, we are normalising for, and implicitly assuming that the baseline represents the same starting condition for the tissues in both legs.
 
-For example, this may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as `"∇SmO2"`).
+This may or may not be an appropriate assumption for your research question; for example, this may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as `"∇SmO2"`), but not if we were interested in asymmetries that could influence SmO<sub>2</sub> at rest.
 
 
 
@@ -535,7 +535,9 @@ Here, our assumption is that during a maximal exercise task, the minimum and max
 
 By normalising this way, we might lose meaningful differences captured by the different amplitudes between *smo2_left* and *smo2_right*, but we might be more interested in the trend or time course of each response.
 
-Our interpretation may be that *smo2_left* appears to start at a slightly higher percent of it's functional range, deoxygenates faster toward a minimum, and reaches a pseudo-plateau near maximal exercise. While *smo2_right* deoxygenates slightly slower and continues to deoxygenate until maximal task tolerance. Additionally, the right leg reoxygenates slightly faster than left during recovery. This might, for example, indicate exercise capacity differences between the limbs.
+Our interpretation may be that *smo2_right* appears to start at a slightly higher percent of its functional range, deoxygenates faster toward a minimum, and reaches a quasi-plateau near maximal exercise. While *smo2_left* deoxygenates slightly slower and continues to deoxygenate until maximal task tolerance. 
+
+Additionally, the left leg reoxygenates slightly faster than right during recovery. This might, for example, indicate exercise capacity differences between the limbs (although these differences are marginal and only discussed as representative for influence on interpretations).
 
 
 
@@ -550,7 +552,7 @@ This is also a good time to demonstrate how to use the global `mnirs.verbose` ar
 ```{r}
 options(mnirs.verbose = FALSE)
 
-read_mnirs(
+nirs_data <- read_mnirs(
     example_mnirs("train.red"),
     nirs_channels = c(
         smo2_left = "SmO2 unfiltered",
@@ -580,24 +582,26 @@ read_mnirs(
     rescale_mnirs(
         nirs_channels = list(c(smo2_left, smo2_right)), ## 👈 channels grouped together
         range = c(0, 100)
-    ) |>
-    plot(time_labels = TRUE)
+    )
+
+plot(nirs_data, time_labels = TRUE)
 ```
 
+We have two exercise intervals in this data set. Let's demonstrate some of the common analysis methods currently available with *`mnirs`*.
 
-# ✅ Signal Processing
+# 📉 Interval extraction
 
 After the NIRS signal has been cleaned and filtered, it should be ready for further processing and analysis. 
 
-*`mnirs`* is being developed to include functionality for processing discrete intervals and events, e.g. reoxygenation kinetics, slope calculations for post-occlusion microvascular responsiveness, and critical oxygenation breakpoints.
+*`mnirs`* is under development to include functionality for processing discrete intervals and events, e.g. reoxygenation kinetics, slope calculations for post-occlusion microvascular responsiveness, and critical oxygenation breakpoints.
 
 
 
 ## `extract_intervals()`
 
-Often we will need to locate and extract smaller intervals from a NIRS recording, for further processing and analysis. For example, if we want to extract the last two minutes from repeated exercise trials.
+Often we will need to locate and extract smaller intervals from a NIRS recording, for further processing and analysis. For example, if we want to extract the last three minutes from repeated exercise trials.
 
-We may have marked interval events in the specified `event_channel`, or we may simply have to manually specify the event markers by `time_channel` value or row number in the data frame.
+We may have marked interval events in the specified `event_channel`, or we may simply have to manually specify the event markers by `time_channel` value or row number in the data frame. See `extract_intervals()` for more details.
 
 * `data`
 
@@ -605,9 +609,9 @@ We may have marked interval events in the specified `event_channel`, or we may s
 
 * `nirs_channels`
 
-    When ensemble-averaging (see `event_groups` below), channels should be grouped by providing a list (e.g. `list(c(A, B), c(C))`) where each group will be shifted to a common scale, and separate scales between groups. The relative scaling between channels will be preserved within each group, but lost between groups.\
+    If returning a list of *"distinct"* intervals (see `event_groups` below), `nirs_channels` does not have to be specified, as no channels are processed.\
 \
-`nirs_channels` should be specified explicitly to ensure the intended grouping structure is returned. The default *`mnirs`* metadata will group all NIRS channels together.
+Only when *"ensemble"*-averaging, `nirs_channels` should be specified by providing a list of column names (e.g. `list(c(A, B), c(A))`), where each list item specifies the channels to be ensemble-averaged within the respective group (ensemble-groups are specified by `event_groups` below), in the order in which they are returned. The default *`mnirs`* metadata will ensemble-average all `nirs_channels`.
 
 * `time_channel`, `event_channel`, & `sample_rate`
 
@@ -615,15 +619,17 @@ We may have marked interval events in the specified `event_channel`, or we may s
 
 * `event_times`, `event_labels`, `event_samples`
 
-    `<under development>`
-
-* `span`
-
-    The interval to be extracted around each event is specified as a time span window in units of `time_channel` in the form `c(start, end)` or `c(before, after)`. Positive numeric values indicate time *after* the specified event. Negative values indicate time *before* the specified event.
+    Interval events can be identified in any of three ways; by `time_channel` values; by `event_channel` labels; or by sample indices (row numbers). Any exact matches will be extracted as a list of events.
 
 * `event_groups`
 
-    `<under development>`
+    Events can be extracted and returned as a list of `"distinct"` intervals, or `"ensemble"`-averaged into a single data frame. Custom grouping structure for ensemble-averaging can be specified by event number, in order of appearance within the original data.\
+\
+e.g. `event_groups = list(c(1, 2), c(3, 4))` would return a list of two intervals, each ensemble-averaged from the respective events, in sequential order from the original data.
+
+* `span`
+
+    The interval to be extracted around each event is specified as a time span window in units of `time_channel` in the form `c(start, end)` or `c(before, after)`. Positive numeric values indicate time *after* the specified event. Negative values indicate time *before* the specified event. A list of unique `span` vectors can be specified for each detected event, otherwise a single `span` vector will be recycled to all intervals.
 
 * `zero_time`
 
@@ -632,31 +638,22 @@ We may have marked interval events in the specified `event_channel`, or we may s
 When ensemble-averaging across intervals, time will always be re-calculated from `0`, since the time values have lost their meaning.
 
 ```{r}
-nirs_data <- read_mnirs(
-    example_mnirs("train.red"),
-    nirs_channels = c(
-        smo2_left = "SmO2 unfiltered",
-        smo2_right = "SmO2 unfiltered"
-    ),
-    time_channel = c(time = "Timestamp (seconds passed)")
-) |>
-    resample_mnirs() ## important step for ensemble-averaging with irregular sampling
+#| fig.width: 8
+#| fig.asp: 0.55
 
 ## return each interval independently with `event_groups = "distinct"`
 distinct_list <- extract_intervals(
     nirs_data,
-    nirs_channels = c(smo2_left, smo2_right), ## recycled to all intervals by default
-    event_times = c(2455, 3166),              ## manually identified event times
-    event_groups = "distinct",                ## return a list of two data frames
-    span = c(-30, 90),                        ## 30 sec before to 90 sec after each event
-    zero_time = FALSE                         ## return original time values
+    nirs_channels = NULL,        ## no channel processing occurs with "distinct" groups
+    event_times = c(371, 1082), ## manually identified end-interval times
+    event_groups = "distinct",   ## return a list of two data frames
+    span = c(-180, 0),           ## include the last 180-sec of each interval
+    zero_time = FALSE            ## return original time values
 )
 
 ## use `{patchwork}` package to plot intervals side by side
 library(patchwork)
 
-## note the section of missing data in interval two
-## ensemble-averaging can help mitigate this kind of data quality issue
 plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
 ```
 
@@ -664,18 +661,21 @@ plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble_list <- extract_intervals(
     nirs_data,
-    nirs_channels = c(smo2_left, smo2_right),
-    event_times = c(2455, 3166),
+    nirs_channels = c(smo2_left, smo2_right), ## recycled to all intervals by default
+    event_times = c(371, 1082),
     event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(-30, 90),
+    span = c(-180, 0),         ## recycled to all intervals by default
     zero_time = TRUE           ## re-calculate common time to start from `0`
 )
 
 plot(ensemble_list[[1L]])
-
 ```
 
+The ensemble-averaged kinetics capture a more representative 'average' response across the two exercise intervals. Note the transient spikes in each interval are somewhat smoothed over. 
 
-## `peak_slope()`
+Ensemble-averaging can help mitigate data dropouts and other quality issues from measurement error or biological variability. For example, ensemble-averaging is common for evaluating systemic VO<sub>2</sub> kinetics, where responses can be highly variable trial to trial.
+
+
+# 🧮 Signal analysis
 
 `<under development>`

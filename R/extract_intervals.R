@@ -9,9 +9,10 @@
 #' @param nirs_channels A character vector or a `list()` of character vectors 
 #'   of mNIRS channel names to operate on within each interval (see *Details*). 
 #'   Names must match column names in `data` exactly.
+#'   - Only needs to be specified when `event_groups` contains *"ensemble"*-
+#'     averaged intervals. If `event_groups = "distinct"` no channel processing
+#'     occurs.
 #'   - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
-#'   - Use multiple list items to include or exclude specific `nirs_channels`
-#'     per interval.
 #'
 #' @param event_channel An *optional* character string giving the name of an
 #'   event/marker column to import. Required to specify `event_labels`. Must
@@ -76,8 +77,8 @@
 #'
 #' ```r
 #' nirs_channels = list(
-#'   c("A", "B", "C"),
-#'   c("A", "C") ## channel "B" is excluded
+#'   c(A, B, C),
+#'   c(A, C) ## channel "B" is excluded
 #' )
 #' ```
 #' 

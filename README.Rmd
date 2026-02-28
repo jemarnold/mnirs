@@ -68,8 +68,8 @@ example_mnirs()
 data_table <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example mNIRS data file
     nirs_channels = c(
-        smo2_right = "SmO2 Live",        ## identify and rename channels
-        smo2_left = "SmO2 Live(2)"
+        smo2_left = "SmO2 Live",        ## identify and rename channels
+        smo2_right = "SmO2 Live(2)"
     ),
     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
     event_channel = NULL,                ## left blank, not currently used in analysis
@@ -250,4 +250,4 @@ Currently, it has been tested successfully with mNIRS data exported from the fol
 
 ---
 
-*Generative codebots were used to assist with code optimisation. All code was thoroughly reviewed, revised, and validated by the package author.*
+*Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed and validated by the package author.*
