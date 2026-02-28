@@ -17,7 +17,7 @@ compute_local_windows(
 
 compute_local_fun(x, window_idx, fn, ...)
 
-compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+compute_outliers(x, window_idx, outlier_cutoff)
 
 compute_valid_neighbours(
   x,
@@ -55,9 +55,6 @@ vectors for the sample indices of local rolling windows.}
 
 \item{...}{Additional arguments.}
 
-\item{local_medians}{A numeric vector the same length as \code{x} of local
-median values.}
-
 \item{outlier_cutoff}{An integer for the local outlier threshold, as
 number of standard deviations above and below the local median. The
 \emph{default} \code{outlier_cutoff = NULL} will not replace outliers.
@@ -75,7 +72,8 @@ shorter length as \code{t} with numeric vectors of sample indices of length
 
 \code{compute_local_fun()}: A numeric vector the same length as \code{x}.
 
-\code{compute_outliers()}: A logical vector the same length as \code{x}.
+\code{compute_outliers()}: A \code{list()} with vectors the same length as \code{x} for
+with numeric local medians and logical identifying where \code{is_outlier}.
 
 \code{compute_valid_neighbours()}: A list the same length as the \code{NA} values in
 \code{x} with numeric vectors of sample indices of length \code{width} samples or
@@ -89,8 +87,9 @@ time variable \code{t}.
 \code{compute_local_fun()}: Compute a rolling function along \code{x} from a list of
 rolling sample windows.
 
-\code{compute_outliers()}: Computes a vector of logicals indicating local
-outliers of \code{x} within a list of rolling sample windows \code{window_idx}.
+\code{compute_outliers()}: Computes a vector of local medians and logicals
+indicating outliers of \code{x} within a list of rolling sample windows
+\code{window_idx}.
 
 \code{compute_valid_neighbours()}: Compute a list of rolling window indices along
 \code{x} to either side of \code{NA}s.

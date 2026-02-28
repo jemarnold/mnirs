@@ -371,8 +371,9 @@ replace_outliers <- function(
 
     ## process =====================================================
     window_idx <- compute_local_windows(t, width = width, span = span)
-    local_medians <- compute_local_fun(x, window_idx, median, na.rm = TRUE)
-    is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+    outlier_stats <- compute_outliers(x, window_idx, outlier_cutoff)
+    local_medians <- outlier_stats$local_medians
+    is_outlier <- outlier_stats$is_outlier
     outlier_length <- length(is_outlier)
     
     ## TODO immature, need way to specify name of channels being replaced

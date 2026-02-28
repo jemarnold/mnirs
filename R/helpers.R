@@ -99,33 +99,38 @@ compute_local_fun <- function(x, window_idx, fn, ...) {
 
 
 #' @description
-#' `compute_outliers()`: Computes a vector of logicals indicating local
-#' outliers of `x` within a list of rolling sample windows `window_idx`.
-#'
-#' @param local_medians A numeric vector the same length as `x` of local
-#'   median values.
+#' `compute_outliers()`: Computes a vector of local medians and logicals 
+#' indicating outliers of `x` within a list of rolling sample windows 
+#' `window_idx`.
 #'
 #' @returns
-#' `compute_outliers()`: A logical vector the same length as `x`.
+#' `compute_outliers()`: A `list()` with vectors the same length as `x` for 
+#' with numeric local medians and logical identifying where `is_outlier`.
 #'
 #' @rdname compute_helpers
 #' @keywords internal
 compute_outliers <- function(
     x,
     window_idx,
-    local_medians,
     outlier_cutoff
 ) {
     n <- length(x)
     L <- 1.4826 ## 1 / qnorm(0.75): MAD at the 75% percentile of |Z|
     # MAD = median(|x - median(x)|) within each window
     ## median of absolute local residuals from the local median
-    local_mad <- vapply(seq_len(n), \(.i) {
-        median(abs(x[window_idx[[.i]]] - local_medians[.i]), na.rm = TRUE)
-    }, numeric(1))
+    local_stats <- vapply(seq_len(n), \(.i) {
+        w <- x[window_idx[[.i]]]
+        local_median <- median(w, na.rm = TRUE)
+        local_mad <- median(abs(w - local_median), na.rm = TRUE)
+
+        c(local_median, local_mad)
+    }, numeric(2))
+
+    local_medians <- local_stats[1L, ]
+    local_mad <- local_stats[2L, ]
 
     ## robust variance threshold based on minimum sample difference
-    ## TODO need to verify behaviour in edge cases
+    ## TODO need to verifybehaviour in edge cases
     abs_diffs <- abs(diff(x[!is.na(x)]))
     smallest_var <- suppressWarnings(min(abs_diffs[abs_diffs > 1e-5]))
 
@@ -135,7 +140,12 @@ compute_outliers <- function(
         abs_dev > (L * outlier_cutoff * local_mad)
     ## NAs from is_outlier check should return FALSE
     is_outlier[is.na(is_outlier)] <- FALSE
-    return(is_outlier)
+    
+    ## return list of vectors w/ local logicals and medians
+    return(list(
+        local_medians = local_medians,
+        is_outlier = is_outlier
+    ))
 }
 
 
@@ -164,13 +174,13 @@ compute_valid_neighbours <- function(
     n_na <- length(na_idx)
 
     if (!is.null(width)) {
-        ## Find position to the left of each NA in valid_idx sequence
+        ## find position to the left of each NA in valid_idx sequence
         pos <- findInterval(na_idx, valid_idx)
         half_width <- floor(width / 2L)
 
         window_idx <- vector("list", n_na)
         for (i in seq_len(n_na)) {
-            ## Extract width samples before and after
+            ## extract width samples before and after
             left <- max(1L, pos[i] - half_width + 1L):pos[i]
             right <- min(n_valid, pos[i] + 1L):min(n_valid, pos[i] + half_width)
             window_idx[[i]] <- valid_idx[sort(unique(c(left, right)))]
@@ -178,21 +188,21 @@ compute_valid_neighbours <- function(
         return(window_idx)
     }
 
-    ## Pre-compute for span approach
+    ## pre-compute for span approach
     t_valid <- t[valid_idx]
     t_na <- t[na_idx]
     half_span <- span * 0.5
 
+    ## build per-NA valid neighbours with binary search on sorted `t_valid`
+    ## falls back to naerest bracketing pair when no valid samples within `span`
     window_idx <- lapply(seq_len(n_na), \(.i) {
-        t_range <- c(t_na[.i] - half_span, t_na[.i] + half_span)
-        in_range <- valid_idx[t_valid >= t_range[1L] & t_valid <= t_range[2L]]
-
-        if (length(in_range) == 0) {
+        lo <- findInterval(t_na[.i] - half_span, t_valid, left.open = TRUE) + 1L
+        hi <- findInterval(t_na[.i] + half_span, t_valid)
+        if (lo > hi) {
             pos <- findInterval(na_idx[.i], valid_idx)
-            in_range <- valid_idx[c(pos, min(n_valid, pos + 1L))]
-            in_range <- unique(in_range)
+            return(unique(valid_idx[c(pos, min(n_valid, pos + 1L))]))
         }
-        in_range
+        valid_idx[lo:hi]
     })
 
     ## window of valid values exclusive around `x`

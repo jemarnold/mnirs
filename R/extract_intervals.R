@@ -680,7 +680,7 @@ group_intervals <- function(
         event_groups <- event_groups[
             order(vapply(event_groups, \(.x) {
                 median(.x, na.rm = TRUE)
-            }, FUN.VALUE = numeric(1))) ## TODO confirm length == 0 always
+            }, numeric(1))) ## TODO confirm length == 0 always
         ]
         if (verbose) {
             cli_inform(c(

@@ -25,6 +25,7 @@ Suggests:
     dplyr,
     ggplot2,
     knitr,
+    patchwork,
     quarto,
     scales,
     signal,
@@ -33,7 +34,6 @@ Suggests:
 VignetteBuilder: 
     quarto
 Config/Needs/website: 
-    patchwork,
     quarto, 
     tidyverse
 Config/testthat/edition: 3
