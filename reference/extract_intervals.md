@@ -36,10 +36,11 @@ extract_intervals(
   interval (see *Details*). Names must match column names in `data`
   exactly.
 
-  - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
+  - Only needs to be specified when `event_groups` contains
+    *"ensemble"*- averaged intervals. If `event_groups = "distinct"` no
+    channel processing occurs.
 
-  - Use multiple list items to include or exclude specific
-    `nirs_channels` per interval.
+  - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
 
 - time_channel:
 
@@ -151,8 +152,8 @@ ensemble-averaging across interval. For example, to exclude a bad
 channel in one interval:
 
     nirs_channels = list(
-      c("A", "B", "C"),
-      c("A", "C") ## channel "B" is excluded
+      c(A, B, C),
+      c(A, C) ## channel "B" is excluded
     )
 
 If all grouped intervals can include all `nirs_channels`, or if

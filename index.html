@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -109,8 +109,8 @@
 <span><span class="va">data_table</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
 <span>    file_path <span class="op">=</span> <span class="fu"><a href="reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>, <span class="co">## call an example mNIRS data file</span></span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>,        <span class="co">## identify and rename channels</span></span>
-<span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span></span>
+<span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 Live"</span>,        <span class="co">## identify and rename channels</span></span>
+<span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>, <span class="co">## date-time format will be converted to numeric</span></span>
 <span>    event_channel <span class="op">=</span> <span class="cn">NULL</span>,                <span class="co">## left blank, not currently used in analysis</span></span>
@@ -131,18 +131,18 @@
 <span></span>
 <span><span class="va">data_table</span></span>
 <span><span class="co">#&gt; # A tibble: 2,203 × 3</span></span>
-<span><span class="co">#&gt;     time smo2_right smo2_left</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 0             54        68</span></span>
-<span><span class="co">#&gt;  2 0.400         54        68</span></span>
-<span><span class="co">#&gt;  3 0.960         54        68</span></span>
-<span><span class="co">#&gt;  4 1.51          54        66</span></span>
-<span><span class="co">#&gt;  5 2.06          54        66</span></span>
-<span><span class="co">#&gt;  6 2.61          54        66</span></span>
-<span><span class="co">#&gt;  7 3.16          54        66</span></span>
-<span><span class="co">#&gt;  8 3.71          57        67</span></span>
-<span><span class="co">#&gt;  9 4.26          57        67</span></span>
-<span><span class="co">#&gt; 10 4.81          57        67</span></span>
+<span><span class="co">#&gt;     time smo2_left smo2_right</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 0            54         68</span></span>
+<span><span class="co">#&gt;  2 0.400        54         68</span></span>
+<span><span class="co">#&gt;  3 0.960        54         68</span></span>
+<span><span class="co">#&gt;  4 1.51         54         66</span></span>
+<span><span class="co">#&gt;  5 2.06         54         66</span></span>
+<span><span class="co">#&gt;  6 2.61         54         66</span></span>
+<span><span class="co">#&gt;  7 3.16         54         66</span></span>
+<span><span class="co">#&gt;  8 3.71         57         67</span></span>
+<span><span class="co">#&gt;  9 4.26         57         67</span></span>
+<span><span class="co">#&gt; 10 4.81         57         67</span></span>
 <span><span class="co">#&gt; # ℹ 2,193 more rows</span></span>
 <span></span>
 <span><span class="co">## note the hidden plot option to display time values as `h:mm:ss`</span></span>
@@ -159,13 +159,13 @@
 <span><span class="co">#&gt; [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $names</span></span>
-<span><span class="co">#&gt; [1] "time"       "smo2_right" "smo2_left" </span></span>
+<span><span class="co">#&gt; [1] "time"       "smo2_left"  "smo2_right"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $nirs_device</span></span>
 <span><span class="co">#&gt; [1] "Moxy"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $nirs_channels</span></span>
-<span><span class="co">#&gt; [1] "smo2_right" "smo2_left" </span></span>
+<span><span class="co">#&gt; [1] "smo2_left"  "smo2_right"</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $time_channel</span></span>
 <span><span class="co">#&gt; [1] "time"</span></span>
@@ -210,18 +210,18 @@
 <span><span class="co">## note the altered "time" values from the original data frame 👇</span></span>
 <span><span class="va">data_resampled</span></span>
 <span><span class="co">#&gt; # A tibble: 2,419 × 3</span></span>
-<span><span class="co">#&gt;     time smo2_right smo2_left</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt;      &lt;dbl&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1   0         54        68  </span></span>
-<span><span class="co">#&gt;  2   0.5       54        68  </span></span>
-<span><span class="co">#&gt;  3   1         54        67.9</span></span>
-<span><span class="co">#&gt;  4   1.5       54        66.0</span></span>
-<span><span class="co">#&gt;  5   2         54        66  </span></span>
-<span><span class="co">#&gt;  6   2.5       54        66  </span></span>
-<span><span class="co">#&gt;  7   3         54        66  </span></span>
-<span><span class="co">#&gt;  8   3.5       55.9      66.6</span></span>
-<span><span class="co">#&gt;  9   4         57        67  </span></span>
-<span><span class="co">#&gt; 10   4.5       57        67  </span></span>
+<span><span class="co">#&gt;     time smo2_left smo2_right</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1   0        54         68  </span></span>
+<span><span class="co">#&gt;  2   0.5      54         68  </span></span>
+<span><span class="co">#&gt;  3   1        54         67.9</span></span>
+<span><span class="co">#&gt;  4   1.5      54         66.0</span></span>
+<span><span class="co">#&gt;  5   2        54         66  </span></span>
+<span><span class="co">#&gt;  6   2.5      54         66  </span></span>
+<span><span class="co">#&gt;  7   3        54         66  </span></span>
+<span><span class="co">#&gt;  8   3.5      55.9       66.6</span></span>
+<span><span class="co">#&gt;  9   4        57         67  </span></span>
+<span><span class="co">#&gt; 10   4.5      57         67  </span></span>
 <span><span class="co">#&gt; # ℹ 2,409 more rows</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -285,7 +285,7 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## read, process, and plot an mNIRS file in one pipeline</span></span>
-<span><span class="fu"><a href="reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
+<span><span class="va">nirs_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"train.red"</span><span class="op">)</span>,</span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 unfiltered"</span>,</span>
@@ -315,10 +315,64 @@
 <span>    <span class="fu"><a href="reference/rescale_mnirs.html">rescale_mnirs</a></span><span class="op">(</span></span>
 <span>        nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span><span class="op">)</span>, <span class="co">## 👈 channels grouped together</span></span>
 <span>        range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span>
-<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span>time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">nirs_data</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-9-1.png" alt="" width="100%"></p>
 </div>
+<div class="section level3">
+<h3 id="extract_intervals-detect-events-and-extract-intervals">
+<code>extract_intervals()</code>: detect events and extract intervals<a class="anchor" aria-label="anchor" href="#extract_intervals-detect-events-and-extract-intervals"></a>
+</h3>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## return each interval independently with `event_groups = "distinct"`</span></span>
+<span><span class="va">distinct_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
+<span>    <span class="va">nirs_data</span>,</span>
+<span>    nirs_channels <span class="op">=</span> <span class="cn">NULL</span>,        <span class="co">## no channel processing occurs with "distinct" groups</span></span>
+<span>    event_times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">371</span>, <span class="fl">1082</span><span class="op">)</span>,  <span class="co">## manually identified end-interval times</span></span>
+<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>,   <span class="co">## return a list of two data frames</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">180</span>, <span class="fl">0</span><span class="op">)</span>,           <span class="co">## include the last 180-sec of each interval</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>            <span class="co">## return original time values</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## use `{patchwork}` package to plot intervals side by side</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct_list</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct_list</span><span class="op">[[</span><span class="fl">2L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-10-1.png" alt="" width="100%"></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## ensemble average both intervals with `event_groups = "ensemble"`</span></span>
+<span><span class="va">ensemble_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
+<span>    <span class="va">nirs_data</span>,</span>
+<span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>, <span class="co">## recycled to all intervals by default</span></span>
+<span>    event_times <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">371</span>, <span class="fl">1082</span><span class="op">)</span>,</span>
+<span>    event_groups <span class="op">=</span> <span class="st">"ensemble"</span>, <span class="co">## ensemble-average across two intervals</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">180</span>, <span class="fl">0</span><span class="op">)</span>,         <span class="co">## recycled to all intervals by default</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co">## re-calculate common time to start from `0`</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble_list</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-unnamed-chunk-11-1.png" alt="" width="100%"></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="future-mnirs-development">Future <em>{mnirs}</em> development<a class="anchor" aria-label="anchor" href="#future-mnirs-development"></a>
+</h2>
+<ul>
+<li>
+<p>Process oxygenation kinetics</p>
+<ul>
+<li><p>Monoexponential &amp; sigmoidal curve fitting</p></li>
+<li><p>non-parametric kinetics &amp; slope analysis</p></li>
+</ul>
+</li>
+<li>
+<p>Critical oxygenation breakpoint analysis</p>
+<ul>
+<li>Manual selection and automation-assisted breakpoint detection (combine expert evaluation with robust probabilistic breakpoint detection)</li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="mnirs-device-compatibility">mNIRS device compatibility<a class="anchor" aria-label="anchor" href="#mnirs-device-compatibility"></a>
@@ -337,23 +391,8 @@
 <li>
 <a href="https://vo2master.com/features/" class="external-link">VO2 Master Manager</a> app (.xlsx)</li>
 </ul>
-</div>
-<div class="section level2">
-<h2 id="future-mnirs-development">Future <em>{mnirs}</em> development<a class="anchor" aria-label="anchor" href="#future-mnirs-development"></a>
-</h2>
-<ul>
-<li><p>Discrete interval processing</p></li>
-<li>
-<p>Process oxygenation kinetics</p>
-<ul>
-<li><p>Monoexponential &amp; sigmoidal curve fitting</p></li>
-<li><p>non-parametric kinetics &amp; slope analysis</p></li>
-</ul>
-</li>
-<li><p>Critical oxygenation breakpoint analysis</p></li>
-</ul>
 <hr>
-<p><em>Generative codebots were used to assist with code optimisation. All code was thoroughly reviewed, revised, and validated by the package author.</em></p>
+<p><em>Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed and validated by the package author.</em></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

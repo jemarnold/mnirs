@@ -9,7 +9,7 @@ series data.'><meta name="twitter:card" content="summary"><meta name="twitter:cr
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,9 +77,10 @@ metadata.</p></dd>
 <dt id="arg-nirs-channels">nirs_channels<a class="anchor" aria-label="anchor" href="#arg-nirs-channels"></a></dt>
 <dd><p>A character vector or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of character vectors
 of mNIRS channel names to operate on within each interval (see <em>Details</em>).
-Names must match column names in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), channels are retrieved from <em>"mnirs"</em> metadata.</p></li>
-<li><p>Use multiple list items to include or exclude specific <code>nirs_channels</code>
-per interval.</p></li>
+Names must match column names in <code>data</code> exactly.</p><ul><li><p>Only needs to be specified when <code>event_groups</code> contains <em>"ensemble"</em>-
+averaged intervals. If <code>event_groups = "distinct"</code> no channel processing
+occurs.</p></li>
+<li><p>If <code>NULL</code> (default), channels are retrieved from <em>"mnirs"</em> metadata.</p></li>
 </ul></dd>
 
 
@@ -191,8 +192,8 @@ order in which they appear in <code>data</code>.</p>
 ensemble-averaging across interval. For example, to exclude a bad channel
 in one interval:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">nirs_channels</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"C"</span><span class="op">)</span> <span class="co">## channel "B" is excluded</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">A</span>, <span class="va">B</span>, <span class="va">C</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">A</span>, <span class="va">C</span><span class="op">)</span> <span class="co">## channel "B" is excluded</span></span>
 <span><span class="op">)</span></span></code></pre><p></p></div>
 <p>If all grouped intervals can include all <code>nirs_channels</code>, or if
 <code>event_groups = "distinct"</code>, a single <code>nirs_channels</code> character vector can
