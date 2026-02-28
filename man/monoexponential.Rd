@@ -65,6 +65,3 @@ y <- predict(model, data)
 \seealso{
 \code{\link[=SS_monoexp3]{SS_monoexp3()}}, \code{\link[=SS_monoexp4]{SS_monoexp4()}}
 }
-\seealso{
-\code{\link[=SS_monoexp]{SS_monoexp()}}
-}

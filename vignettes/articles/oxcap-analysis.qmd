@@ -334,7 +334,7 @@ A window with fewer samples will tend to return steeper slope values, which may 
 
 ## iteratively find peak local slopes within each occlusion interval
 ## return summary values for each factor level of "interval" grouping column
-slopes_df <- df_list |>
+slopes_df <- df_grouped |>
     reframe(
         .by = interval,
         {
