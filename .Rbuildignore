@@ -18,3 +18,5 @@
 ^vignettes/articles/\.quarto$
 ^vignettes/articles/*_files$
 ^cran-comments\.md$
+^mnirs_hexSticker\.R$
+mnirs-hex.*\.png$
