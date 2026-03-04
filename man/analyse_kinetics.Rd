@@ -65,7 +65,8 @@ one row per \code{nirs_channel} and per interval, containing columns
 \code{interval}, \code{nirs_channels}, and individual method parameters.}
 \item{\code{data}}{A list of the original input data frames augmented with a
 \verb{*_fitted} column of model predicted values for each \code{nirs_channel}.}
-\item{\code{t0}}{A data frame of event times (\code{t0}) for each \code{nirs_channel}
+\item{\code{event_times}}{A data frame of event times (\code{t0}) for each
+\code{nirs_channel}
 per interval, sourced from \code{event_times} supplied from
 \code{extract_intervals}, if present in the metadata.}
 \item{\code{diagnostics}}{A data frame of model diagnostics (\code{n_obs}, \code{r2},
@@ -162,12 +163,14 @@ result <- read_mnirs(
         smo2_right = "SmO2 unfiltered"
     ),
     time_channel = c(time = "Timestamp (seconds passed)"),
+    zero_time = TRUE,
     verbose = FALSE
 ) |>
     resample_mnirs(verbose = FALSE) |>
     extract_intervals(
-        event_times = c(2455, 3166),
+        event_times = c(368, 1093),
         event_groups = "distinct",
+        span = c(-20, 90),
         zero_time = TRUE,
         verbose = FALSE
     ) |>

@@ -100,7 +100,8 @@
 #'       `interval`, `nirs_channels`, and individual method parameters.}
 #'   \item{`data`}{A list of the original input data frames augmented with a
 #'       `*_fitted` column of model predicted values for each `nirs_channel`.}
-#'   \item{`t0`}{A data frame of event times (`t0`) for each `nirs_channel`
+#'   \item{`event_times`}{A data frame of event times (`t0`) for each
+#'       `nirs_channel`
 #'       per interval, sourced from `event_times` supplied from
 #'       `extract_intervals`, if present in the metadata.}
 #'   \item{`diagnostics`}{A data frame of model diagnostics (`n_obs`, `r2`,
@@ -119,12 +120,14 @@
 #'         smo2_right = "SmO2 unfiltered"
 #'     ),
 #'     time_channel = c(time = "Timestamp (seconds passed)"),
+#'     zero_time = TRUE,
 #'     verbose = FALSE
 #' ) |>
 #'     resample_mnirs(verbose = FALSE) |>
 #'     extract_intervals(
-#'         event_times = c(2455, 3166),
+#'         event_times = c(368, 1093),
 #'         event_groups = "distinct",
+#'         span = c(-20, 90),
 #'         zero_time = TRUE,
 #'         verbose = FALSE
 #'     ) |>
@@ -162,7 +165,6 @@ analyse_kinetics <- function(
 
     ## create lightweight dispatch object
     data <- structure(
-        # list(data_list = data_list),
         data,
         class = c(method, "mnirs_kinetics")
     )
@@ -209,7 +211,6 @@ analyse_kinetics.peak_slope <- function(
             verbose = verbose
         )
         result$interval <- id
-        result$t0 <- attr(df, "event_times") %||% NA_real_ ## if not present
 
         ## convert each row's channel_args list to a 1-row data frame
         ## replace NULL values with NA to keep consistent columns
@@ -267,14 +268,18 @@ analyse_kinetics.peak_slope <- function(
     )
 
     ## extract data_list from the first item in each `interval`
-    data_list <- Filter(Negate(is.null), results$data)
+    data_list <- Filter(\(.x) !is.null(.x), results$data)
     names(data_list) <- interval_names
 
-    ## extract data frame of `event_times` 
-    t0_df <- as.data.frame(results[c("interval", "nirs_channels", "t0")])
+    ## extract event_times as list-column (one row per interval)
+    event_times_df <- data.frame(interval = interval_names)
+    event_times_df$event_times <- lapply(data_list, \(.df) {
+        et <- attr(.df, "event_times")
+        if (is.null(et)) NA_real_ else unlist(et)
+    })
 
     ## remove lists from results & relocate interval col
-    results[c("channel_args", "data", "t0", "diagnostics")] <- NULL
+    results[c("channel_args", "data", "diagnostics")] <- NULL
     results <- results[, c("interval", setdiff(names(results), "interval"))]
 
     ## ! implement find_first_extreme
@@ -286,7 +291,7 @@ analyse_kinetics.peak_slope <- function(
             method = method,   ## method = "peak_slope"
             results = results, ## tibble of scalar results
             data = data_list,  ## df of data frames
-            t0 = t0_df,        ## df of `event_times` `t` values
+            event_times = event_times_df,   ## df of `event_times` `t` values
             diagnostics = diagnostics_df,   ## df of model diagnostics
             channel_args = channel_args_df, ## df of channel args provided to `analyse_slope`
             call = match.call()

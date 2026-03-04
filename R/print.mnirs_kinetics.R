@@ -8,6 +8,31 @@
 #' @returns Return:
 #'      \item{`print`}{Returns a model summary}
 #'
+#' @examples
+#' result <- read_mnirs(
+#'     example_mnirs("train.red"),
+#'     nirs_channels = c(smo2 = "SmO2 unfiltered"),
+#'     time_channel = c(time = "Timestamp (seconds passed)"),
+#'     zero_time = TRUE,
+#'     verbose = FALSE
+#' ) |>
+#'     resample_mnirs(verbose = FALSE) |>
+#'     extract_intervals(
+#'         event_times = c(368, 1093),
+#'         event_groups = "distinct", ## return ensemble-averaged intervals
+#'         span = c(-20, 90),
+#'         zero_time = TRUE,
+#'         verbose = FALSE
+#'     ) |>
+#'     analyse_kinetics(
+#'         nirs_channels = c(smo2),
+#'         method = "peak_slope",
+#'         span = 10,
+#'         verbose = FALSE
+#'     )
+#'
+#' print(result)
+#'
 #' @export
 print.mnirs_kinetics <- function(x, ...) {
     results <- as.data.frame(x$results)
