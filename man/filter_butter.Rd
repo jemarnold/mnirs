@@ -86,13 +86,13 @@ set.seed(13)
 sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 noise <- rnorm(150, mean = 0, sd = 6)
 noisy_sin <- sin + noise
-filt_without_edge <- filter_butter(
+without_edge_detection <- filter_butter(
     x = noisy_sin,
     order = 2,
     W = 0.1,
     edges = "none"
 )
-filt_with_edge <- filter_butter(
+with_edge_detection <- filter_butter(
     x = noisy_sin,
     order = 2,
     W = 0.1,
@@ -106,10 +106,10 @@ filt_with_edge <- filter_butter(
             scale_colour_mnirs(name = NULL) +
             ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
             ggplot2::geom_line(
-                ggplot2::aes(y = filt_without_edge, colour = "filt_without_edge")
+                ggplot2::aes(y = without_edge_detection, colour = "without_edge_detection")
             ) +
             ggplot2::geom_line(
-                ggplot2::aes(y = filt_with_edge, colour = "filt_with_edge")
+                ggplot2::aes(y = with_edge_detection, colour = "with_edge_detection")
             )
     }
 }

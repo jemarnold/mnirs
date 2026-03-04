@@ -187,26 +187,14 @@ data <- read_mnirs(
 ) |>
     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 
-## extract intervals as a list of data frames
-extract_intervals(
-    data,
-    nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093), ## specify interval events
-    event_groups = "distinct",  ## return all unique intervals
-    span = list(c(-20, 90)),    ## specify the event start-end timespans
-    zero_time = TRUE,           ## start time from zero
-    verbose = FALSE
-)
-
 ## ensemble-average across multiple intervals
 interval_list <- extract_intervals(
-    data,
-    nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093),
-    event_groups = "ensemble", ## return ensemble-averaged intervals
-    span = list(c(-20, 90)),
-    zero_time = TRUE,
-    verbose = FALSE
+    data,                       ## channels recycled to all intervals by default
+    nirs_channels = c(smo2_left, smo2_right),
+    event_times = c(368, 1093), ## manually identified interval start timesfs
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
+    zero_time = TRUE           ## re-calculate common time to start from `0`
 )
 
 interval_list[[1L]]

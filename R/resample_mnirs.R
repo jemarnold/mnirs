@@ -56,19 +56,20 @@
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
 #'     time_channel = c(time = "hh:mm:ss"),
-#'     verbose = FALSE
+#'     verbose = TRUE
 #' )
-#'
+#' 
+#' ## note warning about irregular sampling
 #' data
 #'
 #' data_resampled <- resample_mnirs(
-#'     data,              ## channels retrieved from metadata
-#'     resample_rate = 2, ## the default `resample_rate = sample_rate` will resample to sample_rate
-#'     method = "linear", ## linear interpolation across any new samples
-#'     verbose = TRUE     ## will confirm the output sample rate
+#'     data,
+#'     resample_rate = 2,
+#'     method = "linear",
+#'     verbose = TRUE
 #' )
 #'
-#' ## note the altered "time" values
+#' ## note the altered `time` values resolving the above warning
 #' data_resampled
 #'
 #' @export

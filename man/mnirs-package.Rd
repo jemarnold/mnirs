@@ -6,7 +6,7 @@
 \alias{mnirs-package}
 \title{mnirs: Muscle Near-Infrared Spectroscopy Processing and Analysis}
 \description{
-Methods for reading, processing, and analysing data from muscle near-infrared spectroscopy (mNIRS) devices.
+Read, process, and analyse data from muscle near-infrared spectroscopy (mNIRS) devices. Import raw data from .csv or .xls(x) files and return a time-series data frame with metadata. Includes standardised methods for cleaning, filtering, and pre-processing NIRS data for subsequent custom analysis, with a custom plot theme and colour palette. Intended for NIRS researchers and practitioners in exercise physiology, sports science, and clinical rehabilitation.
 }
 \seealso{
 Useful links:
@@ -18,7 +18,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Jem Arnold \email{jem.arnold@ubc.ca} (\href{https://orcid.org/0000-0003-3908-9447}{ORCID}) [copyright holder]
+\strong{Maintainer}: Jem Arnold \email{jem.arnold@gmail.com} (\href{https://orcid.org/0000-0003-3908-9447}{ORCID}) [copyright holder]
 
 }
 \keyword{internal}

@@ -110,7 +110,7 @@
 #'   available with `attributes()`.
 #'
 #' @examples
-#' ## read example data
+#' ## read example data and clean for outliers
 #' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
@@ -123,17 +123,19 @@
 #'         width = 10,
 #'         verbose = FALSE
 #'     )
+#' 
+#' data
 #'
 #' data_filtered <- filter_mnirs(
-#'     data,
+#'     data,                   ## blank channels will be retrieved from metadata
 #'     method = "butterworth", ## Butterworth digital filter is a common choice
-#'     order = 2,              ## order is the number of filter passes
-#'     W = 0.02,               ## fractional critical frequency
-#'     type = "low",           ## specify a low-pass filter
-#'     na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
-#'     verbose = FALSE
+#'     order = 2,              ## filter order number
+#'     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
+#'     type = "low",           ## specify a "low-pass" filter
+#'     na.rm = TRUE            ## explicitly preserve NAs
 #' )
 #' 
+#' ## note the smoothed `smo2` values
 #' data_filtered
 #'
 #' \donttest{
@@ -418,19 +420,25 @@ filter_mnirs.moving_average <- function(
 #'
 #' @returns A numeric vector the same length as `x`.
 #'
-#' @seealso [zoo::rollmean()]
-#'
 #' @examples
-#' ## basic moving average with sample width
 #' x <- c(1, 3, 2, 5, 4, 6, 5, 7)
+#' t <- c(0, 1, 2, 4, 5, 6, 7, 10)  ## irregular time with gaps
+#'
+#' ## width: centred window of 3 samples
 #' filter_moving_average(x, width = 3)
 #'
-#' ## with explicit time vector
-#' t <- c(0, 1, 2, 3, 4, 5, 6, 7)
-#' filter_moving_average(x, t, width = 2)
+#' ## partial = TRUE fills edge values with a narrower window
+#' filter_moving_average(x, width = 3, partial = TRUE)
 #'
-#' ## using timespan instead of sample width
-#' filter_moving_average(x, span = 2)
+#' ## span: centred window of 2 time-units (accounts for irregular sampling)
+#' filter_moving_average(x, t, span = 2)
+#'
+#' ## na.rm = FALSE (default): any NA in the window propagates to the result
+#' x_na <- c(1, NA, 3, 4, 5, NA, 7, 8)
+#' filter_moving_average(x_na, width = 3)
+#' 
+#' ## na.rm = TRUE: skip NAs within the window and return the mean of valid values
+#' filter_moving_average(x_na, width = 3, partial = TRUE, na.rm = TRUE)
 #'
 #' @export
 filter_moving_average <- function(
@@ -539,13 +547,13 @@ filter_moving_average <- function(
 #' sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 #' noise <- rnorm(150, mean = 0, sd = 6)
 #' noisy_sin <- sin + noise
-#' filt_without_edge <- filter_butter(
+#' without_edge_detection <- filter_butter(
 #'     x = noisy_sin,
 #'     order = 2,
 #'     W = 0.1,
 #'     edges = "none"
 #' )
-#' filt_with_edge <- filter_butter(
+#' with_edge_detection <- filter_butter(
 #'     x = noisy_sin,
 #'     order = 2,
 #'     W = 0.1,
@@ -559,10 +567,10 @@ filter_moving_average <- function(
 #'             scale_colour_mnirs(name = NULL) +
 #'             ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
 #'             ggplot2::geom_line(
-#'                 ggplot2::aes(y = filt_without_edge, colour = "filt_without_edge")
+#'                 ggplot2::aes(y = without_edge_detection, colour = "without_edge_detection")
 #'             ) +
 #'             ggplot2::geom_line(
-#'                 ggplot2::aes(y = filt_with_edge, colour = "filt_with_edge")
+#'                 ggplot2::aes(y = with_edge_detection, colour = "with_edge_detection")
 #'             )
 #'     }
 #' }

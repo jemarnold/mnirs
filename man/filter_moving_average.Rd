@@ -62,18 +62,23 @@ If there are no valid values within the calculation window, will return \code{NA
 A partial moving average will be calculated at the edges of the data.
 }
 \examples{
-## basic moving average with sample width
 x <- c(1, 3, 2, 5, 4, 6, 5, 7)
+t <- c(0, 1, 2, 4, 5, 6, 7, 10)  ## irregular time with gaps
+
+## width: centred window of 3 samples
 filter_moving_average(x, width = 3)
 
-## with explicit time vector
-t <- c(0, 1, 2, 3, 4, 5, 6, 7)
-filter_moving_average(x, t, width = 2)
+## partial = TRUE fills edge values with a narrower window
+filter_moving_average(x, width = 3, partial = TRUE)
 
-## using timespan instead of sample width
-filter_moving_average(x, span = 2)
+## span: centred window of 2 time-units (accounts for irregular sampling)
+filter_moving_average(x, t, span = 2)
 
-}
-\seealso{
-\code{\link[zoo:rollmean]{zoo::rollmean()}}
+## na.rm = FALSE (default): any NA in the window propagates to the result
+x_na <- c(1, NA, 3, 4, 5, NA, 7, 8)
+filter_moving_average(x_na, width = 3)
+
+## na.rm = TRUE: skip NAs within the window and return the mean of valid values
+filter_moving_average(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+
 }

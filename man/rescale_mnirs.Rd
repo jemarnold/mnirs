@@ -68,15 +68,14 @@ together, and should be defined explicitly for other grouping arrangements.
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>
-    rescale_mnirs(
-        nirs_channels = list(c(smo2_right, smo2_left)),
-        range = c(0, 10), ## rescale to a 0-10 arbitrary units
-        verbose = FALSE
+    rescale_mnirs(        ## un-grouped nirs channels to rescale separately 
+        nirs_channels = list(smo2_left, smo2_right), 
+        range = c(0, 100) ## rescale to a 0-100\% functional exercise range
     )
 
 data

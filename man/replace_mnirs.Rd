@@ -215,9 +215,9 @@ equivalent to \code{replace_missing(x, width = 1)}).
 \examples{
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
-replace_invalid(x, invalid_values = 999, width = 2, method = "median")
+replace_invalid(x, invalid_values = 999, width = 3, method = "median")
 
-(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
+(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 3, method = "none"))
 
 replace_missing(x_na, method = "linear")
 
@@ -231,22 +231,18 @@ data <- read_mnirs(
 
 ## clean data
 data_clean <- replace_mnirs(
-    data,
-    nirs_channels = NULL, ## nirs_channels will be retrieved from metadata
-    time_channel = NULL,  ## retrieved from metadata
-    invalid_values = 0,   ## known invalid values in the data
-    invalid_above = 90,   ## remove data spikes
-    outlier_cutoff = 3,   ## recommended default value
-    width = 10,           ## window to detect local outliers
-    method = "linear",    ## linear interpolation over `NA`s
-    verbose = FALSE
+    data,               ## blank channels will be retrieved from metadata
+    invalid_values = 0, ## known invalid values in the data
+    invalid_above = 90, ## remove data spikes above 90
+    outlier_cutoff = 3, ## recommended default value
+    width = 10,         ## window to detect and replace outliers/missing values
+    method = "linear"   ## linear interpolation over `NA`s
 )
-
-data_clean
 
 \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {
         ## plot original and show where values have been replaced
+        ## ignore warning about replacing the existing colour scale
         plot(data, time_labels = TRUE) +
             ggplot2::scale_colour_manual(
                 name = NULL,
