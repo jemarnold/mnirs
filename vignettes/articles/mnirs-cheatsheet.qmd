@@ -1,0 +1,242 @@
+---
+title: ""
+format:
+  typst:
+    papersize: a4
+    margin:
+      x: 0.5cm
+      y: 0.5cm
+    columns: 3
+    keep-typ: false
+    template-partials:
+      - typst-template.typ
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=typst}
+#set text(font: "Arial", size: 8pt)
+#set par(leading: 0.5em)
+#show heading.where(level: 2): set text(size: 10pt, weight: "bold")
+#show raw: set text(font: "Courier New", size: 7.5pt)
+
+// Full-width header — spans all columns
+#place(
+  top + left,
+  float: true,
+  scope: "parent",
+  clearance: 0.5cm,
+  block(
+    width: 100%,
+    fill: rgb("#0080ff"),
+    radius: 4pt,
+    inset: 8pt,
+    [
+      #grid(
+        columns: (1fr, auto),
+        gutter: 8pt,
+        [
+          #text(size: 20pt, weight: "bold", fill: white)[mnirs]
+          #h(0.6em)
+          #text(size: 10pt, fill: white.transparentize(30%))[v0.4.2.2]
+          #linebreak()
+          #text(size: 9pt, weight: "bold", fill: white)[
+            Muscle Near-Infrared Spectroscopy Processing and Analysis
+          ]
+          #linebreak()
+          #v(0.2em)
+          #text(size: 8pt, fill: white.transparentize(20%))[
+            Read, process, and analyse data from muscle near-infrared spectroscopy (mNIRS) devices. Import raw data from .csv or .xls(x) files and return a time-series data frame with metadata. Includes standardised methods for cleaning, filtering, and pre-processing mNIRS data for subsequent custom analysis, with a custom plot theme and colour palette.
+          ]
+        ],
+        [
+          #image("mnirs-hex.svg", height: 1.6cm)
+        ]
+      )
+    ]
+  )
+)
+
+// Workflow pipeline — spans all columns
+#place(
+  top + left,
+  float: true,
+  scope: "parent",
+  clearance: 0.3cm,
+  block(
+    width: 100%,
+    stroke: rgb("#cccccc"),
+    radius: 4pt,
+    inset: (x: 10pt, y: 6pt),
+    [
+      #text(size: 8.5pt, weight: "bold")[Workflow] #h(0.8em)
+      #text(font: "Courier New", size: 8pt)[
+        read_mnirs() #sym.arrow.r resample_mnirs() #sym.arrow.r replace_mnirs() #sym.arrow.r filter_mnirs() #sym.arrow.r shift_mnirs() / rescale_mnirs() #sym.arrow.r extract_intervals() #sym.arrow.r plot()
+      ]
+    ]
+  )
+)
+```
+
+## Read
+
+**`read_mnirs()`** — Import mnirs data from .csv or .xls(x)
+
+**`example_mnirs()`** — Paths to a included example file
+
+```r
+read_mnirs()
+
+example_mnirs()
+```
+
+---
+
+## Resample
+
+**`resample_mnirs()`** — Resample to a regular time grid
+
+```r
+resample_mnirs()
+```
+
+---
+
+## Clean
+
+**`replace_mnirs()`** — Replace outliers, invalid values, and missing data
+
+```r
+replace_mnirs()
+```
+
+#### Vector-level functions
+
+**`replace_outliers()`** — Replace local outliers
+
+**`replace_invalid()`** — Replace specified invalid values
+
+**`replace_missing()`** — Interpolate over `NA` values
+
+```r
+replace_outliers()
+replace_invalid()
+replace_missing()
+```
+
+---
+
+```{=typst}
+#colbreak()
+```
+
+## Filter
+
+**`filter_mnirs()`** — Apply digital filter/smoothing to mNIRS channels
+
+```r
+filter_mnirs()
+```
+
+#### Vector-level functions
+
+**`filter_butter()`** — Apply a Butterworth digital filter
+
+**`filter_ma()`** — Apply centred moving average smoothing
+
+```r
+filter_butter()
+filter_ma()
+```
+
+---
+
+## Transform
+
+**`shift_mnirs()`** — Shift channels to a reference value
+
+```r
+shift_mnirs()
+```
+
+**`rescale_mnirs()`** — Rescale channels data range
+
+```r
+rescale_mnirs()
+```
+
+**`extract_intervals()`** — Extract interval data frames around events
+
+```r
+extract_intervals()
+```
+
+---
+
+```{=typst}
+#colbreak()
+```
+
+## Plot
+
+**`plot()`** — Plot a data frame of class `"mnirs"`
+
+```r
+plot()
+```
+
+**`theme_mnirs()`** — ggplot2 theme for mnirs plots
+
+```r
+theme_mnirs()
+```
+
+**`palette_mnirs()`** — Access the mnirs colour palette
+
+```r
+palette_mnirs()
+```
+
+**`scale_colour_mnirs()`** — Colour scale with mnirs palette 
+
+**`scale_fill_mnirs()`** — Fill scale with mnirs palette
+    
+
+```r
+scale_colour_mnirs()
+scale_fill_mnirs()
+```
+
+**`format_hmmss()`** — Plot axis in time units
+
+**`breaks_timespan()`** — Plot axis with time breaks
+
+```r
+scale_x_continuous(
+    breaks = breaks_timespan(),
+    labels = format_hmmss
+)
+```
+
+```{=typst}
+// Footer
+#place(
+  bottom + left,
+  scope: "parent",
+  float: true,
+  block(
+    width: 100%,
+    [
+      #line(length: 100%, stroke: 0.5pt + rgb("#cccccc"))
+      #v(0.2em)
+      #text(size: 7pt, fill: rgb("#888888"))[
+        {mnirs} website: #link("https://jemarnold.github.io/mnirs/")[jemarnold.github.io/mnirs]
+        #h(1fr)
+        {mnirs} github: #link("https://github.com/jemarnold/mnirs")[github.com/jemarnold/mnirs]
+      ]
+    ]
+  )
+)
+```
