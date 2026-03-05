@@ -38,7 +38,7 @@
 #' ## kinetics analysis method
 #'
 #' #### `method = "half_time"`
-#' 
+#'
 #' `<under development>`
 #'
 #' #### `method = "peak_slope"`
@@ -65,11 +65,11 @@
 #' }
 #'
 #' #### `method = "monoexponential"`
-#' 
+#'
 #' `<under development>`
 #'
 #' #### `method = "sigmoidal"`
-#' 
+#'
 #' `<under development>`
 #'
 #' ## channel_args per nirs_channel
@@ -105,7 +105,8 @@
 #'       per interval, sourced from `event_times` supplied from
 #'       `extract_intervals`, if present in the metadata.}
 #'   \item{`diagnostics`}{A data frame of model diagnostics (`n_obs`, `r2`,
-#'       `adj_r2`, `rmse`) with one row per `nirs_channel` and interval.}
+#'       `adj_r2`, `pseudo_r2`, `rmse`, `snr`, `cv_rmse`) with one row per
+#'       `nirs_channel` and interval.}
 #'   \item{`channel_args`}{A data frame of the resolved arguments used for
 #'       each `nirs_channel` with one row per `nirs_channel` and interval.}
 #'   \item{`call`}{The matched call.}
@@ -138,13 +139,13 @@
 #'         direction = "auto", ## auto-detect slope direction
 #'         verbose = FALSE
 #'     )
-#' 
+#'
 #' ## formatted table of results
 #' result
-#' 
+#'
 #' ## results are accessible from the results list
 #' result$results
-#' 
+#'
 #' ## along with diagnostics and other results
 #' result$diagnostics
 #'
@@ -168,7 +169,7 @@ analyse_kinetics <- function(
         data,
         class = c(method, "mnirs_kinetics")
     )
-    
+
     UseMethod("analyse_kinetics", data)
 }
 
@@ -221,7 +222,7 @@ analyse_kinetics.peak_slope <- function(
 
         ## convert each row's diagnostics into a 1-row data frame
         result$diagnostics <- Map(\(.nirs, .diag) {
-            data.frame(interval = id, nirs_channels = .nirs, .diag)
+            cbind(data.frame(interval = id, nirs_channels = .nirs), .diag)
         }, result$nirs_channels, result$diagnostics)
 
         ## append `*_fitted` cols to data for `nirs_channels` at `window_idx`
@@ -259,8 +260,7 @@ analyse_kinetics.peak_slope <- function(
         rbind,
         c(results$channel_args, make.row.names = FALSE)
     )
-    
-    
+
     ## extract diagnostics into single data frame
     diagnostics_df <- do.call(
         rbind,
@@ -288,11 +288,11 @@ analyse_kinetics.peak_slope <- function(
     ## return
     structure(
         list(
-            method = method,   ## method = "peak_slope"
+            method = method, ## method = "peak_slope"
             results = results, ## tibble of scalar results
-            data = data_list,  ## df of data frames
-            event_times = event_times_df,   ## df of `event_times` `t` values
-            diagnostics = diagnostics_df,   ## df of model diagnostics
+            data = data_list, ## df of data frames
+            event_times = event_times_df, ## df of `event_times` `t` values
+            diagnostics = diagnostics_df, ## df of model diagnostics
             channel_args = channel_args_df, ## df of channel args provided to `analyse_slope`
             call = match.call()
         ),
@@ -314,7 +314,7 @@ as_data_list <- function(data) {
         }
 
         ## refactor grouping variables to order of appearance
-        ## TODO should I convert this to Base R if dplyr is required 
+        ## TODO should I convert this to Base R if dplyr is required
         ## TODO for grouping anyway?
         group_vars <- dplyr::group_vars(data)
         df_grp <- data |>
@@ -372,23 +372,38 @@ as_data_list <- function(data) {
 #' Compute model diagnostics
 #'
 #' @param fitted A numeric vector of the predicted values.
+#' @param n_params Integer; number of estimated parameters in the model,
+#'   excluding the intercept (default `1L`). Used to compute `adj_r2`.
+#'   For non-linear models (`"monoexponential"`, `"sigmoidal"`), pass the
+#'   number of free parameters fit by the solver.
 #' @inheritParams peak_slope
 #'
-#' @returns A named list with `n_obs`, `r2`, `adj_r2`, and `rmse`.
+#' @returns A 1-row `data.frame` with columns `n_obs`, `r2`, `adj_r2`,
+#'   `pseudo_r2`, `rmse`, `snr`, and `cv_rmse`.
+#'
+#'   - `adj_r2`: adjusted $R^2$ penalised by `n_params`. Appropriate for
+#'     OLS linear models; interpret with caution for non-linear fits.
+#'   - `pseudo_r2`: squared Pearson correlation between observed and fitted
+#'     values, $\rho^2 = \left[\text{cor}(x, \hat{x})\right]^2$. Equivalent
+#'     to $R^2$ for OLS but well-defined for non-linear and multivariate
+#'     models. Preferred for `"monoexponential"` and `"sigmoidal"` methods.
 #'
 #' @keywords internal
-compute_diagnostics <- function(x, t, fitted, verbose = TRUE) {
+compute_diagnostics <- function(x, t, fitted, n_params = 1L, verbose = TRUE) {
     complete_cases <- which(is.finite(x) & is.finite(t))
     x <- x[complete_cases]
     t <- t[complete_cases]
     fitted <- fitted[is.finite(fitted)]
     n_obs <- length(fitted)
-    
-    return_na <- list(
-        n_obs = n_obs,
-        r2 = NA_real_,
-        adj_r2 = NA_real_,
-        rmse = NA_real_
+
+    return_na <- data.frame(
+        n_obs     = n_obs,
+        r2        = NA_real_,
+        adj_r2    = NA_real_,
+        pseudo_r2 = NA_real_,
+        rmse      = NA_real_,
+        snr       = NA_real_,
+        cv_rmse   = NA_real_
     )
 
     if (length(x) != length(t) || length(x) != n_obs) {
@@ -406,23 +421,52 @@ compute_diagnostics <- function(x, t, fitted, verbose = TRUE) {
         return(return_na)
     }
 
+    ## residuals
     resid <- x - fitted
     ss_res <- sum(resid^2)
     ss_tot <- sum((x - mean(x))^2)
 
+    ## R²
     r2 <- if (ss_tot == 0) NA_real_ else 1 - ss_res / ss_tot
-    adj_r2 <- if (is.na(r2) || n_obs <= 2L) {
+
+    ## adjusted R²: penalised by n_params; valid for OLS linear models
+    adj_r2 <- if (is.na(r2) || n_obs <= (n_params + 1L)) {
         NA_real_
     } else {
-        1 - (1 - r2) * (n_obs - 1) / (n_obs - 2) ## TODO check for multivariate models
+        1 - (1 - r2) * (n_obs - 1L) / (n_obs - n_params - 1L)
     }
 
+    ## pseudo-R²: cor(observed, fitted)² — valid for linear and non-linear
+    ## models; equals R² for OLS, preferred for monoexponential/sigmoidal
+    pseudo_r2 <- if (stats::sd(x) == 0 || stats::sd(fitted) == 0) {
+        NA_real_
+    } else {
+        stats::cor(x, fitted)^2
+    }
+
+    ## RMSE
     rmse <- sqrt(mean(resid^2))
 
-    list(
-        n_obs = n_obs,
-        r2 = r2,
-        adj_r2 = adj_r2,
-        rmse = rmse
+    ## SNR: signal variance to residual variance, in dB
+    var_signal <- ss_tot / (n_obs - 1L)
+    var_resid  <- ss_res / (n_obs - 1L)
+    snr <- if (is.na(var_signal) || var_resid == 0) {
+        NA_real_
+    } else {
+        10 * log10(var_signal / var_resid)
+    }
+
+    ## CV-RMSE: RMSE normalised by the absolute mean of observed values
+    x_mean <- mean(x)
+    cv_rmse <- if (x_mean == 0) NA_real_ else rmse / abs(x_mean)
+
+    data.frame(
+        n_obs     = n_obs,
+        r2        = r2,
+        adj_r2    = adj_r2,
+        pseudo_r2 = pseudo_r2,
+        rmse      = rmse,
+        snr       = snr,
+        cv_rmse   = cv_rmse
     )
 }

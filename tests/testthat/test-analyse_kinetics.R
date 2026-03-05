@@ -6,12 +6,15 @@ test_that("compute_diagnostics returns correct structure", {
 
     result <- compute_diagnostics(x, t, fitted)
 
-    expect_type(result, "list")
-    expect_named(result, c("n_obs", "r2", "adj_r2", "rmse"))
+    expect_s3_class(result, "data.frame")
+    expect_named(result, c("n_obs", "r2", "adj_r2", "pseudo_r2", "rmse", "snr", "cv_rmse"))
     expect_type(result$n_obs, "integer")
     expect_type(result$r2, "double")
     expect_type(result$adj_r2, "double")
+    expect_type(result$pseudo_r2, "double")
     expect_type(result$rmse, "double")
+    expect_type(result$snr, "double")
+    expect_type(result$cv_rmse, "double")
 })
 
 test_that("compute_diagnostics matches lm() summary", {
@@ -27,6 +30,56 @@ test_that("compute_diagnostics matches lm() summary", {
     expect_equal(result$r2, lm_summary$r.squared)
     expect_equal(result$adj_r2, lm_summary$adj.r.squared)
     expect_equal(result$rmse, sqrt(mean(residuals(lm_fit)^2)))
+    ## pseudo_r2 = cor(observed, fitted)^2; equals R^2 for OLS
+    expect_equal(result$pseudo_r2, lm_summary$r.squared, tolerance = 1e-10)
+})
+
+test_that("compute_diagnostics n_params adjusts adj_r2 denominator", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    t <- seq_along(x)
+    fitted <- predict(lm(x ~ t))
+    n <- length(x)
+
+    r2 <- compute_diagnostics(x, t, fitted, n_params = 1L)$r2
+    adj_r2_p1 <- compute_diagnostics(x, t, fitted, n_params = 1L)$adj_r2
+    adj_r2_p3 <- compute_diagnostics(x, t, fitted, n_params = 3L)$adj_r2
+
+    expect_equal(adj_r2_p1, 1 - (1 - r2) * (n - 1) / (n - 2))
+    expect_equal(adj_r2_p3, 1 - (1 - r2) * (n - 1) / (n - 4))
+    ## more params → more penalisation
+    expect_lt(adj_r2_p3, adj_r2_p1)
+})
+
+test_that("compute_diagnostics adj_r2 is NA when n <= n_params + 1", {
+    x <- c(1, 2, 3)
+    t <- seq_along(x)
+    fitted <- predict(lm(x ~ t))
+
+    ## n = 3, n_params = 2: denominator = 0 → NA
+    result <- compute_diagnostics(x, t, fitted, n_params = 2L)
+    expect_true(is.na(result$adj_r2))
+})
+
+test_that("compute_diagnostics pseudo_r2 is valid for a non-linear fit", {
+    t <- seq(0, 4 * pi, length.out = 50)
+    ## simulate exponential decay with noise
+    x <- 20 * exp(-0.3 * t) + rnorm(50, sd = 0.5)
+    fitted <- 20 * exp(-0.3 * t)   ## true curve, no noise
+
+    result <- compute_diagnostics(x, t, fitted)
+
+    expect_true(result$pseudo_r2 > 0 && result$pseudo_r2 <= 1)
+    expect_equal(result$pseudo_r2, cor(x, fitted)^2, tolerance = 1e-10)
+})
+
+test_that("compsute_diagnostics pseudo_r2 equals r2 for OLS linear fit", {
+    x <- c(2, 4, 5, 4, 5, 7, 8, 9, 10, 10)
+    t <- seq_along(x)
+    fitted <- predict(lm(x ~ t))
+
+    result <- compute_diagnostics(x, t, fitted)
+
+    expect_equal(result$pseudo_r2, result$r2, tolerance = 1e-10)
 })
 
 test_that("compute_diagnostics handles perfect fit", {
@@ -38,7 +91,10 @@ test_that("compute_diagnostics handles perfect fit", {
 
     expect_equal(result$r2, 1)
     expect_equal(result$adj_r2, 1)
+    expect_equal(result$pseudo_r2, 1)
     expect_equal(result$rmse, 0)
+    expect_true(is.na(result$snr))    ## zero residual variance → NA
+    expect_equal(result$cv_rmse, 0)   ## rmse = 0, x_mean != 0
 })
 
 test_that("compute_diagnostics handles edge cases", {
@@ -47,17 +103,21 @@ test_that("compute_diagnostics handles edge cases", {
     expect_equal(result$n_obs, 1L)
     expect_true(is.na(result$r2))
     expect_true(is.na(result$adj_r2))
+    expect_true(is.na(result$pseudo_r2))
     expect_true(is.na(result$rmse))
+    expect_true(is.na(result$snr))
+    expect_true(is.na(result$cv_rmse))
 
-    ## n = 2 returns NA for adj_r2 only
+    ## n = 2: adj_r2 NA (denominator = 0), pseudo_r2 defined
     result <- compute_diagnostics(c(1, 2), c(1, 2), c(1, 2))
     expect_equal(result$n_obs, 2L)
     expect_equal(result$r2, 1)
     expect_true(is.na(result$adj_r2))
+    expect_equal(result$pseudo_r2, 1)
     expect_equal(result$rmse, 0)
 })
 
-test_that("compute_diagnostics handles zero variance in y", {
+test_that("compute_diagnostics handles zero variance in x", {
     x <- rep(5, 10)
     t <- seq_along(x)
     fitted <- rep(5, 10)
@@ -66,6 +126,9 @@ test_that("compute_diagnostics handles zero variance in y", {
 
     expect_true(is.na(result$r2))
     expect_equal(result$rmse, 0)
+    expect_true(is.na(result$snr))    ## zero signal variance → NA
+    expect_true(is.na(result$pseudo_r2)) ## sd(fitted) = 0 → NA
+    expect_equal(result$cv_rmse, 0)   ## rmse = 0, x_mean = 5
 })
 
 test_that("computes_diagnostics validates input lengths", {
@@ -78,6 +141,37 @@ test_that("computes_diagnostics validates input lengths", {
         "x.*t.*fitted.*equal lengths"
     )
     expect_true(is.na(result$r2))
+})
+
+test_that("compute_diagnostics snr is positive for a good fit", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    t <- seq_along(x)
+    fitted <- predict(lm(x ~ t))
+
+    result <- compute_diagnostics(x, t, fitted)
+
+    expect_true(result$snr > 0)
+    ## SNR = 10 * log10(var(signal) / var(residuals))
+    expect_equal(
+        result$snr,
+        10 * log10(var(x) / var(x - fitted)),
+        tolerance = 1e-10
+    )
+})
+
+test_that("compute_diagnostics cv_rmse scales with signal magnitude", {
+    t <- seq_len(10)
+
+    x1 <- c(10, 11, 10, 12, 11, 10, 13, 11, 10, 12) ## mean ~ 11
+    x2 <- x1 * 10                                     ## mean ~ 110
+    fitted1 <- predict(lm(x1 ~ t))
+    fitted2 <- predict(lm(x2 ~ t))
+
+    r1 <- compute_diagnostics(x1, t, fitted1)
+    r2 <- compute_diagnostics(x2, t, fitted2)
+
+    ## CV-RMSE should be equal (RMSE and mean scale proportionally)
+    expect_equal(r1$cv_rmse, r2$cv_rmse, tolerance = 1e-10)
 })
 
 
@@ -537,7 +631,11 @@ test_that("analyse_kinetics.peak_slope diagnostics are populated", {
     diag <- result$diagnostics
     expect_true("n_obs" %in% names(diag))
     expect_true("r2" %in% names(diag))
+    expect_true("adj_r2" %in% names(diag))
+    expect_true("pseudo_r2" %in% names(diag))
     expect_true("rmse" %in% names(diag))
+    expect_true("snr" %in% names(diag))
+    expect_true("cv_rmse" %in% names(diag))
     expect_equal(nrow(diag), 1L)
     expect_equal(diag$nirs_channels, "smo2_left")
 })
