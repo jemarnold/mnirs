@@ -25,27 +25,22 @@ A \link[ggplot2:ggplot]{ggplot2} scale object.
 Scales for custom \emph{{mnirs}} palette
 }
 \examples{
-\donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE) &&
-        requireNamespace("scales", quietly = TRUE)) {
+\dontshow{if (rlang::is_installed(c("ggplot2", "scales"))) withAutoprint(\{ # examplesIf}
+## plot example data
+df <- read_mnirs(
+    file_path = example_mnirs("moxy_ramp"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
+)
 
-        ## plot example data
-        df <- read_mnirs(
-            file_path = example_mnirs("moxy_ramp"),
-            nirs_channels = c(smo2_left = "SmO2 Live",
-                              smo2_right = "SmO2 Live(2)"),
-            time_channel = c(time = "hh:mm:ss"),
-            verbose = FALSE
-        )
-
-        ggplot2::ggplot(df, ggplot2::aes(x = time)) +
-            theme_mnirs() +
-            scale_colour_mnirs(name = NULL) +
-            ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +
-            ggplot2::geom_line(ggplot2::aes(y = smo2_right, colour = "smo2_right"))
-    }
-}
-
+ggplot2::ggplot(df, ggplot2::aes(x = time)) +
+    theme_mnirs() +
+    scale_colour_mnirs(name = NULL) +
+    ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +
+    ggplot2::geom_line(ggplot2::aes(y = smo2_right, colour = "smo2_right"))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=theme_mnirs]{theme_mnirs()}}, \code{\link[=palette_mnirs]{palette_mnirs()}}

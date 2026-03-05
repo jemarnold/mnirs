@@ -99,21 +99,18 @@ with_edge_detection <- filter_butter(
     edges = "rep1"
 )
 
-\donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
-            theme_mnirs() +
-            scale_colour_mnirs(name = NULL) +
-            ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
-            ggplot2::geom_line(
-                ggplot2::aes(y = without_edge_detection, colour = "without_edge_detection")
-            ) +
-            ggplot2::geom_line(
-                ggplot2::aes(y = with_edge_detection, colour = "with_edge_detection")
-            )
-    }
-}
-
+\dontshow{if (rlang::is_installed("ggplot2")) withAutoprint(\{ # examplesIf}
+ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
+    theme_mnirs() +
+    scale_colour_mnirs(name = NULL) +
+    ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
+    ggplot2::geom_line(
+        ggplot2::aes(y = without_edge_detection, colour = "without_edge_detection")
+    ) +
+    ggplot2::geom_line(
+        ggplot2::aes(y = with_edge_detection, colour = "with_edge_detection")
+    )
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[signal:filtfilt]{signal::filtfilt()}}, \code{\link[signal:butter]{signal::butter()}}

@@ -44,14 +44,12 @@ In this vignette we will demonstrate how to:
 
 * 🔀 Demonstrate a complete data wrangling process using pipe-friendly functions.
 
-* 📉 Detect and extract intervals for further analysis.
-
-* 🧮 Analyse signal descriptive data and kinetics. `<under development>`
+* 🧮 Detect and extract intervals for further analysis.
 
 
 *`mnirs`* is currently [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental). Functionality may change! Stay updated on development and follow releases at [github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
 
-*{mnirs}* is designed to process NIRS data, but it can be used to read, clean, and process other time series data which require many of the same processing steps. Enjoy!
+*`mnirs`* is designed to process NIRS data, but it can be used to read, clean, and process other time series data which require many of the same processing steps. Enjoy!
 
 
 # 📂 Read data from file
@@ -475,7 +473,7 @@ For this data set, we want to shift each NIRS channel so that the mean of the 2-
 ::: {.callout-note}
 ## `{tidyverse}`-style channel name specification
 
-This is a good time to note that here and in most `*mnirs*` functions, data channels can be specified using `{tidyverse}`-style naming; Data frame column names can be specified either with quotes as a character string (`"smo2"`), or as a direct symbol (`smo2`).
+This is a good time to note that here and in most *`mnirs`* functions, data channels can be specified using `{tidyverse}`-style naming; Data frame column names can be specified either with quotes as a character string (`"smo2"`), or as a direct symbol (`smo2`).
 
 `{tidyselect}` support functions such as `starts_with()`, `matches()` can also be used.
 :::
@@ -590,7 +588,7 @@ plot(nirs_data, time_labels = TRUE)
 
 We have two exercise intervals in this data set. Let's demonstrate some of the common analysis methods currently available with *`mnirs`*.
 
-# 📉 Interval extraction
+# 🧮 Interval extraction
 
 After the NIRS signal has been cleaned and filtered, it should be ready for further processing and analysis. 
 
@@ -676,6 +674,8 @@ The ensemble-averaged kinetics capture a more representative 'average' response 
 Ensemble-averaging can help mitigate data dropouts and other quality issues from measurement error or biological variability. For example, ensemble-averaging is common for evaluating systemic VO<sub>2</sub> kinetics, where responses can be highly variable trial to trial.
 
 
-# 🧮 Signal analysis
+# Conclusion
 
-`<under development>`
+This vignette walks through the core functionality of *`mnirs`* to read, clean, and pre-process data in preparation for analysis.
+
+Future development and articles will cover standardised analysis methods, including deoxygenation & reoxygenation kinetics and critical oxygenation breakpoint analysis.

@@ -29,6 +29,7 @@ A \link[ggplot2:ggplot]{ggplot2} object.
 Create a simple plot for objects returned from \code{\link[=create_mnirs_data]{create_mnirs_data()}}.
 }
 \examples{
+\dontshow{if (rlang::is_installed(c("ggplot2", "scales"))) withAutoprint(\{ # examplesIf}
 data_table <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_left = "SmO2 Live",
@@ -37,11 +38,7 @@ data_table <- read_mnirs(
     verbose = FALSE
 )
 
-\donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ## note the options to display time values as `h:mm:ss` with 8 breaks
-        plot(data_table, time_labels = TRUE, n.breaks = 8)
-    }
-}
-
+## note the options to display time values as `h:mm:ss` with 8 breaks
+plot(data_table, time_labels = TRUE, n.breaks = 8)
+\dontshow{\}) # examplesIf}
 }

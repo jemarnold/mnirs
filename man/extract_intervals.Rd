@@ -194,7 +194,7 @@ interval_list <- extract_intervals(
     event_times = c(368, 1093), ## manually identified interval start timesfs
     event_groups = "ensemble",  ## ensemble-average across two intervals
     span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
-    zero_time = TRUE           ## re-calculate common time to start from `0`
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
 interval_list[[1L]]

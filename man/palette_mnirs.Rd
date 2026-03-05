@@ -18,14 +18,11 @@ Named or unnamed character vector of hex colours.
 Custom \emph{{mnirs}} colour palette
 }
 \examples{
-\donttest{
-    if (requireNamespace("scales", quietly = TRUE)) {
-        scales::show_col(palette_mnirs())
-        scales::show_col(palette_mnirs(n = 2))
-        scales::show_col(palette_mnirs(names = c("red", "orange")))
-    }
-}
-
+\dontshow{if (rlang::is_installed("scales")) withAutoprint(\{ # examplesIf}
+scales::show_col(palette_mnirs())
+scales::show_col(palette_mnirs(n = 2))
+scales::show_col(palette_mnirs(names = c("red", "orange")))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=theme_mnirs]{theme_mnirs()}}, \code{\link[=scale_colour_mnirs]{scale_colour_mnirs()}}

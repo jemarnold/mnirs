@@ -128,7 +128,14 @@ checks and validations.}
 \code{replace_mnirs()} returns a \link[tibble:tibble-package]{tibble} of class
 \emph{"mnirs"} with metadata available with \code{attributes()}.
 
-Vectorised \verb{replace_*()} return a numeric vector the same length as \code{x}.
+\code{replace_invalid()} return a numeric vector the same length as \code{x} with
+invalid values replaced.
+
+\code{replace_outliers()} return a numeric vector the same length as \code{x} with
+local outliers replaced.
+
+\code{replace_missing()} return a numeric vector the same length as \code{x} with
+missing values replaced.
 }
 \description{
 \code{replace_mnirs()} detects and removes local outliers and specified invalid

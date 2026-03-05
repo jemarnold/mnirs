@@ -231,7 +231,8 @@ replace_mnirs <- function(
 #'   values themselves.
 #'
 #' @returns
-#' Vectorised `replace_*()` return a numeric vector the same length as `x`.
+#' `replace_invalid()` return a numeric vector the same length as `x` with
+#' invalid values replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 2
@@ -337,6 +338,10 @@ replace_invalid <- function(
 #'   A low `outlier_cutoff` will declare more points to be outliers.
 #'   `outlier_cutoff = 3` corresponds to Pearson's 3 sigma edit rule.
 #'   `outlier_cutoff = 0` corresponds to Tukey's median filter.
+#' 
+#' @returns
+#' `replace_outliers()` return a numeric vector the same length as `x` with
+#' local outliers replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 3
@@ -417,6 +422,10 @@ replace_outliers <- function(
 #'   leading and trailing `NA`s). If there are no valid values within either
 #'   side of `span`, the first valid sample on either side will be used (i.e.
 #'   equivalent to `replace_missing(x, width = 1)`).
+#' 
+#' @returns
+#' `replace_missing()` return a numeric vector the same length as `x` with
+#' missing values replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 4

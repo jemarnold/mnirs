@@ -38,8 +38,12 @@
 #' data <- data.frame(t, x)
 #'
 #' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
+#' 
+#' model
 #'
 #' y <- predict(model, data)
+#' 
+#' y
 #'
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {
@@ -175,8 +179,12 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' data <- data.frame(t, x)
 #'
 #' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
+#' 
+#' model
 #'
 #' y <- predict(model, data)
+#' 
+#' y
 #'
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {

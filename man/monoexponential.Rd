@@ -50,7 +50,11 @@ data <- data.frame(t, x)
 
 model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
 
+model
+
 y <- predict(model, data)
+
+y
 
 \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {

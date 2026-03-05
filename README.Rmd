@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# mnirs <a href="jemarnold.github.io/mnirs/"><img src="man/figures/mnirs-hex.svg" align="right" height="139" alt="mnirs website" /></a>
+# mnirs <a href="https://jemarnold.github.io/mnirs/"><img src="man/figures/mnirs-hex.svg" align="right" height="139" alt="mnirs website" /></a>
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
