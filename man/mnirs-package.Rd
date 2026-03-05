@@ -6,7 +6,7 @@
 \alias{mnirs-package}
 \title{mnirs: Muscle Near-Infrared Spectroscopy Processing and Analysis}
 \description{
-Read, process, and analyse data from muscle near-infrared spectroscopy (mNIRS) devices. Import raw data from .csv or .xls(x) files and return a time-series data frame with metadata. Includes standardised methods for cleaning, filtering, and pre-processing mNIRS data for subsequent custom analysis, with a custom plot theme and colour palette. Intended for mNIRS researchers and practitioners in exercise physiology, sports science, and clinical rehabilitation.
+Read, process, and analyse data from muscle near-infrared spectroscopy (mNIRS) devices. Import raw data from .csv or .xls(x) files and return a time-series data frame with metadata. Includes standardised methods for cleaning, filtering, and pre-processing mNIRS data for subsequent analysis, with a custom plot theme and colour palette. Intended for mNIRS researchers and practitioners in exercise physiology, sports science, and clinical rehabilitation.
 }
 \seealso{
 Useful links:

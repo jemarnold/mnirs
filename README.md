@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# mnirs <a href="jemarnold.github.io/mnirs/"><img src="man/figures/mnirs-hex.svg" align="right" height="139" alt="mnirs website" /></a>
+# mnirs <a href="https://jemarnold.github.io/mnirs/"><img src="man/figures/mnirs-hex.svg" align="right" height="139" alt="mnirs website" /></a>
 
 <!-- badges: start -->
 
@@ -142,7 +142,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-03 00:29:00 PST"
+#> [1] "2026-03-04 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values

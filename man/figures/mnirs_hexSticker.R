@@ -12,23 +12,23 @@ hexSticker::sticker(
     ## imported image
     subplot = r"(C:\Users\Jem\Downloads\mnirs-transparent.png)",
     s_x = 1, # centred horizontally
-    s_y = 1, # slightly below centre to leave room for text
+    s_y = 0.95, # slightly below centre to leave room for text
     s_width = 1.0, # fill most of the hex width
     s_height = 0.7, # constrain height proportionally
 
     ## package name parameters
     package = "mnirs",
     p_x = 1,
-    p_y = 1.5,
-    p_size = 25,
+    p_y = 1.4,
+    p_size = 12,
     p_color = "#1a284f",
     p_family = "merriweather_sans",
     p_fontface = 2, # "plain", "bold", "italic", "bolditalic"
 
     ## hex geometry
-    h_fill = "#bcced7", # deep navy — contrasts orange muscle
-    h_color = "#fb653a",
-    # h_color = "#1a284f",
+    h_fill = "#bcced7",    ## light blue-grey background
+    # h_color = "#fb653a", ## orange of muscle icon
+    h_color = "#1a284f",   ## dark navy
     h_size = 1.5,
     white_around_sticker = FALSE,
 
