@@ -410,6 +410,7 @@ filter_mnirs.moving_average <- function(
 #' Apply a moving average filter
 #'
 #' Apply a simple moving average smoothing filter to vector data.
+#' `filter_moving_average()` is an alias of `filter_ma()`.
 #'
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
@@ -500,6 +501,32 @@ filter_ma <- function(
     ## NaN to NA
     y[!is.finite(y)] <- NA_real_
     return(y)
+}
+
+
+#' @rdname filter_ma
+#' @usage filter_moving_average()
+#' @export
+filter_moving_average <- function(
+    x,
+    t = seq_along(x),
+    width = NULL,
+    span = NULL,
+    partial = FALSE,
+    na.rm = FALSE,
+    verbose = TRUE,
+    ...
+) {
+    filter_ma(
+        x = x,
+        t = t,
+        width = width,
+        span = span,
+        partial = partial,
+        na.rm = na.rm,
+        verbose = verbose,
+        ...
+    )
 }
 
 

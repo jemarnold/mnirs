@@ -2,6 +2,7 @@
 % Please edit documentation in R/filter_mnirs.R
 \name{filter_ma}
 \alias{filter_ma}
+\alias{filter_moving_average}
 \title{Apply a moving average filter}
 \usage{
 filter_ma(
@@ -14,6 +15,8 @@ filter_ma(
   verbose = TRUE,
   ...
 )
+
+filter_moving_average()
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}
@@ -49,6 +52,7 @@ A numeric vector the same length as \code{x}.
 }
 \description{
 Apply a simple moving average smoothing filter to vector data.
+\code{filter_moving_average()} is an alias of \code{filter_ma()}.
 }
 \details{
 Applies a centred (symmetrical) moving average filter in a local window
