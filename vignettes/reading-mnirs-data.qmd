@@ -392,7 +392,7 @@ For filtering vector data and more details about Butterworth filter parameters, 
 
     Moving average filtering occurs within a rolling local window specified by one of either `width` or `span`. `width` defines a number of samples centred around the local index being evaluated (`idx`), whereas `span` defines a range of time in units of `time_channel`.
 
-For filtering vector data and more details about the moving average filter, see `filter_moving_average()`
+For filtering vector data and more details about the moving average filter, see `filter_ma()`
 
 
 ## Apply the filter

@@ -1,16 +1,16 @@
-## filter_moving_average() ===========================================
-test_that("filter_moving_average() returns expected smoothed values", {
+## filter_ma() ===========================================
+test_that("filter_ma() returns expected smoothed values", {
     x <- c(1, 2, 3, 4, 5)
 
     # Width-based centred window, partial = FALSE
-    result <- filter_moving_average(
+    result <- filter_ma(
         x,
         width = 3,
         verbose = FALSE,
         partial = FALSE
     )
     expect_equal(result, c(NA, 2, 3, 4, NA))
-    result <- filter_moving_average(
+    result <- filter_ma(
         x,
         width = 3,
         verbose = FALSE,
@@ -19,23 +19,23 @@ test_that("filter_moving_average() returns expected smoothed values", {
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 
     # Width-based with single width (floor(1/2) = 0, so just x itself)
-    result <- filter_moving_average(x, width = 1, verbose = FALSE)
+    result <- filter_ma(x, width = 1, verbose = FALSE)
     expect_equal(result, x)
 })
 
-test_that("filter_moving_average() handles custom time vectors", {
+test_that("filter_ma() handles custom time vectors", {
     x <- c(10, 20, 30, 40, 50, 60)
     t <- c(0, 1, 3, 6, 10, 11)
 
     # Span-based with time gaps
-    result <- filter_moving_average(x, t, span = 2, verbose = FALSE)
+    result <- filter_ma(x, t, span = 2, verbose = FALSE)
     expect_equal(result, c(15, 15, 30, 40, 55, 55))
 })
 
-test_that("filter_moving_average() handles NA values correctly", {
+test_that("filter_ma() handles NA values correctly", {
     x <- c(1, NA, 3, 4, 5)
 
-    result <- filter_moving_average(
+    result <- filter_ma(
         x,
         width = 3,
         partial = FALSE,
@@ -43,7 +43,7 @@ test_that("filter_moving_average() handles NA values correctly", {
     )
     expect_equal(result, c(rep(NA, 3), 4, NA))
 
-    result <- filter_moving_average(
+    result <- filter_ma(
         x,
         width = 3,
         partial = TRUE,
@@ -51,7 +51,7 @@ test_that("filter_moving_average() handles NA values correctly", {
     )
     expect_equal(result, c(1, 2, 3.5, 4, 4.5))
     
-    result <- filter_moving_average(
+    result <- filter_ma(
         x,
         width = 3,
         partial = FALSE, ## min 3 valid obs
@@ -59,7 +59,7 @@ test_that("filter_moving_average() handles NA values correctly", {
     )
     expect_equal(result, c(rep(NA, 3), 4, NA))
     
-    result <- filter_moving_average(
+    result <- filter_ma(
         x,
         width = 3,
         partial = TRUE,
@@ -68,20 +68,20 @@ test_that("filter_moving_average() handles NA values correctly", {
     expect_equal(result, c(rep(NA, 3), 4, 4.5))
 
     x <- c(1, NA, NA, NA, NA, 6, 7, 8)
-    result <- filter_moving_average(x, width = 3, partial = TRUE, na.rm = TRUE)
+    result <- filter_ma(x, width = 3, partial = TRUE, na.rm = TRUE)
     expect_equal(result, c(1, 1, NA, NA, 6, 6.5, 7, 7.5))
 })
 
-test_that("filter_moving_average() validates x as numeric", {
+test_that("filter_ma() validates x as numeric", {
     expect_error(
-        filter_moving_average(c("a", "b", "c"), width = 3, verbose = FALSE),
+        filter_ma(c("a", "b", "c"), width = 3, verbose = FALSE),
         "x.*numeric"
     )
 })
 
-test_that("filter_moving_average() validates t as numeric", {
+test_that("filter_ma() validates t as numeric", {
     expect_error(
-        filter_moving_average(
+        filter_ma(
             1:5,
             t = letters[1:5],
             width = 3,
@@ -91,58 +91,58 @@ test_that("filter_moving_average() validates t as numeric", {
     )
 })
 
-test_that("filter_moving_average() validates x and t have same length", {
+test_that("filter_ma() validates x and t have same length", {
     expect_error(
-        filter_moving_average(1:5, t = 1:3, width = 3, verbose = FALSE),
+        filter_ma(1:5, t = 1:3, width = 3, verbose = FALSE),
         "equal length"
     )
 })
 
-test_that("filter_moving_average() validates width & span constraints", {
+test_that("filter_ma() validates width & span constraints", {
     x <- 1:10
 
     ## width or span required
     expect_error(
-        filter_moving_average(x, verbose = FALSE),
+        filter_ma(x, verbose = FALSE),
         "width.*or.*span.*must be defined"
     )
 
     # Width must be positive integer
     expect_error(
-        filter_moving_average(x, width = -1, verbose = FALSE),
+        filter_ma(x, width = -1, verbose = FALSE),
         "width.*integer"
     )
 
     ## width = 0
     expect_error(
-        filter_moving_average(x, width = 0, verbose = FALSE),
+        filter_ma(x, width = 0, verbose = FALSE),
         "width.*integer"
     )
     ## width > length(x)
     expect_true(all(
-        filter_moving_average(x, width = 21, partial = TRUE) == mean(x)
+        filter_ma(x, width = 21, partial = TRUE) == mean(x)
     ))
 
     # Span must be positive
     expect_error(
-        filter_moving_average(x, span = -1, verbose = FALSE),
+        filter_ma(x, span = -1, verbose = FALSE),
         "span.*numeric"
     )
 
     ## span = 0
-    expect_equal(filter_moving_average(x, span = 0, verbose = FALSE), x)
+    expect_equal(filter_ma(x, span = 0, verbose = FALSE), x)
     ## span = 0.5 takes nearest 1 sample
-    expect_equal(filter_moving_average(x, span = 0.5, verbose = FALSE), x)
+    expect_equal(filter_ma(x, span = 0.5, verbose = FALSE), x)
     ## span > length(x)
     expect_true(all(
-        filter_moving_average(x, span = 21, partial = TRUE) == mean(x)
+        filter_ma(x, span = 21, partial = TRUE) == mean(x)
     ))
 })
 
-test_that("filter_moving_average() warns when both width and span provided", {
+test_that("filter_ma() warns when both width and span provided", {
     ## should produce warning
     expect_message(
-        filter_moving_average(1:5, width = 3, span = 2),
+        filter_ma(1:5, width = 3, span = 2),
         "width.*span"
     )
 
@@ -153,28 +153,28 @@ test_that("filter_moving_average() warns when both width and span provided", {
     ## should not produce warning
     # Should default to width
     expect_silent(
-        result <- filter_moving_average(1:5, width = 3, span = 2, partial = TRUE)
+        result <- filter_ma(1:5, width = 3, span = 2, partial = TRUE)
     )
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 })
 
-test_that("filter_moving_average() handles edge cases", {
+test_that("filter_ma() handles edge cases", {
     # Single value
     expect_equal(
-        filter_moving_average(5, width = 1, verbose = FALSE),
+        filter_ma(5, width = 1, verbose = FALSE),
         5,
         ignore_attr = TRUE
     )
 
     # Two values
     expect_equal(
-        filter_moving_average(c(1, 2), width = 1, verbose = FALSE),
+        filter_ma(c(1, 2), width = 1, verbose = FALSE),
         c(1, 2)
     )
 
     # All NA
     expect_error(
-        filter_moving_average(c(NA, NA, NA), width = 3, verbose = FALSE),
+        filter_ma(c(NA, NA, NA), width = 3, verbose = FALSE),
         "x.*numeric"
     )
 })
@@ -183,7 +183,7 @@ test_that("moving_average with insufficient width returns NA with warning", {
     t <- 1:10
     x <- c(1, NA, 3, NA, 5, NA, 7, NA, 9, NA)
 
-    expect_all_equal(filter_moving_average(x, t, width = 2), NA_real_) |> 
+    expect_all_equal(filter_ma(x, t, width = 2), NA_real_) |> 
         expect_warning("Less than.*2.*valid samples")
 })
 
@@ -360,6 +360,22 @@ test_that("filter_mnirs validates input data", {
     expect_error(
         filter_mnirs(data.frame(x = 1:10)),
         "`data`.*data.*frame"
+    )
+})
+
+test_that("filter_mnirs method aliases work", {
+    result_spline <- filter_mnirs(moxy_data, method = "spline", verbose = FALSE)
+    result_ma     <- filter_mnirs(moxy_data, method = "ma", width = 5, verbose = FALSE)
+
+    expect_s3_class(result_spline, "mnirs")
+    expect_s3_class(result_ma, "mnirs")
+    expect_equal(
+        result_spline,
+        filter_mnirs(moxy_data, method = "smooth_spline", verbose = FALSE)
+    )
+    expect_equal(
+        result_ma,
+        filter_mnirs(moxy_data, method = "moving_average", width = 5, verbose = FALSE)
     )
 })
 

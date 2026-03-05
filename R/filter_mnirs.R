@@ -170,7 +170,16 @@ filter_mnirs <- function(
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
-    method <- match.arg(method)
+    ## using method aliases 
+    method <- match.arg(method, c(
+        "smooth_spline", "butterworth", "moving_average", "spline", "ma"
+    ))
+    method <- switch(
+        method,
+        spline = "smooth_spline",
+        ma = "moving_average",
+        method
+    )
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
@@ -380,7 +389,7 @@ filter_mnirs.moving_average <- function(
     time_vec <- data[[time_channel]]
 
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_moving_average(
+        filter_ma(
             x = .x,
             t = time_vec,
             width = width,
@@ -400,7 +409,7 @@ filter_mnirs.moving_average <- function(
 
 #' Apply a moving average filter
 #'
-#' Apply a simple moving average smoothing filter to vector data
+#' Apply a simple moving average smoothing filter to vector data.
 #'
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
@@ -425,23 +434,24 @@ filter_mnirs.moving_average <- function(
 #' t <- c(0, 1, 2, 4, 5, 6, 7, 10)  ## irregular time with gaps
 #'
 #' ## width: centred window of 3 samples
-#' filter_moving_average(x, width = 3)
+#' filter_ma(x, width = 3)
 #'
 #' ## partial = TRUE fills edge values with a narrower window
-#' filter_moving_average(x, width = 3, partial = TRUE)
+#' filter_ma(x, width = 3, partial = TRUE)
 #'
 #' ## span: centred window of 2 time-units (accounts for irregular sampling)
-#' filter_moving_average(x, t, span = 2)
+#' filter_ma(x, t, span = 2)
 #'
 #' ## na.rm = FALSE (default): any NA in the window propagates to the result
 #' x_na <- c(1, NA, 3, 4, 5, NA, 7, 8)
-#' filter_moving_average(x_na, width = 3)
-#' 
-#' ## na.rm = TRUE: skip NAs within the window and return the mean of valid values
-#' filter_moving_average(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+#' filter_ma(x_na, width = 3)
 #'
+#' ## na.rm = TRUE: skip NAs within the window and return the mean of valid values
+#' filter_ma(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+#'
+#' @rdname filter_ma
 #' @export
-filter_moving_average <- function(
+filter_ma <- function(
     x,
     t = seq_along(x),
     width = NULL,
@@ -479,7 +489,7 @@ filter_moving_average <- function(
     if (verbose && all(is.na(window_idx))) {
         cli_warn(c(
             "!" = "Less than {.val {min_obs}} valid samples detected in \\
-            {.fn filter_moving_average} windows.",
+            {.fn filter_ma} windows.",
             "i" = "Specify {.arg width} >= {.val {2}} or increase \\
             {.arg span} to include more samples."
         ))
