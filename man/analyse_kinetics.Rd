@@ -70,7 +70,8 @@ one row per \code{nirs_channel} and per interval, containing columns
 per interval, sourced from \code{event_times} supplied from
 \code{extract_intervals}, if present in the metadata.}
 \item{\code{diagnostics}}{A data frame of model diagnostics (\code{n_obs}, \code{r2},
-\code{adj_r2}, \code{rmse}) with one row per \code{nirs_channel} and interval.}
+\code{adj_r2}, \code{pseudo_r2}, \code{rmse}, \code{snr}, \code{cv_rmse}) with one row per
+\code{nirs_channel} and interval.}
 \item{\code{channel_args}}{A data frame of the resolved arguments used for
 each \code{nirs_channel} with one row per \code{nirs_channel} and interval.}
 \item{\code{call}}{The matched call.}
@@ -168,7 +169,7 @@ result <- read_mnirs(
 ) |>
     resample_mnirs(verbose = FALSE) |>
     extract_intervals(
-        event_times = c(368, 1093),
+        start = by_time(368, 1093),
         event_groups = "distinct",
         span = c(-20, 90),
         zero_time = TRUE,

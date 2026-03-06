@@ -384,7 +384,7 @@ as_data_list <- function(data) {
 #'   - `adj_r2`: adjusted $R^2$ penalised by `n_params`. Appropriate for
 #'     OLS linear models; interpret with caution for non-linear fits.
 #'   - `pseudo_r2`: squared Pearson correlation between observed and fitted
-#'     values, $\rho^2 = \left[\text{cor}(x, \hat{x})\right]^2$. Equivalent
+#'     values, $\rho^2 = (\text{cor}(x, \hat{x}))^2$. Equivalent
 #'     to $R^2$ for OLS but well-defined for non-linear and multivariate
 #'     models. Preferred for `"monoexponential"` and `"sigmoidal"` methods.
 #'

@@ -4,7 +4,7 @@
 \alias{compute_diagnostics}
 \title{Compute model diagnostics}
 \usage{
-compute_diagnostics(x, t, fitted, verbose = TRUE)
+compute_diagnostics(x, t, fitted, n_params = 1L, verbose = TRUE)
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}
@@ -14,12 +14,26 @@ or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
 
 \item{fitted}{A numeric vector of the predicted values.}
 
+\item{n_params}{Integer; number of estimated parameters in the model,
+excluding the intercept (default \code{1L}). Used to compute \code{adj_r2}.
+For non-linear models (\code{"monoexponential"}, \code{"sigmoidal"}), pass the
+number of free parameters fit by the solver.}
+
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
-A named list with \code{n_obs}, \code{r2}, \code{adj_r2}, and \code{rmse}.
+A 1-row \code{data.frame} with columns \code{n_obs}, \code{r2}, \code{adj_r2},
+\code{pseudo_r2}, \code{rmse}, \code{snr}, and \code{cv_rmse}.
+\itemize{
+\item \code{adj_r2}: adjusted $R^2$ penalised by \code{n_params}. Appropriate for
+OLS linear models; interpret with caution for non-linear fits.
+\item \code{pseudo_r2}: squared Pearson correlation between observed and fitted
+values, $\rho^2 = (\text{cor}(x, \hat{x}))^2$. Equivalent
+to $R^2$ for OLS but well-defined for non-linear and multivariate
+models. Preferred for \code{"monoexponential"} and \code{"sigmoidal"} methods.
+}
 }
 \description{
 Compute model diagnostics
