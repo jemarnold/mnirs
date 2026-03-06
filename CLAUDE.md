@@ -4,15 +4,14 @@
 
 `{mnirs}` is an R package for reading, processing, and analysing muscle near-infrared spectroscopy (mNIRS) data. It imports raw data from CSV/XLS(X) files and provides a standardised pipeline of cleaning, filtering, and analysis functions. It is intended for mNIRS researchers and practitioners in exercise physiology, sports science, and clinical rehabilitation.
 
-## Common Commands
+## Formatting
 
 Format code with [air](https://github.com/posit-dev/air) (config in [air.toml](air.toml)):
 ```
 air format R/
 ```
 
-### Comments
-
+* Enforce line limit of 80 characters
 * Comments should briefly explain the "why" of the operation
 * Comments in the form: `## lower case comment`
 

@@ -18,7 +18,7 @@
 #' ) |>
 #'     resample_mnirs(verbose = FALSE) |>
 #'     extract_intervals(
-#'         event_times = c(368, 1093),
+#'         start = by_time(368, 1093),
 #'         event_groups = "distinct", ## return ensemble-averaged intervals
 #'         span = c(-20, 90),
 #'         zero_time = TRUE,
