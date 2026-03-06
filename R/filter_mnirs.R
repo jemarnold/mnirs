@@ -505,7 +505,6 @@ filter_ma <- function(
 
 
 #' @rdname filter_ma
-#' @usage filter_moving_average()
 #' @export
 filter_moving_average <- function(
     x,

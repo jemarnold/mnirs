@@ -381,12 +381,12 @@ as_data_list <- function(data) {
 #' @returns A 1-row `data.frame` with columns `n_obs`, `r2`, `adj_r2`,
 #'   `pseudo_r2`, `rmse`, `snr`, and `cv_rmse`.
 #'
-#'   - `adj_r2`: adjusted $R^2$ penalised by `n_params`. Appropriate for
+#'   - `adj_r2`: adjusted `R^2` penalised by `n_params`. Appropriate for
 #'     OLS linear models; interpret with caution for non-linear fits.
 #'   - `pseudo_r2`: squared Pearson correlation between observed and fitted
-#'     values, $\rho^2 = (\text{cor}(x, \hat{x}))^2$. Equivalent
-#'     to $R^2$ for OLS but well-defined for non-linear and multivariate
-#'     models. Preferred for `"monoexponential"` and `"sigmoidal"` methods.
+#'     values. Equivalent to `R^2` for OLS but well-defined for non-linear
+#'     and multivariate models. Preferred for `"monoexponential"` and
+#'     `"sigmoidal"` methods.
 #'
 #' @keywords internal
 compute_diagnostics <- function(x, t, fitted, n_params = 1L, verbose = TRUE) {

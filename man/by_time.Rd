@@ -30,11 +30,29 @@ Helper functions to define interval start or end boundaries for
 \code{\link[=extract_intervals]{extract_intervals()}}.
 }
 \examples{
+## read example data
+data <- read_mnirs(
+    example_mnirs("train.red"),
+    nirs_channels = c(
+        smo2_left = "SmO2 unfiltered",
+        smo2_right = "SmO2 unfiltered"
+    ),
+    time_channel = c(time = "Timestamp (seconds passed)"),
+    zero_time = TRUE,
+    verbose = FALSE
+) |>
+    resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
+
+## introduce event_channel with "start" string
+data$event <- NA_character_
+data$event[50] <- "start"
+data <- create_mnirs_data(data, event_channel = "event")
+
 ## start and end by time
 extract_intervals(data, start = by_time(30), end = by_time(60))
 
 ## start by label, end by time
-extract_intervals(data, start = by_label("exercise_start"), end = by_time(300))
+extract_intervals(data, start = by_label("start"), end = by_time(300))
 
 ## multiple intervals by sample index
 extract_intervals(data, start = by_sample(100, 500), end = by_sample(200, 600))

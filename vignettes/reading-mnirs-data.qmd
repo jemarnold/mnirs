@@ -616,9 +616,9 @@ Only when *"ensemble"*-averaging, `nirs_channels` should be specified by providi
 
     If the data contain *`mnirs`* metadata, these channels will be detected automatically. Or they can be specified explicitly.
 
-* `event_times`, `event_labels`, `event_samples`
+* `start` & `end`
 
-    Interval events can be identified in any of three ways; by `time_channel` values; by `event_channel` labels; or by sample indices (row numbers). Any exact matches will be extracted as a list of events.
+    Interval boundaries are specified using helper functions: `by_time()` for `time_channel` values; `by_label()` for `event_channel` labels; or `by_sample()` for sample indices (row numbers). Provide both `start` and `end` to define precise intervals, or provide `start` alone with `span` to extract windows around events. Multiple values can be passed to extract multiple intervals.
 
 * `event_groups`
 
@@ -628,7 +628,9 @@ e.g. `event_groups = list(c(1, 2), c(3, 4))` would return a list of two interval
 
 * `span`
 
-    The interval to be extracted around each event is specified as a time span window in units of `time_channel` in the form `c(start, end)` or `c(before, after)`. Positive numeric values indicate time *after* the specified event. Negative values indicate time *before* the specified event. A list of unique `span` vectors can be specified for each detected event, otherwise a single `span` vector will be recycled to all intervals.
+    When only `start` (or `end`) is provided, `span` specifies a time window in units of `time_channel` as `c(before, after)`, where positive values indicate time after the event and negative values indicate time before. When both `start` and `end` are provided, `span` shifts boundaries additively: `span[1]` adjusts starts, `span[2]` adjusts ends.\
+\
+A list of unique `span` vectors can be specified for each interval, otherwise a single `span` vector will be recycled to all intervals.
 
 * `zero_time`
 
@@ -642,11 +644,12 @@ When ensemble-averaging across intervals, time will always be re-calculated from
 
 ## return each interval independently with `event_groups = "distinct"`
 distinct_list <- extract_intervals(
-    nirs_data,                 ## channels blank for "distinct" grouping
-    event_times = c(191, 902), ## manually identified interval start times
-    event_groups = "distinct", ## return a list of data frames for each (2) event
-    span = c(0, 180),          ## include the last 180-sec of each interval
-    zero_time = FALSE          ## return original time values
+    nirs_data,                  ## channels blank for "distinct" grouping
+    start = by_time(191, 902),  ## manually identified interval start times
+    end = by_time(371, 1082),   ## interval end time (start + 180 sec)
+    event_groups = "distinct",  ## return a list of data frames for each (2) event
+    span = c(0, 0),             ## no modification to the 3-min intervals
+    zero_time = FALSE           ## return original time values
 )
 
 ## use `{patchwork}` package to plot intervals side by side
@@ -658,12 +661,12 @@ plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
 ```{r}
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble_list <- extract_intervals(
-    nirs_data,                 ## channels recycled to all intervals by default
+    nirs_data,                  ## channels recycled to all intervals by default
     nirs_channels = c(smo2_left, smo2_right),
-    event_times = c(191, 902),
-    event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(0, 180),          ## recycled to all intervals groups by default
-    zero_time = TRUE           ## re-calculate common time to start from `0`
+    start = by_time(191, 902),  ## alternatively specify start times + 180 sec
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    span = c(0, 180),           ## span recycled to all intervals by default
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
 plot(ensemble_list[[1L]])

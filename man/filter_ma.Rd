@@ -16,7 +16,16 @@ filter_ma(
   ...
 )
 
-filter_moving_average()
+filter_moving_average(
+  x,
+  t = seq_along(x),
+  width = NULL,
+  span = NULL,
+  partial = FALSE,
+  na.rm = FALSE,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}

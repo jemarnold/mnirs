@@ -228,9 +228,9 @@ For this analysis, we will re-join the returned list of data frames into a combi
 \
 We will analyse OxCap from the deoxyhaeme (HHb) NIRS signal, which is often recommended [@Costalat2025].
     
-* `event_times`, `event_labels`, & `event_samples`
+* `start` & `end`
 
-    Interval events can be specified by any combination of time (values of `time_channel`), labels (values of `event_channel`), or sample (row number). Multiple values can be entered as vectors. At least one event must be specified.\
+    Interval boundaries are specified using helper functions: `by_time()` for `time_channel` values; `by_label()` for `event_channel` labels; or `by_sample()` for sample indices (row numbers). Provide both `start` and `end` to define precise intervals, or provide `start` alone with `span` to extract windows around events.\
 \
 Once again, in this example data file, the occlusions are all identified by the event label `"Occlusion"`. This makes it very simple to detect this string in the `event` column, and extract intervals around them.\
 \
@@ -238,7 +238,7 @@ Detecting intervals by event labels must match a full string *exactly*. If the e
 
 * `span`
 
-    Where an event is detected, an interval will be extracted with a time span specified as a two-element numeric vector; `c(start, end)`, in units of the `time_channel`. Where positive values represent times after the event, and negative values represent times before the event.\
+    When only `start` (or `end`) is provided, `span` specifies a time window in units of `time_channel` as `c(before, after)`, where positive values indicate time after the event and negative values indicate time before. When both `start` and `end` are provided, `span` shifts boundaries additively: `span[1]` adjusts starts, `span[2]` adjusts ends.\
 \
 All occlusion bouts were held for 5-seconds in this protocol. If the occlusion duration changed across the protocol, we might have to specify a list of time spans, rather than a single `span` as in this case.\
 \
@@ -264,7 +264,7 @@ For repeated occlusion testing, the original time information for each occlusion
 ## re-join the returned list of data frames with each occlusion interval labelled as "interval"
 df_list <- extract_intervals(
     df,
-    event_labels = "Occlusion", ## event label used in file, must match string exactly
+    start = by_label("Occlusion"), ## event label used in file, must match string exactly
     event_groups = "distinct", ## return each occlusion event separately
     span = c(1, 5), ## occlusion interval c(start, end) with reference to the event time value
     zero_time = FALSE ## preserve original time values at each event

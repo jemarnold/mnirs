@@ -142,7 +142,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-04 00:29:00 PST"
+#> [1] "2026-03-05 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
@@ -294,11 +294,12 @@ plot(nirs_data, time_labels = TRUE)
 ``` r
 ## return each interval independently with `event_groups = "distinct"`
 distinct_list <- extract_intervals(
-    nirs_data,                 ## channels blank for "distinct" grouping
-    event_times = c(191, 902), ## manually identified interval start times
-    event_groups = "distinct", ## return a list of data frames for each (2) event
-    span = c(0, 180),          ## include the last 180-sec of each interval
-    zero_time = FALSE          ## return original time values
+    nirs_data,                  ## channels blank for "distinct" grouping
+    start = by_time(191, 902),  ## manually identified interval start times
+    end = by_time(371, 1082),   ## interval end time (start + 180 sec)
+    event_groups = "distinct",  ## return a list of data frames for each (2) event
+    span = c(0, 0),             ## no modification to the 3-min intervals
+    zero_time = FALSE           ## return original time values
 )
 
 ## use `{patchwork}` package to plot intervals side by side
@@ -312,12 +313,12 @@ plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
 ``` r
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble_list <- extract_intervals(
-    nirs_data,                 ## channels recycled to all intervals by default
+    nirs_data,                  ## channels recycled to all intervals by default
     nirs_channels = c(smo2_left, smo2_right),
-    event_times = c(191, 902),
-    event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(0, 180),          ## recycled to all intervals groups by default
-    zero_time = TRUE           ## re-calculate common time to start from `0`
+    start = by_time(191, 902),  ## alternatively specify start times + 180 sec
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    span = c(0, 180),           ## span recycled to all intervals by default
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
 plot(ensemble_list[[1L]])
