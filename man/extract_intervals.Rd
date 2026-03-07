@@ -61,14 +61,18 @@ time values, character for event labels, explicit integer (e.g. \code{2L})
 for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_sample]{by_sample()}},
 \code{\link[=by_label]{by_label()}}, or \code{\link[=by_lap]{by_lap()}}.}
 
-\item{span}{A \code{list()} of two-element numeric vectors \code{c(before, after)} in
-units of \code{time_channel}. Applied additively to interval boundaries:
+\item{span}{A one- or two-element numeric vector \code{c(before, after)} in units
+of \code{time_channel}, or a \code{list()} of such vectors. Applied additively to
+interval boundaries:
 \itemize{
 \item When both \code{start} and \code{end} are specified: \code{span[1]} shifts start times,
 \code{span[2]} shifts end times.
 \item When only \code{start} or only \code{end} is specified: both \code{span[1]} and
-\code{span[2]} apply to the specified boundary (like a window around an
-event).
+\code{span[2]} apply as a window around the event).
+\item A single \emph{positive} value is recycled to shift the end times (e.g.
+\code{span = 60} -> \code{c(0, 60)}).
+\item A single \emph{negative} value is recyclede to shift the start times (e.g.
+\code{span = -60} -> \code{c(-60, 0)}).
 }}
 
 \item{event_groups}{Either a character string or a \code{list()} of integer
@@ -128,7 +132,9 @@ label, end by time). When lengths differ, the shorter is recycled.
 
 \subsection{The \code{span} window}{
 
-\code{span} applies an additive time shift to interval boundaries:
+\code{span} applies an additive time shift to interval boundaries. A single
+numeric value is recycled: \code{span = 60} becomes \code{c(0, 60)} and
+\code{span = -60} becomes \code{c(-60, 0)}.
 \itemize{
 \item \strong{\code{start} + \code{end}}: \code{span[1]} shifts starts, \code{span[2]} shifts ends.
 For example, \verb{start = by_time(30), end = by_time(60), span = c(-5, 10)}

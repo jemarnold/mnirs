@@ -31,13 +31,17 @@
 #'   for lap numbers — or created with [by_time()], [by_sample()], 
 #'   [by_label()], or [by_lap()].
 #'
-#' @param span A `list()` of two-element numeric vectors `c(before, after)` in
-#'   units of `time_channel`. Applied additively to interval boundaries:
+#' @param span A one- or two-element numeric vector `c(before, after)` in units 
+#'   of `time_channel`, or a `list()` of such vectors. Applied additively to
+#'   interval boundaries:
 #'   - When both `start` and `end` are specified: `span[1]` shifts start times,
 #'     `span[2]` shifts end times.
 #'   - When only `start` or only `end` is specified: both `span[1]` and
-#'     `span[2]` apply to the specified boundary (like a window around an
-#'     event).
+#'     `span[2]` apply as a window around the event).
+#'   - A single *positive* value is recycled to shift the end times (e.g. 
+#'     `span = 60` -> `c(0, 60)`).
+#'   - A single *negative* value is recyclede to shift the start times (e.g. 
+#'     `span = -60` -> `c(-60, 0)`).
 #'
 #' @param event_groups Either a character string or a `list()` of integer
 #'   vectors specifying how to group intervals (see *Details*).
@@ -83,7 +87,9 @@
 #'
 #' ## The `span` window
 #'
-#' `span` applies an additive time shift to interval boundaries:
+#' `span` applies an additive time shift to interval boundaries. A single
+#' numeric value is recycled: `span = 60` becomes `c(0, 60)` and
+#' `span = -60` becomes `c(-60, 0)`.
 #'
 #' - **`start` + `end`**: `span[1]` shifts starts, `span[2]` shifts ends.
 #'   For example, `start = by_time(30), end = by_time(60), span = c(-5, 10)`
@@ -244,6 +250,7 @@ extract_intervals <- function(
     ## expand parameters ====================================
     event_groups <- make_list(event_groups)
     span <- make_list(span)
+    span <- lapply(span, recycle_span)
 
     ## resolve raw interval indices ============================
     interval_idx <- resolve_interval(start, end, time_vec, event_vec)

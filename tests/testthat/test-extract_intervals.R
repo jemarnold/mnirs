@@ -131,6 +131,19 @@ test_that("as_mnirs_interval errors on unsupported type", {
 })
 
 
+## recycle_span() =========================================================
+test_that("recycle_span works", {
+    ## recycle_span expands positive scalar to c(0, x)
+    expect_equal(recycle_span(60), c(0, 60))
+    ## recycle_span expands negative scalar to c(x, 0)
+    expect_equal(recycle_span(-60), c(-60, 0))
+    ## recycle_span treats zero as positive
+    expect_equal(recycle_span(0), c(0, 0))
+    ## recycle_span passes through two-element vector
+    expect_equal(recycle_span(c(-5, 10)), c(-5, 10))
+})
+
+
 ## resolve_interval_indices() =======================================================
 test_that("resolve_interval_indices resolves time to correct indices", {
     time_vec <- seq(0.1, 10, by = 0.1)
@@ -1243,6 +1256,40 @@ test_that("extract_intervals coerces raw integer to by_lap", {
     expect_equal(result[[1]]$time[1], 1.0)
     expect_equal(rev(result[[1]]$time)[1], 3.9)
     expect_equal(nrow(result[[1]]), 30)
+})
+
+test_that("extract_intervals recycles positive span scalar", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+
+    result <- extract_intervals(
+        data = data,
+        start = by_time(2),
+        end = by_time(5),
+        event_groups = "distinct",
+        span = 1,
+        verbose = FALSE
+    )
+
+    ## span = 1 → c(0, 1): start unchanged, end shifted +1
+    expect_equal(result[[1]]$time[1], 2, tolerance = 0.1)
+    expect_equal(rev(result[[1]]$time)[1], 6, tolerance = 0.1)
+})
+
+test_that("extract_intervals recycles negative span scalar", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+
+    result <- extract_intervals(
+        data = data,
+        start = by_time(2),
+        end = by_time(5),
+        event_groups = "distinct",
+        span = -1,
+        verbose = FALSE
+    )
+
+    ## span = -1 → c(-1, 0): start shifted -1, end unchanged
+    expect_equal(result[[1]]$time[1], 1, tolerance = 0.1)
+    expect_equal(rev(result[[1]]$time)[1], 5, tolerance = 0.1)
 })
 
 test_that("extract_intervals applies zero_time correctly", {

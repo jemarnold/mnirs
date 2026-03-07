@@ -101,10 +101,10 @@ by_lap <- function(...) {
 }
 
 
-## coerce raw values to mnirs_interval objects
-## @param x A raw value or mnirs_interval object.
-## @param arg Name of the argument for error messages.
-## @keywords internal
+#' coerce raw values to mnirs_interval objects
+#' @param x A raw value or mnirs_interval object.
+#' @param arg Name of the argument for error messages.
+#' @keywords internal
 as_mnirs_interval <- function(x, arg = "start") {
     if (is.null(x) || inherits(x, "mnirs_interval")) {
         return(x)
@@ -127,8 +127,23 @@ as_mnirs_interval <- function(x, arg = "start") {
 }
 
 
-## resolve a single mnirs_interval object to integer row indices
-## @keywords internal
+#' recycle a single-element span to c(before, after)
+#' positive → c(0, x), negative → c(x, 0)
+#' @keywords internal
+recycle_span <- function(span) {
+    if (is.numeric(span) && length(span) == 1L) {
+        if (span >= 0) {
+            return(c(0, span))
+        } else {
+            return(c(span, 0))
+        }
+    }
+    span
+}
+
+
+#' resolve a single mnirs_interval object to integer row indices
+#' @keywords internal
 resolve_interval_indices <- function(
     interval,
     time_vec,
@@ -173,8 +188,8 @@ resolve_interval_indices <- function(
 }
 
 
-## resolve start/end into raw index vectors (no span applied)
-## @keywords internal
+#' resolve start/end into raw index vectors (no span applied)
+#' @keywords internal
 resolve_interval <- function(
     start_interval,
     end_interval,
@@ -312,8 +327,8 @@ recycle_param <- function(param, n_events, event_groups, verbose = TRUE) {
 }
 
 
-## apply span to raw indices and build interval_spec data frame
-## @keywords internal
+#' apply span to raw indices and build interval_spec data frame
+#' @keywords internal
 apply_span_to_indices <- function(
     interval_idx,
     time_vec,

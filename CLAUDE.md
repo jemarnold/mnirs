@@ -63,6 +63,7 @@ In [R/helpers.R](R/helpers.R):
 ### Documentation
 
 - Roxygen2 with markdown enabled (`Roxygen: list(markdown = TRUE)`). 
+- Roxygen2 commented with `#'`
 - pkgdown site config is in [_pkgdown.yml](_pkgdown.yml); sections follow the pipeline order: 
     - Read → Pre-process → Interval detection → Process kinetics → Plotting
 
