@@ -358,7 +358,11 @@ apply_span_to_indices <- function(
             span_before
         end_times <- time_vec[interval_idx$end_idx] + span_after
         ## two-element c(start, end) when both boundaries defined
-        interval_times <- Map(c, start_times, end_times)
+        interval_times <- Map(
+            c, 
+            time_vec[interval_idx$start_idx], 
+            time_vec[interval_idx$end_idx]
+        )
     } else {
         ## start-only or end-only: both span values apply to the reference
         start_times <- event_times + span_before
@@ -475,7 +479,7 @@ ensemble_intervals <- function(
         list(
             ## ensemble-average time values makes no sense, so return zero-offset
             data = zero_offset_data(.df, time_channel, t0),
-            interval_times = interval_times,
+            interval_times = interval_times - t0, ## zero_time recalc
             interval_span = attr(.df, "interval_span")
         )
     })
@@ -541,7 +545,7 @@ group_intervals <- function(
     nirs_channels,
     metadata,
     event_groups,
-    zero_time = TRUE,
+    zero_time = FALSE,
     verbose = TRUE
 ) {
     time_channel <- metadata$time_channel
@@ -551,8 +555,11 @@ group_intervals <- function(
     if (n_intervals == 1L || event_groups[[1L]][1L] == "distinct") {
         result <- lapply(interval_list, \(.df) {
             if (zero_time) {
-                t0 <- attr(.df, "interval_times")[[1L]]
+                interval_times <- attr(.df, "interval_times")
+                t0 <- interval_times[[1L]]
                 .df <- zero_offset_data(.df, time_channel, t0)
+                ## also zero_time recalc `interval_times`
+                attr(.df, "interval_times") <- interval_times - t0
             }
 
             create_mnirs_data(
@@ -624,8 +631,13 @@ group_intervals <- function(
             ## single interval return as-is
             df <- interval_list[[.g]]
             if (zero_time) {
-                t0 <- attr(df, "interval_times")[[1L]]
+                interval_times <- attr(df, "interval_times")
+                t0 <- interval_times[[1L]]
                 df <- zero_offset_data(df, time_channel, t0)
+                df <- create_mnirs_data(
+                    df,
+                    interval_times = interval_times - t0 ## zero_time recalc
+                )
             }
             df
         } else {

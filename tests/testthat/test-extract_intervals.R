@@ -630,14 +630,14 @@ test_that("apply_span_to_indices creates correct specification with start, end",
     result <- apply_span_to_indices(
         interval_idx,
         time_vec,
-        list(c(0, 0), c(0, 0), c(0, 0)),
+        span = list(c(0, 1), c(0, 1), c(0, 1)),
         verbose = FALSE
     )
 
     expect_s3_class(result, "data.frame")
     expect_equal(nrow(result), 3)
     expect_equal(result$start_idx, c(10, 40, 70))
-    expect_equal(result$end_idx, c(30, 60, 90))
+    expect_equal(result$end_idx, c(40, 70, 100))
     expect_equal(
         result$interval_times,
         Map(c, time_vec[start_idx], time_vec[end_idx])
@@ -870,7 +870,9 @@ test_that("ensemble_intervals preserves metadata", {
     expect_equal(attr(result, "time_channel"), "time")
     expect_equal(attr(result, "sample_rate"), 10)
     expect_true(is.list(attr(result, "interval_times")))
-    expect_setequal(unlist(attr(result, "interval_times")), c(10, 20))
+    ## TODO 2026-03-07 update `interval_times` adheres to `zero_time` to represent interval times of returned data frame, not input data frame
+    # expect_setequal(unlist(attr(result, "interval_times")), c(10, 20))
+    expect_setequal(unlist(attr(result, "interval_times")), c(0, 0))
     expect_true(is.list(attr(result, "interval_span")))
     expect_setequal(lengths(attr(result, "interval_span")), 2)
 })
@@ -1165,7 +1167,7 @@ test_that("group_intervals custom multi-interval groups preserve metadata", {
         nirs_channels = rep(list(c("smo2_left", "smo2_right")), 4),
         metadata = metadata,
         event_groups = list(c(1, 2), c(3, 4)),
-        zero_time = TRUE,
+        # zero_time = FALSE, ## ensemble auto zeroes
         verbose = FALSE
     )
 
@@ -1179,13 +1181,13 @@ test_that("group_intervals custom multi-interval groups preserve metadata", {
     expect_length(attr(result[[1]], "interval_times"), 2)
     expect_equal(
         attr(result[[1]], "interval_times"),
-        list(0, 10),
+        list(0, 0), ## start times for two grouped intervals
         ignore_attr = TRUE
     )
     expect_length(attr(result[[2]], "interval_times"), 2)
     expect_equal(
         attr(result[[2]], "interval_times"),
-        list(20, 30),
+        list(0, 0), ## adheres to `zero_time` to represent output data frame
         ignore_attr = TRUE
     )
 })
@@ -1232,6 +1234,19 @@ test_that("group_intervals custom single-interval group retains original attrs",
     expect_equal(attr(lone, "time_channel"), "time")
     expect_equal(attr(lone, "interval_times"), 20)
     expect_equal(attr(lone, "interval_span"), c(-1, 4))
+
+    ## with `zero_time = TRUE`
+    result <- group_intervals(
+        interval_list = interval_list,
+        nirs_channels = rep(list(c("smo2_left", "smo2_right")), 3),
+        metadata = metadata,
+        event_groups = list(c(1, 2), 3),
+        zero_time = TRUE,
+        verbose = FALSE
+    )
+
+    lone <- result[["interval_3"]]
+    expect_equal(attr(lone, "interval_times"), 0) ## adheres to `zero_time`
 })
 
 
