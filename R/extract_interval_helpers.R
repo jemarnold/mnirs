@@ -138,7 +138,13 @@ recycle_span <- function(span) {
             return(c(span, 0))
         }
     }
-    span
+    if (!is.numeric(span) || length(span) != 2L) {
+        cli_abort(c(
+            "x" = "{.arg span} must be a one- or two-element {.cls numeric} \\
+            vector."
+        ))
+    }
+    return(span)
 }
 
 
@@ -341,8 +347,6 @@ apply_span_to_indices <- function(
     ## extract span values (already recycled to n_intervals by recycle_param)
     span_before <- vapply(span, `[`, numeric(1), 1L)
     span_after <- vapply(span, `[`, numeric(1), 2L)
-    span_before <- rep_len(span_before, n_intervals)
-    span_after <- rep_len(span_after, n_intervals)
 
     event_times <- time_vec[pmin(interval_idx$start_idx, n_obs)]
 
@@ -456,13 +460,13 @@ ensemble_intervals <- function(
     sample_rate <- metadata$sample_rate
     ## extract data & metadata from interval_list
     interval_data <- lapply(interval_list, \(.df) {
-        event_time <- attr(.df, "event_times")
+        event_times <- attr(.df, "event_times")
         time_channel <- attr(.df, "time_channel")
         ## return data & metadata from each interval
         list(
             ## ensemble-average time values makes no sense, so return zero-offset
-            data = zero_offset_data(.df, time_channel, event_time),
-            event_time = event_time,
+            data = zero_offset_data(.df, time_channel, event_times),
+            event_times = event_times,
             interval_span = attr(.df, "interval_span")
         )
     })
@@ -497,25 +501,27 @@ ensemble_intervals <- function(
     result <- data.frame(
         setNames(list(unique_times), time_channel),
         setNames(
+            ## janky solution to different default dimensions as single...
+            ## vs multiple column matrix
             as.data.frame(if (col_n == 1L) result_matrix else t(result_matrix)),
             nirs_channels
         )
     )
 
-    ## add metadata
-    result <- create_mnirs_data(
-        result,
-        nirs_device = attr(df_long, "nirs_device"),
-        # nirs_channels = unique(c(metadata$nirs_channels, nirs_channels)),
-        nirs_channels = unique(nirs_channels),
-        time_channel = time_channel,
-        event_channel = attr(df_long, "event_channel"),
-        sample_rate = sample_rate,
-        event_times = lapply(interval_data, `[[`, "event_time"),
-        interval_span = lapply(interval_data, `[[`, "interval_span")
+    ## return with metadata
+    return(
+        create_mnirs_data(
+            result,
+            nirs_device = metadata$nirs_device,
+            nirs_channels = unique(nirs_channels),
+            time_channel = time_channel,
+            event_channel = metadata$event_channel,
+            sample_rate = sample_rate,
+            start_timestamp = metadata$start_timestamp,
+            event_times = lapply(interval_data, `[[`, "event_times"),
+            interval_span = lapply(interval_data, `[[`, "interval_span")
+        )
     )
-
-    return(result)
 }
 
 
@@ -536,8 +542,8 @@ group_intervals <- function(
     if (n_intervals == 1L || event_groups[[1L]][1L] == "distinct") {
         result <- lapply(interval_list, \(.df) {
             if (zero_time) {
-                event_time <- attr(.df, "event_times")
-                .df <- zero_offset_data(.df, time_channel, event_time)
+                event_times <- attr(.df, "event_times")
+                .df <- zero_offset_data(.df, time_channel, event_times)
             }
 
             create_mnirs_data(
@@ -547,7 +553,8 @@ group_intervals <- function(
                 time_channel = time_channel,
                 event_channel = metadata$event_channel,
                 sample_rate = metadata$sample_rate,
-                event_times = attr(.df, "event_time"),
+                start_timestamp = metadata$start_timestamp,
+                event_times = attr(.df, "event_times"),
                 interval_span = attr(.df, "interval_span")
             )
         })
@@ -566,7 +573,7 @@ group_intervals <- function(
                 verbose
             )
         )
-        # attributes(result[[1]])
+        
         return(result)
     }
 
@@ -585,7 +592,8 @@ group_intervals <- function(
         ]
         if (verbose) {
             cli_inform(c(
-                "!" = "Intervals detected not in {.arg event_groups}.",
+                "!" = "Intervals detected not specified in \\
+                {.arg event_groups}.",
                 "i" = "Ungrouped intervals included as discrete."
             ))
         }
@@ -607,8 +615,8 @@ group_intervals <- function(
             ## single interval return as-is
             df <- interval_list[[.g]]
             if (zero_time) {
-                event_time <- attr(df, "event_times")
-                df <- zero_offset_data(df, time_channel, event_time)
+                event_times <- attr(df, "event_times")
+                df <- zero_offset_data(df, time_channel, event_times)
             }
             df
         } else {
@@ -623,7 +631,6 @@ group_intervals <- function(
         }
     })
 
-    ## TODO do I want to name by interval or by group?
     names(result) <- vapply(event_groups, \(.g) {
         paste0("interval_", paste(.g, collapse = "_"))
     }, character(1))

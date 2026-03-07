@@ -40,7 +40,7 @@
 #'     `span[2]` apply as a window around the event).
 #'   - A single *positive* value is recycled to shift the end times (e.g. 
 #'     `span = 60` -> `c(0, 60)`).
-#'   - A single *negative* value is recyclede to shift the start times (e.g. 
+#'   - A single *negative* value is recycled to shift the start times (e.g. 
 #'     `span = -60` -> `c(-60, 0)`).
 #'
 #' @param event_groups Either a character string or a `list()` of integer
@@ -189,7 +189,7 @@ extract_intervals <- function(
     start = NULL,
     end = NULL,
     span = list(c(-60, 60)),
-    event_groups = list("distinct", "ensemble"),
+    event_groups = c("distinct", "ensemble"),
     zero_time = FALSE,
     verbose = TRUE
 ) {

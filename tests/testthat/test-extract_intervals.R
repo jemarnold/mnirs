@@ -143,6 +143,15 @@ test_that("recycle_span works", {
     expect_equal(recycle_span(c(-5, 10)), c(-5, 10))
 })
 
+test_that("recycle_span validates span", {
+    ## length > 2 errors
+    expect_error(recycle_span(c(1, 2, 3)), "span.*must be")
+    ## length 0 errors
+    expect_error(recycle_span(numeric(0)), "span.*must be")
+    ## non-numeric errors
+    expect_error(recycle_span("a"), "span.*must be")
+})
+
 
 ## resolve_interval_indices() =======================================================
 test_that("resolve_interval_indices resolves time to correct indices", {

@@ -13,7 +13,7 @@ extract_intervals(
   start = NULL,
   end = NULL,
   span = list(c(-60, 60)),
-  event_groups = list("distinct", "ensemble"),
+  event_groups = c("distinct", "ensemble"),
   zero_time = FALSE,
   verbose = TRUE
 )
@@ -71,7 +71,7 @@ interval boundaries:
 \code{span[2]} apply as a window around the event).
 \item A single \emph{positive} value is recycled to shift the end times (e.g.
 \code{span = 60} -> \code{c(0, 60)}).
-\item A single \emph{negative} value is recyclede to shift the start times (e.g.
+\item A single \emph{negative} value is recycled to shift the start times (e.g.
 \code{span = -60} -> \code{c(-60, 0)}).
 }}
 
