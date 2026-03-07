@@ -191,8 +191,8 @@ test_that("rescale_mnirs works on Train.Red", {
         nirs_channels = c(
             smo2_left = "SmO2 unfiltered",
             smo2_right = "SmO2 unfiltered",
-            dhb_left = "HBDiff unfiltered",
-            dhb_right = "HBDiff unfiltered"
+            o2hb_left = "O2HB unfiltered",
+            o2hb_right = "O2HB unfiltered"
         ),
         time_channel = c(time = "Timestamp (seconds passed)"),
         verbose = FALSE
@@ -203,7 +203,7 @@ test_that("rescale_mnirs works on Train.Red", {
         nirs_channels = list(
             "smo2_left",
             "smo2_right",
-            c("dhb_left", "dhb_right")
+            c("o2hb_left", "o2hb_right")
         ),
         range = c(0, 100)
     )
@@ -214,8 +214,8 @@ test_that("rescale_mnirs works on Train.Red", {
     ## check grouping together: min value should come from each group
     expect_true(any(result$smo2_left %in% c(0, 100), na.rm = TRUE))
     expect_true(any(result$smo2_right %in% c(0, 100), na.rm = TRUE))
-    expect_true(any(result$dhb_left == 0, na.rm = TRUE))
-    expect_false(any(result$dhb_right == 0, na.rm = TRUE))
-    expect_false(any(result$dhb_left == 100, na.rm = TRUE))
-    expect_true(any(result$dhb_right == 100, na.rm = TRUE))
+    expect_true(any(result$o2hb_left == 0, na.rm = TRUE))
+    expect_false(any(result$o2hb_right == 0, na.rm = TRUE))
+    expect_false(any(result$o2hb_left == 100, na.rm = TRUE))
+    expect_true(any(result$o2hb_right == 100, na.rm = TRUE))
 })

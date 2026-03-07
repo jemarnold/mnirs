@@ -149,7 +149,7 @@ test_that("detect_mnirs_device works on example files", {
             detect_mnirs_device(),
         list(
             nirs_device = "Train.Red",
-            header_row = 40
+            header_row = 41
         )
     )
 

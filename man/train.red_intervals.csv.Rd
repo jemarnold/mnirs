@@ -7,10 +7,11 @@
 \format{
 .csv file with header metadata and with 10 columns and 12001 rows.
 \itemize{
-\item \code{nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")}
+\item \code{nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHB unfiltered")}
 \item \code{time_channel = c("Timestamp (seconds passed)")}
 \item \code{event_channel = c("Lap/Event")}
-\item \code{reoxy_start_times = c(2455, 3166)} ## c(371, 1082) from zero_time
+\item \code{interval_times = list(c(2150.09, 2457.05), c(2865.05, 3168.08))}
+\item \code{interval_times = list(c(65.94, 372.90), c(780.90, 1183.93))} ## from zero_time
 }
 }
 \description{

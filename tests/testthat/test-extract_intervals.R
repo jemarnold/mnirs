@@ -1707,7 +1707,7 @@ test_that("extract_intervals works on train.red data", {
     result <- extract_intervals(
         data,
         nirs_channels = c("smo2_left", "smo2_right"),
-        start = by_time(2455, 3166),
+        start = by_time(2150, 3168),
         event_groups = "ensemble",
         span = list(c(-30, 180)),
         zero_time = FALSE,
@@ -1715,7 +1715,7 @@ test_that("extract_intervals works on train.red data", {
     )
 
     ## visual check
-    # plot(result[[1L]])
+    plot(result[[1L]], time_labels = TRUE)
 
     ## structure
     expect_length(result, 1)
@@ -1730,7 +1730,7 @@ test_that("extract_intervals works on train.red data", {
     result <- extract_intervals(
         data,
         nirs_channels = c("smo2_left", "smo2_right"),
-        start = by_time(2455, 3166),
+        start = by_time(2150, 3168),
         event_groups = "distinct",
         span = list(c(-30, 180)),
         zero_time = FALSE,
@@ -1748,12 +1748,12 @@ test_that("extract_intervals works on train.red data", {
     expect_named(result[[1L]], c("time", "smo2_left", "smo2_right"))
     expect_named(result[[2L]], c("time", "smo2_left", "smo2_right"))
     ## range of time_channel
-    expect_lte(min(result[[1L]][[1]]), 2455 - 30)
-    expect_equal(min(result[[1L]][[1]]), 2455 - 30, tolerance = 0.1)
-    expect_lte(max(result[[1L]][[1]]), 2455 + 180)
-    expect_equal(max(result[[1L]][[1]]), 2455 + 180, tolerance = 0.1)
-    expect_lte(min(result[[2L]][[1]]), 3166 - 30)
-    expect_equal(min(result[[2L]][[1]]), 3166 - 30, tolerance = 0.1)
-    expect_lte(max(result[[2L]][[1]]), 3166 + 180)
-    expect_equal(max(result[[2L]][[1]]), 3166 + 180, tolerance = 0.1)
+    expect_lte(min(result[[1L]][[1]]), 2150 - 30)
+    expect_equal(min(result[[1L]][[1]]), 2150 - 30, tolerance = 0.1)
+    expect_lte(max(result[[1L]][[1]]), 2150 + 180)
+    expect_equal(max(result[[1L]][[1]]), 2150 + 180, tolerance = 0.1)
+    expect_lte(min(result[[2L]][[1]]), 3168 - 30)
+    expect_equal(min(result[[2L]][[1]]), 3168 - 30, tolerance = 0.1)
+    expect_lte(max(result[[2L]][[1]]), 3168 + 180)
+    expect_equal(max(result[[2L]][[1]]), 3168 + 180, tolerance = 0.1)
 })
