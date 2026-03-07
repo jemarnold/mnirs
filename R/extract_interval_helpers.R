@@ -175,6 +175,7 @@ resolve_interval_indices <- function(
         },
         lap = {
             vapply(interval$by_lap, \(lap_val) {
+                event_vec <- as.integer(event_vec)
                 matches <- which(event_vec == lap_val)
                 if (length(matches) == 0L) {
                     cli_abort(c(
@@ -347,16 +348,13 @@ apply_span_to_indices <- function(
     ## extract span values (already recycled to n_intervals by recycle_param)
     span_before <- vapply(span, `[`, numeric(1), 1L)
     span_after <- vapply(span, `[`, numeric(1), 2L)
-
-    ## TODO test whether pmin() calls are necessary
-    # event_times <- time_vec[pmin(interval_idx$start_idx, n_obs)]
-    event_times <- time_vec[interval_idx$start_idx]
+    event_times <- time_vec[pmin(interval_idx$start_idx, n_obs)]
 
     if (interval_idx$has_start && interval_idx$has_end) {
         ## span[1] shifts starts, span[2] shifts ends
-        start_times <- time_vec[interval_idx$start_idx] +
+        start_times <- time_vec[pmin(interval_idx$start_idx, n_obs)] +
             span_before
-        end_times <- time_vec[interval_idx$end_idx] + span_after
+        end_times <- time_vec[pmin(interval_idx$end_idx, n_obs)] + span_after
         ## two-element c(start, end) when both boundaries defined
         interval_times <- Map(
             c, 

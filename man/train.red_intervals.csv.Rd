@@ -9,9 +9,9 @@
 \itemize{
 \item \code{nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHB unfiltered")}
 \item \code{time_channel = c("Timestamp (seconds passed)")}
-\item \code{event_channel = c("Lap/Event")}
-\item \code{interval_times = list(c(2150.09, 2457.05), c(2865.05, 3168.08))}
-\item \code{interval_times = list(c(65.94, 372.90), c(780.90, 1183.93))} ## from zero_time
+\item \code{event_channel = c("e")}
+\item \code{interval_times = list(start = c(2150.09, 2865.05), end = c(2457.05, 3168.08))}
+\item \code{interval_times = list(start = c(65.94, 780.90), end = c(372.90, 1183.93))} ## from zero_time
 }
 }
 \description{

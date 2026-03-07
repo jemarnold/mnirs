@@ -2,14 +2,14 @@
 % Please edit documentation in R/resample_mnirs.R
 \name{resample_mnirs}
 \alias{resample_mnirs}
-\title{Re-sample a data frame}
+\title{Re-sample an \emph{{mnirs}} data frame}
 \usage{
 resample_mnirs(
   data,
   time_channel = NULL,
   sample_rate = NULL,
   resample_rate = sample_rate,
-  method = c("linear", "locf", "none"),
+  method = c("locf", "linear", "none"),
   verbose = TRUE
 )
 }
@@ -31,24 +31,24 @@ be used if detected, or the sample rate will be estimated from
 \code{time_channel}.
 }}
 
-\item{resample_rate}{An \emph{optional} numeric value indicating the desired
-output sample rate (in Hz) to re-sample the data frame. The \emph{default}
-\code{resample_rate = sample_rate} will interpolate over missing and repeated
-samples within the bounds of the existing data rounded to the nearest
-value in Hz.}
+\item{resample_rate}{An \emph{optional} sample rate (Hz) for the output data
+frame. If \code{NULL} (\emph{default}) resamples to the existing \code{sample_rate},
+which regularises any irregular samples without changing the rate.}
 
-\item{method}{A character string indicating how to handle resampling
-(see \emph{Details} for more on each method):
+\item{method}{A character string specifying how new samples are filled.
+Default is \emph{"locf"} (see \emph{Details} for more on each method):
 \describe{
-\item{\code{"linear"}}{Re-samples and replaces \code{NA}s via linear
-interpolation (the \emph{default}) using \code{\link[stats:approxfun]{stats::approx()}}.}
-\item{\code{"locf"}}{(\emph{"Last observation carried forward"}). Re-samples and
-replaces \code{NA}s with the most recent valid non-\code{NA} value to the left
-for trailing samples or to the right for leading samples, using
-\code{\link[stats:approxfun]{stats::approx()}}.}
-\item{\code{"none"}}{Re-samples by matching values to their nearest value of
-\code{time_channel}, \emph{without} interpolating across new samples or \code{NA}s in
-the original data frame.}
+\item{\code{"locf"}}{(\emph{"Last observation carried forward"}). Fills new and
+missing samples with the most recent valid non-\code{NA} value to the left,
+or the nearest valid value to the right for leading \code{NA}s. Safe for
+numeric, integer, and character columns.}
+\item{\code{"linear"}}{Fills new and missing samples via linear interpolation
+using \code{\link[stats:approxfun]{stats::approx()}}. Suitable for numeric columns only; non-numeric
+columns will fall back to \code{"locf"} behaviour.}
+\item{\code{"none"}}{Matches each new sample to the nearest original
+\code{time_channel} value within half a sample-interval tolerance, without
+any interpolation. New samples that fall between original values are
+returned as \code{NA}.}
 }}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
@@ -56,35 +56,50 @@ the original data frame.}
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
-A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
-available with \code{attributes()}.
+A \link[tibble:tibble-package]{tibble} of class \code{"mnirs"}. Metadata are
+stored as attributes and can be accessed with \code{attributes(data)}.
 }
 \description{
-Up- or down-sample the number of samples in an \emph{"mnirs"} data frame
-using interpolation.
+Up- or down-sample an \emph{"mnirs"} data frame to a new sample rate, filling
+new samples via nearest-neighbour matching or interpolation.
 }
 \details{
 This function uses \code{\link[=replace_missing]{replace_missing()}} (based on \code{\link[stats:approxfun]{stats::approx()}}) to
-interpolate across new samples in the re-sampled data range.
+interpolate across new samples in the resampled data range.
+\subsection{Sample rate and time channel}{
 
-\code{time_channel} and \code{sample_rate} can be retrieved automatically from
-\code{data} of class \emph{"mnirs"} which has been processed with \code{{mnirs}},
-if not defined explicitly.
+\code{time_channel} and \code{sample_rate} are retrieved automatically from \code{data}
+of class \emph{"mnirs"} which has been processed with \code{{mnirs}}, if not
+defined explicitly.
 
 Otherwise, \code{sample_rate} will be estimated from the values in \code{time_channel}.
 However, this may return unexpected values, and it is safer to define
 \code{sample_rate} explicitly.
+}
 
-The \emph{default} setting \code{resample_rate = sample_rate} will interpolate over
-missing and repeated samples within the bounds of the existing data
-rounded to the nearest \code{sample_rate}.
+\subsection{Default behaviour}{
 
-By \emph{default}, \code{method = "linear"} or \code{"locf"} will interpolate across \code{NA}s
-in the original data and any new samples between existing values of
-\code{time_channel} (see \code{?replace_missing}). Whereas \code{method = "none"} will
-match values of numeric columns from the original samples of \code{time_channel}
-to the new re-sampled samples, without interpolation. Meaning \code{NA}s in the
-original data and any new samples will be returned as \code{NA}.
+When \code{resample_rate} is omitted, the output has the same \code{sample_rate} as
+the input but with a regular, evenly-spaced \code{time_channel}. This is useful
+for regularising data that contains missing or repeated samples without
+changing the nominal rate.
+}
+
+\subsection{Column handling}{
+
+Numeric columns are interpolated according to \code{method} (see
+\code{?replace_missing}). Non-numeric columns (character event labels, integer
+lap numbers) are always filled by last-observation-carried-forward,
+regardless of \code{method}:
+\itemize{
+\item When down-sampling, the first non-\code{NA} value in each output bin is used.
+\item When up-sampling or regularising, the most recent original value is
+carried forward into new samples.
+\item For \code{method = "none"}, existing rows are matched to the nearest original
+values of \code{time_channel} without interpolation or filling, meaning newly
+created samples and any \code{NA}s in the original data are returned as \code{NA}.
+}
+}
 }
 \examples{
 ## read example data
@@ -100,9 +115,9 @@ data
 
 data_resampled <- resample_mnirs(
     data,
-    resample_rate = 2,
-    method = "linear",
-    verbose = TRUE
+    resample_rate = 2,  ## blank channels will be retrieved from metadata
+    method = "linear",  ## blank by default will resample to `sample_rate`
+    verbose = TRUE      ## linear interpolation across resampled indices
 )
 
 ## note the altered `time` values resolving the above warning

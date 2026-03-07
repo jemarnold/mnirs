@@ -1,54 +1,67 @@
-#' Re-sample a data frame
+#' Re-sample an *{mnirs}* data frame
 #'
-#' Up- or down-sample the number of samples in an *"mnirs"* data frame
-#' using interpolation.
+#' Up- or down-sample an *"mnirs"* data frame to a new sample rate, filling
+#' new samples via nearest-neighbour matching or interpolation.
 #'
-#' @param resample_rate An *optional* numeric value indicating the desired
-#'   output sample rate (in Hz) to re-sample the data frame. The *default*
-#'   `resample_rate = sample_rate` will interpolate over missing and repeated
-#'   samples within the bounds of the existing data rounded to the nearest
-#'   value in Hz.
-#' @param method A character string indicating how to handle resampling
-#'   (see *Details* for more on each method):
+#' @param resample_rate An *optional* sample rate (Hz) for the output data 
+#'   frame. If `NULL` (*default*) resamples to the existing `sample_rate`,
+#'  which regularises any irregular samples without changing the rate.
+#' 
+#' @param method A character string specifying how new samples are filled. 
+#'   Default is *"locf"* (see *Details* for more on each method):
 #'   \describe{
-#'      \item{`"linear"`}{Re-samples and replaces `NA`s via linear
-#'      interpolation (the *default*) using [stats::approx()].}
-#'      \item{`"locf"`}{(*"Last observation carried forward"*). Re-samples and
-#'      replaces `NA`s with the most recent valid non-`NA` value to the left
-#'      for trailing samples or to the right for leading samples, using
-#'      [stats::approx()].}
-#'      \item{`"none"`}{Re-samples by matching values to their nearest value of
-#'      `time_channel`, *without* interpolating across new samples or `NA`s in
-#'      the original data frame.}
+#'     \item{`"locf"`}{(*"Last observation carried forward"*). Fills new and 
+#'     missing samples with the most recent valid non-`NA` value to the left,
+#'     or the nearest valid value to the right for leading `NA`s. Safe for
+#'     numeric, integer, and character columns.} 
+#'     \item{`"linear"`}{Fills new and missing samples via linear interpolation
+#'     using [stats::approx()]. Suitable for numeric columns only; non-numeric
+#'     columns will fall back to `"locf"` behaviour.}
+#'     \item{`"none"`}{Matches each new sample to the nearest original
+#'     `time_channel` value within half a sample-interval tolerance, without
+#'     any interpolation. New samples that fall between original values are
+#'     returned as `NA`.}
 #'   }
+#' 
 #' @inheritParams validate_mnirs
 #'
 #' @details
 #' This function uses [replace_missing()] (based on [stats::approx()]) to
-#'   interpolate across new samples in the re-sampled data range.
+#' interpolate across new samples in the resampled data range.
+#' 
+#' ## Sample rate and time channel
 #'
-#' `time_channel` and `sample_rate` can be retrieved automatically from
-#'   `data` of class *"mnirs"* which has been processed with `{mnirs}`,
-#'   if not defined explicitly.
+#' `time_channel` and `sample_rate` are retrieved automatically from `data` 
+#' of class *"mnirs"* which has been processed with `{mnirs}`, if not 
+#' defined explicitly.
 #'
 #' Otherwise, `sample_rate` will be estimated from the values in `time_channel`.
-#'   However, this may return unexpected values, and it is safer to define
-#'   `sample_rate` explicitly.
+#' However, this may return unexpected values, and it is safer to define
+#' `sample_rate` explicitly.
 #'
-#' The *default* setting `resample_rate = sample_rate` will interpolate over
-#'   missing and repeated samples within the bounds of the existing data
-#'   rounded to the nearest `sample_rate`.
+#' ## Default behaviour
 #'
-#' By *default*, `method = "linear"` or `"locf"` will interpolate across `NA`s
-#'   in the original data and any new samples between existing values of
-#'   `time_channel` (see `?replace_missing`). Whereas `method = "none"` will
-#'   match values of numeric columns from the original samples of `time_channel`
-#'   to the new re-sampled samples, without interpolation. Meaning `NA`s in the
-#'   original data and any new samples will be returned as `NA`.
+#' When `resample_rate` is omitted, the output has the same `sample_rate` as 
+#' the input but with a regular, evenly-spaced `time_channel`. This is useful 
+#' for regularising data that contains missing or repeated samples without 
+#' changing the nominal rate.
+#' 
+#' ## Column handling
 #'
-#' @returns
-#' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
-#'   available with `attributes()`.
+#' Numeric columns are interpolated according to `method` (see 
+#' `?replace_missing`). Non-numeric columns (character event labels, integer 
+#' lap numbers) are always filled by last-observation-carried-forward, 
+#' regardless of `method`:
+#'
+#' - When down-sampling, the first non-`NA` value in each output bin is used.
+#' - When up-sampling or regularising, the most recent original value is
+#'   carried forward into new samples.
+#' - For `method = "none"`, existing rows are matched to the nearest original
+#'   values of `time_channel` without interpolation or filling, meaning newly
+#'   created samples and any `NA`s in the original data are returned as `NA`.
+#'
+#' @returns A [tibble][tibble::tibble-package] of class `"mnirs"`. Metadata are
+#'   stored as attributes and can be accessed with `attributes(data)`.
 #'
 #' @examples
 #' ## read example data
@@ -58,15 +71,15 @@
 #'     time_channel = c(time = "hh:mm:ss"),
 #'     verbose = TRUE
 #' )
-#' 
+#'
 #' ## note warning about irregular sampling
 #' data
 #'
 #' data_resampled <- resample_mnirs(
 #'     data,
-#'     resample_rate = 2,
-#'     method = "linear",
-#'     verbose = TRUE
+#'     resample_rate = 2,  ## blank channels will be retrieved from metadata
+#'     method = "linear",  ## blank by default will resample to `sample_rate`
+#'     verbose = TRUE      ## linear interpolation across resampled indices
 #' )
 #'
 #' ## note the altered `time` values resolving the above warning
@@ -78,7 +91,7 @@ resample_mnirs <- function(
     time_channel = NULL,
     sample_rate = NULL,
     resample_rate = sample_rate, ## placeholder indicating default condition
-    method = c("linear", "locf", "none"),
+    method = c("locf", "linear", "none"),
     verbose = TRUE
 ) {
     ## validation ====================================
