@@ -64,7 +64,7 @@ theme_set(theme_mnirs()) ## set pretty default ggplot2 theme
 ```{r}
 df <- read_mnirs(
     example_mnirs("train.red"),
-    nirs_channels = c(smo2 = "SmO2"),
+    nirs_channels = c(smo2 = "SmO2 unfiltered"),
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>

@@ -901,6 +901,52 @@ test_that("ensemble_intervals returns the right number of dims", {
     expect_equal(ncol(result), length(nirs_channels) + 1)
 })
 
+test_that("ensemble_intervals preserves all metadata attributes", {
+    interval1 <- create_mock_interval(time_start = 10, n = 11, event_time = 10)
+    interval2 <- create_mock_interval(time_start = 20, n = 11, event_time = 20)
+    interval_list <- list(interval_1 = interval1, interval_2 = interval2)
+    metadata <- list(
+        time_channel = "time",
+        sample_rate = 10,
+        nirs_device = "MockDevice",
+        event_channel = "event",
+        start_timestamp = as.POSIXct("2024-01-01")
+    )
+
+    result <- ensemble_intervals(
+        interval_list = interval_list,
+        nirs_channels = c("smo2_left", "smo2_right"),
+        metadata = metadata,
+        verbose = FALSE
+    )
+
+    expect_equal(attr(result, "nirs_device"), "MockDevice")
+    expect_equal(attr(result, "nirs_channels"), c("smo2_left", "smo2_right"))
+    expect_equal(attr(result, "event_channel"), "event")
+    expect_equal(
+        attr(result, "start_timestamp"),
+        as.POSIXct("2024-01-01")
+    )
+    ## class is preserved
+    expect_true(inherits(result, "mnirs"))
+})
+
+test_that("ensemble_intervals deduplicates nirs_channels attr", {
+    interval1 <- create_mock_interval(time_start = 0, n = 11, event_time = 0)
+    interval_list <- list(i1 = interval1, i2 = interval1)
+    metadata <- list(time_channel = "time", sample_rate = 10)
+
+    ## duplicated channel name supplied; attr must be unique
+    result <- ensemble_intervals(
+        interval_list = interval_list,
+        nirs_channels = c("smo2_left", "smo2_left"),
+        metadata = metadata,
+        verbose = FALSE
+    )
+
+    expect_equal(attr(result, "nirs_channels"), "smo2_left")
+})
+
 
 ## group_intervals() ==================================================
 test_that("group_intervals returns distinct intervals unchanged", {
@@ -1021,6 +1067,143 @@ test_that("group_intervals returns single interval as distinct regardless", {
     )
 
     expect_length(result, 1)
+})
+
+test_that("group_intervals (distinct) preserves all metadata on each interval", {
+    interval1 <- create_mock_interval(time_start = 0, n = 11, event_time = 0)
+    interval2 <- create_mock_interval(time_start = 10, n = 11, event_time = 10)
+    interval_list <- list(interval_1 = interval1, interval_2 = interval2)
+    metadata <- list(
+        time_channel = "time",
+        sample_rate = 10,
+        nirs_device = "MockDevice",
+        event_channel = "event",
+        start_timestamp = as.POSIXct("2024-01-01")
+    )
+
+    result <- group_intervals(
+        interval_list = interval_list,
+        nirs_channels = list(
+            c("smo2_left", "smo2_right"),
+            c("smo2_left", "smo2_right")
+        ),
+        metadata = metadata,
+        event_groups = "distinct",
+        zero_time = FALSE,
+        verbose = FALSE
+    )
+
+    for (iv in result) {
+        expect_equal(attr(iv, "nirs_device"), "MockDevice")
+        expect_equal(attr(iv, "nirs_channels"), c("smo2_left", "smo2_right"))
+        expect_equal(attr(iv, "time_channel"), "time")
+        expect_equal(attr(iv, "event_channel"), "event")
+        expect_equal(attr(iv, "sample_rate"), 10)
+        expect_equal(
+            attr(iv, "start_timestamp"),
+            as.POSIXct("2024-01-01")
+        )
+    }
+    ## event_times and interval_span forwarded from original interval attrs
+    expect_true(inherits(result[[1]], "mnirs"))
+    expect_equal(attr(result[[1]], "event_times"), 0)
+    expect_equal(attr(result[[1]], "interval_span"), c(-1, 4))
+    expect_true(inherits(result[[2]], "mnirs"))
+    expect_equal(attr(result[[2]], "event_times"), 10)
+    expect_equal(attr(result[[2]], "interval_span"), c(-1, 4))
+})
+
+
+test_that("group_intervals custom multi-interval groups preserve metadata", {
+    interval1 <- create_mock_interval(time_start = 0, n = 11, event_time = 0)
+    interval2 <- create_mock_interval(time_start = 10, n = 11, event_time = 10)
+    interval3 <- create_mock_interval(time_start = 20, n = 11, event_time = 20)
+    interval4 <- create_mock_interval(time_start = 30, n = 11, event_time = 30)
+    interval_list <- list(
+        interval_1 = interval1,
+        interval_2 = interval2,
+        interval_3 = interval3,
+        interval_4 = interval4
+    )
+    metadata <- list(
+        time_channel = "time",
+        sample_rate = 10,
+        nirs_device = "MockDevice",
+        event_channel = "event"
+    )
+
+    result <- group_intervals(
+        interval_list = interval_list,
+        nirs_channels = rep(list(c("smo2_left", "smo2_right")), 4),
+        metadata = metadata,
+        event_groups = list(c(1, 2), c(3, 4)),
+        zero_time = TRUE,
+        verbose = FALSE
+    )
+
+    for (iv in result) {
+        expect_equal(attr(iv, "nirs_device"), "MockDevice")
+        expect_equal(attr(iv, "sample_rate"), 10)
+        expect_equal(attr(iv, "event_channel"), "event")
+        expect_true(inherits(iv, "mnirs"))
+    }
+    ## ensemble sub-groups collect event_times as a list
+    expect_length(attr(result[[1]], "event_times"), 2)
+    expect_equal(
+        attr(result[[1]], "event_times"),
+        list(0, 10),
+        ignore_attr = TRUE
+    )
+    expect_length(attr(result[[2]], "event_times"), 2)
+    expect_equal(
+        attr(result[[2]], "event_times"),
+        list(20, 30),
+        ignore_attr = TRUE
+    )
+})
+
+test_that("group_intervals custom single-interval group retains original attrs", {
+    interval1 <- create_mock_interval(
+        time_start = 0,
+        n = 11,
+        event_time = 0,
+        span = c(-2, 5)
+    )
+    interval2 <- create_mock_interval(
+        time_start = 10,
+        n = 11,
+        event_time = 10,
+        span = c(-1, 4)
+    )
+    interval3 <- create_mock_interval(
+        time_start = 20,
+        n = 11,
+        event_time = 20,
+        span = c(-1, 4)
+    )
+    interval_list <- list(
+        interval_1 = interval1,
+        interval_2 = interval2,
+        interval_3 = interval3
+    )
+    metadata <- list(time_channel = "time", sample_rate = 10)
+
+    ## intervals 1+2 ensembled; interval 3 returned as lone group (raw)
+    result <- group_intervals(
+        interval_list = interval_list,
+        nirs_channels = rep(list(c("smo2_left", "smo2_right")), 3),
+        metadata = metadata,
+        event_groups = list(c(1, 2), 3),
+        zero_time = FALSE,
+        verbose = FALSE
+    )
+
+    lone <- result[["interval_3"]]
+    ## original attrs are preserved on the lone interval
+    expect_equal(attr(lone, "nirs_channels"), c("smo2_left", "smo2_right"))
+    expect_equal(attr(lone, "time_channel"), "time")
+    expect_equal(attr(lone, "event_times"), 20)
+    expect_equal(attr(lone, "interval_span"), c(-1, 4))
 })
 
 
