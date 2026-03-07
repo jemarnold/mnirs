@@ -40,7 +40,7 @@ create_mock_interval <- function(
         class = c("mnirs", class(df)),
         nirs_channels = c("smo2_left", "smo2_right"),
         time_channel = "time",
-        event_times = event_time,
+        interval_times = event_time,
         interval_span = span,
         nirs_device = "test_device",
         event_channel = NULL
@@ -594,7 +594,7 @@ test_that("recycle_param messages when recycling groups with verbose", {
 ## apply_span_to_indices() ================================================
 test_that("apply_span_to_indices creates correct interval specification", {
     time_vec <- seq(0, 10, by = 0.1)
-    raw_indices <- list(
+    interval_idx <- list(
         start_idx = c(20, 50, 80),
         end_idx = NULL,
         has_start = TRUE,
@@ -603,7 +603,7 @@ test_that("apply_span_to_indices creates correct interval specification", {
     span <- list(c(-1, 1), c(-1, 1), c(-1, 1))
 
     result <- apply_span_to_indices(
-        raw_indices,
+        interval_idx,
         time_vec,
         span,
         verbose = FALSE
@@ -613,12 +613,40 @@ test_that("apply_span_to_indices creates correct interval specification", {
     expect_equal(nrow(result), 3)
     expect_equal(result$start_idx, c(10, 40, 70))
     expect_equal(result$end_idx, c(30, 60, 90))
-    expect_equal(result$event_times, time_vec[c(20, 50, 80)])
+    expect_equal(result$interval_times, as.list(time_vec[c(20, 50, 80)]))
+})
+
+test_that("apply_span_to_indices creates correct specification with start, end", {
+    time_vec <- seq(0, 10, by = 0.1)
+    start_idx <- c(10, 40, 70)
+    end_idx <- c(30, 60, 90)
+    interval_idx <- list(
+        start_idx = start_idx,
+        end_idx = end_idx,
+        has_start = TRUE,
+        has_end = TRUE
+    )
+
+    result <- apply_span_to_indices(
+        interval_idx,
+        time_vec,
+        list(c(0, 0), c(0, 0), c(0, 0)),
+        verbose = FALSE
+    )
+
+    expect_s3_class(result, "data.frame")
+    expect_equal(nrow(result), 3)
+    expect_equal(result$start_idx, c(10, 40, 70))
+    expect_equal(result$end_idx, c(30, 60, 90))
+    expect_equal(
+        result$interval_times,
+        Map(c, time_vec[start_idx], time_vec[end_idx])
+    )
 })
 
 test_that("apply_span_to_indices calculates correct start/end indices", {
     time_vec <- seq(0, 10, by = 0.1)
-    raw_indices <- list(
+    interval_idx <- list(
         start_idx = 51L,
         end_idx = NULL,
         has_start = TRUE,
@@ -626,9 +654,9 @@ test_that("apply_span_to_indices calculates correct start/end indices", {
     )
 
     result <- apply_span_to_indices(
-        raw_indices,
+        interval_idx,
         time_vec,
-        list(c(-1, 2)),
+        span = list(c(-1, 2)),
         verbose = FALSE
     )
 
@@ -641,7 +669,7 @@ test_that("apply_span_to_indices calculates correct start/end indices", {
 
 test_that("apply_span_to_indices clips partial out-of-bounds intervals", {
     time_vec <- seq(0, 10, by = 0.1)
-    raw_indices <- list(
+    interval_idx <- list(
         start_idx = 6L,
         end_idx = NULL,
         has_start = TRUE,
@@ -649,9 +677,9 @@ test_that("apply_span_to_indices clips partial out-of-bounds intervals", {
     )
 
     result <- apply_span_to_indices(
-        raw_indices,
+        interval_idx,
         time_vec,
-        list(c(-2, 2)),
+        span = list(c(-2, 2)),
         verbose = FALSE
     )
 
@@ -660,9 +688,9 @@ test_that("apply_span_to_indices clips partial out-of-bounds intervals", {
     ## returns warning with verbose = TRUE
     expect_warning(
         result <- apply_span_to_indices(
-            raw_indices,
+            interval_idx,
             time_vec,
-            list(c(-2, 10)),
+            span = list(c(-2, 10)),
             verbose = TRUE
         ),
         "partially outside"
@@ -674,7 +702,7 @@ test_that("apply_span_to_indices clips partial out-of-bounds intervals", {
 
 test_that("apply_span_to_indices errors for entirely out-of-bounds", {
     time_vec <- seq(0, 10, by = 0.1)
-    raw_indices <- list(
+    interval_idx <- list(
         start_idx = 50L,
         end_idx = NULL,
         has_start = TRUE,
@@ -683,9 +711,9 @@ test_that("apply_span_to_indices errors for entirely out-of-bounds", {
 
     expect_error(
         apply_span_to_indices(
-            raw_indices,
+            interval_idx,
             time_vec,
-            list(c(100, 200)),
+            span = list(c(100, 200)),
             verbose = FALSE
         ),
         regexp = "entirely outside"
@@ -694,7 +722,7 @@ test_that("apply_span_to_indices errors for entirely out-of-bounds", {
 
 test_that("apply_span_to_indices applies span correctly with start+end", {
     time_vec <- seq(0, 10, by = 0.1)
-    raw_indices <- list(
+    interval_idx <- list(
         start_idx = 21L, ## time = 2
         end_idx = 61L, ## time = 6
         has_start = TRUE,
@@ -703,9 +731,9 @@ test_that("apply_span_to_indices applies span correctly with start+end", {
 
     ## span[1] shifts start, span[2] shifts end
     result <- apply_span_to_indices(
-        raw_indices,
+        interval_idx,
         time_vec,
-        list(c(-1, 2)),
+        span = list(c(-1, 2)),
         verbose = FALSE
     )
 
@@ -722,10 +750,10 @@ test_that("extract_interval_list returns correct number of intervals", {
     interval_spec <- data.frame(
         start_idx = c(10, 50),
         end_idx = c(30, 70),
-        event_times = c(1, 5),
         span_before = c(-1, -1),
         span_after = c(2, 2)
     )
+    interval_spec$interval_times <- list(1, 5) ## two start_times, no end_times
 
     result <- extract_interval_list(
         data = data,
@@ -746,10 +774,10 @@ test_that("extract_interval_list extracts correct row ranges", {
     interval_spec <- data.frame(
         start_idx = 20,
         end_idx = 40,
-        event_times = 3,
         span_before = -1,
         span_after = 1
     )
+    interval_spec$interval_times <- list(3) ## one start_times, no end_times
 
     result <- extract_interval_list(
         data = data,
@@ -766,10 +794,10 @@ test_that("extract_interval_list preserves metadata attributes", {
     interval_spec <- data.frame(
         start_idx = 10,
         end_idx = 30,
-        event_times = 1.5,
         span_before = -0.5,
         span_after = 1.5
     )
+    interval_spec$interval_times <- list(c(1.5, 3.0)) ## one start_times, one end_times
 
     result <- extract_interval_list(
         data = data,
@@ -777,7 +805,7 @@ test_that("extract_interval_list preserves metadata attributes", {
         nirs_channels = list(c("smo2_left"))
     )
 
-    expect_equal(attr(result[[1L]], "event_times"), 1.5)
+    expect_equal(attr(result[[1L]], "interval_times"), c(1.5, 3.0))
     expect_equal(attr(result[[1L]], "interval_span"), c(-0.5, 1.5))
     expect_equal(attr(result[[1L]], "nirs_channels"), "smo2_left")
 })
@@ -841,8 +869,8 @@ test_that("ensemble_intervals preserves metadata", {
 
     expect_equal(attr(result, "time_channel"), "time")
     expect_equal(attr(result, "sample_rate"), 10)
-    expect_true(is.list(attr(result, "event_times")))
-    expect_setequal(unlist(attr(result, "event_times")), c(10, 20))
+    expect_true(is.list(attr(result, "interval_times")))
+    expect_setequal(unlist(attr(result, "interval_times")), c(10, 20))
     expect_true(is.list(attr(result, "interval_span")))
     expect_setequal(lengths(attr(result, "interval_span")), 2)
 })
@@ -1104,12 +1132,12 @@ test_that("group_intervals (distinct) preserves all metadata on each interval", 
             as.POSIXct("2024-01-01")
         )
     }
-    ## event_times and interval_span forwarded from original interval attrs
+    ## interval_times and interval_span forwarded from original interval attrs
     expect_true(inherits(result[[1]], "mnirs"))
-    expect_equal(attr(result[[1]], "event_times"), 0)
+    expect_equal(attr(result[[1]], "interval_times"), 0)
     expect_equal(attr(result[[1]], "interval_span"), c(-1, 4))
     expect_true(inherits(result[[2]], "mnirs"))
-    expect_equal(attr(result[[2]], "event_times"), 10)
+    expect_equal(attr(result[[2]], "interval_times"), 10)
     expect_equal(attr(result[[2]], "interval_span"), c(-1, 4))
 })
 
@@ -1147,16 +1175,16 @@ test_that("group_intervals custom multi-interval groups preserve metadata", {
         expect_equal(attr(iv, "event_channel"), "event")
         expect_true(inherits(iv, "mnirs"))
     }
-    ## ensemble sub-groups collect event_times as a list
-    expect_length(attr(result[[1]], "event_times"), 2)
+    ## ensemble sub-groups collect interval_times as a list
+    expect_length(attr(result[[1]], "interval_times"), 2)
     expect_equal(
-        attr(result[[1]], "event_times"),
+        attr(result[[1]], "interval_times"),
         list(0, 10),
         ignore_attr = TRUE
     )
-    expect_length(attr(result[[2]], "event_times"), 2)
+    expect_length(attr(result[[2]], "interval_times"), 2)
     expect_equal(
-        attr(result[[2]], "event_times"),
+        attr(result[[2]], "interval_times"),
         list(20, 30),
         ignore_attr = TRUE
     )
@@ -1202,7 +1230,7 @@ test_that("group_intervals custom single-interval group retains original attrs",
     ## original attrs are preserved on the lone interval
     expect_equal(attr(lone, "nirs_channels"), c("smo2_left", "smo2_right"))
     expect_equal(attr(lone, "time_channel"), "time")
-    expect_equal(attr(lone, "event_times"), 20)
+    expect_equal(attr(lone, "interval_times"), 20)
     expect_equal(attr(lone, "interval_span"), c(-1, 4))
 })
 
@@ -1265,10 +1293,13 @@ test_that("extract_intervals works with start and end", {
     )
 
     expect_length(result, 2)
-    expect_equal(result[[1]]$time[1], 2, tolerance = 0.1)
-    expect_equal(rev(result[[1]]$time)[1], 4, tolerance = 0.1)
-    expect_equal(result[[2]]$time[1], 5, tolerance = 0.1)
-    expect_equal(rev(result[[2]]$time)[1], 8, tolerance = 0.1)
+    expect_equal(result[[1]]$time[1], 2)
+    expect_equal(rev(result[[1]]$time)[1], 4)
+    expect_equal(result[[2]]$time[1], 5)
+    expect_equal(rev(result[[2]]$time)[1], 8)
+    ## interval_times is c(start, end) when both boundaries defined
+    expect_equal(attr(result[[1]], "interval_times"), c(2, 4))
+    expect_equal(attr(result[[2]], "interval_times"), c(5, 8))
 })
 
 test_that("extract_intervals works with by_sample", {
@@ -1463,8 +1494,8 @@ test_that("extract_intervals recycles positive span scalar", {
     )
 
     ## span = 1 → c(0, 1): start unchanged, end shifted +1
-    expect_equal(result[[1]]$time[1], 2, tolerance = 0.1)
-    expect_equal(rev(result[[1]]$time)[1], 6, tolerance = 0.1)
+    expect_equal(result[[1]]$time[1], 2)
+    expect_equal(rev(result[[1]]$time)[1], 6)
 })
 
 test_that("extract_intervals recycles negative span scalar", {
@@ -1480,8 +1511,8 @@ test_that("extract_intervals recycles negative span scalar", {
     )
 
     ## span = -1 → c(-1, 0): start shifted -1, end unchanged
-    expect_equal(result[[1]]$time[1], 1, tolerance = 0.1)
-    expect_equal(rev(result[[1]]$time)[1], 5, tolerance = 0.1)
+    expect_equal(result[[1]]$time[1], 1)
+    expect_equal(rev(result[[1]]$time)[1], 5)
 })
 
 test_that("extract_intervals applies zero_time correctly", {
@@ -1497,7 +1528,7 @@ test_that("extract_intervals applies zero_time correctly", {
     )
 
     # Time should start at -1 (span before) after zero offset
-    expect_equal(min(result[[1]]$time), -1, tolerance = 0.1)
+    expect_equal(min(result[[1]]$time), -1)
 })
 
 test_that("extract_intervals handles grouping", {

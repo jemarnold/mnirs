@@ -255,7 +255,7 @@ read_mnirs <- function(
 #'   - event_channel
 #'   - sample_rate
 #'   - start_timestamp
-#'   - event_times 
+#'   - interval_times
 #'   - interval_span 
 #'
 #' @details
@@ -309,7 +309,7 @@ create_mnirs_data <- function(data, ...) {
         event_channel = metadata$event_channel,
         sample_rate = metadata$sample_rate,
         start_timestamp = metadata$start_timestamp,
-        event_times = metadata$event_times,
+        interval_times = metadata$interval_times,
         interval_span = metadata$interval_span,
     )
 

@@ -100,10 +100,9 @@
 #'       `interval`, `nirs_channels`, and individual method parameters.}
 #'   \item{`data`}{A list of the original input data frames augmented with a
 #'       `*_fitted` column of model predicted values for each `nirs_channel`.}
-#'   \item{`event_times`}{A data frame of event times (`t0`) for each
-#'       `nirs_channel`
-#'       per interval, sourced from `event_times` supplied from
-#'       `extract_intervals`, if present in the metadata.}
+#'   \item{`interval_times`}{A data frame of interval times for each
+#'       `nirs_channel` per interval, supplied from `extract_intervals`, if
+#'       present in the metadata.}
 #'   \item{`diagnostics`}{A data frame of model diagnostics (`n_obs`, `r2`,
 #'       `adj_r2`, `pseudo_r2`, `rmse`, `snr`, `cv_rmse`) with one row per
 #'       `nirs_channel` and interval.}
@@ -271,11 +270,11 @@ analyse_kinetics.peak_slope <- function(
     data_list <- Filter(\(.x) !is.null(.x), results$data)
     names(data_list) <- interval_names
 
-    ## extract event_times as list-column (one row per interval)
-    event_times_df <- data.frame(interval = interval_names)
-    event_times_df$event_times <- lapply(data_list, \(.df) {
-        et <- attr(.df, "event_times")
-        if (is.null(et)) NA_real_ else unlist(et)
+    ## extract interval_times as list-column (one row per interval)
+    interval_times_df <- data.frame(interval = interval_names)
+    interval_times_df$interval_times <- lapply(data_list, \(.df) {
+        it <- attr(.df, "interval_times")
+        if (is.null(it)) NA_real_ else unlist(it)
     })
 
     ## remove lists from results & relocate interval col
@@ -291,7 +290,7 @@ analyse_kinetics.peak_slope <- function(
             method = method, ## method = "peak_slope"
             results = results, ## tibble of scalar results
             data = data_list, ## df of data frames
-            event_times = event_times_df, ## df of `event_times` `t` values
+            interval_times = interval_times_df, ## df of `interval_times` `t` values
             diagnostics = diagnostics_df, ## df of model diagnostics
             channel_args = channel_args_df, ## df of channel args provided to `analyse_slope`
             call = match.call()
@@ -338,7 +337,7 @@ as_data_list <- function(data) {
                     "time_channel",
                     "event_channel",
                     "sample_rate",
-                    "event_times",
+                    "interval_times",
                     "interval_span"
                 )]
             )

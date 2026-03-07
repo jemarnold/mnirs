@@ -65,10 +65,9 @@ one row per \code{nirs_channel} and per interval, containing columns
 \code{interval}, \code{nirs_channels}, and individual method parameters.}
 \item{\code{data}}{A list of the original input data frames augmented with a
 \verb{*_fitted} column of model predicted values for each \code{nirs_channel}.}
-\item{\code{event_times}}{A data frame of event times (\code{t0}) for each
-\code{nirs_channel}
-per interval, sourced from \code{event_times} supplied from
-\code{extract_intervals}, if present in the metadata.}
+\item{\code{interval_times}}{A data frame of interval times for each
+\code{nirs_channel} per interval, supplied from \code{extract_intervals}, if
+present in the metadata.}
 \item{\code{diagnostics}}{A data frame of model diagnostics (\code{n_obs}, \code{r2},
 \code{adj_r2}, \code{pseudo_r2}, \code{rmse}, \code{snr}, \code{cv_rmse}) with one row per
 \code{nirs_channel} and interval.}

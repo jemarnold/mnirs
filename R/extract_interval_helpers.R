@@ -348,17 +348,23 @@ apply_span_to_indices <- function(
     span_before <- vapply(span, `[`, numeric(1), 1L)
     span_after <- vapply(span, `[`, numeric(1), 2L)
 
-    event_times <- time_vec[pmin(interval_idx$start_idx, n_obs)]
+    ## TODO test whether pmin() calls are necessary
+    # event_times <- time_vec[pmin(interval_idx$start_idx, n_obs)]
+    event_times <- time_vec[interval_idx$start_idx]
 
     if (interval_idx$has_start && interval_idx$has_end) {
         ## span[1] shifts starts, span[2] shifts ends
-        start_times <- time_vec[pmin(interval_idx$start_idx, n_obs)] +
+        start_times <- time_vec[interval_idx$start_idx] +
             span_before
-        end_times <- time_vec[pmin(interval_idx$end_idx, n_obs)] + span_after
+        end_times <- time_vec[interval_idx$end_idx] + span_after
+        ## two-element c(start, end) when both boundaries defined
+        interval_times <- Map(c, start_times, end_times)
     } else {
         ## start-only or end-only: both span values apply to the reference
         start_times <- event_times + span_before
         end_times <- event_times + span_after
+        ## TODO stored as a list-column to allow variable length per row
+        interval_times <- as.list(event_times)
     }
 
     ## convert boundary times to boundary indices
@@ -380,32 +386,33 @@ apply_span_to_indices <- function(
 
     ## check for partial out of bounds
     partial_oob <- start_idx < 1L | end_idx > n_obs
-    if (verbose && any(partial_oob)) {
-        oob_ids <- which(partial_oob)
-        n_oob <- qty(length(oob_ids))
-        cli_warn(c(
-            "!" = "{n_oob} Interval{?s} {.val {oob_ids}} {n_oob} {?is/are} \\
-            partially outside data bounds.",
-            "i" = "Returning available data only."
-        ))
+    ## reduce to valid range
+    if (any(partial_oob)) {
+        start_idx <- pmax(1L, start_idx)
+        end_idx <- pmin(n_obs, end_idx)
+
+        if (verbose) {
+            oob_ids <- which(partial_oob)
+            n_oob <- qty(length(oob_ids))
+            cli_warn(c(
+                "!" = "{n_oob} Interval{?s} {.val {oob_ids}} {n_oob} \\
+                {?is/are} partially outside data bounds.",
+                "i" = "Returning available data only."
+            ))
+        }
     }
 
-    ## clip to valid range
-    start_idx <- pmax(1L, start_idx)
-    end_idx <- pmin(n_obs, end_idx)
-
-    return(
-        data.frame(
-            event_times = event_times,
-            span_before = span_before,
-            span_after = span_after,
-            start_times = start_times,
-            end_times = end_times,
-            start_idx = start_idx,
-            end_idx = end_idx,
-            stringsAsFactors = FALSE
-        )
+    result <- data.frame(
+        span_before = span_before,
+        span_after = span_after,
+        start_times = start_times,
+        end_times = end_times,
+        start_idx = start_idx,
+        end_idx = end_idx,
+        stringsAsFactors = FALSE
     )
+    result$interval_times <- interval_times
+    return(result)
 }
 
 
@@ -426,7 +433,7 @@ extract_interval_list <- function(
         create_mnirs_data(
             interval_data,
             nirs_channels = nirs_channels[[.i]], ## overwrite for interval data
-            event_times = interval_spec$event_times[.i],
+            interval_times = interval_spec$interval_times[[.i]],
             interval_span = c(
                 interval_spec$span_before[.i],
                 interval_spec$span_after[.i]
@@ -442,7 +449,7 @@ extract_interval_list <- function(
 #' Recalculate time_channel values with zero offset at event time (t0)
 #' @keywords internal
 zero_offset_data <- function(data, time_channel, t0) {
-    ## zero time channel to event_time `t0`
+    ## zero time channel to start_time `t0`
     data[[time_channel]] <- data[[time_channel]] - t0
     return(data)
 }
@@ -460,13 +467,15 @@ ensemble_intervals <- function(
     sample_rate <- metadata$sample_rate
     ## extract data & metadata from interval_list
     interval_data <- lapply(interval_list, \(.df) {
-        event_times <- attr(.df, "event_times")
+        interval_times <- attr(.df, "interval_times")
         time_channel <- attr(.df, "time_channel")
+        ## zero-offset to start time (first element of interval_times)
+        t0 <- interval_times[[1L]]
         ## return data & metadata from each interval
         list(
             ## ensemble-average time values makes no sense, so return zero-offset
-            data = zero_offset_data(.df, time_channel, event_times),
-            event_times = event_times,
+            data = zero_offset_data(.df, time_channel, t0),
+            interval_times = interval_times,
             interval_span = attr(.df, "interval_span")
         )
     })
@@ -518,7 +527,7 @@ ensemble_intervals <- function(
             event_channel = metadata$event_channel,
             sample_rate = sample_rate,
             start_timestamp = metadata$start_timestamp,
-            event_times = lapply(interval_data, `[[`, "event_times"),
+            interval_times = lapply(interval_data, `[[`, "interval_times"),
             interval_span = lapply(interval_data, `[[`, "interval_span")
         )
     )
@@ -542,8 +551,8 @@ group_intervals <- function(
     if (n_intervals == 1L || event_groups[[1L]][1L] == "distinct") {
         result <- lapply(interval_list, \(.df) {
             if (zero_time) {
-                event_times <- attr(.df, "event_times")
-                .df <- zero_offset_data(.df, time_channel, event_times)
+                t0 <- attr(.df, "interval_times")[[1L]]
+                .df <- zero_offset_data(.df, time_channel, t0)
             }
 
             create_mnirs_data(
@@ -554,7 +563,7 @@ group_intervals <- function(
                 event_channel = metadata$event_channel,
                 sample_rate = metadata$sample_rate,
                 start_timestamp = metadata$start_timestamp,
-                event_times = attr(.df, "event_times"),
+                interval_times = attr(.df, "interval_times"),
                 interval_span = attr(.df, "interval_span")
             )
         })
@@ -615,8 +624,8 @@ group_intervals <- function(
             ## single interval return as-is
             df <- interval_list[[.g]]
             if (zero_time) {
-                event_times <- attr(df, "event_times")
-                df <- zero_offset_data(df, time_channel, event_times)
+                t0 <- attr(df, "interval_times")[[1L]]
+                df <- zero_offset_data(df, time_channel, t0)
             }
             df
         } else {

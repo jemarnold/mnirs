@@ -334,7 +334,7 @@ create_kinetics_data <- function(
         nirs_channels = channels,
         time_channel = "time",
         sample_rate = sample_rate,
-        event_times = sample(t, 1)
+        interval_times = sample(t, 1)
     )
 }
 
@@ -353,13 +353,13 @@ test_that("analyse_kinetics returns correct structure", {
     expect_s3_class(result, "mnirs_kinetics")
     expect_named(
         result,
-        c("method", "results", "data", "event_times", "diagnostics",
+        c("method", "results", "data", "interval_times", "diagnostics",
           "channel_args", "call")
     )
     expect_equal(result$method, "peak_slope")
     expect_s3_class(result$results, "data.frame")
     expect_type(result$data, "list")
-    expect_s3_class(result$event_times, "data.frame")
+    expect_s3_class(result$interval_times, "data.frame")
     expect_s3_class(result$diagnostics, "data.frame")
     expect_s3_class(result$channel_args, "data.frame")
 })
@@ -426,7 +426,7 @@ test_that("analyse_kinetics$data preserves mnirs metadata with grouped input", {
         nirs_channels = "smo2",
         time_channel = "time",
         sample_rate = 10,
-        event_times = sample(df$time, 1L)
+        interval_times = sample(df$time, 1L)
     )
     grouped_df <- dplyr::group_by(df, group)
 
@@ -467,7 +467,7 @@ test_that("analyse_kinetics.peak_slope works with single data frame", {
     expect_false(is.na(result$results$slope))
     expect_false(is.na(result$results$intercept))
     expect_length(result$data, 1L)
-    expect_equal(nrow(result$event_times), 1L)
+    expect_equal(nrow(result$interval_times), 1L)
     expect_equal(nrow(result$diagnostics), 1L)
     expect_equal(nrow(result$channel_args), 1L)
 })
@@ -485,7 +485,7 @@ test_that("analyse_kinetics.peak_slope works with multiple nirs_channels", {
 
     expect_equal(nrow(result$results), 2L)
     expect_equal(result$results$nirs_channels, c("smo2_left", "smo2_right"))
-    expect_equal(nrow(result$event_times), 1L) ## event_times per interval
+    expect_equal(nrow(result$interval_times), 1L) ## interval_times per interval
     expect_equal(nrow(result$diagnostics), 2L)
     expect_equal(nrow(result$channel_args), 2L)
     ## data list should have one element (single interval)
@@ -509,7 +509,7 @@ test_that("analyse_kinetics.peak_slope works with list of data frames", {
 
     expect_equal(nrow(result$results), 2L)
     expect_equal(result$results$interval, c("baseline", "exercise"))
-    expect_equal(nrow(result$event_times), 2L)
+    expect_equal(nrow(result$interval_times), 2L)
     expect_equal(nrow(result$diagnostics), 2L)
     expect_equal(nrow(result$channel_args), 2L)
     expect_length(result$data, 2L)
@@ -659,11 +659,11 @@ test_that("analyse_kinetics.peak_slope augments data with fitted columns", {
     expect_true(any(is.na(aug$smo2_left_fitted)))
 })
 
-test_that("event_times is a list-column with one row per interval (distinct)", {
+test_that("interval_times is a list-column with one row per interval (distinct)", {
     df1 <- create_kinetics_data(n = 50)
     df2 <- create_kinetics_data(n = 50)
-    attr(df1, "event_times") <- 1.5
-    attr(df2, "event_times") <- 3.0
+    attr(df1, "interval_times") <- 1.5
+    attr(df2, "interval_times") <- 3.0
 
     result <- analyse_kinetics(
         list(baseline = df1, exercise = df2),
@@ -673,20 +673,20 @@ test_that("event_times is a list-column with one row per interval (distinct)", {
         verbose = FALSE
     )
 
-    et <- result$event_times
+    et <- result$interval_times
     expect_s3_class(et, "data.frame")
     expect_equal(nrow(et), 2L)
     expect_equal(et$interval, c("baseline", "exercise"))
-    expect_type(et$event_times, "list")
+    expect_type(et$interval_times, "list")
     ## each entry is a scalar numeric
-    expect_equal(et$event_times[[1L]], 1.5)
-    expect_equal(et$event_times[[2L]], 3.0)
+    expect_equal(et$interval_times[[1L]], 1.5)
+    expect_equal(et$interval_times[[2L]], 3.0)
 })
 
-test_that("event_times list-column unpacks multiple times (ensemble)", {
+test_that("interval_times list-column unpacks multiple times (ensemble)", {
     df1 <- create_kinetics_data(n = 50)
-    ## simulate ensemble: event_times is a list of constituent event times
-    attr(df1, "event_times") <- list(368, 1093)
+    ## simulate ensemble: interval_times is a list of constituent event times
+    attr(df1, "interval_times") <- list(368, 1093)
 
     result <- analyse_kinetics(
         list(ensemble = df1),
@@ -696,17 +696,17 @@ test_that("event_times list-column unpacks multiple times (ensemble)", {
         verbose = FALSE
     )
 
-    et <- result$event_times
+    et <- result$interval_times
     expect_equal(nrow(et), 1L)
     expect_equal(et$interval, "ensemble")
-    expect_type(et$event_times, "list")
+    expect_type(et$interval_times, "list")
     ## entry is a numeric vector of length 2
-    expect_equal(et$event_times[[1L]], c(368, 1093))
+    expect_equal(et$interval_times[[1L]], c(368, 1093))
 })
 
-test_that("event_times returns NA when attribute is NULL", {
+test_that("interval_times returns NA when attribute is NULL", {
     df <- create_kinetics_data(n = 50)
-    attr(df, "event_times") <- NULL
+    attr(df, "interval_times") <- NULL
 
     result <- analyse_kinetics(
         df,
@@ -716,10 +716,10 @@ test_that("event_times returns NA when attribute is NULL", {
         verbose = FALSE
     )
 
-    et <- result$event_times
+    et <- result$interval_times
     expect_equal(nrow(et), 1L)
-    expect_type(et$event_times, "list")
-    expect_true(is.na(et$event_times[[1L]]))
+    expect_type(et$interval_times, "list")
+    expect_true(is.na(et$interval_times[[1L]]))
 })
 
 test_that("analyse_kinetics.peak_slope works with grouped data", {
@@ -736,7 +736,7 @@ test_that("analyse_kinetics.peak_slope works with grouped data", {
         nirs_channels = "smo2",
         time_channel = "time",
         sample_rate = 10,
-        event_times = sample(df$time, 1L)
+        interval_times = sample(df$time, 1L)
     )
     grouped_df <- dplyr::group_by(df, group)
 

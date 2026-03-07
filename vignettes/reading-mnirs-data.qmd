@@ -634,7 +634,7 @@ A list of unique `span` vectors can be specified for each interval, otherwise a 
 
 * `zero_time`
 
-    `FALSE` by default; because `time_channel` values within each returned interval likely start at a non-zero value, `zero_time = TRUE` will re-calculate time starting from zero at the specified event. Meaning the `event_time` (or however an event is specified) will become `0`.\
+    `FALSE` by default; because `time_channel` values within each returned interval likely start at a non-zero value, `zero_time = TRUE` will re-calculate time starting from zero at the specified event. Meaning the start time (or however an event is specified) will become `0`.\
 \
 When ensemble-averaging across intervals, time will always be re-calculated from `0`, since the time values have lost their meaning.
 
