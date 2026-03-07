@@ -433,7 +433,10 @@ select_rename_data <- function(
 #' @keywords internal
 convert_type <- function(data, time_channel) {
     ## convert decimal "," to "."
-    char_cols <- setdiff(names(data)[sapply(data, is.character)], time_channel)
+    char_cols <- setdiff(
+        names(data)[vapply(data, is.character, logical(1L))],
+        time_channel
+    )
     for (col in char_cols) {
         data.table::set(
             data,

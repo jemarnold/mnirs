@@ -76,7 +76,58 @@ test_that("by_label creates mnirs_interval with correct structure", {
 })
 
 test_that("by_label validates input", {
-    expect_error(by_label(123), "character")
+    expect_error(by_label(123), "valid.*character")
+})
+
+test_that("by_lap creates mnirs_interval with correct structure", {
+    result <- by_lap(1, 3, 5)
+    expect_s3_class(result, "mnirs_interval")
+    expect_equal(result$type, "lap")
+    expect_equal(result$by_lap, c(1L, 3L, 5L))
+})
+
+test_that("by_lap validates input", {
+    expect_error(by_lap(0), "valid.*integer")
+    expect_error(by_lap(-1), "valid.*integer")
+    expect_error(by_lap(1.5), "valid.*integer")
+})
+
+
+## as_mnirs_interval() =====================================================
+test_that("as_mnirs_interval passes through NULL", {
+    expect_null(as_mnirs_interval(NULL))
+})
+
+test_that("as_mnirs_interval passes through mnirs_interval", {
+    interval <- by_time(5)
+    result <- as_mnirs_interval(interval)
+    expect_identical(result, interval)
+})
+
+test_that("as_mnirs_interval coerces numeric to by_time", {
+    result <- as_mnirs_interval(c(2, 5, 8))
+    expect_s3_class(result, "mnirs_interval")
+    expect_equal(result$type, "time")
+    expect_equal(result$by_time, c(2, 5, 8))
+})
+
+test_that("as_mnirs_interval coerces character to by_label", {
+    result <- as_mnirs_interval(c("start", "end"))
+    expect_s3_class(result, "mnirs_interval")
+    expect_equal(result$type, "label")
+    expect_equal(result$by_label, c("start", "end"))
+})
+
+test_that("as_mnirs_interval coerces integer to by_lap", {
+    result <- as_mnirs_interval(c(1L, 3L))
+    expect_s3_class(result, "mnirs_interval")
+    expect_equal(result$type, "lap")
+    expect_equal(result$by_lap, c(1L, 3L))
+})
+
+test_that("as_mnirs_interval errors on unsupported type", {
+    expect_error(as_mnirs_interval(TRUE, "start"), "start.*must be")
+    expect_error(as_mnirs_interval(list(1), "end"), "end.*must be")
 })
 
 
@@ -117,6 +168,44 @@ test_that("resolve_interval_indices errors when no labels match", {
             event_vec
         ),
         "No events detected"
+    )
+})
+
+test_that("resolve_interval_indices resolves laps with position = first", {
+    event_vec <- c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L)
+
+    result <- resolve_interval_indices(
+        by_lap(1, 3),
+        time_vec = NULL,
+        event_vec,
+        position = "first"
+    )
+    expect_equal(result, c(1L, 7L))
+})
+
+test_that("resolve_interval_indices resolves laps with position = last", {
+    event_vec <- c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L)
+
+    result <- resolve_interval_indices(
+        by_lap(1, 3),
+        time_vec = NULL,
+        event_vec,
+        position = "last"
+    )
+    expect_equal(result, c(3L, 9L))
+})
+
+test_that("resolve_interval_indices errors when lap not found", {
+    event_vec <- c(1L, 1L, 2L, 2L)
+
+    expect_error(
+        resolve_interval_indices(
+            by_lap(5),
+            time_vec = NULL,
+            event_vec,
+            position = "first"
+        ),
+        "No samples found for lap"
     )
 })
 
@@ -917,19 +1006,25 @@ test_that("group_intervals returns single interval as distinct regardless", {
 test_that("extract_intervals validates start/end args", {
     data <- create_mock_mnirs(n = 100, sample_rate = 10)
 
+    ## unsupported types still error via as_mnirs_interval
     expect_error(
         extract_intervals(
             data,
-            start = "bad",
+            start = TRUE,
             span = c(-1, 1),
             verbose = FALSE
         ),
-        "start.*must be created"
+        "start.*must be"
     )
 
     expect_error(
-        extract_intervals(data, end = 999, span = c(-1, 1), verbose = FALSE),
-        "end.*must be created"
+        extract_intervals(
+            data,
+            end = list(1),
+            span = c(-1, 1),
+            verbose = FALSE
+        ),
+        "end.*must be"
     )
 })
 
@@ -950,6 +1045,25 @@ test_that("extract_intervals returns list of tibbles", {
     expect_equal(rev(result[[1]]$time)[1], 2 + 1)
     expect_equal(result[[2]]$time[1], 5 - 1)
     expect_equal(rev(result[[2]]$time)[1], 5 + 1)
+})
+
+test_that("extract_intervals works with start and end", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+
+    result <- extract_intervals(
+        data = data,
+        start = by_time(2, 5),
+        end = by_time(4, 8),
+        event_groups = "distinct",
+        span = c(0, 0),
+        verbose = FALSE
+    )
+
+    expect_length(result, 2)
+    expect_equal(result[[1]]$time[1], 2, tolerance = 0.1)
+    expect_equal(rev(result[[1]]$time)[1], 4, tolerance = 0.1)
+    expect_equal(result[[2]]$time[1], 5, tolerance = 0.1)
+    expect_equal(rev(result[[2]]$time)[1], 8, tolerance = 0.1)
 })
 
 test_that("extract_intervals works with by_sample", {
@@ -988,23 +1102,147 @@ test_that("extract_intervals works with by_label", {
     expect_equal(rev(result[[1]]$time)[1], 5 + 1)
 })
 
-test_that("extract_intervals works with start and end", {
+test_that("extract_intervals works with by_lap start only", {
     data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    ## replace character event with integer laps
+    data$event <- rep(1:10, each = 10)
 
     result <- extract_intervals(
         data = data,
-        start = by_time(2, 5),
-        end = by_time(4, 8),
+        event_channel = "event",
+        start = by_lap(3),
+        event_groups = "distinct",
+        span = c(0, 0.5),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    ## lap 3 starts at row 21 (time = 2.0), span c(0, 0.5) -> [2.0, 2.5]
+    expect_equal(result[[1]]$time[1], 2.0)
+    expect_equal(rev(result[[1]]$time)[1], 2.5)
+})
+
+test_that("extract_intervals works with by_lap start and end", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    data$event <- rep(1:10, each = 10)
+
+    result <- extract_intervals(
+        data = data,
+        event_channel = "event",
+        start = by_lap(2),
+        end = by_lap(4),
+        event_groups = "distinct",
+        span = c(0, 0),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    ## lap 2 first sample: row 11 (time = 1.0)
+    ## lap 4 last sample: row 40 (time = 3.9)
+    expect_equal(result[[1]]$time[1], 1.0)
+    expect_equal(rev(result[[1]]$time)[1], 3.9)
+    expect_equal(nrow(result[[1]]), 30) ## rows 11 to 40
+})
+
+test_that("extract_intervals works with multiple by_lap pairs", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    data$event <- rep(1:10, each = 10)
+
+    result <- extract_intervals(
+        data = data,
+        event_channel = "event",
+        start = by_lap(1, 5),
+        end = by_lap(2, 7),
         event_groups = "distinct",
         span = c(0, 0),
         verbose = FALSE
     )
 
     expect_length(result, 2)
-    expect_equal(result[[1]]$time[1], 2, tolerance = 0.1)
-    expect_equal(rev(result[[1]]$time)[1], 4, tolerance = 0.1)
-    expect_equal(result[[2]]$time[1], 5, tolerance = 0.1)
-    expect_equal(rev(result[[2]]$time)[1], 8, tolerance = 0.1)
+    ## lap 1 first sample: row 1 (time = 0.0)
+    ## lap 2 last sample: row 20 (time = 1.9)
+    expect_equal(result[[1]]$time[1], 0.0)
+    expect_equal(rev(result[[1]]$time)[1], 1.9)
+    ## interval 1: lap 1 first (row 1) to lap 2 last (row 20)
+    expect_equal(nrow(result[[1]]), 20)
+    ## lap 5 first sample: row 50 (time = 4.0)
+    ## lap 7 last sample: row 70 (time = 6.9)
+    expect_equal(result[[2]]$time[1], 4.0)
+    expect_equal(rev(result[[2]]$time)[1], 6.9)
+    ## interval 2: lap 5 first (row 41) to lap 7 last (row 70)
+    expect_equal(nrow(result[[2]]), 30)
+})
+
+test_that("extract_intervals errors when by_lap used without event_channel", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    ## remove event_channel from metadata
+    attr(data, "event_channel") <- NULL
+    data$event <- NULL
+
+    expect_error(
+        extract_intervals(
+            data = data,
+            start = by_lap(1),
+            span = c(0, 1),
+            verbose = FALSE
+        ),
+        "event_channel.*required"
+    )
+})
+
+test_that("extract_intervals coerces raw numeric to by_time", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+
+    result <- extract_intervals(
+        data = data,
+        start = 2,
+        event_groups = "distinct",
+        span = c(-1, 1),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    expect_equal(result[[1]]$time[1], 2 - 1)
+    expect_equal(rev(result[[1]]$time)[1], 2 + 1)
+})
+
+test_that("extract_intervals coerces raw character to by_label", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    data$event[51] <- "marker"
+
+    result <- extract_intervals(
+        data = data,
+        event_channel = "event",
+        start = "marker",
+        event_groups = "distinct",
+        span = c(-1, 1),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    expect_equal(result[[1]]$time[1], 5 - 1)
+    expect_equal(rev(result[[1]]$time)[1], 5 + 1)
+})
+
+test_that("extract_intervals coerces raw integer to by_lap", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    data$event <- rep(1:10, each = 10)
+
+    result <- extract_intervals(
+        data = data,
+        event_channel = "event",
+        start = 2L,
+        end = 4L,
+        event_groups = "distinct",
+        span = c(0, 0),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    ## same as by_lap(2) / by_lap(4)
+    expect_equal(result[[1]]$time[1], 1.0)
+    expect_equal(rev(result[[1]]$time)[1], 3.9)
+    expect_equal(nrow(result[[1]]), 30)
 })
 
 test_that("extract_intervals applies zero_time correctly", {

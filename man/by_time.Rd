@@ -4,13 +4,16 @@
 \alias{by_time}
 \alias{by_sample}
 \alias{by_label}
-\title{Specify interval boundaries by time, sample, or label}
+\alias{by_lap}
+\title{Specify interval boundaries by time, sample, label, or lap}
 \usage{
 by_time(...)
 
 by_sample(...)
 
 by_label(...)
+
+by_lap(...)
 }
 \arguments{
 \item{...}{Specify start or end boundaries.
@@ -19,6 +22,9 @@ by_label(...)
 \item{\code{by_sample(...)}}{Integer sample indices (row numbers).}
 \item{\code{by_label(...)}}{Character strings to match in \code{event_channel}.
 All matching occurrences are returned.}
+\item{\code{by_lap(...)}}{Integer lap numbers to match in \code{event_channel}.
+For \code{start}, resolves to the first sample of each lap. For \code{end},
+resolves to the last sample.}
 }}
 }
 \value{
@@ -28,6 +34,15 @@ and \code{end} arguments of \code{\link[=extract_intervals]{extract_intervals()}
 \description{
 Helper functions to define interval start or end boundaries for
 \code{\link[=extract_intervals]{extract_intervals()}}.
+}
+\details{
+These helpers can be used explicitly for arguments \code{start}/\code{end}, or raw
+values can be passed directly:
+\itemize{
+\item Numeric → \code{by_time()}
+\item Character → \code{by_label()}
+\item Explicit integer (e.g. \code{2L}) → \code{by_lap()}
+}
 }
 \examples{
 ## read example data

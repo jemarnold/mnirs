@@ -41,7 +41,7 @@ in the form \code{c(time = "original_name")}.
 }}
 
 \item{event_channel}{An \emph{optional} character string giving the name of an
-event/marker column to import. Names must match the file header exactly.
+event/lap column to import. Names must match the file header exactly.
 A named character vector can be used to rename the column on import in
 the form \code{c(event = "original_name")}.}
 

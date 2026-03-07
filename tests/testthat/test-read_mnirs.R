@@ -1848,11 +1848,11 @@ test_that("read_mnirs VO2master with ',' decimals returns numeric", {
         )
     )
 
-    expect_all_true(sapply(df_raw, is.character))
+    expect_all_true(vapply(df_raw, is.character, logical(1L)))
 
     ## should convert decimal "," to numeric
     df <- convert_type(df_raw, time_channel)
-    expect_all_true(sapply(df[, -c(1:2)], is.numeric))
+    expect_all_true(vapply(df[, -c(1:2)], is.numeric, logical(1L)))
 
     ## integrated test
     expect_message(

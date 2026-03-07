@@ -1,4 +1,4 @@
-#' Specify interval boundaries by time, sample, or label
+#' Specify interval boundaries by time, sample, label, or lap
 #'
 #' Helper functions to define interval start or end boundaries for
 #' [extract_intervals()].
@@ -9,7 +9,17 @@
 #'     \item{`by_sample(...)`}{Integer sample indices (row numbers).}
 #'     \item{`by_label(...)`}{Character strings to match in `event_channel`.
 #'     All matching occurrences are returned.}
+#'     \item{`by_lap(...)`}{Integer lap numbers to match in `event_channel`.
+#'     For `start`, resolves to the first sample of each lap. For `end`,
+#'     resolves to the last sample.}
 #'   }
+#' 
+#' @details
+#' These helpers can be used explicitly for arguments `start`/`end`, or raw 
+#' values can be passed directly: 
+#'   - Numeric → `by_time()`
+#'   - Character → `by_label()`
+#'   - Explicit integer (e.g. `2L`) → `by_lap()`
 #'
 #' @returns An object of class `"mnirs_interval"` for use with the `start`
 #'   and `end` arguments of [extract_intervals()].
@@ -27,12 +37,12 @@
 #'     verbose = FALSE
 #' ) |>
 #'     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
-#' 
+#'
 #' ## introduce event_channel with "start" string
 #' data$event <- NA_character_
 #' data$event[50] <- "start"
 #' data <- create_mnirs_data(data, event_channel = "event")
-#' 
+#'
 #' ## start and end by time
 #' extract_intervals(data, start = by_time(30), end = by_time(60))
 #'
@@ -79,12 +89,51 @@ by_label <- function(...) {
 }
 
 
+#' @rdname by_time
+#' @export
+by_lap <- function(...) {
+    by_lap <- c(...)
+    validate_numeric(by_lap, range = c(1, Inf), integer = TRUE)
+    structure(
+        list(type = "lap", by_lap = as.integer(by_lap)),
+        class = "mnirs_interval"
+    )
+}
+
+
+## coerce raw values to mnirs_interval objects
+## @param x A raw value or mnirs_interval object.
+## @param arg Name of the argument for error messages.
+## @keywords internal
+as_mnirs_interval <- function(x, arg = "start") {
+    if (is.null(x) || inherits(x, "mnirs_interval")) {
+        return(x)
+    }
+    ## integer before numeric — integers are also numeric in R
+    if (is.integer(x)) {
+        return(by_lap(x))
+    }
+    if (is.numeric(x)) {
+        return(by_time(x))
+    }
+    if (is.character(x)) {
+        return(by_label(x))
+    }
+    cli_abort(
+        "{.arg {arg}} must be {.cls numeric}, {.cls integer}, \\
+        {.cls character}, or a {.fn by_time}, {.fn by_sample}, \\
+        {.fn by_label}, {.fn by_lap} specification."
+    )
+}
+
+
 ## resolve a single mnirs_interval object to integer row indices
 ## @keywords internal
 resolve_interval_indices <- function(
     interval,
     time_vec,
-    event_vec = NULL
+    event_vec = NULL,
+    position = "first"
 ) {
     switch(
         interval$type,
@@ -102,6 +151,23 @@ resolve_interval_indices <- function(
                 ))
             }
             matches
+        },
+        lap = {
+            vapply(interval$by_lap, \(lap_val) {
+                matches <- which(event_vec == lap_val)
+                if (length(matches) == 0L) {
+                    cli_abort(c(
+                        "x" = "No samples found for lap {.val {lap_val}}.",
+                        "i" = "Check that {.arg event_channel} contains \\
+                        lap numbers."
+                    ))
+                }
+                if (position == "first") {
+                    matches[1L]
+                } else {
+                    matches[length(matches)]
+                }
+            }, integer(1))
         }
     )
 }
@@ -120,12 +186,18 @@ resolve_interval <- function(
 
     if (has_start) {
         start_idx <- resolve_interval_indices(
-            start_interval, time_vec, event_vec
+            start_interval,
+            time_vec,
+            event_vec,
+            position = "first"
         )
     }
     if (has_end) {
         end_idx <- resolve_interval_indices(
-            end_interval, time_vec, event_vec
+            end_interval,
+            time_vec,
+            event_vec,
+            position = "last"
         )
     }
 

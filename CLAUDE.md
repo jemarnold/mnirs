@@ -6,25 +6,22 @@
 
 ## Formatting
 
-Format code with [air](https://github.com/posit-dev/air) (config in [air.toml](air.toml)):
-```
-air format R/
-```
-
-* Enforce line limit of 80 characters
-* Comments should briefly explain the "why" of the operation
-* Comments in the form: `## lower case comment`
+- Enforce line limit of 80 characters
+- Comments should briefly explain the "why" of the operation
+- Comments in the form: `## lower case comment`
 
 ## Architecture
 
 ### The `mnirs` S3 Class
 
-The central data structure is an `"mnirs"` object — a tibble subclass carrying metadata as attributes, mainly including:
-- `nirs_channels` — names of the NIRS signal columns
-- `time_channel` — name of the time column
-- `sample_rate` — numeric samples per second
+- The central data structure is an `"mnirs"` object — a tibble subclass carrying metadata as attributes, mainly including:
+    - `nirs_channels` — names of the NIRS signal columns
+    - `time_channel` — name of the time column
+    - `event_channel` — name of an event (character) or lap (integer) column
+    - `sample_rate` — numeric samples per second
 
-Most processing functions receive and return an `mnirs` object, preserving these attributes throughout the pipeline.
+- Most processing functions receive and return an `mnirs` data frame, preserving these attributes throughout the pipeline.
+- Vector-wise functions operate on `x` (response variable) over `t` (time) and return a vector `y` of the same length as `x`.
 
 ### Processing Pipeline
 
@@ -46,22 +43,30 @@ In [R/helpers.R](R/helpers.R):
 
 ### Messaging
 
-Use `cli_abort()`, `cli_warn()`, `cli_inform()` from `{cli}` for all user-facing messages. The global option `mnirs.verbose` controls whether informational messages are shown.
+- Use `cli_abort()`, `cli_warn()`, `cli_inform()` from `{cli}` for all user-facing messages. 
+- The global option `mnirs.verbose` controls whether informational messages are shown.
 
 ### Validation
 
-Input validation lives in [R/validate_mnirs.R](R/validate_mnirs.R) with helpers `validate_numeric()`, `validate_nirs_channels()`, etc.
+- Input validation lives in [R/validate_mnirs.R](R/validate_mnirs.R) with helpers `validate_numeric()`, `validate_nirs_channels()`, etc.
 
 ### Testing
 
-unit tests live in `tests/testthat/` for key functionality. Tests should not be deleted, modified, or added without asking confirmation.
+- Unit tests live in `tests/testthat/` for key functionality. 
+- Write core functionality and remind the user tests should be written next.
+- Tests should not be deleted, modified, or added without asking confirmation.
+
+### devtools
+
+- Don't run devtool commands, inform the user which commands to run themselves.
 
 ### Documentation
 
-- Roxygen2 with markdown enabled (`Roxygen: list(markdown = TRUE)`)
-- Run `devtools::document()` after any roxygen changes — never edit `NAMESPACE` or `man/` directly
-- pkgdown site config is in [_pkgdown.yml](_pkgdown.yml); sections follow the pipeline order: Read → Pre-process → Interval detection → Process kinetics → Plotting
+- Roxygen2 with markdown enabled (`Roxygen: list(markdown = TRUE)`). 
+- pkgdown site config is in [_pkgdown.yml](_pkgdown.yml); sections follow the pipeline order: 
+    - Read → Pre-process → Interval detection → Process kinetics → Plotting
 
 ### Example Data
 
-Six sample files in `inst/extdata/` cover supported device formats (Artinis, Moxy, Portamon, Train.Red, VO2 Master). Access via e.g.`example_mnirs("moxy_ramp")`.
+- Example files in `inst/extdata/` cover supported device formats (Artinis, Moxy, Portamon, Train.Red, VO2 Master). 
+- Access via e.g.`example_mnirs("moxy_ramp")` with appropriate column names and event times.

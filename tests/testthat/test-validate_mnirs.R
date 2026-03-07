@@ -380,6 +380,27 @@ test_that("validate_event_channel() works for quosures", {
     expect_equal(result, "event")
 })
 
+test_that("validate_event_channel() accepts integer column", {
+    data <- create_test_data()
+    ## create_test_data() uses c(1, rep(NA, nrow - 2), 2) — integerish
+    data$lap <- c(1L, rep(NA_integer_, nrow(data) - 2L), 2L)
+    result <- validate_event_channel("lap", data)
+    expect_equal(result, "lap")
+})
+
+test_that("validate_event_channel() error conditions", {
+    data <- create_test_data()
+
+    ## errors for non-integerish numeric column
+    data$bad_col <- c(1.5, rep(NA, nrow(data) - 2), 2.5)
+    expect_error(validate_event_channel("bad_col", data), "integer")
+
+    ## errors when integer column is all NA
+    data$lap <- rep(NA_integer_, nrow(data))
+    expect_error(validate_event_channel("lap", data), "must contain valid")
+})
+
+
 
 ## within() ===============================================================
 test_that("within() handles basic inclusive range (default)", {

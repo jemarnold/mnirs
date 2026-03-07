@@ -26,7 +26,7 @@
 #'     in the form `c(time = "original_name")`.
 #'
 #' @param event_channel An *optional* character string giving the name of an
-#'   event/marker column to import. Names must match the file header exactly.
+#'   event/lap column to import. Names must match the file header exactly.
 #'   A named character vector can be used to rename the column on import in
 #'   the form `c(event = "original_name")`.
 #'

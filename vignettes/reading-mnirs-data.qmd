@@ -99,7 +99,7 @@ A few example data files are included in the *`mnirs`* package. File paths can b
 
 * `event_channel`
 
-    Optionally, A channel can be specified which indicates *events* or other marker in the data table.\
+    Optionally, A channel can be specified which indicates character *event* labels or integer *lap* values in the data table.\
 \
 These channel names are used to detect the data table within the file, and must match exactly with text strings in the file on the same row. We can rename these channels when reading data by specifying a named character vector: 
 
@@ -600,7 +600,7 @@ After the NIRS signal has been cleaned and filtered, it should be ready for furt
 
 Often we will need to locate and extract smaller intervals from a NIRS recording, for further processing and analysis. For example, if we want to extract the last three minutes from repeated exercise trials.
 
-We may have marked interval events in the specified `event_channel`, or we may simply have to manually specify the event markers by `time_channel` value or row number in the data frame. See `extract_intervals()` for more details.
+We may have marked event labels or have incremental lap numbers in the specified `event_channel`, or we may simply have to manually specify the event markers by `time_channel` value or row number in the data frame. See `extract_intervals()` for more details.
 
 * `data`
 
@@ -618,7 +618,7 @@ Only when *"ensemble"*-averaging, `nirs_channels` should be specified by providi
 
 * `start` & `end`
 
-    Interval boundaries are specified using helper functions: `by_time()` for `time_channel` values; `by_label()` for `event_channel` labels; or `by_sample()` for sample indices (row numbers). Provide both `start` and `end` to define precise intervals, or provide `start` alone with `span` to extract windows around events. Multiple values can be passed to extract multiple intervals.
+    Interval boundaries are specified using helper functions: `by_time()` for `time_channel` values; `by_sample()` for sample indices (row numbers); `by_label()` for `event_channel` labels; or `by_lap()` for `event_channel` lap integers. Provide both `start` and `end` to define precise intervals, or provide `start` alone with `span` to extract windows around events. Multiple values can be passed to extract multiple intervals.
 
 * `event_groups`
 

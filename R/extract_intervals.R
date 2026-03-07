@@ -1,33 +1,43 @@
 #' Extract intervals from *{mnirs}* data
 #'
 #' Extract intervals from *"mnirs"* time series data, specifying interval
-#' start and end boundaries by time, sample index, or event label using
-#' [by_time()], [by_sample()], or [by_label()] helpers.
-#'
-#' @param data A data frame of class *"mnirs"* containing time series data and
-#'   metadata.
+#' start and end boundaries by time, sample index, event label, or lap number.
 #'
 #' @param nirs_channels A character vector or a `list()` of character vectors
 #'   of mNIRS channel names to operate on within each interval (see *Details*).
 #'   Names must match column names in `data` exactly.
-#'   - Only needs to be specified when `event_groups` contains *"ensemble"*-
+#'   - Must only be specified when `event_groups` contains *"ensemble"*-
 #'     averaged intervals. If `event_groups = "distinct"` no channel processing
 #'     occurs.
 #'   - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
 #'
 #' @param event_channel An *optional* character string giving the name of an
-#'   event/marker column. Required when using [by_label()] for `start` or
-#'   `end`. Retrieved from metadata if not defined explicitly.
+#'   event/lap column. The column may contain character event labels or integer 
+#'   lap numbers. 
+#'   - Required when using [by_label()] or [by_lap()] for `start` or `end`.
+#'   - Retrieved from metadata if not defined explicitly.
 #'
 #' @param sample_rate An *optional* numeric sample rate (Hz) used to bin time
 #'   values for ensemble-averaging. If `NULL`, will be estimated from
 #'   `time_channel` (see *Details*).
 #'
-#' @param start An interval specification created by [by_time()],
-#'   [by_sample()], or [by_label()] indicating where intervals begin.
+#' @param start Specifies where intervals begin. Either raw values — numeric 
+#'   for time values, character for event labels, explicit integer (e.g. `2L`) 
+#'   for lap numbers — or created with [by_time()], [by_sample()], 
+#'   [by_label()], or [by_lap()].
 #'
-#' @param end An interval specification created by [by_time()],
-#'   [by_sample()], or [by_label()] indicating where intervals end.
+#' @param end Specifies where intervals end. Either raw values — numeric for 
+#'   time values, character for event labels, explicit integer (e.g. `2L`) 
+#'   for lap numbers — or created with [by_time()], [by_sample()], 
+#'   [by_label()], or [by_lap()].
+#'
+#' @param span A `list()` of two-element numeric vectors `c(before, after)` in
+#'   units of `time_channel`. Applied additively to interval boundaries:
+#'   - When both `start` and `end` are specified: `span[1]` shifts start times,
+#'     `span[2]` shifts end times.
+#'   - When only `start` or only `end` is specified: both `span[1]` and
+#'     `span[2]` apply to the specified boundary (like a window around an
+#'     event).
 #'
 #' @param event_groups Either a character string or a `list()` of integer
 #'   vectors specifying how to group intervals (see *Details*).
@@ -40,14 +50,6 @@
 #'     `nirs_channel` within each group and return one data frame per group.}
 #'   }
 #'
-#' @param span A `list()` of two-element numeric vectors `c(before, after)` in
-#'   units of `time_channel`. Applied additively to interval boundaries:
-#'   - When both `start` and `end` are specified: `span[1]` shifts start times,
-#'     `span[2]` shifts end times.
-#'   - When only `start` or only `end` is specified: both `span[1]` and
-#'     `span[2]` apply to the specified boundary (like a window around an
-#'     event).
-#'
 #' @param zero_time Logical. Default is `FALSE`. If `TRUE`, re-calculates
 #'   numeric `time_channel` values to start from zero within each interval
 #'   data frame.
@@ -57,14 +59,24 @@
 #' @details
 #' ## Interval specification
 #'
-#' Interval boundaries are specified using helper functions:
+#' Interval boundaries are specified using helper functions, or by passing
+#' raw values directly:
 #'
 #' \describe{
-#'   \item{[by_time()]}{Numeric time values in units of `time_channel`.}
+#'   \item{[by_time()] or numeric}{Time values in units of `time_channel`.}
 #'   \item{[by_sample()]}{Integer sample indices (row numbers).}
-#'   \item{[by_label()]}{Character strings to match in `event_channel`.
+#'   \item{[by_label()] or character}{Strings to match in `event_channel`.
 #'   All matching occurrences are returned.}
+#'   \item{[by_lap()] or explicit integer (e.g. `2L`)}{Lap numbers to match
+#'   in `event_channel`. Resolves to the first sample of each lap for
+#'   `start`, and the last sample for `end`.}
 #' }
+#'
+#' Raw values supplied to `start`/`end` are auto-coerced: 
+#'   - Numeric → [by_time()]
+#'   - Character → [by_label()], 
+#'   - Explicit integer (e.g. `2L`) → [by_lap()]. 
+#'   - Use [by_sample()] explicitly for sample indices.
 #'
 #' `start` and `end` can use different specification types (e.g., start by
 #' label, end by time). When lengths differ, the shorter is recycled.
@@ -147,8 +159,8 @@
 #'     data,                       ## channels recycled to all intervals by default
 #'     nirs_channels = c(smo2_left, smo2_right),
 #'     start = by_time(368, 1093), ## manually identified interval start times
-#'     event_groups = "ensemble",  ## ensemble-average across two intervals
 #'     span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
+#'     event_groups = "ensemble",  ## ensemble-average across two intervals
 #'     zero_time = TRUE            ## re-calculate common time to start from `0`
 #' )
 #'
@@ -170,8 +182,8 @@ extract_intervals <- function(
     sample_rate = NULL,
     start = NULL,
     end = NULL,
-    event_groups = list("distinct", "ensemble"),
     span = list(c(-60, 60)),
+    event_groups = list("distinct", "ensemble"),
     zero_time = FALSE,
     verbose = TRUE
 ) {
@@ -190,39 +202,34 @@ extract_intervals <- function(
         data, time_channel, sample_rate, verbose
     )
 
+    ## coerce raw values to mnirs_interval objects
+    start <- as_mnirs_interval(start, "start")
+    end <- as_mnirs_interval(end, "end")
+
     ## validate interval specs
     if (is.null(c(start, end))) {
         cli_abort(c(
             "x" = "No interval specification provided.",
             "i" = "Specify {.arg start} and/or {.arg end} using \\
-            {.fn by_time}, {.fn by_sample}, or {.fn by_label}."
-        ))
-    }
-    if (!is.null(start) && !inherits(start, "mnirs_interval")) {
-        cli_abort(c(
-            "x" = "{.arg start} must be created with {.fn by_time}, \\
-            {.fn by_sample}, or {.fn by_label}."
-        ))
-    }
-    if (!is.null(end) && !inherits(end, "mnirs_interval")) {
-        cli_abort(c(
-            "x" = "{.arg end} must be created with {.fn by_time}, \\
-            {.fn by_sample}, or {.fn by_label}."
+            {.fn by_time}, {.fn by_sample}, {.fn by_label}, or {.fn by_lap}."
         ))
     }
 
-    ## resolve event_channel if by_label is used
-    uses_label <- (inherits(start, "mnirs_interval") &&
-        start$type == "label") ||
-        (inherits(end, "mnirs_interval") && end$type == "label")
-    if (uses_label) {
+    ## resolve event_channel if by_label or by_lap is used
+    uses_event_channel <- (
+        inherits(start, "mnirs_interval") && start$type %in% c("label", "lap")
+    ) || (
+        inherits(end, "mnirs_interval") && end$type %in% c("label", "lap")
+    )
+    if (uses_event_channel) {
         event_channel <- tryCatch(
             validate_event_channel(event_channel, data, required = TRUE),
             error = function(e) {
                 cli_abort(c(
                     "x" = "{.arg event_channel} is required when using \\
-                    {.fn by_label}.",
-                    "i" = "Specify column name containing event labels."
+                    {.fn by_label} or {.fn by_lap}.",
+                    "i" = "Specify column name containing {.cls character} \\
+                    event labels or {.cls integer} lap numbers."
                 ))
             }
         )
