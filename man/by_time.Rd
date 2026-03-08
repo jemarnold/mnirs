@@ -60,7 +60,7 @@ data <- read_mnirs(
 )
 
 ## start and end by time
-extract_intervals(data, start = by_time(66), end = by_time(373))
+extract_intervals(data, start = by_time(66), end = by_time(357))
 
 ## start by lap
 extract_intervals(data, start = by_lap(2, 4), span = 0)
