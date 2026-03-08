@@ -1,4 +1,4 @@
-#' Specify interval boundaries by time, sample, label, or lap
+#' Specify interval boundaries by time, label, lap, or sample
 #'
 #' Helper functions to define interval start or end boundaries for
 #' [extract_intervals()].
@@ -6,20 +6,21 @@
 #' @param ... Specify start or end boundaries.
 #'   \describe{
 #'     \item{`by_time(...)`}{Numeric time values in units of `time_channel`.}
-#'     \item{`by_sample(...)`}{Integer sample indices (row numbers).}
 #'     \item{`by_label(...)`}{Character strings to match in `event_channel`.
 #'     All matching occurrences are returned.}
 #'     \item{`by_lap(...)`}{Integer lap numbers to match in `event_channel`.
 #'     For `start`, resolves to the first sample of each lap. For `end`,
 #'     resolves to the last sample.}
+#'     \item{`by_sample(...)`}{Integer sample indices (row numbers).}
 #'   }
 #'
 #' @details
 #' These helpers can be used explicitly for arguments `start`/`end`, or raw
 #' values can be passed directly:
-#'   - Numeric → `by_time()`
-#'   - Character → `by_label()`
-#'   - Explicit integer (e.g. `2L`) → `by_lap()`
+#'   - Numeric → [by_time()]
+#'   - Character → [by_label()], 
+#'   - Explicit integer (e.g. `2L`) → [by_lap()]. 
+#'   - Use [by_sample()] explicitly for sample indices.
 #'
 #' @returns An object of class `"mnirs_interval"` for use with the `start`
 #'   and `end` arguments of [extract_intervals()].
@@ -33,24 +34,27 @@
 #'         smo2_right = "SmO2 unfiltered"
 #'     ),
 #'     time_channel = c(time = "Timestamp (seconds passed)"),
+#'     event_channel = c(lap = "Lap/Event"),
 #'     zero_time = TRUE,
 #'     verbose = FALSE
-#' ) |>
-#'     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
+#' )
+#'
+#' ## start and end by time
+#' extract_intervals(data, start = by_time(66), end = by_time(373))
+#'
+#' ## start by lap
+#' extract_intervals(data, start = by_lap(2, 4), span = 0)
 #'
 #' ## introduce event_channel with "start" string
 #' data$event <- NA_character_
-#' data$event[50] <- "start"
+#' data$event[1000] <- "start"
 #' data <- create_mnirs_data(data, event_channel = "event")
-#'
-#' ## start and end by time
-#' extract_intervals(data, start = by_time(30), end = by_time(60))
-#'
+#' 
 #' ## start by label, end by time
-#' extract_intervals(data, start = by_label("start"), end = by_time(300))
-#'
+#' extract_intervals(data, start = by_label("start"), end = by_time(1500))
+#' 
 #' ## multiple intervals by sample index
-#' extract_intervals(data, start = by_sample(100, 500), end = by_sample(200, 600))
+#' extract_intervals(data, start = by_sample(1000, 1500), end = by_sample(2000, 2600))
 #'
 #' @export
 by_time <- function(...) {
@@ -174,39 +178,22 @@ resolve_interval_indices <- function(
             matches
         },
         lap = {
-            event_vec <- as.integer(event_vec)
-            if (position == "all") {
-                ## return list of all matching indices per lap
-                lapply(interval$by_lap, \(lap_val) {
-                    matches <- which(event_vec == lap_val)
-                    if (length(matches) == 0L) {
-                        cli_abort(c(
-                            "x" = "No samples found for lap \\
-                            {.val {lap_val}}.",
-                            "i" = "Check that {.arg event_channel} \\
-                            contains lap numbers."
-                        ))
-                    }
-                    matches
-                })
-            } else {
-                vapply(interval$by_lap, \(lap_val) {
-                    matches <- which(event_vec == lap_val)
-                    if (length(matches) == 0L) {
-                        cli_abort(c(
-                            "x" = "No samples found for lap \\
-                            {.val {lap_val}}.",
-                            "i" = "Check that {.arg event_channel} \\
-                            contains lap numbers."
-                        ))
-                    }
-                    if (position == "first") {
-                        matches[1L]
-                    } else {
-                        matches[length(matches)]
-                    }
-                }, integer(1))
-            }
+            vapply(interval$by_lap, \(lap_val) {
+                event_vec <- as.integer(event_vec)
+                matches <- which(event_vec == lap_val)
+                if (length(matches) == 0L) {
+                    cli_abort(c(
+                        "x" = "No samples found for lap {.val {lap_val}}.",
+                        "i" = "Check that {.arg event_channel} contains \\
+                        lap numbers."
+                    ))
+                }
+                if (position == "first") {
+                    matches[1L]
+                } else {
+                    matches[length(matches)]
+                }
+            }, integer(1))
         }
     )
 }
@@ -222,79 +209,66 @@ resolve_interval <- function(
 ) {
     has_start <- !is.null(start_interval)
     has_end <- !is.null(end_interval)
+    interval <- start_interval %||% end_interval
 
-    ## single-boundary lap: resolve all lap indices then derive start/end
-    single_boundary_lap <- (has_start != has_end) &&
-        ((has_start && start_interval$type == "lap") ||
-            (has_end && end_interval$type == "lap"))
-
-    if (single_boundary_lap) {
-        interval <- if (has_start) start_interval else end_interval
-        all_indices <- resolve_interval_indices(
-            interval,
-            time_vec,
-            event_vec,
-            position = "all"
-        )
-        start_idx <- vapply(all_indices, min, integer(1))
-        end_idx <- vapply(all_indices, max, integer(1))
-        ## treat as both-boundary so apply_span_to_indices uses the
-        ## start+end path (span[1] → start, span[2] → end)
-        return(
-            list(
-                start_idx = start_idx,
-                end_idx = end_idx,
-                has_start = TRUE,
-                has_end = TRUE
-            )
-        )
-    }
-
-    if (has_start) {
+    ## single-boundary lap: resolve to full lap (first + last)
+    if (interval$type == "lap" && xor(has_start, has_end)) {
         start_idx <- resolve_interval_indices(
-            start_interval,
-            time_vec,
-            event_vec,
-            position = "first"
+            interval, time_vec, event_vec, position = "first"
         )
-    }
-    if (has_end) {
         end_idx <- resolve_interval_indices(
-            end_interval,
-            time_vec,
-            event_vec,
-            position = "last"
+            interval, time_vec, event_vec, position = "last"
         )
-    }
-
-    if (has_start && has_end) {
-        n_start <- length(start_idx)
-        n_end <- length(end_idx)
-        ## warn and truncate if lengths differ — only paired intervals are valid
-        if (n_start != n_end) {
-            n_intervals <- min(n_start, n_end)
-            cli_warn(c(
-                "!" = "{.arg start} ({col_blue(n_start)}) and {.arg end} \\
-                ({col_blue(n_end)}) have unequal lengths.",
-                "i" = "Returning {col_blue(n_intervals)} paired interval{?s}."
-            ))
-            start_idx <- start_idx[seq_len(n_intervals)]
-            end_idx <- end_idx[seq_len(n_intervals)]
-        }
-    } else {
-        ## start-only or end-only
-        start_idx <- if (has_start) start_idx else end_idx
-        end_idx <- if (has_end) end_idx else NULL
-    }
-
-    return(
-        list(
+        return(list(
             start_idx = start_idx,
             end_idx = end_idx,
+            has_start = TRUE,
+            has_end = TRUE
+        ))
+    }
+
+    ## single-boundary non-lap: reference point for span window
+    if (xor(has_start, has_end)) {
+        ref_idx <- resolve_interval_indices(
+            interval, time_vec, event_vec,
+            position = if (has_start) "first" else "last"
+        )
+        return(list(
+            start_idx = ref_idx,
+            end_idx = NULL,
             has_start = has_start,
             has_end = has_end
-        )
+        ))
+    }
+
+    ## both boundaries specified
+    start_idx <- resolve_interval_indices(
+        start_interval, time_vec, event_vec, position = "first"
     )
+    end_idx <- resolve_interval_indices(
+        end_interval, time_vec, event_vec, position = "last"
+    )
+
+    ## warn and truncate if lengths differ — only paired intervals
+    n_start <- length(start_idx)
+    n_end <- length(end_idx)
+    if (n_start != n_end) {
+        n_intervals <- min(n_start, n_end)
+        cli_warn(c(
+            "!" = "{.arg start} ({col_blue(n_start)}) and {.arg end} \\
+            ({col_blue(n_end)}) have unequal lengths.",
+            "i" = "Returning {col_blue(n_intervals)} paired interval{?s}."
+        ))
+        start_idx <- start_idx[seq_len(n_intervals)]
+        end_idx <- end_idx[seq_len(n_intervals)]
+    }
+
+    return(list(
+        start_idx = start_idx,
+        end_idx = end_idx,
+        has_start = TRUE,
+        has_end = TRUE
+    ))
 }
 
 
@@ -409,7 +383,7 @@ apply_span_to_indices <- function(
         ## start-only or end-only: both span values apply to the reference
         start_times <- event_times + span_before
         end_times <- event_times + span_after
-        ## TODO stored as a list-column to allow variable length per row
+        ## stored as a list-column to allow variable length per row
         interval_times <- as.list(event_times)
     }
 

@@ -8,7 +8,7 @@ resolve_interval_indices(
   interval,
   time_vec,
   event_vec = NULL,
-  position = "first"
+  position = c("first", "last")
 )
 }
 \description{

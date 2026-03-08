@@ -1,7 +1,8 @@
 #' Extract intervals from *{mnirs}* data
 #'
 #' Extract intervals from *"mnirs"* time series data, specifying interval
-#' start and end boundaries by time, sample index, event label, or lap number.
+#' start and end boundaries by time value, event label, lap number, or sample 
+#' index.
 #'
 #' @param nirs_channels A character vector or a `list()` of character vectors
 #'   of mNIRS channel names to operate on within each interval (see *Details*).
@@ -23,13 +24,13 @@
 #'
 #' @param start Specifies where intervals begin. Either raw values — numeric 
 #'   for time values, character for event labels, explicit integer (e.g. `2L`) 
-#'   for lap numbers — or created with [by_time()], [by_sample()], 
-#'   [by_label()], or [by_lap()].
+#'   for lap numbers — or created with [by_time()], [by_label()], [by_lap()],
+#'   or [by_sample()].
 #'
 #' @param end Specifies where intervals end. Either raw values — numeric for 
 #'   time values, character for event labels, explicit integer (e.g. `2L`) 
-#'   for lap numbers — or created with [by_time()], [by_sample()], 
-#'   [by_label()], or [by_lap()].
+#'   for lap numbers — or created with [by_time()], [by_label()], [by_lap()],
+#'   or [by_sample()].
 #'
 #' @param span A one- or two-element numeric vector `c(before, after)` in units 
 #'   of `time_channel`, or a `list()` of such vectors. Applied additively to
@@ -68,12 +69,13 @@
 #'
 #' \describe{
 #'   \item{[by_time()] or numeric}{Time values in units of `time_channel`.}
-#'   \item{[by_sample()]}{Integer sample indices (row numbers).}
 #'   \item{[by_label()] or character}{Strings to match in `event_channel`.
 #'   All matching occurrences are returned.}
 #'   \item{[by_lap()] or explicit integer (e.g. `2L`)}{Lap numbers to match
 #'   in `event_channel`. Resolves to the first sample of each lap for
-#'   `start`, and the last sample for `end`.}
+#'   `start`, and the last sample for `end`, or all samples of the lap if only 
+#'   one of either `start` or `end` is specified.}
+#'   \item{[by_sample()]}{Integer sample indices (row numbers).}
 #' }
 #'
 #' Raw values supplied to `start`/`end` are auto-coerced: 

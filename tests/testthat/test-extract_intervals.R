@@ -279,6 +279,58 @@ test_that("resolve_interval warns and truncates unequal lengths", {
     expect_equal(length(result$end_idx), 2)
 })
 
+test_that("resolve_interval resolves lap start-only to full lap boundaries", {
+    event_vec <- c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L)
+    time_vec <- seq(0, 0.8, by = 0.1)
+
+    result <- resolve_interval(
+        start_interval = by_lap(2),
+        end_interval = NULL,
+        time_vec = time_vec,
+        event_vec = event_vec
+    )
+
+    ## lap 2 occupies rows 4-6; start=first, end=last
+    expect_true(result$has_start)
+    expect_true(result$has_end)
+    expect_equal(result$start_idx, 4L)
+    expect_equal(result$end_idx, 6L)
+})
+
+test_that("resolve_interval resolves lap end-only to full lap boundaries", {
+    event_vec <- c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L)
+    time_vec <- seq(0, 0.8, by = 0.1)
+
+    result <- resolve_interval(
+        start_interval = NULL,
+        end_interval = by_lap(3),
+        time_vec = time_vec,
+        event_vec = event_vec
+    )
+
+    ## lap 3 occupies rows 7-9; start=first, end=last
+    expect_true(result$has_start)
+    expect_true(result$has_end)
+    expect_equal(result$start_idx, 7L)
+    expect_equal(result$end_idx, 9L)
+})
+
+test_that("resolve_interval lap single-boundary supports multiple laps", {
+    event_vec <- c(1L, 1L, 2L, 2L, 3L, 3L)
+    time_vec <- seq(0, 0.5, by = 0.1)
+
+    result <- resolve_interval(
+        start_interval = by_lap(1, 3),
+        end_interval = NULL,
+        time_vec = time_vec,
+        event_vec = event_vec
+    )
+
+    ## lap 1: rows 1-2; lap 3: rows 5-6
+    expect_equal(result$start_idx, c(1L, 5L))
+    expect_equal(result$end_idx, c(2L, 6L))
+})
+
 ## recycle_to_length() ==============================================
 test_that("recycle_to_length returns unchanged when lengths match", {
     input <- list(c(-1, 1), c(-2, 2), c(-3, 3))
@@ -1358,19 +1410,58 @@ test_that("extract_intervals works with by_lap start only", {
     ## replace character event with integer laps
     data$event <- rep(1:10, each = 10)
 
+    ## single boundary: full lap returned (first to last sample)
     result <- extract_intervals(
         data = data,
         event_channel = "event",
         start = by_lap(3),
         event_groups = "distinct",
-        span = c(0, 0.5),
+        span = c(0, 0),
         verbose = FALSE
     )
 
     expect_length(result, 1)
-    ## lap 3 starts at row 21 (time = 2.0), span c(0, 0.5) -> [2.0, 2.5]
+    ## lap 3: rows 21-30, times 2.0-2.9
     expect_equal(result[[1]]$time[1], 2.0)
-    expect_equal(rev(result[[1]]$time)[1], 2.5)
+    expect_equal(rev(result[[1]]$time)[1], 2.9)
+    expect_equal(nrow(result[[1]]), 10)
+    ## interval_times reflects both boundaries
+    expect_equal(attr(result[[1]], "interval_times"), c(2.0, 2.9))
+
+    ## span shifts boundaries around the full lap
+    result <- extract_intervals(
+        data = data,
+        event_channel = "event",
+        start = by_lap(3),
+        event_groups = "distinct",
+        span = c(-0.5, 0.5),
+        verbose = FALSE
+    )
+
+    ## lap 3 starts at 2.0, ends at 2.9; span[-0.5, 0.5] -> [1.5, 3.4]
+    expect_equal(result[[1]]$time[1], 1.5)
+    expect_equal(rev(result[[1]]$time)[1], 3.4)
+})
+
+test_that("extract_intervals works with by_lap end only", {
+    data <- create_mock_mnirs(n = 100, sample_rate = 10)
+    data$event <- rep(1:10, each = 10)
+
+    result <- extract_intervals(
+        data = data,
+        event_channel = "event",
+        end = by_lap(5),
+        event_groups = "distinct",
+        span = c(0, 0),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    ## lap 5: rows 41-50, times 4.0-4.9
+    expect_equal(result[[1]]$time[1], 4.0)
+    expect_equal(rev(result[[1]]$time)[1], 4.9)
+    expect_equal(nrow(result[[1]]), 10)
+    expect_equal(attr(result[[1]], "interval_times"), c(4.0, 4.9))
 })
 
 test_that("extract_intervals works with by_lap start and end", {

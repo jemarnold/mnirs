@@ -5,7 +5,7 @@
 \alias{by_sample}
 \alias{by_label}
 \alias{by_lap}
-\title{Specify interval boundaries by time, sample, label, or lap}
+\title{Specify interval boundaries by time, label, lap, or sample}
 \usage{
 by_time(...)
 
@@ -19,12 +19,12 @@ by_lap(...)
 \item{...}{Specify start or end boundaries.
 \describe{
 \item{\code{by_time(...)}}{Numeric time values in units of \code{time_channel}.}
-\item{\code{by_sample(...)}}{Integer sample indices (row numbers).}
 \item{\code{by_label(...)}}{Character strings to match in \code{event_channel}.
 All matching occurrences are returned.}
 \item{\code{by_lap(...)}}{Integer lap numbers to match in \code{event_channel}.
 For \code{start}, resolves to the first sample of each lap. For \code{end},
 resolves to the last sample.}
+\item{\code{by_sample(...)}}{Integer sample indices (row numbers).}
 }}
 }
 \value{
@@ -39,9 +39,10 @@ Helper functions to define interval start or end boundaries for
 These helpers can be used explicitly for arguments \code{start}/\code{end}, or raw
 values can be passed directly:
 \itemize{
-\item Numeric → \code{by_time()}
-\item Character → \code{by_label()}
-\item Explicit integer (e.g. \code{2L}) → \code{by_lap()}
+\item Numeric → \code{\link[=by_time]{by_time()}}
+\item Character → \code{\link[=by_label]{by_label()}},
+\item Explicit integer (e.g. \code{2L}) → \code{\link[=by_lap]{by_lap()}}.
+\item Use \code{\link[=by_sample]{by_sample()}} explicitly for sample indices.
 }
 }
 \examples{
@@ -53,23 +54,26 @@ data <- read_mnirs(
         smo2_right = "SmO2 unfiltered"
     ),
     time_channel = c(time = "Timestamp (seconds passed)"),
+    event_channel = c(lap = "Lap/Event"),
     zero_time = TRUE,
     verbose = FALSE
-) |>
-    resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
+)
+
+## start and end by time
+extract_intervals(data, start = by_time(66), end = by_time(373))
+
+## start by lap
+extract_intervals(data, start = by_lap(2, 4), span = 0)
 
 ## introduce event_channel with "start" string
 data$event <- NA_character_
-data$event[50] <- "start"
+data$event[1000] <- "start"
 data <- create_mnirs_data(data, event_channel = "event")
 
-## start and end by time
-extract_intervals(data, start = by_time(30), end = by_time(60))
-
 ## start by label, end by time
-extract_intervals(data, start = by_label("start"), end = by_time(300))
+extract_intervals(data, start = by_label("start"), end = by_time(1500))
 
 ## multiple intervals by sample index
-extract_intervals(data, start = by_sample(100, 500), end = by_sample(200, 600))
+extract_intervals(data, start = by_sample(1000, 1500), end = by_sample(2000, 2600))
 
 }

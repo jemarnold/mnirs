@@ -53,13 +53,13 @@ values for ensemble-averaging. If \code{NULL}, will be estimated from
 
 \item{start}{Specifies where intervals begin. Either raw values — numeric
 for time values, character for event labels, explicit integer (e.g. \code{2L})
-for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_sample]{by_sample()}},
-\code{\link[=by_label]{by_label()}}, or \code{\link[=by_lap]{by_lap()}}.}
+for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
+or \code{\link[=by_sample]{by_sample()}}.}
 
 \item{end}{Specifies where intervals end. Either raw values — numeric for
 time values, character for event labels, explicit integer (e.g. \code{2L})
-for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_sample]{by_sample()}},
-\code{\link[=by_label]{by_label()}}, or \code{\link[=by_lap]{by_lap()}}.}
+for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
+or \code{\link[=by_sample]{by_sample()}}.}
 
 \item{span}{A one- or two-element numeric vector \code{c(before, after)} in units
 of \code{time_channel}, or a \code{list()} of such vectors. Applied additively to
@@ -100,7 +100,8 @@ A named \code{list()} of \link[tibble:tibble-package]{tibbles} of class
 }
 \description{
 Extract intervals from \emph{"mnirs"} time series data, specifying interval
-start and end boundaries by time, sample index, event label, or lap number.
+start and end boundaries by time value, event label, lap number, or sample
+index.
 }
 \details{
 \subsection{Interval specification}{
@@ -110,12 +111,13 @@ raw values directly:
 
 \describe{
 \item{\code{\link[=by_time]{by_time()}} or numeric}{Time values in units of \code{time_channel}.}
-\item{\code{\link[=by_sample]{by_sample()}}}{Integer sample indices (row numbers).}
 \item{\code{\link[=by_label]{by_label()}} or character}{Strings to match in \code{event_channel}.
 All matching occurrences are returned.}
 \item{\code{\link[=by_lap]{by_lap()}} or explicit integer (e.g. \code{2L})}{Lap numbers to match
 in \code{event_channel}. Resolves to the first sample of each lap for
-\code{start}, and the last sample for \code{end}.}
+\code{start}, and the last sample for \code{end}, or all samples of the lap if only
+one of either \code{start} or \code{end} is specified.}
+\item{\code{\link[=by_sample]{by_sample()}}}{Integer sample indices (row numbers).}
 }
 
 Raw values supplied to \code{start}/\code{end} are auto-coerced:
