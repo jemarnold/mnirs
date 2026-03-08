@@ -13,10 +13,10 @@
 #'     For `start`, resolves to the first sample of each lap. For `end`,
 #'     resolves to the last sample.}
 #'   }
-#' 
+#'
 #' @details
-#' These helpers can be used explicitly for arguments `start`/`end`, or raw 
-#' values can be passed directly: 
+#' These helpers can be used explicitly for arguments `start`/`end`, or raw
+#' values can be passed directly:
 #'   - Numeric → `by_time()`
 #'   - Character → `by_label()`
 #'   - Explicit integer (e.g. `2L`) → `by_lap()`
@@ -154,7 +154,7 @@ resolve_interval_indices <- function(
     interval,
     time_vec,
     event_vec = NULL,
-    position = "first"
+    position = c("first", "last")
 ) {
     switch(
         interval$type,
@@ -174,22 +174,39 @@ resolve_interval_indices <- function(
             matches
         },
         lap = {
-            vapply(interval$by_lap, \(lap_val) {
-                event_vec <- as.integer(event_vec)
-                matches <- which(event_vec == lap_val)
-                if (length(matches) == 0L) {
-                    cli_abort(c(
-                        "x" = "No samples found for lap {.val {lap_val}}.",
-                        "i" = "Check that {.arg event_channel} contains \\
-                        lap numbers."
-                    ))
-                }
-                if (position == "first") {
-                    matches[1L]
-                } else {
-                    matches[length(matches)]
-                }
-            }, integer(1))
+            event_vec <- as.integer(event_vec)
+            if (position == "all") {
+                ## return list of all matching indices per lap
+                lapply(interval$by_lap, \(lap_val) {
+                    matches <- which(event_vec == lap_val)
+                    if (length(matches) == 0L) {
+                        cli_abort(c(
+                            "x" = "No samples found for lap \\
+                            {.val {lap_val}}.",
+                            "i" = "Check that {.arg event_channel} \\
+                            contains lap numbers."
+                        ))
+                    }
+                    matches
+                })
+            } else {
+                vapply(interval$by_lap, \(lap_val) {
+                    matches <- which(event_vec == lap_val)
+                    if (length(matches) == 0L) {
+                        cli_abort(c(
+                            "x" = "No samples found for lap \\
+                            {.val {lap_val}}.",
+                            "i" = "Check that {.arg event_channel} \\
+                            contains lap numbers."
+                        ))
+                    }
+                    if (position == "first") {
+                        matches[1L]
+                    } else {
+                        matches[length(matches)]
+                    }
+                }, integer(1))
+            }
         }
     )
 }
@@ -205,6 +222,33 @@ resolve_interval <- function(
 ) {
     has_start <- !is.null(start_interval)
     has_end <- !is.null(end_interval)
+
+    ## single-boundary lap: resolve all lap indices then derive start/end
+    single_boundary_lap <- (has_start != has_end) &&
+        ((has_start && start_interval$type == "lap") ||
+            (has_end && end_interval$type == "lap"))
+
+    if (single_boundary_lap) {
+        interval <- if (has_start) start_interval else end_interval
+        all_indices <- resolve_interval_indices(
+            interval,
+            time_vec,
+            event_vec,
+            position = "all"
+        )
+        start_idx <- vapply(all_indices, min, integer(1))
+        end_idx <- vapply(all_indices, max, integer(1))
+        ## treat as both-boundary so apply_span_to_indices uses the
+        ## start+end path (span[1] → start, span[2] → end)
+        return(
+            list(
+                start_idx = start_idx,
+                end_idx = end_idx,
+                has_start = TRUE,
+                has_end = TRUE
+            )
+        )
+    }
 
     if (has_start) {
         start_idx <- resolve_interval_indices(
@@ -587,7 +631,7 @@ group_intervals <- function(
                 verbose
             )
         )
-        
+
         return(result)
     }
 
