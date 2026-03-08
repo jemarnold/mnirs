@@ -1223,8 +1223,8 @@ test_that("rolling_slope works visually", {
     #     })
 })
 
-test_that("rolling_slope works on example_mnirs() data", {
-    skip("rolling_slope visual checks")
+test_that("rolling_slope works visually on example_mnirs() data", {
+    skip("visual check for rolling_slope")
 
     data <- read_mnirs(
         example_mnirs("moxy_ramp"),

@@ -569,7 +569,7 @@ nirs_data <- read_mnirs(
     filter_mnirs(
         method = "butterworth",
         order = 2,
-        W = 0.01,
+        W = 0.02,
         na.rm = TRUE
     ) |>
     shift_mnirs(
