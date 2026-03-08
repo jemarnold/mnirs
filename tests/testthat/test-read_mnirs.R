@@ -67,27 +67,63 @@ test_that("example_mnirs() does not show files with `~`", {
 
 ## read_file() ==================================================
 
-test_that("read_file() reads Excel files correctly", {
+test_that("read_file() reads moxy (perfpro) xlsx files correctly", {
     file_path <- example_mnirs("moxy_ramp")
     skip_if(!grepl("\\.xls(x)?$", file_path, ignore.case = TRUE))
 
     result <- read_file(file_path)
 
     expect_s3_class(result, "data.frame")
-    expect_true(ncol(result) > 0)
-    expect_true(nrow(result) > 0)
+    expect_equal(ncol(result), 6)
+    expect_gt(nrow(result), 0)
     expect_all_true(unlist(lapply(result, is.character)))
 })
 
-test_that("read_file() reads CSV files correctly", {
+test_that("read_file() reads moxy .csv files correctly", {
+    file_path <- example_mnirs("moxy_intervals")
+    skip_if(!grepl("\\.csv$", file_path, ignore.case = TRUE))
+
+    result <- read_file(file_path)
+
+    expect_s3_class(result, "data.frame")
+    expect_equal(ncol(result), 7)
+    expect_gt(nrow(result), 0)
+    expect_all_true(unlist(lapply(result, is.character)))
+})
+
+test_that("read_file() reads explicit comma train.red csv correctly", {
     file_path <- example_mnirs("train.red")
     skip_if(!grepl("\\.csv$", file_path, ignore.case = TRUE))
 
     result <- read_file(file_path)
 
     expect_s3_class(result, "data.frame")
-    expect_true(ncol(result) > 0)
-    expect_true(nrow(result) > 0)
+    expect_equal(ncol(result), 12)
+    expect_gt(nrow(result), 0)
+    expect_all_true(unlist(lapply(result, is.character)))
+})
+
+test_that("read_file() reads train.red files correctly", {
+    file_path <- test_path("testdata/train.red-mre.csv")
+    skip_if_not(file.exists(file_path), "testdata not available")
+
+    result <- read_file(file_path)
+
+    expect_s3_class(result, "data.frame")
+    expect_equal(ncol(result), 23)
+    expect_gt(nrow(result), 0)
+    expect_all_true(unlist(lapply(result, is.character)))
+})
+
+test_that("read_file() reads vo2master files correctly", {
+    file_path <- test_path("testdata/vo2master.csv")
+    skip_if_not(file.exists(file_path), "testdata not available")
+
+    result <- read_file(file_path)
+
+    expect_s3_class(result, "data.frame")
+    expect_gt(ncol(result), 12)
+    expect_gt(nrow(result), 0)
     expect_all_true(unlist(lapply(result, is.character)))
 })
 
@@ -124,7 +160,6 @@ test_that("detect_mnirs_device works on example files", {
     ## xlsx files
     expect_equal(
         read_file(example_mnirs("moxy_ramp")) |>
-            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
         list(
             nirs_device = "Moxy",
@@ -134,7 +169,6 @@ test_that("detect_mnirs_device works on example files", {
 
     expect_equal(
         read_file(example_mnirs("artinis_intervals")) |>
-            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
         list(
             nirs_device = "Artinis",
@@ -145,17 +179,34 @@ test_that("detect_mnirs_device works on example files", {
     ## csv files
     expect_equal(
         read_file(example_mnirs("train.red")) |>
-            # apply(1L, paste, collapse = " ") |>
             detect_mnirs_device(),
         list(
             nirs_device = "Train.Red",
             header_row = 41
         )
     )
+    
+
+})
+
+test_that("detect_mnirs_device works on internal example files", {
+    file_path <- test_path("testdata/train.red-mre.csv")
+    skip_if_not(file.exists(file_path), "testdata not available")
+    
+    expect_equal(
+        read_file(file_path) |>
+            detect_mnirs_device(),
+        list(
+            nirs_device = "Train.Red",
+            header_row = 521
+        )
+    )
+    
+    file_path <- test_path("testdata/vo2master.csv")
+    skip_if_not(file.exists(file_path), "testdata not available")
 
     expect_equal(
-        read_file(file_path = example_mnirs("vo2master")) |>
-            # apply(1L, paste, collapse = " ") |>
+        read_file(file_path) |>
             detect_mnirs_device(),
         list(
             nirs_device = "VO2master-Moxy",
@@ -518,14 +569,6 @@ test_that("rename_duplicates() handles empty strings", {
     expect_equal(result, c("O2Hb", "col_2", "HHb", "col_4"))
 })
 
-test_that("rename_duplicates() handles naming empty as duplicated", {
-    skip("rename_duplicates should not encounter this situation")
-    x <- c("O2Hb", "", "HHb", "col_2")
-    result <- rename_duplicates(x)
-
-    expect_equal(result, c("O2Hb", "col_2", "HHb", "col_2_1"))
-})
-
 test_that("rename_duplicates() handles NA values", {
     x <- c("O2Hb", NA, "HHb", NA)
     result <- rename_duplicates(x)
@@ -814,7 +857,7 @@ test_that("convert_type() coerces integer columns apart from event_channel", {
     )
 
     result <- convert_type(data, "time", event_channel = "lap")
-    
+
     expect_type(result$time, "double")
     expect_type(result$B, "double")
     expect_type(result$lap, "integer")
@@ -824,31 +867,58 @@ test_that("convert_type() coerces integer columns apart from event_channel", {
 })
 
 
-## clean_invalid() ==================================================
-test_that("clean_invalid handles character vectors", {
-    expect_equal(clean_invalid(c("a", "", "b")), c("a", NA_character_, "b"))
-    expect_equal(clean_invalid(c("x", "NA", "y")), c("x", NA_character_, "y"))
-    expect_equal(clean_invalid(c("", "NA")), c(NA_character_, NA_character_))
-    expect_equal(clean_invalid(""), NA_character_)
-    expect_equal(clean_invalid(NA_character_), NA_character_)
-    expect_equal(clean_invalid(character(0)), character(0))
+test_that("convert_type() standardises empty and 'NA' strings to NA", {
+    data <- data.frame(
+        time = c("1", "2", "3"),
+        A = c("a", "", "b"),
+        B = c("x", "NA", "y"),
+        stringsAsFactors = FALSE
+    )
+
+    result <- convert_type(data, "time")
+
+    expect_equal(result$A, c("a", NA_character_, "b"))
+    expect_equal(result$B, c("x", NA_character_, "y"))
 })
 
-test_that("clean_invalid handles numeric vectors", {
-    ## skip, avoid loss of precision
-    # expect_equal(
-    #     clean_invalid(c(1.2345678, 2.3, NA)),
-    #     c(1.234568, 2.3, NA_real_)
-    # )
-    expect_equal(clean_invalid(c(0, -0)), c(0, 0))
-    expect_equal(clean_invalid(c(Inf, -Inf, NaN)), rep(NA_real_, 3))
-    expect_equal(clean_invalid(numeric(0)), numeric(0))
-    expect_equal(clean_invalid(NA_real_), NA_real_)
+test_that("convert_type() standardises Inf/NaN to NA in numeric cols", {
+    data <- data.frame(
+        time = c("1", "2", "3", "4"),
+        A = c("1.5", "Inf", "-Inf", "NaN"),
+        stringsAsFactors = FALSE
+    )
+
+    result <- convert_type(data, "time")
+
+    expect_type(result$A, "double")
+    expect_equal(result$A, c(1.5, NA_real_, NA_real_, NA_real_))
 })
 
-test_that("clean_invalid does nothing to other types", {
-    expect_equal(clean_invalid(TRUE), TRUE)
-    expect_equal(clean_invalid(list(1, 2)), list(1, 2))
+test_that("convert_type() standardises non-finite integers to NA", {
+    ## event_channel kept as integer; other int cols coerced to numeric
+    data <- data.frame(
+        time = c("1", "2", "3"),
+        lap = c("1", NA, "2"),
+        B = c("10", "20", "30"),
+        stringsAsFactors = FALSE
+    )
+
+    result <- convert_type(data, "time", event_channel = "lap")
+
+    expect_type(result$lap, "integer")
+    expect_equal(result$lap, c(1L, NA_integer_, 2L))
+    expect_type(result$B, "double")
+})
+
+test_that("convert_type() preserves valid numeric values", {
+    data <- data.frame(
+        time = c("1", "2"),
+        A = c("0", "-0"),
+        stringsAsFactors = FALSE
+    )
+
+    result <- convert_type(data, "time")
+    expect_equal(result$A, c(0, 0))
 })
 
 ## remove_empty_rows_cols() ===========================================
@@ -1164,7 +1234,8 @@ test_that("parse_time_channel() add_timestamp=TRUE with start_timestamp reconstr
     start_ts <- "2025-06-01T09:00:00"
 
     result <- parse_time_channel(
-        data, "time",
+        data,
+        "time",
         start_timestamp = start_ts,
         add_timestamp = TRUE
     )
@@ -1188,7 +1259,7 @@ test_that("parse_time_channel() add_timestamp=TRUE with no timestamps skips colu
     )
 
     result <- parse_time_channel(
-        data, 
+        data,
         time_channel = "time",
         start_timestamp = NULL,
         add_timestamp = TRUE
@@ -1375,11 +1446,6 @@ test_that("detect_irregular_samples uses correct time_channel name", {
 ## read_mnirs() =======================================================
 ## read_mnirs() auto-detection =========================================
 test_that("read_mnirs auto-detects Moxy channels when nirs_channels = NULL", {
-    skip_if(
-        length(device_channels$Moxy$nirs_channels) == 0L,
-        "Moxy device_channels not populated"
-    )
-
     file_path <- example_mnirs("moxy_ramp")
 
     expect_message(
@@ -1405,11 +1471,6 @@ test_that("read_mnirs auto-detects Moxy channels when nirs_channels = NULL", {
 })
 
 test_that("read_mnirs auto-detects Train.Red channels when nirs_channels = NULL", {
-    skip_if(
-        length(device_channels$Train.Red$nirs_channels) == 0L,
-        "Train.Red device_channels not populated"
-    )
-
     file_path <- example_mnirs("train.red")
 
     expect_message(
@@ -1426,8 +1487,14 @@ test_that("read_mnirs auto-detects Train.Red channels when nirs_channels = NULL"
 
     expect_s3_class(df, "mnirs")
     expect_equal(attr(df, "nirs_device"), "Train.Red")
-    expect_equal(attr(df, "nirs_channels"), device_channels$Train.Red$nirs_channels)
-    expect_equal(attr(df, "time_channel"), device_channels$Train.Red$time_channel)
+    expect_equal(
+        attr(df, "nirs_channels"),
+        device_channels$Train.Red$nirs_channels
+    )
+    expect_equal(
+        attr(df, "time_channel"),
+        device_channels$Train.Red$time_channel
+    )
     expect_true(all(
         device_channels$Train.Red$nirs_channels %in% names(df)
     ))
@@ -1496,8 +1563,6 @@ test_that("read_mnirs returns all columns when auto-detecting nirs_channels", {
     expect_true("SmO2 Live" %in% names(df))
     expect_true("hh:mm:ss" %in% names(df))
 })
-
-
 
 
 ## moxy ===============================================================
@@ -1630,6 +1695,57 @@ test_that("read_mnirs moxy invalid channel names", {
 ## train.red ========================================================
 test_that("read_mnirs train.red works", {
     file_path <- example_mnirs("train.red_intervals.csv")
+
+    expect_no_message(
+        read_mnirs(
+            file_path = file_path,
+            nirs_channels = c(
+                smo2_left = "SmO2 unfiltered",
+                smo2_right = "SmO2 unfiltered"
+            ),
+            time_channel = c(time = "Timestamp (seconds passed)"),
+            verbose = FALSE
+        )
+    )
+
+    expect_warning(
+        df <- read_mnirs(
+            file_path = file_path,
+            nirs_channels = c(
+                smo2_left = "SmO2 unfiltered",
+                smo2_right = "SmO2 unfiltered"
+            ),
+            time_channel = c(time = "Timestamp (seconds passed)"),
+            verbose = TRUE
+        ),
+        "irregular"
+    ) |>
+        expect_message("Estimated.*sample_rate.*10")
+
+    expect_s3_class(df, "mnirs")
+    expect_s3_class(df, "data.frame")
+    expect_true(all(
+        c("time", "smo2_left", "smo2_right") %in% names(df)
+    ))
+    expect_equal(class(df$time), "numeric")
+    expect_gte(df$time[1], 0)
+
+    ## check that time diffs should be 0 < Δ < 1 with proper POSIXct import
+    expect_gt(sum(diff(df$time[1:100]) < 1 & diff(df$time[1:100]) > 0), 0)
+    expect_lt(sum(diff(df$time[1:100]) %in% c(0, 1)), 99)
+
+    expect_true(all(
+        c("nirs_device", "nirs_channels", "time_channel", "sample_rate") %in%
+            names(attributes(df))
+    ))
+
+    expect_equal(attr(df, "nirs_device"), "Train.Red")
+    expect_equal(attr(df, "sample_rate"), 10)
+})
+
+test_that("read_mnirs external train.red mre works", {
+    file_path <- test_path("testdata/train.red-mre.csv")
+    skip_if_not(file.exists(file_path), "testdata not available")
 
     expect_no_message(
         read_mnirs(
@@ -1864,7 +1980,9 @@ test_that("read_mnirs Oxysoft invalid channel names", {
 
 ## VO2master app ========================================================
 test_that("read_mnirs VO2master with ',' decimals returns numeric", {
-    file_path <- example_mnirs("vo2master")
+    file_path <- test_path("testdata/vo2master.csv")
+    skip_if_not(file.exists(file_path), "testdata not available")
+
     nirs_channels <- c(
         smo2_1 = "SmO2[%]",
         smo2_2 = "SmO2 -  2[%]",
@@ -1889,7 +2007,7 @@ test_that("read_mnirs VO2master with ',' decimals returns numeric", {
     ## integrated test
     expect_message(
         df <- read_mnirs(
-            file_path = example_mnirs("vo2master"),
+            file_path = file_path,
             nirs_channels = c(
                 smo2_1 = "SmO2[%]",
                 smo2_2 = "SmO2 -  2[%]",

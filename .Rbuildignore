@@ -22,3 +22,4 @@
 mnirs-hex.*\.png$
 ^CLAUDE\.md$
 ^tests/testthat/testdata$
+^\.claude$

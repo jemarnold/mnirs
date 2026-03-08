@@ -64,7 +64,7 @@ library(mnirs)
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
 #> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
-#> [5] "train.red_intervals.csv" "vo2master.csv"
+#> [5] "train.red_intervals.csv"
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
@@ -142,7 +142,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-07 00:29:00 PST"
+#> [1] "2026-03-08 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values

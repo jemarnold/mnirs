@@ -205,9 +205,6 @@ read_mnirs <- function(
         start_timestamp <- time_list$start_timestamp
     }
 
-    ## standardise invalid to NA
-    data[] <- lapply(data, \(.x) clean_invalid(.x))
-
     ## validate and estimate sample rate
     ## will write new "time" column if Oxysoft export rate detected
     ## return list(data_sampled, time_renamed, sample_rate)

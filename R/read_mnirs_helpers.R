@@ -11,35 +11,33 @@ read_file <- function(file_path) {
 
     ## import data_raw from either excel or csv
     if (grepl("\\.csv$", file_path, ignore.case = TRUE)) {
+        ## sample lines for separator and column count detection
         lines <- readLines(file_path, warn = FALSE)
         nrows <- length(lines)
 
-        ## detect separator: comma vs tab
-        sep <- if (any(grepl("\t", lines[seq_len(min(10L, nrows))]))) {
-            "\t"
-        } else {
-            ","
-        }
+        ## detect separator: comma vs tab from first 10 lines
+        head_lines <- lines[seq_len(min(10L, nrows))]
+        sep <- if (any(grepl("\t", head_lines))) "\t" else ","
 
         ## find the max number of separators from the end of the data file
-        n_seps <- max(lengths(gregexpr(
-            sep,
-            lines[seq(to = nrows, by = 1L, len = min(50, nrows))],
-            fixed = TRUE
-        )))
+        tail_lines <- lines[seq(to = nrows, by = 1L, len = min(50, nrows))]
+        n_seps <- max(lengths(gregexpr(sep, tail_lines, fixed = TRUE)))
 
         ## pad the first line so fread infers the correct column count
         lines <- c(strrep(sep, n_seps), lines)
 
-        data_raw <- as.data.frame(
+        ## read with explicit sep and column count to handle
+        ## irregular header rows with fewer columns than data
+        data_raw <- tibble::tibble(
             data.table::fread(
                 text = lines,
                 header = FALSE,
                 fill = Inf,
+                sep = sep,
                 colClasses = "character",
+                # col.names = paste0("V", seq_len(ncols)),
             )[-1, ]
         )
-        
     } else if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
         ## report error when file is open and cannot be accessed by readxl
         data_raw <- tryCatch(
@@ -97,6 +95,19 @@ device_channels <- list(
 )
 
 
+#' Datetime format strings for POSIXct parsing
+#' @keywords internal
+datetime_formats <- c(
+    "%H:%M:%OS",
+    "%Y-%m-%dT%H:%M:%OS",
+    "%Y-%m-%dT%H:%M:%OS%z",
+    "%Y-%m-%d %H:%M:%OS",
+    "%Y/%m/%d %H:%M:%OS",
+    "%d-%m-%Y %H:%M:%OS",
+    "%d/%m/%Y %H:%M:%OS"
+)
+
+
 #' Detect mnirs device from file metadata
 #' @keywords internal
 detect_mnirs_device <- function(data) {
@@ -122,38 +133,25 @@ detect_mnirs_device <- function(data) {
         )
     )
 
-    ## Find the first row in `data_strings` where all `patterns` match
-    ## keywords internal
-    find_header_row <- function(data_strings, patterns, mode = all) {
-        Find(\(.i) {
-            mode(
-                vapply(patterns, grepl, logical(1L), 
-                x = data_strings[.i], fixed = TRUE)
-            )
-        }, seq_along(data_strings))
-    }
-
-    ## collapse each row to a single string — searched once, reused per device
+    ## collapse each row to a single string for pattern matching
     data_strings <- apply(data, 1L, paste, collapse = " ")
 
-    matched_row <- Find(\(.i) {
-        any(vapply(device_patterns, \(.d) {
-            !is.null(find_header_row(data_strings[.i], .d$pattern, .d$mode))
-        }, logical(1L)))
-    }, seq_along(data_strings))
-
-    if (is.null(matched_row)) {
-        return(list(nirs_device = NULL, header_row = 1L))
+    ## single pass: first row × device match wins
+    ## ! I don't like for loops
+    for (i in seq_along(data_strings)) {
+        for (nm in names(device_patterns)) {
+            .d <- device_patterns[[nm]]
+            matched <- vapply(
+                .d$pattern, grepl, logical(1L),
+                x = data_strings[i], fixed = TRUE
+            )
+            if (.d$mode(matched)) {
+                return(list(nirs_device = nm, header_row = i))
+            }
+        }
     }
 
-    device_name <- Find(\(.nm) {
-        .d <- device_patterns[[.nm]]
-        !is.null(
-            find_header_row(data_strings[matched_row], .d$pattern, .d$mode)
-        )
-    }, names(device_patterns))
-
-    return(list(nirs_device = device_name, header_row = matched_row))
+    return(list(nirs_device = NULL, header_row = 1L))
 }
 
 
@@ -270,40 +268,35 @@ detect_time_channel <- function(
         return(c(sample = "1"))
     }
 
-    ## alert and return detected `time_channel` column name
-    alert_time_channel <- function(time_channel) {
-        if (verbose) {
-            cli_inform(c(
-                "!" = "Detected {.arg time_channel} = {.val {time_channel}}."
-            ))
-        }
-        return(time_channel)
-    }
+    col_names <- names(data)
 
     ## match column names to possible time column names
-    col_names <- names(data)
     time_regex <- "time|duration|hms|h+:m+:s+"
     time_idx <- grep(time_regex, col_names, ignore.case = TRUE)[1L]
-    if (!is.na(time_idx)) {
-        return(alert_time_channel(col_names[time_idx]))
-    }
 
     ## find name of POSIXct column
-    posix_idx <- Position(\(.col) inherits(.col, "POSIXct"), data)
-    if (!is.na(posix_idx)) {
-        return(alert_time_channel(col_names[posix_idx]))
+    if (is.na(time_idx)) {
+        time_idx <- Position(\(.col) inherits(.col, "POSIXct"), data)
     }
 
     ## find name of character column with time format strings
-    string_idx <- Position(\(.col) {
-        is.character(.col) && {
-            first_val <- .col[which(!is.na(.col))[1L]]
-            !is.na(first_val) && grepl("^\\d{1,2}:\\d{2}(:\\d{2})?", first_val)
-        }
-    }, data)
+    if (is.na(time_idx)) {
+        time_idx <- Position(\(.col) {
+            is.character(.col) && {
+                val <- .col[which(!is.na(.col))[1L]]
+                !is.na(val) && grepl("^\\d{1,2}:\\d{2}(:\\d{2})?", val)
+            }
+        }, data)
+    }
 
-    if (!is.na(string_idx)) {
-        return(alert_time_channel(col_names[string_idx]))
+    if (!is.na(time_idx)) {
+        if (verbose) {
+            cli_inform(c(
+                "!" = "Detected {.arg time_channel} = \\
+                {.val {col_names[time_idx]}}."
+            ))
+        }
+        return(col_names[time_idx])
     }
 
     cli_abort(c(
@@ -355,7 +348,7 @@ select_rename_data <- function(
     keep_all = FALSE,
     verbose = TRUE
 ) {
-    ## if channels not named, names from object
+    ## ensure all channel inputs are named (name = original_col_name)
     channel_list <- list(
         time_channel = time_channel,
         event_channel = event_channel,
@@ -363,27 +356,25 @@ select_rename_data <- function(
     ) |>
         lapply(\(.x) if (is.null(.x)) .x else name_channels(.x))
 
-    channel_inputs <- lapply(channel_list, names)
-    renamed_channels <- lapply(channel_inputs, rename_duplicates)
+    ## original column names (values) mapped to user names (names)
+    ## rename_duplicates makes user-facing names unique
+    orig_names <- lapply(channel_list, \(.x) {
+        if (is.null(.x)) NULL else rename_duplicates(as.character(.x))
+    })
+    user_names <- lapply(channel_list, \(.x) {
+        if (is.null(.x)) NULL else rename_duplicates(names(.x))
+    })
 
-    ## carry forward renamed channels
-    nirs_renamed <- renamed_channels$nirs_channels
-    time_renamed <- renamed_channels$time_channel
-    event_renamed <- renamed_channels$event_channel
+    ## flat vectors for column matching
+    orig_vec <- unlist(orig_names, use.names = FALSE)
+    user_vec <- unlist(user_names, use.names = FALSE)
 
-    ## de-duplicate channels & columns
+    ## de-duplicate data column names
     data_names <- rename_duplicates(names(data))
-    channel_vec <- unlist(
-        lapply(channel_list, rename_duplicates),
-        use.names = FALSE
-    )
-    channel_inputs <- unlist(channel_inputs, use.names = FALSE)
-    renamed_channels <- unlist(renamed_channels, use.names = FALSE)
-
-    ## TODO check for duplicate channel_inputs not in data names?
 
     ## check channels exist in data
-    if (length(setdiff(channel_vec, data_names)) > 0L) {
+    missing <- setdiff(orig_vec, data_names)
+    if (length(missing) > 0L) {
         cli_abort(c(
             "x" = "Channel names not detected.",
             "i" = "Column names are case sensitive and must match exactly."
@@ -392,39 +383,43 @@ select_rename_data <- function(
 
     ## keep all columns or only specified channels
     selected_cols <- if (keep_all) {
-        c(channel_vec, setdiff(data_names, channel_vec))
+        c(orig_vec, setdiff(data_names, orig_vec))
     } else {
-        channel_vec
+        orig_vec
     }
 
-    ## rename columns from specified channel names
+    ## select and rename: channel columns get user names,
+    ## remaining columns keep de-duplicated data names
     result <- setNames(data, data_names)
     result <- result[, selected_cols, drop = FALSE]
-    channel_names_idx <- match(channel_vec, names(result))
+    channel_idx <- match(orig_vec, names(result))
 
-    ## prioritise user input channel names if duplicates with result names
-    prioritise_custom <- rename_duplicates(c(renamed_channels, names(result)))
-    names(result) <- prioritise_custom[!prioritise_custom %in% renamed_channels]
-    names(result)[channel_names_idx] <- renamed_channels
+    ## resolve clashes: user names take priority over data names
+    all_names <- rename_duplicates(c(user_vec, names(result)))
+    names(result) <- all_names[!all_names %in% user_vec]
+    names(result)[channel_idx] <- user_vec
 
-    renamed <- !names(result)[channel_names_idx] %in% channel_inputs
-
-    if (verbose && any(renamed)) {
-        ## warn about renamed names
-        old_names <- channel_inputs[renamed]
-        renamed <- names(result)[channel_names_idx][renamed]
+    ## warn if any channels were renamed from their input names
+    was_renamed <- user_vec !=
+        unlist(lapply(channel_list, names), use.names = FALSE)
+    if (verbose && any(was_renamed)) {
+        old <- unlist(
+            lapply(channel_list, names),
+            use.names = FALSE
+        )[was_renamed]
+        new <- user_vec[was_renamed]
         cli_warn(c(
             "!" = "Duplicate channel names detected.",
-            "i" = "Renamed: {.val {paste(old_names, renamed, sep = ' = ')}}",
+            "i" = "Renamed: {.val {paste(old, new, sep = ' = ')}}",
             "i" = "Unique channel names can be defined explicitly."
         ))
     }
 
     return(list(
         data = result,
-        nirs_channel = nirs_renamed,
-        time_channel = time_renamed,
-        event_channel = event_renamed
+        nirs_channel = user_names$nirs_channels,
+        time_channel = user_names$time_channel,
+        event_channel = user_names$event_channel
     ))
 }
 
@@ -466,22 +461,19 @@ convert_type <- function(
     )
     data[int_cols] <- lapply(data[int_cols], as.numeric)
 
+    ## standardise Inf/NaN/empty to NA
+    data[] <- lapply(data, \(.x) {
+        if (is.character(.x)) {
+            .x[.x %in% c("", "NA")] <- NA_character_
+        } else if (is.integer(.x)) {
+            .x[!is.finite(.x)] <- NA_integer_
+        } else if (is.numeric(.x)) {
+            .x[!is.finite(.x)] <- NA_real_
+        }
+        .x
+    })
+
     return(data)
-}
-
-
-#' Standardise invalid to NA values and round numeric to avoid float
-#' precision error
-#' @keywords internal
-clean_invalid <- function(x) {
-    if (is.character(x)) {
-        x[x %in% c("", "NA")] <- NA_character_
-    } else if (is.integer(x)) {
-        x[!is.finite(x)] <- NA_integer_
-    } else if (is.numeric(x)) {
-        x[!is.finite(x)] <- NA_real_
-    }
-    return(x)
 }
 
 
@@ -496,26 +488,16 @@ remove_empty_rows_cols <- function(data) {
 #' Extract earliest POSIXct value from file header metadata
 #' @keywords internal
 extract_start_timestamp <- function(file_header) {
-    formats <- c(
-        "%Y-%m-%dT%H:%M:%OS",
-        "%Y-%m-%dT%H:%M:%OS%z",
-        "%Y-%m-%d %H:%M:%OS",
-        "%Y/%m/%d %H:%M:%OS",
-        "%d-%m-%Y %H:%M:%OS",
-        "%d/%m/%Y %H:%M:%OS",
-        "%H:%M:%OS"
-    )
-
     header_values <- unlist(file_header, use.names = FALSE)
     header_values <- header_values[!is.na(header_values) & header_values != ""]
 
     ## search for POSIXct values, return the earliest time value
     ## TODO fragile for misinterpreted formats for invalid "early" timestamps
     parsed <- vapply(header_values, \(.x) {
-        as.POSIXct(.x, tryFormats = formats, optional = TRUE)
+        as.POSIXct(.x, tryFormats = datetime_formats, optional = TRUE)
     }, numeric(1L))
     parsed <- which(!is.na(parsed))
-    
+
     if (length(parsed) == 0L) {
         return(NULL)
     }
@@ -523,7 +505,6 @@ extract_start_timestamp <- function(file_header) {
     ## return the character string timestamp
     return(min(header_values[parsed]))
 }
-
 
 
 #' Parse time_channel character or dttm to numeric
@@ -535,23 +516,16 @@ parse_time_channel <- function(
     add_timestamp = FALSE,
     zero_time = FALSE
 ) {
-    ## character to POSIXct
-    formats <- c(
-        "%Y-%m-%dT%H:%M:%OS",
-        "%Y-%m-%dT%H:%M:%OS%z",
-        "%Y-%m-%d %H:%M:%OS",
-        "%Y/%m/%d %H:%M:%OS",
-        "%d-%m-%Y %H:%M:%OS",
-        "%d/%m/%Y %H:%M:%OS",
-        "%H:%M:%OS"
-    )
-
     time_vec <- data[[time_channel]]
     ## fractional unix time to POSIXct
     if (is.numeric(time_vec) && all(time_vec <= 1, na.rm = TRUE)) {
         time_vec <- as.POSIXct(time_vec * 86400)
     } else if (is.character(time_vec)) {
-        time_vec <- as.POSIXct(time_vec, tryFormats = formats, optional = TRUE)
+        time_vec <- as.POSIXct(
+            time_vec,
+            tryFormats = datetime_formats,
+            optional = TRUE
+        )
     }
 
     if (zero_time && is.numeric(time_vec)) {
@@ -582,7 +556,7 @@ parse_time_channel <- function(
         if (!is.null(start_timestamp)) {
             start_time <- as.POSIXct(
                 start_timestamp,
-                tryFormats = formats,
+                tryFormats = datetime_formats,
                 optional = TRUE
             )
             data$timestamp <- start_time + time_vec
@@ -690,7 +664,7 @@ detect_irregular_samples <- function(
 
     info_msg <- if (length(irregular_vec) > 5L) {
         ## if more than 5 irregular samples, print the first three
-        irregular_display <- irregular_vec[1:3]
+        irregular_display <- irregular_vec[seq_len(3L)]
 
         "Investigate at {.arg {time_channel}} = {.val {irregular_display}} \\
         and {length(irregular_vec) - 3L} more."
