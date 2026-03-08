@@ -188,7 +188,7 @@ read_mnirs <- function(
     ## remove empty (NA) columns and rows
     data <- remove_empty_rows_cols(data)
     ## convert char decimal "," to "." and convert column types
-    data <- convert_type(data, time_channel)
+    data <- convert_type(data, time_renamed, event_renamed, verbose)
     ## convert POSIXct to numeric and/or recalc time from zero
     ## return list(data, start_timestamp) — start_timestamp from time_channel POSIXct
     time_list <- parse_time_channel(
@@ -199,6 +199,7 @@ read_mnirs <- function(
         zero_time
     )
     data <- time_list$data
+    
     ## extract start_timestamp from data if not already found in header
     if (is.null(start_timestamp)) {
         start_timestamp <- time_list$start_timestamp

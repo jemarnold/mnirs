@@ -803,6 +803,27 @@ test_that("select_rename_data() prioritises custom names over data", {
     expect_equal(result$data$custom, "10")
 })
 
+## convert_type() ================================================
+test_that("convert_type() coerces integer columns apart from event_channel", {
+    data <- data.frame(
+        time = c(1, 2, 3),
+        lap = c(1.0, NA_real_, 2.0),
+        B = c(10, 20, 30),
+        x = c(10.5, 11.0, 11.5),
+        stringsAsFactors = FALSE
+    )
+
+    result <- convert_type(data, "time", event_channel = "lap")
+    
+    expect_type(result$time, "double")
+    expect_type(result$B, "double")
+    expect_type(result$lap, "integer")
+    expect_equal(result$lap, c(1L, NA_integer_, 2L))
+    ## other columns unaffected
+    expect_type(result$x, "double")
+})
+
+
 ## clean_invalid() ==================================================
 test_that("clean_invalid handles character vectors", {
     expect_equal(clean_invalid(c("a", "", "b")), c("a", NA_character_, "b"))
@@ -1001,10 +1022,7 @@ test_that("parse_time_channel() recalculates numeric time from zero", {
 })
 
 test_that("parse_time_channel() parses fractional unix time", {
-    skip(
-        "fractional time doesn't seem to work properly, but \
-    I also don't have a real-world example to challenge it"
-    )
+    skip("fractional time doesn't seem to work properly, but I also don't have a real-world example to test it")
 
     hrs_vec <- seq(4, 24, by = 4)
     data <- data.frame(
@@ -1660,6 +1678,20 @@ test_that("read_mnirs train.red works", {
     expect_equal(attr(df, "sample_rate"), 10)
 })
 
+test_that("read_mnirs coerces integerish event_channel to integer", {
+    ## train.red "Lap/Event" column contains lap numbers (doubles from CSV)
+    data <- read_mnirs(
+        file_path = example_mnirs("train.red_intervals.csv"),
+        nirs_channels = c(smo2_left = "SmO2 unfiltered"),
+        time_channel = c(time = "Timestamp (seconds passed)"),
+        event_channel = c(lap = "Lap/Event"),
+        verbose = FALSE
+    )
+    # rlang::is_integerish(df$lap)
+
+    expect_type(data$lap, "integer")
+})
+
 test_that("read_mnirs train.red works with zero_time", {
     file_path <- example_mnirs("train.red_intervals.csv")
 
@@ -1869,12 +1901,12 @@ test_that("read_mnirs VO2master with ',' decimals returns numeric", {
         "Estimated.*sample_rate.*1"
     )
 
-    expect_equal(class(df$time), "numeric")
+    expect_type(df$time, "double")
     expect_equal(sum(diff(df$time[1:100]) == 1), 99)
     ## smo2 should be numeric from "27,90"
-    expect_equal(class(df$smo2_1), "numeric")
-    expect_equal(class(df$smo2_2), "numeric")
-    expect_equal(class(df$smo2_3), "numeric")
+    expect_type(df$smo2_1, "double")
+    expect_type(df$smo2_2, "double")
+    expect_type(df$smo2_3, "double")
 
     expect_true(all(
         c("nirs_channels", "time_channel", "sample_rate") %in%

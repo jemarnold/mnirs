@@ -431,10 +431,16 @@ select_rename_data <- function(
 
 #' Standardise comma decimals to periods in character columns
 #' @keywords internal
-convert_type <- function(data, time_channel) {
+convert_type <- function(
+    data,
+    time_channel,
+    event_channel = NULL,
+    verbose = TRUE
+) {
+    colnames <- names(data)
     ## convert decimal "," to "."
     char_cols <- setdiff(
-        names(data)[vapply(data, is.character, logical(1L))],
+        colnames[vapply(data, is.character, logical(1L))],
         time_channel
     )
     for (col in char_cols) {
@@ -453,6 +459,13 @@ convert_type <- function(data, time_channel) {
         as.is = TRUE
     )
 
+    ## coerce integer columns to numeric (except event_channel)
+    int_cols <- setdiff(
+        colnames[vapply(data, is.integer, logical(1L))],
+        event_channel
+    )
+    data[int_cols] <- lapply(data[int_cols], as.numeric)
+
     return(data)
 }
 
@@ -463,6 +476,8 @@ convert_type <- function(data, time_channel) {
 clean_invalid <- function(x) {
     if (is.character(x)) {
         x[x %in% c("", "NA")] <- NA_character_
+    } else if (is.integer(x)) {
+        x[!is.finite(x)] <- NA_integer_
     } else if (is.numeric(x)) {
         x[!is.finite(x)] <- NA_real_
     }
