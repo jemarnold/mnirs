@@ -35,7 +35,6 @@ read_file <- function(file_path) {
                 fill = Inf,
                 sep = sep,
                 colClasses = "character",
-                # col.names = paste0("V", seq_len(ncols)),
             )[-1, ]
         )
     } else if (grepl("\\.xls(x)?$", file_path, ignore.case = TRUE)) {
@@ -82,7 +81,7 @@ device_channels <- list(
     ),
     Train.Red = list(
         time_channel = c("Timestamp (seconds passed)"),
-        nirs_channels = c("SmO2 unfiltered")
+        nirs_channels = c("SmO2")
     ),
     Moxy = list(
         time_channel = c("hh:mm:ss"),
@@ -133,25 +132,36 @@ detect_mnirs_device <- function(data) {
         )
     )
 
+    ## find the first row in `string` where all `patterns` match
+    find_row <- function(string, patterns, mode = all) {
+        Find(\(.i) {
+            mode(vapply(patterns, \(.x) {
+                    grepl(.x, string[.i], fixed = TRUE)
+                }, logical(1L)))
+        }, seq_along(string))
+    }
+
     ## collapse each row to a single string for pattern matching
     data_strings <- apply(data, 1L, paste, collapse = " ")
 
-    ## single pass: first row × device match wins
-    ## ! I don't like for loops
-    for (i in seq_along(data_strings)) {
-        for (nm in names(device_patterns)) {
-            .d <- device_patterns[[nm]]
-            matched <- vapply(
-                .d$pattern, grepl, logical(1L),
-                x = data_strings[i], fixed = TRUE
-            )
-            if (.d$mode(matched)) {
-                return(list(nirs_device = nm, header_row = i))
-            }
-        }
+    ## find first row of `data_strings` which matches any of `device_patterns`
+    matched_row <- Find(\(.i) {
+        any(vapply(device_patterns, \(.d) {
+            !is.null(find_row(data_strings[.i], .d$pattern, .d$mode))
+        }, logical(1L)))
+    }, seq_along(data_strings))
+
+    if (is.null(matched_row)) {
+        return(list(nirs_device = NULL, header_row = 1L))
     }
 
-    return(list(nirs_device = NULL, header_row = 1L))
+    ## return the first device name which matches the row of `data_strings`
+    device_name <- Find(\(.nm) {
+        .d <- device_patterns[[.nm]]
+        !is.null(find_row(data_strings[matched_row], .d$pattern, .d$mode))
+    }, names(device_patterns))
+
+    return(list(nirs_device = device_name, header_row = matched_row))
 }
 
 
@@ -220,6 +230,7 @@ read_data_table <- function(
 ) {
     nrows <- nrow(data)
     ## find the first row where ALL nirs_channels match
+    ## start with `header_row` passed from `detect_mnirs_device()`
     header_row <- Find(\(.i) {
         all(nirs_channels %in% data[.i, ])
     }, c(header_row, seq_len(nrows)))
@@ -239,8 +250,8 @@ read_data_table <- function(
     file_header <- data[seq_len(header_row), ]
 
     return(list(
-        data_table = data_table,
-        file_header = file_header
+        file_header = file_header,
+        data_table = data_table
     ))
 }
 
@@ -320,8 +331,8 @@ rename_duplicates <- function(x) {
         return(x)
     }
     ## rename blank strings
-    empty <- is_empty(x)
-    x[empty] <- paste0("col_", which(empty))
+    empty <- which(is_empty(x))
+    x[empty] <- paste0("col_", empty)
 
     return(make.unique(x, sep = "_"))
 }
@@ -390,8 +401,7 @@ select_rename_data <- function(
 
     ## select and rename: channel columns get user names,
     ## remaining columns keep de-duplicated data names
-    result <- setNames(data, data_names)
-    result <- result[, selected_cols, drop = FALSE]
+    result <- setNames(data, data_names)[, selected_cols, drop = FALSE]
     channel_idx <- match(orig_vec, names(result))
 
     ## resolve clashes: user names take priority over data names
@@ -489,20 +499,21 @@ remove_empty_rows_cols <- function(data) {
 #' @keywords internal
 extract_start_timestamp <- function(file_header) {
     header_values <- unlist(file_header, use.names = FALSE)
-    header_values <- header_values[!is.na(header_values) & header_values != ""]
+    header_values <- header_values[!is_empty(header_values)]
 
     ## search for POSIXct values, return the earliest time value
     ## TODO fragile for misinterpreted formats for invalid "early" timestamps
-    parsed <- vapply(header_values, \(.x) {
-        as.POSIXct(.x, tryFormats = datetime_formats, optional = TRUE)
-    }, numeric(1L))
-    parsed <- which(!is.na(parsed))
+    parsed <- which(!is.na(
+        vapply(header_values, \(.x) {
+            as.POSIXct(.x, tryFormats = datetime_formats, optional = TRUE)
+        }, numeric(1L))
+    ))
 
     if (length(parsed) == 0L) {
         return(NULL)
     }
 
-    ## return the character string timestamp
+    ## return the earliest character string timestamp, assuming start time
     return(min(header_values[parsed]))
 }
 
@@ -517,10 +528,14 @@ parse_time_channel <- function(
     zero_time = FALSE
 ) {
     time_vec <- data[[time_channel]]
-    ## fractional unix time to POSIXct
-    if (is.numeric(time_vec) && all(time_vec <= 1, na.rm = TRUE)) {
-        time_vec <- as.POSIXct(time_vec * 86400)
-    } else if (is.character(time_vec)) {
+
+    ## recalculate numeric time to start from zero
+    if (zero_time && is.numeric(time_vec)) {
+        time_vec <- time_vec - time_vec[1L]
+    }
+
+    ## character time to POSIXct
+    if (is.character(time_vec)) {
         time_vec <- as.POSIXct(
             time_vec,
             tryFormats = datetime_formats,
@@ -528,24 +543,19 @@ parse_time_channel <- function(
         )
     }
 
-    if (zero_time && is.numeric(time_vec)) {
-        ## recalculate to start from zero
-        time_vec <- time_vec - time_vec[1L]
-    }
-
+    ## preserve POSIXct timestamp and convert to numeric seconds
     timestamp_vec <- NULL
     if (inherits(time_vec, "POSIXct")) {
-        ## preserve timestamp
         timestamp_vec <- time_vec
-        ## POSIXct to numeric seconds
         time_vec <- as.numeric(difftime(time_vec, time_vec[1L], units = "secs"))
     }
 
     data[[time_channel]] <- time_vec
 
+    ## add_timestamp preserves or adds POSIXct/dttm column
     if (add_timestamp) {
+        ## add "timestamp" col after `time_channel` position
         col_names <- names(data)
-        ## add_timestamp preserves dttm column or adds
         time_idx <- match(time_channel, col_names)
         data_names <- append(col_names, "timestamp", time_idx)
         data$timestamp <- NA_real_
@@ -563,26 +573,18 @@ parse_time_channel <- function(
         } else if (!is.null(timestamp_vec)) {
             data$timestamp <- timestamp_vec
         } else {
+            ## column removed if no timestamp detected
             data$timestamp <- NULL
         }
     }
 
+    ## extract earliest POSIXct value as start_timestamp metadata
+    ## if not already passed from file header
     if (is.null(start_timestamp) && !is.null(timestamp_vec)) {
-        ## extract earliest POSIXct value as start_timestamp
         start_timestamp <- min(timestamp_vec, na.rm = TRUE)
     }
 
     return(list(data = data, start_timestamp = start_timestamp))
-}
-
-
-#' Extract Oxysoft sample rate
-#' @keywords internal
-extract_oxysoft_rate <- function(file_header, sample_rate = NULL) {
-    pos <- which(file_header == "Export sample rate", arr.ind = TRUE)
-    sample_rate <- as.numeric(file_header[pos[1L], pos[2L] + 1L])
-
-    return(sample_rate)
 }
 
 
@@ -600,7 +602,8 @@ parse_sample_rate <- function(
     ## extract and overwrite with exported sample_rate
     ## create new "time" column at col_idx behind `time_channel`
     if (!is.null(nirs_device) && nirs_device == "Artinis") {
-        sample_rate <- extract_oxysoft_rate(file_header, sample_rate)
+        pos <- which(file_header == "Export sample rate", arr.ind = TRUE)
+        sample_rate <- as.numeric(file_header[pos[1L], pos[2L] + 1L])
 
         col_names <- names(data)
         time_vec <- data[[time_channel]] / sample_rate
