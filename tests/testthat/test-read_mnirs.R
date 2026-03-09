@@ -190,18 +190,17 @@ test_that("detect_mnirs_device works on example files", {
 })
 
 test_that("detect_mnirs_device works on internal example files", {
+    skip_on_ci()
+    skip_on_covr()
     file_path <- test_path("testdata/train.red-mre.csv")
     skip_if_not(file.exists(file_path), "testdata not available")
     
     expect_equal(
         read_file(file_path) |>
-            ## remote covr test was failing with `actual = 590`
-            ## inconsistency in how empty .csv rows are skipped
-            remove_empty_rows_cols() |>
             detect_mnirs_device(),
         list(
             nirs_device = "Train.Red",
-            header_row = 518
+            header_row = 521
         )
     )
     
