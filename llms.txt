@@ -78,7 +78,7 @@ data_table <- read_mnirs(
 #> ℹ Investigate at `time` = 211.99 and 1184.
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
-## Note the above info message that sample_rate was estimated correctly at 2 Hz ☝
+## Note the above info message that sample_rate was estimated correctly at 2 Hz 👆
 ## ignore the warnings about irregular sampling for now, we will resample later
 
 data_table
