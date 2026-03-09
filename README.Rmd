@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/jemarnold/mnirs/graph/badge.svg)](https://app.codecov.io/gh/jemarnold/mnirs)
 <!-- badges: end -->
 
-*{mnirs}* contains standardised, reproducible methods for reading, processing, and analysing data from muscle near-infrared spectroscopy (mNIRS) devices.
+*{mnirs}* contains standardised, reproducible methods for reading, processing, and analysing data from muscle near-infrared spectroscopy (mNIRS) devices. Intended for mNIRS researchers and practitioners in exercise physiology, sports science, and clinical rehabilitation with minimal coding experience required.
 
 ## Installation
 

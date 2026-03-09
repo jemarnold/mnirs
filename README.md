@@ -14,7 +14,9 @@ coverage](https://codecov.io/gh/jemarnold/mnirs/graph/badge.svg)](https://app.co
 
 *{mnirs}* contains standardised, reproducible methods for reading,
 processing, and analysing data from muscle near-infrared spectroscopy
-(mNIRS) devices.
+(mNIRS) devices. Intended for mNIRS researchers and practitioners in
+exercise physiology, sports science, and clinical rehabilitation with
+minimal coding experience required.
 
 ## Installation
 

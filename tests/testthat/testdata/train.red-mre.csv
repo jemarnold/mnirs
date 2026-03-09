@@ -202,7 +202,7 @@ Sensor 1,Train.Red FYER
 -------------------------------------------------------------
 Sensor DataType,expertV13
 Sensor ID,Train.Red FYER 0702
-Mac Address,3802647A-3636-40A1-BB76-C89971C30D49
+Mac Address,
 Firmware Version,
 Sensor Position,quadVLRight
 Initial TSI,64.20
@@ -397,7 +397,7 @@ Sensor 2,Train.Red FYER
 -------------------------------------------------------------
 Sensor DataType,expertV13
 Sensor ID,Train.Red FYER 0673
-Mac Address,D8571490-C537-376C-93ED-E8FC6791A110
+Mac Address,
 Firmware Version,
 Sensor Position,quadVLLeft
 Initial TSI,62.99

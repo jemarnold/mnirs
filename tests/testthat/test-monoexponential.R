@@ -352,25 +352,6 @@ test_that("fix_coefs() warns for invalid parameter names", {
     )
 })
 
-## ! I need to verify tryCatch fall-back in real-world first
-# test_that("fix_coefs() errors when data unavailable and not supplied", {
-#     set.seed(909)
-#     t <- 1:60
-#     x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-#         rnorm(length(t), 0, 3)
-#     data <- data.frame(t, x)
-
-#     model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
-
-#     # Simulate unavailable data by breaking environment
-#     model$call$data <- as.name("nonexistent_data")
-
-#     expect_error(
-#         fix_coefs(model, TD = 15),
-#         "Cannot retrieve original model data frame"
-#     )
-# })
-
 test_that("fix_coefs() accepts explicit data argument", {
     set.seed(1010)
     t <- 1:60

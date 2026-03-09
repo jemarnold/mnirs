@@ -116,12 +116,7 @@ First, load our packages and initial setup options. We will silence {mnirs} info
 #| label: setup
 #| warning: false
 
-## tidyverse packages for convenient data wrangling
-library(tidyr)
-library(purrr)
-library(stringr)
-library(dplyr)
-library(ggplot2)
+library(tidyverse) ## tidyverse packages for convenient data wrangling
 library(mnirs)
 
 options(mnirs.verbose = FALSE) ## globally silence info/warning messages
