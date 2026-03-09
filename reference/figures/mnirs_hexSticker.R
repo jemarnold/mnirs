@@ -21,14 +21,15 @@ hexSticker::sticker(
     p_x = 1,
     p_y = 1.4,
     p_size = 12,
-    p_color = "#1a284f",
+    p_color = "#004992",
     p_family = "merriweather_sans",
     p_fontface = 2, # "plain", "bold", "italic", "bolditalic"
 
     ## hex geometry
     h_fill = "#bcced7",    ## light blue-grey background
     # h_color = "#fb653a", ## orange of muscle icon
-    h_color = "#1a284f",   ## dark navy
+    # h_color = "#1a284f", ## dark navy
+    h_color = "#004992",   ## blue
     h_size = 1.5,
     white_around_sticker = FALSE,
 
