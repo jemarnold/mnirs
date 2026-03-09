@@ -48,17 +48,12 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 ``` r
 data_table <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 )
 
-# \donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ## note the options to display time values as `h:mm:ss` with 8 breaks
-        plot(data_table, time_labels = TRUE, n.breaks = 8)
-    }
-
-# }
+## note the options to display time values as `h:mm:ss` with 8 breaks
+plot(data_table, time_labels = TRUE, n.breaks = 8)
 ```

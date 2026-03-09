@@ -178,7 +178,14 @@ replace_missing(
 class *"mnirs"* with metadata available with
 [`attributes()`](https://rdrr.io/r/base/attributes.html).
 
-Vectorised `replace_*()` return a numeric vector the same length as `x`.
+`replace_invalid()` return a numeric vector the same length as `x` with
+invalid values replaced.
+
+`replace_outliers()` return a numeric vector the same length as `x` with
+local outliers replaced.
+
+`replace_missing()` return a numeric vector the same length as `x` with
+missing values replaced.
 
 ## Details
 
@@ -260,14 +267,14 @@ specified by `method`.
 ``` r
 ## vectorised operation
 x <- c(1, 999, 3, 4, 999, 6)
-replace_invalid(x, invalid_values = 999, width = 2, method = "median")
-#> [1] 1 3 3 4 6 6
+replace_invalid(x, invalid_values = 999, width = 3, method = "median")
+#> [1] 1 2 3 4 5 6
 
-(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
-#> [1]   1 999   3   4 999   6
+(x_na <- replace_outliers(x, outlier_cutoff = 3, width = 3, method = "none"))
+#> [1]  1 NA  3  4 NA  6
 
 replace_missing(x_na, method = "linear")
-#> [1]   1 999   3   4 999   6
+#> [1] 1 2 3 4 5 6
 
 ## read example data
 data <- read_mnirs(
@@ -279,36 +286,18 @@ data <- read_mnirs(
 
 ## clean data
 data_clean <- replace_mnirs(
-    data,
-    nirs_channels = NULL, ## nirs_channels will be retrieved from metadata
-    time_channel = NULL,  ## retrieved from metadata
-    invalid_values = 0,   ## known invalid values in the data
-    invalid_above = 90,   ## remove data spikes
-    outlier_cutoff = 3,   ## recommended default value
-    width = 10,           ## window to detect local outliers
-    method = "linear",    ## linear interpolation over `NA`s
-    verbose = FALSE
+    data,               ## blank channels will be retrieved from metadata
+    invalid_values = 0, ## known invalid values in the data
+    invalid_above = 90, ## remove data spikes above 90
+    outlier_cutoff = 3, ## recommended default value
+    width = 10,         ## window to detect and replace outliers/missing values
+    method = "linear"   ## linear interpolation over `NA`s
 )
-
-data_clean
-#> # A tibble: 2,203 × 2
-#>     time  smo2
-#>    <dbl> <dbl>
-#>  1 0        54
-#>  2 0.400    54
-#>  3 0.960    54
-#>  4 1.51     54
-#>  5 2.06     54
-#>  6 2.61     54
-#>  7 3.16     54
-#>  8 3.71     57
-#>  9 4.26     57
-#> 10 4.81     57
-#> # ℹ 2,193 more rows
 
 # \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {
         ## plot original and show where values have been replaced
+        ## ignore warning about replacing the existing colour scale
         plot(data, time_labels = TRUE) +
             ggplot2::scale_colour_manual(
                 name = NULL,

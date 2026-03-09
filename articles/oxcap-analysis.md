@@ -3,7 +3,7 @@
 ## Introduction
 
 I am continuing to develop the
-[*`{mnirs}`*](https://github.com/jemarnold/mnirs) package for processing
+[`{mnirs}`](https://github.com/jemarnold/mnirs) package for processing
 and analysing muscle near-infrared spectroscopy in R.
 
 In this article, I will demonstrate how the recently added functionality
@@ -14,9 +14,9 @@ methods.
 
 > **Tip**
 >
-> This article assumes basic familiarity with the *{mnirs}* package. For
-> an overview and demonstration of data processing with *{mnirs}*,
-> please see the package vignette [*Reading and Cleaning Data with
+> This article assumes basic familiarity with the {mnirs} package. For
+> an overview and demonstration of data processing with {mnirs}, please
+> see the package vignette [*Reading and Cleaning Data with
 > {mnirs}*](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html).
 
 #### Muscle oxidative capacity testing
@@ -88,8 +88,7 @@ intermittent arterial occlusions measured from A. mVO2 recovery data are
 fit to an exponential (dashed line) to estimate the recovery k. C:
 summaries of current reports of the mVO2 recovery rate constant (k),
 which is proportional to oxidative capacity, in upper and lower limbs of
-adults in health and disease. A and B: redrawn with permission from
-Elsevier (1).
+adults in health and disease.
 
 This technique has been well studied in recent years, validated against
 ³¹P-MRS \[[4](#ref-Ryan2013)\] and mitochondrial content protein markers
@@ -110,7 +109,7 @@ operator-related variability between research centres, and thereby
 improving interpretation of outcomes across populations and
 interventions \[[6](#ref-Costalat2025),[7](#ref-Rasica2024)\].
 
-I wanted to see how well (or poorly) my current *{mnirs}* functionality
+I wanted to see how well (or poorly) my current {mnirs} functionality
 could process and analyse repeated occlusion muscle OxCap data.
 
 In the future, this process will be wrapped into convenience functions
@@ -119,14 +118,14 @@ is already considerably simpler and more robust than non-reproducible
 methods relying on manual data cleaning, occlusion interval selection,
 and curve fitting.
 
-## Oxidative capacity analysis in *{mnirs}*
+## Oxidative capacity analysis in {mnirs}
 
 This article serves as a vignette for three analysis functions recently
-added to the *{mnirs}* package, and how they can be used together to
+added to the {mnirs} package, and how they can be used together to
 perform robust OxCap analysis.
 
 - [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md):
-  is used to detect specific events or times in an *`mnirs`* data frame,
+  is used to detect specific events or times in an *“mnirs”* data frame,
   and extract an interval around each one, returning a list of data
   frames.  
     
@@ -182,21 +181,21 @@ For OxCap analysis, we will perform roughly 8 steps:
 7.  Extract the rate constant (*k*) for each trial exponential curve.
 8.  Plot the modelled data.
 
-My aim is to perform this analysis using only the *{mnirs}* package and
-*{tidyverse}* functions, keeping the script as clean as possible, with
-as few janky manual adjustments as necessary.
+My aim is to perform this analysis using only the {mnirs} package and
+{tidyverse} functions, keeping the script as clean as possible, with as
+few janky manual adjustments as necessary.
 
 #### Setup
 
 First, load our packages and initial setup options. We will silence
-*{mnirs}* info messages and set our ggplot2 theme.
+{mnirs} info messages and set our ggplot2 theme.
 
 ``` r
 library(tidyverse) ## tidyverse packages for convenient data wrangling
 library(mnirs)
 
 options(mnirs.verbose = FALSE) ## globally silence info/warning messages
-theme_set(theme_mnirs(legend.position = "none")) ## set ggplot2 theme for plotting
+theme_set(theme_mnirs(legend.position = "none")) ## set ggplot2 theme
 ```
 
 > **Note**
@@ -206,17 +205,17 @@ theme_set(theme_mnirs(legend.position = "none")) ## set ggplot2 theme for plotti
 > Postdoctoral fellow in [Dr. Martin
 > MacInnis](https://scholar.google.com/citations?hl=en&user=tJepNIQAAAAJ)’
 > lab at the University of Calgary. They have kindly allowed me to
-> include this file with the *{mnirs}* package for users to examine
+> include this file with the {mnirs} package for users to examine
 > themselves.
 >
 > It can be accessed by calling `example_mnirs("portamon-oxcap")`.
 
-This article will assume basic familiarity with the *{mnirs}* package.
-For further details and demonstration of data processing, please see the
+This article will assume basic familiarity with the {mnirs} package. For
+further details and demonstration of data processing, please see the
 package vignette [*Reading and Cleaning Data with
 {mnirs}*](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html).
 
-## Read *{mnirs}* data file
+## Read {mnirs} data file
 
 The included example file has three NIRS channels and a column with
 sample number, which will automatically be converted to a time value
@@ -228,8 +227,8 @@ filtered, so minimal pre-processing is required.
 
 One thing to note: *Artinis Oxysoft* exports an event label column
 without a named header by default. This is the column we will use to
-identify our occlusion events by the label `"Occlusion"`, so we need to
-include it. Currently in *{mnirs}* an unnamed column like this will be
+identify our occlusion events by the label *“Occlusion”*, so we need to
+include it. Currently in {mnirs} an unnamed column like this will be
 named `"col_"` with a numeric suffix for the column number in the data
 file. In our example file, this events column will therefore be
 `"col_6"`. It’s not the most elegant solution, but it works for now!
@@ -294,10 +293,9 @@ in oxygenation between samples, according to Beever et al, 2020
 ``` r
 df <- df |>
     mutate(
-        ## blood volume correction factor beta, requires all positive values
+        ## blood volume correction factor `beta`
         beta = o2hb / (o2hb + hhb),
-        ## use {purrr} to iteratively adjust NIRS values from one sample to the next
-        ## corrected for change in blood volume by beta since the previous sample
+        ## iteratively correct NIRS values from one sample to the next
         o2hb = purrr::accumulate(2:n(), \(prev, i) {
             prev + (o2hb[i] - o2hb[i - 1]) - beta[i] * (thb[i] - thb[i - 1])
             }, .init = 0
@@ -335,7 +333,7 @@ to analyse iteratively.
 
   This function takes in a data frame, applies processing to all
   channels specified, then returns a list of processed data frames.
-  *`mnirs`* metadata will be passed to and from this function.  
+  *“mnirs”* metadata will be passed to and from this function.  
     
   For this analysis, we will re-join the returned list of data frames
   into a combined data frame with a grouping variable labelled
@@ -348,37 +346,42 @@ to analyse iteratively.
   series variable; `event_channel` specifies where to look for event
   labels; and `sample_rate` specifies the recording rate used when
   ensemble-averaging across intervals with unequal time samples. If any
-  arguments are not specified, they will be retrieved from *`mnirs`*
+  arguments are not specified, they will be retrieved from *“mnirs”*
   metadata. Channels in the data but not explicitly specified will be
   passed through unprocessed to the returned data frames.  
     
   We will analyse OxCap from the deoxyhaeme (HHb) NIRS signal, which is
   often recommended \[[6](#ref-Costalat2025)\].
 
-- `event_times`, `event_labels`, & `event_samples`
+- `start` & `end`
 
-  Interval events can be specified by any combination of time (values of
-  `time_channel`), labels (values of `event_channel`), or sample (row
-  number). Multiple values can be entered as vectors. At least one event
-  must be specified.  
+  Interval boundaries are specified using helper functions:
+  [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  for `time_channel` values;
+  [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  for `event_channel` labels; or
+  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  for sample indices (row numbers). Provide both `start` and `end` to
+  define precise intervals, or provide `start` alone with `span` to
+  extract windows around events.  
     
   Once again, in this example data file, the occlusions are all
-  identified by the event label `"Occlusion"`. This makes it very simple
-  to detect this string in the `event` column, and extract intervals
-  around them.  
+  identified by the event label *“Occlusion”*. This makes it very simple
+  to detect this string in the `event` column as the `start` value to
+  extract each interval.  
     
-  Detecting intervals by event labels must match a full string
-  *exactly*. If the event labels are inconsistent, we could specify a
-  regular expression (regex) string such as `"(?i)occlusions?"` or
-  `"start|end"`.
+  Detecting intervals by event labels must match a full string exactly
+  or use a regular expression (regex) string such as *“(?i)occlusions?”*
+  or *“start\|end”*.
 
 - `span`
 
-  Where an event is detected, an interval will be extracted with a time
-  span specified as a two-element numeric vector; `c(start, end)`, in
-  units of the `time_channel`. Where positive values represent times
-  after the event, and negative values represent times before the
-  event.  
+  When only `start` (or `end`) is provided, `span` specifies a time
+  window in units of `time_channel` as `c(before, after)`, where
+  positive values indicate time after the event and negative values
+  indicate time before. When both `start` and `end` are provided, `span`
+  shifts boundaries additively: `span[1]` adjusts starts, `span[2]`
+  adjusts ends.  
     
   All occlusion bouts were held for 5-seconds in this protocol. If the
   occlusion duration changed across the protocol, we might have to
@@ -389,7 +392,7 @@ to analyse iteratively.
   the first ~0.5 sec after the occlusion label, the deoxyhaeme signal
   was disrupted by the inflation of the cuff, which might produce
   invalid slope values. So we will specify a time span of `c(1, 5)`,
-  i.e. from 1 to 5 seconds after each `"Occlusion"` event label. If we
+  i.e. from 1 to 5 seconds after each *“Occlusion”* event label. If we
   wanted to include an interval before the event label, we could specify
   a negative numeric value, e.g. `c(-2.5, 2.5)` to include a 5-sec span
   centred on the label itself.
@@ -419,22 +422,23 @@ to analyse iteratively.
   recovery function, so we keep this as `FALSE`.
 
 ``` r
-## identify and extract intervals by event label
-## re-join the returned list of data frames with each occlusion interval labelled as "interval"
+## identify and extract intervals by event label "Occlusion"
+## re-join the returned list of data frames 
 df_list <- extract_intervals(
     df,
-    event_labels = "Occlusion", ## event label used in file, must match string exactly
+    start = by_label("Occlusion"), ## event label used in file
     event_groups = "distinct", ## return each occlusion event separately
-    span = c(1, 5), ## occlusion interval c(start, end) with reference to the event time value
+    span = c(1, 5), ## interval c(start, end) around each event time value
     zero_time = FALSE ## preserve original time values at each event
 )
 
-## join back into a single grouped data frame, mostly for easier plotting below
+## join back into a single grouped data frame
+## only necessary for easier plotting
 df_grouped <- df_list |>
     purrr::list_rbind(names_to = "interval") |>
     ## convert the "interval" column to a categorical factor
     mutate(interval = factor(interval, levels = unique(interval))) |>
-    ## add `mnirs` metadata back to the combined data frame, for plotting
+    ## add "mnirs" metadata back to the combined data frame, for plotting
     create_mnirs_data(
         attributes(df_list[[1L]])[c("nirs_channels", "time_channel")]
     )
@@ -593,10 +597,10 @@ task.
 
 - `tau`
 
-  The time constant (𝜏) of the exponential function determines the
-  steepness of the initial slope of the curve. *Tau* is approximated by
-  the time required to converge 63.2% of the amplitude between `A` and
-  `B`.  
+  The time constant (τ) describes the speed of the exponential
+  transition from `A` to `B`, and is approximated by the time elapsed
+  when the response has completed 63.2% of the total amplitude. i.e.,
+  has reached the value `A + 0.632 × (B − A)`.  
     
   The rate constant (*k*) is the inverse of the time constant
   (`k = 1 / tau`) and is also commonly used in NIRS research, including
@@ -635,7 +639,8 @@ time constant (*tau*).
 
 ``` r
 ## use 3-param monoexponential model for each trial
-## return fitted curve and time constant tau coefficient
+## fit models by trial within the data frame with {tidyr} and {purrr}
+## return fitted data and time constant tau coefficient
 pred_df <- slopes_df |>
     ## nest the data to model each trial
     tidyr::nest(.by = trial) |>
@@ -690,7 +695,7 @@ p +
 ## Conclusion
 
 This article demonstrates how muscle oxidative capacity analysis can be
-performed using *{mnirs}* and some relatively simple, reproducible data
+performed using {mnirs} and some relatively simple, reproducible data
 wrangling steps.
 
 In future development, I would like to wrap some of these processing

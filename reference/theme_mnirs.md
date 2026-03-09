@@ -78,20 +78,13 @@ object.
 ## Examples
 
 ``` r
-# \donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ## plot example data
-        read_mnirs(
-            file_path = example_mnirs("moxy_ramp"),
-            nirs_channels = c(
-                smo2_right = "SmO2 Live",
-                smo2_left = "SmO2 Live(2)"
-            ),
-            time_channel = c(time = "hh:mm:ss"),
-            verbose = FALSE
-        ) |>
-            plot(time_labels = TRUE)
-    }
-
-# }
+## plot example data
+read_mnirs(
+    file_path = example_mnirs("moxy_ramp"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
+) |>
+    plot(time_labels = TRUE)
 ```

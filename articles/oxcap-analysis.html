@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,8 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+<li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul>
 </li>
@@ -63,7 +64,7 @@
       <h1>Analysing muscle oxidative capacity with {mnirs}</h1>
 
       <p class="author">Jem Arnold</p>
-      <p class="date">2026-02-28</p>
+      <p class="date">2026-03-09</p>
 
       <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/vignettes/articles/oxcap-analysis.qmd" class="external-link"><code>vignettes/articles/oxcap-analysis.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -76,12 +77,12 @@
 
     <section class="section level2"><h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>I am continuing to develop the <a href="https://github.com/jemarnold/mnirs" class="external-link"><em><code>{mnirs}</code></em></a> package for processing and analysing muscle near-infrared spectroscopy in R.</p>
+<p>I am continuing to develop the <a href="https://github.com/jemarnold/mnirs" class="external-link"><code>{mnirs}</code></a> package for processing and analysing muscle near-infrared spectroscopy in R.</p>
 <p>In this article, I will demonstrate how the recently added functionality can be combined to perform muscle oxidative capacity (OxCap) analysis from a repeated ischaemic occlusion protocol, while ensuring reproducibility and adhering to current gold-standard processing methods.</p>
 <div>
 <blockquote>
 <p><strong>Tip</strong></p>
-<p>This article assumes basic familiarity with the <em>{mnirs}</em> package. For an overview and demonstration of data processing with <em>{mnirs}</em>, please see the package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html"><em>Reading and Cleaning Data with {mnirs}</em></a>.</p>
+<p>This article assumes basic familiarity with the {mnirs} package. For an overview and demonstration of data processing with {mnirs}, please see the package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html"><em>Reading and Cleaning Data with {mnirs}</em></a>.</p>
 </blockquote>
 </div>
 <section class="level3"><h4 id="muscle-oxidative-capacity-testing">Muscle oxidative capacity testing<a class="anchor" aria-label="anchor" href="#muscle-oxidative-capacity-testing"></a>
@@ -103,21 +104,20 @@
 <p>Immediately after the exercise task when metabolic demand is high, mV̇O<sub>2</sub> will be elevated. It will decline at an exponential rate as recovery proceeds back to baseline. The rate constant (<em>k</em>, min<sup>-1</sup>) of this monoexponential curve quantifies the muscle OxCap value <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure><p><img src="figures/Adami-2018.jpg"></p>
-<figcaption>Figure 1 from Adami et al, 2018 <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>. Muscle oxygen consumption (mVO2) recovery rate constant (k) by near-infrared spectroscopy. A and B: example of the oxidative capacity test by NIRS. A: changes in the tissue saturation index (TSI) during dynamic exercise (EX, gray area) and subsequent intermittent arterial occlusions at rest. B: mVO2 recovery kinetics derived from the rate of change of TSI during intermittent arterial occlusions measured from A. mVO2 recovery data are fit to an exponential (dashed line) to estimate the recovery k. C: summaries of current reports of the mVO2 recovery rate constant (k), which is proportional to oxidative capacity, in upper and lower limbs of adults in health and disease. A and B: redrawn with permission from Elsevier (1).</figcaption></figure>
+<figcaption>Figure 1 from Adami et al, 2018 <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>. Muscle oxygen consumption (mVO2) recovery rate constant (k) by near-infrared spectroscopy. A and B: example of the oxidative capacity test by NIRS. A: changes in the tissue saturation index (TSI) during dynamic exercise (EX, gray area) and subsequent intermittent arterial occlusions at rest. B: mVO2 recovery kinetics derived from the rate of change of TSI during intermittent arterial occlusions measured from A. mVO2 recovery data are fit to an exponential (dashed line) to estimate the recovery k. C: summaries of current reports of the mVO2 recovery rate constant (k), which is proportional to oxidative capacity, in upper and lower limbs of adults in health and disease.</figcaption></figure>
 </div>
 <p>This technique has been well studied in recent years, validated against <sup>31</sup>P-MRS <span class="citation" data-cites="Ryan2013">[<a href="#ref-Ryan2013" role="doc-biblioref">4</a>]</span> and mitochondrial content protein markers <span class="citation" data-cites="Tripp2023">[<a href="#ref-Tripp2023" role="doc-biblioref">5</a>]</span>. The rate constant <em>k</em> has been shown to be proportionally higher (faster recovery) in endurance-trained muscle, and lower (slower) in pathalogical and diseased muscle <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>.</p>
 </section><section class="level3"><h4 id="a-call-for-standardised-processing-methods">A call for standardised processing methods<a class="anchor" aria-label="anchor" href="#a-call-for-standardised-processing-methods"></a>
 </h4>
 <p>Technical procedures and analysis methods for OxCap assessment have converged toward standardisation in recent years, with methods showing good reliability and reproducibility.</p>
 <p>Recently there has been a call to implement standard analysis scripts with robust slope detection and non-linear modelling, to minimise operator-related variability between research centres, and thereby improving interpretation of outcomes across populations and interventions <span class="citation" data-cites="Costalat2025 Rasica2024">[<a href="#ref-Costalat2025" role="doc-biblioref">6</a>,<a href="#ref-Rasica2024" role="doc-biblioref">7</a>]</span>.</p>
-<p>I wanted to see how well (or poorly) my current <em>{mnirs}</em> functionality could process and analyse repeated occlusion muscle OxCap data.</p>
+<p>I wanted to see how well (or poorly) my current {mnirs} functionality could process and analyse repeated occlusion muscle OxCap data.</p>
 <p>In the future, this process will be wrapped into convenience functions to make the process easier for the end user. But I believe this process is already considerably simpler and more robust than non-reproducible methods relying on manual data cleaning, occlusion interval selection, and curve fitting.</p>
-</section></section><section class="section level2"><h2 id="oxidative-capacity-analysis-in-mnirs">Oxidative capacity analysis in <em>{mnirs}</em>
-<a class="anchor" aria-label="anchor" href="#oxidative-capacity-analysis-in-mnirs"></a>
+</section></section><section class="section level2"><h2 id="oxidative-capacity-analysis-in-mnirs">Oxidative capacity analysis in {mnirs}<a class="anchor" aria-label="anchor" href="#oxidative-capacity-analysis-in-mnirs"></a>
 </h2>
-<p>This article serves as a vignette for three analysis functions recently added to the <em>{mnirs}</em> package, and how they can be used together to perform robust OxCap analysis.</p>
+<p>This article serves as a vignette for three analysis functions recently added to the {mnirs} package, and how they can be used together to perform robust OxCap analysis.</p>
 <ul>
-<li><p><code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>: is used to detect specific events or times in an <em><code>mnirs</code></em> data frame, and extract an interval around each one, returning a list of data frames.<br><br>
+<li><p><code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>: is used to detect specific events or times in an <em>“mnirs”</em> data frame, and extract an interval around each one, returning a list of data frames.<br><br>
 This is useful when a certain event is labelled in <code>event_channel</code>, or a list of time values is provided manually for when events occur, such as the start of an exercise interval or occlusion. The returned list of data frames is ready for further analysis. See <code><a href="../reference/extract_intervals.html">?extract_intervals</a></code> for more details.</p></li>
 <li><p><code><a href="../reference/peak_slope.html">peak_slope()</a></code>: is used to find the peak positive or negative linear regression slope from a numeric vector and return the slope value, intercept, and associated parameters.<br><br>
 The segment of an mNIRS signal with the steepest slope is often interpreted to represent the point of greatest mismatch between O<sub>2</sub> supply and O<sub>2</sub> demand, such as for muscle OxCap testing. See <code><a href="../reference/peak_slope.html">?peak_slope</a></code> for more details.</p></li>
@@ -137,30 +137,30 @@ Calling these functions in non-linear curve fitting functions (e.g. <code><a hr
 <li>Extract the rate constant (<em>k</em>) for each trial exponential curve.</li>
 <li>Plot the modelled data.</li>
 </ol>
-<p>My aim is to perform this analysis using only the <em>{mnirs}</em> package and <em>{tidyverse}</em> functions, keeping the script as clean as possible, with as few janky manual adjustments as necessary.</p>
+<p>My aim is to perform this analysis using only the {mnirs} package and {tidyverse} functions, keeping the script as clean as possible, with as few janky manual adjustments as necessary.</p>
 </section><section class="level3"><h4 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h4>
-<p>First, load our packages and initial setup options. We will silence <em>{mnirs}</em> info messages and set our ggplot2 theme.</p>
+<p>First, load our packages and initial setup options. We will silence {mnirs} info messages and set our ggplot2 theme.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span> <span class="co">## tidyverse packages for convenient data wrangling</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jemarnold.github.io/mnirs/">mnirs</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">## globally silence info/warning messages</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="../reference/theme_mnirs.html">theme_mnirs</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span> <span class="co">## set ggplot2 theme for plotting</span></span></code></pre></div>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="../reference/theme_mnirs.html">theme_mnirs</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span> <span class="co">## set ggplot2 theme</span></span></code></pre></div>
 </div>
 <div>
 <blockquote>
 <p><strong>Note</strong></p>
-<p>I received this example file from <a href="https://scholar.google.com/citations?user=A9JwQbYAAAAJ&amp;hl=en" class="external-link">Dr. Thomas Tripp</a>, Postdoctoral fellow in <a href="https://scholar.google.com/citations?hl=en&amp;user=tJepNIQAAAAJ" class="external-link">Dr. Martin MacInnis</a>’ lab at the University of Calgary. They have kindly allowed me to include this file with the <em>{mnirs}</em> package for users to examine themselves.</p>
+<p>I received this example file from <a href="https://scholar.google.com/citations?user=A9JwQbYAAAAJ&amp;hl=en" class="external-link">Dr. Thomas Tripp</a>, Postdoctoral fellow in <a href="https://scholar.google.com/citations?hl=en&amp;user=tJepNIQAAAAJ" class="external-link">Dr. Martin MacInnis</a>’ lab at the University of Calgary. They have kindly allowed me to include this file with the {mnirs} package for users to examine themselves.</p>
 <p>It can be accessed by calling <code>example_mnirs("portamon-oxcap")</code>.</p>
 </blockquote>
 </div>
-<p>This article will assume basic familiarity with the <em>{mnirs}</em> package. For further details and demonstration of data processing, please see the package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html"><em>Reading and Cleaning Data with {mnirs}</em></a>.</p>
-</section></section><section class="section level2"><h2 id="read-mnirs-data-file">Read <em>{mnirs}</em> data file<a class="anchor" aria-label="anchor" href="#read-mnirs-data-file"></a>
+<p>This article will assume basic familiarity with the {mnirs} package. For further details and demonstration of data processing, please see the package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html"><em>Reading and Cleaning Data with {mnirs}</em></a>.</p>
+</section></section><section class="section level2"><h2 id="read-mnirs-data-file">Read {mnirs} data file<a class="anchor" aria-label="anchor" href="#read-mnirs-data-file"></a>
 </h2>
 <p>The included example file has three NIRS channels and a column with sample number, which will automatically be converted to a time value when the <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> function recognises the <em>Artinis Oxysoft</em> export format and sample rate (10 Hz). The file does not need to be cleaned for outliers or digitally filtered, so minimal pre-processing is required.</p>
-<p>One thing to note: <em>Artinis Oxysoft</em> exports an event label column without a named header by default. This is the column we will use to identify our occlusion events by the label <code>"Occlusion"</code>, so we need to include it. Currently in <em>{mnirs}</em> an unnamed column like this will be named <code>"col_"</code> with a numeric suffix for the column number in the data file. In our example file, this events column will therefore be <code>"col_6"</code>. It’s not the most elegant solution, but it works for now!</p>
+<p>One thing to note: <em>Artinis Oxysoft</em> exports an event label column without a named header by default. This is the column we will use to identify our occlusion events by the label <em>“Occlusion”</em>, so we need to include it. Currently in {mnirs} an unnamed column like this will be named <code>"col_"</code> with a numeric suffix for the column number in the data file. In our example file, this events column will therefore be <code>"col_6"</code>. It’s not the most elegant solution, but it works for now!</p>
 <p>We can separate the two trials in the data set by finding the longer gap between consecutive occlusion labels and manually defining intervals before that as trial 1, and after that as trial 2.</p>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
@@ -211,10 +211,9 @@ Calling these functions in non-linear curve fitting functions (e.g. <code><a hr
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        <span class="co">## blood volume correction factor beta, requires all positive values</span></span>
+<span>        <span class="co">## blood volume correction factor `beta`</span></span>
 <span>        beta <span class="op">=</span> <span class="va">o2hb</span> <span class="op">/</span> <span class="op">(</span><span class="va">o2hb</span> <span class="op">+</span> <span class="va">hhb</span><span class="op">)</span>,</span>
-<span>        <span class="co">## use {purrr} to iteratively adjust NIRS values from one sample to the next</span></span>
-<span>        <span class="co">## corrected for change in blood volume by beta since the previous sample</span></span>
+<span>        <span class="co">## iteratively correct NIRS values from one sample to the next</span></span>
 <span>        o2hb <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/accumulate.html" class="external-link">accumulate</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>, \<span class="op">(</span><span class="va">prev</span>, <span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
 <span>            <span class="va">prev</span> <span class="op">+</span> <span class="op">(</span><span class="va">o2hb</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">o2hb</span><span class="op">[</span><span class="va">i</span> <span class="op">-</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="va">beta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="va">thb</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">thb</span><span class="op">[</span><span class="va">i</span> <span class="op">-</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
 <span>            <span class="op">}</span>, .init <span class="op">=</span> <span class="fl">0</span></span>
@@ -248,25 +247,25 @@ Calling these functions in non-linear curve fitting functions (e.g. <code><a hr
 <ul>
 <li>
 <p><code>data</code></p>
-<p>This function takes in a data frame, applies processing to all channels specified, then returns a list of processed data frames. <em><code>mnirs</code></em> metadata will be passed to and from this function.<br><br>
+<p>This function takes in a data frame, applies processing to all channels specified, then returns a list of processed data frames. <em>“mnirs”</em> metadata will be passed to and from this function.<br><br>
 For this analysis, we will re-join the returned list of data frames into a combined data frame with a grouping variable labelled “interval”.</p>
 </li>
 <li>
 <p><code>nirs_channels</code>, <code>time_channel</code>, <code>event_channel</code>, &amp; <code>sample_rate</code></p>
-<p>Specify which column names in <code>data</code> will be processed. <code>nirs_channels</code> are the response variables; <code>time_channel</code> is the time series variable; <code>event_channel</code> specifies where to look for event labels; and <code>sample_rate</code> specifies the recording rate used when ensemble-averaging across intervals with unequal time samples. If any arguments are not specified, they will be retrieved from <em><code>mnirs</code></em> metadata. Channels in the data but not explicitly specified will be passed through unprocessed to the returned data frames.<br><br>
+<p>Specify which column names in <code>data</code> will be processed. <code>nirs_channels</code> are the response variables; <code>time_channel</code> is the time series variable; <code>event_channel</code> specifies where to look for event labels; and <code>sample_rate</code> specifies the recording rate used when ensemble-averaging across intervals with unequal time samples. If any arguments are not specified, they will be retrieved from <em>“mnirs”</em> metadata. Channels in the data but not explicitly specified will be passed through unprocessed to the returned data frames.<br><br>
 We will analyse OxCap from the deoxyhaeme (HHb) NIRS signal, which is often recommended <span class="citation" data-cites="Costalat2025">[<a href="#ref-Costalat2025" role="doc-biblioref">6</a>]</span>.</p>
 </li>
 <li>
-<p><code>event_times</code>, <code>event_labels</code>, &amp; <code>event_samples</code></p>
-<p>Interval events can be specified by any combination of time (values of <code>time_channel</code>), labels (values of <code>event_channel</code>), or sample (row number). Multiple values can be entered as vectors. At least one event must be specified.<br><br>
-Once again, in this example data file, the occlusions are all identified by the event label <code>"Occlusion"</code>. This makes it very simple to detect this string in the <code>event</code> column, and extract intervals around them.<br><br>
-Detecting intervals by event labels must match a full string <em>exactly</em>. If the event labels are inconsistent, we could specify a regular expression (regex) string such as <code>"(?i)occlusions?"</code> or <code>"start|end"</code>.</p>
+<p><code>start</code> &amp; <code>end</code></p>
+<p>Interval boundaries are specified using helper functions: <code><a href="../reference/by_time.html">by_time()</a></code> for <code>time_channel</code> values; <code><a href="../reference/by_time.html">by_label()</a></code> for <code>event_channel</code> labels; or <code><a href="../reference/by_time.html">by_sample()</a></code> for sample indices (row numbers). Provide both <code>start</code> and <code>end</code> to define precise intervals, or provide <code>start</code> alone with <code>span</code> to extract windows around events.<br><br>
+Once again, in this example data file, the occlusions are all identified by the event label <em>“Occlusion”</em>. This makes it very simple to detect this string in the <code>event</code> column as the <code>start</code> value to extract each interval.<br><br>
+Detecting intervals by event labels must match a full string exactly or use a regular expression (regex) string such as <em>“(?i)occlusions?”</em> or <em>“start|end”</em>.</p>
 </li>
 <li>
 <p><code>span</code></p>
-<p>Where an event is detected, an interval will be extracted with a time span specified as a two-element numeric vector; <code>c(start, end)</code>, in units of the <code>time_channel</code>. Where positive values represent times after the event, and negative values represent times before the event.<br><br>
+<p>When only <code>start</code> (or <code>end</code>) is provided, <code>span</code> specifies a time window in units of <code>time_channel</code> as <code>c(before, after)</code>, where positive values indicate time after the event and negative values indicate time before. When both <code>start</code> and <code>end</code> are provided, <code>span</code> shifts boundaries additively: <code>span[1]</code> adjusts starts, <code>span[2]</code> adjusts ends.<br><br>
 All occlusion bouts were held for 5-seconds in this protocol. If the occlusion duration changed across the protocol, we might have to specify a list of time spans, rather than a single <code>span</code> as in this case.<br><br>
-From visual investigation of the plots, we were able to see that in the first ~0.5 sec after the occlusion label, the deoxyhaeme signal was disrupted by the inflation of the cuff, which might produce invalid slope values. So we will specify a time span of <code>c(1, 5)</code>, i.e. from 1 to 5 seconds after each <code>"Occlusion"</code> event label. If we wanted to include an interval before the event label, we could specify a negative numeric value, e.g. <code>c(-2.5, 2.5)</code> to include a 5-sec span centred on the label itself.</p>
+From visual investigation of the plots, we were able to see that in the first ~0.5 sec after the occlusion label, the deoxyhaeme signal was disrupted by the inflation of the cuff, which might produce invalid slope values. So we will specify a time span of <code>c(1, 5)</code>, i.e. from 1 to 5 seconds after each <em>“Occlusion”</em> event label. If we wanted to include an interval before the event label, we could specify a negative numeric value, e.g. <code>c(-2.5, 2.5)</code> to include a 5-sec span centred on the label itself.</p>
 </li>
 <li>
 <p><code>event_groups</code></p>
@@ -281,22 +280,23 @@ For repeated occlusion testing, the original time information for each occlusion
 </ul>
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## identify and extract intervals by event label</span></span>
-<span><span class="co">## re-join the returned list of data frames with each occlusion interval labelled as "interval"</span></span>
+<code class="sourceCode R"><span><span class="co">## identify and extract intervals by event label "Occlusion"</span></span>
+<span><span class="co">## re-join the returned list of data frames </span></span>
 <span><span class="va">df_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
 <span>    <span class="va">df</span>,</span>
-<span>    event_labels <span class="op">=</span> <span class="st">"Occlusion"</span>, <span class="co">## event label used in file, must match string exactly</span></span>
+<span>    start <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_label</a></span><span class="op">(</span><span class="st">"Occlusion"</span><span class="op">)</span>, <span class="co">## event label used in file</span></span>
 <span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>, <span class="co">## return each occlusion event separately</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="co">## occlusion interval c(start, end) with reference to the event time value</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="co">## interval c(start, end) around each event time value</span></span>
 <span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span> <span class="co">## preserve original time values at each event</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## join back into a single grouped data frame, mostly for easier plotting below</span></span>
+<span><span class="co">## join back into a single grouped data frame</span></span>
+<span><span class="co">## only necessary for easier plotting</span></span>
 <span><span class="va">df_grouped</span> <span class="op">&lt;-</span> <span class="va">df_list</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"interval"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co">## convert the "interval" column to a categorical factor</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">interval</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">interval</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co">## add `mnirs` metadata back to the combined data frame, for plotting</span></span>
+<span>    <span class="co">## add "mnirs" metadata back to the combined data frame, for plotting</span></span>
 <span>    <span class="fu"><a href="../reference/create_mnirs_data.html">create_mnirs_data</a></span><span class="op">(</span></span>
 <span>        <span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">df_list</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nirs_channels"</span>, <span class="st">"time_channel"</span><span class="op">)</span><span class="op">]</span></span>
 <span>    <span class="op">)</span></span>
@@ -426,7 +426,7 @@ A window with fewer samples will tend to return steeper slope values, which may 
 </li>
 <li>
 <p><code>tau</code></p>
-<p>The time constant (𝜏) of the exponential function determines the steepness of the initial slope of the curve. <em>Tau</em> is approximated by the time required to converge 63.2% of the amplitude between <code>A</code> and <code>B</code>.<br><br>
+<p>The time constant (τ) describes the speed of the exponential transition from <code>A</code> to <code>B</code>, and is approximated by the time elapsed when the response has completed 63.2% of the total amplitude. i.e., has reached the value <code>A + 0.632 × (B − A)</code>.<br><br>
 The rate constant (<em>k</em>) is the inverse of the time constant (<code>k = 1 / tau</code>) and is also commonly used in NIRS research, including for OxCap assessment. In this example we will report <em>k</em> in units of min<sup>-1</sup>.</p>
 </li>
 <li>
@@ -445,7 +445,8 @@ Often during repeated occlusions after exercise, the first occlusions may not co
 <div class="cell" data-layout-align="center">
 <div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## use 3-param monoexponential model for each trial</span></span>
-<span><span class="co">## return fitted curve and time constant tau coefficient</span></span>
+<span><span class="co">## fit models by trial within the data frame with {tidyr} and {purrr}</span></span>
+<span><span class="co">## return fitted data and time constant tau coefficient</span></span>
 <span><span class="va">pred_df</span> <span class="op">&lt;-</span> <span class="va">slopes_df</span> <span class="op">|&gt;</span></span>
 <span>    <span class="co">## nest the data to model each trial</span></span>
 <span>    <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">nest</a></span><span class="op">(</span>.by <span class="op">=</span> <span class="va">trial</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -502,7 +503,7 @@ Often during repeated occlusions after exercise, the first occlusions may not co
 </div>
 </section></section><section class="section level2"><h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>This article demonstrates how muscle oxidative capacity analysis can be performed using <em>{mnirs}</em> and some relatively simple, reproducible data wrangling steps.</p>
+<p>This article demonstrates how muscle oxidative capacity analysis can be performed using {mnirs} and some relatively simple, reproducible data wrangling steps.</p>
 <p>In future development, I would like to wrap some of these processing steps into dedicated functions with recommended default parameters, to make the analysis process more streamlined.</p>
 <p>However, there are also a few limitations to this current process: modelling monoexponential behaviour with relatively few data samples (there are 17 occlusions per trial in this example) can result in unstable fit parameters or inability to converge non-linear fitting at all.</p>
 <p>A more robust fitting process may be required for real-world data where mV̇O<sub>2</sub> recovery does not perfectly conform to monoexponential behaviour. Or, manual processing steps may be inevitably required during analysis to accommodate for these computational limitations.</p>

@@ -32,7 +32,7 @@ create_mnirs_data(data, ...)
 
   - start_timestamp
 
-  - event_times
+  - interval_times
 
   - interval_span
 

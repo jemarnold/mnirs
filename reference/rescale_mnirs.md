@@ -93,31 +93,30 @@ arrangements.
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>
-    rescale_mnirs(
-        nirs_channels = list(c(smo2_right, smo2_left)),
-        range = c(0, 10), ## rescale to a 0-10 arbitrary units
-        verbose = FALSE
+    rescale_mnirs(        ## un-grouped nirs channels to rescale separately 
+        nirs_channels = list(smo2_left, smo2_right), 
+        range = c(0, 100) ## rescale to a 0-100% functional exercise range
     )
 
 data
 #> # A tibble: 2,203 × 3
-#>     time smo2_right smo2_left
-#>    <dbl>      <dbl>     <dbl>
-#>  1 0            5.4       6.8
-#>  2 0.400        5.4       6.8
-#>  3 0.960        5.4       6.8
-#>  4 1.51         5.4       6.6
-#>  5 2.06         5.4       6.6
-#>  6 2.61         5.4       6.6
-#>  7 3.16         5.4       6.6
-#>  8 3.71         5.7       6.7
-#>  9 4.26         5.7       6.7
-#> 10 4.81         5.7       6.7
+#>     time smo2_left smo2_right
+#>    <dbl>     <dbl>      <dbl>
+#>  1 0            54       78.2
+#>  2 0.400        54       78.2
+#>  3 0.960        54       78.2
+#>  4 1.51         54       75.6
+#>  5 2.06         54       75.6
+#>  6 2.61         54       75.6
+#>  7 3.16         54       75.6
+#>  8 3.71         57       76.9
+#>  9 4.26         57       76.9
+#> 10 4.81         57       76.9
 #> # ℹ 2,193 more rows
 
 # \donttest{

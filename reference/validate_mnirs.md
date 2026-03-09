@@ -107,8 +107,8 @@ validate_x_t(x, t, invalid = FALSE)
 
 - event_channel:
 
-  A character string giving the name of the event/marker column. Must
-  match a column name in `data` exactly.
+  A character string giving the name of the event/lap column. Must match
+  a column name in `data` exactly.
 
   - If `NULL` (default), the `event_channel` metadata attribute of
     `data` is used.

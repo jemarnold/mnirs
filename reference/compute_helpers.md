@@ -6,8 +6,9 @@ along a time variable `t`.
 `compute_local_fun()`: Compute a rolling function along `x` from a list
 of rolling sample windows.
 
-`compute_outliers()`: Computes a vector of logicals indicating local
-outliers of `x` within a list of rolling sample windows `window_idx`.
+`compute_outliers()`: Computes a vector of local medians and logicals
+indicating outliers of `x` within a list of rolling sample windows
+`window_idx`.
 
 `compute_valid_neighbours()`: Compute a list of rolling window indices
 along `x` to either side of `NA`s.
@@ -25,7 +26,7 @@ compute_local_windows(
 
 compute_local_fun(x, window_idx, fn, ...)
 
-compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+compute_outliers(x, window_idx, outlier_cutoff)
 
 compute_valid_neighbours(
   x,
@@ -83,10 +84,6 @@ compute_valid_neighbours(
 
   Additional arguments.
 
-- local_medians:
-
-  A numeric vector the same length as `x` of local median values.
-
 - outlier_cutoff:
 
   An integer for the local outlier threshold, as number of standard
@@ -109,7 +106,9 @@ length `width` samples or `span` units of time `t`.
 
 `compute_local_fun()`: A numeric vector the same length as `x`.
 
-`compute_outliers()`: A logical vector the same length as `x`.
+`compute_outliers()`: A [`list()`](https://rdrr.io/r/base/list.html)
+with vectors the same length as `x` for with numeric local medians and
+logical identifying where `is_outlier`.
 
 `compute_valid_neighbours()`: A list the same length as the `NA` values
 in `x` with numeric vectors of sample indices of length `width` samples

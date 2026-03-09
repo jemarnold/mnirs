@@ -1,7 +1,8 @@
 # Extract intervals from *mnirs* data
 
-Detect and extract intervals around specified events from *"mnirs"* time
-series data.
+Extract intervals from *"mnirs"* time series data, specifying interval
+start and end boundaries by time value, event label, lap number, or
+sample index.
 
 ## Usage
 
@@ -12,11 +13,10 @@ extract_intervals(
   time_channel = NULL,
   event_channel = NULL,
   sample_rate = NULL,
-  event_times = NULL,
-  event_labels = NULL,
-  event_samples = NULL,
-  event_groups = list("distinct", "ensemble"),
-  span = list(c(-30, 180)),
+  start = NULL,
+  end = NULL,
+  span = list(c(-60, 60)),
+  event_groups = c("distinct", "ensemble"),
   zero_time = FALSE,
   verbose = TRUE
 )
@@ -36,9 +36,9 @@ extract_intervals(
   interval (see *Details*). Names must match column names in `data`
   exactly.
 
-  - Only needs to be specified when `event_groups` contains
-    *"ensemble"*- averaged intervals. If `event_groups = "distinct"` no
-    channel processing occurs.
+  - Must only be specified when `event_groups` contains *"ensemble"*-
+    averaged intervals. If `event_groups = "distinct"` no channel
+    processing occurs.
 
   - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
 
@@ -52,10 +52,16 @@ extract_intervals(
 
 - event_channel:
 
-  An *optional* character string giving the name of an event/marker
-  column to import. Required to specify `event_labels`. Must match
-  column names in `data` exactly. Retrieved from metadata if not defined
-  explicitly.
+  An *optional* character string giving the name of an event/lap column.
+  The column may contain character event labels or integer lap numbers.
+
+  - Required when using
+    [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+    or
+    [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+    for `start` or `end`.
+
+  - Retrieved from metadata if not defined explicitly.
 
 - sample_rate:
 
@@ -63,20 +69,45 @@ extract_intervals(
   ensemble-averaging. If `NULL`, will be estimated from `time_channel`
   (see *Details*).
 
-- event_times:
+- start:
 
-  A numeric vector of `time_channel` values indicating event start times
-  (see *Details*).
+  Specifies where intervals begin. Either raw values — numeric for time
+  values, character for event labels, explicit integer (e.g. `2L`) for
+  lap numbers — or created with
+  [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+  [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+  or
+  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md).
 
-- event_labels:
+- end:
 
-  A character vector of strings to match in `event_channel`, indicating
-  event starts. Matching is case-sensitive and must match exactly.
+  Specifies where intervals end. Either raw values — numeric for time
+  values, character for event labels, explicit integer (e.g. `2L`) for
+  lap numbers — or created with
+  [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+  [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+  or
+  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md).
 
-- event_samples:
+- span:
 
-  an integer vector of sample indices (row numbers) indicating event
-  starts.
+  A one- or two-element numeric vector `c(before, after)` in units of
+  `time_channel`, or a [`list()`](https://rdrr.io/r/base/list.html) of
+  such vectors. Applied additively to interval boundaries:
+
+  - When both `start` and `end` are specified: `span[1]` shifts start
+    times, `span[2]` shifts end times.
+
+  - When only `start` or only `end` is specified: both `span[1]` and
+    `span[2]` apply as a window around the event).
+
+  - A single *positive* value is recycled to shift the end times (e.g.
+    `span = 60` -\> `c(0, 60)`).
+
+  - A single *negative* value is recycled to shift the start times (e.g.
+    `span = -60` -\> `c(-60, 0)`).
 
 - event_groups:
 
@@ -97,12 +128,6 @@ extract_intervals(
 
   :   Ensemble-average each specified `nirs_channel` within each group
       and return one data frame per group.
-
-- span:
-
-  A [`list()`](https://rdrr.io/r/base/list.html) of two-element numeric
-  vectors specifying the window around each event as `c(before, after)`,
-  in units of `time_channel`.
 
 - zero_time:
 
@@ -125,24 +150,65 @@ class *"mnirs"*, with metadata available via
 
 ## Details
 
-### Event specification
+### Interval specification
 
-Interval events can be identified in three ways, in combination:
+Interval boundaries are specified using helper functions, or by passing
+raw values directly:
 
-- `event_times`:
+- [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  or numeric:
 
-  Numeric time valuess in units of `time_channel`.
+  Time values in units of `time_channel`.
 
-- `event_samples`:
+- [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  or character:
+
+  Strings to match in `event_channel`. All matching occurrences are
+  returned.
+
+- [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  or explicit integer (e.g. `2L`):
+
+  Lap numbers to match in `event_channel`. Resolves to the first sample
+  of each lap for `start`, and the last sample for `end`, or all samples
+  of the lap if only one of either `start` or `end` is specified.
+
+- [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md):
 
   Integer sample indices (row numbers).
 
-- `event_labels`:
+Raw values supplied to `start`/`end` are auto-coerced:
 
-  Character strings to match exactly in `event_channel`.
+- Numeric →
+  [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
 
-Events can be specified in any order, and will always be returned in the
-order in which they appear in `data`.
+- Character →
+  [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+
+- Explicit integer (e.g. `2L`) →
+  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md).
+
+- Use
+  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  explicitly for sample indices.
+
+`start` and `end` can use different specification types (e.g., start by
+label, end by time). When lengths differ, the shorter is recycled.
+
+### The `span` window
+
+`span` applies an additive time shift to interval boundaries. A single
+numeric value is recycled: `span = 60` becomes `c(0, 60)` and
+`span = -60` becomes `c(-60, 0)`.
+
+- **`start` + `end`**: `span[1]` shifts starts, `span[2]` shifts ends.
+  For example,
+  `start = by_time(30), end = by_time(60), span = c(-5, 10)` gives an
+  interval of `[25, 70]`.
+
+- **`start` only** or **`end` only**: both span values apply to the
+  single boundary, like a window around an event. For example,
+  `start = by_time(30), span = c(-5, 60)` gives `[25, 90]`.
 
 ### Per-interval `nirs_channels` for ensemble-averaging
 
@@ -161,26 +227,7 @@ If all grouped intervals can include all `nirs_channels`, or if
 can be supplied and recycled to all groups, or left as `NULL` for
 channels to be taken from *"mnirs"* metadata.
 
-### Interval time `span` windows
-
-Each interval is defined relative to its event time in units of
-`time_channel` as `[event_times + before, event_times + after]`.
-
-- `before` is typically a negative value (window can extend before the
-  event).
-
-- `after` is typically a positive value (window can extend after the
-  event).
-
-- Both values can be either positive or negative to reference an
-  interval window either completely before, or completely after the
-  indicated event, respectively.
-
-If an interval time span is partially out of bounds, available in-bounds
-data are returned with a warning. Interval time spans entirely out of
-bounds returns an error.
-
-### Grouping events
+### Grouping intervals
 
 `event_groups` controls whether extracted intervals are returned as
 distinct data frames or ensemble-averaged.
@@ -201,18 +248,14 @@ distinct data frames or ensemble-averaged.
   return a list with one data frame for each group. Any intervals
   detected but not specified in `event_groups` are returned as distinct.
 
-`event_groups` lists canned be named (e.g.
+`event_groups` lists can be named (e.g.
 `list(low = c(1, 2), high = c(3, 4))`) and will pass those names to the
-returned list of data frames. Otherwise, the return list will be named
-`c("interval_1", "interval_2")` etc. for distinct intervals;
-`"ensemble"` for ensemble-averaged; or `c("group_1_2", "group_3_4")`
-etc. for custom grouping structure.
+returned list of data frames.
 
 When `event_groups` is a list of numeric interval numbers, list items in
 `nirs_channels` and `span` are recycled to the number of groups. If
-lists are only partially specified (if there are more intervals or
-groups detected than there are argument list items) The final argument
-item is recycled forward as needed. Extra argument items are ignored.
+lists are only partially specified, the final item is recycled forward
+as needed. Extra items are ignored.
 
 ## Examples
 
@@ -230,74 +273,30 @@ data <- read_mnirs(
 ) |>
     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 
-## extract intervals as a list of data frames
-extract_intervals(
-    data,
-    nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093), ## specify interval events
-    event_groups = "distinct",  ## return all unique intervals
-    span = list(c(-20, 90)),    ## specify the event start-end timespans
-    zero_time = TRUE,           ## start time from zero
-    verbose = FALSE
-)
-#> $interval_1
-#> # A tibble: 1,101 × 3
-#>     time smo2_left smo2_right
-#>    <dbl>     <dbl>      <dbl>
-#>  1 -20        55.6       60.9
-#>  2 -19.9      55.8       60.7
-#>  3 -19.8      56.1       60.6
-#>  4 -19.7      56.3       60.4
-#>  5 -19.6      56.6       60.3
-#>  6 -19.5      56.8       60.1
-#>  7 -19.4      56.6       60.1
-#>  8 -19.3      56.9       59.8
-#>  9 -19.2      56.7       60.1
-#> 10 -19.1      56.2       59.8
-#> # ℹ 1,091 more rows
-#> 
-#> $interval_2
-#> # A tibble: 1,101 × 3
-#>     time smo2_left smo2_right
-#>    <dbl>     <dbl>      <dbl>
-#>  1 -20        56.2       57.2
-#>  2 -19.9      55.7       57.4
-#>  3 -19.8      55.3       57.0
-#>  4 -19.7      55.3       58.6
-#>  5 -19.6      55.3       58.8
-#>  6 -19.5      55.3       57.9
-#>  7 -19.4      55.3       59.1
-#>  8 -19.3      55.3       59.0
-#>  9 -19.2      55.3       57.6
-#> 10 -19.1      55.7       57.4
-#> # ℹ 1,091 more rows
-#> 
-
 ## ensemble-average across multiple intervals
 interval_list <- extract_intervals(
-    data,
-    nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093),
-    event_groups = "ensemble", ## return ensemble-averaged intervals
-    span = list(c(-20, 90)),
-    zero_time = TRUE,
-    verbose = FALSE
+    data,                       ## channels recycled to all intervals by default
+    nirs_channels = c(smo2_left, smo2_right),
+    start = by_time(368, 1093), ## manually identified interval start times
+    span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
 interval_list[[1L]]
 #> # A tibble: 1,101 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
-#>  1 -20        55.9       59.0
-#>  2 -19.9      55.8       59.1
-#>  3 -19.8      55.7       58.8
-#>  4 -19.7      55.8       59.5
-#>  5 -19.6      56.0       59.6
-#>  6 -19.5      56.1       59.0
-#>  7 -19.4      56.0       59.6
-#>  8 -19.3      56.1       59.4
-#>  9 -19.2      56.0       58.8
-#> 10 -19.1      55.9       58.6
+#>  1 -20        56.2       58.9
+#>  2 -19.9      56.2       58.9
+#>  3 -19.8      55.4       59.0
+#>  4 -19.7      55.4       59.2
+#>  5 -19.6      55.4       60.2
+#>  6 -19.5      55.4       60.2
+#>  7 -19.4      56.0       58.9
+#>  8 -19.3      56.0       60.0
+#>  9 -19.2      56.2       59.8
+#> 10 -19.1      55.8       59.0
 #> # ℹ 1,091 more rows
 
 # \donttest{

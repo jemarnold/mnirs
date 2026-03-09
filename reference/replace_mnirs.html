@@ -23,7 +23,7 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,7 +33,8 @@ via interpolation methods.'><meta name="twitter:card" content="summary"><meta na
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -226,7 +227,12 @@ checks and validations.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>replace_mnirs()</code> returns a <a href="https://tibble.tidyverse.org/reference/tibble-package.html" class="external-link">tibble</a> of class
 <em>"mnirs"</em> with metadata available with <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes()</a></code>.</p>
-<p>Vectorised <code>replace_*()</code> return a numeric vector the same length as <code>x</code>.</p>
+<p><code>replace_invalid()</code> return a numeric vector the same length as <code>x</code> with
+invalid values replaced.</p>
+<p><code>replace_outliers()</code> return a numeric vector the same length as <code>x</code> with
+local outliers replaced.</p>
+<p><code>replace_missing()</code> return a numeric vector the same length as <code>x</code> with
+missing values replaced.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -287,14 +293,14 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## vectorised operation</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">999</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">999</span>, <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 3 3 4 6 6</span>
+<span class="r-in"><span><span class="fu">replace_invalid</span><span class="op">(</span><span class="va">x</span>, invalid_values <span class="op">=</span> <span class="fl">999</span>, width <span class="op">=</span> <span class="fl">3</span>, method <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5 6</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="op">(</span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">2</span>, method <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   1 999   3   4 999   6</span>
+<span class="r-in"><span><span class="op">(</span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu">replace_outliers</span><span class="op">(</span><span class="va">x</span>, outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, width <span class="op">=</span> <span class="fl">3</span>, method <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  1 NA  3  4 NA  6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">replace_missing</span><span class="op">(</span><span class="va">x_na</span>, method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]   1 999   3   4 999   6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3 4 5 6</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## read example data</span></span></span>
 <span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span></span>
@@ -306,36 +312,18 @@ equivalent to <code>replace_missing(x, width = 1)</code>).</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## clean data</span></span></span>
 <span class="r-in"><span><span class="va">data_clean</span> <span class="op">&lt;-</span> <span class="fu">replace_mnirs</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">data</span>,</span></span>
-<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="cn">NULL</span>, <span class="co">## nirs_channels will be retrieved from metadata</span></span></span>
-<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="cn">NULL</span>,  <span class="co">## retrieved from metadata</span></span></span>
-<span class="r-in"><span>    invalid_values <span class="op">=</span> <span class="fl">0</span>,   <span class="co">## known invalid values in the data</span></span></span>
-<span class="r-in"><span>    invalid_above <span class="op">=</span> <span class="fl">90</span>,   <span class="co">## remove data spikes</span></span></span>
-<span class="r-in"><span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,   <span class="co">## recommended default value</span></span></span>
-<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">10</span>,           <span class="co">## window to detect local outliers</span></span></span>
-<span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>,    <span class="co">## linear interpolation over `NA`s</span></span></span>
-<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    <span class="va">data</span>,               <span class="co">## blank channels will be retrieved from metadata</span></span></span>
+<span class="r-in"><span>    invalid_values <span class="op">=</span> <span class="fl">0</span>, <span class="co">## known invalid values in the data</span></span></span>
+<span class="r-in"><span>    invalid_above <span class="op">=</span> <span class="fl">90</span>, <span class="co">## remove data spikes above 90</span></span></span>
+<span class="r-in"><span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, <span class="co">## recommended default value</span></span></span>
+<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">10</span>,         <span class="co">## window to detect and replace outliers/missing values</span></span></span>
+<span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>   <span class="co">## linear interpolation over `NA`s</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">data_clean</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,203 × 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time  smo2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 0        54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.400    54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 0.960    54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.51     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.06     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.61     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.16     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.71     57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.26     57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.81     57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,193 more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>        <span class="co">## plot original and show where values have been replaced</span></span></span>
+<span class="r-in"><span>        <span class="co">## ignore warning about replacing the existing colour scale</span></span></span>
 <span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>            <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_colour_manual</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>                name <span class="op">=</span> <span class="cn">NULL</span>,</span></span>

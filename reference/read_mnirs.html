@@ -11,7 +11,7 @@ metadata.'><meta name="twitter:card" content="summary"><meta name="twitter:creat
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,8 @@ metadata.'><meta name="twitter:card" content="summary"><meta name="twitter:creat
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -96,7 +97,7 @@ in the form <code>c(time = "original_name")</code>.</p></li>
 
 <dt id="arg-event-channel">event_channel<a class="anchor" aria-label="anchor" href="#arg-event-channel"></a></dt>
 <dd><p>An <em>optional</em> character string giving the name of an
-event/marker column to import. Names must match the file header exactly.
+event/lap column to import. Names must match the file header exactly.
 A named character vector can be used to rename the column on import in
 the form <code>c(event = "original_name")</code>.</p></dd>
 
@@ -202,32 +203,38 @@ time values), if <code>verbose = TRUE</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">## call an example mNIRS data file</span></span></span>
-<span class="r-in"><span><span class="va">file_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">read_mnirs</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="va">file_path</span>,</span></span>
-<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>                   <span class="co">## identify and rename channels</span></span></span>
-<span class="r-in"><span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 Live"</span>,</span></span>
-<span class="r-in"><span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">read_mnirs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    file_path <span class="op">=</span> <span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>, <span class="co">## call an example data file</span></span></span>
+<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        smo2_left <span class="op">=</span> <span class="st">"SmO2 Live"</span>,            <span class="co">## identify and rename channels</span></span></span>
+<span class="r-in"><span>        smo2_right <span class="op">=</span> <span class="st">"SmO2 Live(2)"</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span>,</span></span>
-<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>, <span class="co">## date-time format will be converted to numeric</span></span></span>
-<span class="r-in"><span>    sample_rate <span class="op">=</span> <span class="cn">NULL</span>,                  <span class="co">## sample_rate will be estimated from time_channel</span></span></span>
-<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">FALSE</span>                      <span class="co">## silence warnings &amp; messages</span></span></span>
+<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"hh:mm:ss"</span><span class="op">)</span>,    <span class="co">## date-time format will be converted to numeric</span></span></span>
+<span class="r-in"><span>    event_channel <span class="op">=</span> <span class="cn">NULL</span>,                   <span class="co">## leave blank if unused</span></span></span>
+<span class="r-in"><span>    sample_rate <span class="op">=</span> <span class="cn">NULL</span>,                     <span class="co">## if blank, will be estimated from time_channel</span></span></span>
+<span class="r-in"><span>    add_timestamp <span class="op">=</span> <span class="cn">FALSE</span>,                  <span class="co">## omit a date-time timestamp column</span></span></span>
+<span class="r-in"><span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>,                       <span class="co">## recalculate time values from zero</span></span></span>
+<span class="r-in"><span>    keep_all <span class="op">=</span> <span class="cn">FALSE</span>,                       <span class="co">## return only the specified data channels</span></span></span>
+<span class="r-in"><span>    verbose <span class="op">=</span> <span class="cn">TRUE</span>                          <span class="co">## show warnings &amp; messages</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Estimated `sample_rate` = <span style="color: #0000BB;">2</span> Hz.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Define `sample_rate` explicitly to override.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Duplicate or irregular `time_channel` samples detected.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Investigate at `time` = <span style="color: #0000BB;">211.99</span> and <span style="color: #0000BB;">1184</span>.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Re-sample with `mnirs::resample_mnirs()`.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,203 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time smo2_right smo2_left</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 0             54        68</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.400         54        68</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 0.960         54        68</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.51          54        66</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.06          54        66</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.61          54        66</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.16          54        66</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.71          57        67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.26          57        67</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.81          57        67</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     time smo2_left smo2_right</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 0            54         68</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.400        54         68</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 0.960        54         68</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.51         54         66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.06         54         66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.61         54         66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.16         54         66</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.71         57         67</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.26         57         67</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.81         57         67</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,193 more rows</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

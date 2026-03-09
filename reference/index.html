@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,7 +17,8 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -90,7 +91,7 @@
           <code><a href="resample_mnirs.html">resample_mnirs()</a></code>
 
         </dt>
-        <dd>Re-sample a data frame</dd>
+        <dd>Re-sample an <em>mnirs</em> data frame</dd>
 
         <dt>
 
@@ -108,7 +109,7 @@
 
         <dt>
 
-          <code><a href="filter_moving_average.html">filter_moving_average()</a></code>
+          <code><a href="filter_ma.html">filter_ma()</a></code> <code><a href="filter_ma.html">filter_moving_average()</a></code>
 
         </dt>
         <dd>Apply a moving average filter</dd>
@@ -142,6 +143,13 @@
 
         </dt>
         <dd>Extract intervals from <em>mnirs</em> data</dd>
+
+        <dt>
+
+          <code><a href="by_time.html">by_time()</a></code> <code><a href="by_time.html">by_sample()</a></code> <code><a href="by_time.html">by_label()</a></code> <code><a href="by_time.html">by_lap()</a></code>
+
+        </dt>
+        <dd>Specify interval boundaries by time, label, lap, or sample</dd>
       </dl></div><div class="section level2">
       <h2 id="process-kinetics">Process kinetics<a class="anchor" aria-label="anchor" href="#process-kinetics"></a></h2>
 
@@ -173,9 +181,9 @@
         </dt>
         <dd>Monoexponential function with 4 parameters</dd>
       </dl></div><div class="section level2">
-      <h2 id="plotting">Plotting<a class="anchor" aria-label="anchor" href="#plotting"></a></h2>
+      <h2 id="printing-plotting">Printing &amp; plotting<a class="anchor" aria-label="anchor" href="#printing-plotting"></a></h2>
 
-      <div class="section-desc"><p>Tools for pretty plotting with <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a>.</p></div>
+      <div class="section-desc"><p>Tools for printing functions and pretty plotting with <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a>.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -246,13 +254,6 @@
 
         </dt>
         <dd>10 Hz Train.Red App export</dd>
-
-        <dt>
-
-          <code><a href="vo2master.csv.html">vo2master.csv</a></code>
-
-        </dt>
-        <dd>1 Hz VO2master app recording from Moxy</dd>
 
         <dt>
 

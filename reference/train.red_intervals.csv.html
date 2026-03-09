@@ -11,7 +11,7 @@ muscle sites. Some data channels have been omitted to keep file size down."><met
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,8 @@ muscle sites. Some data channels have been omitted to keep file size down."><met
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -53,10 +54,11 @@ muscle sites. Some data channels have been omitted to keep file size down.</p>
 
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>.csv file with header metadata and with 10 columns and 12001 rows.</p><ul><li><p><code>nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")</code></p></li>
+    <p>.csv file with header metadata and with 10 columns and 12001 rows.</p><ul><li><p><code>nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHB unfiltered")</code></p></li>
 <li><p><code>time_channel = c("Timestamp (seconds passed)")</code></p></li>
 <li><p><code>event_channel = c("Lap/Event")</code></p></li>
-<li><p><code>event_times = c(2455, 3166)</code> ## c(371, 1082) from zero_time</p></li>
+<li><p><code>interval_times = list(start = c(2150.09, 2865.05), end = c(2441.06, 3168.08))</code></p></li>
+<li><p><code>interval_times = list(start = c(65.94, 780.90), end = c(356.91, 1183.93))</code> ## from zero_time</p></li>
 </ul></div>
 
   </main></div>

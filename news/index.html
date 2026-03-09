@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,7 +17,8 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -39,6 +40,50 @@
       <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.0" id="mnirs-050">mnirs 0.5.0<a class="anchor" aria-label="anchor" href="#mnirs-050"></a></h2>
+<div class="section level4">
+<h4 id="updated-core-functions-0-5-0">Updated core functions<a class="anchor" aria-label="anchor" href="#updated-core-functions-0-5-0"></a></h4>
+<ul><li>
+<p><code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> expands <code>event_channel</code> to work with integer <em>“lap”</em> numbers, or character event label as previous.</p>
+<ul><li>Should now work on more .csv file formats; previously read errors may have occured where the file contained header rows above the data table, resulting in improper detection of columns.</li>
+<li>
+<code>event_channel</code> can now be specified as an integer <code>lap</code> column, in addition to a character column as previous.</li>
+<li>Other {mnirs} functions may expect <code>event_channel</code> to be either character or integer-ish.</li>
+</ul></li>
+<li>
+<p><code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> <strong><em>breaking change</em></strong> to argument specification:</p>
+<ul><li>Function arguments <code>start</code> and <code>end</code> replace <code>event_times</code>, <code>event_labels</code>, and <code>event_samples</code>. Allowing for more flexible and more clear interval boundary specifications.</li>
+<li>Helper functions <code><a href="../reference/by_time.html">by_time()</a></code>, <code><a href="../reference/by_time.html">by_label()</a></code>, <code><a href="../reference/by_time.html">by_lap()</a></code>, and <code><a href="../reference/by_time.html">by_sample()</a></code> added to specify <code>start</code>/<code>end</code> values.</li>
+<li>Fix edge-cases where metadata were not returned as expected.</li>
+</ul></li>
+<li><p><code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code> now defaults to <code>method = "locf"</code> which is safer for more column types where interpolation may not be appropriate (integer, discrete numeric, character, factors, etc).</p></li>
+<li><p><code><a href="../reference/filter_ma.html">filter_ma()</a></code> has been renamed from <code><a href="../reference/filter_ma.html">filter_moving_average()</a></code>. The latter is kept as an alias of the former.</p></li>
+<li><p><code><a href="../reference/peak_slope.html">peak_slope()</a></code> now returns a <em>“fitted”</em> vector with the linear regression predicted values within the peak slope window.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="updated-articles-0-5-0">Updated articles<a class="anchor" aria-label="anchor" href="#updated-articles-0-5-0"></a></h4>
+<ul><li>README:
+<ul><li>Add basic use covering <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>.</li>
+<li>Add rough draft <em>{mnirs}</em> hex icon.</li>
+</ul></li>
+<li>
+<em>“Reading and Cleaning Data with {mnirs}”</em> vignette:
+<ul><li>Add section: <em>“Detect and extract intervals”</em> covering <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> core functionality.</li>
+</ul></li>
+<li>Rough draft at creating an {mnirs} cheatsheet.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="documentation-0-5-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-5-0"></a></h4>
+<ul><li>Many function help documents re-written to be more readible.</li>
+<li>Updated function examples with clearer conditions for CRAN submission.</li>
+</ul></div>
+<div class="section level4">
+<h4 id="example-files-0-5-0">Example files<a class="anchor" aria-label="anchor" href="#example-files-0-5-0"></a></h4>
+<ul><li>Update <code>train.red_intervals.csv</code> revert to include original onboard smoothed and unfiltered NIRS channels.</li>
+<li>Remove <code>vo2master.csv</code> from example data, as it is only used for internal testing.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.2" id="mnirs-042">mnirs 0.4.2<a class="anchor" aria-label="anchor" href="#mnirs-042"></a></h2>
 <ul><li>Update <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>
@@ -102,7 +147,7 @@
 <ul><li>Implement <code><a href="https://rdrr.io/pkg/data.table/man/fread.html" class="external-link">data.table::fread()</a></code> to handle .csv with empty rows and long string metadata in the header above the data table.</li>
 <li>Awaiting future expanded <a href="https://r-datatable.com" class="external-link">data.table</a> implementation across <a href="https://jemarnold.github.io/mnirs/">mnirs</a>, i.e. for <code>data.table::froll*</code> functions.</li>
 </ul></li>
-<li>Fix <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code> to correctly identify windows where <code>partial = FALSE</code> was not met due to <code>NA</code>s.</li>
+<li>Fix <code><a href="../reference/filter_ma.html">filter_moving_average()</a></code> to correctly identify windows where <code>partial = FALSE</code> was not met due to <code>NA</code>s.</li>
 <li>Remove internal <a href="https://github.com/jasonjfoster/roll" class="external-link">roll</a> dependency.</li>
 <li>Update documentation in expectation of CRAN submission.
 <ul><li>Remove internal function examples to minimise <code>\donttest()</code> issues.</li>
@@ -112,14 +157,14 @@
 <h2 class="pkg-version" data-toc-text="0.2.0" id="mnirs-020">mnirs 0.2.0<a class="anchor" aria-label="anchor" href="#mnirs-020"></a></h2>
 <ul><li>Implement tidy evaluation with <a href="https://rlang.r-lib.org" class="external-link">rlang</a> and <a href="https://tidyselect.r-lib.org" class="external-link">tidyselect</a>.</li>
 <li>Update function documentation &amp; examples, <code>README</code>, vignette.</li>
-<li>Fix <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code> and <code>rolling_mean()</code> to correctly use <code>partial</code> and <code>na.rm</code> arguments.</li>
+<li>Fix <code><a href="../reference/filter_ma.html">filter_moving_average()</a></code> and <code>rolling_mean()</code> to correctly use <code>partial</code> and <code>na.rm</code> arguments.</li>
 <li>Fix <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code> to correctly use <code>width</code> and <code>span</code> arguments.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.9" id="mnirs-019">mnirs 0.1.9<a class="anchor" aria-label="anchor" href="#mnirs-019"></a></h2>
 <ul><li>Create <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code> to calculate local linear regression slopes along a vector.</li>
 <li>Integrate [roll][roll::roll-package] for faster rolling median, mean, and lm implementation under certain conditions.
-<ul><li>Currently used: <code>roll_lm()</code> for <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>, <code>roll_median()</code> for <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code>roll_mean()</code> for <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code>.</li>
+<ul><li>Currently used: <code>roll_lm()</code> for <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>, <code>roll_median()</code> for <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code>roll_mean()</code> for <code><a href="../reference/filter_ma.html">filter_moving_average()</a></code>.</li>
 <li>May roll back in favour of <code>data.table::froll_*</code> when 1.17.99+ is updated on CRAN.</li>
 </ul></li>
 <li>Update local rolling functions with <code>align = c("center", "left", "right")</code> arg.
@@ -127,10 +172,10 @@
 </ul></li>
 <li>Update internal <code><a href="../reference/compute_helpers.html">compute_local_fun()</a></code> to allow additional arguments, e.g. for <code>na.rm = TRUE</code>.</li>
 <li>Remove redundant internal numeric rounding. Results may now have floating point precision issues, but avoid compounding rounding error.
-<ul><li>Affects: <code><a href="../reference/filter_mnirs.html">filter_mnirs.smooth_spline()</a></code>, <code><a href="../reference/filter_mnirs.html">filter_mnirs.moving_average()</a></code>, <code><a href="../reference/parse_sample_rate.html">parse_sample_rate()</a></code> and <code><a href="../reference/clean_invalid.html">clean_invalid()</a></code> for <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code>, <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/validate_mnirs.html">validate_sample_rate()</a></code>.</li>
+<ul><li>Affects: <code><a href="../reference/filter_mnirs.html">filter_mnirs.smooth_spline()</a></code>, <code><a href="../reference/filter_mnirs.html">filter_mnirs.moving_average()</a></code>, <code><a href="../reference/parse_sample_rate.html">parse_sample_rate()</a></code> and <code>clean_invalid()</code> for <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code>, <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/validate_mnirs.html">validate_sample_rate()</a></code>.</li>
 </ul></li>
 <li>Add hidden <code>bypass_check</code> argument to reduce overhead from validation redundancy.
-<ul><li>Affects: <code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_missing()</a></code>, <code><a href="../reference/filter_moving_average.html">filter_moving_average()</a></code>, new functions <code><a href="../reference/rolling_slope.html">slope()</a></code>, <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>.</li>
+<ul><li>Affects: <code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_missing()</a></code>, <code><a href="../reference/filter_ma.html">filter_moving_average()</a></code>, new functions <code><a href="../reference/rolling_slope.html">slope()</a></code>, <code><a href="../reference/rolling_slope.html">rolling_slope()</a></code>.</li>
 </ul></li>
 <li>Update <code><a href="../reference/validate_mnirs.html">validate_numeric()</a></code> logic to reduce overhead.</li>
 </ul></div>

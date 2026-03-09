@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,7 +17,8 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -109,7 +110,28 @@ constant (<code>k = 1/tau</code>).</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/nls.html" class="external-link">nls</a></span><span class="op">(</span><span class="va">x</span> <span class="op">~</span> <span class="fu"><a href="SS_monoexp.html">SS_monoexp4</a></span><span class="op">(</span><span class="va">t</span>, <span class="va">A</span>, <span class="va">B</span>, <span class="va">tau</span>, <span class="va">TD</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">model</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Nonlinear regression model</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   model: x ~ SS_monoexp4(t, A, B, tau, TD)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    data: data</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       A       B     tau      TD </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  10.461 100.233   8.313  14.884 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  residual sum-of-squares: 455.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Number of iterations to convergence: 5 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Achieved convergence tolerance: 7.481e-07</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">data</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">y</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9] 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110 11.71031 21.74373</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17] 30.63994 38.52783 45.52169 51.72285 57.22115 62.09627 66.41882 70.25145</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [25] 73.64968 76.66275 79.33431 81.70306 83.80334 85.66557 87.31673 88.78074</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [33] 90.07881 91.22976 92.25026 93.15510 93.95737 94.66872 95.29944 95.85867</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [41] 96.35452 96.79416 97.18398 97.52961 97.83607 98.10780 98.34872 98.56234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [49] 98.75175 98.91969 99.06859 99.20062 99.31768 99.42148 99.51351 99.59511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [57] 99.66746 99.73161 99.78849 99.83892</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>

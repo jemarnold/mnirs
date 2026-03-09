@@ -131,33 +131,32 @@ preferred over `by`, and `width` will be preferred over `span`.
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>
-    shift_mnirs(
-        nirs_channels = list(smo2_right, smo2_left),
-        to = 0,            ## each channel will be shifted to zero
-        span = 120,        ## shift the mean of the first 120 sec
-        position = "first",
-        verbose = FALSE
+    shift_mnirs(           ## un-grouped nirs channels to shift separately 
+        nirs_channels = list(smo2_left, smo2_right), 
+        to = 0,            ## NIRS values will be shifted to zero
+        span = 120,        ## shift the *first* 120 sec of data to zero
+        position = "first"
     )
 
 data
 #> # A tibble: 2,203 × 3
-#>     time smo2_right smo2_left
-#>    <dbl>      <dbl>     <dbl>
-#>  1 0          -1.55     2.21 
-#>  2 0.400      -1.55     2.21 
-#>  3 0.960      -1.55     2.21 
-#>  4 1.51       -1.55     0.215
-#>  5 2.06       -1.55     0.215
-#>  6 2.61       -1.55     0.215
-#>  7 3.16       -1.55     0.215
-#>  8 3.71        1.45     1.21 
-#>  9 4.26        1.45     1.21 
-#> 10 4.81        1.45     1.21 
+#>     time smo2_left smo2_right
+#>    <dbl>     <dbl>      <dbl>
+#>  1 0         -1.55      2.21 
+#>  2 0.400     -1.55      2.21 
+#>  3 0.960     -1.55      2.21 
+#>  4 1.51      -1.55      0.215
+#>  5 2.06      -1.55      0.215
+#>  6 2.61      -1.55      0.215
+#>  7 3.16      -1.55      0.215
+#>  8 3.71       1.45      1.21 
+#>  9 4.26       1.45      1.21 
+#> 10 4.81       1.45      1.21 
 #> # ℹ 2,193 more rows
 
 # \donttest{

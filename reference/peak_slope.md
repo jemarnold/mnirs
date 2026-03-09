@@ -94,6 +94,11 @@ A named list containing:
 
   The index position of the peak slope.
 
+- `fitted`:
+
+  A numeric vector of predicted values from `x` over `t[window_idx]`
+  from the peak slope and intercept.
+
 - `window_idx`:
 
   An integer vector of indices for the peak slope window.
@@ -151,6 +156,9 @@ peak_slope(x, width = 5)
 #> $idx
 #> [1] 8
 #> 
+#> $fitted
+#> [1]  7.2  9.0 10.8 12.6 14.4
+#> 
 #> $window_idx
 #> [1]  6  7  8  9 10
 #> 
@@ -171,6 +179,9 @@ peak_slope(x_dec, width = 5)
 #> 
 #> $idx
 #> [1] 6
+#> 
+#> $fitted
+#> [1] 14.4 12.6 10.8  9.0  7.2
 #> 
 #> $window_idx
 #> [1] 4 5 6 7 8

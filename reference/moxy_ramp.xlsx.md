@@ -16,4 +16,4 @@ placed on bilateral vastus lateralis muscle sites. With data errors
 
 - `event_channel = c("Lap")`
 
-- `event_times = c(870)`
+- `reoxy_start_times = c(870)`

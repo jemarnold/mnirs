@@ -28,16 +28,25 @@ Clean, filter, and process data.
   [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
   [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
   : Replace outliers, invalid values, and missing values
+
 - [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
-  : Re-sample a data frame
+  :
+
+  Re-sample an *mnirs* data frame
+
 - [`filter_mnirs()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
   : Filter a data frame
+
 - [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md)
   : Apply a Butterworth digital filter
-- [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
+
+- [`filter_ma()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md)
+  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md)
   : Apply a moving average filter
+
 - [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md)
   : Shift data range
+
 - [`rescale_mnirs()`](https://jemarnold.github.io/mnirs/reference/rescale_mnirs.md)
   : Re-scale data range
 
@@ -49,6 +58,12 @@ Detect and extract intervals for further analysis
   :
 
   Extract intervals from *mnirs* data
+
+- [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md) :
+  Specify interval boundaries by time, label, lap, or sample
 
 ## Process kinetics
 
@@ -62,9 +77,10 @@ Estimate response dynamics and kinetic parameters
 - [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
   : Monoexponential function with 4 parameters
 
-## Plotting
+## Printing & plotting
 
-Tools for pretty plotting with [ggplot2](https://ggplot2.tidyverse.org).
+Tools for printing functions and pretty plotting with
+[ggplot2](https://ggplot2.tidyverse.org).
 
 - [`plot(`*`<mnirs>`*`)`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)
   :
@@ -102,8 +118,6 @@ Example data files included in the package
   : 0.5 Hz Moxy onboard export
 - [`train.red_intervals.csv`](https://jemarnold.github.io/mnirs/reference/train.red_intervals.csv.md)
   : 10 Hz Train.Red App export
-- [`vo2master.csv`](https://jemarnold.github.io/mnirs/reference/vo2master.csv.md)
-  : 1 Hz VO2master app recording from Moxy
 - [`artinis_intervals.xlsx`](https://jemarnold.github.io/mnirs/reference/artinis_intervals.xlsx.md)
   : 10 Hz Artinis Oxysoft export recorded with Oxymon MKIII
 - [`moxy_ramp.xlsx`](https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.md)

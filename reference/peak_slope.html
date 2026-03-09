@@ -9,7 +9,7 @@ slope within a numeric vector and returns regression parameters"><meta name="twi
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +19,8 @@ slope within a numeric vector and returns regression parameters"><meta name="twi
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -133,6 +134,10 @@ global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></
 <dt><code>idx</code></dt>
 <dd><p>The index position of the peak slope.</p></dd>
 
+<dt><code>fitted</code></dt>
+<dd><p>A numeric vector of predicted values from <code>x</code> over
+<code>t[window_idx]</code> from the peak slope and intercept.</p></dd>
+
 <dt><code>window_idx</code></dt>
 <dd><p>An integer vector of indices for the peak slope
 window.</p></dd>
@@ -185,6 +190,9 @@ with caution.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $idx</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fitted</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  7.2  9.0 10.8 12.6 14.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $window_idx</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1]  6  7  8  9 10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -205,6 +213,9 @@ with caution.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $idx</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $fitted</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14.4 12.6 10.8  9.0  7.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $window_idx</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 5 6 7 8</span>

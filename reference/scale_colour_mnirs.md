@@ -38,25 +38,18 @@ object.
 ## Examples
 
 ``` r
-# \donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE) &&
-        requireNamespace("scales", quietly = TRUE)) {
+## plot example data
+df <- read_mnirs(
+    file_path = example_mnirs("moxy_ramp"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
+    time_channel = c(time = "hh:mm:ss"),
+    verbose = FALSE
+)
 
-        ## plot example data
-        df <- read_mnirs(
-            file_path = example_mnirs("moxy_ramp"),
-            nirs_channels = c(smo2_right = "SmO2 Live",
-                              smo2_left = "SmO2 Live(2)"),
-            time_channel = c(time = "hh:mm:ss"),
-            verbose = FALSE
-        )
-
-        ggplot2::ggplot(df, ggplot2::aes(x = time)) +
-            theme_mnirs() +
-            scale_colour_mnirs(name = NULL) +
-            ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +
-            ggplot2::geom_line(ggplot2::aes(y = smo2_right, colour = "smo2_right"))
-    }
-
-# }
+ggplot2::ggplot(df, ggplot2::aes(x = time)) +
+    theme_mnirs() +
+    scale_colour_mnirs(name = NULL) +
+    ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +
+    ggplot2::geom_line(ggplot2::aes(y = smo2_right, colour = "smo2_right"))
 ```

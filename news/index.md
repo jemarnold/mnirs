@@ -1,5 +1,74 @@
 # Changelog
 
+## mnirs 0.5.0
+
+#### Updated core functions
+
+- [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+  expands `event_channel` to work with integer *“lap”* numbers, or
+  character event label as previous.
+
+  - Should now work on more .csv file formats; previously read errors
+    may have occured where the file contained header rows above the data
+    table, resulting in improper detection of columns.
+  - `event_channel` can now be specified as an integer `lap` column, in
+    addition to a character column as previous.
+  - Other {mnirs} functions may expect `event_channel` to be either
+    character or integer-ish.
+
+- [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  ***breaking change*** to argument specification:
+
+  - Function arguments `start` and `end` replace `event_times`,
+    `event_labels`, and `event_samples`. Allowing for more flexible and
+    more clear interval boundary specifications.
+  - Helper functions
+    [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+    [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+    [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
+    and
+    [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+    added to specify `start`/`end` values.
+  - Fix edge-cases where metadata were not returned as expected.
+
+- [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
+  now defaults to `method = "locf"` which is safer for more column types
+  where interpolation may not be appropriate (integer, discrete numeric,
+  character, factors, etc).
+
+- [`filter_ma()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md)
+  has been renamed from
+  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md).
+  The latter is kept as an alias of the former.
+
+- [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+  now returns a *“fitted”* vector with the linear regression predicted
+  values within the peak slope window.
+
+#### Updated articles
+
+- README:
+  - Add basic use covering
+    [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md).
+  - Add rough draft *{mnirs}* hex icon.
+- *“Reading and Cleaning Data with {mnirs}”* vignette:
+  - Add section: *“Detect and extract intervals”* covering
+    [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+    core functionality.
+- Rough draft at creating an {mnirs} cheatsheet.
+
+#### Documentation
+
+- Many function help documents re-written to be more readible.
+- Updated function examples with clearer conditions for CRAN submission.
+
+#### Example files
+
+- Update `train.red_intervals.csv` revert to include original onboard
+  smoothed and unfiltered NIRS channels.
+- Remove `vo2master.csv` from example data, as it is only used for
+  internal testing.
+
 ## mnirs 0.4.2
 
 - Update
@@ -124,7 +193,7 @@
     implementation across [mnirs](https://jemarnold.github.io/mnirs/),
     i.e. for `data.table::froll*` functions.
 - Fix
-  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
+  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md)
   to correctly identify windows where `partial = FALSE` was not met due
   to `NA`s.
 - Remove internal [roll](https://github.com/jasonjfoster/roll)
@@ -138,7 +207,7 @@
   [tidyselect](https://tidyselect.r-lib.org).
 - Update function documentation & examples, `README`, vignette.
 - Fix
-  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md)
+  [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md)
   and `rolling_mean()` to correctly use `partial` and `na.rm` arguments.
 - Fix
   [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md)
@@ -156,7 +225,7 @@
     `roll_median()` for
     [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
     `roll_mean()` for
-    [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md).
+    [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md).
   - May roll back in favour of `data.table::froll_*` when 1.17.99+ is
     updated on CRAN.
 - Update local rolling functions with
@@ -174,9 +243,7 @@
     [`filter_mnirs.smooth_spline()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md),
     [`filter_mnirs.moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md),
     [`parse_sample_rate()`](https://jemarnold.github.io/mnirs/reference/parse_sample_rate.md)
-    and
-    [`clean_invalid()`](https://jemarnold.github.io/mnirs/reference/clean_invalid.md)
-    for
+    and `clean_invalid()` for
     [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md),
     [`replace_mnirs()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
     [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md),
@@ -188,7 +255,7 @@
     [`replace_invalid()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
     [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
     [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md),
-    [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_moving_average.md),
+    [`filter_moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md),
     new functions
     [`slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
     [`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md).

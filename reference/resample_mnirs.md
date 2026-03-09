@@ -1,7 +1,7 @@
-# Re-sample a data frame
+# Re-sample an *mnirs* data frame
 
-Up- or down-sample the number of samples in an *"mnirs"* data frame
-using interpolation.
+Up- or down-sample an *"mnirs"* data frame to a new sample rate, filling
+new samples via nearest-neighbour matching or interpolation.
 
 ## Usage
 
@@ -11,7 +11,7 @@ resample_mnirs(
   time_channel = NULL,
   sample_rate = NULL,
   resample_rate = sample_rate,
-  method = c("linear", "locf", "none"),
+  method = c("locf", "linear", "none"),
   verbose = TRUE
 )
 ```
@@ -41,35 +41,35 @@ resample_mnirs(
 
 - resample_rate:
 
-  An *optional* numeric value indicating the desired output sample rate
-  (in Hz) to re-sample the data frame. The *default*
-  `resample_rate = sample_rate` will interpolate over missing and
-  repeated samples within the bounds of the existing data rounded to the
-  nearest value in Hz.
+  An *optional* sample rate (Hz) for the output data frame. If `NULL`
+  (*default*) resamples to the existing `sample_rate`, which regularises
+  any irregular samples without changing the rate.
 
 - method:
 
-  A character string indicating how to handle resampling (see *Details*
-  for more on each method):
-
-  `"linear"`
-
-  :   Re-samples and replaces `NA`s via linear interpolation (the
-      *default*) using
-      [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html).
+  A character string specifying how new samples are filled. Default is
+  *"locf"* (see *Details* for more on each method):
 
   `"locf"`
 
-  :   (*"Last observation carried forward"*). Re-samples and replaces
-      `NA`s with the most recent valid non-`NA` value to the left for
-      trailing samples or to the right for leading samples, using
+  :   (*"Last observation carried forward"*). Fills new and missing
+      samples with the most recent valid non-`NA` value to the left, or
+      the nearest valid value to the right for leading `NA`s. Safe for
+      numeric, integer, and character columns.
+
+  `"linear"`
+
+  :   Fills new and missing samples via linear interpolation using
       [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html).
+      Suitable for numeric columns only; non-numeric columns will fall
+      back to `"locf"` behaviour.
 
   `"none"`
 
-  :   Re-samples by matching values to their nearest value of
-      `time_channel`, *without* interpolating across new samples or
-      `NA`s in the original data frame.
+  :   Matches each new sample to the nearest original `time_channel`
+      value within half a sample-interval tolerance, without any
+      interpolation. New samples that fall between original values are
+      returned as `NA`.
 
 - verbose:
 
@@ -80,36 +80,51 @@ resample_mnirs(
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)
-of class *"mnirs"* with metadata available with
-[`attributes()`](https://rdrr.io/r/base/attributes.html).
+of class `"mnirs"`. Metadata are stored as attributes and can be
+accessed with `attributes(data)`.
 
 ## Details
 
 This function uses
 [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
 (based on [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html))
-to interpolate across new samples in the re-sampled data range.
+to interpolate across new samples in the resampled data range.
 
-`time_channel` and `sample_rate` can be retrieved automatically from
-`data` of class *"mnirs"* which has been processed with `{mnirs}`, if
-not defined explicitly.
+### Sample rate and time channel
+
+`time_channel` and `sample_rate` are retrieved automatically from `data`
+of class *"mnirs"* which has been processed with `{mnirs}`, if not
+defined explicitly.
 
 Otherwise, `sample_rate` will be estimated from the values in
 `time_channel`. However, this may return unexpected values, and it is
 safer to define `sample_rate` explicitly.
 
-The *default* setting `resample_rate = sample_rate` will interpolate
-over missing and repeated samples within the bounds of the existing data
-rounded to the nearest `sample_rate`.
+### Default behaviour
 
-By *default*, `method = "linear"` or `"locf"` will interpolate across
-`NA`s in the original data and any new samples between existing values
-of `time_channel` (see
+When `resample_rate` is omitted, the output has the same `sample_rate`
+as the input but with a regular, evenly-spaced `time_channel`. This is
+useful for regularising data that contains missing or repeated samples
+without changing the nominal rate.
+
+### Column handling
+
+Numeric columns are interpolated according to `method` (see
 [`?replace_missing`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)).
-Whereas `method = "none"` will match values of numeric columns from the
-original samples of `time_channel` to the new re-sampled samples,
-without interpolation. Meaning `NA`s in the original data and any new
-samples will be returned as `NA`.
+Non-numeric columns (character event labels, integer lap numbers) are
+always filled by last-observation-carried-forward, regardless of
+`method`:
+
+- When down-sampling, the first non-`NA` value in each output bin is
+  used.
+
+- When up-sampling or regularising, the most recent original value is
+  carried forward into new samples.
+
+- For `method = "none"`, existing rows are matched to the nearest
+  original values of `time_channel` without interpolation or filling,
+  meaning newly created samples and any `NA`s in the original data are
+  returned as `NA`.
 
 ## Examples
 
@@ -119,9 +134,15 @@ data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
     time_channel = c(time = "hh:mm:ss"),
-    verbose = FALSE
+    verbose = TRUE
 )
+#> ! Estimated `sample_rate` = 2 Hz.
+#> ℹ Define `sample_rate` explicitly to override.
+#> Warning: ! Duplicate or irregular `time_channel` samples detected.
+#> ℹ Investigate at `time` = 211.99 and 1184.
+#> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
+## note warning about irregular sampling
 data
 #> # A tibble: 2,203 × 2
 #>     time  smo2
@@ -139,14 +160,14 @@ data
 #> # ℹ 2,193 more rows
 
 data_resampled <- resample_mnirs(
-    data,              ## channels retrieved from metadata
-    resample_rate = 2, ## the default `resample_rate = sample_rate` will resample to sample_rate
-    method = "linear", ## linear interpolation across any new samples
-    verbose = TRUE     ## will confirm the output sample rate
+    data,
+    resample_rate = 2,  ## blank channels will be retrieved from metadata
+    method = "linear",  ## blank by default will resample to `sample_rate`
+    verbose = TRUE      ## linear interpolation across resampled indices
 )
 #> ℹ Output is resampled at 2 Hz.
 
-## note the altered "time" values
+## note the altered `time` values resolving the above warning
 data_resampled
 #> # A tibble: 2,419 × 2
 #>     time  smo2

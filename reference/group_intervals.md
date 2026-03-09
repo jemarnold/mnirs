@@ -10,7 +10,7 @@ group_intervals(
   nirs_channels,
   metadata,
   event_groups,
-  zero_time = TRUE,
+  zero_time = FALSE,
   verbose = TRUE
 )
 ```

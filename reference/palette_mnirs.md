@@ -30,14 +30,9 @@ Named or unnamed character vector of hex colours.
 ## Examples
 
 ``` r
-# \donttest{
-    if (requireNamespace("scales", quietly = TRUE)) {
-        scales::show_col(palette_mnirs())
-        scales::show_col(palette_mnirs(n = 2))
-        scales::show_col(palette_mnirs(names = c("red", "orange")))
-    }
+scales::show_col(palette_mnirs())
 
+scales::show_col(palette_mnirs(n = 2))
 
-
-# }
+scales::show_col(palette_mnirs(names = c("red", "orange")))
 ```

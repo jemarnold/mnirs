@@ -219,7 +219,7 @@ Then `NA`s will be preserved and passed through in the returned data.
 ## Examples
 
 ``` r
-## read example data
+## read example data and clean for outliers
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
@@ -233,16 +233,32 @@ data <- read_mnirs(
         verbose = FALSE
     )
 
+data
+#> # A tibble: 2,203 × 2
+#>     time  smo2
+#>    <dbl> <dbl>
+#>  1 0        54
+#>  2 0.400    54
+#>  3 0.960    54
+#>  4 1.51     54
+#>  5 2.06     54
+#>  6 2.61     54
+#>  7 3.16     54
+#>  8 3.71     57
+#>  9 4.26     57
+#> 10 4.81     57
+#> # ℹ 2,193 more rows
+
 data_filtered <- filter_mnirs(
-    data,
+    data,                   ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
-    order = 2,              ## order is the number of filter passes
-    W = 0.02,               ## fractional critical frequency
-    type = "low",           ## specify a low-pass filter
-    na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
-    verbose = FALSE
+    order = 2,              ## filter order number
+    W = 0.02,               ## filter fractional critical frequency `[0, 1]`
+    type = "low",           ## specify a "low-pass" filter
+    na.rm = TRUE            ## explicitly preserve NAs
 )
 
+## note the smoothed `smo2` values
 data_filtered
 #> # A tibble: 2,203 × 2
 #>     time  smo2
