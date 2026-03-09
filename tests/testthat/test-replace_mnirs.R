@@ -539,14 +539,6 @@ test_that("replace_missing() replaces NAs with span method", {
     )
 })
 
-test_that("replace_missing() replaces Inf and -Inf", {
-    skip("intentionally not replacing Inf")
-    x <- c(1, Inf, 3, -Inf, 5)
-    result <- replace_missing(x, method = "linear")
-    expect_equal(result, c(1, 2, 3, 4, 5))
-    expect_false(any(is.infinite(result)))
-})
-
 test_that("replace_missing() replaces NaN", {
     x <- c(1, NaN, 3, NaN, 5)
     result <- replace_missing(x, method = "linear")

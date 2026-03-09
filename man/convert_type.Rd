@@ -4,7 +4,7 @@
 \alias{convert_type}
 \title{Standardise comma decimals to periods in character columns}
 \usage{
-convert_type(data, time_channel)
+convert_type(data, time_channel, event_channel = NULL, verbose = TRUE)
 }
 \description{
 Standardise comma decimals to periods in character columns

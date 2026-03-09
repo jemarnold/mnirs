@@ -1,37 +1,48 @@
 #' Extract intervals from *{mnirs}* data
 #'
-#' Detect and extract intervals around specified events from *"mnirs"* time
-#' series data.
+#' Extract intervals from *"mnirs"* time series data, specifying interval
+#' start and end boundaries by time value, event label, lap number, or sample 
+#' index.
 #'
-#' @param data A data frame of class *"mnirs"* containing time series data and
-#'   metadata.
-#'
-#' @param nirs_channels A character vector or a `list()` of character vectors 
-#'   of mNIRS channel names to operate on within each interval (see *Details*). 
+#' @param nirs_channels A character vector or a `list()` of character vectors
+#'   of mNIRS channel names to operate on within each interval (see *Details*).
 #'   Names must match column names in `data` exactly.
-#'   - Only needs to be specified when `event_groups` contains *"ensemble"*-
+#'   - Must only be specified when `event_groups` contains *"ensemble"*-
 #'     averaged intervals. If `event_groups = "distinct"` no channel processing
 #'     occurs.
 #'   - If `NULL` (default), channels are retrieved from *"mnirs"* metadata.
 #'
 #' @param event_channel An *optional* character string giving the name of an
-#'   event/marker column to import. Required to specify `event_labels`. Must
-#'   match column names in `data` exactly. Retrieved from metadata if not
-#'   defined explicitly.
+#'   event/lap column. The column may contain character event labels or integer 
+#'   lap numbers. 
+#'   - Required when using [by_label()] or [by_lap()] for `start` or `end`.
+#'   - Retrieved from metadata if not defined explicitly.
 #'
 #' @param sample_rate An *optional* numeric sample rate (Hz) used to bin time
 #'   values for ensemble-averaging. If `NULL`, will be estimated from
 #'   `time_channel` (see *Details*).
 #'
-#' @param event_times A numeric vector of `time_channel` values indicating event
-#'   start times (see *Details*).
+#' @param start Specifies where intervals begin. Either raw values — numeric 
+#'   for time values, character for event labels, explicit integer (e.g. `2L`) 
+#'   for lap numbers — or created with [by_time()], [by_label()], [by_lap()],
+#'   or [by_sample()].
 #'
-#' @param event_labels A character vector of strings to match in
-#'   `event_channel`, indicating event starts. Matching is case-sensitive and
-#'   must match exactly.
+#' @param end Specifies where intervals end. Either raw values — numeric for 
+#'   time values, character for event labels, explicit integer (e.g. `2L`) 
+#'   for lap numbers — or created with [by_time()], [by_label()], [by_lap()],
+#'   or [by_sample()].
 #'
-#' @param event_samples an integer vector of sample indices (row numbers)
-#'   indicating event starts.
+#' @param span A one- or two-element numeric vector `c(before, after)` in units 
+#'   of `time_channel`, or a `list()` of such vectors. Applied additively to
+#'   interval boundaries:
+#'   - When both `start` and `end` are specified: `span[1]` shifts start times,
+#'     `span[2]` shifts end times.
+#'   - When only `start` or only `end` is specified: both `span[1]` and
+#'     `span[2]` apply as a window around the event).
+#'   - A single *positive* value is recycled to shift the end times (e.g. 
+#'     `span = 60` -> `c(0, 60)`).
+#'   - A single *negative* value is recycled to shift the start times (e.g. 
+#'     `span = -60` -> `c(-60, 0)`).
 #'
 #' @param event_groups Either a character string or a `list()` of integer
 #'   vectors specifying how to group intervals (see *Details*).
@@ -44,9 +55,6 @@
 #'     `nirs_channel` within each group and return one data frame per group.}
 #'   }
 #'
-#' @param span A `list()` of two-element numeric vectors specifying the window
-#'   around each event as `c(before, after)`, in units of `time_channel`.
-#'
 #' @param zero_time Logical. Default is `FALSE`. If `TRUE`, re-calculates
 #'   numeric `time_channel` values to start from zero within each interval
 #'   data frame.
@@ -54,19 +62,43 @@
 #' @inheritParams validate_mnirs
 #'
 #' @details
-#' ## Event specification
+#' ## Interval specification
 #'
-#' Interval events can be identified in three ways, in combination:
+#' Interval boundaries are specified using helper functions, or by passing
+#' raw values directly:
 #'
 #' \describe{
-#'   \item{`event_times`}{Numeric time valuess in units of `time_channel`.}
-#'   \item{`event_samples`}{Integer sample indices (row numbers).}
-#'   \item{`event_labels`}{Character strings to match exactly in
-#'   `event_channel`.}
+#'   \item{[by_time()] or numeric}{Time values in units of `time_channel`.}
+#'   \item{[by_label()] or character}{Strings to match in `event_channel`.
+#'   All matching occurrences are returned.}
+#'   \item{[by_lap()] or explicit integer (e.g. `2L`)}{Lap numbers to match
+#'   in `event_channel`. Resolves to the first sample of each lap for
+#'   `start`, and the last sample for `end`, or all samples of the lap if only 
+#'   one of either `start` or `end` is specified.}
+#'   \item{[by_sample()]}{Integer sample indices (row numbers).}
 #' }
 #'
-#' Events can be specified in any order, and will always be returned in the
-#' order in which they appear in `data`.
+#' Raw values supplied to `start`/`end` are auto-coerced: 
+#'   - Numeric → [by_time()]
+#'   - Character → [by_label()], 
+#'   - Explicit integer (e.g. `2L`) → [by_lap()]. 
+#'   - Use [by_sample()] explicitly for sample indices.
+#'
+#' `start` and `end` can use different specification types (e.g., start by
+#' label, end by time). When lengths differ, the shorter is recycled.
+#'
+#' ## The `span` window
+#'
+#' `span` applies an additive time shift to interval boundaries. A single
+#' numeric value is recycled: `span = 60` becomes `c(0, 60)` and
+#' `span = -60` becomes `c(-60, 0)`.
+#'
+#' - **`start` + `end`**: `span[1]` shifts starts, `span[2]` shifts ends.
+#'   For example, `start = by_time(30), end = by_time(60), span = c(-5, 10)`
+#'   gives an interval of `[25, 70]`.
+#' - **`start` only** or **`end` only**: both span values apply to the single
+#'   boundary, like a window around an event. For example,
+#'   `start = by_time(30), span = c(-5, 60)` gives `[25, 90]`.
 #'
 #' ## Per-interval `nirs_channels` for ensemble-averaging
 #'
@@ -81,29 +113,13 @@
 #'   c(A, C) ## channel "B" is excluded
 #' )
 #' ```
-#' 
-#' If all grouped intervals can include all `nirs_channels`, or if 
-#' `event_groups = "distinct"`, a single `nirs_channels` character vector can 
+#'
+#' If all grouped intervals can include all `nirs_channels`, or if
+#' `event_groups = "distinct"`, a single `nirs_channels` character vector can
 #' be supplied and recycled to all groups, or left as `NULL` for channels to
 #' be taken from *"mnirs"* metadata.
 #'
-#' ## Interval time `span` windows
-#'
-#' Each interval is defined relative to its event time in units of
-#' `time_channel` as `[event_times + before, event_times + after]`.
-#'
-#' - `before` is typically a negative value (window can extend before the
-#'   event).
-#' - `after` is typically a positive value (window can extend after the event).
-#' - Both values can be either positive or negative to reference an interval
-#'   window either completely before, or completely after the indicated event,
-#'   respectively.
-#'
-#' If an interval time span is partially out of bounds, available in-bounds
-#' data are returned with a warning. Interval time spans entirely out of bounds
-#' returns an error.
-#'
-#' ## Grouping events
+#' ## Grouping intervals
 #'
 #' `event_groups` controls whether extracted intervals are returned as distinct
 #' data frames or ensemble-averaged.
@@ -119,19 +135,15 @@
 #'    for each group. Any intervals detected but not specified in
 #'    `event_groups` are returned as distinct.}
 #' }
-#' 
-#' `event_groups` lists canned be named (e.g. 
-#' `list(low = c(1, 2), high = c(3, 4))`) and will pass those names to the 
-#' returned list of data frames. Otherwise, the return list will be named
-#' `c("interval_1", "interval_2")` etc. for distinct intervals; `"ensemble"`
-#' for ensemble-averaged; or `c("group_1_2", "group_3_4")` etc. for custom
-#' grouping structure.
+#'
+#' `event_groups` lists can be named (e.g.
+#' `list(low = c(1, 2), high = c(3, 4))`) and will pass those names to the
+#' returned list of data frames.
 #'
 #' When `event_groups` is a list of numeric interval numbers, list items in
 #' `nirs_channels` and `span` are recycled to the number of groups. If lists
-#' are only partially specified (if there are more intervals or groups detected
-#' than there are argument list items) The final argument item is recycled
-#' forward as needed. Extra argument items are ignored.
+#' are only partially specified, the final item is recycled forward as needed.
+#' Extra items are ignored.
 #'
 #' @returns A named `list()` of [tibbles][tibble::tibble-package] of class
 #'   *"mnirs"*, with metadata available via `attributes()`.
@@ -150,26 +162,14 @@
 #' ) |>
 #'     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 #'
-#' ## extract intervals as a list of data frames
-#' extract_intervals(
-#'     data,
-#'     nirs_channels = list(c(smo2_left, smo2_right)),
-#'     event_times = c(368, 1093), ## specify interval events
-#'     event_groups = "distinct",  ## return all unique intervals
-#'     span = list(c(-20, 90)),    ## specify the event start-end timespans
-#'     zero_time = TRUE,           ## start time from zero
-#'     verbose = FALSE
-#' )
-#'
 #' ## ensemble-average across multiple intervals
 #' interval_list <- extract_intervals(
-#'     data,
-#'     nirs_channels = list(c(smo2_left, smo2_right)),
-#'     event_times = c(368, 1093),
-#'     event_groups = "ensemble", ## return ensemble-averaged intervals
-#'     span = list(c(-20, 90)),
-#'     zero_time = TRUE,
-#'     verbose = FALSE
+#'     data,                       ## channels recycled to all intervals by default
+#'     nirs_channels = c(smo2_left, smo2_right),
+#'     start = by_time(368, 1093), ## manually identified interval start times
+#'     span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
+#'     event_groups = "ensemble",  ## ensemble-average across two intervals
+#'     zero_time = TRUE            ## re-calculate common time to start from `0`
 #' )
 #'
 #' interval_list[[1L]]
@@ -188,11 +188,10 @@ extract_intervals <- function(
     time_channel = NULL,
     event_channel = NULL,
     sample_rate = NULL,
-    event_times = NULL,
-    event_labels = NULL,
-    event_samples = NULL,
-    event_groups = list("distinct", "ensemble"),
-    span = list(c(-30, 180)),
+    start = NULL,
+    end = NULL,
+    span = list(c(-60, 60)),
+    event_groups = c("distinct", "ensemble"),
     zero_time = FALSE,
     verbose = TRUE
 ) {
@@ -210,40 +209,35 @@ extract_intervals <- function(
     sample_rate <- validate_sample_rate(
         data, time_channel, sample_rate, verbose
     )
-    ## validate `event_times` within bounds of `range(time_channel)`
-    time_range <- range(time_vec, na.rm = TRUE)
-    validate_numeric(
-        event_times,
-        range = time_range,
-        msg2 = paste0(
-            " within the range of `time_channel` = ",
-            col_blue('[', paste(time_range, collapse = ', '), ']'),
-            "."
-        )
-    )
-    ## validate `event_samples` within bounds of `nrow(data)`
-    sample_range <- c(1, length(time_vec))
-    validate_numeric(
-        event_samples,
-        integer = TRUE,
-        range = sample_range,
-        msg2 = paste0(
-            " within the nrows of `data` = ",
-            col_blue('[', paste(sample_range, collapse = ', '), ']'),
-            " samples"
-        )
-    )
 
-    ## if `event_labels` provided, `event_channel` must be provided
-    if (!is.null(event_labels)) {
+    ## coerce raw values to mnirs_interval objects
+    start <- as_mnirs_interval(start, "start")
+    end <- as_mnirs_interval(end, "end")
+
+    ## validate interval specs
+    if (is.null(c(start, end))) {
+        cli_abort(c(
+            "x" = "No interval specification provided.",
+            "i" = "Specify {.arg start} and/or {.arg end} using \\
+            {.fn by_time}, {.fn by_sample}, {.fn by_label}, or {.fn by_lap}."
+        ))
+    }
+
+    ## resolve event_channel if by_label or by_lap is used
+    uses_event_channel <- (
+        inherits(start, "mnirs_interval") && start$type %in% c("label", "lap")
+    ) || (
+        inherits(end, "mnirs_interval") && end$type %in% c("label", "lap")
+    )
+    if (uses_event_channel) {
         event_channel <- tryCatch(
             validate_event_channel(event_channel, data, required = TRUE),
             error = function(e) {
-                ## more informative error message when event_labels present
                 cli_abort(c(
                     "x" = "{.arg event_channel} is required when using \\
-                    {.arg event_labels}.",
-                    "i" = "Specify column name containing event labels."
+                    {.fn by_label} or {.fn by_lap}.",
+                    "i" = "Specify column name containing {.cls character} \\
+                    event labels or {.cls integer} lap numbers."
                 ))
             }
         )
@@ -255,23 +249,17 @@ extract_intervals <- function(
         event_vec <- NULL
     }
 
-    ## detect events ===========================================
-    ## return indices for each identified event
-    event_indices <- detect_events(
-        time_vec,
-        event_vec,
-        event_times,
-        event_labels,
-        event_samples,
-        verbose
-    )
-
     ## expand parameters ====================================
-    ## n_events accounts for grouping structure of identified events
-    n_events <- length(event_indices)
     event_groups <- make_list(event_groups)
+    span <- make_list(span)
+    span <- lapply(span, recycle_span)
 
-    ## validate params are lists and expand last to fill any missing events
+    ## resolve raw interval indices ============================
+    interval_idx <- resolve_interval(start, end, time_vec, event_vec)
+
+    n_events <- length(interval_idx$start_idx)
+
+    ## recycle params to match number of intervals
     nirs_channels <- recycle_param(
         nirs_channels,
         n_events,
@@ -280,26 +268,22 @@ extract_intervals <- function(
     )
     span <- recycle_param(span, n_events, event_groups, verbose)
 
-    ## specify interval metadata =======================================
-    ## return a data frame of metadata for each interval
-    interval_spec <- specify_intervals(
+    ## apply span and build interval spec ======================
+    interval_spec <- apply_span_to_indices(
+        interval_idx,
         time_vec,
-        event_indices,
-        span, ## as list
+        span,
         verbose
     )
 
     ## extract interval data ===================================
-    ## return a list of data frames for each interval
     interval_list <- extract_interval_list(
         data,
         interval_spec,
-        nirs_channels ## as list
+        nirs_channels
     )
 
     ## apply grouping logic ====================================
-    ## return a list of data frames according to grouping logic
-    ## where grouped intervals will be ensemble-averaged
     result <- group_intervals(
         interval_list,
         nirs_channels,
@@ -308,424 +292,6 @@ extract_intervals <- function(
         zero_time,
         verbose
     )
-
-    return(result)
-}
-
-
-#' Detect event indices
-#' @keywords internal
-detect_events <- function(
-    time_vec,
-    event_vec,
-    event_times,
-    event_labels,
-    event_samples,
-    verbose = TRUE
-) {
-    ## validate event_labels and match label indices
-    label_indices <- if (!is.null(event_labels)) {
-        matches <- grepl(paste(event_labels, collapse = "|"), event_vec)
-        ## if no indices returned for any of `event_labels`
-        if (verbose && !any(matches)) {
-            cli_warn(c(
-                "!" = "No events detected matching {.val {event_labels}}",
-                "i" = "Must match contents of {.arg event_channel} exactly."
-            ))
-        }
-        which(matches)
-    } else {
-        NULL
-    }
-
-    ## NULL if all NULL; integer(0) if all integer(0); numeric if any numeric
-    event_indices <- sort(unique(c(
-        event_samples,
-        ## lowest idx GTE event_times
-        findInterval(event_times, time_vec, left.open = TRUE) + 1L,
-        label_indices
-    )))
-
-    ## if no indices returned
-    if (length(event_indices) == 0) {
-        cli_abort(c(
-            "x" = "No events detected.",
-            "i" = "Provide {.arg event_times}, {.arg event_labels}, or \\
-            {.arg event_samples} within {.arg data}."
-        ))
-    }
-
-    return(event_indices)
-}
-
-
-#' Recycle parameter list to target length
-#' @keywords internal
-recycle_to_length <- function(
-    param,
-    n,
-    name = c("event", "group"),
-    verbose = TRUE
-) {
-    n_param <- length(param)
-
-    if (n_param == n) {
-        return(param)
-    }
-
-    if (n_param > n) {
-        if (verbose) {
-            cli_inform(c(
-                "!" = "{.arg {substitute(param)}} exceeds the number of \\
-                {name}s by {.val {n_param - n}}.",
-                "i" = "Extra values are ignored."
-            ))
-        }
-        return(param[seq_len(n)])
-    }
-
-    ## n_param < n:  recycle last element forward
-    if (verbose && n_param > 1L) {
-        cli_inform(c(
-            "i" = "{.arg {substitute(param)}} recycled to meet \\
-            {.val {n - n_param}} unspecified {name}{qty(n - n_param)}{?s}."
-        ))
-    }
-    return(param[c(seq_len(n_param), rep(n_param, n - n_param))])
-}
-
-
-#' Recycle parameter to match number of events
-#'
-#' Recycle an argument vector to a list or repeat the last list item to match
-#' the number of events.
-#'
-#' @keywords internal
-recycle_param <- function(param, n_events, event_groups, verbose = TRUE) {
-    ## flatten nested lists to single-depth list
-    param <- if (is.list(param)) {
-        lapply(param, \(.x) if (is.list(.x)) unlist(.x) else .x)
-    } else {
-        list(param)
-    }
-
-    ## custom grouping: recycle per group, then map to event order
-    if (is.numeric(event_groups[[1L]])) {
-        n_groups <- length(event_groups)
-        groups_unlisted <- unlist(event_groups)
-
-        ## recycle param to number of groups
-        param <- recycle_to_length(param, n_groups, "group", verbose)
-
-        ## create mapping:  event_id -> group_id
-        ## rep(1:n_groups, lengths(event_groups)) gives group index per event in event_groups
-        group_for_event <- rep(seq_len(n_groups), lengths(event_groups))
-
-        ## build lookup:  position i holds group index for event i (NA if ungrouped)
-        event_to_group <- integer(n_events)
-        valid_events <- groups_unlisted[groups_unlisted <= n_events]
-        valid_groups <- group_for_event[groups_unlisted <= n_events]
-        event_to_group[valid_events] <- valid_groups
-
-        ## fill ungrouped (zero) positions with last group index
-        event_to_group[event_to_group == 0L] <- n_groups
-
-        ## index into param by group assignment
-        return(param[event_to_group])
-    }
-
-    ## standard recycling for "distinct" or "ensemble"
-    recycle_to_length(param, n_events, "event", verbose)
-}
-
-
-#' Convert event indices and spans to interval specifications
-#' @keywords internal
-specify_intervals <- function(
-    time_vec,
-    event_indices,
-    span, ## as list
-    verbose = TRUE
-) {
-    n_obs <- length(time_vec)
-    span_before <- vapply(span, `[`, numeric(1), 1L)
-    span_after <- vapply(span, `[`, numeric(1), 2L)
-    event_times <- time_vec[event_indices]
-    ## calculate boundary times
-    start_times <- event_times + span_before ## negative span specifies before
-    end_times <- event_times + span_after
-    ## convert to boundary indices
-    start_idx <- findInterval(start_times, time_vec) ## greatest idx LTE start_times
-    end_idx <- findInterval(end_times, time_vec)
-
-    # Check for entirely out of bounds intervals
-    ## TODO also excludes intervals of 1 sample at start/end of data
-    entirely_oob <- end_idx <= 1L | start_idx >= n_obs
-
-    if (any(entirely_oob)) {
-        oob_ids <- which(entirely_oob)
-        n_oob <- qty(length(oob_ids))
-        cli_abort(c(
-            "x" = "{n_oob} Interval{?s} {.val {oob_ids}} {n_oob} {?is/are} \\
-            entirely outside data bounds.",
-            "i" = "Intervals must be specified within existing data bounds."
-        ))
-    }
-
-    ## check for partial bounds, only for alert info
-    partial_oob <- start_idx < 1L | end_idx > n_obs
-    if (verbose && any(partial_oob)) {
-        oob_ids <- which(partial_oob)
-        n_oob <- qty(length(oob_ids))
-        cli_warn(c(
-            "!" = "{n_oob} Interval{?s} {.val {oob_ids}} {n_oob} {?is/are} \\
-            partially outside data bounds.",
-            "i" = "Returning available data only."
-        ))
-    }
-
-    # Clip to valid range
-    start_idx <- pmax(1L, start_idx)
-    end_idx <- pmin(n_obs, end_idx)
-
-    interval_spec <- data.frame(
-        event_indices = event_indices,
-        event_times = event_times,
-        span_before = span_before,
-        span_after = span_after,
-        start_times = start_times,
-        end_times = end_times,
-        start_idx = start_idx,
-        end_idx = end_idx,
-        stringsAsFactors = FALSE
-    )
-
-    return(interval_spec)
-}
-
-
-#' Extract interval data by index
-#' @keywords internal
-extract_interval_list <- function(
-    data,
-    interval_spec,
-    nirs_channels ## as list
-) {
-    n_vec <- seq_len(nrow(interval_spec))
-    interval_list <- lapply(n_vec, \(.i) {
-        ## local indices for event
-        idx_range <- interval_spec$start_idx[.i]:interval_spec$end_idx[.i]
-        interval_data <- data[idx_range, , drop = FALSE]
-
-        ## return interval_data with metadata
-        create_mnirs_data(
-            interval_data,
-            nirs_channels = nirs_channels[[.i]], ## overwrite for interval data
-            event_times = interval_spec$event_times[.i],
-            interval_span = c(
-                interval_spec$span_before[.i],
-                interval_spec$span_after[.i]
-            )
-        )
-    })
-
-    names(interval_list) <- sprintf("interval_%d", n_vec)
-    return(interval_list)
-}
-
-
-#' Recalculate time_channel values with zero offset at event time (t0)
-#' @keywords internal
-zero_offset_data <- function(data, time_channel, t0) {
-    ## zero time channel to event_time `t0`
-    data[[time_channel]] <- data[[time_channel]] - t0
-    return(data)
-}
-
-
-#' Ensemble average multiple intervals
-#' @keywords internal
-ensemble_intervals <- function(
-    interval_list,
-    nirs_channels,
-    metadata,
-    verbose = TRUE
-) {
-    time_channel <- metadata$time_channel
-    sample_rate <- metadata$sample_rate
-    ## extract data & metadata from interval_list
-    interval_data <- lapply(interval_list, \(.df) {
-        event_time <- attr(.df, "event_times")
-        time_channel <- attr(.df, "time_channel")
-        ## return data & metadata from each interval
-        list(
-            ## ensemble-average time values makes no sense, so return zero-offset
-            data = zero_offset_data(.df, time_channel, event_time),
-            event_time = event_time,
-            interval_span = attr(.df, "interval_span")
-        )
-    })
-
-    ## stack interval data frames
-    df_long <- do.call(rbind, lapply(interval_data, `[[`, "data"))
-    ## resample times to nearest estimated sample rate for binned ensembling
-    time_resampled <- round(df_long[[time_channel]] * sample_rate) / sample_rate
-    ## split row indices by unique time
-    time_groups <- split(seq_len(nrow(df_long)), time_resampled)
-    unique_times <- as.numeric(names(time_groups))
-
-    ## warn if any time samples have only one value, implying irregular
-    ## samples and may result in alternating samples instead of ensemble-means
-    if (verbose && min(lengths(time_groups), na.rm = TRUE) < 2) {
-        cli_warn(c(
-            "!" = "Duplicate or irregular {.arg time_channel} samples \\
-            detected after ensemble-averaging.",
-            "i" = "Check your resulting data for inconsistent results.",
-            "i" = "Re-sample with {.fn mnirs::resample_mnirs}."
-        ))
-    }
-
-    col_n <- length(nirs_channels)
-    ## nirs_channel-wise means per unique time matrix operation
-    ## nirs_channel must be vectorised and exist in the interval_data
-    channel_matrix <- as.matrix(df_long[, nirs_channels, drop = FALSE])
-    result_matrix <- vapply(time_groups, \(.idx) {
-        colMeans(channel_matrix[.idx, , drop = FALSE], na.rm = TRUE)
-    }, numeric(col_n))
-
-    result <- data.frame(
-        setNames(list(unique_times), time_channel),
-        setNames(
-            as.data.frame(if (col_n == 1L) result_matrix else t(result_matrix)),
-            nirs_channels
-        )
-    )
-
-    ## add metadata
-    result <- create_mnirs_data(
-        result,
-        nirs_device = attr(df_long, "nirs_device"),
-        # nirs_channels = unique(c(metadata$nirs_channels, nirs_channels)),
-        nirs_channels = unique(nirs_channels),
-        time_channel = time_channel,
-        event_channel = attr(df_long, "event_channel"),
-        sample_rate = sample_rate,
-        event_times = lapply(interval_data, `[[`, "event_time"),
-        interval_span = lapply(interval_data, `[[`, "interval_span")
-    )
-
-    return(result)
-}
-
-
-#' Apply grouping to intervals
-#' @keywords internal
-group_intervals <- function(
-    interval_list,
-    nirs_channels,
-    metadata,
-    event_groups,
-    zero_time = TRUE,
-    verbose = TRUE
-) {
-    time_channel <- metadata$time_channel
-    n_intervals <- length(interval_list)
-
-    ## return distinct intervals
-    if (n_intervals == 1L || event_groups[[1L]][1L] == "distinct") {
-        result <- lapply(interval_list, \(.df) {
-            if (zero_time) {
-                event_time <- attr(.df, "event_times")
-                .df <- zero_offset_data(.df, time_channel, event_time)
-            }
-
-            create_mnirs_data(
-                .df,
-                nirs_device = metadata$nirs_device,
-                nirs_channels = unique(attr(.df, "nirs_channels")),
-                time_channel = time_channel,
-                event_channel = metadata$event_channel,
-                sample_rate = metadata$sample_rate,
-                event_times = attr(.df, "event_time"),
-                interval_span = attr(.df, "interval_span")
-            )
-        })
-
-        return(result)
-    }
-
-    ## return ensembled intervals
-    if (event_groups[[1L]][1L] == "ensemble") {
-        all_nirs <- unique(unlist(nirs_channels))
-        result <- list(
-            ensemble = ensemble_intervals(
-                interval_list,
-                nirs_channels = all_nirs,
-                metadata,
-                verbose
-            )
-        )
-        # attributes(result[[1]])
-        return(result)
-    }
-
-    ## custom grouping ===================================
-    ## find ungrouped intervals
-    grouped_ids <- unlist(event_groups)
-    ungrouped_ids <- setdiff(seq_len(n_intervals), grouped_ids)
-
-    ## add ungrouped ids as individual groups and fuzzy sort list
-    if (length(ungrouped_ids) > 0) {
-        event_groups <- c(event_groups, as.list(ungrouped_ids))
-        event_groups <- event_groups[
-            order(vapply(event_groups, \(.x) {
-                median(.x, na.rm = TRUE)
-            }, FUN.VALUE = numeric(1))) ## TODO confirm length == 0 always
-        ]
-        if (verbose) {
-            cli_inform(c(
-                "!" = "Intervals detected not in {.arg event_groups}.",
-                "i" = "Ungrouped intervals included as discrete."
-            ))
-        }
-    }
-
-    ## check and warn for duplicated intervals in groups
-    dup <- grouped_ids[duplicated(grouped_ids)]
-    if (verbose && length(dup) > 0) {
-        cli_warn(c(
-            "!" = "Duplicates detected of {qty(length(dup))} \\
-            interval{?s} {.val {dup}}.",
-            "i" = "Re-specify {.arg event_groups} to remove duplicates."
-        ))
-    }
-
-    ## process by group
-    result <- lapply(event_groups, \(.g) {
-        if (length(.g) == 1L) {
-            ## single interval return as-is
-            df <- interval_list[[.g]]
-            if (zero_time) {
-                event_time <- attr(df, "event_times")
-                df <- zero_offset_data(df, time_channel, event_time)
-            }
-            df
-        } else {
-            ## return ensembled intervals
-            group_nirs <- unique(unlist(nirs_channels[.g]))
-            ensemble_intervals(
-                interval_list[.g],
-                nirs_channels = group_nirs,
-                metadata,
-                verbose
-            )
-        }
-    })
-
-    ## TODO do I want to name by interval or by group?
-    names(result) <- vapply(event_groups, \(.g) {
-        paste0("interval_", paste(.g, collapse = "_"))
-    }, character(1))
 
     return(result)
 }

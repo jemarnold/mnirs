@@ -110,7 +110,7 @@
 #'   available with `attributes()`.
 #'
 #' @examples
-#' ## read example data
+#' ## read example data and clean for outliers
 #' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2 = "SmO2 Live"),
@@ -123,17 +123,19 @@
 #'         width = 10,
 #'         verbose = FALSE
 #'     )
+#' 
+#' data
 #'
 #' data_filtered <- filter_mnirs(
-#'     data,
+#'     data,                   ## blank channels will be retrieved from metadata
 #'     method = "butterworth", ## Butterworth digital filter is a common choice
-#'     order = 2,              ## order is the number of filter passes
-#'     W = 0.02,               ## fractional critical frequency
-#'     type = "low",           ## specify a low-pass filter
-#'     na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
-#'     verbose = FALSE
+#'     order = 2,              ## filter order number
+#'     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
+#'     type = "low",           ## specify a "low-pass" filter
+#'     na.rm = TRUE            ## explicitly preserve NAs
 #' )
 #' 
+#' ## note the smoothed `smo2` values
 #' data_filtered
 #'
 #' \donttest{
@@ -168,7 +170,16 @@ filter_mnirs <- function(
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
-    method <- match.arg(method)
+    ## using method aliases 
+    method <- match.arg(method, c(
+        "smooth_spline", "butterworth", "moving_average", "spline", "ma"
+    ))
+    method <- switch(
+        method,
+        spline = "smooth_spline",
+        ma = "moving_average",
+        method
+    )
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
@@ -378,7 +389,7 @@ filter_mnirs.moving_average <- function(
     time_vec <- data[[time_channel]]
 
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_moving_average(
+        filter_ma(
             x = .x,
             t = time_vec,
             width = width,
@@ -398,7 +409,8 @@ filter_mnirs.moving_average <- function(
 
 #' Apply a moving average filter
 #'
-#' Apply a simple moving average smoothing filter to vector data
+#' Apply a simple moving average smoothing filter to vector data.
+#' `filter_moving_average()` is an alias of `filter_ma()`.
 #'
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
@@ -418,22 +430,29 @@ filter_mnirs.moving_average <- function(
 #'
 #' @returns A numeric vector the same length as `x`.
 #'
-#' @seealso [zoo::rollmean()]
-#'
 #' @examples
-#' ## basic moving average with sample width
 #' x <- c(1, 3, 2, 5, 4, 6, 5, 7)
-#' filter_moving_average(x, width = 3)
+#' t <- c(0, 1, 2, 4, 5, 6, 7, 10)  ## irregular time with gaps
 #'
-#' ## with explicit time vector
-#' t <- c(0, 1, 2, 3, 4, 5, 6, 7)
-#' filter_moving_average(x, t, width = 2)
+#' ## width: centred window of 3 samples
+#' filter_ma(x, width = 3)
 #'
-#' ## using timespan instead of sample width
-#' filter_moving_average(x, span = 2)
+#' ## partial = TRUE fills edge values with a narrower window
+#' filter_ma(x, width = 3, partial = TRUE)
 #'
+#' ## span: centred window of 2 time-units (accounts for irregular sampling)
+#' filter_ma(x, t, span = 2)
+#'
+#' ## na.rm = FALSE (default): any NA in the window propagates to the result
+#' x_na <- c(1, NA, 3, 4, 5, NA, 7, 8)
+#' filter_ma(x_na, width = 3)
+#'
+#' ## na.rm = TRUE: skip NAs within the window and return the mean of valid values
+#' filter_ma(x_na, width = 3, partial = TRUE, na.rm = TRUE)
+#'
+#' @rdname filter_ma
 #' @export
-filter_moving_average <- function(
+filter_ma <- function(
     x,
     t = seq_along(x),
     width = NULL,
@@ -471,7 +490,7 @@ filter_moving_average <- function(
     if (verbose && all(is.na(window_idx))) {
         cli_warn(c(
             "!" = "Less than {.val {min_obs}} valid samples detected in \\
-            {.fn filter_moving_average} windows.",
+            {.fn filter_ma} windows.",
             "i" = "Specify {.arg width} >= {.val {2}} or increase \\
             {.arg span} to include more samples."
         ))
@@ -482,6 +501,31 @@ filter_moving_average <- function(
     ## NaN to NA
     y[!is.finite(y)] <- NA_real_
     return(y)
+}
+
+
+#' @rdname filter_ma
+#' @export
+filter_moving_average <- function(
+    x,
+    t = seq_along(x),
+    width = NULL,
+    span = NULL,
+    partial = FALSE,
+    na.rm = FALSE,
+    verbose = TRUE,
+    ...
+) {
+    filter_ma(
+        x = x,
+        t = t,
+        width = width,
+        span = span,
+        partial = partial,
+        na.rm = na.rm,
+        verbose = verbose,
+        ...
+    )
 }
 
 
@@ -539,33 +583,30 @@ filter_moving_average <- function(
 #' sin <- sin(2 * pi * 1:150 / 50) * 20 + 40
 #' noise <- rnorm(150, mean = 0, sd = 6)
 #' noisy_sin <- sin + noise
-#' filt_without_edge <- filter_butter(
+#' without_edge_detection <- filter_butter(
 #'     x = noisy_sin,
 #'     order = 2,
 #'     W = 0.1,
 #'     edges = "none"
 #' )
-#' filt_with_edge <- filter_butter(
+#' with_edge_detection <- filter_butter(
 #'     x = noisy_sin,
 #'     order = 2,
 #'     W = 0.1,
 #'     edges = "rep1"
 #' )
 #'
-#' \donttest{
-#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
-#'         ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
-#'             theme_mnirs() +
-#'             scale_colour_mnirs(name = NULL) +
-#'             ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
-#'             ggplot2::geom_line(
-#'                 ggplot2::aes(y = filt_without_edge, colour = "filt_without_edge")
-#'             ) +
-#'             ggplot2::geom_line(
-#'                 ggplot2::aes(y = filt_with_edge, colour = "filt_with_edge")
-#'             )
-#'     }
-#' }
+#' @examplesIf rlang::is_installed("ggplot2")
+#' ggplot2::ggplot(data.frame(), ggplot2::aes(x = seq_along(noise))) +
+#'     theme_mnirs() +
+#'     scale_colour_mnirs(name = NULL) +
+#'     ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
+#'     ggplot2::geom_line(
+#'         ggplot2::aes(y = without_edge_detection, colour = "without_edge_detection")
+#'     ) +
+#'     ggplot2::geom_line(
+#'         ggplot2::aes(y = with_edge_detection, colour = "with_edge_detection")
+#'     )
 #'
 #' @export
 filter_butter <- function(

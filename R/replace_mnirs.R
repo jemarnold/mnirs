@@ -65,9 +65,9 @@
 #' @examples
 #' ## vectorised operation
 #' x <- c(1, 999, 3, 4, 999, 6)
-#' replace_invalid(x, invalid_values = 999, width = 2, method = "median")
+#' replace_invalid(x, invalid_values = 999, width = 3, method = "median")
 #'
-#' (x_na <- replace_outliers(x, outlier_cutoff = 3, width = 2, method = "none"))
+#' (x_na <- replace_outliers(x, outlier_cutoff = 3, width = 3, method = "none"))
 #'
 #' replace_missing(x_na, method = "linear")
 #'
@@ -81,22 +81,18 @@
 #'
 #' ## clean data
 #' data_clean <- replace_mnirs(
-#'     data,
-#'     nirs_channels = NULL, ## nirs_channels will be retrieved from metadata
-#'     time_channel = NULL,  ## retrieved from metadata
-#'     invalid_values = 0,   ## known invalid values in the data
-#'     invalid_above = 90,   ## remove data spikes
-#'     outlier_cutoff = 3,   ## recommended default value
-#'     width = 10,           ## window to detect local outliers
-#'     method = "linear",    ## linear interpolation over `NA`s
-#'     verbose = FALSE
+#'     data,               ## blank channels will be retrieved from metadata
+#'     invalid_values = 0, ## known invalid values in the data
+#'     invalid_above = 90, ## remove data spikes above 90
+#'     outlier_cutoff = 3, ## recommended default value
+#'     width = 10,         ## window to detect and replace outliers/missing values
+#'     method = "linear"   ## linear interpolation over `NA`s
 #' )
-#' 
-#' data_clean
 #' 
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {
 #'         ## plot original and show where values have been replaced
+#'         ## ignore warning about replacing the existing colour scale
 #'         plot(data, time_labels = TRUE) +
 #'             ggplot2::scale_colour_manual(
 #'                 name = NULL,
@@ -235,7 +231,8 @@ replace_mnirs <- function(
 #'   values themselves.
 #'
 #' @returns
-#' Vectorised `replace_*()` return a numeric vector the same length as `x`.
+#' `replace_invalid()` return a numeric vector the same length as `x` with
+#' invalid values replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 2
@@ -341,6 +338,10 @@ replace_invalid <- function(
 #'   A low `outlier_cutoff` will declare more points to be outliers.
 #'   `outlier_cutoff = 3` corresponds to Pearson's 3 sigma edit rule.
 #'   `outlier_cutoff = 0` corresponds to Tukey's median filter.
+#' 
+#' @returns
+#' `replace_outliers()` return a numeric vector the same length as `x` with
+#' local outliers replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 3
@@ -371,8 +372,9 @@ replace_outliers <- function(
 
     ## process =====================================================
     window_idx <- compute_local_windows(t, width = width, span = span)
-    local_medians <- compute_local_fun(x, window_idx, median, na.rm = TRUE)
-    is_outlier <- compute_outliers(x, window_idx, local_medians, outlier_cutoff)
+    outlier_stats <- compute_outliers(x, window_idx, outlier_cutoff)
+    local_medians <- outlier_stats$local_medians
+    is_outlier <- outlier_stats$is_outlier
     outlier_length <- length(is_outlier)
     
     ## TODO immature, need way to specify name of channels being replaced
@@ -420,6 +422,10 @@ replace_outliers <- function(
 #'   leading and trailing `NA`s). If there are no valid values within either
 #'   side of `span`, the first valid sample on either side will be used (i.e.
 #'   equivalent to `replace_missing(x, width = 1)`).
+#' 
+#' @returns
+#' `replace_missing()` return a numeric vector the same length as `x` with
+#' missing values replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 4

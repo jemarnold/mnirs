@@ -10,11 +10,10 @@ extract_intervals(
   time_channel = NULL,
   event_channel = NULL,
   sample_rate = NULL,
-  event_times = NULL,
-  event_labels = NULL,
-  event_samples = NULL,
-  event_groups = list("distinct", "ensemble"),
-  span = list(c(-30, 180)),
+  start = NULL,
+  end = NULL,
+  span = list(c(-60, 60)),
+  event_groups = c("distinct", "ensemble"),
   zero_time = FALSE,
   verbose = TRUE
 )
@@ -27,7 +26,7 @@ metadata.}
 of mNIRS channel names to operate on within each interval (see \emph{Details}).
 Names must match column names in \code{data} exactly.
 \itemize{
-\item Only needs to be specified when \code{event_groups} contains \emph{"ensemble"}-
+\item Must only be specified when \code{event_groups} contains \emph{"ensemble"}-
 averaged intervals. If \code{event_groups = "distinct"} no channel processing
 occurs.
 \item If \code{NULL} (default), channels are retrieved from \emph{"mnirs"} metadata.
@@ -41,23 +40,40 @@ used.
 }}
 
 \item{event_channel}{An \emph{optional} character string giving the name of an
-event/marker column to import. Required to specify \code{event_labels}. Must
-match column names in \code{data} exactly. Retrieved from metadata if not
-defined explicitly.}
+event/lap column. The column may contain character event labels or integer
+lap numbers.
+\itemize{
+\item Required when using \code{\link[=by_label]{by_label()}} or \code{\link[=by_lap]{by_lap()}} for \code{start} or \code{end}.
+\item Retrieved from metadata if not defined explicitly.
+}}
 
 \item{sample_rate}{An \emph{optional} numeric sample rate (Hz) used to bin time
 values for ensemble-averaging. If \code{NULL}, will be estimated from
 \code{time_channel} (see \emph{Details}).}
 
-\item{event_times}{A numeric vector of \code{time_channel} values indicating event
-start times (see \emph{Details}).}
+\item{start}{Specifies where intervals begin. Either raw values — numeric
+for time values, character for event labels, explicit integer (e.g. \code{2L})
+for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
+or \code{\link[=by_sample]{by_sample()}}.}
 
-\item{event_labels}{A character vector of strings to match in
-\code{event_channel}, indicating event starts. Matching is case-sensitive and
-must match exactly.}
+\item{end}{Specifies where intervals end. Either raw values — numeric for
+time values, character for event labels, explicit integer (e.g. \code{2L})
+for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
+or \code{\link[=by_sample]{by_sample()}}.}
 
-\item{event_samples}{an integer vector of sample indices (row numbers)
-indicating event starts.}
+\item{span}{A one- or two-element numeric vector \code{c(before, after)} in units
+of \code{time_channel}, or a \code{list()} of such vectors. Applied additively to
+interval boundaries:
+\itemize{
+\item When both \code{start} and \code{end} are specified: \code{span[1]} shifts start times,
+\code{span[2]} shifts end times.
+\item When only \code{start} or only \code{end} is specified: both \code{span[1]} and
+\code{span[2]} apply as a window around the event).
+\item A single \emph{positive} value is recycled to shift the end times (e.g.
+\code{span = 60} -> \code{c(0, 60)}).
+\item A single \emph{negative} value is recycled to shift the start times (e.g.
+\code{span = -60} -> \code{c(-60, 0)}).
+}}
 
 \item{event_groups}{Either a character string or a \code{list()} of integer
 vectors specifying how to group intervals (see \emph{Details}).
@@ -69,9 +85,6 @@ all detected intervals, returning a single data frame.}
 \item{\code{list(c(1, 2), c(3, 4))}}{Ensemble-average each specified
 \code{nirs_channel} within each group and return one data frame per group.}
 }}
-
-\item{span}{A \code{list()} of two-element numeric vectors specifying the window
-around each event as \code{c(before, after)}, in units of \code{time_channel}.}
 
 \item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-calculates
 numeric \code{time_channel} values to start from zero within each interval
@@ -86,23 +99,52 @@ A named \code{list()} of \link[tibble:tibble-package]{tibbles} of class
 \emph{"mnirs"}, with metadata available via \code{attributes()}.
 }
 \description{
-Detect and extract intervals around specified events from \emph{"mnirs"} time
-series data.
+Extract intervals from \emph{"mnirs"} time series data, specifying interval
+start and end boundaries by time value, event label, lap number, or sample
+index.
 }
 \details{
-\subsection{Event specification}{
+\subsection{Interval specification}{
 
-Interval events can be identified in three ways, in combination:
+Interval boundaries are specified using helper functions, or by passing
+raw values directly:
 
 \describe{
-\item{\code{event_times}}{Numeric time valuess in units of \code{time_channel}.}
-\item{\code{event_samples}}{Integer sample indices (row numbers).}
-\item{\code{event_labels}}{Character strings to match exactly in
-\code{event_channel}.}
+\item{\code{\link[=by_time]{by_time()}} or numeric}{Time values in units of \code{time_channel}.}
+\item{\code{\link[=by_label]{by_label()}} or character}{Strings to match in \code{event_channel}.
+All matching occurrences are returned.}
+\item{\code{\link[=by_lap]{by_lap()}} or explicit integer (e.g. \code{2L})}{Lap numbers to match
+in \code{event_channel}. Resolves to the first sample of each lap for
+\code{start}, and the last sample for \code{end}, or all samples of the lap if only
+one of either \code{start} or \code{end} is specified.}
+\item{\code{\link[=by_sample]{by_sample()}}}{Integer sample indices (row numbers).}
 }
 
-Events can be specified in any order, and will always be returned in the
-order in which they appear in \code{data}.
+Raw values supplied to \code{start}/\code{end} are auto-coerced:
+\itemize{
+\item Numeric → \code{\link[=by_time]{by_time()}}
+\item Character → \code{\link[=by_label]{by_label()}},
+\item Explicit integer (e.g. \code{2L}) → \code{\link[=by_lap]{by_lap()}}.
+\item Use \code{\link[=by_sample]{by_sample()}} explicitly for sample indices.
+}
+
+\code{start} and \code{end} can use different specification types (e.g., start by
+label, end by time). When lengths differ, the shorter is recycled.
+}
+
+\subsection{The \code{span} window}{
+
+\code{span} applies an additive time shift to interval boundaries. A single
+numeric value is recycled: \code{span = 60} becomes \code{c(0, 60)} and
+\code{span = -60} becomes \code{c(-60, 0)}.
+\itemize{
+\item \strong{\code{start} + \code{end}}: \code{span[1]} shifts starts, \code{span[2]} shifts ends.
+For example, \verb{start = by_time(30), end = by_time(60), span = c(-5, 10)}
+gives an interval of \verb{[25, 70]}.
+\item \strong{\code{start} only} or \strong{\code{end} only}: both span values apply to the single
+boundary, like a window around an event. For example,
+\verb{start = by_time(30), span = c(-5, 60)} gives \verb{[25, 90]}.
+}
 }
 
 \subsection{Per-interval \code{nirs_channels} for ensemble-averaging}{
@@ -124,25 +166,7 @@ be supplied and recycled to all groups, or left as \code{NULL} for channels to
 be taken from \emph{"mnirs"} metadata.
 }
 
-\subsection{Interval time \code{span} windows}{
-
-Each interval is defined relative to its event time in units of
-\code{time_channel} as \verb{[event_times + before, event_times + after]}.
-\itemize{
-\item \code{before} is typically a negative value (window can extend before the
-event).
-\item \code{after} is typically a positive value (window can extend after the event).
-\item Both values can be either positive or negative to reference an interval
-window either completely before, or completely after the indicated event,
-respectively.
-}
-
-If an interval time span is partially out of bounds, available in-bounds
-data are returned with a warning. Interval time spans entirely out of bounds
-returns an error.
-}
-
-\subsection{Grouping events}{
+\subsection{Grouping intervals}{
 
 \code{event_groups} controls whether extracted intervals are returned as distinct
 data frames or ensemble-averaged.
@@ -159,18 +183,14 @@ for each group. Any intervals detected but not specified in
 \code{event_groups} are returned as distinct.}
 }
 
-\code{event_groups} lists canned be named (e.g.
+\code{event_groups} lists can be named (e.g.
 \code{list(low = c(1, 2), high = c(3, 4))}) and will pass those names to the
-returned list of data frames. Otherwise, the return list will be named
-\code{c("interval_1", "interval_2")} etc. for distinct intervals; \code{"ensemble"}
-for ensemble-averaged; or \code{c("group_1_2", "group_3_4")} etc. for custom
-grouping structure.
+returned list of data frames.
 
 When \code{event_groups} is a list of numeric interval numbers, list items in
 \code{nirs_channels} and \code{span} are recycled to the number of groups. If lists
-are only partially specified (if there are more intervals or groups detected
-than there are argument list items) The final argument item is recycled
-forward as needed. Extra argument items are ignored.
+are only partially specified, the final item is recycled forward as needed.
+Extra items are ignored.
 }
 }
 \examples{
@@ -187,26 +207,14 @@ data <- read_mnirs(
 ) |>
     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
 
-## extract intervals as a list of data frames
-extract_intervals(
-    data,
-    nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093), ## specify interval events
-    event_groups = "distinct",  ## return all unique intervals
-    span = list(c(-20, 90)),    ## specify the event start-end timespans
-    zero_time = TRUE,           ## start time from zero
-    verbose = FALSE
-)
-
 ## ensemble-average across multiple intervals
 interval_list <- extract_intervals(
-    data,
-    nirs_channels = list(c(smo2_left, smo2_right)),
-    event_times = c(368, 1093),
-    event_groups = "ensemble", ## return ensemble-averaged intervals
-    span = list(c(-20, 90)),
-    zero_time = TRUE,
-    verbose = FALSE
+    data,                       ## channels recycled to all intervals by default
+    nirs_channels = c(smo2_left, smo2_right),
+    start = by_time(368, 1093), ## manually identified interval start times
+    span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
 interval_list[[1L]]

@@ -355,7 +355,7 @@ test_that("rolling_slope calculates invalid", {
 
 test_that("rolling_slope handles NaN & Inf", {
     x <- c(1, 2, NaN, 4, 5, Inf, 7, 8)
-    ## ! reconcile different results between methods
+    ## reconcile different results between methods?
     ## differences are that centred `span` is divided by two
     ## so 2/1 = ±1 sample on each side
     ## whereas `width` is left-biased forward looking c(idx, idx+1)
@@ -582,7 +582,10 @@ test_that("peak_slope returns correct structure", {
     result <- peak_slope(x, width = 5)
 
     expect_type(result, "list")
-    expect_named(result, c("slope", "intercept", "y", "t", "idx", "window_idx"))
+    expect_named(
+        result,
+        c("slope", "intercept", "y", "t", "idx", "fitted", "window_idx")
+    )
     expect_type(result$slope, "double")
     expect_type(result$intercept, "double")
     expect_type(result$y, "double")
@@ -759,6 +762,30 @@ test_that("peak_slope verbose messages work", {
 })
 
 
+test_that("peak_slope fitted values match window", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+    t <- seq_along(x)
+
+    results_df <- peak_slope(x, t, width = 5)
+
+    fitted <- results_df$fitted
+    window_idx <- results_df$window_idx
+
+    expect_length(fitted, length(window_idx))
+
+    # Verify fitted values match slope * t + intercept
+    expect_equal(
+        fitted,
+        results_df$intercept + results_df$slope * t[window_idx]
+    )
+    ## verify fitted values match lm predictions
+    expect_equal(
+        fitted,
+        predict(lm(x[window_idx] ~ t[window_idx])),
+        ignore_attr = TRUE
+    )
+})
+
 ## integration ============================================================
 test_that("rolling_slope works visually", {
     # x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
@@ -821,8 +848,8 @@ test_that("rolling_slope works visually", {
     #     })
 })
 
-test_that("rolling_slope works on example_mnirs() data", {
-    skip("rolling_slope visual checks")
+test_that("rolling_slope works visually on example_mnirs() data", {
+    skip("visual check for rolling_slope")
 
     data <- read_mnirs(
         example_mnirs("moxy_ramp"),

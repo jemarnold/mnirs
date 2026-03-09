@@ -90,7 +90,7 @@ column. Must match a column name in \code{data} exactly.
 used.
 }}
 
-\item{event_channel}{A character string giving the name of the event/marker
+\item{event_channel}{A character string giving the name of the event/lap
 column. Must match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{event_channel} metadata attribute of \code{data} is

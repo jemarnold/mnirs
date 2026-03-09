@@ -755,8 +755,8 @@ test_that("shift_mnirs works on Train.Red", {
         nirs_channels = c(
             smo2_left = "SmO2 unfiltered",
             smo2_right = "SmO2 unfiltered",
-            dhb_left = "HBDiff unfiltered",
-            dhb_right = "HBDiff unfiltered"
+            o2hb_left = "O2HB unfiltered",
+            o2hb_right = "O2HB unfiltered"
         ),
         time_channel = c(time = "Timestamp (seconds passed)"),
         verbose = FALSE
@@ -767,14 +767,16 @@ test_that("shift_mnirs works on Train.Red", {
         nirs_channels = list(
             "smo2_left",
             "smo2_right",
-            c("dhb_left", "dhb_right")
+            c("o2hb_left", "o2hb_right")
         ),
         time_channel = NULL,
         to = 0,
         by = NULL,
-        span = 0,
-        position = c("min", "max", "first")
+        span = 0, ## should default to 1 sample?
+        position = "min"
     )
+
+    data$time[which(diff(data$time) < 0)]
 
     # plot(data) + ggplot2::ylim(0, 100)
     # plot(data_shifted) + ggplot2::ylim(0, 100) + geom_hline(yintercept = c(0))
@@ -782,12 +784,12 @@ test_that("shift_mnirs works on Train.Red", {
     ## check grouping together: min value should come from each group
     expect_true(any(data_shifted$smo2_left == 0, na.rm = TRUE))
     expect_true(any(data_shifted$smo2_right == 0, na.rm = TRUE))
-    expect_true(any(data_shifted$dhb_left == 0, na.rm = TRUE))
-    expect_false(any(data_shifted$dhb_right == 0, na.rm = TRUE))
+    expect_true(any(data_shifted$o2hb_left == 0, na.rm = TRUE))
+    expect_false(any(data_shifted$o2hb_right == 0, na.rm = TRUE))
     ## check both shifted together maintaining relative scaling
     expect_equal(
-        data_shifted$dhb_left - data_shifted$dhb_right,
-        data$dhb_left - data$dhb_right
+        data_shifted$o2hb_left - data_shifted$o2hb_right,
+        data$o2hb_left - data$o2hb_right
     )
     ## check both shifted independently
     expect_false(isTRUE(all.equal(

@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Muscle Near-Infrared Spectroscopy (mNIRS)
+# mnirs <a href="https://jemarnold.github.io/mnirs/"><img src="man/figures/mnirs-hex.svg" align="right" height="139" alt="mnirs website" /></a>
 
 <!-- badges: start -->
 
@@ -12,8 +12,11 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 coverage](https://codecov.io/gh/jemarnold/mnirs/graph/badge.svg)](https://app.codecov.io/gh/jemarnold/mnirs)
 <!-- badges: end -->
 
-*{mnirs}* is a package for reading, processing, and analysing data from
-muscle near-infrared spectroscopy (mNIRS) devices.
+*{mnirs}* contains standardised, reproducible methods for reading,
+processing, and analysing data from muscle near-infrared spectroscopy
+(mNIRS) devices. Intended for mNIRS researchers and practitioners in
+exercise physiology, sports science, and clinical rehabilitation with
+minimal coding experience required.
 
 ## Installation
 
@@ -63,23 +66,23 @@ library(mnirs)
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
 #> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
-#> [5] "train.red_intervals.csv" "vo2master.csv"
+#> [5] "train.red_intervals.csv"
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
 data_table <- read_mnirs(
-    file_path = example_mnirs("moxy_ramp"), ## call an example mNIRS data file
+    file_path = example_mnirs("moxy_ramp"), ## call an example data file
     nirs_channels = c(
-        smo2_left = "SmO2 Live",        ## identify and rename channels
+        smo2_left = "SmO2 Live",            ## identify and rename channels
         smo2_right = "SmO2 Live(2)"
     ),
-    time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-    event_channel = NULL,                ## left blank, not currently used in analysis
-    sample_rate = NULL,                  ## if blank, sample_rate will be estimated from time_channel
-    add_timestamp = FALSE,               ## omit the date-time timestamp column
-    zero_time = TRUE,                    ## recalculate time values from zero
-    keep_all = FALSE,                    ## return only the specified data channels
-    verbose = TRUE                       ## show warnings & messages
+    time_channel = c(time = "hh:mm:ss"),    ## date-time format will be converted to numeric
+    event_channel = NULL,                   ## leave blank if unused
+    sample_rate = NULL,                     ## if blank, will be estimated from time_channel
+    add_timestamp = FALSE,                  ## omit a date-time timestamp column
+    zero_time = TRUE,                       ## recalculate time values from zero
+    keep_all = FALSE,                       ## return only the specified data channels
+    verbose = TRUE                          ## show warnings & messages
 )
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
@@ -106,8 +109,13 @@ data_table
 #> 10 4.81         57         67
 #> # ℹ 2,193 more rows
 
-## note the hidden plot option to display time values as `h:mm:ss`
-plot(data_table, time_labels = TRUE)
+## note the `time_labels` plot argument to display time values as `h:mm:ss`
+plot(
+    data_table,
+    time_labels = TRUE,
+    n.breaks = 5,
+    na.omit = FALSE
+)
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" alt="" width="100%" />
@@ -136,20 +144,19 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-02-28 00:29:00 PST"
+#> [1] "2026-03-08 00:29:00 PST"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
 
 ``` r
 data_cleaned <- replace_mnirs(
-    data_table,         ## channels will be retrieved from metadata
+    data_table,         ## blank channels will be retrieved from metadata
     invalid_values = 0, ## known invalid values in the data
-    invalid_above = 90, ## remove data spikes
+    invalid_above = 90, ## remove data spikes above 90
     outlier_cutoff = 3, ## recommended default value
-    width = 10,         ## local window to detect local outliers and replace missing values
-    method = "linear",  ## linear interpolation over `NA`s
-    verbose = TRUE
+    width = 10,         ## window to detect and replace outliers/missing values
+    method = "linear"   ## linear interpolation over `NA`s
 )
 
 plot(data_cleaned, time_labels = TRUE)
@@ -161,10 +168,9 @@ plot(data_cleaned, time_labels = TRUE)
 
 ``` r
 data_resampled <- resample_mnirs(
-    data_cleaned,      ## channels retrieved from metadata
-    resample_rate = 2, ## the default `resample_rate = sample_rate` will resample to sample_rate
-    method = "linear", ## linear interpolation across any new samples
-    verbose = TRUE     ## will confirm the output sample rate
+    data_cleaned,      ## blank channels will be retrieved from metadata
+    resample_rate = 2, ## blank by default will resample to `sample_rate`
+    method = "linear"  ## linear interpolation across resampled indices
 )
 #> ℹ Output is resampled at 2 Hz.
 
@@ -190,12 +196,12 @@ data_resampled
 
 ``` r
 data_filtered <- filter_mnirs(
-    data_resampled,         ## channels retrieved from metadata
+    data_resampled,         ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
     order = 2,              ## filter order number
-    W = 0.02,               ## filter fractional critical frequency
-    type = "low",           ## specify a low-pass filter
-    na.rm = TRUE            ## explicitly preserve any NAs
+    W = 0.02,               ## filter fractional critical frequency `[0, 1]`
+    type = "low",           ## specify a "low-pass" filter
+    na.rm = TRUE            ## explicitly preserve NAs
 )
 
 ## we will add the non-filtered data back to the plot to compare
@@ -219,7 +225,7 @@ data_shifted <- shift_mnirs(
     data_filtered,     ## un-grouped nirs channels to shift separately 
     nirs_channels = list(smo2_left, smo2_right), 
     to = 0,            ## NIRS values will be shifted to zero
-    span = 120,        ## shift the first 120 sec of data to zero
+    span = 120,        ## shift the *first* 120 sec of data to zero
     position = "first"
 )
 
@@ -248,7 +254,6 @@ plot(data_rescaled, time_labels = TRUE) +
 ## global option to silence info & warning messages
 options(mnirs.verbose = FALSE)
 
-## read, process, and plot an mNIRS file in one pipeline
 nirs_data <- read_mnirs(
     example_mnirs("train.red"),
     nirs_channels = c(
@@ -267,7 +272,7 @@ nirs_data <- read_mnirs(
     filter_mnirs(
         method = "butterworth",
         order = 2,
-        W = 0.01,
+        W = 0.02,
         na.rm = TRUE
     ) |>
     shift_mnirs(
@@ -291,12 +296,12 @@ plot(nirs_data, time_labels = TRUE)
 ``` r
 ## return each interval independently with `event_groups = "distinct"`
 distinct_list <- extract_intervals(
-    nirs_data,
-    nirs_channels = NULL,        ## no channel processing occurs with "distinct" groups
-    event_times = c(371, 1082),  ## manually identified end-interval times
-    event_groups = "distinct",   ## return a list of two data frames
-    span = c(-180, 0),           ## include the last 180-sec of each interval
-    zero_time = FALSE            ## return original time values
+    nirs_data,                  ## channels blank for "distinct" grouping
+    start = by_time(177, 904),  ## manually identified interval start times
+    end = by_time(357, 1084),   ## interval end time (start + 180 sec)
+    event_groups = "distinct",  ## return a list of data frames for each (2) event
+    span = c(0, 0),             ## no modification to the 3-min intervals
+    zero_time = FALSE           ## return original time values
 )
 
 ## use `{patchwork}` package to plot intervals side by side
@@ -310,12 +315,12 @@ plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
 ``` r
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble_list <- extract_intervals(
-    nirs_data,
-    nirs_channels = c(smo2_left, smo2_right), ## recycled to all intervals by default
-    event_times = c(371, 1082),
-    event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(-180, 0),         ## recycled to all intervals by default
-    zero_time = TRUE           ## re-calculate common time to start from `0`
+    nirs_data,                  ## channels recycled to all intervals by default
+    nirs_channels = c(smo2_left, smo2_right),
+    start = by_time(177, 904),  ## alternatively specify start times + 180 sec
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    span = c(0, 180),           ## span recycled to all intervals by default
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
 plot(ensemble_list[[1L]])

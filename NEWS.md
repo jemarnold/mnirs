@@ -1,3 +1,45 @@
+# mnirs 0.5.0
+
+### Updated core functions
+
+* `read_mnirs()` expands `event_channel` to work with integer *"lap"* numbers, or character event label as previous.
+    * Should now work on more .csv file formats; previously read errors may have occured where the file contained header rows above the data table, resulting in improper detection of columns.
+    * `event_channel` can now be specified as an integer `lap` column, in addition to a character column as previous.
+    * Other {mnirs} functions may expect `event_channel` to be either character or integer-ish.
+
+* `extract_intervals()` ***breaking change*** to argument specification:
+    * Function arguments `start` and `end` replace `event_times`, `event_labels`, and `event_samples`. Allowing for more flexible and more clear interval boundary specifications.
+    * Helper functions `by_time()`, `by_label()`, `by_lap()`, and `by_sample()` added to specify `start`/`end` values.
+    * Fix edge-cases where metadata were not returned as expected.    
+
+* `resample_mnirs()` now defaults to `method = "locf"` which is safer for more column types where interpolation may not be appropriate (integer, discrete numeric, character, factors, etc).
+
+* `filter_ma()` has been renamed from `filter_moving_average()`. The latter is kept as an alias of the former.
+
+* `peak_slope()` now returns a *"fitted"* vector with the linear regression predicted values within the peak slope window. 
+
+### Updated articles
+
+* README:
+    * Add basic use covering `extract_intervals()`.
+    * Add rough draft *{mnirs}* hex icon.
+
+* *"Reading and Cleaning Data with {mnirs}"* vignette:
+    * Add section: *"Detect and extract intervals"* covering `extract_intervals()` core functionality.
+
+* Rough draft at creating an {mnirs} cheatsheet.
+
+### Documentation
+
+* Many function help documents re-written to be more readible.
+* Updated function examples with clearer conditions for CRAN submission.
+
+### Example files
+    
+* Update `train.red_intervals.csv` revert to include original onboard smoothed and unfiltered NIRS channels.
+* Remove `vo2master.csv` from example data, as it is only used for internal testing.
+
+
 # mnirs 0.4.2
 
 * Update `read_mnirs()` 

@@ -1,0 +1,222 @@
+---
+title: "mnirs-cheatsheet"
+format:
+  typst:
+    papersize: a4
+    margin:
+      x: 0.5cm
+      y: 0.5cm
+    columns: 3
+    column-gutter: 0.4cm
+    keep-typ: false
+    template-partials:
+      - typst-template.typ
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{=typst}
+#set text(font: "Merriweather Sans", size: 8pt)
+#set par(leading: 0.5em)
+#show heading.where(level: 2): set text(size: 10pt, weight: "bold")
+#show raw.where(block: false): it => box(
+  fill: rgb("#f0f0f0"),
+  stroke: rgb("#cccccc"),
+  radius: 2pt,
+  inset: (x: 3pt, y: 1pt),
+  text(font: "Monaspace Neon Var", size: 7.5pt, it)
+)
+#show raw.where(block: true): set text(font: "Monaspace Neon Var", size: 7.5pt)
+
+// Full-width header — spans all columns
+#place(
+  top + left,
+  float: true,
+  scope: "parent",
+  clearance: 0.5cm,
+  block(
+    width: 100%,
+    fill: rgb("#0080ff"),
+    radius: 4pt,
+    inset: 8pt,
+    [
+      #grid(
+        columns: (auto, 1fr),
+        gutter: 8pt,
+        align: horizon,
+        [
+          #image("mnirs-hex.svg", height: 1.8cm)
+        ],
+        [
+          #text(size: 20pt, weight: "bold", fill: white)[mnirs]
+          #h(0.6em)
+          #text(size: 10pt, fill: white.transparentize(30%))[v0.4.2.2]
+          #linebreak()
+          #text(size: 9pt, weight: "bold", fill: white)[
+            Muscle Near-Infrared Spectroscopy Processing and Analysis
+          ]
+          #linebreak()
+          #v(0.2em)
+          #text(size: 9pt, fill: white.transparentize(20%))[
+            Read, process, and analyse data from muscle near-infrared spectroscopy (mNIRS) devices. Import raw data from .csv or .xls(x) files and return a time-series data frame with metadata. Includes standardised methods for cleaning, filtering, and pre-processing mNIRS data for subsequent analysis, with a custom plot theme and colour palette.
+          ]
+        ]
+      )
+    ]
+  )
+)
+
+// Helper: code-shaded chip
+#let chip(t) = box(
+  fill: rgb("#f0f0f0"),
+  stroke: rgb("#cccccc"),
+  radius: 2pt,
+  inset: (x: 3pt, y: 1pt),
+  text(font: "Monaspace Neon Var", size: 7pt, t)
+)
+#let tree-line(indent, branch, content) = {
+  text(font: "Monaspace Neon Var", size: 7.5pt)[#indent#branch ]
+  content
+  linebreak()
+}
+
+// Workflow — column 1
+#align(center, block(
+  stroke: rgb("#cccccc"),
+  radius: 4pt,
+  inset: (x: 10pt, y: 8pt),
+  [
+      #set align(left)
+      #text(size: 12pt, weight: "bold")[Workflow]
+      #v(0.3em)
+      #set text(font: "Monaspace Neon Var", size: 12pt)
+      #tree-line("", "├──", chip("read_mnirs()"))
+      #tree-line("│   ", "├──", chip("create_mnirs_data()"))
+      #tree-line("│   ", "└──", chip("example_mnirs()"))
+      #tree-line("", "├──", chip("resample_mnirs()"))
+      #tree-line("", "├──", chip("replace_mnirs()"))
+      #tree-line("│   ", "├──", chip("replace_invalid()"))
+      #tree-line("│   ", "├──", chip("replace_outliers()"))
+      #tree-line("│   ", "└──", chip("replace_missing()"))
+      #tree-line("", "├──", chip("filter_mnirs()"))
+      #tree-line("│   ", "├──", chip("filter_ma()"))
+      #tree-line("│   ", "└──", chip("filter_butter()"))
+      #tree-line("", "├──", chip("shift_mnirs()"))
+      #tree-line("", "├──", chip("rescale_mnirs()"))
+      #tree-line("", "├──", chip("plot.mnirs()"))
+      #tree-line("│   ", "├──", chip("theme_mnirs()"))
+      #tree-line("│   ", "├──", chip("palette_mnirs()"))
+      #tree-line("│   ", "├──", chip("scale_colour_mnirs()"))
+      #tree-line("│   ", "├──", chip("scale_fill_mnirs()"))
+      #tree-line("│   ", "├──", chip("format_hmmss()"))
+      #tree-line("│   ", "└──", chip("breaks_timespan()"))
+      #tree-line("", "└──", chip("extract_intervals()"))
+    ]
+))
+```
+
+```{=typst}
+#colbreak()
+```
+
+## Read
+
+`read_mnirs()` — Import mnirs data from .csv or .xls(x)
+
+#### Package-level functions
+
+`example_mnirs()` — Paths to an included example file
+
+`create_mnirs_data()` — Add *"mnirs"* class metadata to data
+
+---
+
+## Resample
+
+`resample_mnirs()` — Resample to a regular time grid
+
+---
+
+## Clean
+
+`replace_mnirs()` — Replace outliers, invalid, and missing data
+
+#### Vector-level functions
+
+`replace_outliers()` — Replace local outliers
+
+`replace_invalid()` — Replace specified invalid values
+
+`replace_missing()` — Interpolate over *NA* values
+
+---
+
+## Filter
+
+`filter_mnirs()` — Apply digital filter to mNIRS channels
+
+#### Vector-level functions
+
+`filter_butter()` — Apply a Butterworth digital filter
+
+`filter_ma()` — Apply centred moving average smoothing
+
+---
+
+## Transform
+
+`shift_mnirs()` — Shift channels to a reference value
+
+`rescale_mnirs()` — Rescale channels data range
+
+---
+
+```{=typst}
+#colbreak()
+```
+
+## Plot
+
+`plot()` — Plot a data frame of class *"mnirs"*
+
+`theme_mnirs()` — ggplot2 theme for mnirs plots
+
+`palette_mnirs()` — Access the mnirs colour palette
+
+`scale_colour_mnirs()` — Colour scale with mnirs palette
+
+`scale_fill_mnirs()` — Fill scale with mnirs palette
+
+`format_hmmss()` — Plot axis in time units
+
+`breaks_timespan()` — Plot axis with time breaks
+
+---
+
+## Extract
+
+`extract_intervals()` — Detect events and extract intervals
+
+```{=typst}
+// Footer
+#place(
+  bottom + left,
+  scope: "parent",
+  float: true,
+  block(
+    width: 100%,
+    [
+      #line(length: 100%, stroke: 0.5pt + rgb("#cccccc"))
+      #v(0.2em)
+      #text(size: 7pt, fill: rgb("#888888"))[
+        #h(0.8em)
+        Website: #link("https://jemarnold.github.io/mnirs/")[jemarnold.github.io/mnirs]
+        #h(0.8em)
+        GitHub: #link("https://github.com/jemarnold/mnirs")[github.com/jemarnold/mnirs]
+      ]
+    ]
+  )
+)
+```

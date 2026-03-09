@@ -102,17 +102,16 @@ over \code{by}, and \code{width} will be preferred over \code{span}.
 ## read example data
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
-    nirs_channels = c(smo2_right = "SmO2 Live",
-                      smo2_left = "SmO2 Live(2)"),
+    nirs_channels = c(smo2_left = "SmO2 Live",
+                      smo2_right = "SmO2 Live(2)"),
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>
-    shift_mnirs(
-        nirs_channels = list(smo2_right, smo2_left),
-        to = 0,            ## each channel will be shifted to zero
-        span = 120,        ## shift the mean of the first 120 sec
-        position = "first",
-        verbose = FALSE
+    shift_mnirs(           ## un-grouped nirs channels to shift separately 
+        nirs_channels = list(smo2_left, smo2_right), 
+        to = 0,            ## NIRS values will be shifted to zero
+        span = 120,        ## shift the *first* 120 sec of data to zero
+        position = "first"
     )
 
 data

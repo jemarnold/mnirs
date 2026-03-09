@@ -56,15 +56,16 @@ reference:
     Detect and extract intervals for further analysis
   contents:
   - extract_intervals
+  - by_time
 - title: Process kinetics
   desc: |
     Estimate response dynamics and kinetic parameters
   contents:
   - peak_slope
   - matches("monoexp")
-- title: Plotting
+- title: Printing & plotting
   desc: |
-    Tools for pretty plotting with `{ggplot2}`.
+    Tools for printing functions and pretty plotting with `{ggplot2}`.
   contents:
   - plot.mnirs
   - theme_mnirs

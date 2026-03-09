@@ -53,7 +53,7 @@ NULL
 #'   - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
 #'   - `time_channel = c("hh:mm:ss")`
 #'   - `event_channel = c("Lap")`
-#'   - `event_times = c(870)`
+#'   - `reoxy_start_times = c(870)`
 #'
 NULL
 
@@ -70,27 +70,11 @@ NULL
 #'
 #' @format .csv file with header metadata and with 10 columns and 12001 rows.
 #'
-#'   - `nirs_channels = c("SmO2 unfiltered", "HBDiff unfiltered")`
+#'   - `nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHB unfiltered")`
 #'   - `time_channel = c("Timestamp (seconds passed)")`
 #'   - `event_channel = c("Lap/Event")`
-#'   - `event_times = c(2455, 3166)` ## c(371, 1082) from zero_time
-#'
-NULL
-
-
-#' @name vo2master.csv
-#'
-#' @title 1 Hz VO2master app recording from Moxy
-#'
-#' @description Exported from VO2 Master Manager app, recorded at 1 Hz.
-#'   A short example recording with three sensors.
-#'
-#' @docType data
-#'
-#' @format .csv file with 12 columns and 240 rows.
-#'
-#'   - `nirs_channels = c("SmO2[%]", "SmO2 -  2[%]", "SmO2 -  3[%]", "THb[THb]", "THb -  2[THb]", "THb -  3[THb]")`
-#'   - `time_channel = c("Time[s]", "Time[hh:mm:ss]")`
+#'   - `interval_times = list(start = c(2150.09, 2865.05), end = c(2441.06, 3168.08))` 
+#'   - `interval_times = list(start = c(65.94, 780.90), end = c(356.91, 1183.93))` ## from zero_time
 #'
 NULL
 

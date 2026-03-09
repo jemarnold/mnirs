@@ -168,7 +168,7 @@ Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
 Then \code{NA}s will be preserved and passed through in the returned data.
 }
 \examples{
-## read example data
+## read example data and clean for outliers
 data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2 = "SmO2 Live"),
@@ -182,16 +182,18 @@ data <- read_mnirs(
         verbose = FALSE
     )
 
+data
+
 data_filtered <- filter_mnirs(
-    data,
+    data,                   ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
-    order = 2,              ## order is the number of filter passes
-    W = 0.02,               ## fractional critical frequency
-    type = "low",           ## specify a low-pass filter
-    na.rm = TRUE,           ## explicitly preserve any NAs and avoid errors
-    verbose = FALSE
+    order = 2,              ## filter order number
+    W = 0.02,               ## filter fractional critical frequency `[0, 1]`
+    type = "low",           ## specify a "low-pass" filter
+    na.rm = TRUE            ## explicitly preserve NAs
 )
 
+## note the smoothed `smo2` values
 data_filtered
 
 \donttest{

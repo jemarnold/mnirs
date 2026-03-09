@@ -26,7 +26,7 @@
 #'     in the form `c(time = "original_name")`.
 #'
 #' @param event_channel An *optional* character string giving the name of an
-#'   event/marker column to import. Names must match the file header exactly.
+#'   event/lap column to import. Names must match the file header exactly.
 #'   A named character vector can be used to rename the column on import in
 #'   the form `c(event = "original_name")`.
 #'
@@ -100,18 +100,19 @@
 #'   as attributes and can be accessed with `attributes(data)`.
 #'
 #' @examples
-#' ## call an example mNIRS data file
-#' file_path <- example_mnirs("moxy_ramp")
-#'
 #' read_mnirs(
-#'     file_path,
-#'     nirs_channels = c(                   ## identify and rename channels
-#'         smo2_right = "SmO2 Live",
-#'         smo2_left = "SmO2 Live(2)"
+#'     file_path = example_mnirs("moxy_ramp"), ## call an example data file
+#'     nirs_channels = c(
+#'         smo2_left = "SmO2 Live",            ## identify and rename channels
+#'         smo2_right = "SmO2 Live(2)"
 #'     ),
-#'     time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
-#'     sample_rate = NULL,                  ## sample_rate will be estimated from time_channel
-#'     verbose = FALSE                      ## silence warnings & messages
+#'     time_channel = c(time = "hh:mm:ss"),    ## date-time format will be converted to numeric
+#'     event_channel = NULL,                   ## leave blank if unused
+#'     sample_rate = NULL,                     ## if blank, will be estimated from time_channel
+#'     add_timestamp = FALSE,                  ## omit a date-time timestamp column
+#'     zero_time = TRUE,                       ## recalculate time values from zero
+#'     keep_all = FALSE,                       ## return only the specified data channels
+#'     verbose = TRUE                          ## show warnings & messages
 #' )
 #'
 #' @export
@@ -187,7 +188,7 @@ read_mnirs <- function(
     ## remove empty (NA) columns and rows
     data <- remove_empty_rows_cols(data)
     ## convert char decimal "," to "." and convert column types
-    data <- convert_type(data, time_channel)
+    data <- convert_type(data, time_renamed, event_renamed, verbose)
     ## convert POSIXct to numeric and/or recalc time from zero
     ## return list(data, start_timestamp) — start_timestamp from time_channel POSIXct
     time_list <- parse_time_channel(
@@ -198,13 +199,11 @@ read_mnirs <- function(
         zero_time
     )
     data <- time_list$data
+    
     ## extract start_timestamp from data if not already found in header
     if (is.null(start_timestamp)) {
         start_timestamp <- time_list$start_timestamp
     }
-
-    ## standardise invalid to NA
-    data[] <- lapply(data, \(.x) clean_invalid(.x))
 
     ## validate and estimate sample rate
     ## will write new "time" column if Oxysoft export rate detected
@@ -254,7 +253,7 @@ read_mnirs <- function(
 #'   - event_channel
 #'   - sample_rate
 #'   - start_timestamp
-#'   - event_times 
+#'   - interval_times
 #'   - interval_span 
 #'
 #' @details
@@ -308,7 +307,7 @@ create_mnirs_data <- function(data, ...) {
         event_channel = metadata$event_channel,
         sample_rate = metadata$sample_rate,
         start_timestamp = metadata$start_timestamp,
-        event_times = metadata$event_times,
+        interval_times = metadata$interval_times,
         interval_span = metadata$interval_span,
     )
 
