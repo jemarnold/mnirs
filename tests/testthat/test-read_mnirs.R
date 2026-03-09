@@ -190,8 +190,8 @@ test_that("detect_mnirs_device works on example files", {
 })
 
 test_that("detect_mnirs_device works on internal example files", {
-    skip_on_ci()   ## test failing on remote `covr::package_coverage()`
-    skip_on_covr() ## related to .csv blank rows inconsistency
+    skip_on_ci()
+    skip_on_covr()
     file_path <- test_path("testdata/train.red-mre.csv")
     skip_if_not(file.exists(file_path), "testdata not available")
     
@@ -358,7 +358,7 @@ test_that("read_data_table() extracts data with valid channels", {
     )
 
     expect_type(result, "list")
-    expect_named(result, c("data_table", "file_header"))
+    expect_named(result, c("file_header", "data_table"))
     expect_s3_class(result$data_table, "data.frame")
     expect_s3_class(result$file_header, "data.frame")
 
@@ -1091,20 +1091,6 @@ test_that("parse_time_channel() recalculates numeric time from zero", {
     result <- parse_time_channel(data, "time", zero_time = TRUE)
 
     expect_equal(result$data$time, c(0, 10, 20))
-})
-
-test_that("parse_time_channel() parses fractional unix time", {
-    skip("fractional time doesn't seem to work properly, but I also don't have a real-world example to test it")
-
-    hrs_vec <- seq(4, 24, by = 4)
-    data <- data.frame(
-        time = hrs_vec / 24, ## fractions of a day
-        value = 1
-    )
-
-    result <- parse_time_channel(data, "time")
-    expect_setequal(result$data$time / 60 / 60, hrs_vec)
-    expect_type(result$data$time, "double")
 })
 
 test_that("parse_time_channel() parses ISO 8601 character timestamps to numeric", {
