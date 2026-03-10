@@ -68,7 +68,8 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A tibble of model parameter results with one row per \code{nirs_channel}
-(columns: \code{nirs_channels}, \code{slope}, \code{intercept}, \code{y}, \code{t}, \code{idx}).
+(columns: \code{nirs_channels}, \code{slope}, \code{intercept}, \code{y},
+\verb{<time_channel>}, \code{idx}).
 Per-channel metadata carried as attributes:
 \itemize{
 \item \code{"predicted"} (named list of data frames for each \code{nirs_channel} with

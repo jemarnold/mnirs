@@ -5,7 +5,7 @@
 \alias{replace_invalid}
 \alias{replace_outliers}
 \alias{replace_missing}
-\title{Replace outliers, invalid values, and missing values}
+\title{Replace outliers, invalid, and missing values in \emph{{mnirs}} data}
 \usage{
 replace_mnirs(
   data,
@@ -37,7 +37,7 @@ replace_invalid(
 replace_outliers(
   x,
   t = seq_along(x),
-  outlier_cutoff = 3L,
+  outlier_cutoff = 3,
   width = NULL,
   span = NULL,
   method = c("median", "none"),
@@ -75,37 +75,42 @@ used.
 }}
 
 \item{invalid_values}{A numeric vector of invalid values to be replaced,
-e.g. \code{invalid_values = c(0, 100, 102.3)}. The \emph{default} \code{NULL} will not
-replace invalid values.}
+e.g. \code{invalid_values = c(0, 100, 102.3)}. Default \code{NULL} will not replace
+invalid values.}
 
 \item{invalid_above, invalid_below}{Numeric values each specifying cutoff
 values, above or below which (respectively) will be replaced, \emph{inclusive}
 of the specified cutoff values.}
 
-\item{outlier_cutoff}{An integer for the local outlier threshold, as
-number of standard deviations above and below the local median. The
-\emph{default} \code{outlier_cutoff = NULL} will not replace outliers.
-\code{outlier_cutoff = 3} is the standard replacement threshold following
-Pearson's rule.}
+\item{outlier_cutoff}{A numeric value for the local outlier threshold, as
+the number of standard deviations from the local median.
+\itemize{
+\item Default \code{NULL} will not replace outliers.
+\item Lower values are more sensitive and flag more outliers; higher values
+are more conservative.
+\item \code{outlier_cutoff = 3} Pearson's 3 sigma edit rule.
+\code{outlier_cutoff = 2} approximates a Tukey-style 1.5×IQR rule.
+\code{outlier_cutoff = 0} Tukey's median filter.
+}}
 
 \item{width}{An integer defining the local window in number of samples
-around \code{idx} in which to perform the operation., between
+centred on \code{idx}, between
 \verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value defining the local window timespan around \code{idx}
-in which to perform the operation. In units of \code{time_channel} or \code{t},
-between \verb{[t - span/2, t + span/2]}.}
+\item{span}{A numeric value defining the local window timespan around
+\code{idx} in units of \code{time_channel} or \code{t}, between
+\verb{[t - span/2, t + span/2]}.}
 
-\item{method}{A character string indicating how to handle replacement
-(see \emph{Details} for more on each method):
+\item{method}{A character string indicating how to handle \code{NA}
+replacement (see \emph{Details}):
 \describe{
 \item{\code{"linear"}}{Replaces \code{NA}s via linear interpolation (the
 \emph{default}) using \code{\link[stats:approxfun]{stats::approx()}}.}
-\item{\code{"median"}}{Replaces \code{NA}s with the local median of valid values
-within a centred window defined by either \code{width} or \code{span}.}
-\item{\code{"locf"}}{(\emph{"Last observation carried forward"}). Replaces
-\code{NA}s with the most recent valid non-\code{NA} value to the left for
-trailing \code{NA}s or to the right for leading \code{NA}s, using
+\item{\code{"median"}}{Replaces \code{NA}s with the local median of valid
+values within a centred window defined by \code{width} or \code{span}.}
+\item{\code{"locf"}}{\emph{"Last observation carried forward"}. Replaces
+\code{NA}s with the most recent valid value to the left for trailing
+\code{NA}s or to the right for leading \code{NA}s, using
 \code{\link[stats:approxfun]{stats::approx()}}.}
 \item{\code{"none"}}{Returns \code{NA}s without replacement.}
 }}
@@ -116,111 +121,125 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of the predictor variable; time
-or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
+sample number). Default is \code{seq_along(x)}.}
 
-\item{bypass_checks}{A logical allowing wrapper functions to bypass redundant
-checks and validations.}
+\item{bypass_checks}{Logical allowing wrapper functions to bypass
+redundant checks and validations.}
 
 \item{...}{Additional arguments.}
 }
 \value{
-\code{replace_mnirs()} returns a \link[tibble:tibble-package]{tibble} of class
-\emph{"mnirs"} with metadata available with \code{attributes()}.
+\code{replace_mnirs()} return a \link[tibble:tibble-package]{tibble} of
+class \code{"mnirs"} with metadata available via \code{attributes()}.
 
-\code{replace_invalid()} return a numeric vector the same length as \code{x} with
-invalid values replaced.
+\code{replace_invalid()} returns a numeric vector the same length as
+\code{x} with invalid values replaced.
 
-\code{replace_outliers()} return a numeric vector the same length as \code{x} with
-local outliers replaced.
+\code{replace_outliers()} returns a numeric vector the same length as
+\code{x} with outliers replaced.
 
-\code{replace_missing()} return a numeric vector the same length as \code{x} with
-missing values replaced.
+\code{replace_missing()} returns a numeric vector the same length as
+\code{x} with missing values replaced.
 }
 \description{
-\code{replace_mnirs()} detects and removes local outliers and specified invalid
-values in \code{nirs_channels} within an \emph{"mnirs"} data frame, and replaces
-missing \code{NA} values via interpolation methods.
+Detect and replace local outliers, specified invalid values, and missing
+\code{NA} values across \code{nirs_channels} within an \emph{"mnirs"} data frame.
+\code{replace_mnirs()} operates on a data frame, extending the vectorised
+functions:.
 
-\code{replace_invalid()} detects specified invalid values or cutoff values in
-vector data and replaces them with the local median value or \code{NA}.
+\code{replace_invalid()} detects specified invalid values or range cutoffs in a
+numeric vector and replace them with the local median value or \code{NA}.
 
-\code{replace_outliers()} detects local outliers in vector data with a Hampel
-filter and replaces with the local median value or \code{NA}.
+\code{replace_outliers()} detects local outliers in a numeric vector using a Hampel filter and replaces with the local median value or \code{NA}.
 
-\code{replace_missing()} detects missing values in vector data and replaces
-via interpolation methods.
+\code{replace_missing()} detects missing (\code{NA}) values in a numeric vector and
+replaces via interpolation.
 }
 \details{
-\code{replace_mnirs()} is a wrapper function expanding the vectorised \verb{replace_*}
-functions to operate on a data frame.
+\subsection{Automatic channel detection}{
 
-\code{nirs_channels} and \code{time_channel} can be retrieved automatically from
-\code{data} of class \emph{"mnirs"} which has been processed with \code{{mnirs}},
-if not defined explicitly.
+\code{nirs_channels} and \code{time_channel} are retrieved automatically from
+\emph{"mnirs"} metadata if not specified explicitly. Columns in \code{data} not
+listed in \code{nirs_channels} are passed through unprocessed.
+}
 
-Channels (columns) in \code{data} not explicitly defined in \code{nirs_channels}
-will be passed through untouched to the output data frame.
+\subsection{The rolling window}{
 
-\code{replace_outliers} and \code{replace_missing} when \code{method = "median"} require
-defining a local rolling window in which to perform outlier detection and
-median interpolation. This window can be specified by either \code{width} as
-the number of samples centred on \code{idx} between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}, or \code{span} as the timespan
-in units of \code{time_channel} centred on \code{idx} between
-\verb{[t - span/2, t + span/2]}. Specifying \code{width} is often faster than
-\code{span}. A partial moving average will be calculated at the edges of the
-data.
+\code{replace_outliers()} and \code{replace_missing()} (when \code{method = "median"})
+operate over a local rolling window for outlier detection and median
+interpolation. The window is specified by either \code{width} as the number
+of samples, or \code{span} as the timespan in units of \code{time_channel}.
+A partial window is calculated at the edges of the data.
+}
 
-\code{replace_invalid()} can be used to remove known invalid values in
-exported data.
-\itemize{
-\item Specific \code{invalid_values} can be replaced, such as \code{c(0, 100, 102.3)}.
+\subsection{Replace invalid values with with \code{replace_invalid()}}{
+
+Specific \code{invalid_values} can be replaced, such as \code{c(0, 100, 102.3)}.
 Data ranges can be replaced with cutoff values specified by \code{invalid_above}
 and \code{invalid_below}, where any values higher or lower than the specified
 cutoff values (respectively) will be replaced, \emph{inclusive} of the cutoff
 values themselves.
 }
 
-\code{replace_outliers()} will compute rolling local median values across \code{x},
-defined by either \code{width} number of samples, or \code{span} timespan in units
-of \code{t}. Specifying \code{width} is often faster than \code{span}.
-\itemize{
-\item Outliers are detected with robust median absolute deviation (MAD) method
-adapted from \code{pracma::hampel()}. Outliers equal to or less than the
-smallest absolute time series difference in \code{x} will be excluded, to
-avoid detecting negligible differences as outliers where local data have
-minimal or zero variation.
-\item Values of \code{x} outside local bounds defined by \code{outlier_cutoff} are
-identified as local outliers and either removed if \code{method = "none"}, or
-replaced with the local median value (\code{method = "median"}, the \emph{default}).
-\item This function will NOT replace \code{NA} values already existing in the \code{x}.
-They will be passed along in the returned vector. See \code{replace_missing()}.
-\item A high \code{outlier_cutoff} threshold makes the Hampel filter more forgiving.
-A low \code{outlier_cutoff} will declare more points to be outliers.
-\code{outlier_cutoff = 3} corresponds to Pearson's 3 sigma edit rule.
-\code{outlier_cutoff = 0} corresponds to Tukey's median filter.
+\subsection{Outlier detection with \code{replace_outliers()}}{
+
+Rolling local medians are computed across \code{x} within a window defined
+by \code{width} (number of samples) or \code{span} (timespan in units of \code{t}).
+
+Outliers are detected with robust median absolute deviation (MAD),
+adapted from \code{pracma::hampel()}. Deviations equal to or less than the
+smallest absolute time series difference in \code{x} are excluded, to avoid
+flagging negligible differences where local data have minimal or zero
+variation.
 }
 
-\code{replace_missing()} will interpolate across missing values (\code{NA}s) as
-specified by \code{method}.
+\subsection{Replacement behaviour}{
+
+Values of \code{x} outside the local bounds defined by \code{outlier_cutoff} are
+identified as outliers and either replaced with the local median
+(\code{method = "median"}, the \emph{default}) or set to \code{NA} (\code{method = "none"}).
+
+Existing \code{NA} values in \code{x} are \emph{not} replaced. They are passed
+through to the returned vector. See \code{\link[=replace_missing]{replace_missing()}}.
+}
+
+\subsection{Choosing \code{outlier_cutoff}}{
+
+\code{outlier_cutoff} is the number of (MAD-normalised) standard deviations
+from the local median. Higher values are more conservative; lower
+values flag more outliers.
 \itemize{
-\item Leading and trailing \code{NA}s are replaced by \emph{"nocb"} (\emph{"next observation}
-\emph{carried backward"}) and \emph{"locf"}, respectively, for both \verb{method = }
-\code{"linear"} and \code{"locf"}, by applying \code{rule = 2} (see \code{\link[stats:approxfun]{stats::approx()}}).
-\item \code{method = "median"} will calculate the local median of valid (non-\code{NA})
-values to either side of \code{NA}s within a window defined by \code{width} number
-of samples, or a timespan defined by \code{span} in units of \code{t} (time). Such
-that sequential \code{NA}s will all be replaced by the same median value.
-\item If there are no valid values within \code{span} to one side of the \code{NA}
-value(s), it will be replaced with the median of the other side (i.e. for
-leading and trailing \code{NA}s). If there are no valid values within either
-side of \code{span}, the first valid sample on either side will be used (i.e.
-equivalent to \code{replace_missing(x, width = 1)}).
+\item \code{outlier_cutoff = 3} — Pearson's 3 sigma edit rule (default).
+\item \code{outlier_cutoff = 2} — approximately Tukey-style 1.5×IQR rule.
+\item \code{outlier_cutoff = 0} — Tukey's median filter (every point
+replaced by local median).
+}
+}
+
+\subsection{Interpolation with \code{replace_missing()}}{
+
+\code{method = "linear"} and \code{method = "locf"} use \code{\link[stats:approxfun]{stats::approx()}} with
+\code{rule = 2}, so leading \code{NA}s are filled by \emph{"nocb"}
+(\emph{"next observation carried backward"}) and trailing \code{NA}s by \emph{"locf"}.
+
+\code{method = "median"} calculates the local median of valid (non-\code{NA})
+values to either side of \code{NA}s, within a window defined by \code{width}
+(number of samples) or \code{span} (timespan in units of \code{t}). Sequential
+\code{NA}s are all replaced by the same median value.
+}
+
+\subsection{Edge behaviour for \code{method = "median"}}{
+
+If there are no valid values within \code{span} to one side of the \code{NA},
+the median of the other side is used (i.e. for leading and trailing
+\code{NA}s). If there are no valid values within either side, the first
+valid sample on either side is used (equivalent to
+\code{replace_missing(x, width = 1)}).
 }
 }
 \examples{
-## vectorised operation
+## vectorised operations
 x <- c(1, 999, 3, 4, 999, 6)
 replace_invalid(x, invalid_values = 999, width = 3, method = "median")
 
@@ -238,37 +257,38 @@ data <- read_mnirs(
 
 ## clean data
 data_clean <- replace_mnirs(
-    data,               ## blank channels will be retrieved from metadata
-    invalid_values = 0, ## known invalid values in the data
-    invalid_above = 90, ## remove data spikes above 90
-    outlier_cutoff = 3, ## recommended default value
-    width = 10,         ## window to detect and replace outliers/missing values
-    method = "linear"   ## linear interpolation over `NA`s
+    data,                  ## channels retrieved from metadata
+    invalid_values = 0,    ## known invalid values in the data
+    invalid_above = 90,    ## remove data spikes above 90
+    outlier_cutoff = 3,    ## Pearson's 3 sigma edit rule
+    width = 10,            ## window for outlier detection and interpolation
+    method = "linear"      ## linear interpolation over NAs
 )
 
 \donttest{
-    if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ## plot original and show where values have been replaced
-        ## ignore warning about replacing the existing colour scale
-        plot(data, time_labels = TRUE) +
-            ggplot2::scale_colour_manual(
-                name = NULL,
-                breaks = c("smo2", "replaced"),
-                values = palette_mnirs(2)
-            ) +
-            ggplot2::geom_point(
-                data = data[data_clean$smo2 != data$smo2, ],
-                ggplot2::aes(y = smo2, colour = "replaced"), na.rm = TRUE
-            ) +
-            ggplot2::geom_line(
-                data = {
-                    data_clean[!is.na(data$smo2), "smo2"] <- NA
-                    data_clean
-                },
-                ggplot2::aes(y = smo2, colour = "replaced"), 
-                linewidth = 1, na.rm = TRUE
-            )
-    }
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    ## plot original and show where values have been replaced
+    ## ignore warning about replacing the existing colour scale
+    plot(data, time_labels = TRUE) +
+      ggplot2::scale_colour_manual(
+        name = NULL,
+        breaks = c("smo2", "replaced"),
+        values = palette_mnirs(2)
+      ) +
+      ggplot2::geom_point(
+        data = data[data_clean$smo2 != data$smo2, ],
+        ggplot2::aes(y = smo2, colour = "replaced"),
+        na.rm = TRUE
+      ) +
+      ggplot2::geom_line(
+        data = {
+          data_clean[!is.na(data$smo2), "smo2"] <- NA
+          data_clean
+        },
+        ggplot2::aes(y = smo2, colour = "replaced"),
+        linewidth = 1, na.rm = TRUE
+      )
+  }
 }
 
 }

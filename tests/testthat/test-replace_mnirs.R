@@ -154,6 +154,9 @@ test_that("replace_outliers() respects outlier_cutoff threshold", {
     expect_true(strict[11] != 15) # detected with strict threshold
     expect_equal(lenient[11], 15) # not detected with lenient threshold
 
+    ## numeric outlier_cutoff
+    expect_equal(replace_outliers(x, span = 3, outlier_cutoff = 2.5)[11], 11)
+
     ## Tukey's median filter.
     x <- c(1:10, 15, 11:20, 20.1) ## reduce min diff to 0.1 to avoid modification
     result <- replace_outliers(x, width = 5, outlier_cutoff = 0)
@@ -174,7 +177,7 @@ test_that("replace_outliers() validates inputs correctly", {
     ) # negative width
     expect_error(
         replace_outliers(x, method = "none", width = 5, outlier_cutoff = -1),
-        "outlier_cutoff.*?integer"
+        "outlier_cutoff.*?positive"
     ) # negative outlier_cutoff
 
     ## halfes all NA
@@ -190,10 +193,6 @@ test_that("replace_outliers() validates inputs correctly", {
         replace_outliers(x, method = "none", span = -1),
         "span.*?numeric"
     ) # negative span
-    expect_error(
-        replace_outliers(x, method = "none", span = 3, outlier_cutoff = -1),
-        "outlier_cutoff.*?integer"
-    ) # negative outlier_cutoff
 
     ## haldes all NA
     x <- rep(NA_real_, 10)
