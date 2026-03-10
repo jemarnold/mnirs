@@ -4,7 +4,7 @@
 \alias{abort_validation}
 \title{validate_numeric abort message construction}
 \usage{
-abort_validation(name, integer = FALSE, msg1 = "", msg2 = ".")
+abort_validation(name, integer = FALSE, msg1 = "", msg2 = "")
 }
 \description{
 validate_numeric abort message construction

@@ -57,9 +57,14 @@ In [R/helpers.R](R/helpers.R):
 - Write core functionality and remind the user tests should be written next.
 - Tests should not be deleted, modified, or added without asking confirmation.
 
-### devtools
+### Devtools & package commands
 
 - Don't run devtool commands, inform the user which commands to run themselves.
+
+## Git Permissions
+
+- Never run commands that modify repository state or remote — this includes `commit`, `push`, `pull`, `merge`, `rebase`, `reset`, `checkout -b`, `branch -d`, `tag`, `stash`, `fetch`, `clone`, or `init`. 
+- Read-only git operations only. Allowed: `status`, `log`, `diff`, `show`, `blame`, `ls-files`.
 
 ### Documentation
 

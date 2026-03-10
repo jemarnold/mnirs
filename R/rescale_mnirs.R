@@ -96,7 +96,7 @@ rescale_mnirs <- function(
     validate_numeric(
         range, 2, 
         msg1 = "two-element", 
-        msg2 = " between {col_blue('range[1], range[2]]')}."
+        msg2 = "between {col_blue('range[1], range[2]]')}."
     )
 
     ## rescale range ================================

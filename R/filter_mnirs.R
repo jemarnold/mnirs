@@ -628,7 +628,7 @@ filter_butter <- function(
     validate_numeric(
         W, W_n, c(0, 1), inclusive = FALSE,
         msg1 = paste0(W_n, "-element positive"),
-        msg2 = " between {col_blue('[0, 1]')}."
+        msg2 = "between {col_blue('[0, 1]')}."
     )
     edges <- match.arg(edges)
 

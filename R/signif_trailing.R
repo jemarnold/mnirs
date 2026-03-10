@@ -216,7 +216,7 @@ signif_pvalue <- function(
     validate_numeric(
         alpha, 1, c(0, 1), FALSE, 
         msg1 = "one-element",
-        msg2 = " between {col_blue('[0, 1]')}"
+        msg2 = "between {col_blue('[0, 1]')}"
     )
 
     if (display == "symbol" && symbol_repeat) {
