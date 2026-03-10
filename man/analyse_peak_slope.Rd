@@ -67,14 +67,20 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 \item{...}{Additional arguments.}
 }
 \value{
-A data frame of model results with rows for each \code{nirs_channel},
-and metadata containing named lists for \code{"fitted"} and \code{"window_idx"}
-values named by \code{nirs_channels}.
+A tibble of model parameter results with one row per \code{nirs_channel}
+(columns: \code{nirs_channels}, \code{slope}, \code{intercept}, \code{y}, \code{t}, \code{idx}).
+Per-channel metadata carried as attributes:
+\itemize{
+\item \code{"predicted"} (named list of data frames for each \code{nirs_channel} with
+columns \code{idx} and \code{fitted}),
+\item \code{"channel_args"} (data.frame, one row per \code{nirs_channel}),
+\item \code{"diagnostics"} (data.frame, one row per \code{nirs_channel}).
+}
 }
 \description{
 Processes the maximum positive or negative local linear slope for each
 \code{nirs_channel} within a data frame and return a data frame of regression
-parameters.
+parameters with additional parameters as metadata via \code{attributes()}.
 }
 \details{
 \subsection{\code{channel_args} per \code{nirs_channel}}{

@@ -324,7 +324,7 @@ peak_slope <- function(
     fitted <- intercept + peak_slope_val * t[window_idx]
 
     ## return
-    list(
+    return(list(
         slope = peak_slope_val,
         intercept = intercept,
         y = y_peak,
@@ -332,7 +332,7 @@ peak_slope <- function(
         idx = peak_idx,
         fitted = fitted,
         window_idx = window_idx
-    )
+    ))
 }
 
 
@@ -340,7 +340,7 @@ peak_slope <- function(
 #'
 #' Processes the maximum positive or negative local linear slope for each
 #' `nirs_channel` within a data frame and return a data frame of regression
-#' parameters.
+#' parameters with additional parameters as metadata via `attributes()`.
 #'
 #' @param channel_args An *optional* `list()` named by `nirs_channels` with 
 #'   unique per-channel arguments to override global default arguments (see
@@ -368,9 +368,14 @@ peak_slope <- function(
 #' )
 #' ```
 #' 
-#' @returns A data frame of model results with rows for each `nirs_channel`,
-#'   and metadata containing named lists for `"fitted"` and `"window_idx"` 
-#'   values named by `nirs_channels`.
+#' @returns A tibble of model parameter results with one row per `nirs_channel`
+#'   (columns: `nirs_channels`, `slope`, `intercept`, `y`,
+#'   `<time_channel>`, `idx`).
+#'   Per-channel metadata carried as attributes:
+#'   - `"predicted"` (named list of data frames for each `nirs_channel` with 
+#'     columns `idx` and `fitted`),
+#'   - `"channel_args"` (data.frame, one row per `nirs_channel`),
+#'   - `"diagnostics"` (data.frame, one row per `nirs_channel`).
 #' 
 #' @keywords internal
 analyse_peak_slope <- function(
@@ -414,41 +419,55 @@ analyse_peak_slope <- function(
     )
 
     ## process =================================
-    ## iterate peak_slope per channel, bind results by row
-    results_df <- do.call(rbind, lapply(nirs_channels, \(.nirs) {
-        ## override defaults with per channel args
+    ## compute per-channel results in a single pass
+    results <- lapply(nirs_channels, \(.nirs) {
         all_args <- utils::modifyList(
             default_args,
             channel_args[[.nirs]] %||% list()
         )
-        
-        ## call peak_slope with per channel args
-        result <- do.call(peak_slope, c(
-                list(x = data[[.nirs]], t = time_vec),
-                all_args
-        ))
-
+        slope_results <- do.call(
+            peak_slope,
+            c(list(x = data[[.nirs]], t = time_vec), all_args)
+        )
         diag <- compute_diagnostics(
-            x = data[[.nirs]][result$window_idx],
-            t = time_vec[result$window_idx],
-            fitted = result$fitted,
+            x = data[[.nirs]][slope_results$window_idx],
+            t = time_vec[slope_results$window_idx],
+            fitted = slope_results$fitted,
+            n_params = 1L,
             verbose = verbose
         )
-        
-        ## return results as a data frame
-        tibble::tibble(
+        scalar <- data.frame(
             nirs_channels = .nirs,
-            slope         = result$slope,
-            intercept     = result$intercept,
-            y             = result$y,
-            t             = result$t,
-            idx           = result$idx,
-            fitted        = list(result$fitted),
-            window_idx    = list(result$window_idx),
-            channel_args  = list(all_args),
-            diagnostics   = list(diag)
+            slope     = slope_results$slope,
+            intercept = slope_results$intercept,
+            y         = slope_results$y, ## predicted response value at idx
+            t         = slope_results$t,
+            idx       = slope_results$idx
         )
-    }))
+        names(scalar)[names(scalar) == "t"] <- time_channel
 
-    return(results_df)
+        list(
+            scalar = scalar,
+            predicted = data.frame(
+                window_idx = slope_results$window_idx,
+                fitted = slope_results$fitted
+            ),
+            diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
+            channel_args = {
+                safe_args <- lapply(all_args, \(.x) {
+                    if (is.null(.x)) NA else .x
+                })
+                data.frame(nirs_channels = .nirs, safe_args)
+            }
+        )
+    })
+    names(results) <- nirs_channels
+
+    ## scalar tibble with per-channel metadata as attributes
+    return(structure(
+        do.call(rbind, lapply(results, `[[`, "scalar")),
+        predicted = lapply(results, `[[`, "predicted"),
+        diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
+        channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))
+    ))
 }

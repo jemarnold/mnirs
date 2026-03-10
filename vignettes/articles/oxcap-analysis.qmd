@@ -351,7 +351,7 @@ slopes_df <- analyse_kinetics(
     mutate(
         ## recalculate time as starting from zero for each trial
         .by = trial,
-        time = t - t[1L],
+        time = time - time[1L],
     ) |>
     select(trial, time, slope)
 

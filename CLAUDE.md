@@ -6,9 +6,10 @@
 
 ## Formatting
 
-- Enforce line limit of 80 characters
-- Comments should briefly explain the "why" of the operation
-- Comments in the form: `## lower case comment`
+- Enforce line limit of 80 characters.
+- Comments should briefly explain the "why" of the operation.
+- Comments in the form: `## lower case comment`.
+- Use explicit `return()` expression at the end of custom functions.
 
 ## Architecture
 

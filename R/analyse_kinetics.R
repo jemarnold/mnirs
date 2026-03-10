@@ -193,13 +193,10 @@ analyse_kinetics.peak_slope <- function(
     data_list <- as_data_list(data)
     interval_names <- names(data_list)
 
-    ## iterate over each data frame in the list
+    ## iterate over each interval
     result_list <- lapply(seq_along(data_list), \(.i) {
-        id <- interval_names[[.i]]
-        df <- data_list[[.i]]
-
         result <- analyse_peak_slope(
-            data = df,
+            data = data_list[[.i]],
             nirs_channels = !!nirs_channels,
             time_channel = !!time_channel,
             width = args$width %||% NULL,
@@ -210,89 +207,24 @@ analyse_kinetics.peak_slope <- function(
             channel_args = channel_args,
             verbose = verbose
         )
-        result$interval <- id
-
-        ## convert each row's channel_args list to a 1-row data frame
-        ## replace NULL values with NA to keep consistent columns
-        result$channel_args <- Map(\(.nirs, .arg) {
-            .arg <- lapply(.arg, \(.x) if (is.null(.x)) NA else .x)
-            data.frame(interval = id, nirs_channels = .nirs, .arg)
-        }, result$nirs_channels, result$channel_args)
-
-        ## convert each row's diagnostics into a 1-row data frame
-        result$diagnostics <- Map(\(.nirs, .diag) {
-            cbind(data.frame(interval = id, nirs_channels = .nirs), .diag)
-        }, result$nirs_channels, result$diagnostics)
-
-        ## append `*_fitted` cols to data for `nirs_channels` at `window_idx`
-        fitted_cols <- Map(\(.nirs, .fitted, .idx) {
-            fitted_vec <- rep(NA_real_, nrow(df))
-            fitted_vec[.idx] <- .fitted
-            fitted_vec
-        }, result$nirs_channels, result$fitted, result$window_idx)
-        names(fitted_cols) <- paste0(result$nirs_channels, "_fitted")
-        augmented_df <- cbind(df, as.data.frame(fitted_cols))
-
-        
-        ## store as single-element list; attach only to the first row
-        result$data <- vector("list", nrow(result))
-        result$data[[1L]] <- augmented_df
-        
-        ## add mnirs metadata back to result$data
-        result$data[[1L]] <- create_mnirs_data(
-            result$data[[1L]],
-            attributes(df)
-        )
-
-        ## remove lists from results
-        result[c("fitted", "window_idx")] <- NULL
-
-        ## return 1-row tibble of results for each data_list
+        result$interval <- interval_names[[.i]]
         result
     })
 
-    ## combine output
-    results <- do.call(rbind, result_list)
-
-    ## extract channel_args into single data frame
-    channel_args_df <- do.call(
-        rbind,
-        c(results$channel_args, make.row.names = FALSE)
-    )
-
-    ## extract diagnostics into single data frame
-    diagnostics_df <- do.call(
-        rbind,
-        c(results$diagnostics, make.row.names = FALSE)
-    )
-
-    ## extract data_list from the first item in each `interval`
-    data_list <- Filter(\(.x) !is.null(.x), results$data)
-    names(data_list) <- interval_names
-
-    ## extract interval_times as list-column (one row per interval)
-    interval_times_df <- data.frame(interval = interval_names)
-    interval_times_df$interval_times <- lapply(data_list, \(.df) {
-        it <- attr(.df, "interval_times")
-        if (is.null(it)) NA_real_ else unlist(it)
-    })
-
-    ## remove lists from results & relocate interval col
-    results[c("channel_args", "data", "diagnostics")] <- NULL
-    results <- results[, c("interval", setdiff(names(results), "interval"))]
+    ## collate into mnirs_kinetics fields
+    gathered <- gather_kinetics(data_list, result_list, interval_names)
 
     ## ! implement find_first_extreme
     ## ! rename `t` to `time_channel`
 
-    ## return
     structure(
         list(
-            method = method, ## method = "peak_slope"
-            results = results, ## tibble of scalar results
-            data = data_list, ## df of data frames
-            interval_times = interval_times_df, ## df of `interval_times` `t` values
-            diagnostics = diagnostics_df, ## df of model diagnostics
-            channel_args = channel_args_df, ## df of channel args provided to `analyse_slope`
+            method = method,
+            results = gathered$results,
+            data = gathered$data,
+            interval_times = gathered$interval_times,
+            diagnostics = gathered$diagnostics,
+            channel_args = gathered$channel_args,
             call = match.call()
         ),
         class = "mnirs_kinetics"
@@ -313,8 +245,6 @@ as_data_list <- function(data) {
         }
 
         ## refactor grouping variables to order of appearance
-        ## TODO should I convert this to Base R if dplyr is required
-        ## TODO for grouping anyway?
         group_vars <- dplyr::group_vars(data)
         df_grp <- data |>
             dplyr::ungroup() |>
@@ -368,6 +298,75 @@ as_data_list <- function(data) {
 }
 
 
+#' Gather per-interval `mnirs_kinetics` into results structure
+#'
+#' Shared helper for `analyse_kinetics.*` methods. Takes a list of
+#' per-interval (per-data frame) kinetics results data frames (each carrying
+#' `"predicted"`, `"channel_args"`, and `"diagnostics"` attributes), the
+#' original `data_list`, and interval names.
+#'
+#' @param data_list Named list of original interval data frames.
+#' @param result_list List of per-interval result data frames with attributes.
+#'
+#' @returns A named list with: `results`, `data`, `interval_times`,
+#'   `diagnostics`, `channel_args`.
+#' @keywords internal
+gather_kinetics <- function(
+    data_list,
+    result_list,
+    interval_names
+) {
+    ## extract per channel attrs; bind to df; add "interval" col; drop rownames
+    flatten_attr <- function(attr_name) {
+        df <- do.call(rbind, lapply(result_list, attr, attr_name))
+        df$interval <- interval_names
+        df <- df[, c("interval", setdiff(names(df), "interval"))]
+        rownames(df) <- NULL
+        df
+    }
+
+    channel_args <- flatten_attr("channel_args")
+    diagnostics <- flatten_attr("diagnostics")
+
+    ## augment `data_list` dfs with `<nirs_channels>_fitted` columns
+    fitted_data_list <- Map(\(.df, .result) {
+        ## extract fitted columns from "predicted" per `nirs_channel`
+        predicted <- attr(.result, "predicted")
+        fitted_cols <- lapply(predicted, \(.pred) {
+            fitted_vec <- rep(NA_real_, nrow(.df))
+            fitted_vec[.pred$window_idx] <- .pred$fitted
+            fitted_vec
+        })
+        names(fitted_cols) <- paste0(names(predicted), "_fitted")
+        ## agument `<nirs_channels>_fitted` columns to df
+        augmented <- cbind(.df, as.data.frame(fitted_cols))
+        ## preserve metadata to augmented data frames
+        create_mnirs_data(augmented, attributes(.df))
+    }, data_list, result_list)
+    names(fitted_data_list) <- interval_names
+
+    ## extract interval_times from each data_list attributes, if exist
+    interval_times_df <- data.frame(interval = interval_names)
+    interval_times_df$interval_times <- lapply(data_list, \(.df) {
+        interval_times <- attr(.df, "interval_times")
+        if (is.null(interval_times)) NA_real_ else unlist(interval_times)
+    })
+
+    ## combine scalar results & relocate interval col to col[1]
+    results <- do.call(rbind, result_list)
+    results <- results[, c("interval", setdiff(names(results), "interval"))]
+    rownames(results) <- NULL
+
+    return(list(
+        results = results,
+        data = fitted_data_list,
+        interval_times = interval_times_df,
+        diagnostics = diagnostics,
+        channel_args = channel_args
+    ))
+}
+
+
 #' Compute model diagnostics
 #'
 #' @param fitted A numeric vector of the predicted values.
@@ -388,7 +387,13 @@ as_data_list <- function(data) {
 #'     `"sigmoidal"` methods.
 #'
 #' @keywords internal
-compute_diagnostics <- function(x, t, fitted, n_params = 1L, verbose = TRUE) {
+compute_diagnostics <- function(
+    x,
+    t,
+    fitted,
+    n_params = 1L,
+    verbose = TRUE
+) {
     complete_cases <- which(is.finite(x) & is.finite(t))
     x <- x[complete_cases]
     t <- t[complete_cases]
@@ -396,13 +401,13 @@ compute_diagnostics <- function(x, t, fitted, n_params = 1L, verbose = TRUE) {
     n_obs <- length(fitted)
 
     return_na <- data.frame(
-        n_obs     = n_obs,
-        r2        = NA_real_,
-        adj_r2    = NA_real_,
+        n_obs = n_obs,
+        r2 = NA_real_,
+        adj_r2 = NA_real_,
         pseudo_r2 = NA_real_,
-        rmse      = NA_real_,
-        snr       = NA_real_,
-        cv_rmse   = NA_real_
+        rmse = NA_real_,
+        snr = NA_real_,
+        cv_rmse = NA_real_
     )
 
     if (length(x) != length(t) || length(x) != n_obs) {
@@ -448,7 +453,7 @@ compute_diagnostics <- function(x, t, fitted, n_params = 1L, verbose = TRUE) {
 
     ## SNR: signal variance to residual variance, in dB
     var_signal <- ss_tot / (n_obs - 1L)
-    var_resid  <- ss_res / (n_obs - 1L)
+    var_resid <- ss_res / (n_obs - 1L)
     snr <- if (is.na(var_signal) || var_resid == 0) {
         NA_real_
     } else {
@@ -460,12 +465,12 @@ compute_diagnostics <- function(x, t, fitted, n_params = 1L, verbose = TRUE) {
     cv_rmse <- if (x_mean == 0) NA_real_ else rmse / abs(x_mean)
 
     data.frame(
-        n_obs     = n_obs,
-        r2        = r2,
-        adj_r2    = adj_r2,
+        n_obs = n_obs,
+        r2 = r2,
+        adj_r2 = adj_r2,
         pseudo_r2 = pseudo_r2,
-        rmse      = rmse,
-        snr       = snr,
-        cv_rmse   = cv_rmse
+        rmse = rmse,
+        snr = snr,
+        cv_rmse = cv_rmse
     )
 }

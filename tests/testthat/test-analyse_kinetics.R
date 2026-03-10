@@ -766,7 +766,7 @@ test_that("analyse_kinetics.peak_slope results have correct columns", {
 
     expected_cols <- c(
         "interval", "nirs_channels", "slope", "intercept",
-        "y", "t", "idx"
+        "y", "time", "idx"
     )
     expect_true(all(expected_cols %in% names(result$results)))
 })
@@ -793,5 +793,63 @@ test_that("analyse_kinetics errors on invalid method", {
     expect_error(
         analyse_kinetics(data, method = "nonexistent"),
         "arg.*should be"
+    )
+})
+
+## benchmark ===========================================================
+test_that("analyse_kinetics.peak_slope benchmark", {
+    ## baselne established from documented example on initial run;
+    ## fails if itr/sec regresses by >10%
+    skip("benchmark baseline test")
+
+    data_list <- read_mnirs(
+        example_mnirs("train.red"),
+        nirs_channels = c(
+            smo2_left = "SmO2 unfiltered",
+            smo2_right = "SmO2 unfiltered"
+        ),
+        time_channel = c(time = "Timestamp (seconds passed)"),
+        zero_time = TRUE,
+        verbose = FALSE
+    ) |>
+        resample_mnirs(verbose = FALSE) |>
+        extract_intervals(
+            start = by_time(368, 1093),
+            event_groups = "distinct",
+            span = c(-20, 90),
+            zero_time = TRUE,
+            verbose = FALSE
+        )
+
+    bm <- bench::mark(
+        analyse_kinetics.peak_slope = suppressWarnings(
+            analyse_kinetics(
+                data_list,
+                nirs_channels = c(smo2_left, smo2_right),
+                method = "peak_slope",
+                span = 10,
+                direction = "auto",
+                verbose = FALSE
+            )
+        ),
+        iterations = 10L,
+        check = FALSE
+    )
+
+    itr_per_sec <- bm$`itr/sec`
+
+    ## baseline: update this value when optimising (seconds)
+    ## run test interactively to calibrate:
+    ##   itr_per_sec will be printed on first failure
+    baseline <- 8
+    threshold <- baseline * 1.10 ## 10% regression budget
+
+    expect_lte(
+        itr_per_sec,
+        threshold,
+        label = sprintf(
+            "%.3f itr/sec exceeds %.0f%% of baseline %.3fs (limit %.3fs)",
+            itr_per_sec, 110, baseline, threshold
+        )
     )
 })
