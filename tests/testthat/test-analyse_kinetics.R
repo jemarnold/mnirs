@@ -7,7 +7,10 @@ test_that("compute_diagnostics returns correct structure", {
     result <- compute_diagnostics(x, t, fitted)
 
     expect_s3_class(result, "data.frame")
-    expect_named(result, c("n_obs", "r2", "adj_r2", "pseudo_r2", "rmse", "snr", "cv_rmse"))
+    expect_named(
+        result,
+        c("n_obs", "r2", "adj_r2", "pseudo_r2", "rmse", "snr", "cv_rmse")
+    )
     expect_type(result$n_obs, "integer")
     expect_type(result$r2, "double")
     expect_type(result$adj_r2, "double")
@@ -64,7 +67,7 @@ test_that("compute_diagnostics pseudo_r2 is valid for a non-linear fit", {
     t <- seq(0, 4 * pi, length.out = 50)
     ## simulate exponential decay with noise
     x <- 20 * exp(-0.3 * t) + rnorm(50, sd = 0.5)
-    fitted <- 20 * exp(-0.3 * t)   ## true curve, no noise
+    fitted <- 20 * exp(-0.3 * t) ## true curve, no noise
 
     result <- compute_diagnostics(x, t, fitted)
 
@@ -93,8 +96,8 @@ test_that("compute_diagnostics handles perfect fit", {
     expect_equal(result$adj_r2, 1)
     expect_equal(result$pseudo_r2, 1)
     expect_equal(result$rmse, 0)
-    expect_true(is.na(result$snr))    ## zero residual variance → NA
-    expect_equal(result$cv_rmse, 0)   ## rmse = 0, x_mean != 0
+    expect_true(is.na(result$snr)) ## zero residual variance → NA
+    expect_equal(result$cv_rmse, 0) ## rmse = 0, x_mean != 0
 })
 
 test_that("compute_diagnostics handles edge cases", {
@@ -126,9 +129,9 @@ test_that("compute_diagnostics handles zero variance in x", {
 
     expect_true(is.na(result$r2))
     expect_equal(result$rmse, 0)
-    expect_true(is.na(result$snr))    ## zero signal variance → NA
+    expect_true(is.na(result$snr)) ## zero signal variance → NA
     expect_true(is.na(result$pseudo_r2)) ## sd(fitted) = 0 → NA
-    expect_equal(result$cv_rmse, 0)   ## rmse = 0, x_mean = 5
+    expect_equal(result$cv_rmse, 0) ## rmse = 0, x_mean = 5
 })
 
 test_that("computes_diagnostics validates input lengths", {
@@ -163,7 +166,7 @@ test_that("compute_diagnostics cv_rmse scales with signal magnitude", {
     t <- seq_len(10)
 
     x1 <- c(10, 11, 10, 12, 11, 10, 13, 11, 10, 12) ## mean ~ 11
-    x2 <- x1 * 10                                     ## mean ~ 110
+    x2 <- x1 * 10 ## mean ~ 110
     fitted1 <- predict(lm(x1 ~ t))
     fitted2 <- predict(lm(x2 ~ t))
 
@@ -273,6 +276,19 @@ test_that("as_data_list errors on invalid input", {
     )
 })
 
+test_that("as_data_list errors when dplyr is unavailable for grouped input", {
+    skip_if_not_installed("dplyr")
+
+    df <- data.frame(x = 1:4, grp = c("A", "A", "B", "B"))
+    grouped <- dplyr::group_by(df, grp)
+
+    with_mocked_bindings(
+        requireNamespace = function(pkg, ...) FALSE,
+        .package = "base",
+        expect_error(as_data_list(grouped), "dplyr.*required for grouped")
+    )
+})
+
 test_that("as_data_list preserves mnirs attributes", {
     df <- create_mnirs_data(
         data.frame(t = 1:5, x = rnorm(5)),
@@ -315,6 +331,112 @@ test_that("as_data_list preserves attributes in grouped split", {
 })
 
 
+## safe_channel_args ===================================================
+test_that("safe_channel_args returns 1-row data frame", {
+    args <- list(width = 10, direction = "up")
+    result <- safe_channel_args("smo2", args)
+
+    expect_s3_class(result, "data.frame")
+    expect_equal(nrow(result), 1L)
+    expect_equal(result$nirs_channels, "smo2")
+    expect_equal(result$width, 10)
+    expect_equal(result$direction, "up")
+})
+
+test_that("safe_channel_args converts NULL to NA", {
+    args <- list(width = 10, control = NULL)
+    result <- safe_channel_args("smo2", args)
+
+    expect_true(is.na(result$control))
+})
+
+test_that("safe_channel_args deparses list values", {
+    args <- list(
+        monoexp_params = 3,
+        control = list(maxiter = 100, tol = 1e-5)
+    )
+    result <- safe_channel_args("smo2", args)
+
+    expect_type(result$control, "character")
+    expect_match(result$control, "maxiter")
+})
+
+
+## build_na_reults ====================================================
+test_that("build_na_reults returns correct 4-element list", {
+    na_scalar <- data.frame(
+        nirs_channels = NA_character_,
+        slope = NA_real_,
+        intercept = NA_real_
+    )
+    all_args <- list(width = 10, direction = "up")
+
+    result <- build_na_reults(
+        "smo2", na_scalar, all_args, n_params = 1L
+    )
+
+    expect_type(result, "list")
+    expect_named(
+        result, c("scalar", "predicted", "diagnostics", "channel_args")
+    )
+
+    ## scalar inherits template with channel name filled in
+    expect_equal(result$scalar$nirs_channels, "smo2")
+    expect_true(is.na(result$scalar$slope))
+
+    ## predicted has NA placeholders
+    expect_true(is.na(result$predicted$window_idx))
+    expect_true(is.na(result$predicted$fitted))
+
+    ## diagnostics has all-NA values
+    expect_equal(result$diagnostics$nirs_channels, "smo2")
+    expect_true(all(is.na(result$diagnostics$r2)))
+
+    ## channel_args is a 1-row data frame
+    expect_equal(nrow(result$channel_args), 1L)
+    expect_equal(result$channel_args$nirs_channels, "smo2")
+})
+
+
+## build_channel_results ============================================
+test_that("build_channel_results combines channels correctly", {
+    ch1 <- list(
+        scalar = data.frame(nirs_channels = "ch1", slope = 1.0),
+        predicted = data.frame(window_idx = 1:3, fitted = c(1, 2, 3)),
+        diagnostics = data.frame(nirs_channels = "ch1", r2 = 0.95),
+        channel_args = data.frame(nirs_channels = "ch1", width = 10)
+    )
+    ch2 <- list(
+        scalar = data.frame(nirs_channels = "ch2", slope = 2.0),
+        predicted = data.frame(window_idx = 1:3, fitted = c(4, 5, 6)),
+        diagnostics = data.frame(nirs_channels = "ch2", r2 = 0.85),
+        channel_args = data.frame(nirs_channels = "ch2", width = 10)
+    )
+
+    result <- build_channel_results(list(ch1 = ch1, ch2 = ch2))
+
+    ## scalar rows are combined
+    expect_equal(nrow(result), 2L)
+    expect_equal(result$nirs_channels, c("ch1", "ch2"))
+    expect_equal(result$slope, c(1.0, 2.0))
+
+    ## predicted preserved as named list
+    pred <- attr(result, "predicted")
+    expect_type(pred, "list")
+    expect_length(pred, 2L)
+    expect_setequal(vapply(pred, nrow, numeric(1)), 3)
+
+    ## diagnostics combined
+    diag <- attr(result, "diagnostics")
+    expect_equal(nrow(diag), 2L)
+    expect_equal(diag$nirs_channels, c("ch1", "ch2"))
+
+    ## channel_args combined
+    ca <- attr(result, "channel_args")
+    expect_equal(nrow(ca), 2L)
+})
+
+
 ## analyse_kinetics ======================================================
 
 ## helper to create test mnirs data
@@ -341,20 +463,29 @@ create_kinetics_data <- function(
 test_that("analyse_kinetics returns correct structure", {
     data <- create_kinetics_data()
 
+    old <- options(mnirs.verbose = FALSE)
+    on.exit(options(old), add = TRUE)
+
     result <- analyse_kinetics(
         data,
         nirs_channels = "smo2_left",
         method = "peak_slope",
-        width = 5,
-        verbose = FALSE
+        width = 5
     )
 
     expect_type(result, "list")
     expect_s3_class(result, "mnirs_kinetics")
     expect_named(
         result,
-        c("method", "results", "data", "interval_times", "diagnostics",
-          "channel_args", "call")
+        c(
+            "method",
+            "results",
+            "data",
+            "interval_times",
+            "diagnostics",
+            "channel_args",
+            "call"
+        )
     )
     expect_equal(result$method, "peak_slope")
     expect_s3_class(result$results, "data.frame")
@@ -727,8 +858,10 @@ test_that("analyse_kinetics.peak_slope works with grouped data", {
 
     df <- data.frame(
         time = rep(seq(0, 4.9, by = 0.1), 2),
-        smo2 = c(sin(seq(0, 4.9, by = 0.1)) * 10 + 50,
-                 cos(seq(0, 4.9, by = 0.1)) * 10 + 50),
+        smo2 = c(
+            sin(seq(0, 4.9, by = 0.1)) * 10 + 50,
+            cos(seq(0, 4.9, by = 0.1)) * 10 + 50
+        ),
         group = rep(c("A", "B"), each = 50)
     )
     df <- create_mnirs_data(
@@ -765,8 +898,13 @@ test_that("analyse_kinetics.peak_slope results have correct columns", {
     )
 
     expected_cols <- c(
-        "interval", "nirs_channels", "slope", "intercept",
-        "y", "time", "idx"
+        "interval",
+        "nirs_channels",
+        "slope",
+        "intercept",
+        "y",
+        "time",
+        "idx"
     )
     expect_true(all(expected_cols %in% names(result$results)))
 })
@@ -784,7 +922,6 @@ test_that("analyse_kinetics captures call", {
 
     expect_true(!is.null(result$call))
     expect_equal(class(result$call), "call")
-    
 })
 
 test_that("analyse_kinetics errors on invalid method", {
@@ -794,6 +931,274 @@ test_that("analyse_kinetics errors on invalid method", {
         analyse_kinetics(data, method = "nonexistent"),
         "arg.*should be"
     )
+})
+
+## analyse_kinetics.monoexponential ====================================
+## helper: create monoexponential test data with known parameters
+create_monoexp_data <- function(
+    A = 50,
+    B = 80,
+    tau = 5,
+    TD = 5,
+    n = 60,
+    sample_rate = 1,
+    noise_sd = 0.5,
+    channels = "smo2",
+    seed = 42
+) {
+    set.seed(seed)
+    t <- seq(0, (n - 1) / sample_rate, length.out = n)
+    x <- monoexponential(t, A, B, tau, TD) + rnorm(n, 0, noise_sd)
+
+    df <- stats::setNames(
+        data.frame(t, x),
+        c("time", channels[1])
+    )
+    if (length(channels) > 1) {
+        for (ch in channels[-1]) {
+            df[[ch]] <- monoexponential(
+                t,
+                A + 5,
+                B + 5,
+                tau,
+                TD
+            ) +
+                rnorm(n, 0, noise_sd)
+        }
+    }
+
+    create_mnirs_data(
+        df,
+        nirs_channels = channels,
+        time_channel = "time",
+        sample_rate = sample_rate
+    )
+}
+
+test_that("analyse_kinetics.monoexponential returns correct structure", {
+    data <- create_monoexp_data()
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    expect_type(result, "list")
+    expect_s3_class(result, "mnirs_kinetics")
+    expect_equal(result$method, "monoexponential")
+    expect_named(
+        result,
+        c(
+            "method",
+            "results",
+            "data",
+            "interval_times",
+            "diagnostics",
+            "channel_args",
+            "call"
+        )
+    )
+})
+
+test_that("monoexponential results have correct coefficient columns", {
+    data <- create_monoexp_data()
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    expected_cols <- c(
+        "interval",
+        "nirs_channels",
+        "A",
+        "B",
+        "tau",
+        "TD",
+        "k",
+        "half_time"
+    )
+    expect_true(all(expected_cols %in% names(result$results)))
+})
+
+test_that("monoexponential recovers known parameters", {
+    A <- 50
+    B <- 80
+    tau <- 5
+
+    data <- create_monoexp_data(
+        A = A,
+        B = B,
+        tau = tau,
+        n = 100,
+        noise_sd = 0.3
+    )
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    coefs <- result$results
+    expect_equal(coefs$A, A, tolerance = 1)
+    expect_equal(coefs$B, B, tolerance = 1)
+    expect_equal(coefs$tau, tau, tolerance = 1)
+    expect_true(is.na(coefs$TD))
+    expect_equal(coefs$k, 1 / coefs$tau, tolerance = 1e-6)
+    expect_equal(coefs$half_time, coefs$tau * log(2), tolerance = 1e-6)
+
+    ## 4-parameter
+    TD <- 10
+    data <- create_monoexp_data(
+        A = A,
+        B = B,
+        tau = tau,
+        TD = TD,
+        n = 100,
+        noise_sd = 0.3
+    )
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 4,
+        verbose = FALSE
+    )
+
+    coefs <- result$results
+    expect_equal(coefs$A, A, tolerance = 2)
+    expect_equal(coefs$B, B, tolerance = 2)
+    expect_equal(coefs$tau, tau, tolerance = 2)
+    expect_equal(coefs$TD, TD, tolerance = 1)
+})
+
+
+test_that("monoexponential works with multiple channels", {
+    nirs_channels <- c("smo2_left", "smo2_right")
+    data <- create_monoexp_data(channels = nirs_channels)
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = nirs_channels,
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    expect_equal(nrow(result$results), 2L)
+    expect_equal(result$results$nirs_channels, nirs_channels)
+    expect_length(attr(result$data[[1]], "nirs_channels"), 2L)
+    expect_named(
+        result$data[[1]],
+        c("time", nirs_channels, paste0(nirs_channels, "_fitted"))
+    )
+})
+
+test_that("monoexponential works with list input", {
+    df1 <- create_monoexp_data(seed = 1)
+    df2 <- create_monoexp_data(seed = 2)
+
+    ## ! not working when df1 & df2 have different nirs_channels
+
+    result <- analyse_kinetics(
+        list(A = df1, B = df2),
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    expect_equal(nrow(result$results), 2L)
+    expect_equal(result$results$interval, c("A", "B"))
+    expect_length(result$data, 2L)
+})
+
+test_that("monoexponential adds fitted columns to data", {
+    data <- create_monoexp_data()
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    aug <- result$data[[1]]
+    expect_true("smo2_fitted" %in% names(aug))
+    expect_type(aug$smo2_fitted, "double")
+    ## fitted values should be close to original
+    expect_true(cor(aug$smo2, aug$smo2_fitted, use = "complete") > 0.9)
+})
+
+test_that("monoexponential diagnostics contain expected columns", {
+    data <- create_monoexp_data()
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        monoexp_params = 3,
+        verbose = FALSE
+    )
+
+    diag <- result$diagnostics
+    expect_true(all(
+        c("nirs_channels", "n_obs", "r2", "adj_r2", "rmse") %in% names(diag)
+    ))
+    expect_true(diag$r2 > 0.9)
+})
+
+test_that("monoexponential returns NA for failed fit", {
+    ## only 3 observations for a 3-param model (needs >= 5)
+    data <- create_monoexp_data(n = 3, noise_sd = 0.1)
+
+    expect_warning(
+        result <- analyse_kinetics(
+            data,
+            nirs_channels = "smo2",
+            method = "monoexponential",
+            monoexp_params = 3,
+            verbose = TRUE
+        ),
+        "nls failed for.*smo2.*interval_1"
+    )
+
+    expect_true(is.na(result$results$A))
+    expect_true(is.na(result$results$tau))
+})
+
+test_that("monoexponential channel_args override defaults", {
+    data <- create_monoexp_data(channels = c("ch1", "ch2"))
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = c("ch1", "ch2"),
+        method = "monoexponential",
+        monoexp_params = 3,
+        channel_args = list(ch2 = list(monoexp_params = 4)),
+        verbose = FALSE
+    )
+
+    ## results
+    expect_equal(is.na(result$results$TD), c(TRUE, FALSE))
+
+    ## channel args
+    ca <- result$channel_args
+    ch1_row <- ca[ca$nirs_channels == "ch1", ]
+    ch2_row <- ca[ca$nirs_channels == "ch2", ]
+    expect_equal(ch1_row$monoexp_params, 3L)
+    expect_equal(ch2_row$monoexp_params, 4L)
 })
 
 ## benchmark ===========================================================
@@ -821,20 +1226,22 @@ test_that("analyse_kinetics.peak_slope benchmark", {
             verbose = FALSE
         )
 
-    bm <- bench::mark(
-        analyse_kinetics.peak_slope = suppressWarnings(
-            analyse_kinetics(
-                data_list,
-                nirs_channels = c(smo2_left, smo2_right),
-                method = "peak_slope",
-                span = 10,
-                direction = "auto",
-                verbose = FALSE
-            )
-        ),
-        iterations = 10L,
-        check = FALSE
-    )
+    # for (i in seq_len(3)) {
+    #     bm <- bench::mark(
+    #         analyse_kinetics.peak_slope = suppressWarnings(
+    #             analyse_kinetics(
+    #                 data_list,
+    #                 nirs_channels = c(smo2_left, smo2_right),
+    #                 method = "peak_slope",
+    #                 span = 10,
+    #                 direction = "auto",
+    #                 verbose = FALSE
+    #             )
+    #         ),
+    #         iterations = 10L,
+    #         check = FALSE
+    #     )
+    # }
 
     itr_per_sec <- bm$`itr/sec`
 
@@ -849,7 +1256,10 @@ test_that("analyse_kinetics.peak_slope benchmark", {
         threshold,
         label = sprintf(
             "%.3f itr/sec exceeds %.0f%% of baseline %.3fs (limit %.3fs)",
-            itr_per_sec, 110, baseline, threshold
+            itr_per_sec,
+            110,
+            baseline,
+            threshold
         )
     )
 })

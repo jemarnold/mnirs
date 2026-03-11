@@ -393,7 +393,6 @@ analyse_peak_slope <- function(
 ) {
     ## validation ==============================================
     validate_mnirs_data(data)
-    metadata <- attributes(data)
     nirs_channels <- validate_nirs_channels(
         enquo(nirs_channels), data, verbose = FALSE
     )
@@ -438,11 +437,11 @@ analyse_peak_slope <- function(
         )
         scalar <- data.frame(
             nirs_channels = .nirs,
-            slope     = slope_results$slope,
-            intercept = slope_results$intercept,
-            y         = slope_results$y, ## predicted response value at idx
-            t         = slope_results$t,
-            idx       = slope_results$idx
+            slope         = slope_results$slope,
+            intercept     = slope_results$intercept,
+            y             = slope_results$y, ## predicted response value at idx
+            t             = slope_results$t,
+            idx           = slope_results$idx
         )
         names(scalar)[names(scalar) == "t"] <- time_channel
 
@@ -453,21 +452,11 @@ analyse_peak_slope <- function(
                 fitted = slope_results$fitted
             ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
-            channel_args = {
-                safe_args <- lapply(all_args, \(.x) {
-                    if (is.null(.x)) NA else .x
-                })
-                data.frame(nirs_channels = .nirs, safe_args)
-            }
+            channel_args = safe_channel_args(.nirs, all_args)
         )
     })
     names(results) <- nirs_channels
 
     ## scalar tibble with per-channel metadata as attributes
-    return(structure(
-        do.call(rbind, lapply(results, `[[`, "scalar")),
-        predicted = lapply(results, `[[`, "predicted"),
-        diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
-        channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))
-    ))
+    return(build_channel_results(results))
 }

@@ -289,6 +289,23 @@ test_that("plot.mnirs works with extract_intervals and faceting", {
     expect_no_error(ggplot2::ggplot_build(p_facet))
 })
 
+test_that("plot.mnirs uses waiver() for breaks when scales is unavailable", {
+    x <- mock_mnirs()
+
+    with_mocked_bindings(
+        is_installed = function(pkg, ...) FALSE,
+        .package = "rlang",
+        {
+            p <- plot(x, time_labels = FALSE)
+            x_scale <- p$scales$get_scales("x")
+            y_scale <- p$scales$get_scales("y")
+            ## both break functions fall back to waiver()
+            expect_true(ggplot2::is_waiver(x_scale$breaks))
+            expect_true(ggplot2::is_waiver(y_scale$breaks))
+        }
+    )
+})
+
 test_that("plot.mnirs moxy.perfpro works", {
     df <- read_mnirs(
         file_path = example_mnirs("moxy_ramp"),

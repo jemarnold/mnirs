@@ -22,8 +22,8 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 An updated model object with remaining free coefficients.
 }
 \description{
-Re-fit a model with fixed coefficients provided as additional arguments. Fixed
-coefficients are not modified when optimising for best fit.
+Re-fit a model with fixed coefficients provided as additional arguments.
+Fixed coefficients are not modified when optimising for best fit.
 }
 \details{
 If no fixed coefficients are supplied, or if a coefficient does not exist

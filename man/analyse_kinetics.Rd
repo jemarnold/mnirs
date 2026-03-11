@@ -3,13 +3,14 @@
 \name{analyse_kinetics}
 \alias{analyse_kinetics}
 \alias{analyse_kinetics.peak_slope}
+\alias{analyse_kinetics.monoexponential}
 \title{Analyse mNIRS kinetics across intervals}
 \usage{
 analyse_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("peak_slope"),
+  method = c("peak_slope", "monoexponential"),
   channel_args = list(),
   verbose = TRUE,
   ...
@@ -40,7 +41,9 @@ method. See \emph{Details}.
 \item{\code{"half_time"}}{\verb{<under development>}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
 arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}.}
-\item{\code{"monoexponential"}}{\verb{<under development>}.}
+\item{\code{"monoexponential"}}{Monoexponential curve fit via
+\code{\link[stats:nls]{stats::nls()}} with arguments: \code{monoexp_params} for \code{\link[=SS_monoexp3]{SS_monoexp3()}} or
+\code{\link[=SS_monoexp4]{SS_monoexp4()}}; \code{algorithm}; \code{control}.}
 \item{\code{"sigmoidal"}}{\verb{<under development>}.}
 }}
 
@@ -126,7 +129,22 @@ calculation over partial windows with at least 2 valid samples.}
 
 \subsection{\code{method = "monoexponential"}}{
 
-\verb{<under development>}
+The \code{"monoexponential"} method fits a self-starting monoexponential
+curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp3]{SS_monoexp3()}}
+(3-parameter: A, B, tau) or \code{\link[=SS_monoexp4]{SS_monoexp4()}} (4-parameter: A, B, tau,
+TD). See \code{\link[=monoexponential]{monoexponential()}} for model equations.
+
+Additional arguments (\code{...}) accepted when
+\code{method = "monoexponential"}:
+
+\describe{
+\item{\code{monoexp_params}}{Integer; \code{3L} (\emph{default}) for \code{\link[=SS_monoexp3]{SS_monoexp3()}} or
+\code{4L} for \code{\link[=SS_monoexp4]{SS_monoexp4()}}.}
+\item{\code{algorithm}}{Character; \code{\link[stats:nls]{stats::nls()}} algorithm — \code{"default"}
+(\emph{default}), \code{"plinear"}, or \code{"port"}.}
+\item{\code{control}}{A named list of control parameters passed to
+\code{\link[stats:nls.control]{stats::nls.control()}}, e.g. \code{list(maxiter = 100)}.}
+}
 }
 
 \subsection{\code{method = "sigmoidal"}}{

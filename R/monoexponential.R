@@ -25,7 +25,7 @@
 #'
 #' @returns A numeric vector of predicted values the same length as
 #'  the predictor variable `t`.
-#' 
+#'
 #' @seealso [SS_monoexp3()], [SS_monoexp4()]
 #'
 #' @examples
@@ -33,16 +33,16 @@
 #' t <- 1:60
 #'
 #' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
 #'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
 #' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
-#' 
+#'
 #' model
 #'
 #' y <- predict(model, data)
-#' 
+#'
 #' y
 #'
 #' \donttest{
@@ -163,7 +163,7 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' The 3-parameter model is recommended for small samples or when no obvious
 #'   time delay exists, as it converges more reliably.
 #'
-#' @returns [SS_monoexp3()] and [SS_monoexp4()]: A numeric vector of predicted 
+#' @returns [SS_monoexp3()] and [SS_monoexp4()]: A numeric vector of predicted
 #'   values the same length as the predictor variable `t`.
 #'
 #' @seealso [monoexponential()], [stats::nls()], [stats::selfStart()],
@@ -174,16 +174,16 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' t <- 1:60
 #'
 #' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
 #'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
 #' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
-#' 
+#'
 #' model
 #'
 #' y <- predict(model, data)
-#' 
+#'
 #' y
 #'
 #' \donttest{
@@ -206,18 +206,17 @@ SS_monoexp3 <- selfStart(
 )
 
 
-
 #' Self-starting monoexponential models
 #'
 #' [SS_monoexp4()] supports a 4-parameter [monoexponential()] function
 #' (A, B, tau, TD).
-#' 
-#' @param TD A numeric parameter for the time delay before the onset of 
+#'
+#' @param TD A numeric parameter for the time delay before the onset of
 #'   exponential response, in units of the predictor variable `t`.
-#' 
+#'
 #' @usage
 #' SS_monoexp4(t, A, B, tau, TD)
-#' 
+#'
 #' @name SS_monoexp
 #' @rdname SS_monoexp
 #' @order 2
@@ -229,12 +228,167 @@ SS_monoexp4 <- selfStart(
 )
 
 
+#' Analyse monoexponential kinetics per channel
+#'
+#' Fit a monoexponential curve to each `nirs_channel` within a single
+#' data frame. Called by [analyse_kinetics()] when
+#' `method = "monoexponential"`.
+#'
+#' @param monoexp_params Integer; `3L` (*default*) for [SS_monoexp3()]
+#'   (A, B, tau) or `4L` for [SS_monoexp4()] (A, B, tau, TD).
+#' @param algorithm Character; [stats::nls()] algorithm — `"default"`
+#'   (*default*), `"plinear"`, or `"port"`.
+#' @param control A named list of control parameters passed to
+#'   [stats::nls.control()].
+#' @inheritParams analyse_peak_slope
+#'
+#' @returns A data frame of model coefficients (one row per channel)
+#'   with attributes `"predicted"`, `"diagnostics"`, `"channel_args"`.
+#'
+#' @keywords internal
+analyse_monoexponential <- function(
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    monoexp_params = 3L,
+    algorithm = c("default", "plinear", "port"),
+    control = list(),
+    channel_args = list(),
+    verbose = TRUE,
+    ...
+) {
+    ## validation ==================================================
+    validate_mnirs_data(data)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose = FALSE
+    )
+    time_channel <- validate_time_channel(enquo(time_channel), data)
+    validate_numeric(
+        monoexp_params, elements = 1, range = c(3, 4), integer = TRUE,
+        msg1 = "one-element", 
+        msg2 = "either {col_blue('3')} or {col_blue('4')}."
+    )
+    algorithm <- match.arg(algorithm)
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
+    }
+    args <- list(...)
+
+    time_vec <- data[[time_channel]]
+    interval_names <- args$interval_names %||% "data"
+
+    default_args <- list(
+        monoexp_params = monoexp_params,
+        algorithm = algorithm,
+        control = control,
+        verbose = verbose,
+        ...
+    )
+
+    ## NA scaffold for convergence failure
+    na_scalar <- data.frame(
+        nirs_channels = NA_character_,
+        A = NA_real_,
+        B = NA_real_,
+        tau = NA_real_,
+        TD = NA_real_,
+        k = NA_real_,
+        half_time = NA_real_
+    )
+
+    ## process =====================================================
+    results <- lapply(nirs_channels, \(.nirs) {
+        all_args <- utils::modifyList(
+            default_args,
+            channel_args[[.nirs]] %||% list()
+        )
+        n_params <- all_args$monoexp_params
+
+        nirs_vec <- data[[.nirs]]
+        complete <- which(is.finite(nirs_vec) & is.finite(time_vec))
+
+        x_fit <- nirs_vec[complete]
+        t_fit <- time_vec[complete]
+        fit_data <- data.frame(.x = x_fit, .t = t_fit)
+
+        ## select selfStart formula
+        nls_formula <- if (n_params == 3L) {
+            .x ~ SS_monoexp3(.t, A, B, tau)
+        } else {
+            .x ~ SS_monoexp4(.t, A, B, tau, TD)
+        }
+
+        ## build nls control
+        ctrl <- if (length(all_args$control) > 0) {
+            do.call(stats::nls.control, all_args$control)
+        } else {
+            stats::nls.control()
+        }
+
+        ## fit nls; return NA on convergence failure
+        model <- tryCatch(
+            stats::nls(
+                formula = nls_formula,
+                data = fit_data,
+                algorithm = all_args$algorithm,
+                control = ctrl
+            ),
+            error = \(e) {
+                if (verbose) {
+                    cli_warn(c(
+                        "!" = "nls failed for {.field {(.nirs)}} in \\
+                        {.field {interval_names}}: {conditionMessage(e)}"
+                    ))
+                }
+                NULL
+            }
+        )
+
+        if (is.null(model)) {
+            return(
+                build_na_reults(.nirs, na_scalar, all_args, n_params)
+            )
+        }
+
+        fitted_vals <- stats::predict(model)
+        coefs <- stats::coef(model)
+        tau_val <- coefs[["tau"]]
+
+        scalar <- data.frame(
+            nirs_channels = .nirs,
+            A = coefs[["A"]],
+            B = coefs[["B"]],
+            tau = tau_val,
+            TD = if (n_params == 4L) coefs[["TD"]] else NA_real_,
+            k = 1 / tau_val,
+            half_time = tau_val * log(2)
+        )
+
+        diag <- compute_diagnostics(
+            x_fit,
+            t_fit,
+            fitted_vals,
+            n_params = as.integer(n_params),
+            verbose = verbose
+        )
+
+        list(
+            scalar = scalar,
+            predicted = data.frame(window_idx = complete, fitted = fitted_vals),
+            diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
+            channel_args = safe_channel_args(.nirs, all_args)
+        )
+    })
+    names(results) <- nirs_channels
+
+    return(build_channel_results(results))
+}
 
 
 #' Update a model object with Fixed coefficients
 #'
-#' Re-fit a model with fixed coefficients provided as additional arguments. Fixed
-#' coefficients are not modified when optimising for best fit.
+#' Re-fit a model with fixed coefficients provided as additional arguments. 
+#' Fixed coefficients are not modified when optimising for best fit.
 #'
 #' @param model An existing model object from `lm`, `nls`, `glm`, and others.
 #' @param data An *optional* data frame to supply manually if original data
@@ -255,9 +409,11 @@ SS_monoexp4 <- selfStart(
 fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     current_coefs <- coef(model)
     fixed_coefs <- list(...)
+    fixed_names <- names(fixed_coefs)
+    current_names <- names(current_coefs)
 
     ## validate coefs
-    invalid <- setdiff(names(fixed_coefs), names(current_coefs))
+    invalid <- setdiff(fixed_names, current_names)
     if (verbose && length(invalid) > 0) {
         cli_warn(c(
             "x" = "Unknown model coefficient{?s}: {.val {invalid}}.",
@@ -276,15 +432,13 @@ fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
         )
 
         if (is.null(data)) {
-            cli_abort(c(
-                "x" = "Cannot retrieve original model data frame."
-            ))
+            cli_abort(c("x" = "Cannot retrieve original model data frame."))
         }
     }
 
     ## get coef list from model and update in place from fixed coefs
     ## remove fixed coef from the start list
-    start_coefs <- current_coefs[!names(current_coefs) %in% names(fixed_coefs)]
+    start_coefs <- current_coefs[!current_names %in% fixed_names]
 
     if (length(start_coefs) == 0) {
         cli_abort(c(
@@ -297,10 +451,10 @@ fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     new_formula <- do.call(substitute, list(stats::formula(model), fixed_coefs))
 
     ## update the model
-    stats::update(
+    return(stats::update(
         model,
         formula = new_formula,
         start = start_coefs,
         data = data
-    )
+    ))
 }

@@ -266,8 +266,11 @@ test_that("SS_monoexp3() handles OxCap with few data points better than SSasymp"
 })
 
 
+## analyse_monoexponential() ===========================================
+## ! add analyse_monoexponential() tests
 
-# fix_coefs() =========================================================
+
+## fix_coefs() =========================================================
 
 test_that("fix_coefs() fixes single parameter correctly", {
     set.seed(303)
