@@ -10,6 +10,9 @@
 #' @param format Indicates how to treat `digits`. Either the desired number of
 #'   decimal places (`format = "digits"`, the *default*) or significant figures
 #'   after the decimal place (`format = "signif"`).
+#' @param trim Logical; if `TRUE` (the *default*), caps `digits` at the
+#'   number of decimal places or significant figures observed in `x`. If
+#'   `FALSE`, uses the exact `digits` value.
 #'
 #' @details
 #' `signif_trailing()`
@@ -28,32 +31,25 @@
 signif_trailing <- function(
     x,
     digits = 2L,
-    format = c("digits", "signif", "max_digits", "max_signif")
+    format = c("digits", "signif"),
+    trim = TRUE
 ) {
     format <- match.arg(format)
-
-    if (format == "max_digits") {
-        validate_numeric(x)
-        validate_numeric(digits, 1, c(0, Inf), integer = TRUE)
-        digits <- min(digits, count_max_decimals(x))
-        format <- "digits"
-    }
-
-    if (format == "max_signif") {
-        validate_numeric(x)
-        validate_numeric(digits, 1, c(0, Inf), FALSE, TRUE)
-        digits <- min(digits, count_max_sigfigs(x))
-        format <- "signif"
-    }
 
     if (format == "digits") {
         validate_numeric(x)
         validate_numeric(digits, 1, c(-Inf, Inf), FALSE, TRUE)
+        if (trim) {
+            digits <- min(digits, count_decimals(x))
+        }
         formatC_x <- round(x, digits)
         formatC_format <- "f"
     } else {
         ## if whole digits >= sig figs, return rounded whole number
-        ## x & digits already validated
+        ## x & digits validated by `signif_whole`
+        if (trim) {
+            digits <- min(digits, count_sigfigs(x))
+        }
         formatC_x <- signif_whole(x, digits)
         formatC_format <- "fg"
     }
@@ -74,14 +70,14 @@ signif_trailing <- function(
 #'
 #' Returns the largest number of decimal places present in any finite,
 #' non-NA element of `x`. Used internally by `signif_trailing()` for
-#' `format = "max_digits"`.
+#' `format = "digits"`.
 #'
 #' @param x A numeric vector.
 #'
 #' @returns A single non-negative integer.
 #'
 #' @keywords internal
-count_max_decimals <- function(x) {
+count_decimals <- function(x) {
     ## handle non-finite elements where nchar shouldn't apply
     x <- x[is.finite(x)]
     if (length(x) == 0L) {
@@ -102,14 +98,14 @@ count_max_decimals <- function(x) {
 #'
 #' Returns the largest number of significant figures present in any finite,
 #' non-NA element of `x`. Used internally by `signif_trailing()` for
-#' `format = "max_signif"`.
+#' `format = "signif"`.
 #'
 #' @param x A numeric vector.
 #'
 #' @returns A single positive integer (minimum 1).
 #'
 #' @keywords internal
-count_max_sigfigs <- function(x) {
+count_sigfigs <- function(x) {
     ## handle non-finite elements where nchar shouldn't apply
     x <- x[is.finite(x) & x != 0]
     if (length(x) == 0L) {
@@ -232,11 +228,11 @@ signif_pvalue <- function(
         threshold <- alpha
     }
 
-    ifelse(
+    return(ifelse(
         x < threshold,
         sprintf("< %.*f", digits, threshold),
-        signif_trailing(x, digits, format)
-    )
+        signif_trailing(x, digits, format, trim = FALSE)
+    ))
 }
 
 

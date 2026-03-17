@@ -249,10 +249,10 @@ df_summary |>
     mutate(
         ## format numeric values for pretty printing
         across(matches(c("mean", "min", "max")), \(.x) {
-            mnirs:::signif_trailing(.x, 1, "max_digits")
+            mnirs:::signif_trailing(.x, 1, "digits")
         }),
         across(matches("slope"), \(.x) {
-            mnirs:::signif_trailing(.x, 3, "max_signif")
+            mnirs:::signif_trailing(.x, 3, "signif")
         }),
     ) |>
     ## print to document
@@ -414,10 +414,10 @@ extract_parameters(df_list) |>
     mutate(
         ## format numeric values for pretty printing
         across(matches(c("mean", "min", "max")), \(.x) {
-            mnirs:::signif_trailing(.x, 1, "max_digits")
+            mnirs:::signif_trailing(.x, 1, "digits")
         }),
         across(matches("slope"), \(.x) {
-            mnirs:::signif_trailing(.x, 3, "max_signif")
+            mnirs:::signif_trailing(.x, 3, "signif")
         }),
     ) |>
     ## print to document

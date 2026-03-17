@@ -46,7 +46,7 @@ print.mnirs_kinetics <- function(x, ...) {
     results[, numeric_cols] <- lapply(
         results[, numeric_cols, drop = FALSE], 
         \(.x) {
-            .x[!is.na(.x)] <- signif_trailing(.x[!is.na(.x)], 4L, "max_signif")
+            .x[!is.na(.x)] <- signif_trailing(.x[!is.na(.x)], 4L, "signif")
             .x[is.na(.x)] <- "NA"
             .x
     })
