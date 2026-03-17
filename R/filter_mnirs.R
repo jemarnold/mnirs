@@ -305,7 +305,6 @@ filter_mnirs.butterworth <- function(
         data, time_channel, sample_rate, verbose
     )
     type <- match.arg(type)
-    edges <- list(...)$edges %||% "rev" ## default filter_butter(edges)
 
     if (is.null(c(W, fc))) {
         cli_abort(c(
@@ -344,7 +343,14 @@ filter_mnirs.butterworth <- function(
 
     ## processing ==========================================
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_butter(.x, order, W, type, edges, na.rm)
+        filter_butter(
+            .x,
+            order,
+            W,
+            type,
+            list(...)$edges %||% "rev",
+            na.rm
+        )
     })
 
     ## Metadata =================================
@@ -384,6 +390,7 @@ filter_mnirs.moving_average <- function(
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
+    args <- list(...)
 
     ## processing ==========================================
     time_vec <- data[[time_channel]]
@@ -394,8 +401,10 @@ filter_mnirs.moving_average <- function(
             t = time_vec,
             width = width,
             span = span,
-            bypass_checks = TRUE,
-            verbose = verbose
+            verbose = verbose,
+            args$partial %||% FALSE,
+            args$na.rm %||% FALSE,
+            bypass_checks = TRUE
         )
     })
 

@@ -61,11 +61,6 @@ In [R/helpers.R](R/helpers.R):
 
 - Don't run devtool commands, inform the user which commands to run themselves.
 
-## Git Permissions
-
-- Never run commands that modify repository state or remote — this includes `commit`, `push`, `pull`, `merge`, `rebase`, `reset`, `checkout -b`, `branch -d`, `tag`, `stash`, `fetch`, `clone`, or `init`. 
-- Read-only git operations only. Allowed: `status`, `log`, `diff`, `show`, `blame`, `ls-files`.
-
 ### Documentation
 
 - Roxygen2 with markdown enabled (`Roxygen: list(markdown = TRUE)`). 
