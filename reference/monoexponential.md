@@ -62,7 +62,7 @@ set.seed(13)
 t <- 1:60
 
 ## create an exponential curve with random noise
-x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
     rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 

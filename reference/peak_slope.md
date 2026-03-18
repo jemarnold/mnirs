@@ -27,8 +27,8 @@ peak_slope(
 
 - t:
 
-  An *optional* numeric vector of the predictor variable; time or sample
-  number. *Defaults* to indices of `t = seq_along(x)`.
+  An *optional* numeric vector of the predictor variable (time or sample
+  number). Default is `seq_along(x)`.
 
 - width:
 

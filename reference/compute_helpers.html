@@ -97,8 +97,8 @@ indicating outliers of <code>x</code> within a list of rolling sample windows
 
 
 <dl><dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>An <em>optional</em> numeric vector of the predictor variable; time
-or sample number. <em>Defaults</em> to indices of <code>t = seq_along(x)</code>.</p></dd>
+<dd><p>An <em>optional</em> numeric vector of the predictor variable (time or
+sample number). Default is <code>seq_along(x)</code>.</p></dd>
 
 
 <dt id="arg-idx">idx<a class="anchor" aria-label="anchor" href="#arg-idx"></a></dt>
@@ -142,11 +142,14 @@ vectors for the sample indices of local rolling windows.</p></dd>
 
 
 <dt id="arg-outlier-cutoff">outlier_cutoff<a class="anchor" aria-label="anchor" href="#arg-outlier-cutoff"></a></dt>
-<dd><p>An integer for the local outlier threshold, as
-number of standard deviations above and below the local median. The
-<em>default</em> <code>outlier_cutoff = NULL</code> will not replace outliers.
-<code>outlier_cutoff = 3</code> is the standard replacement threshold following
-Pearson's rule.</p></dd>
+<dd><p>A numeric value for the local outlier threshold, as
+the number of standard deviations from the local median.</p><ul><li><p>Default <code>NULL</code> will not replace outliers.</p></li>
+<li><p>Lower values are more sensitive and flag more outliers; higher values
+are more conservative.</p></li>
+<li><p><code>outlier_cutoff = 3</code> Pearson's 3 sigma edit rule.
+<code>outlier_cutoff = 2</code> approximates a Tukey-style 1.5×IQR rule.
+<code>outlier_cutoff = 0</code> Tukey's median filter.</p></li>
+</ul></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

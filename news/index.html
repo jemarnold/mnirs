@@ -41,6 +41,20 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.1" id="mnirs-051">mnirs 0.5.1<a class="anchor" aria-label="anchor" href="#mnirs-051"></a></h2>
+<div class="section level4">
+<h4 id="updated-core-functions-0-5-1">Updated core functions<a class="anchor" aria-label="anchor" href="#updated-core-functions-0-5-1"></a></h4>
+<ul><li><p><code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> now has better automated channel detection logic for <em>“Artinis” / “Oxysoft”</em> file formats. <code>nirs_channels</code> and <code>time_channel</code> can be left blank to automatically <em>“sample”</em>, <em>“time”</em> (from <code>sample_rate</code>), and nirs channel <em>“2”</em>.</p></li>
+<li><p><code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code> now accepts numeric <code>outlier_cutoff</code> values for more precise outlier detection thresholds (previously was integers only). Documentation also updated.</p></li>
+<li><p><code><a href="../reference/filter_mnirs.html">filter_mnirs.moving_average()</a></code> now accepts <code>partial</code> argument passed to <code><a href="../reference/filter_ma.html">filter_ma()</a></code>, which permits calculation with fewer than the specified number of valid samples in the local window, allowing calculation when missing values (<code>NA</code>) are present.</p></li>
+</ul></div>
+<div class="section level4">
+<h4 id="updated-internal-functions-0-5-1">Updated internal functions<a class="anchor" aria-label="anchor" href="#updated-internal-functions-0-5-1"></a></h4>
+<ul><li>
+<code><a href="../reference/signif_trailing.html">signif_trailing()</a></code> simplified with <code>format = c("digits", "signif")</code> printing the lesser of either <code>digits</code> or the max decimal/sigfigs in the data, by default when new arg: <code>trim = TRUE</code>. Otherwise <code>trim = FALSE</code> will print to the exact number of <code>digits</code>.</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="mnirs-050">mnirs 0.5.0<a class="anchor" aria-label="anchor" href="#mnirs-050"></a></h2>
 <div class="section level4">
 <h4 id="updated-core-functions-0-5-0">Updated core functions<a class="anchor" aria-label="anchor" href="#updated-core-functions-0-5-0"></a></h4>

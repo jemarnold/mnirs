@@ -57,15 +57,13 @@ shift_mnirs(
 
 - width:
 
-  An integer defining the local window in number of samples around `idx`
-  in which to perform the operation., between
-  `[idx - floor(width/2), idx + floor(width/2)]`.
+  An integer defining the local window in number of samples centred on
+  `idx`, between `[idx - floor(width/2), idx + floor(width/2)]`.
 
 - span:
 
   A numeric value defining the local window timespan around `idx` in
-  which to perform the operation. In units of `time_channel` or `t`,
-  between `[t - span/2, t + span/2]`.
+  units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 
 - position:
 

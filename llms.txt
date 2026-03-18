@@ -380,7 +380,9 @@ Clean, filter, and process data.
   [`replace_invalid()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
   [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
   [`replace_missing()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
-  : Replace outliers, invalid values, and missing values
+  :
+
+  Replace outliers, invalid, and missing values in *mnirs* data
 
 - [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
   :

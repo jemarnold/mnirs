@@ -326,7 +326,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-09 00:29:00 UTC"
+#> [1] "2026-03-18 00:29:00 UTC"
 ```
 
 ## 🧹 Replace local outliers, invalid values, and missing values

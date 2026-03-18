@@ -107,14 +107,14 @@ channels will be shifted, e.g. shift all values up by 10 units.</p></dd>
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
 <dd><p>An integer defining the local window in number of samples
-around <code>idx</code> in which to perform the operation., between
+centred on <code>idx</code>, between
 <code>[idx - floor(width/2), idx + floor(width/2)]</code>.</p></dd>
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>A numeric value defining the local window timespan around <code>idx</code>
-in which to perform the operation. In units of <code>time_channel</code> or <code>t</code>,
-between <code>[t - span/2, t + span/2]</code>.</p></dd>
+<dd><p>A numeric value defining the local window timespan around
+<code>idx</code> in units of <code>time_channel</code> or <code>t</code>, between
+<code>[t - span/2, t + span/2]</code>.</p></dd>
 
 
 <dt id="arg-position">position<a class="anchor" aria-label="anchor" href="#arg-position"></a></dt>

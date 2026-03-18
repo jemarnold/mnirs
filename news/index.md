@@ -1,5 +1,35 @@
 # Changelog
 
+## mnirs 0.5.1
+
+#### Updated core functions
+
+- [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+  now has better automated channel detection logic for *“Artinis” /
+  “Oxysoft”* file formats. `nirs_channels` and `time_channel` can be
+  left blank to automatically *“sample”*, *“time”* (from `sample_rate`),
+  and nirs channel *“2”*.
+
+- [`replace_outliers()`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)
+  now accepts numeric `outlier_cutoff` values for more precise outlier
+  detection thresholds (previously was integers only). Documentation
+  also updated.
+
+- [`filter_mnirs.moving_average()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md)
+  now accepts `partial` argument passed to
+  [`filter_ma()`](https://jemarnold.github.io/mnirs/reference/filter_ma.md),
+  which permits calculation with fewer than the specified number of
+  valid samples in the local window, allowing calculation when missing
+  values (`NA`) are present.
+
+#### Updated internal functions
+
+- [`signif_trailing()`](https://jemarnold.github.io/mnirs/reference/signif_trailing.md)
+  simplified with `format = c("digits", "signif")` printing the lesser
+  of either `digits` or the max decimal/sigfigs in the data, by default
+  when new arg: `trim = TRUE`. Otherwise `trim = FALSE` will print to
+  the exact number of `digits`.
+
 ## mnirs 0.5.0
 
 #### Updated core functions

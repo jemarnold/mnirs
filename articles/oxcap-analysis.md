@@ -241,7 +241,6 @@ before that as trial 1, and after that as trial 2.
 df <- read_mnirs(
     file_path = example_mnirs("portamon-oxcap.xlsx"),
     nirs_channels = c(thb = 2, hhb = 3, o2hb = 4), ## identify and rename NIRS channels
-    time_channel = c(sample = 1),
     event_channel = c(event = "col_6") ## specify the unnamed events column
 )
 

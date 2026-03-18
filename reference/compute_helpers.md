@@ -41,8 +41,8 @@ compute_valid_neighbours(
 
 - t:
 
-  An *optional* numeric vector of the predictor variable; time or sample
-  number. *Defaults* to indices of `t = seq_along(x)`.
+  An *optional* numeric vector of the predictor variable (time or sample
+  number). Default is `seq_along(x)`.
 
 - idx:
 
@@ -86,11 +86,17 @@ compute_valid_neighbours(
 
 - outlier_cutoff:
 
-  An integer for the local outlier threshold, as number of standard
-  deviations above and below the local median. The *default*
-  `outlier_cutoff = NULL` will not replace outliers.
-  `outlier_cutoff = 3` is the standard replacement threshold following
-  Pearson's rule.
+  A numeric value for the local outlier threshold, as the number of
+  standard deviations from the local median.
+
+  - Default `NULL` will not replace outliers.
+
+  - Lower values are more sensitive and flag more outliers; higher
+    values are more conservative.
+
+  - `outlier_cutoff = 3` Pearson's 3 sigma edit rule.
+    `outlier_cutoff = 2` approximates a Tukey-style 1.5×IQR rule.
+    `outlier_cutoff = 0` Tukey's median filter.
 
 - verbose:
 

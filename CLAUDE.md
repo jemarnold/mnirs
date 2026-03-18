@@ -11,9 +11,11 @@ physiology, sports science, and clinical rehabilitation.
 
 ## Formatting
 
-- Enforce line limit of 80 characters
-- Comments should briefly explain the “why” of the operation
-- Comments in the form: `## lower case comment`
+- Enforce line limit of 80 characters.
+- Comments should briefly explain the “why” of the operation.
+- Comments in the form: `## lower case comment`.
+- Use explicit [`return()`](https://rdrr.io/r/base/function.html)
+  expression at the end of custom functions.
 
 ## Architecture
 
@@ -106,7 +108,7 @@ In [R/helpers.R](https://jemarnold.github.io/mnirs/R/helpers.R): -
 - Tests should not be deleted, modified, or added without asking
   confirmation.
 
-### devtools
+### Devtools & package commands
 
 - Don’t run devtool commands, inform the user which commands to run
   themselves.

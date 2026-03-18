@@ -37,20 +37,18 @@ filter_moving_average(
 
 - t:
 
-  An *optional* numeric vector of the predictor variable; time or sample
-  number. *Defaults* to indices of `t = seq_along(x)`.
+  An *optional* numeric vector of the predictor variable (time or sample
+  number). Default is `seq_along(x)`.
 
 - width:
 
-  An integer defining the local window in number of samples around `idx`
-  in which to perform the operation., between
-  `[idx - floor(width/2), idx + floor(width/2)]`.
+  An integer defining the local window in number of samples centred on
+  `idx`, between `[idx - floor(width/2), idx + floor(width/2)]`.
 
 - span:
 
   A numeric value defining the local window timespan around `idx` in
-  which to perform the operation. In units of `time_channel` or `t`,
-  between `[t - span/2, t + span/2]`.
+  units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 
 - partial:
 

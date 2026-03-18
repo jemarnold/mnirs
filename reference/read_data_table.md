@@ -5,11 +5,5 @@ Read data table from raw data
 ## Usage
 
 ``` r
-read_data_table(
-  data,
-  nirs_channels,
-  time_channel = NULL,
-  event_channel = NULL,
-  header_row = 1L
-)
+read_data_table(data, nirs_channels, header_row = 1L)
 ```

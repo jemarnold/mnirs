@@ -13,11 +13,7 @@ or significance symbols.
 ## Usage
 
 ``` r
-signif_trailing(
-  x,
-  digits = 2L,
-  format = c("digits", "signif", "max_digits", "max_signif")
-)
+signif_trailing(x, digits = 2L, format = c("digits", "signif"), trim = TRUE)
 
 signif_whole(x, digits = 5L)
 
@@ -49,6 +45,12 @@ signif_pvalue(
   Indicates how to treat `digits`. Either the desired number of decimal
   places (`format = "digits"`, the *default*) or significant figures
   after the decimal place (`format = "signif"`).
+
+- trim:
+
+  Logical; if `TRUE` (the *default*), caps `digits` at the number of
+  decimal places or significant figures observed in `x`. If `FALSE`,
+  uses the exact `digits` value.
 
 - display:
 
