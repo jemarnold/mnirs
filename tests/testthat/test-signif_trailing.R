@@ -154,16 +154,20 @@ test_that("trim reduces to observed significant figures", {
     expect_equal(
         signif_trailing(c(0.3, -0.4, 0.5), digits = 5, format = "signif"),
         signif_trailing(
-            c(0.3, -0.4, 0.5), digits = 1,
-            format = "signif", trim = FALSE
+            c(0.3, -0.4, 0.5),
+            digits = 1,
+            format = "signif",
+            trim = FALSE
         )
     )
     ## c(1.23, 4.5) max sigfigs = 3
     expect_equal(
         signif_trailing(c(1.23, 4.5), digits = 5, format = "signif"),
         signif_trailing(
-            c(1.23, 4.5), digits = 3,
-            format = "signif", trim = FALSE
+            c(1.23, 4.5),
+            digits = 3,
+            format = "signif",
+            trim = FALSE
         )
     )
 })
@@ -172,8 +176,10 @@ test_that("trim caps at digits when data has more sigfigs", {
     expect_equal(
         signif_trailing(c(1.2345, 6.789), digits = 3, format = "signif"),
         signif_trailing(
-            c(1.2345, 6.789), digits = 3,
-            format = "signif", trim = FALSE
+            c(1.2345, 6.789),
+            digits = 3,
+            format = "signif",
+            trim = FALSE
         )
     )
 })
@@ -183,8 +189,10 @@ test_that("trim handles whole numbers (signif)", {
     expect_equal(
         signif_trailing(c(100, 123), digits = 5, format = "signif"),
         signif_trailing(
-            c(100, 123), digits = 3,
-            format = "signif", trim = FALSE
+            c(100, 123),
+            digits = 3,
+            format = "signif",
+            trim = FALSE
         )
     )
 })
@@ -193,8 +201,10 @@ test_that("trim handles NA and special values (signif)", {
     expect_equal(
         signif_trailing(c(1.5, NA, Inf), digits = 5, format = "signif"),
         signif_trailing(
-            c(1.5, NA, Inf), digits = 2,
-            format = "signif", trim = FALSE
+            c(1.5, NA, Inf),
+            digits = 2,
+            format = "signif",
+            trim = FALSE
         )
     )
 })
@@ -204,8 +214,10 @@ test_that("trim handles zero-only finite values (signif)", {
     expect_equal(
         signif_trailing(c(0, 0, 0), digits = 5, format = "signif"),
         signif_trailing(
-            c(0, 0, 0), digits = 1,
-            format = "signif", trim = FALSE
+            c(0, 0, 0),
+            digits = 1,
+            format = "signif",
+            trim = FALSE
         )
     )
 })

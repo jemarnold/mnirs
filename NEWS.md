@@ -2,6 +2,20 @@
     * Currently implemented for `method = "peak_slope"` only, with other methods coming soon.
     * Includes generic `print()` function.
     
+# mnirs 0.5.1
+
+### Updated core functions
+
+* `read_mnirs()` now has better automated channel detection logic for *"Artinis" / "Oxysoft"* file formats. `nirs_channels` and `time_channel` can be left blank to automatically *"sample"*, *"time"* (from `sample_rate`), and nirs channel *"2"*.
+
+* `replace_outliers()` now accepts numeric `outlier_cutoff` values for more precise outlier detection thresholds (previously was integers only). Documentation also updated.
+
+* `filter_mnirs.moving_average()` now accepts `partial` argument passed to `filter_ma()`, which permits calculation with fewer than the specified number of valid samples in the local window, allowing calculation when missing values (`NA`) are present.
+
+### Updated internal functions
+
+* `signif_trailing()` simplified with `format = c("digits", "signif")` printing the lesser of either `digits` or the max decimal/sigfigs in the data, by default when new arg: `trim = TRUE`. Otherwise `trim = FALSE` will print to the exact number of `digits`.
+
 
 # mnirs 0.5.0
 
