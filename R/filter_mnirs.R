@@ -305,6 +305,7 @@ filter_mnirs.butterworth <- function(
         data, time_channel, sample_rate, verbose
     )
     type <- match.arg(type)
+    edges <- list(...)$edges %||% "rev"
 
     if (is.null(c(W, fc))) {
         cli_abort(c(
@@ -343,14 +344,7 @@ filter_mnirs.butterworth <- function(
 
     ## processing ==========================================
     data[nirs_channels] <- lapply(data[nirs_channels], \(.x) {
-        filter_butter(
-            .x,
-            order,
-            W,
-            type,
-            list(...)$edges %||% "rev",
-            na.rm
-        )
+        filter_butter(.x, order, W, type, edges, na.rm)
     })
 
     ## Metadata =================================
