@@ -77,7 +77,7 @@ model
 #>  residual sum-of-squares: 455.5
 #> 
 #> Number of iterations to convergence: 5 
-#> Achieved convergence tolerance: 7.481e-07
+#> Achieved convergence tolerance: 7.619e-07
 
 y <- predict(model, data)
 

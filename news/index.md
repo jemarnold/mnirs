@@ -1,5 +1,13 @@
 # Changelog
 
+## mnirs 0.5.2
+
+#### Shiny app
+
+- Update online shiny app hosted at
+  <https://jemarnold-mnirs-app.share.connect.posit.cloud/> with basic
+  reading and pre-processing functionality.
+
 ## mnirs 0.5.1
 
 #### Updated core functions
