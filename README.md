@@ -35,21 +35,20 @@ remotes::install_github("jemarnold/mnirs")
 ## Online App
 
 A very basic implementation of this package is hosted at
-<https://jem-arnold.shinyapps.io/mnirs/> and can currently be used for
-reading and pre-processing mNIRS data.
+<https://jemarnold-mnirs-app.share.connect.posit.cloud/> and can
+currently be used for reading and pre-processing mNIRS data.
 
 [![mnirs processing shiny
-app](man/figures/README-shinyapp.jpg)](https://jem-arnold.shinyapps.io/mnirs/)
+app](man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
 
 ## Usage
 
-A more detailed vignette for common usage can be found here: [Reading
-and Cleaning Data with
+A more detailed vignette for common usage can be found on the package
+website: [Reading and Cleaning Data with
 {mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
 
 *{mnirs}* is currently in experimental development and functionality may
-change! Stay updated on development and follow releases at
-[github.com/jemarnold/mnirs](https://github.com/jemarnold/mnirs).
+change. Stay updated on development and follow releases !
 
 *{mnirs}* is designed to process NIRS data, but it can be used to read,
 clean, and process other time series datasets which require many of the
@@ -144,7 +143,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-08 00:29:00 PST"
+#> [1] "2026-03-17 00:29:00 PDT"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
