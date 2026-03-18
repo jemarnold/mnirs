@@ -39,7 +39,7 @@ A very basic implementation of this package is hosted at
 reading and pre-processing mNIRS data.
 
 [![mnirs processing shiny
-app](man/figures/README-shinyapp.jpg)](https://jem-arnold.shinyapps.io/mnirs/)
+app](man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
 
 ## Usage
 
@@ -144,7 +144,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-08 00:29:00 PST"
+#> [1] "2026-03-17 00:29:00 PDT"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values

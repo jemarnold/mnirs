@@ -41,7 +41,7 @@ remotes::install_github("jemarnold/mnirs")
 
 A very basic implementation of this package is hosted at https://jem-arnold.shinyapps.io/mnirs/ and can currently be used for reading and pre-processing mNIRS data.
 
-[![mnirs processing shiny app](man/figures/README-shinyapp.jpg)](https://jem-arnold.shinyapps.io/mnirs/)
+[![mnirs processing shiny app](man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
 
 ## Usage
 
