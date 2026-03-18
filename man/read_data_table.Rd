@@ -4,13 +4,7 @@
 \alias{read_data_table}
 \title{Read data table from raw data}
 \usage{
-read_data_table(
-  data,
-  nirs_channels,
-  time_channel = NULL,
-  event_channel = NULL,
-  header_row = 1L
-)
+read_data_table(data, nirs_channels, header_row = 1L)
 }
 \description{
 Read data table from raw data

@@ -30,16 +30,16 @@ filter_moving_average(
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of the predictor variable; time
-or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
+sample number). Default is \code{seq_along(x)}.}
 
 \item{width}{An integer defining the local window in number of samples
-around \code{idx} in which to perform the operation., between
+centred on \code{idx}, between
 \verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value defining the local window timespan around \code{idx}
-in which to perform the operation. In units of \code{time_channel} or \code{t},
-between \verb{[t - span/2, t + span/2]}.}
+\item{span}{A numeric value defining the local window timespan around
+\code{idx} in units of \code{time_channel} or \code{t}, between
+\verb{[t - span/2, t + span/2]}.}
 
 \item{partial}{A logical specifying whether to perform the operation over a
 subset of available data within the local rolling window (\code{TRUE}), or

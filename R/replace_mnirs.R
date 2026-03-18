@@ -1,69 +1,71 @@
-#' Replace outliers, invalid values, and missing values
+#' Replace outliers, invalid, and missing values in *{mnirs}* data
 #'
-#' @description
-#' `replace_mnirs()` detects and removes local outliers and specified invalid
-#' values in `nirs_channels` within an *"mnirs"* data frame, and replaces
-#' missing `NA` values via interpolation methods.
+#' Detect and replace local outliers, specified invalid values, and missing
+#' `NA` values across `nirs_channels` within an *"mnirs"* data frame.
+#' `replace_mnirs()` operates on a data frame, extending the vectorised 
+#' functions:.
 #'
 #' @param invalid_values A numeric vector of invalid values to be replaced,
-#'   e.g. `invalid_values = c(0, 100, 102.3)`. The *default* `NULL` will not
-#'   replace invalid values.
+#'   e.g. `invalid_values = c(0, 100, 102.3)`. Default `NULL` will not replace
+#'   invalid values.
+#'
 #' @param invalid_above,invalid_below Numeric values each specifying cutoff
 #'   values, above or below which (respectively) will be replaced, *inclusive*
 #'   of the specified cutoff values.
-#' @param outlier_cutoff An integer for the local outlier threshold, as
-#'   number of standard deviations above and below the local median. The
-#'   *default* `outlier_cutoff = NULL` will not replace outliers.
-#'   `outlier_cutoff = 3` is the standard replacement threshold following
-#'   Pearson's rule.
+#'
+#' @param outlier_cutoff A numeric value for the local outlier threshold, as
+#'   the number of standard deviations from the local median.
+#'   - Default `NULL` will not replace outliers.
+#'   - Lower values are more sensitive and flag more outliers; higher values
+#'     are more conservative.
+#'   - `outlier_cutoff = 3` Pearson's 3 sigma edit rule.
+#'     `outlier_cutoff = 2` approximates a Tukey-style 1.5×IQR rule.
+#'     `outlier_cutoff = 0` Tukey's median filter.
+#'
 #' @param width An integer defining the local window in number of samples
-#'   around `idx` in which to perform the operation., between
+#'   centred on `idx`, between
 #'   `[idx - floor(width/2), idx + floor(width/2)]`.
-#' @param span A numeric value defining the local window timespan around `idx`
-#'   in which to perform the operation. In units of `time_channel` or `t`,
-#'   between `[t - span/2, t + span/2]`.
-#' @param method A character string indicating how to handle replacement
-#'   (see *Details* for more on each method):
+#'
+#' @param span A numeric value defining the local window timespan around
+#'   `idx` in units of `time_channel` or `t`, between
+#'   `[t - span/2, t + span/2]`.
+#'
+#' @param method A character string indicating how to handle `NA`
+#'   replacement (see *Details*):
 #'   \describe{
-#'      \item{`"linear"`}{Replaces `NA`s via linear interpolation (the
-#'      *default*) using [stats::approx()].}
-#'      \item{`"median"`}{Replaces `NA`s with the local median of valid values
-#'      within a centred window defined by either `width` or `span`.}
-#'      \item{`"locf"`}{(*"Last observation carried forward"*). Replaces
-#'      `NA`s with the most recent valid non-`NA` value to the left for
-#'      trailing `NA`s or to the right for leading `NA`s, using
-#'      [stats::approx()].}
-#'      \item{`"none"`}{Returns `NA`s without replacement.}
+#'     \item{`"linear"`}{Replaces `NA`s via linear interpolation (the
+#'     *default*) using [stats::approx()].}
+#'     \item{`"median"`}{Replaces `NA`s with the local median of valid
+#'     values within a centred window defined by `width` or `span`.}
+#'     \item{`"locf"`}{*"Last observation carried forward"*. Replaces
+#'     `NA`s with the most recent valid value to the left for trailing
+#'     `NA`s or to the right for leading `NA`s, using
+#'     [stats::approx()].}
+#'     \item{`"none"`}{Returns `NA`s without replacement.}
 #'   }
+#'
 #' @inheritParams validate_mnirs
 #'
 #' @details
-#' `replace_mnirs()` is a wrapper function expanding the vectorised `replace_*`
-#'   functions to operate on a data frame.
+#' ## Automatic channel detection
 #'
-#' `nirs_channels` and `time_channel` can be retrieved automatically from
-#'   `data` of class *"mnirs"* which has been processed with `{mnirs}`,
-#'   if not defined explicitly.
+#' `nirs_channels` and `time_channel` are retrieved automatically from
+#' *"mnirs"* metadata if not specified explicitly. Columns in `data` not
+#' listed in `nirs_channels` are passed through unprocessed.
 #'
-#' Channels (columns) in `data` not explicitly defined in `nirs_channels`
-#'   will be passed through untouched to the output data frame.
+#' ## The rolling window
 #'
-#' `replace_outliers` and `replace_missing` when `method = "median"` require
-#'   defining a local rolling window in which to perform outlier detection and
-#'   median interpolation. This window can be specified by either `width` as
-#'   the number of samples centred on `idx` between
-#'   `[idx - floor(width/2), idx + floor(width/2)]`, or `span` as the timespan
-#'   in units of `time_channel` centred on `idx` between
-#'   `[t - span/2, t + span/2]`. Specifying `width` is often faster than
-#'   `span`. A partial moving average will be calculated at the edges of the
-#'   data.
+#' `replace_outliers()` and `replace_missing()` (when `method = "median"`)
+#' operate over a local rolling window for outlier detection and median
+#' interpolation. The window is specified by either `width` as the number
+#' of samples, or `span` as the timespan in units of `time_channel`.
+#' A partial window is calculated at the edges of the data.
 #'
-#' @returns
-#' `replace_mnirs()` returns a [tibble][tibble::tibble-package] of class
-#'   *"mnirs"* with metadata available with `attributes()`.
+#' @returns `replace_mnirs()` return a [tibble][tibble::tibble-package] of 
+#' class `"mnirs"` with metadata available via `attributes()`.
 #'
 #' @examples
-#' ## vectorised operation
+#' ## vectorised operations
 #' x <- c(1, 999, 3, 4, 999, 6)
 #' replace_invalid(x, invalid_values = 999, width = 3, method = "median")
 #'
@@ -81,39 +83,40 @@
 #'
 #' ## clean data
 #' data_clean <- replace_mnirs(
-#'     data,               ## blank channels will be retrieved from metadata
-#'     invalid_values = 0, ## known invalid values in the data
-#'     invalid_above = 90, ## remove data spikes above 90
-#'     outlier_cutoff = 3, ## recommended default value
-#'     width = 10,         ## window to detect and replace outliers/missing values
-#'     method = "linear"   ## linear interpolation over `NA`s
+#'     data,                  ## channels retrieved from metadata
+#'     invalid_values = 0,    ## known invalid values in the data
+#'     invalid_above = 90,    ## remove data spikes above 90
+#'     outlier_cutoff = 3,    ## Pearson's 3 sigma edit rule
+#'     width = 10,            ## window for outlier detection and interpolation
+#'     method = "linear"      ## linear interpolation over NAs
 #' )
-#' 
+#'
 #' \donttest{
-#'     if (requireNamespace("ggplot2", quietly = TRUE)) {
-#'         ## plot original and show where values have been replaced
-#'         ## ignore warning about replacing the existing colour scale
-#'         plot(data, time_labels = TRUE) +
-#'             ggplot2::scale_colour_manual(
-#'                 name = NULL,
-#'                 breaks = c("smo2", "replaced"),
-#'                 values = palette_mnirs(2)
-#'             ) +
-#'             ggplot2::geom_point(
-#'                 data = data[data_clean$smo2 != data$smo2, ],
-#'                 ggplot2::aes(y = smo2, colour = "replaced"), na.rm = TRUE
-#'             ) +
-#'             ggplot2::geom_line(
-#'                 data = {
-#'                     data_clean[!is.na(data$smo2), "smo2"] <- NA
-#'                     data_clean
-#'                 },
-#'                 ggplot2::aes(y = smo2, colour = "replaced"), 
-#'                 linewidth = 1, na.rm = TRUE
-#'             )
-#'     }
+#'   if (requireNamespace("ggplot2", quietly = TRUE)) {
+#'     ## plot original and show where values have been replaced
+#'     ## ignore warning about replacing the existing colour scale
+#'     plot(data, time_labels = TRUE) +
+#'       ggplot2::scale_colour_manual(
+#'         name = NULL,
+#'         breaks = c("smo2", "replaced"),
+#'         values = palette_mnirs(2)
+#'       ) +
+#'       ggplot2::geom_point(
+#'         data = data[data_clean$smo2 != data$smo2, ],
+#'         ggplot2::aes(y = smo2, colour = "replaced"),
+#'         na.rm = TRUE
+#'       ) +
+#'       ggplot2::geom_line(
+#'         data = {
+#'           data_clean[!is.na(data$smo2), "smo2"] <- NA
+#'           data_clean
+#'         },
+#'         ggplot2::aes(y = smo2, colour = "replaced"),
+#'         linewidth = 1, na.rm = TRUE
+#'       )
+#'   }
 #' }
-#' 
+#'
 #' @rdname replace_mnirs
 #' @order 1
 #' @export
@@ -208,31 +211,32 @@ replace_mnirs <- function(
 }
 
 
-#' Replace Invalid Values
+#' Replace invalid values
 #'
-#' `replace_invalid()` detects specified invalid values or cutoff values in
-#' vector data and replaces them with the local median value or `NA`.
+#' `replace_invalid()` detects specified invalid values or range cutoffs in a 
+#' numeric vector and replace them with the local median value or `NA`.
 #'
 #' @param x A numeric vector of the response variable.
-#' @param t An *optional* numeric vector of the predictor variable; time
-#'   or sample number. *Defaults* to indices of `t = seq_along(x)`.
-#' @param bypass_checks A logical allowing wrapper functions to bypass redundant
-#'   checks and validations.
+#'
+#' @param t An *optional* numeric vector of the predictor variable (time or
+#'   sample number). Default is `seq_along(x)`.
+#'
+#' @param bypass_checks Logical allowing wrapper functions to bypass
+#'   redundant checks and validations.
+#'
 #' @inheritParams replace_mnirs
 #'
 #' @details
-#' `replace_invalid()` can be used to remove known invalid values in
-#'   exported data.
+#' ## Replace invalid values with with `replace_invalid()`
+#' 
+#' Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
+#' Data ranges can be replaced with cutoff values specified by `invalid_above` 
+#' and `invalid_below`, where any values higher or lower than the specified 
+#' cutoff values (respectively) will be replaced, *inclusive* of the cutoff 
+#' values themselves.
 #'
-#' - Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
-#'   Data ranges can be replaced with cutoff values specified by `invalid_above`
-#'   and `invalid_below`, where any values higher or lower than the specified
-#'   cutoff values (respectively) will be replaced, *inclusive* of the cutoff
-#'   values themselves.
-#'
-#' @returns
-#' `replace_invalid()` return a numeric vector the same length as `x` with
-#' invalid values replaced.
+#' @returns `replace_invalid()` returns a numeric vector the same length as 
+#' `x` with invalid values replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 2
@@ -309,39 +313,45 @@ replace_invalid <- function(
 }
 
 
-#' Replace Local Outliers
+#' Replace local outliers
 #'
-#' `replace_outliers()` detects local outliers in vector data with a Hampel
-#' filter and replaces with the local median value or `NA`.
+#' `replace_outliers()` detects local outliers in a numeric vector using a Hampel filter and replaces with the local median value or `NA`.
 #'
 #' @inheritParams replace_invalid
 #'
 #' @details
-#' `replace_outliers()` will compute rolling local median values across `x`,
-#'   defined by either `width` number of samples, or `span` timespan in units
-#'   of `t`. Specifying `width` is often faster than `span`.
+#' ## Outlier detection with `replace_outliers()`
 #'
-#' - Outliers are detected with robust median absolute deviation (MAD) method
-#'   adapted from `pracma::hampel()`. Outliers equal to or less than the
-#'   smallest absolute time series difference in `x` will be excluded, to
-#'   avoid detecting negligible differences as outliers where local data have
-#'   minimal or zero variation.
+#' Rolling local medians are computed across `x` within a window defined
+#' by `width` (number of samples) or `span` (timespan in units of `t`).
 #'
-#' - Values of `x` outside local bounds defined by `outlier_cutoff` are
-#'   identified as local outliers and either removed if `method = "none"`, or
-#'   replaced with the local median value (`method = "median"`, the *default*).
+#' Outliers are detected with robust median absolute deviation (MAD),
+#' adapted from `pracma::hampel()`. Deviations equal to or less than the
+#' smallest absolute time series difference in `x` are excluded, to avoid
+#' flagging negligible differences where local data have minimal or zero
+#' variation.
 #'
-#' - This function will NOT replace `NA` values already existing in the `x`.
-#'   They will be passed along in the returned vector. See `replace_missing()`.
+#' ## Replacement behaviour
 #'
-#' - A high `outlier_cutoff` threshold makes the Hampel filter more forgiving.
-#'   A low `outlier_cutoff` will declare more points to be outliers.
-#'   `outlier_cutoff = 3` corresponds to Pearson's 3 sigma edit rule.
-#'   `outlier_cutoff = 0` corresponds to Tukey's median filter.
-#' 
-#' @returns
-#' `replace_outliers()` return a numeric vector the same length as `x` with
-#' local outliers replaced.
+#' Values of `x` outside the local bounds defined by `outlier_cutoff` are
+#' identified as outliers and either replaced with the local median
+#' (`method = "median"`, the *default*) or set to `NA` (`method = "none"`).
+#'
+#' Existing `NA` values in `x` are *not* replaced. They are passed
+#' through to the returned vector. See [replace_missing()].
+#'
+#' ## Choosing `outlier_cutoff`
+#'
+#' `outlier_cutoff` is the number of (MAD-normalised) standard deviations
+#' from the local median. Higher values are more conservative; lower
+#' values flag more outliers.
+#'   - `outlier_cutoff = 3` — Pearson's 3 sigma edit rule (default).
+#'   - `outlier_cutoff = 2` — approximately Tukey-style 1.5×IQR rule.
+#'   - `outlier_cutoff = 0` — Tukey's median filter (every point
+#'     replaced by local median).
+#'
+#' @returns `replace_outliers()` returns a numeric vector the same length as 
+#' `x` with outliers replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 3
@@ -349,7 +359,7 @@ replace_invalid <- function(
 replace_outliers <- function(
     x,
     t = seq_along(x),
-    outlier_cutoff = 3L,
+    outlier_cutoff = 3,
     width = NULL,
     span = NULL,
     method = c("median", "none"),
@@ -365,8 +375,7 @@ replace_outliers <- function(
         validate_width_span(width, span, verbose)
     }
     validate_numeric(
-        outlier_cutoff, 1, c(0, Inf), integer = TRUE, 
-        msg1 = "one-element positive"
+        outlier_cutoff, 1, c(0, Inf), msg1 = "one-element positive"
     )
     method <- match.arg(method)
 
@@ -396,36 +405,37 @@ replace_outliers <- function(
     return(y)
 }
 
-#' Replace Missing Values
+#' Replace missing values
 #'
-#' `replace_missing()` detects missing values in vector data and replaces
-#' via interpolation methods.
+#' `replace_missing()` detects missing (`NA`) values in a numeric vector and 
+#' replaces via interpolation.
 #'
 #' @param ... Additional arguments.
+#'
 #' @inheritParams replace_invalid
 #'
 #' @details
-#' `replace_missing()` will interpolate across missing values (`NA`s) as
-#'   specified by `method`.
+#' ## Interpolation with `replace_missing()`
 #'
-#' - Leading and trailing `NA`s are replaced by *"nocb"* (*"next observation*
-#'   *carried backward"*) and *"locf"*, respectively, for both `method = `
-#'   `"linear"` and `"locf"`, by applying `rule = 2` (see [stats::approx()]).
+#' `method = "linear"` and `method = "locf"` use [stats::approx()] with
+#' `rule = 2`, so leading `NA`s are filled by *"nocb"* 
+#' (*"next observation carried backward"*) and trailing `NA`s by *"locf"*.
 #'
-#' - `method = "median"` will calculate the local median of valid (non-`NA`)
-#'   values to either side of `NA`s within a window defined by `width` number
-#'   of samples, or a timespan defined by `span` in units of `t` (time). Such
-#'   that sequential `NA`s will all be replaced by the same median value.
+#' `method = "median"` calculates the local median of valid (non-`NA`)
+#' values to either side of `NA`s, within a window defined by `width`
+#' (number of samples) or `span` (timespan in units of `t`). Sequential
+#' `NA`s are all replaced by the same median value.
 #'
-#' - If there are no valid values within `span` to one side of the `NA`
-#'   value(s), it will be replaced with the median of the other side (i.e. for
-#'   leading and trailing `NA`s). If there are no valid values within either
-#'   side of `span`, the first valid sample on either side will be used (i.e.
-#'   equivalent to `replace_missing(x, width = 1)`).
-#' 
-#' @returns
-#' `replace_missing()` return a numeric vector the same length as `x` with
-#' missing values replaced.
+#' ## Edge behaviour for `method = "median"`
+#'
+#' If there are no valid values within `span` to one side of the `NA`,
+#' the median of the other side is used (i.e. for leading and trailing
+#' `NA`s). If there are no valid values within either side, the first
+#' valid sample on either side is used (equivalent to
+#' `replace_missing(x, width = 1)`).
+#'
+#' @returns `replace_missing()` returns a numeric vector the same length as 
+#' `x` with missing values replaced.
 #'
 #' @rdname replace_mnirs
 #' @order 4

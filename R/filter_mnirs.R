@@ -384,6 +384,7 @@ filter_mnirs.moving_average <- function(
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
+    args <- list(...)
 
     ## processing ==========================================
     time_vec <- data[[time_channel]]
@@ -394,8 +395,10 @@ filter_mnirs.moving_average <- function(
             t = time_vec,
             width = width,
             span = span,
-            bypass_checks = TRUE,
-            verbose = verbose
+            verbose = verbose,
+            args$partial %||% FALSE,
+            args$na.rm %||% FALSE,
+            bypass_checks = TRUE
         )
     })
 
@@ -628,7 +631,7 @@ filter_butter <- function(
     validate_numeric(
         W, W_n, c(0, 1), inclusive = FALSE,
         msg1 = paste0(W_n, "-element positive"),
-        msg2 = " between {col_blue('[0, 1]')}."
+        msg2 = "between {col_blue('[0, 1]')}."
     )
     edges <- match.arg(edges)
 

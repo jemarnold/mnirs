@@ -21,7 +21,7 @@ validate_numeric(
   integer = FALSE,
   invalid = FALSE,
   msg1 = "",
-  msg2 = "."
+  msg2 = ""
 )
 
 validate_mnirs_data(data, ncol = 2L)

@@ -67,14 +67,14 @@ NULL
 
 #' validate_numeric abort message construction
 #' @keywords internal
-abort_validation <- function(name, integer = FALSE, msg1 = "", msg2 = ".") {
+abort_validation <- function(name, integer = FALSE, msg1 = "", msg2 = "") {
     type <- if (integer) "integer" else "numeric"
 
     cli_abort(c(
         "x" = paste0(
             "{.arg {name}} must be a valid ",
             msg1,
-            " {.cls {type}}",
+            " {.cls {type}} ",
             msg2
         )
     ))
@@ -90,7 +90,7 @@ validate_numeric <- function(
     integer = FALSE,
     invalid = FALSE,
     msg1 = "",
-    msg2 = "."
+    msg2 = ""
 ) {
     ## pass through NULL
     if (is.null(x)) {

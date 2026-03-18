@@ -1306,13 +1306,15 @@ test_that("group_intervals custom single-interval group retains original attrs",
 test_that("extract_intervals validates start/end args", {
     data <- create_mock_mnirs(n = 100, sample_rate = 10)
 
+    old <- options(mnirs.verbose = FALSE)
+    on.exit(options(old), add = TRUE)
+
     ## unsupported types still error via as_mnirs_interval
     expect_error(
         extract_intervals(
             data,
             start = TRUE,
-            span = c(-1, 1),
-            verbose = FALSE
+            span = c(-1, 1)
         ),
         "start.*must be"
     )
@@ -1321,8 +1323,7 @@ test_that("extract_intervals validates start/end args", {
         extract_intervals(
             data,
             end = list(1),
-            span = c(-1, 1),
-            verbose = FALSE
+            span = c(-1, 1)
         ),
         "end.*must be"
     )

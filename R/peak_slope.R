@@ -208,7 +208,7 @@ rolling_slope <- function(
 #'   \item{`y`}{The response value predicted from `x` at `t`.}
 #'   \item{`t`}{The time value at the index of the peak slope window.}
 #'   \item{`idx`}{The index position of the peak slope.}
-#'   \item{`fitted`}{A numeric vector of predicted values from `x` over 
+#'   \item{`fitted`}{A numeric vector of predicted values from `x` over
 #'   `t[window_idx]` from the peak slope and intercept.}
 #'   \item{`window_idx`}{An integer vector of indices for the peak slope
 #'   window.}
@@ -324,7 +324,7 @@ peak_slope <- function(
     fitted <- intercept + peak_slope_val * t[window_idx]
 
     ## return
-    list(
+    return(list(
         slope = peak_slope_val,
         intercept = intercept,
         y = y_peak,
@@ -332,5 +332,5 @@ peak_slope <- function(
         idx = peak_idx,
         fitted = fitted,
         window_idx = window_idx
-    )
+    ))
 }

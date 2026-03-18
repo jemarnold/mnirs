@@ -3,24 +3,30 @@ test_that("filter_ma() returns expected smoothed values", {
     x <- c(1, 2, 3, 4, 5)
 
     # Width-based centred window, partial = FALSE
-    result <- filter_ma(
+    result <- filter_ma(x, width = 3, verbose = FALSE, partial = FALSE)
+    expect_equal(result, c(NA, 2, 3, 4, NA))
+    result <- filter_ma(x, width = 3, verbose = FALSE, partial = TRUE)
+    expect_equal(result, c(1.5, 2, 3, 4, 4.5))
+
+    # Width-based with single width (floor(1/2) = 0, so just x itself)
+    result <- filter_ma(x, width = 1, verbose = FALSE)
+    expect_equal(result, x)
+    
+    ## filter_moving_average alias for filter_ma
+    result <- filter_moving_average(
         x,
         width = 3,
         verbose = FALSE,
         partial = FALSE
     )
     expect_equal(result, c(NA, 2, 3, 4, NA))
-    result <- filter_ma(
+    result <- filter_moving_average(
         x,
         width = 3,
         verbose = FALSE,
         partial = TRUE
     )
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
-
-    # Width-based with single width (floor(1/2) = 0, so just x itself)
-    result <- filter_ma(x, width = 1, verbose = FALSE)
-    expect_equal(result, x)
 })
 
 test_that("filter_ma() handles custom time vectors", {
@@ -50,7 +56,7 @@ test_that("filter_ma() handles NA values correctly", {
         na.rm = TRUE,
     )
     expect_equal(result, c(1, 2, 3.5, 4, 4.5))
-    
+
     result <- filter_ma(
         x,
         width = 3,
@@ -58,7 +64,7 @@ test_that("filter_ma() handles NA values correctly", {
         na.rm = TRUE, ## mean excludes NA
     )
     expect_equal(result, c(rep(NA, 3), 4, NA))
-    
+
     result <- filter_ma(
         x,
         width = 3,
@@ -183,7 +189,7 @@ test_that("moving_average with insufficient width returns NA with warning", {
     t <- 1:10
     x <- c(1, NA, 3, NA, 5, NA, 7, NA, 9, NA)
 
-    expect_all_equal(filter_ma(x, t, width = 2), NA_real_) |> 
+    expect_all_equal(filter_ma(x, t, width = 2), NA_real_) |>
         expect_warning("Less than.*2.*valid samples")
 })
 
@@ -365,7 +371,12 @@ test_that("filter_mnirs validates input data", {
 
 test_that("filter_mnirs method aliases work", {
     result_spline <- filter_mnirs(moxy_data, method = "spline", verbose = FALSE)
-    result_ma     <- filter_mnirs(moxy_data, method = "ma", width = 5, verbose = FALSE)
+    result_ma <- filter_mnirs(
+        moxy_data,
+        method = "ma",
+        width = 5,
+        verbose = FALSE
+    )
 
     expect_s3_class(result_spline, "mnirs")
     expect_s3_class(result_ma, "mnirs")
@@ -375,7 +386,12 @@ test_that("filter_mnirs method aliases work", {
     )
     expect_equal(
         result_ma,
-        filter_mnirs(moxy_data, method = "moving_average", width = 5, verbose = FALSE)
+        filter_mnirs(
+            moxy_data,
+            method = "moving_average",
+            width = 5,
+            verbose = FALSE
+        )
     )
 })
 

@@ -143,15 +143,34 @@ test_that("read_file() errors", {
     )
 })
 
-test_that("read_file() handles locked Excel files", {
-    skip("Manual test: requires open excel file")
-    skip_on_cran()
-    # This test requires actually opening the system file
-    ## doesn't seem to lock the file? non-interactive environment?
+test_that("read_file() errors when Excel file cannot be opened", {
     file_path <- example_mnirs("moxy_ramp")
     skip_if(!grepl("\\.xls(x)?$", file_path, ignore.case = TRUE))
 
-    read_file(file_path)
+    local_mocked_bindings(
+        read_excel = function(...) stop("cannot be opened"),
+        .package = "readxl"
+    )
+
+    expect_error(
+        read_file(file_path),
+        "File cannot be opened"
+    )
+})
+
+test_that("read_file() re-throws other Excel read errors", {
+    file_path <- example_mnirs("moxy_ramp")
+    skip_if(!grepl("\\.xls(x)?$", file_path, ignore.case = TRUE))
+
+    local_mocked_bindings(
+        read_excel = function(...) stop("some other error"),
+        .package = "readxl"
+    )
+
+    expect_error(
+        read_file(file_path),
+        "some other error"
+    )
 })
 
 
@@ -172,7 +191,7 @@ test_that("detect_mnirs_device works on example files", {
             detect_mnirs_device(),
         list(
             nirs_device = "Artinis",
-            header_row = 1
+            header_row = 38
         )
     )
 
@@ -185,8 +204,6 @@ test_that("detect_mnirs_device works on example files", {
             header_row = 41
         )
     )
-    
-
 })
 
 test_that("detect_mnirs_device works on internal example files", {
@@ -194,7 +211,7 @@ test_that("detect_mnirs_device works on internal example files", {
     skip_on_covr()
     file_path <- test_path("testdata/train.red-mre.csv")
     skip_if_not(file.exists(file_path), "testdata not available")
-    
+
     expect_equal(
         read_file(file_path) |>
             detect_mnirs_device(),
@@ -203,7 +220,7 @@ test_that("detect_mnirs_device works on internal example files", {
             header_row = 521
         )
     )
-    
+
     file_path <- test_path("testdata/vo2master.csv")
     skip_if_not(file.exists(file_path), "testdata not available")
 
@@ -211,7 +228,7 @@ test_that("detect_mnirs_device works on internal example files", {
         read_file(file_path) |>
             detect_mnirs_device(),
         list(
-            nirs_device = "VO2master-Moxy",
+            nirs_device = "VO2master",
             header_row = 1
         )
     )
@@ -263,8 +280,8 @@ test_that("detect_device_channels() detects known channels for device", {
         verbose = FALSE
     )
 
-    expect_equal(result$nirs_channels, device_channels$Moxy$nirs_channels)
-    expect_equal(result$time_channel, device_channels$Moxy$time_channel)
+    expect_equal(result$nirs_channels, device_patterns$Moxy$nirs_channels)
+    expect_equal(result$time_channel, device_patterns$Moxy$time_channel)
 })
 
 test_that("detect_device_channels() user time_channel overrides device default", {
@@ -275,7 +292,7 @@ test_that("detect_device_channels() user time_channel overrides device default",
         verbose = FALSE
     )
 
-    expect_equal(result$nirs_channels, device_channels$Moxy$nirs_channels)
+    expect_equal(result$nirs_channels, device_patterns$Moxy$nirs_channels)
     expect_equal(result$time_channel, c(time = "custom_time"))
 })
 
@@ -283,17 +300,6 @@ test_that("detect_device_channels() errors when device is NULL and no channels",
     expect_error(
         detect_device_channels(
             nirs_device = NULL,
-            nirs_channels = NULL,
-            verbose = FALSE
-        ),
-        "cannot be determined"
-    )
-})
-
-test_that("detect_device_channels() errors for device with empty known channels", {
-    expect_error(
-        detect_device_channels(
-            nirs_device = "Artinis",
             nirs_channels = NULL,
             verbose = FALSE
         ),
@@ -351,11 +357,7 @@ test_that("read_data_table() extracts data with valid channels", {
         stringsAsFactors = FALSE
     )
 
-    result <- read_data_table(
-        data,
-        nirs_channels = c("O2Hb", "HHb"),
-        time_channel = "Time"
-    )
+    result <- read_data_table(data, nirs_channels = c("O2Hb", "HHb"))
 
     expect_type(result, "list")
     expect_named(result, c("file_header", "data_table"))
@@ -372,25 +374,6 @@ test_that("read_data_table() extracts data with valid channels", {
     expect_true(all(result$file_header == data[1:3, ]))
 })
 
-test_that("read_data_table() works with event channel", {
-    data <- data.frame(
-        V1 = c("header", "O2Hb", "10"),
-        V2 = c("header", "Time", "0.1"),
-        V3 = c("header", "Event", "Start"),
-        stringsAsFactors = FALSE
-    )
-
-    result <- read_data_table(
-        data,
-        nirs_channels = "O2Hb",
-        time_channel = "Time",
-        event_channel = "Event"
-    )
-
-    expect_equal(names(result$data_table), c("O2Hb", "Time", "Event"))
-    expect_equal(result$data_table$Event, "Start")
-})
-
 test_that("read_data_table() errors when channels not found", {
     data <- data.frame(
         V1 = c("header", "WrongChannel", "10"),
@@ -399,7 +382,7 @@ test_that("read_data_table() errors when channels not found", {
     )
 
     expect_error(
-        read_data_table(data, "O2Hb", "Time"),
+        read_data_table(data, "O2Hb"),
         "Channel names not detected"
     )
 })
@@ -412,7 +395,7 @@ test_that("read_data_table() is case sensitive", {
     )
 
     expect_error(
-        read_data_table(data, "O2Hb", "Time"),
+        read_data_table(data, "O2Hb"),
         "case sensitive"
     )
 })
@@ -424,14 +407,6 @@ test_that("detect_time_channel returns provided time_channel", {
     expect_equal(
         detect_time_channel(df, time_channel = "custom", verbose = FALSE),
         "custom"
-    )
-})
-
-test_that("detect_time_channel returns sample for Artinis", {
-    df <- data.frame(`1` = 1:5, check.names = FALSE)
-    expect_equal(
-        detect_time_channel(df, nirs_device = "Artinis", verbose = FALSE),
-        c(sample = "1")
     )
 })
 
@@ -541,16 +516,6 @@ test_that("detect_time_channel verbose messages work", {
     expect_message(
         detect_time_channel(df, verbose = TRUE),
         "Detected.*time_channel"
-    )
-
-    df_artinis <- data.frame(`1` = 1:5, check.names = FALSE)
-    expect_message(
-        detect_time_channel(
-            df_artinis,
-            nirs_device = "Artinis",
-            verbose = TRUE
-        ),
-        "Oxysoft.*sample"
     )
 })
 
@@ -1292,7 +1257,7 @@ test_that("parse_sample_rate handles Artinis device", {
         nirs_channels = c(HHb = 2, O2Hb = 3),
         time_channel = c(sample = 1),
         event_channel = NULL,
-        verbose = FALSE
+        verbose = TRUE
     ) |>
         dplyr::select(-time)
 
@@ -1450,11 +1415,11 @@ test_that("read_mnirs auto-detects Moxy channels when nirs_channels = NULL", {
 
     expect_s3_class(df, "mnirs")
     expect_equal(attr(df, "nirs_device"), "Moxy")
-    expect_equal(attr(df, "nirs_channels"), device_channels$Moxy$nirs_channels)
-    expect_equal(attr(df, "time_channel"), device_channels$Moxy$time_channel)
+    expect_equal(attr(df, "nirs_channels"), device_patterns$Moxy$nirs_channels)
+    expect_equal(attr(df, "time_channel"), device_patterns$Moxy$time_channel)
     ## auto-detected channels should keep original names (not renamed)
     expect_true(all(
-        device_channels$Moxy$nirs_channels %in% names(df)
+        device_patterns$Moxy$nirs_channels %in% names(df)
     ))
 })
 
@@ -1477,28 +1442,41 @@ test_that("read_mnirs auto-detects Train.Red channels when nirs_channels = NULL"
     expect_equal(attr(df, "nirs_device"), "Train.Red")
     expect_equal(
         attr(df, "nirs_channels"),
-        device_channels$Train.Red$nirs_channels
+        device_patterns$Train.Red$nirs_channels
     )
     expect_equal(
         attr(df, "time_channel"),
-        device_channels$Train.Red$time_channel
+        device_patterns$Train.Red$time_channel
     )
     expect_true(all(
-        device_channels$Train.Red$nirs_channels %in% names(df)
+        device_patterns$Train.Red$nirs_channels %in% names(df)
     ))
 })
 
-test_that("read_mnirs errors for Artinis with nirs_channels = NULL", {
+test_that("read_mnirs auto-detects Artinis channels when nirs_channels = NULL", {
     file_path <- example_mnirs("artinis_intervals")
 
-    expect_error(
-        read_mnirs(
+    expect_message(
+        df <- read_mnirs(
             file_path = file_path,
             nirs_channels = NULL,
-            verbose = FALSE
+            time_channel = NULL,
+            verbose = TRUE
         ),
-        "cannot be determined"
+        "Artinis.*detected"
+    ) |>
+        expect_message("Oxysoft.*sample_rate.*10")
+
+    expect_s3_class(df, "mnirs")
+    expect_equal(attr(df, "nirs_device"), "Artinis")
+    expect_equal(
+        attr(df, "nirs_channels"),
+        device_patterns$Artinis$nirs_channels
     )
+    expect_equal(attr(df, "time_channel"), "time")
+    expect_true(all(
+        device_patterns$Artinis$nirs_channels %in% names(df)
+    ))
 })
 
 test_that("read_mnirs keep_all = FALSE returns only specified columns by default", {
@@ -1911,7 +1889,71 @@ test_that("read_mnirs oxysoft works", {
     expect_equal(attr(df, "time_channel"), "time")
 })
 
-test_that("read_mnirs Oxysoft invalid channel names", {
+test_that("read_mnirs Oxysoft Portamon works", {
+    file_path <- example_mnirs("portamon")
+
+    old_verbose <- getOption("mnirs.verbose")
+    on.exit(options(mnirs.verbose = old_verbose), add = TRUE)
+    options(mnirs.verbose = FALSE)
+
+    expect_equal(
+        read_file(file_path) |>
+            detect_mnirs_device(),
+        list(
+            nirs_device = "Artinis",
+            header_row = 43
+        )
+    )
+
+    df <- read_mnirs(
+        file_path = example_mnirs("portamon-oxcap.xlsx"),
+        nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
+        time_channel = NULL,
+        event_channel = c(event = "col_6")
+    )
+
+    expect_true(all(
+        c("sample", "time", "event", "thb", "hhb", "o2hb") %in% names(df)
+    ))
+
+    ## auto detect channels
+    df2 <- read_mnirs(
+        file_path,
+        nirs_channels = NULL,
+        time_channel = NULL,
+        verbose = TRUE
+    )
+
+    expect_true(all(
+        c("sample", "time", "2", "3", "4", "5", "col_6") %in% names(df2)
+    ))
+
+    for (d in list(df, df2)) {
+        expect_s3_class(d, "mnirs")
+        expect_s3_class(d, "data.frame")
+
+        expect_equal(class(d$time), "numeric")
+        expect_equal(d$time[1], 0)
+        expect_equal(d$sample[1:10] / 10, d$time[1:10])
+
+        expect_true(all.equal(diff(d$time[1:100]), rep(0.1, 99)))
+
+        expect_true(all(
+            c(
+                "nirs_device",
+                "nirs_channels",
+                "time_channel",
+                "sample_rate"
+            ) %in% names(attributes(d))
+        ))
+
+        expect_equal(attr(d, "nirs_device"), "Artinis")
+        expect_equal(attr(d, "sample_rate"), 10)
+        expect_equal(attr(d, "time_channel"), "time")
+    }
+})
+
+test_that("read_mnirs Oxysoft edge case channel names", {
     file_path <- example_mnirs("artinis_intervals")
 
     old_verbose <- getOption("mnirs.verbose")

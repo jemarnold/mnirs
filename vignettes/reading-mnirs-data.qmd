@@ -90,8 +90,7 @@ A few example data files are included in the *`mnirs`* package. File paths can b
 
 * `nirs_channels`
     
-    Multiple *NIRS* channels can be specified from the data file as a vector of names. If no `nirs_channels` are specified, `read_mnirs()` will attempt to recognise the NIRS device file format, and return the full data frame with
-    all detected columns. This can be useful for file exploration, to find the target channel names. However, best practice is to specify the desired `nirs_channels` explicitly
+    Multiple *NIRS* channels can be specified from the data file as a vector of names. If no `nirs_channels` are specified, `read_mnirs()` will attempt to recognise the NIRS device file format, and return the full data frame with all detected columns. This can be useful for file exploration, to find the target channel names. However, best practice is to specify the desired `nirs_channels` explicitly
 
 * `time_channel`
 

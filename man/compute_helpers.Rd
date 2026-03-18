@@ -28,8 +28,8 @@ compute_valid_neighbours(
 )
 }
 \arguments{
-\item{t}{An \emph{optional} numeric vector of the predictor variable; time
-or sample number. \emph{Defaults} to indices of \code{t = seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
+sample number). Default is \code{seq_along(x)}.}
 
 \item{idx}{A numeric vector of indices of \code{t} at which to calculate local
 windows. All indices of \code{t} by \emph{default}, or can be used to only calculate
@@ -55,11 +55,16 @@ vectors for the sample indices of local rolling windows.}
 
 \item{...}{Additional arguments.}
 
-\item{outlier_cutoff}{An integer for the local outlier threshold, as
-number of standard deviations above and below the local median. The
-\emph{default} \code{outlier_cutoff = NULL} will not replace outliers.
-\code{outlier_cutoff = 3} is the standard replacement threshold following
-Pearson's rule.}
+\item{outlier_cutoff}{A numeric value for the local outlier threshold, as
+the number of standard deviations from the local median.
+\itemize{
+\item Default \code{NULL} will not replace outliers.
+\item Lower values are more sensitive and flag more outliers; higher values
+are more conservative.
+\item \code{outlier_cutoff = 3} Pearson's 3 sigma edit rule.
+\code{outlier_cutoff = 2} approximates a Tukey-style 1.5×IQR rule.
+\code{outlier_cutoff = 0} Tukey's median filter.
+}}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A

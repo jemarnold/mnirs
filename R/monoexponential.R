@@ -25,7 +25,7 @@
 #'
 #' @returns A numeric vector of predicted values the same length as
 #'  the predictor variable `t`.
-#' 
+#'
 #' @seealso [SS_monoexp3()], [SS_monoexp4()]
 #'
 #' @examples
@@ -33,16 +33,16 @@
 #' t <- 1:60
 #'
 #' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
 #'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
 #' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
-#' 
+#'
 #' model
 #'
 #' y <- predict(model, data)
-#' 
+#'
 #' y
 #'
 #' \donttest{
@@ -163,7 +163,7 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' The 3-parameter model is recommended for small samples or when no obvious
 #'   time delay exists, as it converges more reliably.
 #'
-#' @returns [SS_monoexp3()] and [SS_monoexp4()]: A numeric vector of predicted 
+#' @returns [SS_monoexp3()] and [SS_monoexp4()]: A numeric vector of predicted
 #'   values the same length as the predictor variable `t`.
 #'
 #' @seealso [monoexponential()], [stats::nls()], [stats::selfStart()],
@@ -174,16 +174,16 @@ monoexp_init <- function(mCall, data, LHS, ...) {
 #' t <- 1:60
 #'
 #' ## create an exponential curve with random noise
-#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) + 
+#' x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
 #'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
 #' model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
-#' 
+#'
 #' model
 #'
 #' y <- predict(model, data)
-#' 
+#'
 #' y
 #'
 #' \donttest{
@@ -206,18 +206,17 @@ SS_monoexp3 <- selfStart(
 )
 
 
-
 #' Self-starting monoexponential models
 #'
 #' [SS_monoexp4()] supports a 4-parameter [monoexponential()] function
 #' (A, B, tau, TD).
-#' 
-#' @param TD A numeric parameter for the time delay before the onset of 
+#'
+#' @param TD A numeric parameter for the time delay before the onset of
 #'   exponential response, in units of the predictor variable `t`.
-#' 
+#'
 #' @usage
 #' SS_monoexp4(t, A, B, tau, TD)
-#' 
+#'
 #' @name SS_monoexp
 #' @rdname SS_monoexp
 #' @order 2
@@ -233,8 +232,8 @@ SS_monoexp4 <- selfStart(
 
 #' Update a model object with Fixed coefficients
 #'
-#' Re-fit a model with fixed coefficients provided as additional arguments. Fixed
-#' coefficients are not modified when optimising for best fit.
+#' Re-fit a model with fixed coefficients provided as additional arguments. 
+#' Fixed coefficients are not modified when optimising for best fit.
 #'
 #' @param model An existing model object from `lm`, `nls`, `glm`, and others.
 #' @param data An *optional* data frame to supply manually if original data
@@ -255,9 +254,11 @@ SS_monoexp4 <- selfStart(
 fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     current_coefs <- coef(model)
     fixed_coefs <- list(...)
+    fixed_names <- names(fixed_coefs)
+    current_names <- names(current_coefs)
 
     ## validate coefs
-    invalid <- setdiff(names(fixed_coefs), names(current_coefs))
+    invalid <- setdiff(fixed_names, current_names)
     if (verbose && length(invalid) > 0) {
         cli_warn(c(
             "x" = "Unknown model coefficient{?s}: {.val {invalid}}.",
@@ -276,15 +277,13 @@ fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
         )
 
         if (is.null(data)) {
-            cli_abort(c(
-                "x" = "Cannot retrieve original model data frame."
-            ))
+            cli_abort(c("x" = "Cannot retrieve original model data frame."))
         }
     }
 
     ## get coef list from model and update in place from fixed coefs
     ## remove fixed coef from the start list
-    start_coefs <- current_coefs[!names(current_coefs) %in% names(fixed_coefs)]
+    start_coefs <- current_coefs[!current_names %in% fixed_names]
 
     if (length(start_coefs) == 0) {
         cli_abort(c(
@@ -297,10 +296,10 @@ fix_coefs <- function(model, data = NULL, verbose = TRUE, ...) {
     new_formula <- do.call(substitute, list(stats::formula(model), fixed_coefs))
 
     ## update the model
-    stats::update(
+    return(stats::update(
         model,
         formula = new_formula,
         start = start_coefs,
         data = data
-    )
+    ))
 }

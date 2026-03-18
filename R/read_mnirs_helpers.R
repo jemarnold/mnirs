@@ -72,24 +72,33 @@ read_file <- function(file_path) {
 }
 
 
-#' Known channel names for supported mNIRS devices
+#' Known channel names and detection patterns for supported mNIRS devices
 #' @keywords internal
-device_channels <- list(
+device_patterns <- list(
     Artinis = list(
-        time_channel = c(),
-        nirs_channels = c()
+        ## keep `time_channel = NULL` to force `detect_time_channel` message
+        time_channel = NULL,
+        nirs_channels = c("2"),
+        pattern = "^(\\d+ )+(\\d+|NA) ?$",
+        fixed = FALSE
     ),
     Train.Red = list(
         time_channel = c("Timestamp (seconds passed)"),
-        nirs_channels = c("SmO2")
+        nirs_channels = c("SmO2"),
+        pattern = c("Timestamp (seconds passed)", "SmO2"),
+        fixed = TRUE
     ),
     Moxy = list(
         time_channel = c("hh:mm:ss"),
-        nirs_channels = c("SmO2 Live")
+        nirs_channels = c("SmO2 Live"),
+        pattern = c("hh:mm:ss", "SmO2 Live"),
+        fixed = TRUE
     ),
-    `VO2master-Moxy` = list(
+    VO2master = list(
         time_channel = c("Time[s]"),
-        nirs_channels = c("SmO2[%]")
+        nirs_channels = c("SmO2[%]"),
+        pattern = c("Time[s]", "SmO2[%]"),
+        fixed = TRUE
     )
 )
 
@@ -110,33 +119,11 @@ datetime_formats <- c(
 #' Detect mnirs device from file metadata
 #' @keywords internal
 detect_mnirs_device <- function(data) {
-    device_patterns <- list(
-        Artinis = list(
-            pattern = c("Oxysoft", "OxySoft"),
-            mode = any
-        ),
-        Train.Red = list(
-            pattern = unlist(device_channels$Train.Red, use.names = FALSE),
-            mode = all
-        ),
-        Moxy = list(
-            pattern = unlist(device_channels$Moxy, use.names = FALSE),
-            mode = all
-        ),
-        `VO2master-Moxy` = list(
-            pattern = unlist(
-                device_channels$`VO2master-Moxy`,
-                use.names = FALSE
-            ),
-            mode = all
-        )
-    )
-
     ## find the first row in `string` where all `patterns` match
-    find_row <- function(string, patterns, mode = all) {
+    find_row <- function(string, patterns, fixed = TRUE) {
         Find(\(.i) {
-            mode(vapply(patterns, \(.x) {
-                    grepl(.x, string[.i], fixed = TRUE)
+            all(vapply(patterns, \(.x) {
+                    grepl(.x, string[.i], fixed = fixed)
                 }, logical(1L)))
         }, seq_along(string))
     }
@@ -147,7 +134,7 @@ detect_mnirs_device <- function(data) {
     ## find first row of `data_strings` which matches any of `device_patterns`
     matched_row <- Find(\(.i) {
         any(vapply(device_patterns, \(.d) {
-            !is.null(find_row(data_strings[.i], .d$pattern, .d$mode))
+            !is.null(find_row(data_strings[.i], .d$pattern, .d$fixed))
         }, logical(1L)))
     }, seq_along(data_strings))
 
@@ -158,7 +145,7 @@ detect_mnirs_device <- function(data) {
     ## return the first device name which matches the row of `data_strings`
     device_name <- Find(\(.nm) {
         .d <- device_patterns[[.nm]]
-        !is.null(find_row(data_strings[matched_row], .d$pattern, .d$mode))
+        !is.null(find_row(data_strings[matched_row], .d$pattern, .d$fixed))
     }, names(device_patterns))
 
     return(list(nirs_device = device_name, header_row = matched_row))
@@ -177,35 +164,29 @@ detect_device_channels <- function(
     ## user-specified channels always take priority
     if (!is.null(nirs_channels)) {
         return(list(
+            ## if `time_channel = NULL` defined at `detect_time_channel`
             time_channel = time_channel,
             nirs_channels = nirs_channels,
             keep_all = keep_all
         ))
     }
 
-    abort_msg <- c(
-        "x" = "{.arg nirs_channels} cannot be determined automatically.",
-        "i" = "Define {.arg nirs_channels} explicitly."
-    )
-
     ## need device detection when is.null(nirs_channel)
     if (is.null(nirs_device)) {
-        cli_abort(abort_msg)
+        cli_abort(c(
+            "x" = "{.arg nirs_channels} cannot be determined automatically.",
+            "i" = "Define {.arg nirs_channels} explicitly."
+        ))
     }
 
-    channel_list <- device_channels[[nirs_device]]
-
-    ## user inputs take priority over device defaults
+    ## successfully detected `nirs_device` with `nirs_channels = NULL`
+    channel_list <- device_patterns[[nirs_device]]
     channel_list <- list(
+        ## user-specified `time_channel` takes priority here
         time_channel = time_channel %||% channel_list$time_channel,
-        nirs_channels = channel_list$nirs_channels, ## NULL at this point
-        keep_all = TRUE
+        nirs_channels = channel_list$nirs_channels,
+        keep_all = TRUE ## return all cols to view potential nirs_channels
     )
-
-    ## error when nirs_channels cannot be resolved
-    if (length(channel_list$nirs_channels) == 0L) {
-        cli_abort(abort_msg)
-    }
 
     if (verbose) {
         cli_inform(c(
@@ -224,8 +205,6 @@ detect_device_channels <- function(
 read_data_table <- function(
     data,
     nirs_channels,
-    time_channel = NULL,
-    event_channel = NULL,
     header_row = 1L
 ) {
     nrows <- nrow(data)
@@ -264,12 +243,12 @@ detect_time_channel <- function(
     nirs_device = NULL,
     verbose = TRUE
 ) {
-    ## TODO there is redundancy with `detect_time_channel()` and `detect_mnirs_device()`
     if (!is.null(time_channel)) {
         return(time_channel)
     }
 
     ## return default sample column for Artinis Oxysoft
+    ## when `nirs_channels` defined but `time_channel = NULL`
     if (!is.null(nirs_device) && nirs_device == "Artinis") {
         if (verbose) {
             cli_inform(c(

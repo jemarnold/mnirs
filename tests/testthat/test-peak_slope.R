@@ -766,17 +766,17 @@ test_that("peak_slope fitted values match window", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
     t <- seq_along(x)
 
-    results_df <- peak_slope(x, t, width = 5)
+    results <- peak_slope(x, t, width = 5)
 
-    fitted <- results_df$fitted
-    window_idx <- results_df$window_idx
+    fitted <- results$fitted
+    window_idx <- results$window_idx
 
     expect_length(fitted, length(window_idx))
 
     # Verify fitted values match slope * t + intercept
     expect_equal(
         fitted,
-        results_df$intercept + results_df$slope * t[window_idx]
+        results$intercept + results$slope * t[window_idx]
     )
     ## verify fitted values match lm predictions
     expect_equal(
