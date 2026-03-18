@@ -6,11 +6,7 @@
 \alias{signif_pvalue}
 \title{Format numbers for display as character strings}
 \usage{
-signif_trailing(
-  x,
-  digits = 2L,
-  format = c("digits", "signif", "max_digits", "max_signif")
-)
+signif_trailing(x, digits = 2L, format = c("digits", "signif"), trim = TRUE)
 
 signif_whole(x, digits = 5L)
 
@@ -34,6 +30,10 @@ the nearest whole value of \code{10^(digits)}.}
 \item{format}{Indicates how to treat \code{digits}. Either the desired number of
 decimal places (\code{format = "digits"}, the \emph{default}) or significant figures
 after the decimal place (\code{format = "signif"}).}
+
+\item{trim}{Logical; if \code{TRUE} (the \emph{default}), caps \code{digits} at the
+number of decimal places or significant figures observed in \code{x}. If
+\code{FALSE}, uses the exact \code{digits} value.}
 
 \item{display}{Specifies output type, either \emph{"value"} (the \emph{default}) for
 formatted numbers or \emph{"symbol"} for significance symbols.}

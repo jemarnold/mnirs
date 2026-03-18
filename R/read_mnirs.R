@@ -154,13 +154,7 @@ read_mnirs <- function(
     keep_all <- channels$keep_all ## TRUE when `nirs_channels` unspecified
 
     ## extract the data_table, and name by header row
-    table_list <- read_data_table(
-        data,
-        nirs_channels,
-        time_channel,
-        event_channel,
-        header_row
-    )
+    table_list <- read_data_table(data, nirs_channels, header_row)
     data <- table_list$data_table
     file_header <- table_list$file_header
 
@@ -168,7 +162,12 @@ read_mnirs <- function(
     start_timestamp <- extract_start_timestamp(file_header)
 
     ## attempt to detect `time_channel` automatically
-    time_channel <- detect_time_channel(data, time_channel, nirs_device, verbose)
+    time_channel <- detect_time_channel(
+        data,
+        time_channel,
+        nirs_device,
+        verbose
+    )
 
     ## rename from channel names, make duplicates unique, keep columns
     ## return list(data_renamed, nirs_renamed, time_renamed, event_renamed)
@@ -199,7 +198,7 @@ read_mnirs <- function(
         zero_time
     )
     data <- time_list$data
-    
+
     ## extract start_timestamp from data if not already found in header
     if (is.null(start_timestamp)) {
         start_timestamp <- time_list$start_timestamp
@@ -242,9 +241,9 @@ read_mnirs <- function(
 #'
 #' Manually add class `"mnirs"` and metadata to an existing data frame.
 #'
-#' @param data A data frame with existing metadata (accessed with 
+#' @param data A data frame with existing metadata (accessed with
 #'   `attributes(data)`).
-#' 
+#'
 #' @param ... Additional arguments with metadata to add to the data frame.
 #'   Can be either seperate named arguments or a list of named values.
 #'   - nirs_device
@@ -254,13 +253,13 @@ read_mnirs <- function(
 #'   - sample_rate
 #'   - start_timestamp
 #'   - interval_times
-#'   - interval_span 
+#'   - interval_span
 #'
 #' @details
-#' Typically will only be called internally, but can be used to inject 
+#' Typically will only be called internally, but can be used to inject
 #'   *{mnirs}* metadata into any data frame.
 #'
-#' @returns 
+#' @returns
 #' A [tibble][tibble::tibble-package] of class `"mnirs"`. Metadata are stored
 #'   as attributes and can be accessed with `attributes(data)`.
 #'
