@@ -2,6 +2,20 @@
     * Currently implemented for `method = "peak_slope"` only, with other methods coming soon.
     * Includes generic `print()` function.
     
+# mnirs 0.5.3
+
+### Updated core functions
+
+* `filter_mnirs()` Method-specific arguments (e.g. `order` for `method = "butterworth"`, or `width` for `method = "moving_average"`) removed from the generic function call. Continue to be passed to the appropriate method via `...`. Documentation updated.
+
+* `filter_ma()` better separates effects of `partial` and `na.rm` args:
+    * `partial = FALSE` by default returns NA at edges where insufficient number of samples are available compared to the specified `width` or `span`.
+    * `partial = TRUE` calculates mean values at edges, as long as one valid non-`NA` sample is available.
+    * `na.rm = FALSE` by default behaves as expected with `mean(na.rm = FALSE)`, propagating any `NA`s in the local window to the calculated mean with a warning.
+        * **NOTE** This differs from the behaviour of `na.rm = FALSE` in `filter_butter()`, which errors if there are any internal `NA`s present. This has not been changed.
+    * `na.rm = TRUE` ignores `NA`s and calculates local means as long as one valid sample is present.
+
+
 # mnirs 0.5.2
 
 ### Shiny app

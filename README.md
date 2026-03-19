@@ -143,7 +143,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-17 00:29:00 PDT"
+#> [1] "2026-03-19 00:29:00 PDT"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
@@ -200,7 +200,7 @@ data_filtered <- filter_mnirs(
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
     type = "low",           ## specify a "low-pass" filter
-    na.rm = TRUE            ## explicitly preserve NAs
+    na.rm = TRUE            ## explicitly ignore NAs
 )
 
 ## we will add the non-filtered data back to the plot to compare

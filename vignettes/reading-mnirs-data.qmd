@@ -345,7 +345,7 @@ We will discuss the process of choosing a digital filter more in depth in anothe
 
 * `na.rm`
 
-    This important argument is left as `FALSE` by default. `filter_mnirs()` will return an error if any missing data (`NA`) are detected in the response variables (`nirs_channels`). Setting `na.rm = TRUE` will bypass these `NA`s and preserve them in the returned data frame, but this must be opted into explicitly in this function and elsewhere.
+    This important argument is left as `FALSE` by default. `filter_mnirs()` will return an error if any missing data (`NA`) are detected in the response variables (`nirs_channels`). Setting `na.rm = TRUE` will ignore these `NA`s and pass them through to the returned data frame, but this must be opted into explicitly in this function and elsewhere.
 
 
 ### Smoothing-spline
@@ -406,7 +406,7 @@ data_filtered <- filter_mnirs(
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
     type = "low",           ## specify a "low-pass" filter
-    na.rm = TRUE            ## explicitly preserve NAs
+    na.rm = TRUE            ## explicitly ignore NAs
 )
 
 ## we will add the non-filtered data back to the plot to compare

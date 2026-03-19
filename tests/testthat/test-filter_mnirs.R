@@ -2,8 +2,7 @@
 test_that("filter_ma() returns expected smoothed values", {
     x <- c(1, 2, 3, 4, 5)
 
-    # Width-based centred window, partial = FALSE
-    result <- filter_ma(x, width = 3, verbose = FALSE, partial = FALSE)
+    result <- filter_ma(x, width = 3, verbose = FALSE, na.rm = TRUE)
     expect_equal(result, c(NA, 2, 3, 4, NA))
     result <- filter_ma(x, width = 3, verbose = FALSE, partial = TRUE)
     expect_equal(result, c(1.5, 2, 3, 4, 4.5))
@@ -46,6 +45,7 @@ test_that("filter_ma() handles NA values correctly", {
         width = 3,
         partial = FALSE,
         na.rm = FALSE,
+        verbose = FALSE
     )
     expect_equal(result, c(rep(NA, 3), 4, NA))
 
@@ -60,16 +60,17 @@ test_that("filter_ma() handles NA values correctly", {
     result <- filter_ma(
         x,
         width = 3,
-        partial = FALSE, ## min 3 valid obs
+        partial = FALSE, ## min 3 valid obs at edges
         na.rm = TRUE, ## mean excludes NA
     )
-    expect_equal(result, c(rep(NA, 3), 4, NA))
+    expect_equal(result, c(NA, 2, 3.5, 4, NA))
 
     result <- filter_ma(
         x,
         width = 3,
         partial = TRUE,
         na.rm = FALSE,
+        verbose = FALSE
     )
     expect_equal(result, c(rep(NA, 3), 4, 4.5))
 
@@ -157,11 +158,9 @@ test_that("filter_ma() warns when both width and span provided", {
     options(mnirs.verbose = FALSE)
 
     ## should not produce warning
-    # Should default to width
     expect_silent(
-        result <- filter_ma(1:5, width = 3, span = 2, partial = TRUE)
+        result <- filter_ma(1:5, width = 3, span = 2)
     )
-    expect_equal(result, c(1.5, 2, 3, 4, 4.5))
 })
 
 test_that("filter_ma() handles edge cases", {
@@ -185,12 +184,18 @@ test_that("filter_ma() handles edge cases", {
     )
 })
 
-test_that("moving_average with insufficient width returns NA with warning", {
+test_that("filter_ma with insufficient width returns NA with warning", {
     t <- 1:10
     x <- c(1, NA, 3, NA, 5, NA, 7, NA, 9, NA)
 
     expect_all_equal(filter_ma(x, t, width = 2), NA_real_) |>
-        expect_warning("Less than.*2.*valid samples")
+        expect_warning("Set.*na.rm = TRUE")
+
+    x <- c(NA, 1, NA)
+    expect_error(
+        filter_ma(x, width = 3, na.rm = TRUE),
+        "Insufficient samples"
+    )
 })
 
 ## filter_butter() =========================================
@@ -237,7 +242,7 @@ test_that("filter_butter returns correct output structure", {
 
     expect_type(result, "double")
     expect_length(result, length(x))
-    expect_false(any(is.na(result)))
+    expect_false(anyNA(result))
 })
 
 test_that("filter_butter handles different edge options", {

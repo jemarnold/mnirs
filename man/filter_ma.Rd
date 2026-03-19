@@ -46,9 +46,9 @@ subset of available data within the local rolling window (\code{TRUE}), or
 requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
 \emph{Details}.}
 
-\item{na.rm}{A logical indicating whether missing values should be preserved
-and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
-will throw an error if there are any \code{NA}s (see \emph{Details}).}
+\item{na.rm}{A logical indicating whether missing values should be
+ignored and passed through the filter (\code{TRUE}). Otherwise \code{FALSE}
+(the \emph{default}) may error if there are any \code{NA}s (see \emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
@@ -89,9 +89,9 @@ filter_ma(x, t, span = 2)
 
 ## na.rm = FALSE (default): any NA in the window propagates to the result
 x_na <- c(1, NA, 3, 4, 5, NA, 7, 8)
-filter_ma(x_na, width = 3)
+filter_ma(x_na, width = 3, na.rm = FALSE)
 
-## na.rm = TRUE: skip NAs within the window and return the mean of valid values
+## na.rm = TRUE: skip NAs and return the local mean of local valid values
 filter_ma(x_na, width = 3, partial = TRUE, na.rm = TRUE)
 
 }

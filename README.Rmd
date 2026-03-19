@@ -142,7 +142,7 @@ data_filtered <- filter_mnirs(
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
     type = "low",           ## specify a "low-pass" filter
-    na.rm = TRUE            ## explicitly preserve NAs
+    na.rm = TRUE            ## explicitly ignore NAs
 )
 
 ## we will add the non-filtered data back to the plot to compare
