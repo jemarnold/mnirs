@@ -419,7 +419,7 @@ format_hmmss <- function(x) {
     # validate_numeric(x)
     x <- as.numeric(x)
     ## logical whether to handle NAs
-    handle_na <- any(is.na(x))
+    handle_na <- anyNA(x)
 
     if (handle_na) {
         na_info <- preserve_na(x)

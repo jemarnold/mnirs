@@ -1166,7 +1166,7 @@ test_that("rolling_slope works visually", {
     ## partial = FALSE
     slopes <- vapply(window_idx, \(.idx) {
         df <- data.frame(t = t[.idx], x = x[.idx])
-        if (length(df$t) < 3 || any(is.na(df$x))) {
+        if (length(df$t) < 3 || anyNA(df$x)) {
             return(NA_real_)
         }
         tryCatch(coef(lm(x ~ t, df))[[2L]], error = \(e) NA_real_)

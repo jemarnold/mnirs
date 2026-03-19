@@ -787,7 +787,7 @@ test_that("analyse_kinetics.peak_slope augments data with fitted columns", {
     expect_true("smo2_right_fitted" %in% names(aug))
     ## fitted values should be NA except at window_idx
     expect_true(any(!is.na(aug$smo2_left_fitted)))
-    expect_true(any(is.na(aug$smo2_left_fitted)))
+    expect_true(anyNA(aug$smo2_left_fitted))
 })
 
 test_that("interval_times is a list-column with one row per interval (distinct)", {
