@@ -194,7 +194,7 @@ test_that("filter_ma with insufficient width returns NA with warning", {
     x <- c(NA, 1, NA)
     expect_error(
         filter_ma(x, width = 3, na.rm = TRUE),
-        "Insufficient samples"
+        "Insufficient.*samples"
     )
 })
 

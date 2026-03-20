@@ -41,14 +41,14 @@ centred on \code{idx}, between
 \code{idx} in units of \code{time_channel} or \code{t}, between
 \verb{[t - span/2, t + span/2]}.}
 
-\item{partial}{A logical specifying whether to perform the operation over a
-subset of available data within the local rolling window (\code{TRUE}), or
-requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
-\emph{Details}.}
+\item{partial}{Logical; default is \code{FALSE}, requires complete local windows
+of valid (non-\code{NA}) samples. If \code{TRUE}, processes available valid samples
+within the local window. See \emph{Details}.}
 
-\item{na.rm}{A logical indicating whether missing values should be
-ignored and passed through the filter (\code{TRUE}). Otherwise \code{FALSE}
-(the \emph{default}) may error if there are any \code{NA}s (see \emph{Details}).}
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A

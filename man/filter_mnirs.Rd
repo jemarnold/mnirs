@@ -43,9 +43,10 @@ used.
 \item{\code{"moving_average"}}{Uses a centred moving average filter.}
 }}
 
-\item{na.rm}{A logical indicating whether missing values should be
-ignored and passed through the filter (\code{TRUE}). Otherwise \code{FALSE}
-(the \emph{default}) may error if there are any \code{NA}s (see \emph{Details}).}
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
@@ -153,7 +154,7 @@ Additional arguments (\code{...}) accepted when \code{method = "moving_average"}
 \describe{
 \item{\code{width} or \code{span}}{Either an integer number of samples, or a
 numeric time duration in units of \code{time_channel} within the local
-rolling window. One of either \code{width} or \code{span} must be specified.}
+window. One of either \code{width} or \code{span} must be specified.}
 \item{\code{partial}}{Logical; \code{FALSE} by default, only returns values
 where a full window of valid (non-\code{NA}) samples are available.
 If \code{TRUE}, ignores \code{NA} and allows calculation over partial windows
@@ -169,7 +170,8 @@ Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
 \code{method = "smooth_spline"} or \code{"butterworth"}, unless \code{na.rm = TRUE}.
 Then \code{NA}s will be ignored and passed through to the returned data.
 For \code{method = "moving_average"}, \code{na.rm} controls whether \code{NA}s within
-each rolling window are removed before computing the mean.
+each local window are ignored before computing the mean, or propagated
+to the returned vector.
 }
 }
 \examples{

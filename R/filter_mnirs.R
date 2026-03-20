@@ -13,9 +13,10 @@
 #'      \item{`"butterworth"`}{Uses a centred Butterworth digital filter.}
 #'      \item{`"moving_average"`}{Uses a centred moving average filter.}
 #'   }
-#' @param na.rm A logical indicating whether missing values should be
-#'   ignored and passed through the filter (`TRUE`). Otherwise `FALSE`
-#'   (the *default*) may error if there are any `NA`s (see *Details*).
+#' @param na.rm Logical; default is `FALSE`, propagates any `NA`s to the 
+#'   returned vector. If `TRUE`, ignores `NA`s and processes available valid 
+#'   samples within the local window. May return errors or warnings. (see 
+#'   *Details*).
 #' @param ... Additional method-specific arguments must be specified 
 #'   (see *Details*).
 #' @inheritParams validate_mnirs
@@ -105,7 +106,7 @@
 #' \describe{
 #'   \item{`width` or `span`}{Either an integer number of samples, or a
 #'       numeric time duration in units of `time_channel` within the local 
-#'       rolling window. One of either `width` or `span` must be specified.}
+#'       window. One of either `width` or `span` must be specified.}
 #'   \item{`partial`}{Logical; `FALSE` by default, only returns values
 #'       where a full window of valid (non-`NA`) samples are available. 
 #'       If `TRUE`, ignores `NA` and allows calculation over partial windows 
@@ -118,7 +119,8 @@
 #' `method = "smooth_spline"` or `"butterworth"`, unless `na.rm = TRUE`.
 #' Then `NA`s will be ignored and passed through to the returned data.
 #' For `method = "moving_average"`, `na.rm` controls whether `NA`s within
-#' each rolling window are removed before computing the mean.
+#' each local window are ignored before computing the mean, or propagated
+#' to the returned vector.
 #'
 #' @returns
 #' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
@@ -400,10 +402,12 @@ filter_mnirs.moving_average <- function(
 #' Apply a simple moving average smoothing filter to vector data.
 #' `filter_moving_average()` is an alias of `filter_ma()`.
 #'
+#' @param partial Logical; default is `FALSE`, requires complete local windows
+#'   of valid (non-`NA`) samples. If `TRUE`, processes available valid samples
+#'   within the local window. See *Details*.
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
 #' @inheritParams filter_mnirs
-#' @inheritParams peak_slope
 #'
 #' @details
 #' Applies a centred (symmetrical) moving average filter in a local window
@@ -483,9 +487,10 @@ filter_ma <- function(
         ## error if fewer valid samples than min_obs
         if (sum(is.finite(x)) < min_obs) {
             cli_abort(c(
-                "x" = "Insufficient samples detected.",
-                "i" = "Specify a smaller {.arg width} or {.arg span}, \\
-                or specify {.arg partial} = {.val {TRUE}}."
+                "x" = "Insufficient valid samples detected in \\
+                {.fn filter_moving_average}.",
+                "i" = "{.arg width} or {.arg span} must be smaller than \\
+                the range of {.arg x}."
             ))
         }
 

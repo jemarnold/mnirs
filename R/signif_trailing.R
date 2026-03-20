@@ -347,7 +347,7 @@ within <- function(x, vec, inclusive = c("left", "right")) {
         abort_validation(substitute(vec))
     }
     inclusive <- match.arg(
-        as.character(inclusive),
+        as.character(inclusive), ## force FALSE to character
         choices = c("left", "right", "FALSE"),
         several.ok = TRUE
     )

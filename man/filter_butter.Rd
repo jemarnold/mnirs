@@ -39,9 +39,10 @@ sequence (\emph{the default}).}
 \item{\code{"none"}}{Will return the unpadded \code{\link[signal:filtfilt]{signal::filtfilt()}} output.}
 }}
 
-\item{na.rm}{A logical indicating whether missing values should be
-ignored and passed through the filter (\code{TRUE}). Otherwise \code{FALSE}
-(the \emph{default}) may error if there are any \code{NA}s (see \emph{Details}).}
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
 
 \item{...}{Additional method-specific arguments must be specified
 (see \emph{Details}).}
