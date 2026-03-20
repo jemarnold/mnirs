@@ -8,9 +8,7 @@ analyse_monoexponential(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  monoexp_params = 3L,
-  algorithm = c("default", "plinear", "port"),
-  control = list(),
+  time_delay = TRUE,
   channel_args = list(),
   verbose = TRUE,
   ...
@@ -34,32 +32,33 @@ column. Must match a column name in \code{data} exactly.
 used.
 }}
 
-\item{monoexp_params}{Integer; \code{3L} (\emph{default}) for \code{\link[=SS_monoexp3]{SS_monoexp3()}}
-(A, B, tau) or \code{4L} for \code{\link[=SS_monoexp4]{SS_monoexp4()}} (A, B, tau, TD).}
-
-\item{algorithm}{Character; \code{\link[stats:nls]{stats::nls()}} algorithm — \code{"default"}
-(\emph{default}), \code{"plinear"}, or \code{"port"}.}
-
-\item{control}{A named list of control parameters passed to
-\code{\link[stats:nls.control]{stats::nls.control()}}.}
-
-\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
-to \code{nirs_channels}, each containing a list of arguments to override the
-global defaults for that channel. See \emph{Details}.}
+\item{time_delay}{Logical; default is \code{TRUE} to attempt to fit a
+4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model (A, B, tau, TD) with a time delay.
+If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
+reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
-
-\item{...}{Additional arguments.}
 }
 \value{
-A data frame of model coefficients (one row per channel)
-with attributes \code{"predicted"}, \code{"diagnostics"}, \code{"channel_args"}.
+A \code{data.frame} with one row per \code{nirs_channel} and columns
+\code{nirs_channels}, \code{A}, \code{B}, \code{tau}, \code{TD}, \code{k}, \code{half_time}.
+Per-channel metadata are attached as attributes:
+\itemize{
+\item \code{"predicted"}: a named list of data frames (per \code{nirs_channel})
+with columns \code{window_idx} and \code{fitted}.
+\item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
+containing model fit diagnostics.
+\item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
+recording the resolved arguments used.
+}
 }
 \description{
 Fit a monoexponential curve to each \code{nirs_channel} within a single
-data frame. Called by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when
-\code{method = "monoexponential"}.
+data frame. Called by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "monoexponential"}.
+}
+\seealso{
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=peak_slope]{peak_slope()}}
 }
 \keyword{internal}

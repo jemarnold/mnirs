@@ -42,8 +42,7 @@ method. See \emph{Details}.
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
 arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
-\code{\link[stats:nls]{stats::nls()}} with arguments: \code{monoexp_params} for \code{\link[=SS_monoexp3]{SS_monoexp3()}} or
-\code{\link[=SS_monoexp4]{SS_monoexp4()}}; \code{algorithm}; \code{control}.}
+\code{\link[stats:nls]{stats::nls()}} with arguments: \code{time_delay}.}
 \item{\code{"sigmoidal"}}{\verb{<under development>}.}
 }}
 
@@ -63,8 +62,8 @@ A formatted table of printed results, with individual elements
 accessable as a list of class \emph{"mnirs_kinetics"} containing:
 
 \item{\code{method}}{The method used, e.g. \code{"half_time"}.}
-\item{\code{results}}{A \link[tibble:tibble-package]{tibble} of results with
-one row per \code{nirs_channel} and per interval, containing columns
+\item{\code{coefficients}}{A \link[tibble:tibble-package]{tibble} of coefficients
+with one row per \code{nirs_channel} and per interval, containing columns
 \code{interval}, \code{nirs_channels}, and individual method parameters.}
 \item{\code{data}}{A list of the original input data frames augmented with a
 \verb{*_fitted} column of model predicted values for each \code{nirs_channel}.}
@@ -139,12 +138,11 @@ TD). See \code{\link[=monoexponential]{monoexponential()}} for model equations.
 Additional arguments (\code{...}) accepted when \code{method = "monoexponential"}:
 
 \describe{
-\item{\code{monoexp_params}}{Integer; \code{3L} (\emph{default}) for \code{\link[=SS_monoexp3]{SS_monoexp3()}} or
-\code{4L} for \code{\link[=SS_monoexp4]{SS_monoexp4()}}.}
-\item{\code{algorithm}}{Character; \code{\link[stats:nls]{stats::nls()}} algorithm — \code{"default"}
-(\emph{default}), \code{"plinear"}, or \code{"port"}.}
-\item{\code{control}}{A named list of control parameters passed to
-\code{\link[stats:nls.control]{stats::nls.control()}}, e.g. \code{list(maxiter = 100)}.}
+\item{\code{time_delay}}{Logical; default is \code{TRUE} to attempt to fit a
+4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model (A, B, tau, TD) with a time delay.
+If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
+reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
+\item{\code{stats::nls()}}{Other arguments can be passed to \code{\link[stats:nls]{stats::nls()}}}
 }
 }
 
@@ -204,10 +202,10 @@ result <- read_mnirs(
 ## formatted table of results
 result
 
-## results are accessible from the results list
-result$results
+## coefficients are accessible from the result list
+result$coefficients
 
-## along with diagnostics and other results
+## along with diagnostics and other returned objects
 result$diagnostics
 
 }

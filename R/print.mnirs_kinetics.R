@@ -35,16 +35,16 @@
 #'
 #' @export
 print.mnirs_kinetics <- function(x, ...) {
-    results <- x$results
-    nrows <- nrow(results)
+    coefs <- x$coefficients
+    nrows <- nrow(coefs)
 
     ## prep numeric values for display; ignore all na cols
-    numeric_cols <- vapply(results, \(.x) {
+    numeric_cols <- vapply(coefs, \(.x) {
         is.numeric(.x) && !all(is.na(.x))
     }, logical(1))
     ## prep only non-NA values
-    results[, numeric_cols] <- lapply(
-        results[, numeric_cols, drop = FALSE], 
+    coefs[, numeric_cols] <- lapply(
+        coefs[, numeric_cols, drop = FALSE], 
         \(.x) {
             .x[!is.na(.x)] <- signif_trailing(.x[!is.na(.x)], 4L, "signif")
             .x[is.na(.x)] <- "NA"
@@ -62,12 +62,12 @@ print.mnirs_kinetics <- function(x, ...) {
     cat("    Model Coefficients:")
     cat("\n")
     if (nrows <= 10) {
-        print(results)
+        print(coefs)
     } else {
         start_ids <- 1:5
         end_idx <- (nrows - 4):nrows
         ## get first and last rows
-        display <- rbind(results[start_ids, ], results[end_idx, ])
+        display <- rbind(coefs[start_ids, ], coefs[end_idx, ])
 
         ## format data frame with row numbers
         output <- utils::capture.output(print(display, row.names = FALSE))

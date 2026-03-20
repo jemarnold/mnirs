@@ -78,10 +78,10 @@ Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"predicted"}: a named list of data frames (per \code{nirs_channel})
 with columns \code{window_idx} and \code{fitted}.
-\item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
-recording the resolved arguments used.
 \item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
 containing model fit diagnostics.
+\item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
+recording the resolved arguments used.
 }
 }
 \description{

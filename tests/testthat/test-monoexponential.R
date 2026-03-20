@@ -267,7 +267,287 @@ test_that("SS_monoexp3() handles OxCap with few data points better than SSasymp"
 
 
 ## analyse_monoexponential() ===========================================
-## ! add analyse_monoexponential() tests
+
+## helper: create monoexponential test data with known parameters
+create_monoexp_data <- function(
+    A = 50,
+    B = 80,
+    tau = 25,
+    TD = 0,
+    n = 60,
+    sample_rate = 1,
+    noise_sd = 0.5,
+    channels = "smo2",
+    seed = 42
+) {
+    set.seed(seed)
+    t <- seq(0, (n - 1) / sample_rate, length.out = n)
+    x <- monoexponential(t, A, B, tau, TD) + rnorm(n, 0, noise_sd)
+
+    df <- stats::setNames(
+        data.frame(t, x),
+        c("time", channels[1])
+    )
+    if (length(channels) > 1) {
+        for (ch in channels[-1]) {
+            df[[ch]] <- monoexponential(
+                t,
+                A + 5,
+                B + 5,
+                tau,
+                TD
+            ) +
+                rnorm(n, 0, noise_sd)
+        }
+    }
+
+    create_mnirs_data(
+        df,
+        nirs_channels = channels,
+        time_channel = "time",
+        sample_rate = sample_rate
+    )
+}
+
+
+test_that("analyse_monoexponential() returns correct structure", {
+    data <- create_monoexp_data()
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = FALSE,
+        verbose = FALSE
+    )
+
+    expect_s3_class(result, "data.frame")
+    expect_named(
+        result,
+        c("nirs_channels", "A", "B", "tau", "TD", "k", "half_time")
+    )
+    expect_equal(nrow(result), 1L)
+
+    ## attributes
+    expect_type(attr(result, "predicted"), "list")
+    ## predicted data frame for each `nirs_channels`
+    expect_s3_class(attr(result, "predicted")$smo2, "data.frame")
+    expect_named(attr(result, "predicted")$smo2, c("window_idx", "fitted"))
+    expect_s3_class(attr(result, "diagnostics"), "data.frame")
+    expect_equal(nrow(attr(result, "diagnostics")), 1L)
+    expect_s3_class(attr(result, "channel_args"), "data.frame")
+    expect_equal(nrow(attr(result, "channel_args")), 1L)
+})
+
+test_that("analyse_monoexponential() validates time_delay argument", {
+    data <- create_monoexp_data()
+
+    expect_error(
+        analyse_monoexponential(
+            data,
+            nirs_channels = "smo2",
+            time_delay = "yes"
+        ),
+        "time_delay.*logical"
+    )
+
+    expect_error(
+        analyse_monoexponential(
+            data,
+            nirs_channels = "smo2",
+            time_delay = c(TRUE, FALSE)
+        ),
+        "time_delay.*logical"
+    )
+})
+
+test_that("analyse_monoexponential() recovers 3-param known parameters", {
+    A <- 50
+    B <- 80
+    tau <- 25
+
+    data <- create_monoexp_data(
+        A = A,
+        B = B,
+        tau = tau,
+        n = 100,
+        noise_sd = 0.3
+    )
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = FALSE,
+        verbose = FALSE
+    )
+
+    expect_equal(result$A, A, tolerance = 1)
+    expect_equal(result$B, B, tolerance = 1)
+    expect_equal(result$tau, tau, tolerance = 1)
+    expect_true(is.na(result$TD))
+    expect_equal(result$k, 1 / tau, tolerance = 1)
+    expect_equal(result$half_time, tau * log(2), tolerance = 1)
+})
+
+test_that("analyse_monoexponential() recovers 4-param known parameters", {
+    A <- 50
+    B <- 80
+    tau <- 25
+    TD <- 10
+
+    data <- create_monoexp_data(
+        A = A,
+        B = B,
+        tau = tau,
+        TD = TD,
+        n = 100,
+        noise_sd = 0.3
+    )
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = TRUE,
+        verbose = FALSE
+    )
+
+    expect_equal(result$A, A, tolerance = 1)
+    expect_equal(result$B, B, tolerance = 1)
+    expect_equal(result$tau, tau, tolerance = 1)
+    expect_equal(result$TD, TD, tolerance = 1)
+    expect_equal(result$k, 1 / tau, tolerance = 1)
+    expect_equal(result$half_time, tau * log(2), tolerance = 1)
+})
+
+test_that("analyse_monoexponential() falls back from 4-param to 3-param", {
+    A = 50
+    B = 80
+    tau = 25
+    TD = 0
+
+    ## short series with small TD makes 4-param hard to converge
+    data <- create_monoexp_data(
+        A = A,
+        B = B,
+        tau = tau,
+        TD = TD,
+        n = 10,
+        noise_sd = 2,
+        seed = 101
+    )
+
+    expect_warning(
+        result <- analyse_monoexponential(
+            data,
+            nirs_channels = "smo2",
+            time_delay = TRUE,
+            verbose = TRUE
+        ),
+        "SS_monoexp4.*fit failed"
+    )
+
+    ## should still return a valid result via 3-param fallback
+    ## albeit with poor fit
+    expect_s3_class(result, "data.frame")
+    expect_true(is.na(result$TD))
+    expect_false(is.na(result$tau))
+})
+
+
+test_that("analyse_monoexponential() returns NA for failed fit", {
+    ## only 3 observations for a 3-param model
+    custom_name <- create_monoexp_data(n = 3, noise_sd = 0.1)
+
+    expect_warning(
+        result <- analyse_monoexponential(
+            custom_name,
+            nirs_channels = "smo2",
+            time_delay = FALSE
+        ),
+        "fit failed for.*smo2.*custom_name" ## call custom interval name
+    )
+
+    expect_true(is.na(result$A))
+    expect_true(is.na(result$tau))
+    expect_true(is.na(result$k))
+})
+
+test_that("analyse_monoexponential() works with multiple channels", {
+    nirs_channels <- c("smo2_left", "smo2_right")
+    data <- create_monoexp_data(channels = nirs_channels)
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = nirs_channels,
+        time_delay = FALSE
+    )
+
+    expect_equal(nrow(result), 2L)
+    expect_equal(result$nirs_channels, nirs_channels)
+
+    predicted <- attr(result, "predicted")
+    expect_length(predicted, 2L)
+    expect_named(predicted, nirs_channels)
+})
+
+test_that("analyse_monoexponential() channel_args override defaults", {
+    data <- create_monoexp_data(channels = c("ch1", "ch2"), TD = 15)
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = c("ch1", "ch2"),
+        time_delay = FALSE,
+        channel_args = list(ch2 = list(time_delay = TRUE))
+    )
+
+    ## ch1 has no TD (3-param), ch2 has TD (4-param)
+    expect_equal(is.na(result$TD), c(TRUE, FALSE))
+
+    ca <- attr(result, "channel_args")
+    ch1_row <- ca[ca$nirs_channels == "ch1", ]
+    ch2_row <- ca[ca$nirs_channels == "ch2", ]
+    expect_false(ch1_row$time_delay)
+    expect_true(ch2_row$time_delay)
+})
+
+test_that("analyse_monoexponential() predicted attribute is well-formed", {
+    data <- create_monoexp_data(n = 100, tau = 25, TD = 15, noise_sd = 0.3)
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = TRUE
+    )
+
+    predicted <- attr(result, "predicted")
+    expect_named(predicted, "smo2")
+    expect_named(predicted$smo2, c("window_idx", "fitted"))
+    expect_type(predicted$smo2$fitted, "double")
+    ## fitted should correlate and agree well with original data
+    expect_true(cor(data$smo2, predicted$smo2$fitted) > 0.9)
+    expect_all_true(abs(data$smo2 - predicted$smo2$fitted) <= 3)
+
+    ## visual check
+    # library(ggplot2)
+    # plot(data) +
+    #     geom_line(aes(y = predicted$smo2$fitted))
+})
+
+test_that("analyse_monoexponential() diagnostics contain expected columns", {
+    data <- create_monoexp_data()
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = FALSE
+    )
+
+    diag <- attr(result, "diagnostics")
+    expect_true(all(
+        c("nirs_channels", "n_obs", "r2", "adj_r2", "rmse") %in% names(diag)
+    ))
+    expect_true(diag$r2 > 0.9)
+})
+
 
 
 ## fix_coefs() =========================================================

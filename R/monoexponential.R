@@ -231,62 +231,62 @@ SS_monoexp4 <- selfStart(
 #' Analyse monoexponential kinetics per channel
 #'
 #' Fit a monoexponential curve to each `nirs_channel` within a single
-#' data frame. Called by [analyse_kinetics()] when
-#' `method = "monoexponential"`.
+#' data frame. Called by [analyse_kinetics()] when `method = "monoexponential"`.
 #'
-#' @param monoexp_params Integer; `3L` (*default*) for [SS_monoexp3()]
-#'   (A, B, tau) or `4L` for [SS_monoexp4()] (A, B, tau, TD).
-#' @param algorithm Character; [stats::nls()] algorithm — `"default"`
-#'   (*default*), `"plinear"`, or `"port"`.
-#' @param control A named list of control parameters passed to
-#'   [stats::nls.control()].
-#' @inheritParams analyse_peak_slope
+#' @param time_delay Logical; default is `TRUE` to attempt to fit a 
+#'   4-parameter [SS_monoexp4()] model (A, B, tau, TD) with a time delay.
+#'   If the 4-parameter fit fails, or if `time_delay = FALSE`, fits a
+#'   reduced 3-parameter [SS_monoexp3()] model (A, B, tau).
+#' @inheritParams validate_mnirs
 #'
-#' @returns A data frame of model coefficients (one row per channel)
-#'   with attributes `"predicted"`, `"diagnostics"`, `"channel_args"`.
+#' @returns A `data.frame` with one row per `nirs_channel` and columns
+#'   `nirs_channels`, `A`, `B`, `tau`, `TD`, `k`, `half_time`.
+#'   Per-channel metadata are attached as attributes:
+#'   - `"predicted"`: a named list of data frames (per `nirs_channel`)
+#'     with columns `window_idx` and `fitted`.
+#'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
+#'     containing model fit diagnostics.
+#'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
+#'     recording the resolved arguments used.
+#'
+#' @seealso [analyse_kinetics()], [peak_slope()]
 #'
 #' @keywords internal
 analyse_monoexponential <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    monoexp_params = 3L,
-    algorithm = c("default", "plinear", "port"),
-    control = list(),
+    time_delay = TRUE,
     channel_args = list(),
     verbose = TRUE,
     ...
 ) {
     ## validation ==================================================
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
+    }
     validate_mnirs_data(data)
     nirs_channels <- validate_nirs_channels(
         enquo(nirs_channels), data, verbose = FALSE
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
-    validate_numeric(
-        monoexp_params, elements = 1, range = c(3, 4), integer = TRUE,
-        msg1 = "one-element", 
-        msg2 = "either {col_blue('3')} or {col_blue('4')}."
-    )
-    algorithm <- match.arg(algorithm)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
+    if (!is.logical(time_delay) || length(time_delay) != 1L) {
+        cli_abort(c(
+            "x" = "{.arg time_delay} must be a single {.cls logical} value."
+        ))
     }
-    args <- list(...)
 
     time_vec <- data[[time_channel]]
-    interval_names <- args$interval_names %||% "data"
+    interval_names <- list(...)$interval_names %||% substitute(data)
 
     default_args <- list(
-        monoexp_params = monoexp_params,
-        algorithm = algorithm,
-        control = control,
+        time_delay = time_delay,
         verbose = verbose,
         ...
     )
 
     ## NA scaffold for convergence failure
-    na_scalar <- data.frame(
+    na_coefs <- data.frame(
         nirs_channels = NA_character_,
         A = NA_real_,
         B = NA_real_,
@@ -302,7 +302,8 @@ analyse_monoexponential <- function(
             default_args,
             channel_args[[.nirs]] %||% list()
         )
-        n_params <- all_args$monoexp_params
+        ## derive n_params from time_delay for internal use
+        n_params <- if (all_args$time_delay) 4L else 3L
 
         nirs_vec <- data[[.nirs]]
         complete <- which(is.finite(nirs_vec) & is.finite(time_vec))
@@ -310,51 +311,59 @@ analyse_monoexponential <- function(
         x_fit <- nirs_vec[complete]
         t_fit <- time_vec[complete]
         fit_data <- data.frame(.x = x_fit, .t = t_fit)
+        model <- NULL ## pre-allocate
 
-        ## select selfStart formula
-        nls_formula <- if (n_params == 3L) {
-            .x ~ SS_monoexp3(.t, A, B, tau)
-        } else {
-            .x ~ SS_monoexp4(.t, A, B, tau, TD)
-        }
-
-        ## build nls control
-        ctrl <- if (length(all_args$control) > 0) {
-            do.call(stats::nls.control, all_args$control)
-        } else {
-            stats::nls.control()
-        }
-
-        ## fit nls; return NA on convergence failure
-        model <- tryCatch(
-            stats::nls(
-                formula = nls_formula,
-                data = fit_data,
-                algorithm = all_args$algorithm,
-                control = ctrl
-            ),
-            error = \(e) {
-                if (verbose) {
-                    cli_warn(c(
-                        "!" = "nls failed for {.field {(.nirs)}} in \\
-                        {.field {interval_names}}: {conditionMessage(e)}"
-                    ))
+        ## attempt nls fit on 4-param, fallback to 3
+        if (n_params == 4L) {
+            model <- tryCatch(
+                stats::nls(.x ~ SS_monoexp4(.t, A, B, tau, TD), fit_data),
+                error = \(e) {
+                    if (verbose) {
+                        cli_warn(c(
+                            "x" = "4-parameter {.fn SS_monoexp4} fit failed \\
+                            for {.field {(.nirs)}} in \\
+                            {.field {interval_names}}.",
+                            "!" = "{conditionMessage(e)}",
+                            "i" = "Attempting 3-parameter fit with \\
+                            {.fn SS_monoexp3}."
+                        ))
+                    }
+                    NULL
                 }
-                NULL
-            }
-        )
+            )
+        }
 
         if (is.null(model)) {
-            return(
-                build_na_reults(.nirs, na_scalar, all_args, n_params)
+            ## fallback to 3-param model
+            n_params <- 3L
+        }
+
+        if (n_params == 3L) {
+            model <- tryCatch(
+                stats::nls(.x ~ SS_monoexp3(.t, A, B, tau), fit_data),
+                error = \(e) {
+                    if (verbose) {
+                        cli_warn(c(
+                            "x" = "3-parameter {.fn SS_monoexp3} fit failed \\
+                            for {.field {(.nirs)}} in \\
+                            {.field {interval_names}}.",
+                            "!" = "{conditionMessage(e)}"
+                        ))
+                    }
+                    NULL
+                }
             )
+        }
+
+        if (is.null(model)) {
+            return(build_na_reults(.nirs, na_coefs, all_args, n_params))
         }
 
         fitted_vals <- stats::predict(model)
         coefs <- stats::coef(model)
         tau_val <- coefs[["tau"]]
 
-        scalar <- data.frame(
+        coefs <- data.frame(
             nirs_channels = .nirs,
             A = coefs[["A"]],
             B = coefs[["B"]],
@@ -368,12 +377,12 @@ analyse_monoexponential <- function(
             x_fit,
             t_fit,
             fitted_vals,
-            n_params = as.integer(n_params),
+            n_params = n_params,
             verbose = verbose
         )
 
         list(
-            scalar = scalar,
+            coefficients = coefs,
             predicted = data.frame(window_idx = complete, fitted = fitted_vals),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = safe_channel_args(.nirs, all_args)

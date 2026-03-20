@@ -15,7 +15,7 @@ A \code{data.frame} with attributes \code{"predicted"},
 }
 \description{
 Combines the list of per-channel result lists (each with
-\code{scalar}, \code{predicted}, \code{diagnostics}, \code{channel_args}) into
+\code{coefficients}, \code{predicted}, \code{diagnostics}, \code{channel_args}) into
 the single attributed data frame that \code{\link[=gather_kinetics]{gather_kinetics()}}
 expects.
 }

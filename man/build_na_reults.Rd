@@ -4,13 +4,13 @@
 \alias{build_na_reults}
 \title{Build a standardised NA result for a failed channel}
 \usage{
-build_na_reults(nirs_channel, na_scalar, all_args, n_params = 1L)
+build_na_reults(nirs_channel, na_coefs, all_args, n_params = 1L)
 }
 \arguments{
 \item{nirs_channel}{Character; column name of the channel.}
 
-\item{na_scalar}{A template 1-row \code{data.frame} with all \code{NA} values matching
-the method's scalar columns.}
+\item{na_coefs}{A template 1-row \code{data.frame} with all \code{NA} values matching
+the method's coefficients columns.}
 
 \item{all_args}{Named list of resolved arguments (passed to
 \code{\link[=safe_channel_args]{safe_channel_args()}}).}
@@ -19,11 +19,11 @@ the method's scalar columns.}
 \code{\link[=compute_diagnostics]{compute_diagnostics()}}).}
 }
 \value{
-A named list with elements \code{scalar}, \code{predicted},
+A named list with elements \code{coefficients}, \code{predicted},
 \code{diagnostics}, and \code{channel_args}.
 }
 \description{
-Returns the 4-element list (\code{scalar}, \code{predicted}, \code{diagnostics},
+Returns the 4-element list (\code{coefficients}, \code{predicted}, \code{diagnostics},
 \code{channel_args}) expected by \code{\link[=gather_kinetics]{gather_kinetics()}}, populated with \code{NA} values.
 }
 \keyword{internal}
