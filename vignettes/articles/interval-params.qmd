@@ -187,9 +187,7 @@ df_summary <- purrr::map(seq_along(df_list), \(.idx) {
     ## find global mean-max and mean-min 10-sec SmO2 values
     ## using `mnirs` rolling functions to find local 10-sec means
     idx <- mnirs:::compute_local_windows(.df$time, span = 10)
-    roll_mean <- mnirs:::compute_local_fun(
-        .df$smo2, idx, mean, na.rm = TRUE
-    )
+    roll_mean <- mnirs:::compute_local_fun(.df$smo2, idx, mean, na.rm = TRUE)
     global_min <- min(roll_mean, na.rm = TRUE)
     global_max <- max(roll_mean, na.rm = TRUE)
 
@@ -256,7 +254,7 @@ df_summary |>
         }),
     ) |>
     ## print to document
-    knitr::kable()    
+    knitr::kable()
 ```
 
 This data frame could be written to file with `writexl::write_xlsx()` or `saveRDS()` for reproducible further processing.

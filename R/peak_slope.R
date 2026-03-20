@@ -1,10 +1,12 @@
 #' Calculate linear slope
 #'
-#' `slope()`: Calculates the linear regression slope of a numeric vector.
+#' `slope()`: Calculate the linear regression slope of a numeric vector via
+#' the least-squares formula.
 #'
 #' @inheritParams peak_slope
 #'
-#' @returns `slope()` returns a numeric slope in units of `x/t`.
+#' @returns `slope()` returns a numeric slope value in units of `x / t`, or
+#'  `NA_real_` when insufficient valid observations are present.
 #'
 #' @rdname rolling_slope
 #' @order 2
@@ -12,13 +14,17 @@
 slope <- function(
     x,
     t = seq_along(x),
+    na.rm = FALSE,
     ...
 ) {
     ## validation =================================================
     args <- list(...)
-
     if (!(args$bypass_checks %||% FALSE)) {
         validate_x_t(x, t, invalid = TRUE)
+    }
+
+    if (length(x) < max(args$min_obs, 2L) || !na.rm && anyNA(x)) {
+        return(NA_real_)
     }
 
     ## remove invalid
@@ -26,10 +32,6 @@ slope <- function(
     x <- x[complete]
     t <- t[complete]
     n <- length(x)
-
-    if (n < max(args$min_obs, 2L)) {
-        return(NA_real_)
-    }
 
     ## processing =================================================
     sum_t <- sum(t)
@@ -51,32 +53,34 @@ slope <- function(
 
 #' Calculate rolling linear slope
 #'
-#' `rolling_slope()`: Computes rolling linear regression slopes within a
-#' local window along a numeric vector.
+#' `rolling_slope()`: Compute rolling linear regression slopes within a local
+#' window along a numeric vector.
 #'
 #' @inheritParams peak_slope
 #'
 #' @details
-#' See details in [peak_slope()].
+#' See [peak_slope()] for details on window specification (`width`, `span`,
+#' `align`), partial windows, and direction detection.
 #'
-#' Additional args (`...`) accepts:
+#' Additional arguments (`...`) accepted:
+#'
 #' \describe{
-#'   \item{`bypass_checks`}{Logical; Speeds operation by bypassing validation
-#'   checks. These checks should be performed upstream.}
-#'   \item{`min_obs`}{Integer; The minimum number of observations required
-#'   to calculate `slope()`. Defined by either `width` or `span`, or equal to
-#'   `2` when `partial = TRUE`}
-#'   \item{`intercept`}{Logical; When `TRUE`, `slope()` will also return a
-#'   numeric intercept value retrievable with `attr(slope, "intercept")`.}
-#'   \item{`window_idx`}{Logical; When `TRUE`, `rolling_slope()` will also
-#'   return a list of numeric window indices retrievable with
-#'   `attr(rolling_slope, "window_idx")`.}
+#'   \item{`bypass_checks`}{Logical; if `TRUE`, skips input validation.
+#'   Intended for internal use when checks have already been performed
+#'   upstream.}
+#'   \item{`min_obs`}{Integer; minimum number of valid observations required
+#'   per window to return a slope. Derived from `width` or `span`, or `2L`
+#'   when `partial = TRUE`.}
+#'   \item{`intercept`}{Logical; if `TRUE`, `slope()` also attaches the
+#'   y-intercept as `attr(slope_val, "intercept")`.}
+#'   \item{`window_idx`}{Logical; if `TRUE`, the list of per-observation
+#'   window indices is attached as `attr(slopes, "window_idx")`.}
 #' }
 #'
-#' @seealso [zoo::rollapply()]
+#' @seealso [peak_slope()]
 #'
 #' @returns `rolling_slope()` returns a numeric vector of rolling local slopes
-#'   in units of `x/t` the same length as `x`.
+#'   in units of `x / t`, the same length as `x`.
 #'
 #' @rdname rolling_slope
 #' @order 1
@@ -88,6 +92,7 @@ rolling_slope <- function(
     span = NULL,
     align = c("centre", "left", "right"),
     partial = FALSE,
+    na.rm = FALSE,
     verbose = TRUE,
     ...
 ) {
@@ -96,13 +101,9 @@ rolling_slope <- function(
     n <- length(x)
 
     if (!(args$bypass_checks %||% FALSE)) {
+        validate_x_t(x, t, invalid = TRUE)
         align <- sub("^center$", "centre", align)
         align <- match.arg(align)
-        if (missing(verbose)) {
-            verbose <- getOption("mnirs.verbose", default = TRUE)
-        }
-
-        validate_x_t(x, t, invalid = TRUE)
 
         ## informative warning message for length zero without aborting
         if (n == 0L) {
@@ -115,7 +116,10 @@ rolling_slope <- function(
         if (all(diff(t) == 0)) {
             return(rep(NA_real_, n))
         }
-        validate_x_t(x, t, invalid = TRUE)
+
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
         validate_width_span(width, span, verbose)
     }
 
@@ -129,6 +133,11 @@ rolling_slope <- function(
     }
 
     if (n < min_obs) {
+        cli_warn(c(
+            "!" = "Insufficient valid samples detected in {.fn rolling_slope}.",
+            "i" = "{.arg width} or {.arg span} must be smaller than \\
+            the range of {.arg x}."
+        ))
         return(rep(NA_real_, n))
     }
 
@@ -136,16 +145,18 @@ rolling_slope <- function(
     window_idx <- compute_local_windows(
         t, width = width, span = span, align = align
     )
+
     if (verbose && all(lengths(window_idx) < min_obs)) {
         cli_warn(c(
-            "!" = "Less than {.val {min_obs}} valid samples detected in \\
+            "!" = "Insufficient valid samples detected in \\
             {.fn rolling_slope} windows.",
-            "i" = "Specify {.arg width} >= {.val {2}} or increase {.arg span} \\
-            to include more samples."
+            "i" = "Specify greater {.arg width} or {.arg span} to include \\
+            more samples."
         ))
     }
+
     slopes <- vapply(window_idx, \(.idx) {
-        slope(x[.idx], t[.idx], min_obs = min_obs, bypass_checks = TRUE)
+        slope(x[.idx], t[.idx], na.rm, min_obs = min_obs, bypass_checks = TRUE)
     }, numeric(1))
 
     if (args$window_idx %||% FALSE) {
@@ -158,60 +169,72 @@ rolling_slope <- function(
 
 #' Find peak linear slope
 #'
-#' Identifies the maximum positive or negative local linear
-#' slope within a numeric vector and returns regression parameters
+#' Identify the maximum positive or negative local linear slope within a
+#' numeric vector using rolling least-squares regression and return a list
+#' of regression parameters for the peak window.
 #'
-#' @param direction A character string to detect either the peak
-#'   `"positive"` or `"negative"` slope, or `"auto"` detect (the *default*)
-#'   based on the overal trend of the signal (see *Details*).
-#' @param partial A logical specifying whether to perform the operation over a
-#'   subset of available data within the local rolling window (`TRUE`), or
-#'   requiring a complete window of valid samples (`FALSE`, by *default*). See
+#' @param direction A character string specifying the slope direction to
+#'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
 #'   *Details*.
 #' @param ... Additional arguments.
 #' @inheritParams compute_local_windows
 #' @inheritParams replace_invalid
+#' @inheritParams filter_mnirs
+#' @inheritParams filter_ma
 #'
 #' @details
-#' Uses rolling slope calculations via the least squares formula on complete
-#'   case data. The local rolling window can be specified by either `width`
-#'   as the number of samples, or `span` as the timespan in units of `t`.
+#' ## Rolling window
 #'
-#' `align` defaults to *"centre"* the local window around `idx` between
-#'   `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
-#'   specified. Even `width` values will bias `align` to *"left"*, with the
-#'   unequal sample forward of `idx`. When `span` is specified with
-#'   `align = "centre"`, the local window is between `[t - span/2, t + span/2]`.
+#' The local rolling window is defined by either `width` (number of samples)
+#' or `span` (time duration in units of `t`). When `align = "centre"` and
+#' `width` is specified, the window spans
+#' `[idx - floor((width - 1) / 2), idx + floor(width / 2)]`. Even `width`
+#' values bias alignment to *"left"*, placing the unequal sample forward of
+#' `idx`. 
+#' 
+#' When `span` is specified with `align = "centre"`, the window spans
+#' `[t - span / 2, t + span / 2]`.
+#' 
+#' ## Direction detection
 #'
-#' When `direction = "auto"`, the net slope across all of `x` is calculated
-#'   to determine the trend direction (positive or negative), then the
-#'   greatest local slope in that direction is returned. If the net slope
-#'   equals zero, will return the greatest absolute local slope. When
-#'   `direction = "positive"` or `"negative"`, returns the greatest
-#'   respective directional slope. If no positive/negative slopes exist,
-#'   returns `NA` with a warning.
+#' When `direction = "auto"`, the net slope across all of `x` is computed to
+#' determine the overall trend (positive or negative), and the greatest local
+#' slope in that direction is returned. 
+#' 
+#' If the net slope equals zero or is `NA`, the greatest absolute local slope 
+#' is returned. When `direction = "positive"` or `"negative"`, the greatest 
+#' respective directional slope is returned. If no slopes in the requested 
+#' direction exist, `NA` is returned with a warning.
 #'
-#' The default `partial = FALSE` requires complete case data with the same
-#'   number of valid samples as specified by `width` or `span` (number of
-#'   samples is estimated for `span` from the sample rate of `t`). If fewer
-#'   than the requires valid samples are present in the local vector, `NA` is
-#'   returned.
+#' ## Partial windows
 #'
-#' `partial = TRUE` allows calculation over partial windows with at least `2`
-#'   valid samples, such as at edge conditions or over missing data `NA`s.
-#'   However, these slope values will be sensitive to noisy data, so use
-#'   with caution.
+#' The default `partial = FALSE` requires a complete number of samples
+#' specified by `width` or `span` (estimated from the sample rate of `t` when
+#' `span` is used). `NA` is returned if fewer samples are present in the
+#' local window. 
+#' 
+#' Setting `partial = TRUE` allows computation with at least 2 valid samples, 
+#' such as at edge conditions. But these values will be more sensitive to 
+#' noise and should be used with caution.
+#' 
+#' ## Missing values
+#'
+#' `na.rm` controls whether missing values (`NA`s) within each local window are 
+#' either propagated to the returned vector when `na.rm = FALSE` (the default),
+#' or ignored before processing if `na.rm = TRUE`.
 #'
 #' @returns A named list containing:
-#'   \item{`slope`}{The peak slope value in units of `x/t`.}
-#'   \item{`intercept`}{The y-intercept of the peak local regression equation.}
-#'   \item{`y`}{The response value predicted from `x` at `t`.}
-#'   \item{`t`}{The time value at the index of the peak slope window.}
-#'   \item{`idx`}{The index position of the peak slope.}
-#'   \item{`fitted`}{A numeric vector of predicted values from `x` over
-#'   `t[window_idx]` from the peak slope and intercept.}
-#'   \item{`window_idx`}{An integer vector of indices for the peak slope
+#'   \item{`slope`}{The peak slope value in units of `x / t`.}
+#'   \item{`intercept`}{The y-intercept of the peak local regression line.}
+#'   \item{`y`}{The predicted response value at the peak slope window index.}
+#'   \item{`t`}{The time value at the peak slope window index.}
+#'   \item{`idx`}{The integer index position of the peak slope window.}
+#'   \item{`fitted`}{A numeric vector of predicted values spanning the peak 
+#'   slope window.}
+#'   \item{`window_idx`}{An integer vector of indices spanning the peak slope
 #'   window.}
+#'
+#' @seealso [rolling_slope()]
 #'
 #' @examples
 #' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
@@ -229,6 +252,7 @@ peak_slope <- function(
     align = c("centre", "left", "right"),
     direction = c("auto", "positive", "negative"),
     partial = FALSE,
+    na.rm = FALSE,
     verbose = TRUE,
     ...
 ) {
@@ -248,6 +272,7 @@ peak_slope <- function(
         span,
         align,
         partial,
+        na.rm,
         verbose,
         window_idx = TRUE,
         bypass_checks = args$bypass_checks %||% FALSE ## use validations
@@ -270,7 +295,7 @@ peak_slope <- function(
 
     ## auto-detect direction from net trend
     if (direction == "auto") {
-        net_slope <- slope(x, t, bypass_checks = TRUE)
+        net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
 
         direction <- if (is.na(net_slope) || net_slope == 0) {
             ## fallback to magnitude comparison when net slope is zero/NA
@@ -293,9 +318,7 @@ peak_slope <- function(
 
     if (length(candidates) == 0L) {
         if (verbose) {
-            cli_warn(c(
-                "!" = "No {direction} slopes detected."
-            ))
+            cli_warn(c("!" = "No {direction} slopes detected."))
         }
         return(na_result)
     }
@@ -314,6 +337,7 @@ peak_slope <- function(
     peak_slope_val <- slope(
         x[window_idx],
         t[window_idx],
+        na.rm = TRUE,
         intercept = TRUE,
         bypass_checks = TRUE
     )
@@ -336,46 +360,49 @@ peak_slope <- function(
 }
 
 
-#' Analyse peak linear slope
+#' Analyse peak linear slope across NIRS channels
 #'
-#' Processes the maximum positive or negative local linear slope for each
-#' `nirs_channel` within a data frame and return a data frame of regression
-#' parameters with additional parameters as metadata via `attributes()`.
+#' Compute the maximum local linear slope for each `nirs_channel` within a
+#' *"mnirs"* data frame and return a data frame of regression parameters
+#' with per-channel metadata as attributes.
 #'
-#' @param channel_args An *optional* `list()` named by `nirs_channels` with 
-#'   unique per-channel arguments to override global default arguments (see
-#'   *Details*).
-#' @inheritParams peak_slope
+#' @param channel_args An *optional* named `list()` with names corresponding
+#'   to `nirs_channels`, each containing a list of arguments to override the
+#'   global defaults for that channel. See *Details*.
 #' @inheritParams validate_mnirs
-#' 
+#' @inheritParams peak_slope
+#'
 #' @details
-#' ## `channel_args` per `nirs_channel`
+#' ## Per-channel argument overrides
 #'
-#' Arguments in `analyse_peak_slope()` apply to all `nirs_channels` by default.
-#'   `channel_args` allows overriding defaults with unique values per 
-#'   `nirs_channel`. e.g.:
+#' Arguments passed to `analyse_peak_slope()` apply to all `nirs_channels`
+#' by default. `channel_args` allows overriding any argument for individual
+#' channels, e.g.:
 #'
-#' ```
+#' ```r
 #' analyse_peak_slope(
 #'     data = df,
 #'     nirs_channels = c(hhb, smo2),
-#'     span = 3, 
+#'     span = 3,
 #'     direction = "positive",
 #'     channel_args = list(
-#'         hhb = list(span = 5),
+#'         hhb  = list(span = 5),
 #'         smo2 = list(direction = "negative")
 #'     )
 #' )
 #' ```
-#' 
-#' @returns A tibble of model parameter results with one row per `nirs_channel`
-#'   (columns: `nirs_channels`, `slope`, `intercept`, `y`,
-#'   `<time_channel>`, `idx`).
-#'   Per-channel metadata carried as attributes:
-#'   - `"predicted"` (named list of data frames for each `nirs_channel` with 
-#'     columns `idx` and `fitted`),
-#'   - `"channel_args"` (data.frame, one row per `nirs_channel`),
-#'   - `"diagnostics"` (data.frame, one row per `nirs_channel`).
+#'
+#' @returns A `data.frame` with one row per `nirs_channel` and columns
+#'   `nirs_channels`, `slope`, `intercept`, `y`, `<time_channel>`, `idx`.
+#'   Per-channel metadata are attached as attributes:
+#'   - `"predicted"`: a named list of data frames (per `nirs_channel`)
+#'     with columns `window_idx` and `fitted`.
+#'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
+#'     recording the resolved arguments used.
+#'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
+#'     containing model fit diagnostics.
+#'
+#' @seealso [analyse_kinetics()], [peak_slope()]
 #' 
 #' @keywords internal
 analyse_peak_slope <- function(
@@ -387,11 +414,15 @@ analyse_peak_slope <- function(
     align = c("centre", "left", "right"),
     direction = c("auto", "positive", "negative"),
     partial = FALSE,
+    na.rm = FALSE,
     channel_args = list(),
     verbose = TRUE,
     ...
 ) {
     ## validation ==============================================
+    if (missing(verbose)) {
+        verbose <- getOption("mnirs.verbose", default = TRUE)
+    }
     validate_mnirs_data(data)
     nirs_channels <- validate_nirs_channels(
         enquo(nirs_channels), data, verbose = FALSE
@@ -401,9 +432,6 @@ analyse_peak_slope <- function(
     align <- sub("^center$", "centre", align)
     align <- match.arg(align)
     direction <- match.arg(direction)
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
-    }
 
     time_vec <- data[[time_channel]]
     default_args <- list(
@@ -412,6 +440,7 @@ analyse_peak_slope <- function(
         align = align,
         direction = direction,
         partial = partial,
+        na.rm = na.rm,
         verbose = verbose,
         bypass_checks = TRUE,
         ...
@@ -443,7 +472,7 @@ analyse_peak_slope <- function(
             t             = slope_results$t,
             idx           = slope_results$idx
         )
-        names(scalar)[names(scalar) == "t"] <- time_channel
+        names(scalar)[names(scalar) == "t"] <- time_channel ## rename
 
         list(
             scalar = scalar,

@@ -164,14 +164,16 @@ at the edges of the data.}
 
 }
 
-\subsection{missing values}{
+\subsection{Missing values}{
 
 Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
 \code{method = "smooth_spline"} or \code{"butterworth"}, unless \code{na.rm = TRUE}.
 Then \code{NA}s will be ignored and passed through to the returned data.
+
 For \code{method = "moving_average"}, \code{na.rm} controls whether \code{NA}s within
-each local window are ignored before computing the mean, or propagated
-to the returned vector.
+each local window are either propagated to the returned vector when
+\code{na.rm = FALSE} (the default), or ignored before processing if
+\code{na.rm = TRUE}.
 }
 }
 \examples{

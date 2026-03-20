@@ -2,7 +2,7 @@
 % Please edit documentation in R/peak_slope.R
 \name{analyse_peak_slope}
 \alias{analyse_peak_slope}
-\title{Analyse peak linear slope}
+\title{Analyse peak linear slope across NIRS channels}
 \usage{
 analyse_peak_slope(
   data,
@@ -13,6 +13,7 @@ analyse_peak_slope(
   align = c("centre", "left", "right"),
   direction = c("auto", "positive", "negative"),
   partial = FALSE,
+  na.rm = FALSE,
   channel_args = list(),
   verbose = TRUE,
   ...
@@ -47,18 +48,22 @@ in which to perform the operation, according to \code{align}. In units of
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
 is \emph{backward looking} from the current sample.}
 
-\item{direction}{A character string to detect either the peak
-\code{"positive"} or \code{"negative"} slope, or \code{"auto"} detect (the \emph{default})
-based on the overal trend of the signal (see \emph{Details}).}
-
-\item{partial}{A logical specifying whether to perform the operation over a
-subset of available data within the local rolling window (\code{TRUE}), or
-requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
+\item{direction}{A character string specifying the slope direction to
+detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{channel_args}{An \emph{optional} \code{list()} named by \code{nirs_channels} with
-unique per-channel arguments to override global default arguments (see
+\item{partial}{Logical; default is \code{FALSE}, requires local windows to have
+complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},
+processes available samples within the local window. See \emph{Details}.}
+
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
 \emph{Details}).}
+
+\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
+to \code{nirs_channels}, each containing a list of arguments to override the
+global defaults for that channel. See \emph{Details}.}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
@@ -67,40 +72,44 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 \item{...}{Additional arguments.}
 }
 \value{
-A tibble of model parameter results with one row per \code{nirs_channel}
-(columns: \code{nirs_channels}, \code{slope}, \code{intercept}, \code{y},
-\verb{<time_channel>}, \code{idx}).
-Per-channel metadata carried as attributes:
+A \code{data.frame} with one row per \code{nirs_channel} and columns
+\code{nirs_channels}, \code{slope}, \code{intercept}, \code{y}, \verb{<time_channel>}, \code{idx}.
+Per-channel metadata are attached as attributes:
 \itemize{
-\item \code{"predicted"} (named list of data frames for each \code{nirs_channel} with
-columns \code{idx} and \code{fitted}),
-\item \code{"channel_args"} (data.frame, one row per \code{nirs_channel}),
-\item \code{"diagnostics"} (data.frame, one row per \code{nirs_channel}).
+\item \code{"predicted"}: a named list of data frames (per \code{nirs_channel})
+with columns \code{window_idx} and \code{fitted}.
+\item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
+recording the resolved arguments used.
+\item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
+containing model fit diagnostics.
 }
 }
 \description{
-Processes the maximum positive or negative local linear slope for each
-\code{nirs_channel} within a data frame and return a data frame of regression
-parameters with additional parameters as metadata via \code{attributes()}.
+Compute the maximum local linear slope for each \code{nirs_channel} within a
+\emph{"mnirs"} data frame and return a data frame of regression parameters
+with per-channel metadata as attributes.
 }
 \details{
-\subsection{\code{channel_args} per \code{nirs_channel}}{
+\subsection{Per-channel argument overrides}{
 
-Arguments in \code{analyse_peak_slope()} apply to all \code{nirs_channels} by default.
-\code{channel_args} allows overriding defaults with unique values per
-\code{nirs_channel}. e.g.:
+Arguments passed to \code{analyse_peak_slope()} apply to all \code{nirs_channels}
+by default. \code{channel_args} allows overriding any argument for individual
+channels, e.g.:
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{analyse_peak_slope(
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_peak_slope(
     data = df,
     nirs_channels = c(hhb, smo2),
-    span = 3, 
+    span = 3,
     direction = "positive",
     channel_args = list(
-        hhb = list(span = 5),
+        hhb  = list(span = 5),
         smo2 = list(direction = "negative")
     )
 )
 }\if{html}{\out{</div>}}
 }
+}
+\seealso{
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=peak_slope]{peak_slope()}}
 }
 \keyword{internal}

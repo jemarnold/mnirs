@@ -112,15 +112,17 @@
 #'       If `TRUE`, ignores `NA` and allows calculation over partial windows 
 #'       at the edges of the data.}
 #' }
-#'
-#' ## missing values
+#' 
+#' ## Missing values
 #'
 #' Missing values (`NA`) in `nirs_channels` will cause an error for
 #' `method = "smooth_spline"` or `"butterworth"`, unless `na.rm = TRUE`.
 #' Then `NA`s will be ignored and passed through to the returned data.
+#' 
 #' For `method = "moving_average"`, `na.rm` controls whether `NA`s within
-#' each local window are ignored before computing the mean, or propagated
-#' to the returned vector.
+#' each local window are either propagated to the returned vector when 
+#' `na.rm = FALSE` (the default), or ignored before processing if 
+#' `na.rm = TRUE`.
 #'
 #' @returns
 #' A [tibble][tibble::tibble-package] of class *"mnirs"* with metadata
@@ -402,23 +404,38 @@ filter_mnirs.moving_average <- function(
 #' Apply a simple moving average smoothing filter to vector data.
 #' `filter_moving_average()` is an alias of `filter_ma()`.
 #'
-#' @param partial Logical; default is `FALSE`, requires complete local windows
-#'   of valid (non-`NA`) samples. If `TRUE`, processes available valid samples
-#'   within the local window. See *Details*.
+#' @param partial Logical; default is `FALSE`, requires local windows to have
+#'   complete number of samples specified by `width` or `span`. If `TRUE`, 
+#'   processes available samples within the local window. See *Details*.
 #' @inheritParams replace_invalid
 #' @inheritParams shift_mnirs
 #' @inheritParams filter_mnirs
 #'
 #' @details
-#' Applies a centred (symmetrical) moving average filter in a local window
-#'   defined by either `width` as the number of samples around `idx` between
-#'   `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
-#'   timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
+#' ## Rolling window
+#' 
+#' Applies a centred (symmetrical) moving average filter in a local
+#' window, defined by either `width` as the number of samples around
+#' `idx` between `[idx - floor(width/2), idx + floor(width/2)]`. Or by
+#' `span` as the timespan in units of `time_channel` between
+#' `[t - span/2, t + span/2]`.
 #'
-#' Specifying `width` is often faster than `span`.
+#' ## Partial windows
 #'
-#' If there are no valid values within the calculation window, will return `NA`.
-#'   A partial moving average will be calculated at the edges of the data.
+#' The default `partial = FALSE` requires a complete number of samples
+#' specified by `width` or `span` (estimated from the sample rate of `t` when
+#' `span` is used). `NA` is returned if fewer samples are present in the
+#' local window. 
+#' 
+#' Setting `partial = TRUE` allows computation with only a single valid sample, 
+#' such as at edge conditions. But these values will be more sensitive to 
+#' noise and should be used with caution.
+#'
+#' ## Missing values
+#'
+#' `na.rm` controls whether missing values (`NA`s) within each local window are 
+#' either propagated to the returned vector when `na.rm = FALSE` (the default),
+#' or ignored before processing if `na.rm = TRUE`.
 #'
 #' @returns A numeric vector the same length as `x`.
 #'
@@ -455,8 +472,7 @@ filter_ma <- function(
     ...
 ) {
     ## validation ===========================================
-    bypass_checks <- list(...)$bypass_checks %||% FALSE
-    if (!bypass_checks) {
+    if (!(list(...)$bypass_checks %||% FALSE)) {
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }

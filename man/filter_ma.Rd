@@ -41,9 +41,9 @@ centred on \code{idx}, between
 \code{idx} in units of \code{time_channel} or \code{t}, between
 \verb{[t - span/2, t + span/2]}.}
 
-\item{partial}{Logical; default is \code{FALSE}, requires complete local windows
-of valid (non-\code{NA}) samples. If \code{TRUE}, processes available valid samples
-within the local window. See \emph{Details}.}
+\item{partial}{Logical; default is \code{FALSE}, requires local windows to have
+complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},
+processes available samples within the local window. See \emph{Details}.}
 
 \item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
 returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
@@ -64,15 +64,33 @@ Apply a simple moving average smoothing filter to vector data.
 \code{filter_moving_average()} is an alias of \code{filter_ma()}.
 }
 \details{
-Applies a centred (symmetrical) moving average filter in a local window
-defined by either \code{width} as the number of samples around \code{idx} between
-\verb{[idx - floor(width/2),} \verb{idx + floor(width/2)]}. Or by \code{span} as the
-timespan in units of \code{time_channel} between \verb{[t - span/2, t + span/2]}.
+\subsection{Rolling window}{
 
-Specifying \code{width} is often faster than \code{span}.
+Applies a centred (symmetrical) moving average filter in a local
+window, defined by either \code{width} as the number of samples around
+\code{idx} between \verb{[idx - floor(width/2), idx + floor(width/2)]}. Or by
+\code{span} as the timespan in units of \code{time_channel} between
+\verb{[t - span/2, t + span/2]}.
+}
 
-If there are no valid values within the calculation window, will return \code{NA}.
-A partial moving average will be calculated at the edges of the data.
+\subsection{Partial windows}{
+
+The default \code{partial = FALSE} requires a complete number of samples
+specified by \code{width} or \code{span} (estimated from the sample rate of \code{t} when
+\code{span} is used). \code{NA} is returned if fewer samples are present in the
+local window.
+
+Setting \code{partial = TRUE} allows computation with only a single valid sample,
+such as at edge conditions. But these values will be more sensitive to
+noise and should be used with caution.
+}
+
+\subsection{Missing values}{
+
+\code{na.rm} controls whether missing values (\code{NA}s) within each local window are
+either propagated to the returned vector when \code{na.rm = FALSE} (the default),
+or ignored before processing if \code{na.rm = TRUE}.
+}
 }
 \examples{
 x <- c(1, 3, 2, 5, 4, 6, 5, 7)

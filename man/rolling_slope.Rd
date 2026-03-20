@@ -12,11 +12,12 @@ rolling_slope(
   span = NULL,
   align = c("centre", "left", "right"),
   partial = FALSE,
+  na.rm = FALSE,
   verbose = TRUE,
   ...
 )
 
-slope(x, t = seq_along(x), ...)
+slope(x, t = seq_along(x), na.rm = FALSE, ...)
 }
 \arguments{
 \item{x}{A numeric vector of the response variable.}
@@ -35,10 +36,14 @@ in which to perform the operation, according to \code{align}. In units of
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
 is \emph{backward looking} from the current sample.}
 
-\item{partial}{A logical specifying whether to perform the operation over a
-subset of available data within the local rolling window (\code{TRUE}), or
-requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
-\emph{Details}.}
+\item{partial}{Logical; default is \code{FALSE}, requires local windows to have
+complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},
+processes available samples within the local window. See \emph{Details}.}
+
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
@@ -48,34 +53,38 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 \code{rolling_slope()} returns a numeric vector of rolling local slopes
-in units of \code{x/t} the same length as \code{x}.
+in units of \code{x / t}, the same length as \code{x}.
 
-\code{slope()} returns a numeric slope in units of \code{x/t}.
+\code{slope()} returns a numeric slope value in units of \code{x / t}, or
+\code{NA_real_} when insufficient valid observations are present.
 }
 \description{
-\code{rolling_slope()}: Computes rolling linear regression slopes within a
-local window along a numeric vector.
+\code{rolling_slope()}: Compute rolling linear regression slopes within a local
+window along a numeric vector.
 
-\code{slope()}: Calculates the linear regression slope of a numeric vector.
+\code{slope()}: Calculate the linear regression slope of a numeric vector via
+the least-squares formula.
 }
 \details{
-See details in \code{\link[=peak_slope]{peak_slope()}}.
+See \code{\link[=peak_slope]{peak_slope()}} for details on window specification (\code{width}, \code{span},
+\code{align}), partial windows, and direction detection.
 
-Additional args (\code{...}) accepts:
+Additional arguments (\code{...}) accepted:
+
 \describe{
-\item{\code{bypass_checks}}{Logical; Speeds operation by bypassing validation
-checks. These checks should be performed upstream.}
-\item{\code{min_obs}}{Integer; The minimum number of observations required
-to calculate \code{slope()}. Defined by either \code{width} or \code{span}, or equal to
-\code{2} when \code{partial = TRUE}}
-\item{\code{intercept}}{Logical; When \code{TRUE}, \code{slope()} will also return a
-numeric intercept value retrievable with \code{attr(slope, "intercept")}.}
-\item{\code{window_idx}}{Logical; When \code{TRUE}, \code{rolling_slope()} will also
-return a list of numeric window indices retrievable with
-\code{attr(rolling_slope, "window_idx")}.}
+\item{\code{bypass_checks}}{Logical; if \code{TRUE}, skips input validation.
+Intended for internal use when checks have already been performed
+upstream.}
+\item{\code{min_obs}}{Integer; minimum number of valid observations required
+per window to return a slope. Derived from \code{width} or \code{span}, or \code{2L}
+when \code{partial = TRUE}.}
+\item{\code{intercept}}{Logical; if \code{TRUE}, \code{slope()} also attaches the
+y-intercept as \code{attr(slope_val, "intercept")}.}
+\item{\code{window_idx}}{Logical; if \code{TRUE}, the list of per-observation
+window indices is attached as \code{attr(slopes, "window_idx")}.}
 }
 }
 \seealso{
-\code{\link[zoo:rollapply]{zoo::rollapply()}}
+\code{\link[=peak_slope]{peak_slope()}}
 }
 \keyword{internal}

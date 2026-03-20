@@ -43,9 +43,9 @@ used.
 \item{control}{A named list of control parameters passed to
 \code{\link[stats:nls.control]{stats::nls.control()}}.}
 
-\item{channel_args}{An \emph{optional} \code{list()} named by \code{nirs_channels} with
-unique per-channel arguments to override global default arguments (see
-\emph{Details}).}
+\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
+to \code{nirs_channels}, each containing a list of arguments to override the
+global defaults for that channel. See \emph{Details}.}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A

@@ -12,7 +12,7 @@
 #'   \describe{
 #'      \item{`"half_time"`}{`<under development>`.}
 #'      \item{`"peak_slope"`}{Peak local linear regression slope. Additional
-#'      arguments: `width` or `span`, `align`, `direction`, `partial`.}
+#'      arguments: `width` or `span`, `align`, `direction`, `partial`, `na.rm`.}
 #'      \item{`"monoexponential"`}{Monoexponential curve fit via
 #'      [stats::nls()] with arguments: `monoexp_params` for [SS_monoexp3()] or
 #'      [SS_monoexp4()]; `algorithm`; `control`.}
@@ -21,8 +21,8 @@
 #' @param channel_args An *optional* `list()` with names corresponding to
 #'   `nirs_channels` for unique per-channel arguments to override global
 #'   default arguments (see *Details*).
-#' @param ... Additional arguments passed to the underlying method function
-#'   (e.g. [peak_slope()]). See *Details*.
+#' @param ... Additional arguments passed to the underlying method function.
+#'   See *Details*.
 #' @inheritParams validate_mnirs
 #'
 #' @details
@@ -60,10 +60,12 @@
 #'       `"left"`, or `"right"`.}
 #'   \item{`direction`}{Character; slope direction to detect — `"auto"`
 #'       (default), `"positive"`, or `"negative"`. See [peak_slope()].}
-#'   \item{`partial`}{Logical; `FALSE` by default, only returns slope values
-#'       where all samples are valid (no `NA`s and no fewer samples than
-#'       `width` or `span` in the local window). If `TRUE`, allows slope
-#'       calculation over partial windows with at least 2 valid samples.}
+#'   \item{`partial`}{Logical; default is `FALSE`, requires local windows 
+#'       to have complete number of samples specified by `width` or `span`. 
+#'       If `TRUE`, processes available samples within the local window.}
+#'   \item{`na.rm`}{Logical; default is `TRUE`, ignores `NA`s and processes 
+#'       available valid samples within the local window. If `TRUE`, 
+#'       propagates any `NA`s to the returned vector.}
 #' }
 #'
 #' #### `method = "monoexponential"`
@@ -73,8 +75,7 @@
 #' (3-parameter: A, B, tau) or [SS_monoexp4()] (4-parameter: A, B, tau,
 #' TD). See [monoexponential()] for model equations.
 #'
-#' Additional arguments (`...`) accepted when
-#' `method = "monoexponential"`:
+#' Additional arguments (`...`) accepted when `method = "monoexponential"`:
 #'
 #' \describe{
 #'   \item{`monoexp_params`}{Integer; `3L` (*default*) for [SS_monoexp3()] or
@@ -180,13 +181,10 @@ analyse_kinetics <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
 
-    ## create lightweight dispatch object
-    data <- structure(
-        data,
-        class = c(method, "mnirs_kinetics")
+    UseMethod(
+        "analyse_kinetics",
+        structure(data, class = c(method, "mnirs_kinetics"))
     )
-
-    UseMethod("analyse_kinetics", data)
 }
 
 
@@ -221,6 +219,7 @@ analyse_kinetics.peak_slope <- function(
             align = args$align %||% "centre",
             direction = args$direction %||% "auto",
             partial = args$partial %||% FALSE,
+            na.rm = args$na.rm %||% TRUE, ## TODO do I want FALSE?
             channel_args = channel_args,
             verbose = verbose
         )

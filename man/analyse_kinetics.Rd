@@ -40,7 +40,7 @@ method. See \emph{Details}.
 \describe{
 \item{\code{"half_time"}}{\verb{<under development>}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
-arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}.}
+arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
 \code{\link[stats:nls]{stats::nls()}} with arguments: \code{monoexp_params} for \code{\link[=SS_monoexp3]{SS_monoexp3()}} or
 \code{\link[=SS_monoexp4]{SS_monoexp4()}}; \code{algorithm}; \code{control}.}
@@ -55,8 +55,8 @@ default arguments (see \emph{Details}).}
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
-\item{...}{Additional arguments passed to the underlying method function
-(e.g. \code{\link[=peak_slope]{peak_slope()}}). See \emph{Details}.}
+\item{...}{Additional arguments passed to the underlying method function.
+See \emph{Details}.}
 }
 \value{
 A formatted table of printed results, with individual elements
@@ -120,10 +120,12 @@ rolling window. One of either \code{width} or \code{span} must be specified.}
 \code{"left"}, or \code{"right"}.}
 \item{\code{direction}}{Character; slope direction to detect — \code{"auto"}
 (default), \code{"positive"}, or \code{"negative"}. See \code{\link[=peak_slope]{peak_slope()}}.}
-\item{\code{partial}}{Logical; \code{FALSE} by default, only returns slope values
-where all samples are valid (no \code{NA}s and no fewer samples than
-\code{width} or \code{span} in the local window). If \code{TRUE}, allows slope
-calculation over partial windows with at least 2 valid samples.}
+\item{\code{partial}}{Logical; default is \code{FALSE}, requires local windows
+to have complete number of samples specified by \code{width} or \code{span}.
+If \code{TRUE}, processes available samples within the local window.}
+\item{\code{na.rm}}{Logical; default is \code{TRUE}, ignores \code{NA}s and processes
+available valid samples within the local window. If \code{TRUE},
+propagates any \code{NA}s to the returned vector.}
 }
 }
 
@@ -134,8 +136,7 @@ curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} wi
 (3-parameter: A, B, tau) or \code{\link[=SS_monoexp4]{SS_monoexp4()}} (4-parameter: A, B, tau,
 TD). See \code{\link[=monoexponential]{monoexponential()}} for model equations.
 
-Additional arguments (\code{...}) accepted when
-\code{method = "monoexponential"}:
+Additional arguments (\code{...}) accepted when \code{method = "monoexponential"}:
 
 \describe{
 \item{\code{monoexp_params}}{Integer; \code{3L} (\emph{default}) for \code{\link[=SS_monoexp3]{SS_monoexp3()}} or

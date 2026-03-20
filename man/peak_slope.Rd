@@ -12,6 +12,7 @@ peak_slope(
   align = c("centre", "left", "right"),
   direction = c("auto", "positive", "negative"),
   partial = FALSE,
+  na.rm = FALSE,
   verbose = TRUE,
   ...
 )
@@ -33,14 +34,18 @@ in which to perform the operation, according to \code{align}. In units of
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
 is \emph{backward looking} from the current sample.}
 
-\item{direction}{A character string to detect either the peak
-\code{"positive"} or \code{"negative"} slope, or \code{"auto"} detect (the \emph{default})
-based on the overal trend of the signal (see \emph{Details}).}
-
-\item{partial}{A logical specifying whether to perform the operation over a
-subset of available data within the local rolling window (\code{TRUE}), or
-requiring a complete window of valid samples (\code{FALSE}, by \emph{default}). See
+\item{direction}{A character string specifying the slope direction to
+detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
+
+\item{partial}{Logical; default is \code{FALSE}, requires local windows to have
+complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},
+processes available samples within the local window. See \emph{Details}.}
+
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
@@ -50,49 +55,65 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A named list containing:
-\item{\code{slope}}{The peak slope value in units of \code{x/t}.}
-\item{\code{intercept}}{The y-intercept of the peak local regression equation.}
-\item{\code{y}}{The response value predicted from \code{x} at \code{t}.}
-\item{\code{t}}{The time value at the index of the peak slope window.}
-\item{\code{idx}}{The index position of the peak slope.}
-\item{\code{fitted}}{A numeric vector of predicted values from \code{x} over
-\code{t[window_idx]} from the peak slope and intercept.}
-\item{\code{window_idx}}{An integer vector of indices for the peak slope
+\item{\code{slope}}{The peak slope value in units of \code{x / t}.}
+\item{\code{intercept}}{The y-intercept of the peak local regression line.}
+\item{\code{y}}{The predicted response value at the peak slope window index.}
+\item{\code{t}}{The time value at the peak slope window index.}
+\item{\code{idx}}{The integer index position of the peak slope window.}
+\item{\code{fitted}}{A numeric vector of predicted values spanning the peak
+slope window.}
+\item{\code{window_idx}}{An integer vector of indices spanning the peak slope
 window.}
 }
 \description{
-Identifies the maximum positive or negative local linear
-slope within a numeric vector and returns regression parameters
+Identify the maximum positive or negative local linear slope within a
+numeric vector using rolling least-squares regression and return a list
+of regression parameters for the peak window.
 }
 \details{
-Uses rolling slope calculations via the least squares formula on complete
-case data. The local rolling window can be specified by either \code{width}
-as the number of samples, or \code{span} as the timespan in units of \code{t}.
+\subsection{Rolling window}{
 
-\code{align} defaults to \emph{"centre"} the local window around \code{idx} between
-\verb{[idx - floor((width-1)/2),} \verb{idx + floor(width/2)]} when \code{width} is
-specified. Even \code{width} values will bias \code{align} to \emph{"left"}, with the
-unequal sample forward of \code{idx}. When \code{span} is specified with
-\code{align = "centre"}, the local window is between \verb{[t - span/2, t + span/2]}.
+The local rolling window is defined by either \code{width} (number of samples)
+or \code{span} (time duration in units of \code{t}). When \code{align = "centre"} and
+\code{width} is specified, the window spans
+\verb{[idx - floor((width - 1) / 2), idx + floor(width / 2)]}. Even \code{width}
+values bias alignment to \emph{"left"}, placing the unequal sample forward of
+\code{idx}.
 
-When \code{direction = "auto"}, the net slope across all of \code{x} is calculated
-to determine the trend direction (positive or negative), then the
-greatest local slope in that direction is returned. If the net slope
-equals zero, will return the greatest absolute local slope. When
-\code{direction = "positive"} or \code{"negative"}, returns the greatest
-respective directional slope. If no positive/negative slopes exist,
-returns \code{NA} with a warning.
+When \code{span} is specified with \code{align = "centre"}, the window spans
+\verb{[t - span / 2, t + span / 2]}.
+}
 
-The default \code{partial = FALSE} requires complete case data with the same
-number of valid samples as specified by \code{width} or \code{span} (number of
-samples is estimated for \code{span} from the sample rate of \code{t}). If fewer
-than the requires valid samples are present in the local vector, \code{NA} is
-returned.
+\subsection{Direction detection}{
 
-\code{partial = TRUE} allows calculation over partial windows with at least \code{2}
-valid samples, such as at edge conditions or over missing data \code{NA}s.
-However, these slope values will be sensitive to noisy data, so use
-with caution.
+When \code{direction = "auto"}, the net slope across all of \code{x} is computed to
+determine the overall trend (positive or negative), and the greatest local
+slope in that direction is returned.
+
+If the net slope equals zero or is \code{NA}, the greatest absolute local slope
+is returned. When \code{direction = "positive"} or \code{"negative"}, the greatest
+respective directional slope is returned. If no slopes in the requested
+direction exist, \code{NA} is returned with a warning.
+}
+
+\subsection{Partial windows}{
+
+The default \code{partial = FALSE} requires a complete number of samples
+specified by \code{width} or \code{span} (estimated from the sample rate of \code{t} when
+\code{span} is used). \code{NA} is returned if fewer samples are present in the
+local window.
+
+Setting \code{partial = TRUE} allows computation with at least 2 valid samples,
+such as at edge conditions. But these values will be more sensitive to
+noise and should be used with caution.
+}
+
+\subsection{Missing values}{
+
+\code{na.rm} controls whether missing values (\code{NA}s) within each local window are
+either propagated to the returned vector when \code{na.rm = FALSE} (the default),
+or ignored before processing if \code{na.rm = TRUE}.
+}
 }
 \examples{
 x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
@@ -101,4 +122,7 @@ peak_slope(x, width = 5)
 x_dec <- rev(x)
 peak_slope(x_dec, width = 5)
 
+}
+\seealso{
+\code{\link[=rolling_slope]{rolling_slope()}}
 }
