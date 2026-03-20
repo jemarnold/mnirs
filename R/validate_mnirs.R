@@ -104,24 +104,34 @@ validate_numeric <- function(
         abort_validation(name, integer, msg1, msg2)
     }
 
-    valid <- !is.na(x)
-
-    ## valid elements length
-    n_valid <- if (!invalid) sum(valid) else length(x)
-    if (!invalid && n_valid == 0L) {
-        abort_validation(name, integer, msg1, msg2)
+    ## valid elements length — skip NA scan when invalid = TRUE
+    if (!invalid) {
+        valid <- !is.na(x)
+        n_valid <- sum(valid)
+        if (n_valid == 0L) {
+            abort_validation(name, integer, msg1, msg2)
+        }
+    } else {
+        n_valid <- length(x)
     }
 
     ## elements check
     if (is.finite(elements) && n_valid != elements) {
         abort_validation(name, integer, msg1, msg2)
     }
+
+    ## subset once for range/integer checks
+    needs_subset <- !is.null(range) || integer
+    if (needs_subset && !invalid) {
+        x_valid <- if (n_valid < length(x)) x[valid] else x
+    }
+
     ## range check
-    if (!is.null(range) && !all(within(x[valid], range, inclusive))) {
+    if (!is.null(range) && !all(within(x_valid, range, inclusive))) {
         abort_validation(name, integer, msg1, msg2)
     }
     ## expensive integer check
-    if (integer && !rlang::is_integerish(x[valid])) {
+    if (integer && !rlang::is_integerish(x_valid)) {
         abort_validation(name, integer, msg1, msg2)
     }
 
@@ -198,11 +208,7 @@ parse_channel_name <- function(channel, data, env = rlang::caller_env()) {
         unname(names(tidyselect::eval_select(channel, data))),
         error = \(e) {
             result <- rlang::eval_tidy(channel, env = env)
-            if (is.list(result) || is.character(result)) {
-                result
-            } else {
-                NULL
-            }
+            if (is.list(result) || is.character(result)) result else NULL
         }
     )
 }
@@ -250,8 +256,9 @@ validate_nirs_channels <- function(
     }
 
     ## validate is numeric and has >=2 valid values
-    invalid_channels <- !vapply(data[nirs_unlisted], is.numeric, logical(1)) |
-        vapply(data[nirs_unlisted], \(.x) sum(is.finite(.x)) < 2, logical(1))
+    invalid_channels <- vapply(data[nirs_unlisted], \(.x) {
+        !is.numeric(.x) || sum(is.finite(.x)) < 2
+    }, logical(1))
 
     if (sum(invalid_channels) > 0) {
         cli_abort(c(
@@ -386,11 +393,9 @@ estimate_sample_rate <- function(x) {
     }
 
     mags <- 10^floor(log10(sample_rate_raw))
-    vals <- sample_rate_raw / mags
+    val <- sample_rate_raw / mags
     pretty_base <- c(1, 2, 5, 10)
-    rounded <- vapply(vals, \(.val) {
-        pretty_base[which.min(abs(pretty_base - .val))]
-    }, numeric(1))
+    rounded <- pretty_base[which.min(abs(pretty_base - val))]
     return(rounded * mags)
 }
 
