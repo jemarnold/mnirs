@@ -141,7 +141,7 @@ find_kinetics_idx <- function(
 #' @returns A named list with: `results`, `data`, `interval_times`,
 #'   `diagnostics`, `channel_args`.
 #' @keywords internal
-gather_kinetics <- function(
+build_kinetics_results <- function(
     data_list,
     result_list,
     interval_names
@@ -208,8 +208,8 @@ gather_kinetics <- function(
 #' @returns A 1-row `data.frame`.
 #'
 #' @keywords internal
-safe_channel_args <- function(nirs_channel, all_args) {
-    safe <- lapply(all_args, \(.x) {
+build_channel_args <- function(nirs_channel, all_args) {
+    args_list <- lapply(all_args, \(.x) {
         if (is.null(.x)) {
             NA
         } else if (is.list(.x)) {
@@ -218,20 +218,23 @@ safe_channel_args <- function(nirs_channel, all_args) {
             .x
         }
     })
-    return(data.frame(nirs_channels = nirs_channel, safe))
+    ## omit internal args
+    args_list[["verbose"]] <- NULL
+    args_list[["bypass_checks"]] <- NULL
+    return(data.frame(nirs_channels = nirs_channel, args_list))
 }
 
 
 #' Build a standardised NA result for a failed channel
 #'
 #' Returns the 4-element list (`coefficients`, `predicted`, `diagnostics`,
-#' `channel_args`) expected by [gather_kinetics()], populated with `NA` values.
+#' `channel_args`) expected by [build_kinetics_results()], populated with `NA` values.
 #'
 #' @param nirs_channel Character; column name of the channel.
 #' @param na_coefs A template 1-row `data.frame` with all `NA` values matching
 #'   the method's coefficients columns.
 #' @param all_args Named list of resolved arguments (passed to
-#'   [safe_channel_args()]).
+#'   [build_channel_args()]).
 #' @param n_params Integer; number of model parameters (passed to
 #'   [compute_diagnostics()]).
 #'
@@ -239,7 +242,7 @@ safe_channel_args <- function(nirs_channel, all_args) {
 #'   `diagnostics`, and `channel_args`.
 #'
 #' @keywords internal
-build_na_reults <- function(
+build_na_results <- function(
     nirs_channel,
     na_coefs,
     all_args,
@@ -259,7 +262,7 @@ build_na_reults <- function(
         coefficients = na_coefs,
         predicted = data.frame(window_idx = NA_integer_, fitted = NA_real_),
         diagnostics = cbind(data.frame(nirs_channels = nirs_channel), na_diag),
-        channel_args = safe_channel_args(nirs_channel, all_args)
+        channel_args = build_channel_args(nirs_channel, all_args)
     ))
 }
 
@@ -268,7 +271,7 @@ build_na_reults <- function(
 #'
 #' Combines the list of per-channel result lists (each with
 #' `coefficients`, `predicted`, `diagnostics`, `channel_args`) into
-#' the single attributed data frame that [gather_kinetics()]
+#' the single attributed data frame that [build_kinetics_results()]
 #' expects.
 #'
 #' @param results Named list of per-channel result lists.

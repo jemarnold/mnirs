@@ -58,7 +58,7 @@ print.mnirs_kinetics <- function(x, ...) {
         cat("Monoexponential non-linear Regression")
     }
 
-    cat("\n\n")
+    cat("\n")
     cat("    Model Coefficients:")
     cat("\n")
     if (nrows <= 10) {

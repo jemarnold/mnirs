@@ -331,10 +331,10 @@ test_that("as_data_list preserves attributes in grouped split", {
 })
 
 
-## safe_channel_args ===================================================
-test_that("safe_channel_args returns 1-row data frame", {
+## build_channel_args ===================================================
+test_that("build_channel_args returns 1-row data frame", {
     args <- list(width = 10, direction = "up")
-    result <- safe_channel_args("smo2", args)
+    result <- build_channel_args("smo2", args)
 
     expect_s3_class(result, "data.frame")
     expect_equal(nrow(result), 1L)
@@ -343,27 +343,27 @@ test_that("safe_channel_args returns 1-row data frame", {
     expect_equal(result$direction, "up")
 })
 
-test_that("safe_channel_args converts NULL to NA", {
+test_that("build_channel_args converts NULL to NA", {
     args <- list(width = 10, control = NULL)
-    result <- safe_channel_args("smo2", args)
+    result <- build_channel_args("smo2", args)
 
     expect_true(is.na(result$control))
 })
 
-test_that("safe_channel_args deparses list values", {
+test_that("build_channel_args deparses list values", {
     args <- list(
         time_delay = FALSE,
         control = list(maxiter = 100, tol = 1e-5)
     )
-    result <- safe_channel_args("smo2", args)
+    result <- build_channel_args("smo2", args)
 
     expect_type(result$control, "character")
     expect_match(result$control, "maxiter")
 })
 
 
-## build_na_reults ====================================================
-test_that("build_na_reults returns correct 4-element list", {
+## build_na_results ====================================================
+test_that("build_na_results returns correct 4-element list", {
     na_coefs <- data.frame(
         nirs_channels = NA_character_,
         slope = NA_real_,
@@ -371,7 +371,7 @@ test_that("build_na_reults returns correct 4-element list", {
     )
     all_args <- list(width = 10, direction = "up")
 
-    result <- build_na_reults("smo2", na_coefs, all_args, n_params = 1L)
+    result <- build_na_results("smo2", na_coefs, all_args, n_params = 1L)
 
     expect_type(result, "list")
     expect_named(

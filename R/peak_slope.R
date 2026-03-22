@@ -28,7 +28,8 @@ slope <- function(
     }
 
     ## remove invalid
-    ## ! redundant with `find_kinetics_idx`
+    ## TODO redundant with `find_kinetics_idx`
+    ## but I want NAs to get to the above `na.rm` check
     complete <- which(is.finite(x) & is.finite(t))
     x <- x[complete]
     t <- t[complete]
@@ -490,7 +491,7 @@ analyse_peak_slope <- function(
                 fitted = slopes$fitted
             ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
-            channel_args = safe_channel_args(.nirs, all_args)
+            channel_args = build_channel_args(.nirs, all_args)
         )
     })
     names(results) <- nirs_channels

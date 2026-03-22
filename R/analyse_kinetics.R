@@ -208,8 +208,6 @@ analyse_kinetics.peak_slope <- function(
     ...
 ) {
     args <- list(...)
-    nirs_channels <- enquo(nirs_channels)
-    time_channel <- enquo(time_channel)
 
     ## normalise input to named list of data frames
     data_list <- as_data_list(data)
@@ -219,12 +217,13 @@ analyse_kinetics.peak_slope <- function(
     result_list <- lapply(seq_along(data_list), \(.i) {
         result <- analyse_peak_slope(
             data = data_list[[.i]],
-            nirs_channels = !!nirs_channels,
-            time_channel = !!time_channel,
+            nirs_channels = !!enquo(nirs_channels),
+            time_channel = !!enquo(time_channel),
             width = args$width %||% NULL,
             span = args$span %||% NULL,
             align = args$align %||% "centre",
             direction = direction,
+            end_fit_span = end_fit_span,
             partial = args$partial %||% FALSE,
             na.rm = args$na.rm %||% TRUE, ## TODO do I want FALSE?
             channel_args = channel_args,
@@ -235,9 +234,7 @@ analyse_kinetics.peak_slope <- function(
     })
 
     ## collate into mnirs_kinetics fields
-    gathered <- gather_kinetics(data_list, result_list, interval_names)
-
-    ## ! implement find_first_extreme
+    gathered <- build_kinetics_results(data_list, result_list, interval_names)
 
     return(structure(
         list(
@@ -271,8 +268,6 @@ analyse_kinetics.monoexponential <- function(
     ## ! implement stats::nls() additional args
     ## ! implement `direction`
     args <- list(...)
-    nirs_channels <- enquo(nirs_channels)
-    time_channel <- enquo(time_channel)
 
     ## normalise input to named list of data frames
     data_list <- as_data_list(data)
@@ -282,9 +277,10 @@ analyse_kinetics.monoexponential <- function(
     result_list <- lapply(seq_along(data_list), \(.i) {
         result <- analyse_monoexponential(
             data = data_list[[.i]],
-            nirs_channels = !!nirs_channels,
-            time_channel = !!time_channel,
+            nirs_channels = !!enquo(nirs_channels),
+            time_channel = !!enquo(time_channel),
             time_delay = args$time_delay %||% TRUE,
+            end_fit_span = end_fit_span,
             channel_args = channel_args,
             verbose = verbose,
             interval_names = interval_names
@@ -294,7 +290,7 @@ analyse_kinetics.monoexponential <- function(
     })
 
     ## collate into mnirs_kinetics fields
-    gathered <- gather_kinetics(data_list, result_list, interval_names)
+    gathered <- build_kinetics_results(data_list, result_list, interval_names)
 
     return(structure(
         list(
@@ -406,6 +402,8 @@ compute_diagnostics <- function(
     n_params = 1L,
     verbose = TRUE
 ) {
+    
+    ## ! check redundant validity check
     complete_cases <- which(is.finite(x) & is.finite(t))
     x <- x[complete_cases]
     t <- t[complete_cases]
@@ -459,6 +457,7 @@ compute_diagnostics <- function(
     } else {
         stats::cor(x, fitted)^2
     }
+    ## ! confirm redundant r2 and pseudo-r2 for lm and nls?
 
     ## RMSE
     rmse <- sqrt(mean(resid^2))
@@ -476,13 +475,15 @@ compute_diagnostics <- function(
     x_mean <- mean(x)
     cv_rmse <- if (x_mean == 0) NA_real_ else rmse / abs(x_mean)
 
-    data.frame(
-        n_obs = n_obs,
-        r2 = r2,
-        adj_r2 = adj_r2,
-        pseudo_r2 = pseudo_r2,
-        rmse = rmse,
-        snr = snr,
-        cv_rmse = cv_rmse
+    return(
+        data.frame(
+            n_obs = n_obs,
+            r2 = r2,
+            adj_r2 = adj_r2,
+            pseudo_r2 = pseudo_r2,
+            rmse = rmse,
+            snr = snr,
+            cv_rmse = cv_rmse
+        )
     )
 }

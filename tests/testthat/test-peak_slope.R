@@ -1113,7 +1113,7 @@ test_that("analyse_peak_slope channel_args stores global arguments", {
     x_args <- ca[ca$nirs_channels == "x", ]
     expect_true(all(c(
         "nirs_channels", "width", "span", "align",
-        "direction", "partial", "verbose", "bypass_checks"
+        "direction", "partial"
     ) %in% names(x_args)))
     expect_equal(x_args$width, 5)
     expect_true(is.na(x_args$span))

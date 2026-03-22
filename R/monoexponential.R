@@ -362,22 +362,26 @@ analyse_monoexponential <- function(
         }
 
         if (is.null(model)) {
-            return(build_na_reults(.nirs, na_coefs, all_args, n_params))
+            return(build_na_results(.nirs, na_coefs, all_args, n_params))
         }
 
         fitted_vals <- stats::predict(model)
         coefs <- stats::coef(model)
         tau_val <- coefs[["tau"]]
+        TD <- if (n_params == 4L) coefs[["TD"]] else NA_real_
 
         coefs <- data.frame(
             nirs_channels = .nirs,
             A = coefs[["A"]],
             B = coefs[["B"]],
             tau = tau_val,
-            TD = if (n_params == 4L) coefs[["TD"]] else NA_real_,
+            TD = TD,
             k = 1 / tau_val,
-            half_time = tau_val * log(2)
+            half_time = sum(TD, tau_val * log(2), na.rm = TRUE)
         )
+
+        ## ! fix cases where `zero_time = FALSE`: esp. for half_time
+        ## ! implement `predicted_params`
 
         diag <- compute_diagnostics(
             x_fit, t_fit, fitted_vals, n_params, verbose
@@ -387,7 +391,7 @@ analyse_monoexponential <- function(
             coefficients = coefs,
             predicted = data.frame(window_idx = valid, fitted = fitted_vals),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
-            channel_args = safe_channel_args(.nirs, all_args)
+            channel_args = build_channel_args(.nirs, all_args)
         )
     })
     names(results) <- nirs_channels
