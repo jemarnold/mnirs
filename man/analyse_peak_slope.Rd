@@ -12,6 +12,7 @@ analyse_peak_slope(
   span = NULL,
   align = c("centre", "left", "right"),
   direction = c("auto", "positive", "negative"),
+  end_fit_span = 20,
   partial = FALSE,
   na.rm = FALSE,
   channel_args = list(),

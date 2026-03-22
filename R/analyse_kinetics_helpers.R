@@ -1,11 +1,11 @@
-#' Find the first extreme peak or trough value in a numeric vector to constrain
-#' model fit
+#' Find valid model-fitting indices up to the first extreme
 #'
-#' Locate the first peak (maximum) or trough (minimum) in `x` such that
-#' no value within the following `end_fit_span` time span exceeds it.
+#' Filters `x` and `t` to valid finite values, locates the first valid peak 
+#' (maximum) or trough (minimum) where `t >= 0`, and returns the integer 
+#' indices of all finite observations up to `end_fit_span` past that extreme.
 #'
-#' @param end_fit_span A numeric value in units of `t` specifying 
-#'   the forward-looking window used to check for subsequent greater/lesser 
+#' @param end_fit_span A numeric value in units of `t` specifying the
+#'   forward-looking window used to check for subsequent greater/lesser
 #'   values than the candidate extreme.
 #' @inheritParams peak_slope
 #'
@@ -18,15 +18,19 @@
 #' the net slope is zero or `NA`, the direction is determined by comparing
 #' `abs(max(x))` to `abs(min(x))`, with ties defaulting to `"positive"`.
 #'
-#' Only samples where `t > 0` are processed, allowing pre-baseline
-#' (negative time) data to be excluded from the search.
+#' ## Negative time handling
 #'
-#' @returns A numeric index at the last index where
-#' `t <= t[extreme_idx] + end_fit_span`, constrained by positive
-#' values of `t` at the start, and the end range of `x`.
+#' Only samples where `t >= 0` are used for detecting the extreme, allowing
+#' pre-baseline (negative time) data to be excluded from the search.
+#' However, indices where `t < 0` are included in the returned vector
+#' provided they are finite.
+#'
+#' @returns An integer vector of indices into `x` (and `t`) where both
+#'   values are finite, truncated at the last index where
+#'   `t <= t[extreme] + end_fit_span`.
 #'
 #' @keywords internal
-find_first_extreme <- function(
+find_kinetics_idx <- function(
     x,
     t = seq_along(x),
     end_fit_span = 20,
@@ -45,14 +49,17 @@ find_first_extreme <- function(
         direction <- match.arg(direction)
     }
 
-    finite_mask <- which(is.finite(x) & t >= 0)
-    x_valid <- x[finite_mask]
-    t_valid <- t[finite_mask]
+    ## all finite indices (including t < 0)
+    finite_mask <- which(is.finite(x) & is.finite(t))
+    ## subset where t >= 0 for extreme detection
+    positive_mask <- finite_mask[t[finite_mask] >= 0]
+    x_valid <- x[positive_mask]
+    t_valid <- t[positive_mask]
     n_valid <- length(x_valid)
 
     ## early returns for degenerate inputs
     if (n_valid < 2L) {
-        return(n)
+        return(finite_mask)
     }
 
     ## direction detection ========================================
@@ -73,19 +80,19 @@ find_first_extreme <- function(
 
     extreme_fn <- if (direction == "positive") max else min
     compare_fn <- if (direction == "positive") `>=` else `<=`
-    which_fn <- if (direction == "positive") which.max else which.min
+    which_fn   <- if (direction == "positive") which.max else which.min
 
     ## monotonic: if global extreme is the last x value
     ## horizontal: if all x values equal
     if (which_fn(x_valid) == n_valid || all(x_valid == x_valid[1L])) {
-        return(n)
+        return(finite_mask)
     }
 
     ## process ==================================================
     ## bin by end_fit_span, find extreme per bin, then check forward window
 
-    ## ensure end_fit_span covers at least one adjacent sample when end_fit_span is
-    ## smaller than the minimum time step
+    ## ensure end_fit_span covers at least one adjacent sample when
+    ## end_fit_span is smaller than the minimum time step
     t_diff <- diff(t_valid)
     mod_span <- max(end_fit_span, min(t_diff[t_diff > 0]))
 
@@ -110,15 +117,14 @@ find_first_extreme <- function(
     }, bin_extreme_idx)
 
     if (!is.null(extreme_idx)) {
-        ## map `extreme_idx` back to original index space
-        extreme_idx <- finite_mask[extreme_idx]
-        end_idx <- which(t_valid <= t_valid[extreme_idx] + end_fit_span)
-        end_idx <- min(max(end_idx), n)
-        return(end_idx)
+        ## map extreme back to original index space via positive_mask
+        orig_extreme <- positive_mask[extreme_idx]
+        t_cutoff <- t[orig_extreme] + end_fit_span
+        return(finite_mask[t[finite_mask] <= t_cutoff])
     }
 
     ## fallback: no qualifying extreme found
-    return(n)
+    return(finite_mask)
 }
 
 

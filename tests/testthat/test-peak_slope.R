@@ -48,10 +48,12 @@ test_that("slope calculates edge cases correctly", {
     expect_true(is.na(slope(rep(NA_real_, 4))))
     expect_true(is.na(slope(rep(NaN, 4))))
     expect_true(is.na(slope(rep(Inf, 4))))
+
     ## NaN & Inf propagated by default
-    expect_equal(slope(c(1, NaN, 3, Inf, 5)), NA_real_)
+    x <- c(1, NaN, 3, Inf, 5)
+    expect_equal(slope(x), NA_real_)
     ## NaN & Inf ignored with `na.rm = TRUE`
-    expect_equal(slope(x = c(1, NaN, 3, Inf, 5), na.rm = TRUE), 1)
+    expect_equal(slope(x, na.rm = TRUE), 1)
 })
 
 test_that("slope returns same as lm model", {
@@ -882,6 +884,8 @@ test_that("analyse_peak_slope handles edge cases", {
         nirs_channels = c("x", "q"),
         time_channel = "t"
     )
+    # plot.mnirs(df, points = TRUE, na.omit = TRUE)
+    
     results <- analyse_peak_slope(
         df,
         width = 3,
@@ -890,8 +894,8 @@ test_that("analyse_peak_slope handles edge cases", {
     )
     expect_all_false(is.na(results$slope))
     expect_all_true(results$slope > 0)
-    expect_equal(attr(results, "predicted")$x$window_idx, c(4, 5, 6))
-    expect_equal(attr(results, "predicted")$x$fitted, c(3, 5, 7))
+    expect_equal(attr(results, "predicted")$x$window_idx, c(3, 4, 5))
+    expect_equal(attr(results, "predicted")$x$fitted, c(5, 7, 9))
     expect_equal(attr(results, "predicted")$q$window_idx, c(1, 2))
     expect_equal(attr(results, "predicted")$q$fitted, c(2, 4))
 })

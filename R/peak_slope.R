@@ -28,6 +28,7 @@ slope <- function(
     }
 
     ## remove invalid
+    ## ! redundant with `find_kinetics_idx`
     complete <- which(is.finite(x) & is.finite(t))
     x <- x[complete]
     t <- t[complete]
@@ -298,10 +299,10 @@ peak_slope <- function(
         net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
 
         direction <- if (is.na(net_slope) || net_slope == 0) {
-            ## fallback to magnitude comparison when net slope is zero/NA
-            max_pos <- max(slopes, na.rm = TRUE)
-            min_neg <- min(slopes, na.rm = TRUE)
-            if (abs(max_pos) >= abs(min_neg)) "positive" else "negative"
+            ## fallback to slope magnitude comparison when net slope is zero/NA
+            max_pos <- abs(max(slopes, na.rm = TRUE))
+            min_neg <- abs(min(slopes, na.rm = TRUE))
+            if (max_pos >= min_neg) "positive" else "negative"
         } else if (net_slope > 0) {
             "positive"
         } else {
@@ -413,6 +414,7 @@ analyse_peak_slope <- function(
     span = NULL,
     align = c("centre", "left", "right"),
     direction = c("auto", "positive", "negative"),
+    end_fit_span = 20,
     partial = FALSE,
     na.rm = FALSE,
     channel_args = list(),
@@ -446,39 +448,46 @@ analyse_peak_slope <- function(
         ...
     )
 
-    ## process =================================
-    ## compute per-channel results in a single pass
+    ## process per-channel =================================
     results <- lapply(nirs_channels, \(.nirs) {
         all_args <- utils::modifyList(
             default_args,
             channel_args[[.nirs]] %||% list()
         )
-        slope_results <- do.call(
-            peak_slope,
-            c(list(x = data[[.nirs]], t = time_vec), all_args)
+    
+        ## filter for valid finite idx before first extreme + end_fit_span
+        valid <- find_kinetics_idx(
+            data[[.nirs]],
+            time_vec,
+            end_fit_span,
+            direction
         )
+        x_fit <- data[[.nirs]][valid]
+        t_fit <- time_vec[valid] ## ! is channel idx unstable for `t` idx??
+        
+        slopes <- do.call(peak_slope, c(list(x = x_fit, t = t_fit), all_args))
         diag <- compute_diagnostics(
-            x = data[[.nirs]][slope_results$window_idx],
-            t = time_vec[slope_results$window_idx],
-            fitted = slope_results$fitted,
+            x = x_fit[slopes$window_idx],
+            t = t_fit[slopes$window_idx],
+            fitted = slopes$fitted,
             n_params = 1L,
             verbose = verbose
         )
         coefs <- data.frame(
             nirs_channels = .nirs,
-            slope         = slope_results$slope,
-            intercept     = slope_results$intercept,
-            y             = slope_results$y, ## predicted response value at idx
-            t             = slope_results$t,
-            idx           = slope_results$idx
+            slope         = slopes$slope,
+            intercept     = slopes$intercept,
+            y             = slopes$y, ## predicted response value at idx
+            t             = slopes$t,
+            idx           = slopes$idx
         )
         names(coefs)[names(coefs) == "t"] <- time_channel ## rename
 
         list(
             coefficients = coefs,
             predicted = data.frame(
-                window_idx = slope_results$window_idx,
-                fitted = slope_results$fitted
+                window_idx = slopes$window_idx,
+                fitted = slopes$fitted
             ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = safe_channel_args(.nirs, all_args)

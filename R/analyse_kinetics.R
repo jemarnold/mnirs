@@ -17,6 +17,12 @@
 #'      [stats::nls()] with arguments: `time_delay`.}
 #'      \item{`"sigmoidal"`}{`<under development>`.}
 #'   }
+#' @param direction A character string specifying the kinetics direction to
+#'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
+#'   *Details*.
+#' @param end_fit_span A numeric value in units of `time_channel` specifying 
+#'   the forward-looking window used to check for subsequent greater/lesser 
+#'   values than the candidate extreme.
 #' @param channel_args An *optional* `list()` with names corresponding to
 #'   `nirs_channels` for unique per-channel arguments to override global
 #'   default arguments (see *Details*).
@@ -57,13 +63,11 @@
 #'       rolling window. One of either `width` or `span` must be specified.}
 #'   \item{`align`}{Character; window alignment — `"centre"` (default),
 #'       `"left"`, or `"right"`.}
-#'   \item{`direction`}{Character; slope direction to detect — `"auto"`
-#'       (default), `"positive"`, or `"negative"`. See [peak_slope()].}
-#'   \item{`partial`}{Logical; default is `FALSE`, requires local windows 
-#'       to have complete number of samples specified by `width` or `span`. 
+#'   \item{`partial`}{Logical; default is `FALSE`, requires local windows
+#'       to have complete number of samples specified by `width` or `span`.
 #'       If `TRUE`, processes available samples within the local window.}
-#'   \item{`na.rm`}{Logical; default is `TRUE`, ignores `NA`s and processes 
-#'       available valid samples within the local window. If `TRUE`, 
+#'   \item{`na.rm`}{Logical; default is `TRUE`, ignores `NA`s and processes
+#'       available valid samples within the local window. If `TRUE`,
 #'       propagates any `NA`s to the returned vector.}
 #' }
 #'
@@ -77,7 +81,7 @@
 #' Additional arguments (`...`) accepted when `method = "monoexponential"`:
 #'
 #' \describe{
-#'   \item{`time_delay`}{Logical; default is `TRUE` to attempt to fit a 
+#'   \item{`time_delay`}{Logical; default is `TRUE` to attempt to fit a
 #'       4-parameter [SS_monoexp4()] model (A, B, tau, TD) with a time delay.
 #'       If the 4-parameter fit fails, or if `time_delay = FALSE`, fits a
 #'       reduced 3-parameter [SS_monoexp3()] model (A, B, tau).}
@@ -170,11 +174,14 @@ analyse_kinetics <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     method = c("peak_slope", "monoexponential"),
+    direction = c("auto", "positive", "negative"),
+    end_fit_span = 20,
     channel_args = list(),
     verbose = TRUE,
     ...
 ) {
     method <- match.arg(method)
+    direction <- match.arg(direction)
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
@@ -194,6 +201,8 @@ analyse_kinetics.peak_slope <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     method,
+    direction = c("auto", "positive", "negative"),
+    end_fit_span = 20,
     channel_args = list(),
     verbose = TRUE,
     ...
@@ -215,7 +224,7 @@ analyse_kinetics.peak_slope <- function(
             width = args$width %||% NULL,
             span = args$span %||% NULL,
             align = args$align %||% "centre",
-            direction = args$direction %||% "auto",
+            direction = direction,
             partial = args$partial %||% FALSE,
             na.rm = args$na.rm %||% TRUE, ## TODO do I want FALSE?
             channel_args = channel_args,
@@ -226,7 +235,6 @@ analyse_kinetics.peak_slope <- function(
     })
 
     ## collate into mnirs_kinetics fields
-    ## TODO check if `interval_names` redundant
     gathered <- gather_kinetics(data_list, result_list, interval_names)
 
     ## ! implement find_first_extreme
@@ -254,11 +262,14 @@ analyse_kinetics.monoexponential <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     method,
+    direction = c("auto", "positive", "negative"),
+    end_fit_span = 20,
     channel_args = list(),
     verbose = TRUE,
     ...
 ) {
     ## ! implement stats::nls() additional args
+    ## ! implement `direction`
     args <- list(...)
     nirs_channels <- enquo(nirs_channels)
     time_channel <- enquo(time_channel)
@@ -366,163 +377,6 @@ as_data_list <- function(data) {
 }
 
 
-#' Gather per-interval `mnirs_kinetics` into results structure
-#'
-#' Shared helper for `analyse_kinetics.*` methods. Takes a list of
-#' per-interval (per-data frame) kinetics results data frames (each carrying
-#' `"predicted"`, `"channel_args"`, and `"diagnostics"` attributes), the
-#' original `data_list`, and interval names.
-#'
-#' @param data_list Named list of original interval data frames.
-#' @param result_list List of per-interval result data frames with attributes.
-#'
-#' @returns A named list with: `results`, `data`, `interval_times`,
-#'   `diagnostics`, `channel_args`.
-#' @keywords internal
-gather_kinetics <- function(
-    data_list,
-    result_list,
-    interval_names
-) {
-    ## extract per channel attrs; bind to df; add "interval" col; drop rownames
-    flatten_attr <- function(attr_name) {
-        df <- do.call(rbind, lapply(result_list, attr, attr_name))
-        df$interval <- interval_names
-        df <- df[, c("interval", setdiff(names(df), "interval"))]
-        rownames(df) <- NULL
-        df
-    }
-
-    channel_args <- flatten_attr("channel_args")
-    diagnostics <- flatten_attr("diagnostics")
-
-    ## augment `data_list` dfs with `<nirs_channels>_fitted` columns
-    fitted_data_list <- Map(\(.df, .result) {
-        ## extract fitted columns from "predicted" per `nirs_channel`
-        predicted <- attr(.result, "predicted")
-        fitted_cols <- lapply(predicted, \(.pred) {
-            fitted_vec <- rep(NA_real_, nrow(.df))
-            fitted_vec[.pred$window_idx] <- .pred$fitted
-            fitted_vec
-        })
-        names(fitted_cols) <- paste0(names(predicted), "_fitted")
-        ## agument `<nirs_channels>_fitted` columns to df
-        augmented <- cbind(.df, as.data.frame(fitted_cols))
-        ## preserve metadata to augmented data frames
-        create_mnirs_data(augmented, attributes(.df))
-    }, data_list, result_list)
-    
-    ## TODO check if `interval_names` redundant
-    names(fitted_data_list) <- interval_names
-
-    ## extract interval_times from each data_list attributes, if exist
-    interval_times_df <- data.frame(interval = interval_names)
-    interval_times_df$interval_times <- lapply(data_list, \(.df) {
-        interval_times <- attr(.df, "interval_times")
-        if (is.null(interval_times)) NA_real_ else unlist(interval_times)
-    })
-
-    ## combine scalar coefficients & relocate interval col to col[1]
-    coefs <- do.call(rbind, result_list)
-    coefs <- coefs[, c("interval", setdiff(names(coefs), "interval"))]
-    rownames(coefs) <- NULL
-
-    return(list(
-        coefficients = coefs,
-        data = fitted_data_list,
-        interval_times = interval_times_df,
-        diagnostics = diagnostics,
-        channel_args = channel_args
-    ))
-}
-
-
-#' Serialise per-channel arguments to a 1-row data frame
-#'
-#' Converts `NULL` values to `NA` and `list` values (e.g. `control`) to
-#' their `deparse()` representation so the result can be stored in a flat
-#' data frame.
-#'
-#' @param nirs_channel Character; column name of the channel.
-#' @param all_args Named list of resolved arguments.
-#'
-#' @returns A 1-row `data.frame`.
-#'
-#' @keywords internal
-safe_channel_args <- function(nirs_channel, all_args) {
-    safe <- lapply(all_args, \(.x) {
-        if (is.null(.x)) {
-            NA
-        } else if (is.list(.x)) {
-            deparse(.x)
-        } else {
-            .x
-        }
-    })
-    return(data.frame(nirs_channels = nirs_channel, safe))
-}
-
-
-#' Build a standardised NA result for a failed channel
-#'
-#' Returns the 4-element list (`coefficients`, `predicted`, `diagnostics`,
-#' `channel_args`) expected by [gather_kinetics()], populated with `NA` values.
-#'
-#' @param nirs_channel Character; column name of the channel.
-#' @param na_coefs A template 1-row `data.frame` with all `NA` values matching
-#'   the method's coefficients columns.
-#' @param all_args Named list of resolved arguments (passed to
-#'   [safe_channel_args()]).
-#' @param n_params Integer; number of model parameters (passed to
-#'   [compute_diagnostics()]).
-#'
-#' @returns A named list with elements `coefficients`, `predicted`,
-#'   `diagnostics`, and `channel_args`.
-#'
-#' @keywords internal
-build_na_reults <- function(
-    nirs_channel,
-    na_coefs,
-    all_args,
-    n_params = 1L
-) {
-    na_diag <- compute_diagnostics(
-        x = numeric(0),
-        t = numeric(0),
-        fitted = numeric(0),
-        n_params = n_params,
-        verbose = FALSE
-    )
-    na_coefs$nirs_channels <- nirs_channel
-    return(list(
-        coefficients = na_coefs,
-        predicted = data.frame(window_idx = NA_integer_, fitted = NA_real_),
-        diagnostics = cbind(data.frame(nirs_channels = nirs_channel), na_diag),
-        channel_args = safe_channel_args(nirs_channel, all_args)
-    ))
-}
-
-
-#' Assemble per-channel results into an attributed data frame
-#'
-#' Combines the list of per-channel result lists (each with
-#' `coefficients`, `predicted`, `diagnostics`, `channel_args`) into
-#' the single attributed data frame that [gather_kinetics()]
-#' expects.
-#'
-#' @param results Named list of per-channel result lists.
-#'
-#' @returns A `data.frame` with attributes `"predicted"`,
-#'   `"diagnostics"`, and `"channel_args"`.
-#' @keywords internal
-build_channel_results <- function(results) {
-    return(structure(
-        do.call(rbind, lapply(results, `[[`, "coefficients")),
-        predicted = lapply(results, `[[`, "predicted"),
-        diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
-        channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))
-    ))
-}
 
 
 #' Compute model diagnostics

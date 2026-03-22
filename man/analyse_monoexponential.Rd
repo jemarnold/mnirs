@@ -9,6 +9,8 @@ analyse_monoexponential(
   nirs_channels = NULL,
   time_channel = NULL,
   time_delay = TRUE,
+  direction = c("auto", "positive", "negative"),
+  end_fit_span = 20,
   channel_args = list(),
   verbose = TRUE,
   ...

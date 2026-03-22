@@ -11,6 +11,8 @@ analyse_kinetics(
   nirs_channels = NULL,
   time_channel = NULL,
   method = c("peak_slope", "monoexponential"),
+  direction = c("auto", "positive", "negative"),
+  end_fit_span = 20,
   channel_args = list(),
   verbose = TRUE,
   ...
@@ -45,6 +47,14 @@ arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{pa
 \code{\link[stats:nls]{stats::nls()}} with arguments: \code{time_delay}.}
 \item{\code{"sigmoidal"}}{\verb{<under development>}.}
 }}
+
+\item{direction}{A character string specifying the kinetics direction to
+detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+\emph{Details}.}
+
+\item{end_fit_span}{A numeric value in units of \code{time_channel} specifying
+the forward-looking window used to check for subsequent greater/lesser
+values than the candidate extreme.}
 
 \item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
 \code{nirs_channels} for unique per-channel arguments to override global
@@ -117,8 +127,6 @@ time duration in units of \code{time_channel} (numeric) in the local
 rolling window. One of either \code{width} or \code{span} must be specified.}
 \item{\code{align}}{Character; window alignment — \code{"centre"} (default),
 \code{"left"}, or \code{"right"}.}
-\item{\code{direction}}{Character; slope direction to detect — \code{"auto"}
-(default), \code{"positive"}, or \code{"negative"}. See \code{\link[=peak_slope]{peak_slope()}}.}
 \item{\code{partial}}{Logical; default is \code{FALSE}, requires local windows
 to have complete number of samples specified by \code{width} or \code{span}.
 If \code{TRUE}, processes available samples within the local window.}

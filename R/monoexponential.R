@@ -233,7 +233,7 @@ SS_monoexp4 <- selfStart(
 #' Fit a monoexponential curve to each `nirs_channel` within a single
 #' data frame. Called by [analyse_kinetics()] when `method = "monoexponential"`.
 #'
-#' @param time_delay Logical; default is `TRUE` to attempt to fit a 
+#' @param time_delay Logical; default is `TRUE` to attempt to fit a
 #'   4-parameter [SS_monoexp4()] model (A, B, tau, TD) with a time delay.
 #'   If the 4-parameter fit fails, or if `time_delay = FALSE`, fits a
 #'   reduced 3-parameter [SS_monoexp3()] model (A, B, tau).
@@ -257,6 +257,8 @@ analyse_monoexponential <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     time_delay = TRUE,
+    direction = c("auto", "positive", "negative"),
+    end_fit_span = 20,
     channel_args = list(),
     verbose = TRUE,
     ...
@@ -296,20 +298,24 @@ analyse_monoexponential <- function(
         half_time = NA_real_
     )
 
-    ## process =====================================================
+    ## process per-channel ============================================
     results <- lapply(nirs_channels, \(.nirs) {
         all_args <- utils::modifyList(
-            default_args,
-            channel_args[[.nirs]] %||% list()
+            default_args, channel_args[[.nirs]] %||% list()
         )
         ## derive n_params from time_delay for internal use
         n_params <- if (all_args$time_delay) 4L else 3L
 
-        nirs_vec <- data[[.nirs]]
-        complete <- which(is.finite(nirs_vec) & is.finite(time_vec))
+        ## filter for valid finite idx before first extreme + end_fit_span
+        valid <- find_kinetics_idx(
+            data[[.nirs]],
+            time_vec,
+            end_fit_span,
+            direction
+        )
+        x_fit <- data[[.nirs]][valid]
+        t_fit <- time_vec[valid]  ## ! is channel idx unstable for `t` idx??
 
-        x_fit <- nirs_vec[complete]
-        t_fit <- time_vec[complete]
         fit_data <- data.frame(.x = x_fit, .t = t_fit)
         model <- NULL ## pre-allocate
 
@@ -374,16 +380,12 @@ analyse_monoexponential <- function(
         )
 
         diag <- compute_diagnostics(
-            x_fit,
-            t_fit,
-            fitted_vals,
-            n_params = n_params,
-            verbose = verbose
+            x_fit, t_fit, fitted_vals, n_params, verbose
         )
 
         list(
             coefficients = coefs,
-            predicted = data.frame(window_idx = complete, fitted = fitted_vals),
+            predicted = data.frame(window_idx = valid, fitted = fitted_vals),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = safe_channel_args(.nirs, all_args)
         )
@@ -396,7 +398,7 @@ analyse_monoexponential <- function(
 
 #' Update a model object with Fixed coefficients
 #'
-#' Re-fit a model with fixed coefficients provided as additional arguments. 
+#' Re-fit a model with fixed coefficients provided as additional arguments.
 #' Fixed coefficients are not modified when optimising for best fit.
 #'
 #' @param model An existing model object from `lm`, `nls`, `glm`, and others.
