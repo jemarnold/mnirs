@@ -15,6 +15,10 @@
         * **NOTE** This differs from the behaviour of `na.rm = FALSE` in `filter_butter()`, which errors if there are any internal `NA`s present. This has not been changed.
     * `na.rm = TRUE` ignores `NA`s and calculates local means as long as one valid sample is present.
 
+* `plot.mnirs()`
+    * Add new arg: `points = TRUE` will plot points in addition to lines, as a useful quick shortcut.
+    * Update `na.omit` now omits non-valid `c(NA, NaN, Inf, -Inf)` values from plotting, not just `NA`.
+
 
 # mnirs 0.5.2
 

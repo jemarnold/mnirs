@@ -4,23 +4,33 @@
 \alias{plot.mnirs}
 \title{Plot \emph{{mnirs}} objects}
 \usage{
-\method{plot}{mnirs}(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...)
+\method{plot}{mnirs}(
+  x,
+  points = FALSE,
+  time_labels = FALSE,
+  n.breaks = 5,
+  na.omit = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{Object of class \emph{"mnirs"} returned from \code{\link[=create_mnirs_data]{create_mnirs_data()}}}
 
-\item{time_labels}{A logical to display x-axis time values formatted as
-\emph{"hh:mm:ss"} using \code{\link[=format_hmmss]{format_hmmss()}}. \code{time_labels = FALSE} (the
-\emph{default}) will display simple numeric values on the x-axis.}
+\item{points}{Logical. Default is \code{FALSE}. If \code{TRUE} displays
+\code{ggplot2::geom_points()}. Otherwise only \code{ggplot2::geom_lines()}
+is displayed.}
 
-\item{n.breaks}{A numeric value to define the number of breaks in both
-x- and y-axes.}
+\item{time_labels}{Logical. Default is \code{FALSE}. If \code{TRUE} displays x-axis
+time values formatted as \emph{"hh:mm:ss"} using \code{\link[=format_hmmss]{format_hmmss()}}. Otherwise,
+x-axis values are displayed as numeric.}
 
-\item{na.omit}{A logical to omit missing (\code{NA}) values for better display
-of connected lines. \code{na.omit = FALSE} (the \emph{default}) can be used to
-identify missing values.}
+\item{n.breaks}{A numeric value specifying the number of breaks in both
+x- and y-axes. Default is \code{5}.}
 
-\item{...}{Additional arguments (currently unused).}
+\item{na.omit}{Logical. Default is \code{FALSE}. If \code{TRUE} omits missing (\code{NA})
+and non-finite \code{c(Inf, -Inf, NaN)} from display.}
+
+\item{...}{Additional arguments.}
 }
 \value{
 A \link[ggplot2:ggplot]{ggplot2} object.

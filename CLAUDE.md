@@ -57,9 +57,10 @@ In [R/helpers.R](R/helpers.R):
 - Write core functionality and remind the user tests should be written next.
 - Tests should not be deleted, modified, or added without asking confirmation.
 
-### Devtools & package commands
+### Devtools & git commands
 
 - Don't run devtool commands, inform the user which commands to run themselves.
+- Don't check previous git commits, only look at current state.
 
 ### Documentation
 

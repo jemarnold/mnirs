@@ -651,7 +651,7 @@ filter_butter <- function(
     ...
 ) {
     ## validation ============================================
-    rlang::check_installed("signal", "to use Butterworth digital filter")
+    check_installed("signal", "to use Butterworth digital filter")
     validate_numeric(x)
     validate_numeric(
         order, 1, c(1, Inf), integer = TRUE, msg1 = "one-element positive"

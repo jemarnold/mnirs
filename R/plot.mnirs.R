@@ -3,15 +3,17 @@
 #' Create a simple plot for objects returned from [create_mnirs_data()].
 #'
 #' @param x Object of class *"mnirs"* returned from [create_mnirs_data()]
-#' @param time_labels A logical to display x-axis time values formatted as
-#'   *"hh:mm:ss"* using [format_hmmss()]. `time_labels = FALSE` (the
-#'   *default*) will display simple numeric values on the x-axis.
-#' @param n.breaks A numeric value to define the number of breaks in both
-#'   x- and y-axes.
-#' @param na.omit A logical to omit missing (`NA`) values for better display
-#'   of connected lines. `na.omit = FALSE` (the *default*) can be used to
-#'   identify missing values.
-#' @param ... Additional arguments (currently unused).
+#' @param points Logical. Default is `FALSE`. If `TRUE` displays 
+#'   `ggplot2::geom_points()`. Otherwise only `ggplot2::geom_lines()` 
+#'   is displayed.
+#' @param time_labels Logical. Default is `FALSE`. If `TRUE` displays x-axis
+#'   time values formatted as *"hh:mm:ss"* using [format_hmmss()]. Otherwise, 
+#'   x-axis values are displayed as numeric.
+#' @param n.breaks A numeric value specifying the number of breaks in both
+#'   x- and y-axes. Default is `5`.
+#' @param na.omit Logical. Default is `FALSE`. If `TRUE` omits missing (`NA`)
+#'   and non-finite `c(Inf, -Inf, NaN)` from display.
+#' @param ... Additional arguments.
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
@@ -28,11 +30,15 @@
 #' plot(data_table, time_labels = TRUE, n.breaks = 8)
 #'
 #' @export
-plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...) {
-    rlang::check_installed(
-        c("ggplot2", "scales"),
-        reason = "to plot mNIRS data"
-    )
+plot.mnirs <- function(
+    x,
+    points = FALSE,
+    time_labels = FALSE,
+    n.breaks = 5,
+    na.omit = FALSE,
+    ...
+) {
+    check_installed(c("ggplot2", "scales"), reason = "to plot mNIRS data")
 
     nirs_channels <- attr(x, "nirs_channels")
     time_channel <- attr(x, "time_channel")
@@ -61,7 +67,7 @@ plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ..
         ggplot2::waiver()
     }
 
-    ## pivot_longer all `nirs_channels` to `y`
+    ## pivot_longer all `nirs_channels` to grouped `y` column
     plot_data <- setNames(
         utils::stack(x[nirs_channels]),
         c("y", "nirs_channels")
@@ -72,8 +78,9 @@ plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ..
         x[other_cols], rep, times = length(nirs_channels)
     )
 
+    ## exclude non-finite values from `y` col with all nirs_channels
     if (na.omit) {
-        plot_data <- plot_data[stats::complete.cases(plot_data["y"]), ]
+        plot_data <- plot_data[is.finite(plot_data[["y"]]), ]
     }
 
     ## plot
@@ -101,7 +108,8 @@ plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ..
         ggplot2::guides(
             colour = ggplot2::guide_legend(override.aes = list(linewidth = 1))
         ) +
-        ggplot2::geom_line()
+        ggplot2::geom_line() + 
+        if (points) ggplot2::geom_point(size = 3)
 
     return(plot)
 }
@@ -161,7 +169,7 @@ theme_mnirs <- function(
     accent = "#0080ff",
     ...
 ) {
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
+    check_installed("ggplot2", reason = "to plot mNIRS data")
     border <- match.arg(border)
     half_line <- base_size * 0.5
 
@@ -290,7 +298,7 @@ palette_mnirs <- function(n = NULL, names = NULL) {
 #' @rdname scale_colour_mnirs
 #' @export
 scale_colour_mnirs <- function(..., aesthetics = "colour") {
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
+    check_installed("ggplot2", reason = "to plot mNIRS data")
 
     ggplot2::discrete_scale(
         aesthetics = aesthetics,
@@ -307,7 +315,7 @@ scale_color_mnirs <- scale_colour_mnirs
 #' @rdname scale_colour_mnirs
 #' @export
 scale_fill_mnirs <- function(..., aesthetics = "fill") {
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
+    check_installed("ggplot2", reason = "to plot mNIRS data")
 
     ggplot2::discrete_scale(
         aesthetics = aesthetics,

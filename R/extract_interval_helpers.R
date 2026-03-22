@@ -640,11 +640,11 @@ group_intervals <- function(
     }
 
     ## warn for duplicated intervals across groups
-    dup <- grouped_ids[duplicated(grouped_ids)]
-    if (verbose && length(dup) > 0) {
+    dupes <- grouped_ids[duplicated(grouped_ids)]
+    if (verbose && length(dupes) > 0) {
         cli_warn(c(
-            "!" = "Duplicates detected of {qty(length(dup))} \\
-            interval{?s} {.val {dup}}.",
+            "!" = "Duplicates detected of {qty(length(dupes))} \\
+            interval{?s} {.val {dupes}}.",
             "i" = "Re-specify {.arg event_groups} to remove duplicates."
         ))
     }
