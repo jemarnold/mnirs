@@ -143,7 +143,7 @@ attributes(data_table)[-2]
 #> [1] 2
 #> 
 #> $start_timestamp
-#> [1] "2026-03-19 00:29:00 PDT"
+#> [1] "2026-03-23 00:29:00 PDT"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values

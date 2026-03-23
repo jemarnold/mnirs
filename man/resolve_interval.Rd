@@ -2,11 +2,11 @@
 % Please edit documentation in R/extract_interval_helpers.R
 \name{resolve_interval}
 \alias{resolve_interval}
-\title{resolve start/end into raw index vectors (no span applied)}
+\title{resolve start/end into time value vectors (no span applied)}
 \usage{
-resolve_interval(start_interval, end_interval, time_vec, event_vec = NULL)
+resolve_interval(start, end, time_vec, event_vec = NULL)
 }
 \description{
-resolve start/end into raw index vectors (no span applied)
+resolve start/end into time value vectors (no span applied)
 }
 \keyword{internal}

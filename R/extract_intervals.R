@@ -255,10 +255,9 @@ extract_intervals <- function(
     span <- make_list(span)
     span <- lapply(span, recycle_span)
 
-    ## resolve raw interval indices ============================
-    interval_idx <- resolve_interval(start, end, time_vec, event_vec)
-
-    n_events <- length(interval_idx$start_idx)
+    ## resolve interval boundary times ==========================
+    interval_list <- resolve_interval(start, end, time_vec, event_vec)
+    n_events <- length(interval_list$start_time)
 
     ## recycle params to match number of intervals
     nirs_channels <- recycle_param(
@@ -270,23 +269,14 @@ extract_intervals <- function(
     span <- recycle_param(span, n_events, event_groups, verbose)
 
     ## apply span and build interval spec ======================
-    interval_spec <- apply_span_to_indices(
-        interval_idx,
-        time_vec,
-        span,
-        verbose
-    )
+    interval_spec <- apply_span(interval_list, time_vec, span, verbose)
 
     ## extract interval data ===================================
-    interval_list <- extract_interval_list(
-        data,
-        interval_spec,
-        nirs_channels
-    )
+    df_list <- extract_df_list(data, time_vec, interval_spec, nirs_channels)
 
     ## apply grouping logic ====================================
     result <- group_intervals(
-        interval_list,
+        df_list,
         nirs_channels,
         metadata,
         event_groups,

@@ -5,7 +5,7 @@
 \title{Apply grouping to intervals}
 \usage{
 group_intervals(
-  interval_list,
+  df_list,
   nirs_channels,
   metadata,
   event_groups,

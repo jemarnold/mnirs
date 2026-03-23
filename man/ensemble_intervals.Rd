@@ -4,7 +4,7 @@
 \alias{ensemble_intervals}
 \title{Ensemble average multiple intervals}
 \usage{
-ensemble_intervals(interval_list, nirs_channels, metadata, verbose = TRUE)
+ensemble_intervals(df_list, nirs_channels, metadata, verbose = TRUE)
 }
 \description{
 Ensemble average multiple intervals
