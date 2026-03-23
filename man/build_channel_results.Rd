@@ -10,12 +10,12 @@ build_channel_results(results)
 \item{results}{Named list of per-channel result lists.}
 }
 \value{
-A \code{data.frame} with attributes \code{"predicted"},
+A \code{data.frame} with attributes \code{"fitted_data"},
 \code{"diagnostics"}, and \code{"channel_args"}.
 }
 \description{
 Combines the list of per-channel result lists (each with
-\code{coefficients}, \code{predicted}, \code{diagnostics}, \code{channel_args}) into
+\code{coefficients}, \code{fitted_data}, \code{diagnostics}, \code{channel_args}) into
 the single attributed data frame that \code{\link[=build_kinetics_results]{build_kinetics_results()}}
 expects.
 }

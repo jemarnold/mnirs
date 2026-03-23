@@ -76,7 +76,7 @@ accessable as a list of class \emph{"mnirs_kinetics"} containing:
 with one row per \code{nirs_channel} and per interval, containing columns
 \code{interval}, \code{nirs_channels}, and individual method parameters.}
 \item{\code{data}}{A list of the original input data frames augmented with a
-\verb{*_fitted} column of model predicted values for each \code{nirs_channel}.}
+\verb{*_fitted} column of model fitted data values for each \code{nirs_channel}.}
 \item{\code{interval_times}}{A data frame of interval times for each
 \code{nirs_channel} per interval, supplied from \code{extract_intervals}, if
 present in the metadata.}

@@ -77,7 +77,7 @@ A \code{data.frame} with one row per \code{nirs_channel} and columns
 \code{nirs_channels}, \code{slope}, \code{intercept}, \code{y}, \verb{<time_channel>}, \code{idx}.
 Per-channel metadata are attached as attributes:
 \itemize{
-\item \code{"predicted"}: a named list of data frames (per \code{nirs_channel})
+\item \code{"fitted_data"}: a named list of data frames (per \code{nirs_channel})
 with columns \code{window_idx} and \code{fitted}.
 \item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
 containing model fit diagnostics.

@@ -119,7 +119,7 @@
 #'       with one row per `nirs_channel` and per interval, containing columns
 #'       `interval`, `nirs_channels`, and individual method parameters.}
 #'   \item{`data`}{A list of the original input data frames augmented with a
-#'       `*_fitted` column of model predicted values for each `nirs_channel`.}
+#'       `*_fitted` column of model fitted data values for each `nirs_channel`.}
 #'   \item{`interval_times`}{A data frame of interval times for each
 #'       `nirs_channel` per interval, supplied from `extract_intervals`, if
 #'       present in the metadata.}

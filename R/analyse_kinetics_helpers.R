@@ -132,7 +132,7 @@ find_kinetics_idx <- function(
 #'
 #' Shared helper for `analyse_kinetics.*` methods. Takes a list of
 #' per-interval (per-data frame) kinetics results data frames (each carrying
-#' `"predicted"`, `"channel_args"`, and `"diagnostics"` attributes), the
+#' `"fitted_data"`, `"channel_args"`, and `"diagnostics"` attributes), the
 #' original `data_list`, and interval names.
 #'
 #' @param data_list Named list of original interval data frames.
@@ -160,14 +160,14 @@ build_kinetics_results <- function(
 
     ## augment `data_list` dfs with `<nirs_channels>_fitted` columns
     fitted_data_list <- Map(\(.df, .result) {
-        ## extract fitted columns from "predicted" per `nirs_channel`
-        predicted <- attr(.result, "predicted")
-        fitted_cols <- lapply(predicted, \(.pred) {
+        ## extract fitted columns from "fitted_data" per `nirs_channel`
+        fitted_data <- attr(.result, "fitted_data")
+        fitted_cols <- lapply(fitted_data, \(.pred) {
             fitted_vec <- rep(NA_real_, nrow(.df))
             fitted_vec[.pred$window_idx] <- .pred$fitted
             fitted_vec
         })
-        names(fitted_cols) <- paste0(names(predicted), "_fitted")
+        names(fitted_cols) <- paste0(names(fitted_data), "_fitted")
         ## agument `<nirs_channels>_fitted` columns to df
         augmented <- cbind(.df, as.data.frame(fitted_cols))
         ## preserve metadata to augmented data frames
@@ -227,7 +227,7 @@ build_channel_args <- function(nirs_channel, all_args) {
 
 #' Build a standardised NA result for a failed channel
 #'
-#' Returns the 4-element list (`coefficients`, `predicted`, `diagnostics`,
+#' Returns the 4-element list (`coefficients`, `fitted_data`, `diagnostics`,
 #' `channel_args`) expected by [build_kinetics_results()], populated with `NA` values.
 #'
 #' @param nirs_channel Character; column name of the channel.
@@ -238,7 +238,7 @@ build_channel_args <- function(nirs_channel, all_args) {
 #' @param n_params Integer; number of model parameters (passed to
 #'   [compute_diagnostics()]).
 #'
-#' @returns A named list with elements `coefficients`, `predicted`,
+#' @returns A named list with elements `coefficients`, `fitted_data`,
 #'   `diagnostics`, and `channel_args`.
 #'
 #' @keywords internal
@@ -260,7 +260,7 @@ build_na_results <- function(
     na_coefs$nirs_channels <- nirs_channel
     return(list(
         coefficients = na_coefs,
-        predicted = data.frame(window_idx = NA_integer_, fitted = NA_real_),
+        fitted_data = data.frame(window_idx = NA_integer_, fitted = NA_real_),
         diagnostics = cbind(data.frame(nirs_channels = nirs_channel), na_diag),
         channel_args = build_channel_args(nirs_channel, all_args)
     ))
@@ -270,19 +270,19 @@ build_na_results <- function(
 #' Assemble per-channel results into an attributed data frame
 #'
 #' Combines the list of per-channel result lists (each with
-#' `coefficients`, `predicted`, `diagnostics`, `channel_args`) into
+#' `coefficients`, `fitted_data`, `diagnostics`, `channel_args`) into
 #' the single attributed data frame that [build_kinetics_results()]
 #' expects.
 #'
 #' @param results Named list of per-channel result lists.
 #'
-#' @returns A `data.frame` with attributes `"predicted"`,
+#' @returns A `data.frame` with attributes `"fitted_data"`,
 #'   `"diagnostics"`, and `"channel_args"`.
 #' @keywords internal
 build_channel_results <- function(results) {
     return(structure(
         do.call(rbind, lapply(results, `[[`, "coefficients")),
-        predicted = lapply(results, `[[`, "predicted"),
+        fitted_data = lapply(results, `[[`, "fitted_data"),
         diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
         channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))
     ))

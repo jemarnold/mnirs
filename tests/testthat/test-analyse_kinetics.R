@@ -375,16 +375,16 @@ test_that("build_na_results returns correct 4-element list", {
 
     expect_type(result, "list")
     expect_named(
-        result, c("coefficients", "predicted", "diagnostics", "channel_args")
+        result, c("coefficients", "fitted_data", "diagnostics", "channel_args")
     )
 
     ## coefs inherits template with channel name filled in
     expect_equal(result$coefficients$nirs_channels, "smo2")
     expect_true(is.na(result$coefficients$slope))
 
-    ## predicted has NA placeholders
-    expect_true(is.na(result$predicted$window_idx))
-    expect_true(is.na(result$predicted$fitted))
+    ## fitted_data has NA placeholders
+    expect_true(is.na(result$fitted_data$window_idx))
+    expect_true(is.na(result$fitted_data$fitted))
 
     ## diagnostics has all-NA values
     expect_equal(result$diagnostics$nirs_channels, "smo2")
@@ -400,13 +400,13 @@ test_that("build_na_results returns correct 4-element list", {
 test_that("build_channel_results combines channels correctly", {
     ch1 <- list(
         coefficients = data.frame(nirs_channels = "ch1", slope = 1.0),
-        predicted = data.frame(window_idx = 1:3, fitted = c(1, 2, 3)),
+        fitted_data = data.frame(window_idx = 1:3, fitted = c(1, 2, 3)),
         diagnostics = data.frame(nirs_channels = "ch1", r2 = 0.95),
         channel_args = data.frame(nirs_channels = "ch1", width = 10)
     )
     ch2 <- list(
         coefficients = data.frame(nirs_channels = "ch2", slope = 2.0),
-        predicted = data.frame(window_idx = 1:3, fitted = c(4, 5, 6)),
+        fitted_data = data.frame(window_idx = 1:3, fitted = c(4, 5, 6)),
         diagnostics = data.frame(nirs_channels = "ch2", r2 = 0.85),
         channel_args = data.frame(nirs_channels = "ch2", width = 10)
     )
@@ -418,11 +418,11 @@ test_that("build_channel_results combines channels correctly", {
     expect_equal(result$nirs_channels, c("ch1", "ch2"))
     expect_equal(result$slope, c(1.0, 2.0))
 
-    ## predicted preserved as named list
-    pred <- attr(result, "predicted")
-    expect_type(pred, "list")
-    expect_length(pred, 2L)
-    expect_setequal(vapply(pred, nrow, numeric(1)), 3)
+    ## fitted_data preserved as named list
+    fitted_data <- attr(result, "fitted_data")
+    expect_type(fitted_data, "list")
+    expect_length(fitted_data, 2L)
+    expect_setequal(vapply(fitted_data, nrow, numeric(1)), 3)
 
     ## diagnostics combined
     diag <- attr(result, "diagnostics")

@@ -397,7 +397,7 @@ peak_slope <- function(
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
 #'   `nirs_channels`, `slope`, `intercept`, `y`, `<time_channel>`, `idx`.
 #'   Per-channel metadata are attached as attributes:
-#'   - `"predicted"`: a named list of data frames (per `nirs_channel`)
+#'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
 #'     with columns `window_idx` and `fitted`.
 #'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
 #'     containing model fit diagnostics.
@@ -486,7 +486,7 @@ analyse_peak_slope <- function(
 
         list(
             coefficients = coefs,
-            predicted = data.frame(
+            fitted_data = data.frame(
                 window_idx = slopes$window_idx,
                 fitted = slopes$fitted
             ),

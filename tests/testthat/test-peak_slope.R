@@ -831,10 +831,10 @@ test_that("analyse_peak_slope returns correct structure", {
     expect_type(results$idx, "integer")
 
     ## metadata carried as attributes
-    expect_type(attr(results, "predicted"), "list")
-    expect_s3_class(attr(results, "predicted")$x, "data.frame")
+    expect_type(attr(results, "fitted_data"), "list")
+    expect_s3_class(attr(results, "fitted_data")$x, "data.frame")
     expect_equal(
-        colnames(attr(results, "predicted")$x),
+        colnames(attr(results, "fitted_data")$x),
         c("window_idx", "fitted")
     )
     expect_s3_class(attr(results, "channel_args"), "data.frame")
@@ -894,10 +894,10 @@ test_that("analyse_peak_slope handles edge cases", {
     )
     expect_all_false(is.na(results$slope))
     expect_all_true(results$slope > 0)
-    expect_equal(attr(results, "predicted")$x$window_idx, c(3, 4, 5))
-    expect_equal(attr(results, "predicted")$x$fitted, c(5, 7, 9))
-    expect_equal(attr(results, "predicted")$q$window_idx, c(1, 2))
-    expect_equal(attr(results, "predicted")$q$fitted, c(2, 4))
+    expect_equal(attr(results, "fitted_data")$x$window_idx, c(3, 4, 5))
+    expect_equal(attr(results, "fitted_data")$x$fitted, c(5, 7, 9))
+    expect_equal(attr(results, "fitted_data")$q$window_idx, c(1, 2))
+    expect_equal(attr(results, "fitted_data")$q$fitted, c(2, 4))
 })
 
 test_that("analyse_peak_slope validates data structure", {
@@ -989,8 +989,8 @@ test_that("analyse_peak_slope channel_args override defaults", {
     )
 
     ## different widths produce different window sizes
-    expect_length(attr(results, "predicted")$x$window_idx, 3) # x uses width = 3
-    expect_length(attr(results, "predicted")$q$window_idx, 7) # q uses width = 7
+    expect_length(attr(results, "fitted_data")$x$window_idx, 3) # x uses width = 3
+    expect_length(attr(results, "fitted_data")$q$window_idx, 7) # q uses width = 7
 })
 
 test_that("analyse_peak_slope channel_args sets different directions", {
@@ -1034,8 +1034,8 @@ test_that("analyse_peak_slope handles single channel", {
     expect_equal(nrow(results), 1)
     expect_equal(results$nirs_channels, "x")
     expect_no_match(results$nirs_channels, "q")
-    expect_contains(names(attr(results, "predicted")), "x")
-    expect_no_match(names(attr(results, "predicted")), "q")
+    expect_contains(names(attr(results, "fitted_data")), "x")
+    expect_no_match(names(attr(results, "fitted_data")), "q")
 })
 
 test_that("analyse_peak_slope preserves channel order", {
@@ -1052,7 +1052,7 @@ test_that("analyse_peak_slope preserves channel order", {
 
     results <- analyse_peak_slope(df, width = 5, verbose = FALSE)
     expect_equal(results$nirs_channels, c("r", "x", "q"))
-    expect_equal(names(attr(results, "predicted")), c("r", "x", "q"))
+    expect_equal(names(attr(results, "fitted_data")), c("r", "x", "q"))
 })
 
 test_that("analyse_peak_slope fitted values match window", {
@@ -1067,8 +1067,8 @@ test_that("analyse_peak_slope fitted values match window", {
 
     results <- analyse_peak_slope(df, width = 5, verbose = FALSE)
 
-    fitted <- attr(results, "predicted")$x$fitted
-    window_idx <- attr(results, "predicted")$x$window_idx
+    fitted <- attr(results, "fitted_data")$x$fitted
+    window_idx <- attr(results, "fitted_data")$x$window_idx
 
     expect_length(fitted, length(window_idx))
 
@@ -1208,7 +1208,7 @@ test_that("rolling_slope works visually", {
 
     ## visual confirmation
     # library(ggplot2)
-    # predicted <- lapply(window_idx, \(.idx) {
+    # fitted_data <- lapply(window_idx, \(.idx) {
     #     df <- data.frame(t = t[.idx], x = x[.idx])
     #     y <- tryCatch(predict(lm(x ~ t, df), df), error = \(e) NA_real_)
     #     df$y <- if (!is.null(attr(y, "non-estim"))) NA_real_ else y
@@ -1218,7 +1218,7 @@ test_that("rolling_slope works visually", {
     # ggplot(data.frame(t, x), aes(t, x)) +
     #     theme_mnirs() +
     #     geom_line(linewidth = 2) +
-    #     lapply(predicted, \(.df) {
+    #     lapply(fitted_data, \(.df) {
     #         list(
     #             geom_line(
     #                 data = .df,

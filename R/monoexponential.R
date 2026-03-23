@@ -242,7 +242,7 @@ SS_monoexp4 <- selfStart(
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
 #'   `nirs_channels`, `A`, `B`, `tau`, `TD`, `k`, `half_time`.
 #'   Per-channel metadata are attached as attributes:
-#'   - `"predicted"`: a named list of data frames (per `nirs_channel`)
+#'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
 #'     with columns `window_idx` and `fitted`.
 #'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
 #'     containing model fit diagnostics.
@@ -389,7 +389,7 @@ analyse_monoexponential <- function(
 
         list(
             coefficients = coefs,
-            predicted = data.frame(window_idx = valid, fitted = fitted_vals),
+            fitted_data = data.frame(window_idx = valid, fitted = fitted_vals),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = build_channel_args(.nirs, all_args)
         )

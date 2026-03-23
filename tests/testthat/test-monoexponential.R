@@ -328,10 +328,10 @@ test_that("analyse_monoexponential() returns correct structure", {
     expect_equal(nrow(result), 1L)
 
     ## attributes
-    expect_type(attr(result, "predicted"), "list")
+    expect_type(attr(result, "fitted_data"), "list")
     ## predicted data frame for each `nirs_channels`
-    expect_s3_class(attr(result, "predicted")$smo2, "data.frame")
-    expect_named(attr(result, "predicted")$smo2, c("window_idx", "fitted"))
+    expect_s3_class(attr(result, "fitted_data")$smo2, "data.frame")
+    expect_named(attr(result, "fitted_data")$smo2, c("window_idx", "fitted"))
     expect_s3_class(attr(result, "diagnostics"), "data.frame")
     expect_equal(nrow(attr(result, "diagnostics")), 1L)
     expect_s3_class(attr(result, "channel_args"), "data.frame")
@@ -484,9 +484,9 @@ test_that("analyse_monoexponential() works with multiple channels", {
     expect_equal(nrow(result), 2L)
     expect_equal(result$nirs_channels, nirs_channels)
 
-    predicted <- attr(result, "predicted")
-    expect_length(predicted, 2L)
-    expect_named(predicted, nirs_channels)
+    fitted_data <- attr(result, "fitted_data")
+    expect_length(fitted_data, 2L)
+    expect_named(fitted_data, nirs_channels)
 })
 
 test_that("analyse_monoexponential() channel_args override defaults", {
@@ -509,7 +509,7 @@ test_that("analyse_monoexponential() channel_args override defaults", {
     expect_true(ch2_row$time_delay)
 })
 
-test_that("analyse_monoexponential() predicted attribute is well-formed", {
+test_that("analyse_monoexponential() fitted_data attribute is well-formed", {
     data <- create_monoexp_data(n = 100, tau = 25, TD = 15, noise_sd = 0.3)
 
     result <- analyse_monoexponential(
@@ -518,18 +518,18 @@ test_that("analyse_monoexponential() predicted attribute is well-formed", {
         time_delay = TRUE
     )
 
-    predicted <- attr(result, "predicted")
-    expect_named(predicted, "smo2")
-    expect_named(predicted$smo2, c("window_idx", "fitted"))
-    expect_type(predicted$smo2$fitted, "double")
+    fitted_data <- attr(result, "fitted_data")
+    expect_named(fitted_data, "smo2")
+    expect_named(fitted_data$smo2, c("window_idx", "fitted"))
+    expect_type(fitted_data$smo2$fitted, "double")
     ## fitted should correlate and agree well with original data
-    expect_true(cor(data$smo2, predicted$smo2$fitted) > 0.9)
-    expect_all_true(abs(data$smo2 - predicted$smo2$fitted) <= 3)
+    expect_true(cor(data$smo2, fitted_data$smo2$fitted) > 0.9)
+    expect_all_true(abs(data$smo2 - fitted_data$smo2$fitted) <= 3)
 
     ## visual check
     # library(ggplot2)
     # plot(data) +
-    #     geom_line(aes(y = predicted$smo2$fitted))
+    #     geom_line(aes(y = fitted_data$smo2$fitted))
 })
 
 test_that("analyse_monoexponential() diagnostics contain expected columns", {

@@ -18,7 +18,7 @@ A named list with: \code{results}, \code{data}, \code{interval_times},
 \description{
 Shared helper for \verb{analyse_kinetics.*} methods. Takes a list of
 per-interval (per-data frame) kinetics results data frames (each carrying
-\code{"predicted"}, \code{"channel_args"}, and \code{"diagnostics"} attributes), the
+\code{"fitted_data"}, \code{"channel_args"}, and \code{"diagnostics"} attributes), the
 original \code{data_list}, and interval names.
 }
 \keyword{internal}
