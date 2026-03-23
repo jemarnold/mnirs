@@ -39,13 +39,29 @@ used.
 If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
 
+\item{direction}{A character string specifying the kinetics direction to
+detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+\emph{Details}.}
+
+\item{end_fit_span}{A numeric value in units of \code{time_channel} specifying
+the forward-looking window used to check for subsequent greater/lesser
+values than the candidate extreme.}
+
+\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
+\code{nirs_channels} for unique per-channel arguments to override global
+default arguments (see \emph{Details}).}
+
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
+
+\item{...}{Additional arguments passed to the underlying method function.
+See \emph{Details}.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
-\code{nirs_channels}, \code{A}, \code{B}, \code{tau}, \code{TD}, \code{k}, \code{half_time}.
+\code{nirs_channels}, \code{A}, \code{B}, \code{tau}, \code{k}, \code{TD}, \code{MRT}, \code{HRT}, \code{tau_fitted},
+\code{MRT_fitted}, \code{HRT_fitted}.
 Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"fitted_data"}: a named list of data frames (per \code{nirs_channel})
@@ -61,6 +77,7 @@ Fit a monoexponential curve to each \code{nirs_channel} within a single
 data frame. Called by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "monoexponential"}.
 }
 \seealso{
-\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=peak_slope]{peak_slope()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=monoexponential]{monoexponential()}}, \code{\link[=SS_monoexp3]{SS_monoexp3()}},
+\code{\link[=SS_monoexp4]{SS_monoexp4()}}
 }
 \keyword{internal}

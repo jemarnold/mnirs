@@ -593,7 +593,7 @@ test_that("peak_slope returns correct structure", {
     )
     expect_type(result$slope, "double")
     expect_type(result$intercept, "double")
-    expect_type(result$y, "double")
+    expect_type(result$fitted, "double")
     expect_true(is.numeric(result$t))
     expect_type(result$idx, "integer")
     expect_type(result$window_idx, "integer")
@@ -665,11 +665,11 @@ test_that("peak_slope returns NA when no slopes in specified direction", {
     )
 })
 
-test_that("peak_slope calculates correct intercept and y", {
+test_that("peak_slope calculates correct intercept and fitted", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
     result <- peak_slope(x, width = 5, verbose = FALSE)
 
-    ## verify y = intercept + slope * t
+    ## verify fitted = intercept + slope * t
     expect_equal(result$y, result$intercept + result$slope * result$t)
 
     ## verify against lm()
@@ -807,27 +807,25 @@ test_that("analyse_peak_slope returns correct structure", {
     t <- seq_along(x)
 
     df <- create_mnirs_data(
-        data = data.frame(t, x, q),
+        data = data.frame(this_time = t, x, q),
         nirs_channels = c("x", "q"),
-        time_channel = "t"
+        time_channel = "this_time"
     )
-
     results <- analyse_peak_slope(df, width = 5)
-    # attributes(results)
 
     expect_s3_class(results, "data.frame")
     expect_equal(nrow(results), 2)
     expect_named(
         results,
-        c("nirs_channels", "slope", "intercept", "y", "t", "idx")
+        c("nirs_channels", "slope", "intercept", "fitted", "this_time", "idx")
     )
 
     expect_type(results$nirs_channels, "character")
     expect_equal(results$nirs_channels, c("x", "q"))
     expect_type(results$slope, "double")
     expect_type(results$intercept, "double")
-    expect_type(results$y, "double")
-    expect_type(results$t, "integer")
+    expect_type(results$fitted, "double")
+    expect_type(results$this_time, "integer")
     expect_type(results$idx, "integer")
 
     ## metadata carried as attributes
@@ -885,13 +883,14 @@ test_that("analyse_peak_slope handles edge cases", {
         time_channel = "t"
     )
     # plot.mnirs(df, points = TRUE, na.omit = TRUE)
-    
+
     results <- analyse_peak_slope(
         df,
         width = 3,
         partial = TRUE,
         verbose = FALSE
     )
+    
     expect_all_false(is.na(results$slope))
     expect_all_true(results$slope > 0)
     expect_equal(attr(results, "fitted_data")$x$window_idx, c(3, 4, 5))
@@ -1210,8 +1209,8 @@ test_that("rolling_slope works visually", {
     # library(ggplot2)
     # fitted_data <- lapply(window_idx, \(.idx) {
     #     df <- data.frame(t = t[.idx], x = x[.idx])
-    #     y <- tryCatch(predict(lm(x ~ t, df), df), error = \(e) NA_real_)
-    #     df$y <- if (!is.null(attr(y, "non-estim"))) NA_real_ else y
+    #     fitted <- tryCatch(predict(lm(x ~ t, df), df), error = \(e) NA_real_)
+    #     df$fitted <- if (!is.null(attr(fitted, "non-estim"))) NA_real_ else fitted
     #     df
     # })[2:12]
 
@@ -1222,12 +1221,12 @@ test_that("rolling_slope works visually", {
     #         list(
     #             geom_line(
     #                 data = .df,
-    #                 aes(t, y),
+    #                 aes(t, fitted),
     #                 colour = "dodgerblue"
     #             ),
     #             geom_point(
     #                 data = .df,
-    #                 aes(t, y),
+    #                 aes(t, fitted),
     #                 colour = c("dodgerblue", "red", "dodgerblue"),
     #                 shape = c(19, 18, 19),
     #                 size = c(2, 5, 2)

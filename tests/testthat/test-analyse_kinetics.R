@@ -661,7 +661,9 @@ test_that("analyse_kinetics returns correct structure", {
         c(
             "method",
             "coefficients",
+            # "model",
             "data",
+            # "predicted_metrics",
             "interval_times",
             "diagnostics",
             "channel_args",
@@ -1004,7 +1006,7 @@ test_that("analyse_kinetics.peak_slope results have correct columns", {
         "nirs_channels",
         "slope",
         "intercept",
-        "y",
+        "fitted",
         "time",
         "idx"
     )
@@ -1067,17 +1069,11 @@ test_that("analyse_kinetics.monoexponential has correct columns", {
         verbose = FALSE
     )
 
-    expected_cols <- c(
-        "interval",
-        "nirs_channels",
-        "A",
-        "B",
-        "tau",
-        "TD",
-        "k",
-        "half_time"
-    )
-    expect_true(all(expected_cols %in% names(result$coefficients)))
+    expect_named(result$coefficients, c(
+        "interval", "nirs_channels", 
+        "A", "B", "tau", "k", "TD", "MRT", "HRT",
+        "tau_fitted", "MRT_fitted", "HRT_fitted"
+    ))
 })
 
 
@@ -1118,6 +1114,64 @@ test_that("analyse_kinetics.monoexponential uses custom interval name", {
     expect_true(is.na(result$coefficients$A))
     expect_true(is.na(result$coefficients$tau))
     expect_true(is.na(result$coefficients$k))
+})
+
+## integration =======================================================
+test_that("analyse_kinetics works visually on Train.Red", {
+    skip_if_not_installed("ggplot2")
+    skip("visual check")
+
+    data_list <- read_mnirs(
+        example_mnirs("train.red"),
+        nirs_channels = c(smo2_left = "SmO2"),
+        time_channel = c(time = "Timestamp (seconds passed)"),
+        zero_time = TRUE,
+        verbose = FALSE
+    ) |>
+        resample_mnirs(verbose = FALSE) |>
+        extract_intervals(
+            start = by_time(368),
+            span = c(10, 90),
+            zero_time = TRUE,
+            verbose = FALSE
+        )
+
+    result <- analyse_kinetics(data_list, method = "peak_slope", span = 10)
+    # result$coefficients
+
+    library(ggplot2)
+    plot(data_list[[1]]) +
+        geom_line(
+            data = result$data[[1]],
+            aes(y = smo2_left_fitted),
+            linewidth = 1.5
+        ) +
+        geom_point(
+            data = result$coefficients,
+            aes(x = time, y = fitted),
+            size = 4,
+            shape = 21,
+            stroke = 1.5,
+            fill = "white"
+        )
+
+    result <- analyse_kinetics(data_list, method = "monoexp", time_delay = TRUE)
+    # result$diagnostics
+
+    plot(data_list[[1]]) +
+        geom_line(
+            data = result$data[[1]],
+            aes(y = smo2_left_fitted),
+            linewidth = 1.5
+        ) +
+        geom_point(
+            data = result$coefficients,
+            aes(x = MRT, y = MRT_fitted),
+            size = 4,
+            shape = 21,
+            stroke = 1.5,
+            fill = "white"
+        )
 })
 
 

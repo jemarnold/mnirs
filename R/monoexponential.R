@@ -238,9 +238,11 @@ SS_monoexp4 <- selfStart(
 #'   If the 4-parameter fit fails, or if `time_delay = FALSE`, fits a
 #'   reduced 3-parameter [SS_monoexp3()] model (A, B, tau).
 #' @inheritParams validate_mnirs
+#' @inheritParams analyse_kinetics
 #'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
-#'   `nirs_channels`, `A`, `B`, `tau`, `TD`, `k`, `half_time`.
+#'   `nirs_channels`, `A`, `B`, `tau`, `k`, `TD`, `MRT`, `HRT`, `tau_fitted`,
+#'   `MRT_fitted`, `HRT_fitted`.
 #'   Per-channel metadata are attached as attributes:
 #'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
 #'     with columns `window_idx` and `fitted`.
@@ -249,7 +251,8 @@ SS_monoexp4 <- selfStart(
 #'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
 #'     recording the resolved arguments used.
 #'
-#' @seealso [analyse_kinetics()], [peak_slope()]
+#' @seealso [analyse_kinetics()], [monoexponential()], [SS_monoexp3()], 
+#'   [SS_monoexp4()]
 #'
 #' @keywords internal
 analyse_monoexponential <- function(
@@ -293,9 +296,13 @@ analyse_monoexponential <- function(
         A = NA_real_,
         B = NA_real_,
         tau = NA_real_,
-        TD = NA_real_,
         k = NA_real_,
-        half_time = NA_real_
+        TD = NA_real_,
+        MRT = NA_real_,
+        HRT = NA_real_,
+        tau_fitted = NA_real_,
+        MRT_fitted = NA_real_,
+        HRT_fitted = NA_real_
     )
 
     ## process per-channel ============================================
@@ -367,21 +374,37 @@ analyse_monoexponential <- function(
 
         fitted_vals <- stats::predict(model)
         coefs <- stats::coef(model)
-        tau_val <- coefs[["tau"]]
-        TD <- if (n_params == 4L) coefs[["TD"]] else NA_real_
+        TD_arg <- if (n_params == 4L) coefs[["TD"]] else NULL
+        TD_val <- TD_arg %||% NA_real_
+        MRT_val <- sum(TD_arg, coefs[["tau"]])
+        HRT_val <- sum(TD_arg, coefs[["tau"]] * log(2))
+
+        ## predict response at tau and MRT using the fitted model
+        tau_fitted <- monoexponential(
+            coefs[["tau"]], coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
+        )
+        MRT_fitted <- monoexponential(
+            MRT_val, coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
+        )
+        HRT_fitted <- monoexponential(
+            HRT_val, coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
+        )
 
         coefs <- data.frame(
             nirs_channels = .nirs,
             A = coefs[["A"]],
             B = coefs[["B"]],
-            tau = tau_val,
-            TD = TD,
-            k = 1 / tau_val,
-            half_time = sum(TD, tau_val * log(2), na.rm = TRUE)
+            tau = coefs[["tau"]],
+            k = 1 / coefs[["tau"]],
+            TD = TD_val,
+            MRT = MRT_val,
+            HRT = HRT_val,
+            tau_fitted = tau_fitted,
+            MRT_fitted = MRT_fitted,
+            HRT_fitted = HRT_fitted
         )
 
         ## ! fix cases where `zero_time = FALSE`: esp. for half_time
-        ## ! implement `predicted_params`
 
         diag <- compute_diagnostics(
             x_fit, t_fit, fitted_vals, n_params, verbose

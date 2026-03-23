@@ -368,11 +368,9 @@ peak_slope <- function(
 #' *"mnirs"* data frame and return a data frame of regression parameters
 #' with per-channel metadata as attributes.
 #'
-#' @param channel_args An *optional* named `list()` with names corresponding
-#'   to `nirs_channels`, each containing a list of arguments to override the
-#'   global defaults for that channel. See *Details*.
 #' @inheritParams validate_mnirs
 #' @inheritParams peak_slope
+#' @inheritParams analyse_kinetics
 #'
 #' @details
 #' ## Per-channel argument overrides
@@ -478,7 +476,7 @@ analyse_peak_slope <- function(
             nirs_channels = .nirs,
             slope         = slopes$slope,
             intercept     = slopes$intercept,
-            y             = slopes$y, ## predicted response value at idx
+            fitted        = slopes$y, ## predicted response value at idx
             t             = slopes$t,
             idx           = slopes$idx
         )

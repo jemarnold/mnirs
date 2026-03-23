@@ -53,6 +53,10 @@ is \emph{backward looking} from the current sample.}
 detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
+\item{end_fit_span}{A numeric value in units of \code{time_channel} specifying
+the forward-looking window used to check for subsequent greater/lesser
+values than the candidate extreme.}
+
 \item{partial}{Logical; default is \code{FALSE}, requires local windows to have
 complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},
 processes available samples within the local window. See \emph{Details}.}
@@ -62,9 +66,9 @@ returned vector. If \code{TRUE}, ignores \code{NA}s and processes available vali
 samples within the local window. May return errors or warnings. (see
 \emph{Details}).}
 
-\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
-to \code{nirs_channels}, each containing a list of arguments to override the
-global defaults for that channel. See \emph{Details}.}
+\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
+\code{nirs_channels} for unique per-channel arguments to override global
+default arguments (see \emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
