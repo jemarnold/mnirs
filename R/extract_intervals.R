@@ -229,6 +229,7 @@ extract_intervals <- function(
     ) || (
         inherits(end, "mnirs_interval") && end$type %in% c("label", "lap")
     )
+    
     if (uses_event_channel) {
         event_channel <- tryCatch(
             validate_event_channel(event_channel, data, required = TRUE),

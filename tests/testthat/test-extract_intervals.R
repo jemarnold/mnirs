@@ -1761,7 +1761,7 @@ test_that("extract_intervals works on Moxy data", {
     result <- extract_intervals(
         data,
         nirs_channels = c("smo2_left", "smo2_right"),
-        start = by_time(870),
+        start = by_time(878),
         span = list(c(-30, 180)),
         zero_time = FALSE,
         verbose = FALSE
@@ -1772,14 +1772,14 @@ test_that("extract_intervals works on Moxy data", {
     expect_length(result[[1L]], 3)
     expect_named(result[[1L]], c("hh:mm:ss", "smo2_left", "smo2_right"))
     ## range of time_channel
-    expect_gte(min(result[[1L]][[1]]), 870 - 30)
-    expect_equal(min(result[[1L]][[1]]), 870 - 30, tolerance = 1)
-    expect_lte(max(result[[1L]][[1]]), 870 + 180)
-    expect_equal(max(result[[1L]][[1]]), 870 + 180, tolerance = 1)
+    expect_gte(min(result[[1L]][[1]]), 878 - 30)
+    expect_equal(min(result[[1L]][[1]]), 878 - 30, tolerance = 1)
+    expect_lte(max(result[[1L]][[1]]), 878 + 180)
+    expect_equal(max(result[[1L]][[1]]), 878 + 180, tolerance = 1)
     ## equivalent to intake df
     expect_equal(
         result[[1L]],
-        data[within(data$`hh:mm:ss`, c(870 - 30, 870 + 180)), ],
+        data[within(data$`hh:mm:ss`, c(878 - 30, 878 + 180)), ],
         ignore_attr = TRUE
     )
 })

@@ -1,3 +1,129 @@
+#' @name moxy_ramp.xlsx
+#'
+#' @title 2 Hz PerfPro export of Moxy data
+#'
+#' @description Exported from PerfPro Studio software, recorded
+#'   at 0.5 Hz no smoothing and exported at 2 Hz. Containing a
+#'   ramp incremental cycling protocol, placed on bilateral
+#'   vastus lateralis muscle sites. Intentional data errors
+#'   (outliers, invalid values, and missing `NA` values) have
+#'   been introduced to demonstrate *{mnirs}* cleaning
+#'   functions.
+#'
+#' @docType data
+#'
+#' @format .xlsx file with five columns and 2202 rows:
+#'   \describe{
+#'     \item{mm-dd}{Recording date (dd-MMM format).}
+#'     \item{hh:mm:ss}{Time of day (hh:mm:ss format).}
+#'     \item{SmO2 Live}{Muscle oxygen saturation, left leg (%). Contains
+#'       simulated erroneous and missing samples.}
+#'     \item{SmO2 Live(2)}{Muscle oxygen saturation, right leg (%).}
+#'     \item{Lap}{Lap marker (integer).}
+#'   }
+#'
+#'   Channel mapping for [read_mnirs()]:
+#'   - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
+#'   - `time_channel = c("hh:mm:ss")`
+#'   - `event_channel = c("Lap")`
+#'   - `interval_times = list(start = c(204, 878))` (occlusion and hyperaemia)
+#'
+#' @source Moxy Monitor (Fortiori Design LLC), exported via PerfPro Studio
+#'   desktop software (https://perfprostudio.com/).
+#'
+#' @seealso [read_mnirs()], [example_mnirs()]
+#'
+#' @examples
+#' example_mnirs("moxy_ramp")
+#'
+NULL
+
+
+#' @name moxy_intervals.csv
+#'
+#' @title 0.5 Hz Moxy onboard export
+#'
+#' @description Exported from Moxy onboard recording at 0.5 Hz
+#'   no smoothing. Containing four 4-minute cycling work intervals,
+#'   placed on the vastus lateralis muscle site.
+#'
+#' @docType data
+#'
+#' @format .csv file with seven columns and 936 rows:
+#'   \describe{
+#'     \item{mm-dd}{Recording date (dd-MMM format).}
+#'     \item{hh:mm:ss}{Recording time of day (hh:mm:ss format).}
+#'     \item{SmO2 Live}{Muscle oxygen saturation, raw signal (%).}
+#'     \item{SmO2 Averaged}{Muscle oxygen saturation, rolling average (%).}
+#'     \item{THb}{Total haemoglobin (arbitrary units).}
+#'     \item{Lap}{Lap marker (integer): but I don't think there is an onboard
+#'       lap function, so it's kind of redundant.}
+#'     \item{Session Ct}{Session count of recordings.}
+#'   }
+#'
+#'   Channel mapping for [read_mnirs()]:
+#'   - `nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")`
+#'   - `time_channel = c("hh:mm:ss")`
+#'   - `interval_times = list(start = c(124, 486, 848, 1210), end = c(364, 726, 1088, 1450))`
+#'
+#' @source Moxy Monitor (Fortiori Design LLC), exported via Moxy Portal App.
+#'   (https://www.moxymonitor.com/)
+#'
+#' @seealso [read_mnirs()], [example_mnirs()]
+#'
+#' @examples
+#' example_mnirs("moxy_intervals")
+#'
+NULL
+
+
+#' @name train.red_intervals.csv
+#'
+#' @title 10 Hz Train.Red App export
+#'
+#' @description Exported from Train.Red app, recorded at 10 Hz.
+#'   Containing two 5-minute cycling work intervals, placed on
+#'   bilateral vastus lateralis muscle sites. Some data channels
+#'   have been omitted to reduce file size.
+#'
+#' @docType data
+#'
+#' @format .csv file with header metadata and 10 columns and 12000 rows:
+#'   \describe{
+#'     \item{Timestamp (seconds passed)}{Elapsed time (s).}
+#'     \item{Lap/Event}{Lap number (numeric).}
+#'     \item{SmO2}{Muscle oxygen saturation, filtered (%). Two channels have
+#'       duplicated names. If both are called, the second will be renamed to
+#'       `SmO2_1`.}
+#'     \item{SmO2 unfiltered}{Muscle oxygen saturation, raw signal (%). Two
+#'       channels have duplicated names. If both are called, the second will
+#'       be renamed to `SmO2 unfiltered_1`.}
+#'     \item{O2HB unfiltered}{Oxyhaemoglobin concentration, raw signal
+#'       (arbitrary units). Two channels have duplicated names. If both are
+#'       called, the second will be renamed to `O2HB unfiltered_1`.}
+#'     \item{HHB unfiltered}{Deoxyhaemoglobin concentration, raw signal
+#'       (arbitrary units). Two channels have duplicated names. If both are
+#'       called, the second will be renamed to `HHb unfiltered_1`.}
+#'   }
+#'
+#'   Channel mapping for [read_mnirs()]:
+#'   - `nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHb unfiltered")`
+#'   - `time_channel = c("Timestamp (seconds passed)")`
+#'   - `event_channel = c("Lap/Event")`
+#'   - `interval_times = list(start = c(2150.09, 2865.05), end = c(2441.06, 3168.08))`
+#'   - `interval_times = list(start = c(65.94, 780.90), end = c(356.91, 1183.93))` from zero_time
+#'
+#' @source Train.Red (Train.Red B.V.), exported via Train.Red app
+#'   (https://train.red/)
+#'
+#' @seealso [read_mnirs()], [example_mnirs()]
+#'
+#' @examples
+#' example_mnirs("train.red")
+#'
+NULL
+
+
 #' @name artinis_intervals.xlsx
 #'
 #' @title 10 Hz Artinis Oxysoft export recorded with Oxymon MKIII
@@ -9,72 +135,28 @@
 #'
 #' @docType data
 #'
-#' @format .xlsx file with header metadata and with five columns and 20919 rows.
+#' @format .xlsx file with header metadata and five columns and 20919 rows:
+#'   \describe{
+#'     \item{Column 1}{Sample index (divide by sample rate for seconds).}
+#'     \item{Column 2}{O2Hb: oxyhaemoglobin concentration change (\eqn{\mu}M).}
+#'     \item{Column 3}{HHb: deoxyhaemoglobin concentration change (\eqn{\mu}M).}
+#'     \item{Column 4}{Event marker (character).}
+#'     \item{Column 5}{Unmarked event label (character).}
+#'   }
 #'
+#'   Channel mapping for [read_mnirs()]:
 #'   - `nirs_channels = c(O2Hb = 2, HHb = 3)`
 #'   - `time_channel = c(sample = 1)`
 #'   - `event_channel = c(event = 4, label = "col_5")`
+#'   - `interval_times = list(start = c(158, 999, 1750) end = c(493, 1333, 1961))` two intervals and post-exercise occlusion
 #'
-NULL
-
-
-#' @name moxy_intervals.csv
+#' @source Artinis Medical Systems. Oxymon MKIII, exported via Oxysoft desktop
+#'   software (https://www.artinis.com/)
 #'
-#' @title 0.5 Hz Moxy onboard export
+#' @seealso [read_mnirs()], [example_mnirs()]
 #'
-#' @description Exported from Moxy onboard recording at 0.5 Hz no smoothing.
-#'   Containing four 5-minute cycling work intervals, placed on the vastus
-#'   lateralis muscle site.
-#'
-#' @docType data
-#'
-#' @format .csv file with seven columns and 974 rows.
-#'
-#'   - `nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")`
-#'   - `time_channel = c("hh:mm:ss")`
-#'
-NULL
-
-
-#' @name moxy_ramp.xlsx
-#'
-#' @title 2 Hz PerfPro export of Moxy data
-#'
-#' @description Exported from PerfPro Studio software, recorded at 0.5 Hz no
-#'   smoothing and exported at 2 Hz. Containing a ramp incremental cycling
-#'   protocol, placed on bilateral vastus lateralis muscle sites. With data
-#'   errors (outliers, invalid data, missing `NA` values) introduced to
-#'   demonstrate *{mnirs}* package functionality.
-#'
-#' @docType data
-#'
-#' @format .xlsx file with six columns and 2203 rows.
-#'
-#'   - `nirs_channels = c("SmO2 Live", "SmO2 Live(2)")`
-#'   - `time_channel = c("hh:mm:ss")`
-#'   - `event_channel = c("Lap")`
-#'   - `reoxy_start_times = c(870)`
-#'
-NULL
-
-
-#' @name train.red_intervals.csv
-#'
-#' @title 10 Hz Train.Red App export
-#'
-#' @description Exported from Train.Red app, recorded at 10 Hz. Containing
-#'   two 5-minute cycling work intervals, placed on bilateral vastus lateralis
-#'   muscle sites. Some data channels have been omitted to keep file size down.
-#'
-#' @docType data
-#'
-#' @format .csv file with header metadata and with 10 columns and 12001 rows.
-#'
-#'   - `nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHB unfiltered")`
-#'   - `time_channel = c("Timestamp (seconds passed)")`
-#'   - `event_channel = c("Lap/Event")`
-#'   - `interval_times = list(start = c(2150.09, 2865.05), end = c(2441.06, 3168.08))` 
-#'   - `interval_times = list(start = c(65.94, 780.90), end = c(356.91, 1183.93))` ## from zero_time
+#' @examples
+#' example_mnirs("artinis_intervals")
 #'
 NULL
 
@@ -83,16 +165,35 @@ NULL
 #'
 #' @title 10 Hz Artinis Oxysoft export recorded with Portamon
 #'
-#' @description Exported from Artinis Oxysoft, recorded on Portamon at
-#'   10 Hz on the vastus lateralis muscle. Containing two trials of repeated 
-#'   occlusion oxidative capacity testing, each with 17 occlusions.
+#' @description Exported from Artinis Oxysoft, recorded on
+#'   Portamon at 10 Hz on the vastus lateralis muscle. Containing
+#'   two trials of repeated occlusion oxidative capacity testing,
+#'   each with 17 occlusions.
 #'
 #' @docType data
 #'
-#' @format .xlsx file with header metadata and with six columns and 7943 rows.
+#' @format .xlsx file with header metadata and six columns and 7943 rows:
+#'   \describe{
+#'     \item{Column 1}{Sample index (divide by sample rate for seconds).}
+#'     \item{Column 2}{tHb: total haemoglobin concentration change
+#'       (\eqn{\mu}M).}
+#'     \item{Column 2}{O2Hb: oxyhaemoglobin concentration change (\eqn{\mu}M).}
+#'     \item{Column 3}{HHb: deoxyhaemoglobin concentration change (\eqn{\mu}M).}
+#'     \item{Column 4}{Event marker (character).}
+#'     \item{Column 5}{Unmarked event label (character).}
+#'   }
 #'
+#'   Channel mapping for [read_mnirs()]:
 #'   - `nirs_channels = c(THb = 2, HHb = 3, O2Hb = 4)`
 #'   - `time_channel = c(sample = 1)`
-#'   - `event_channel = c(event = 4, label = "col_6")`
+#'   - `event_channel = c(event = 5, label = "col_6")`
+#'
+#' @source Artinis Medical Systems. Portamon, exported via Oxysoft desktop
+#'   software (https://www.artinis.com/)
+#'
+#' @seealso [read_mnirs()], [example_mnirs()]
+#'
+#' @examples
+#' example_mnirs("portamon")
 #'
 NULL
