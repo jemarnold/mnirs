@@ -153,26 +153,26 @@ test_that("recycle_span validates span", {
 })
 
 
-## resolve_interval_indices() =======================================================
-test_that("resolve_interval_indices resolves time to correct indices", {
+## find_interval_idx() =======================================================
+test_that("find_interval_idx resolves time to correct indices", {
     time_vec <- seq(0.1, 10, by = 0.1)
 
-    result <- resolve_interval_indices(by_time(2, 5, 8), time_vec)
+    result <- find_interval_idx(by_time(2, 5, 8), time_vec)
     expect_equal(result, c(20L, 50L, 80L))
 })
 
-test_that("resolve_interval_indices resolves sample indices directly", {
+test_that("find_interval_idx resolves sample indices directly", {
     time_vec <- seq(0.1, 10, by = 0.1)
 
-    result <- resolve_interval_indices(by_sample(10, 30, 70), time_vec)
+    result <- find_interval_idx(by_sample(10, 30, 70), time_vec)
     expect_equal(result, c(10L, 30L, 70L))
 })
 
-test_that("resolve_interval_indices resolves labels to matching indices", {
+test_that("find_interval_idx resolves labels to matching indices", {
     time_vec <- seq(0.1, 10, by = 0.1)
     event_vec <- c("start", rep("", 4), "mid", rep("", 4), "end")
 
-    result <- resolve_interval_indices(
+    result <- find_interval_idx(
         by_label("start", "mid"),
         time_vec,
         event_vec
@@ -180,11 +180,11 @@ test_that("resolve_interval_indices resolves labels to matching indices", {
     expect_equal(result, c(1L, 6L))
 })
 
-test_that("resolve_interval_indices errors when no labels match", {
+test_that("find_interval_idx errors when no labels match", {
     event_vec <- c(rep("", 50), "marker", rep("", 50))
 
     expect_error(
-        resolve_interval_indices(
+        find_interval_idx(
             by_label("invalid"),
             time_vec = NULL,
             event_vec
@@ -193,10 +193,10 @@ test_that("resolve_interval_indices errors when no labels match", {
     )
 })
 
-test_that("resolve_interval_indices resolves laps with position = first", {
+test_that("find_interval_idx resolves laps with position = first", {
     event_vec <- c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L)
 
-    result <- resolve_interval_indices(
+    result <- find_interval_idx(
         by_lap(1, 3),
         time_vec = NULL,
         event_vec,
@@ -205,10 +205,10 @@ test_that("resolve_interval_indices resolves laps with position = first", {
     expect_equal(result, c(1L, 7L))
 })
 
-test_that("resolve_interval_indices resolves laps with position = last", {
+test_that("find_interval_idx resolves laps with position = last", {
     event_vec <- c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L)
 
-    result <- resolve_interval_indices(
+    result <- find_interval_idx(
         by_lap(1, 3),
         time_vec = NULL,
         event_vec,
@@ -217,11 +217,11 @@ test_that("resolve_interval_indices resolves laps with position = last", {
     expect_equal(result, c(3L, 9L))
 })
 
-test_that("resolve_interval_indices errors when lap not found", {
+test_that("find_interval_idx errors when lap not found", {
     event_vec <- c(1L, 1L, 2L, 2L)
 
     expect_error(
-        resolve_interval_indices(
+        find_interval_idx(
             by_lap(5),
             time_vec = NULL,
             event_vec,

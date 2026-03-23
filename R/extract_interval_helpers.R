@@ -151,7 +151,7 @@ recycle_span <- function(span) {
 
 #' resolve a single mnirs_interval object to integer row indices
 #' @keywords internal
-resolve_interval_indices <- function(
+find_interval_idx <- function(
     interval,
     time_vec,
     event_vec = NULL,
@@ -186,8 +186,7 @@ resolve_interval_indices <- function(
                         lap numbers."
                     ))
                 }
-                matches[if (position == "first") 1L
-                    else length(matches)]
+                matches[if (position == "first") 1L else length(matches)]
             }, integer(1))
         }
     )
@@ -208,10 +207,10 @@ resolve_interval <- function(
 
     ## single-boundary lap: resolve to full lap (first + last)
     if (interval$type == "lap" && xor(has_start, has_end)) {
-        start_idx <- resolve_interval_indices(
+        start_idx <- find_interval_idx(
             interval, time_vec, event_vec, position = "first"
         )
-        end_idx <- resolve_interval_indices(
+        end_idx <- find_interval_idx(
             interval, time_vec, event_vec, position = "last"
         )
         return(list(
@@ -224,7 +223,7 @@ resolve_interval <- function(
 
     ## single-boundary non-lap: reference point for span window
     if (xor(has_start, has_end)) {
-        ref_idx <- resolve_interval_indices(
+        ref_idx <- find_interval_idx(
             interval, 
             time_vec, 
             event_vec,
@@ -239,10 +238,10 @@ resolve_interval <- function(
     }
 
     ## both boundaries specified
-    start_idx <- resolve_interval_indices(
+    start_idx <- find_interval_idx(
         start_interval, time_vec, event_vec, position = "first"
     )
-    end_idx <- resolve_interval_indices(
+    end_idx <- find_interval_idx(
         end_interval, time_vec, event_vec, position = "last"
     )
 
@@ -311,7 +310,12 @@ recycle_to_length <- function(
 #' the number of events.
 #'
 #' @keywords internal
-recycle_param <- function(param, n_events, event_groups, verbose = TRUE) {
+recycle_param <- function(
+    param,
+    n_events,
+    event_groups,
+    verbose = TRUE
+) {
     ## flatten nested lists to single-depth list
     param <- if (is.list(param)) {
         lapply(param, \(.x) if (is.list(.x)) unlist(.x) else .x)
@@ -377,6 +381,7 @@ apply_span_to_indices <- function(
         )
     } else {
         ## start-only or end-only: both span values apply to the reference
+        ## ! need to use original input time, not time to index to time
         start_times <- event_times + span_before
         end_times <- event_times + span_after
         interval_times <- as.list(event_times)
