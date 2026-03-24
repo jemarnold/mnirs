@@ -115,6 +115,11 @@
 #'   accessable as a list of class *"mnirs_kinetics"* containing:
 #'
 #'   \item{`method`}{The method used, e.g. `"half_time"`.}
+#'   \item{`model`}{A named list of model objects (per interval,
+#'       per `nirs_channel`). For `"peak_slope"`, each element is an
+#'       [lm][stats::lm] object; for `"monoexponential"`, an
+#'       [nls][stats::nls] object. `NULL` for channels where fitting
+#'       failed.}
 #'   \item{`coefficients`}{A [tibble][tibble::tibble-package] of coefficients
 #'       with one row per `nirs_channel` and per interval, containing columns
 #'       `interval`, `nirs_channels`, and individual method parameters.}
@@ -239,6 +244,7 @@ analyse_kinetics.peak_slope <- function(
     return(structure(
         list(
             method = method,
+            model = gathered$model,
             coefficients = gathered$coefficients,
             data = gathered$data,
             interval_times = gathered$interval_times,
@@ -295,7 +301,7 @@ analyse_kinetics.monoexponential <- function(
     return(structure(
         list(
             method = method,
-            model = model,
+            model = gathered$model,
             coefficients = gathered$coefficients,
             data = gathered$data,
             interval_times = gathered$interval_times,

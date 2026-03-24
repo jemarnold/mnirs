@@ -72,6 +72,11 @@ A formatted table of printed results, with individual elements
 accessable as a list of class \emph{"mnirs_kinetics"} containing:
 
 \item{\code{method}}{The method used, e.g. \code{"half_time"}.}
+\item{\code{model}}{A named list of model objects (per interval,
+per \code{nirs_channel}). For \code{"peak_slope"}, each element is an
+\link[stats:lm]{lm} object; for \code{"monoexponential"}, an
+\link[stats:nls]{nls} object. \code{NULL} for channels where fitting
+failed.}
 \item{\code{coefficients}}{A \link[tibble:tibble-package]{tibble} of coefficients
 with one row per \code{nirs_channel} and per interval, containing columns
 \code{interval}, \code{nirs_channels}, and individual method parameters.}

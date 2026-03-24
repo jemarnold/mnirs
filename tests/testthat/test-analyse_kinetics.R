@@ -375,7 +375,8 @@ test_that("build_na_results returns correct 4-element list", {
 
     expect_type(result, "list")
     expect_named(
-        result, c("coefficients", "fitted_data", "diagnostics", "channel_args")
+        result,
+        c("coefficients", "model", "fitted_data", "diagnostics", "channel_args")
     )
 
     ## coefs inherits template with channel name filled in
@@ -668,10 +669,9 @@ test_that("analyse_kinetics returns correct structure", {
         result,
         c(
             "method",
+            "model",
             "coefficients",
-            # "model",
             "data",
-            # "predicted_metrics",
             "interval_times",
             "diagnostics",
             "channel_args",
@@ -1209,31 +1209,37 @@ test_that("analyse_kinetics.peak_slope benchmark", {
         )
 
     # for (i in seq_len(3)) {
-    #     bm <- bench::mark(
-    #         analyse_peak_slope = suppressWarnings(
-    #             lapply(data_list, \(.df) {
-    #                 analyse_peak_slope(
-    #                     .df,
-    #                     nirs_channels = c(smo2_left, smo2_right),
-    #                     span = 10,
-    #                     verbose = FALSE
-    #                 )
-    #             })
-    #         ),
-    #         analyse_kinetics.peak_slope = suppressWarnings(
-    #             analyse_kinetics(
-    #                 data_list,
-    #                 nirs_channels = c(smo2_left, smo2_right),
-    #                 method = "peak_slope",
-    #                 span = 10,
-    #                 direction = "auto",
-    #                 verbose = FALSE
-    #             )
-    #         ),
-    #         iterations = 5L,
-    #         check = FALSE
-    #     )
+        # bench::mark(
+        #     analyse_peak_slope = suppressWarnings(
+        #         lapply(data_list, \(.df) {
+        #             analyse_peak_slope(
+        #                 .df,
+        #                 nirs_channels = c(smo2_left, smo2_right),
+        #                 span = 10,
+        #                 verbose = FALSE
+        #             )
+        #         })
+        #     ),
+        #     analyse_kinetics.peak_slope = suppressWarnings(
+        #         analyse_kinetics(
+        #             data_list,
+        #             nirs_channels = c(smo2_left, smo2_right),
+        #             method = "peak_slope",
+        #             span = 10,
+        #             direction = "auto",
+        #             verbose = FALSE
+        #         )
+        #     ),
+        #     iterations = 5L,
+        #     check = FALSE
+        # )
     # }
+
+    # A tibble: 2 × 13
+#>    expression                 min median `itr/sec` mem_alloc `gc/sec`
+#>    <bch:expr>              <bch:> <bch:>     <dbl> <bch:byt>    <dbl>
+#>  1 analyse_peak_slope      69.3ms 73.4ms      13.8    30.4MB     22.1
+#>  2 analyse_kinetics.peak_… 72.4ms 75.4ms      13.3    30.5MB     21.2
 
     # itr_per_sec <- bm$`itr/sec`
 

@@ -138,8 +138,8 @@ find_kinetics_idx <- function(
 #' @param data_list Named list of original interval data frames.
 #' @param result_list List of per-interval result data frames with attributes.
 #'
-#' @returns A named list with: `results`, `data`, `interval_times`,
-#'   `diagnostics`, `channel_args`.
+#' @returns A named list with: `coefficients`, `model`, `data`,
+#'   `interval_times`, `diagnostics`, `channel_args`.
 #' @keywords internal
 build_kinetics_results <- function(
     data_list,
@@ -180,6 +180,10 @@ build_kinetics_results <- function(
         interval_times <- attr(.df, "interval_times")
         if (is.null(interval_times)) NA_real_ else unlist(interval_times)
     })
+
+    ## extract per-interval model lists (named by nirs_channel)
+    model_list <- lapply(result_list, attr, "model")
+    names(model_list) <- interval_names
 
     ## combine scalar coefficients & relocate interval col to col[1]
     coefs <- do.call(rbind, result_list)
@@ -228,8 +232,9 @@ build_channel_args <- function(nirs_channel, all_args) {
 
 #' Build a standardised NA result for a failed channel
 #'
-#' Returns the 4-element list (`coefficients`, `fitted_data`, `diagnostics`,
-#' `channel_args`) expected by [build_kinetics_results()], populated with `NA` values.
+#' Returns the 5-element list (`coefficients`, `model`, `fitted_data`,
+#' `diagnostics`, `channel_args`) expected by [build_kinetics_results()],
+#' populated with `NA`/`NULL` values.
 #'
 #' @param nirs_channel Character; column name of the channel.
 #' @param na_coefs A template 1-row `data.frame` with all `NA` values matching
@@ -239,8 +244,8 @@ build_channel_args <- function(nirs_channel, all_args) {
 #' @param n_params Integer; number of model parameters (passed to
 #'   [compute_diagnostics()]).
 #'
-#' @returns A named list with elements `coefficients`, `fitted_data`,
-#'   `diagnostics`, and `channel_args`.
+#' @returns A named list with elements `coefficients`, `model`,
+#'   `fitted_data`, `diagnostics`, and `channel_args`.
 #'
 #' @keywords internal
 build_na_results <- function(
@@ -261,6 +266,7 @@ build_na_results <- function(
     na_coefs$nirs_channels <- nirs_channel
     return(list(
         coefficients = na_coefs,
+        model = NULL,
         fitted_data = data.frame(window_idx = NA_integer_, fitted = NA_real_),
         diagnostics = cbind(data.frame(nirs_channels = nirs_channel), na_diag),
         channel_args = build_channel_args(nirs_channel, all_args)
@@ -277,7 +283,7 @@ build_na_results <- function(
 #'
 #' @param results Named list of per-channel result lists.
 #'
-#' @returns A `data.frame` with attributes `"fitted_data"`,
+#' @returns A `data.frame` with attributes `"model"`, `"fitted_data"`,
 #'   `"diagnostics"`, and `"channel_args"`.
 #' @keywords internal
 build_channel_results <- function(results) {

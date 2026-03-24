@@ -12,8 +12,8 @@ build_kinetics_results(data_list, result_list, interval_names)
 \item{result_list}{List of per-interval result data frames with attributes.}
 }
 \value{
-A named list with: \code{results}, \code{data}, \code{interval_times},
-\code{diagnostics}, \code{channel_args}.
+A named list with: \code{coefficients}, \code{model}, \code{data},
+\code{interval_times}, \code{diagnostics}, \code{channel_args}.
 }
 \description{
 Shared helper for \verb{analyse_kinetics.*} methods. Takes a list of

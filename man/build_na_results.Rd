@@ -19,11 +19,12 @@ the method's coefficients columns.}
 \code{\link[=compute_diagnostics]{compute_diagnostics()}}).}
 }
 \value{
-A named list with elements \code{coefficients}, \code{fitted_data},
-\code{diagnostics}, and \code{channel_args}.
+A named list with elements \code{coefficients}, \code{model},
+\code{fitted_data}, \code{diagnostics}, and \code{channel_args}.
 }
 \description{
-Returns the 4-element list (\code{coefficients}, \code{fitted_data}, \code{diagnostics},
-\code{channel_args}) expected by \code{\link[=build_kinetics_results]{build_kinetics_results()}}, populated with \code{NA} values.
+Returns the 5-element list (\code{coefficients}, \code{model}, \code{fitted_data},
+\code{diagnostics}, \code{channel_args}) expected by \code{\link[=build_kinetics_results]{build_kinetics_results()}},
+populated with \code{NA}/\code{NULL} values.
 }
 \keyword{internal}

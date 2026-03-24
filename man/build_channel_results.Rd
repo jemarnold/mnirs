@@ -10,7 +10,7 @@ build_channel_results(results)
 \item{results}{Named list of per-channel result lists.}
 }
 \value{
-A \code{data.frame} with attributes \code{"fitted_data"},
+A \code{data.frame} with attributes \code{"model"}, \code{"fitted_data"},
 \code{"diagnostics"}, and \code{"channel_args"}.
 }
 \description{
