@@ -328,6 +328,8 @@ test_that("analyse_monoexponential() returns correct structure", {
     expect_equal(nrow(result), 1L)
 
     ## attributes
+    expect_type(attr(result, "model"), "list")
+    expect_true(inherits(attr(result, "model")$smo2, "nls"))
     expect_type(attr(result, "fitted_data"), "list")
     ## predicted data frame for each `nirs_channels`
     expect_s3_class(attr(result, "fitted_data")$smo2, "data.frame")

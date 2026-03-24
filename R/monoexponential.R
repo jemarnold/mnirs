@@ -321,10 +321,10 @@ analyse_monoexponential <- function(
             direction
         )
         x_fit <- data[[.nirs]][valid]
-        t_fit <- time_vec[valid]  ## ! is channel idx unstable for `t` idx??
+        t_fit <- time_vec[valid]
 
         fit_data <- data.frame(.x = x_fit, .t = t_fit)
-        model <- NULL ## pre-allocate
+        model <- NULL ## pre-allocate for 3-param condition
 
         ## attempt nls fit on 4-param, fallback to 3
         if (n_params == 4L) {
@@ -390,6 +390,7 @@ analyse_monoexponential <- function(
             HRT_val, coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
         )
 
+        ## ! fix cases where `zero_time = FALSE`: esp. for half_time
         coefs <- data.frame(
             nirs_channels = .nirs,
             A = coefs[["A"]],
@@ -404,14 +405,13 @@ analyse_monoexponential <- function(
             HRT_fitted = HRT_fitted
         )
 
-        ## ! fix cases where `zero_time = FALSE`: esp. for half_time
-
         diag <- compute_diagnostics(
             x_fit, t_fit, fitted_vals, n_params, verbose
         )
 
         list(
             coefficients = coefs,
+            model = model,
             fitted_data = data.frame(window_idx = valid, fitted = fitted_vals),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = build_channel_args(.nirs, all_args)

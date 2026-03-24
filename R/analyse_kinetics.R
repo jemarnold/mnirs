@@ -225,7 +225,7 @@ analyse_kinetics.peak_slope <- function(
             direction = direction,
             end_fit_span = end_fit_span,
             partial = args$partial %||% FALSE,
-            na.rm = args$na.rm %||% TRUE, ## TODO do I want FALSE?
+            na.rm = args$na.rm %||% TRUE, ## TODO do I want less opinionated?
             channel_args = channel_args,
             verbose = verbose
         )
@@ -295,6 +295,7 @@ analyse_kinetics.monoexponential <- function(
     return(structure(
         list(
             method = method,
+            model = model,
             coefficients = gathered$coefficients,
             data = gathered$data,
             interval_times = gathered$interval_times,

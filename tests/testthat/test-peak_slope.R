@@ -829,6 +829,8 @@ test_that("analyse_peak_slope returns correct structure", {
     expect_type(results$idx, "integer")
 
     ## metadata carried as attributes
+    expect_type(attr(results, "model"), "list")
+    expect_true(inherits(attr(results, "model")$x, "lm")) ## ! implement
     expect_type(attr(results, "fitted_data"), "list")
     expect_s3_class(attr(results, "fitted_data")$x, "data.frame")
     expect_equal(

@@ -929,8 +929,6 @@ test_that("ensemble_intervals preserves metadata", {
     expect_equal(attr(result, "time_channel"), "time")
     expect_equal(attr(result, "sample_rate"), 10)
     expect_true(is.list(attr(result, "interval_times")))
-    ## TODO 2026-03-07 update `interval_times` adheres to `zero_time` to represent interval times of returned data frame, not input data frame
-    # expect_setequal(unlist(attr(result, "interval_times")), c(10, 20))
     expect_setequal(unlist(attr(result, "interval_times")), c(0, 0))
     expect_true(is.list(attr(result, "interval_span")))
     expect_setequal(lengths(attr(result, "interval_span")), 2)
@@ -1735,9 +1733,6 @@ test_that("extract_intervals respects nirs_channels metadata", {
         verbose = FALSE
     )
 
-    ## TODO 2026-02-15 changed to overwrite nirs_channels
-    # expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
-    # expect_equal(attr(result[[2]], "nirs_channels"), all_channels)
     expect_equal(attr(result[[1]], "nirs_channels"), "smo2_left")
     expect_equal(attr(result[[2]], "nirs_channels"), "smo2_left")
 

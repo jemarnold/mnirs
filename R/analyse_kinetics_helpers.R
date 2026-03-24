@@ -188,6 +188,7 @@ build_kinetics_results <- function(
 
     return(list(
         coefficients = coefs,
+        model = model_list,
         data = fitted_data_list,
         interval_times = interval_times_df,
         diagnostics = diagnostics,
@@ -282,6 +283,7 @@ build_na_results <- function(
 build_channel_results <- function(results) {
     return(structure(
         do.call(rbind, lapply(results, `[[`, "coefficients")),
+        model = lapply(results, `[[`, "model"),
         fitted_data = lapply(results, `[[`, "fitted_data"),
         diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
         channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))

@@ -400,12 +400,14 @@ test_that("build_na_results returns correct 4-element list", {
 test_that("build_channel_results combines channels correctly", {
     ch1 <- list(
         coefficients = data.frame(nirs_channels = "ch1", slope = 1.0),
+        model = data.frame(temp = "object"),
         fitted_data = data.frame(window_idx = 1:3, fitted = c(1, 2, 3)),
         diagnostics = data.frame(nirs_channels = "ch1", r2 = 0.95),
         channel_args = data.frame(nirs_channels = "ch1", width = 10)
     )
     ch2 <- list(
         coefficients = data.frame(nirs_channels = "ch2", slope = 2.0),
+        model = data.frame(temp = "object"),
         fitted_data = data.frame(window_idx = 1:3, fitted = c(4, 5, 6)),
         diagnostics = data.frame(nirs_channels = "ch2", r2 = 0.85),
         channel_args = data.frame(nirs_channels = "ch2", width = 10)
@@ -417,6 +419,12 @@ test_that("build_channel_results combines channels correctly", {
     expect_equal(nrow(result), 2L)
     expect_equal(result$nirs_channels, c("ch1", "ch2"))
     expect_equal(result$slope, c(1.0, 2.0))
+
+    ## TODO model preserved as ...
+    model <- attr(result, "model")
+    expect_type(model, "list")
+    expect_length(model, 2L)
+    ## TODO verify model object type
 
     ## fitted_data preserved as named list
     fitted_data <- attr(result, "fitted_data")
@@ -1137,7 +1145,7 @@ test_that("analyse_kinetics works visually on Train.Red", {
         )
 
     result <- analyse_kinetics(data_list, method = "peak_slope", span = 10)
-    # result$coefficients
+    result$
 
     library(ggplot2)
     plot(data_list[[1]]) +

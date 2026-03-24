@@ -395,6 +395,7 @@ peak_slope <- function(
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
 #'   `nirs_channels`, `slope`, `intercept`, `y`, `<time_channel>`, `idx`.
 #'   Per-channel metadata are attached as attributes:
+#'   - `"model"`: a linear regression model object via `stats::lm()`.
 #'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
 #'     with columns `window_idx` and `fitted`.
 #'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
@@ -453,7 +454,7 @@ analyse_peak_slope <- function(
             default_args,
             channel_args[[.nirs]] %||% list()
         )
-    
+
         ## filter for valid finite idx before first extreme + end_fit_span
         valid <- find_kinetics_idx(
             data[[.nirs]],
@@ -462,9 +463,23 @@ analyse_peak_slope <- function(
             direction
         )
         x_fit <- data[[.nirs]][valid]
-        t_fit <- time_vec[valid] ## ! is channel idx unstable for `t` idx??
-        
+        t_fit <- time_vec[valid]
+
         slopes <- do.call(peak_slope, c(list(x = x_fit, t = t_fit), all_args))
+
+        ## fit lm on peak window for model object
+        model <- if (!anyNA(slopes$window_idx)) {
+            stats::lm(
+                x ~ t,
+                data = data.frame(
+                    x = x_fit[slopes$window_idx],
+                    t = t_fit[slopes$window_idx]
+                )
+            )
+        } else {
+            NULL
+        }
+
         diag <- compute_diagnostics(
             x = x_fit[slopes$window_idx],
             t = t_fit[slopes$window_idx],
@@ -480,10 +495,11 @@ analyse_peak_slope <- function(
             t             = slopes$t,
             idx           = slopes$idx
         )
-        names(coefs)[names(coefs) == "t"] <- time_channel ## rename
+        names(coefs)[names(coefs) == "t"] <- time_channel
 
         list(
             coefficients = coefs,
+            model = model,
             fitted_data = data.frame(
                 window_idx = slopes$window_idx,
                 fitted = slopes$fitted
