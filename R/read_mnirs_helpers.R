@@ -481,7 +481,7 @@ extract_start_timestamp <- function(file_header) {
     header_values <- header_values[!is_empty(header_values)]
 
     ## search for POSIXct values, return the earliest time value
-    ## TODO fragile for misinterpreted formats for invalid "early" timestamps
+    ## vulnerable to invalid timestamps
     parsed <- which(!is.na(
         vapply(header_values, \(.x) {
             as.POSIXct(.x, tryFormats = datetime_formats, optional = TRUE)

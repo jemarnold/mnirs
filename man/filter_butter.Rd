@@ -6,25 +6,24 @@
 \usage{
 filter_butter(
   x,
-  order = 2,
+  order = 2L,
   W,
   type = c("low", "high", "stop", "pass"),
   edges = c("rev", "rep1", "none"),
-  na.rm = FALSE
+  na.rm = FALSE,
+  ...
 )
 }
 \arguments{
 \item{x}{A numeric vector.}
 
-\item{order}{An integer defining the filter order for
-\code{method = "butterworth"} (\emph{default} \code{order = 2}).}
+\item{order}{An integer defining the filter order (\emph{default} \code{order = 2}).}
 
 \item{W}{A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for \code{method = "butterworth"}, as a fraction of the
-Nyquist frequency (see \emph{Details}).}
+frequency(ies) as a fraction of the Nyquist frequency (see \emph{Details}).}
 
-\item{type}{A character string indicating the digital filter type for
-\code{method = "butterworth"} (see \emph{Details}).
+\item{type}{A character string indicating the digital filter type (see
+\emph{Details}).
 \describe{
 \item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
 \item{\code{"high"}}{For a \emph{high-pass} filter.}
@@ -32,17 +31,21 @@ Nyquist frequency (see \emph{Details}).}
 \item{\code{"pass"}}{For a \emph{pass-band} filter.}
 }}
 
-\item{edges}{A character string indicating how to pad \code{x} for edge detection.
+\item{edges}{A character string indicating edge detection padding for \code{x}.
 \describe{
-\item{\code{"rev"}}{(\emph{the default}) Will pad \code{x} with the preceding 5\% data
-in reverse sequence.}
+\item{\code{"rev"}}{Will pad \code{x} with the preceding 5\% data in reverse
+sequence (\emph{the default}).}
 \item{\code{"rep1"}}{Will pad \code{x} by repeating the last preceding value.}
 \item{\code{"none"}}{Will return the unpadded \code{\link[signal:filtfilt]{signal::filtfilt()}} output.}
 }}
 
-\item{na.rm}{A logical indicating whether missing values should be preserved
-and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
-will throw an error if there are any \code{NA}s (see \emph{Details}).}
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
+
+\item{...}{Additional method-specific arguments must be specified
+(see \emph{Details}).}
 }
 \value{
 A numeric vector the same length as \code{x}.
@@ -79,7 +82,7 @@ frequency in the range \verb{W = [0, 1]}, where \code{1} is the Nyquist
 frequency, i.e., half the sample rate of the data in Hz.
 
 Missing values (\code{NA}) in \code{x} will cause an error unless \code{na.rm = TRUE}.
-Then \code{NA}s will be preserved and passed through in the returned vector.
+Then \code{NA}s will be ignored and passed through to the returned vector.
 }
 \examples{
 set.seed(13)

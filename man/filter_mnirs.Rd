@@ -11,15 +11,7 @@ filter_mnirs(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  sample_rate = NULL,
   method = c("smooth_spline", "butterworth", "moving_average"),
-  spar = NULL,
-  order = 2,
-  W = NULL,
-  fc = NULL,
-  type = c("low", "high", "stop", "pass"),
-  width = NULL,
-  span = NULL,
   na.rm = FALSE,
   verbose = TRUE,
   ...
@@ -43,59 +35,25 @@ column. Must match a column name in \code{data} exactly.
 used.
 }}
 
-\item{sample_rate}{A numeric value for the sample rate in Hz for
-\code{method = "butterworth"}. Will be taken from metadata or estimated
-from \code{time_channel} if not defined explicitly.}
-
 \item{method}{A character string indicating how to filter the data (see
 \emph{Details}).
 \describe{
 \item{\code{"smooth_spline"}}{Fits a cubic smoothing spline.}
-\item{\code{"butterworth"}}{Uses a centred Butterworth digital filter.
-\code{type} must be defined (see \emph{Details}).}
+\item{\code{"butterworth"}}{Uses a centred Butterworth digital filter.}
 \item{\code{"moving_average"}}{Uses a centred moving average filter.}
 }}
 
-\item{spar}{A numeric value defining the smoothing parameter for
-\code{method = "smooth_spline"}.}
-
-\item{order}{An integer defining the filter order for
-\code{method = "butterworth"} (\emph{default} \code{order = 2}).}
-
-\item{W}{A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for \code{method = "butterworth"}, as a fraction of the
-Nyquist frequency (see \emph{Details}).}
-
-\item{fc}{A one- or two-element numeric vector defining the filter cutoff
-frequency(ies) for \code{method = "butterworth"}, in Hz (see \emph{Details}).}
-
-\item{type}{A character string indicating the digital filter type for
-\code{method = "butterworth"} (see \emph{Details}).
-\describe{
-\item{\code{"low"}}{For a \emph{low-pass} filter (the \emph{default}).}
-\item{\code{"high"}}{For a \emph{high-pass} filter.}
-\item{\code{"stop"}}{For a \emph{stop-band} (band-reject) filter.}
-\item{\code{"pass"}}{For a \emph{pass-band} filter.}
-}}
-
-\item{width}{An integer defining the local window in number of samples
-around \code{idx} in which to perform the operation for
-\code{method = "moving_average"}. Between
-\verb{[idx - floor(width/2), idx + floor(width/2)]}.}
-
-\item{span}{A numeric value defining the local window timespan around \code{idx}
-in which to perform the operation for \code{method = "moving_average"}.
-In units of \code{time_channel} or \code{t}, between \verb{[t - span/2, t + span/2]}.}
-
-\item{na.rm}{A logical indicating whether missing values should be preserved
-and passed through the filter (\code{TRUE}). Otherwise \code{FALSE} (the \emph{default})
-will throw an error if there are any \code{NA}s (see \emph{Details}).}
+\item{na.rm}{Logical; default is \code{FALSE}, propagates any \code{NA}s to the
+returned vector. If \code{TRUE}, ignores \code{NA}s and processes available valid
+samples within the local window. May return errors or warnings. (see
+\emph{Details}).}
 
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
-\item{...}{Additional arguments.}
+\item{...}{Additional method-specific arguments must be specified
+(see \emph{Details}).}
 }
 \value{
 A \link[tibble:tibble-package]{tibble} of class \emph{"mnirs"} with metadata
@@ -111,61 +69,112 @@ using either:
 }
 }
 \details{
-\describe{
-\item{\code{method = "smooth_spline"}}{Applies a non-parametric cubic
-smoothing spline from \code{\link[stats:smooth.spline]{stats::smooth.spline()}}. Smoothing is defined
-by the parameter \code{spar}, which can be left as \code{NULL} and automatically
-determined via penalised log liklihood. This usually works well for
-smoothing responses occurring on the order of minutes or longer. \code{spar}
-can be defined explicitly, typically (but not necessarily) in the range
-\verb{spar = [0, 1]}.}
+\subsection{filtering method}{
+\subsection{\code{method = "smooth_spline"}}{
 
-\item{\code{method = "butterworth"}}{Applies a centred (two-pass
-symmetrical) Butterworth digital filter from \code{\link[signal:butter]{signal::butter()}} and
-\code{\link[signal:filtfilt]{signal::filtfilt()}}.
+Applies a non-parametric cubic smoothing spline from
+\code{\link[stats:smooth.spline]{stats::smooth.spline()}}. Smoothing is defined by the parameter \code{spar},
+which can be left as \code{NULL} and automatically determined via penalised
+log likelihood. This usually works well for responses occurring on the
+order of minutes or longer. \code{spar} can be specified typically, but not
+necessarily, in the range \verb{spar = [0, 1]}.
+
+Additional arguments (\code{...}) accepted when \code{method = "smooth_spline"}:
+
+\describe{
+\item{\code{spar}}{A numeric smoothing parameter passed to
+\code{\link[stats:smooth.spline]{stats::smooth.spline()}}. If \code{NULL} (\emph{default}), automatically
+determined via penalised log likelihood.}
+}
+}
+
+\subsection{\code{method = "butterworth"}}{
+
+Applies a centred (two-pass symmetrical) Butterworth digital filter
+from \code{\link[signal:butter]{signal::butter()}} and \code{\link[signal:filtfilt]{signal::filtfilt()}}.
 
 Filter \code{type} defines how the desired signal frequencies are either
 passed or rejected from the output signal. \emph{Low-pass} and \emph{high-pass}
 filters allow only frequencies \emph{lower} or \emph{higher} than the cutoff
-frequency \code{W} to be passed through as the output signal, respectively.
+frequency, respectively to be passed through to the output signal.
 \emph{Stop-band} defines a critical range of frequencies which are rejected
 from the output signal. \emph{Pass-band} defines a critical range of
 frequencies which are passed through as the output signal.
 
-The filter order (number of passes) is defined by \code{order}, typically in
-the range \verb{order = [1, 10]}. Higher filter order tends to capture more
-rapid changes in amplitude, but also causes more distortion around
-those change points in the signal. General advice is to use the
-lowest filter order which sufficiently captures the desired rapid
+The filter order (number of passes) is defined by \code{order}, typically
+in the range \verb{order = [1, 10]}. Higher filter order tends to capture
+more rapid changes in amplitude, but also causes more distortion
+around those change points in the signal. General advice is to use
+the lowest filter order which sufficiently captures the desired rapid
 responses in the data.
 
-The critical (cutoff) frequency is defined by \code{W}, a numeric value for
-\emph{low-pass} and \emph{high-pass} filters, or a two-element vector
-\code{c(low, high)} defining the lower and upper bands for \emph{stop-band} and
-\emph{pass-band} filters. \code{W} represents the desired fractional cutoff
+The critical (cutoff) frequency can be defined by \code{W}, a numeric value
+for \emph{low-pass} and \emph{high-pass} filters, or a two-element vector
+\code{c(low, high)} defining the lower and upper bands for \emph{stop-band}
+and \emph{pass-band} filters. \code{W} represents the desired fractional cutoff
 frequency in the range \verb{W = [0, 1]}, where \code{1} is the Nyquist
-frequency, i.e., half the sample rate of the data in Hz.
+frequency, i.e., half the \code{sample_rate} of the data in Hz.
 
 Alternatively, the cutoff frequency can be defined by \code{fc} and
 \code{sample_rate} together. \code{fc} represents the desired cutoff frequency
-in Hz, and \code{sample_rate} is the sample rate of the recorded data in
-Hz. \code{W = fc / (sample_rate / 2)}.
+directly in Hz, and \code{sample_rate} is the sample rate of the recorded data
+in Hz. Where \code{W = fc / (sample_rate / 2)}.
 
-Only one of either \code{W} or \code{fc} should be defined. If both are defined,
-\code{W} will be preferred over \code{fc}.}
+Only one of either \code{W} or \code{fc} should be defined. If both are
+defined, \code{W} will be preferred over \code{fc}.
 
-\item{\code{method = "moving_average"}}{Applies a centred (symmetrical)
-moving average filter in a local window, defined by either \code{width}
-as the number of samples around \code{idx} between \verb{[idx - floor(width/2),}
-\verb{idx + floor(width/2)]}. Or by \code{span} as the timespan in units of
-\code{time_channel} between \verb{[t - span/2, t + span/2]}. Specifying \code{width}
-is often faster than \code{span}. A partial moving average will be calculated
+Additional arguments (\code{...}) accepted when \code{method = "butterworth"}:
+
+\describe{
+\item{\code{order}}{An integer for the filter order (\emph{default} \code{2}).}
+\item{\code{W}}{A numeric fractional cutoff frequency within \verb{[0, 1]}. One
+of either \code{W} or \code{fc} must be specified.}
+\item{\code{fc}}{A numeric absolute cutoff frequency in Hz. Used with
+\code{sample_rate} to compute \code{W}.}
+\item{\code{sample_rate}}{A numeric sample rate in Hz. Will be taken from
+metadata or estimated from \code{time_channel} if not defined.}
+\item{\code{type}}{A character string specifying filter type, one of:
+\code{c("low", "high", "stop", "pass")} (\code{"low"} is the default).}
+\item{\code{edges}}{A character string specifying the edge padding, one of:
+\code{c("rev", "rep1", "none")} (\code{"rev"} is the default).
+See \code{\link[=filter_butter]{filter_butter()}}.}
+}
+}
+
+\subsection{\code{method = "moving_average"}}{
+
+Applies a centred (symmetrical) moving average filter in a local
+window, defined by either \code{width} as the number of samples around
+\code{idx} between \verb{[idx - floor(width/2), idx + floor(width/2)]}. Or by
+\code{span} as the timespan in units of \code{time_channel} between
+\verb{[t - span/2, t + span/2]}.
+
+Additional arguments (\code{...}) accepted when \code{method = "moving_average"}:
+
+\describe{
+\item{\code{width} or \code{span}}{Either an integer number of samples, or a
+numeric time duration in units of \code{time_channel} within the local
+window. One of either \code{width} or \code{span} must be specified.}
+\item{\code{partial}}{Logical; \code{FALSE} by default, only returns values
+where a full window of valid (non-\code{NA}) samples are available.
+If \code{TRUE}, ignores \code{NA} and allows calculation over partial windows
 at the edges of the data.}
 }
+}
+
+}
+
+\subsection{Missing values}{
 
 Missing values (\code{NA}) in \code{nirs_channels} will cause an error for
 \code{method = "smooth_spline"} or \code{"butterworth"}, unless \code{na.rm = TRUE}.
-Then \code{NA}s will be preserved and passed through in the returned data.
+Then \code{NA}s will be ignored and passed through to the returned data.
+
+For \code{method = "moving_average"}, \code{na.rm} controls whether \code{NA}s within
+each local window are either propagated to the returned vector when
+\code{na.rm = FALSE} (the default), or ignored before processing if
+\code{na.rm = TRUE}.
+}
 }
 \examples{
 ## read example data and clean for outliers
@@ -190,7 +199,7 @@ data_filtered <- filter_mnirs(
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
     type = "low",           ## specify a "low-pass" filter
-    na.rm = TRUE            ## explicitly preserve NAs
+    na.rm = TRUE            ## explicitly ignore NAs
 )
 
 ## note the smoothed `smo2` values

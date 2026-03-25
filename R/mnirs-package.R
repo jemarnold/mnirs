@@ -13,6 +13,7 @@
 #' @importFrom rlang %||%
 #' @importFrom rlang .data
 #' @importFrom rlang :=
+#' @importFrom rlang check_installed
 #' @importFrom rlang enquo
 #' @importFrom stats coef
 #' @importFrom stats median

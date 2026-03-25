@@ -35,17 +35,17 @@ Typically will only be called internally, but can be used to inject
 \emph{{mnirs}} metadata into any data frame.
 }
 \examples{
-df <- data.frame(
+data <- data.frame(
     A = 1:3,
     B = seq(10, 30, 10),
     C = seq(11, 33, 11)
 )
 
-attributes(df)
+attributes(data)
 
 ## inject metadata
 nirs_data <- create_mnirs_data(
-    df,
+    data,
     nirs_channels = c("B", "C"),
     time_channel = "A",
     sample_rate = 1

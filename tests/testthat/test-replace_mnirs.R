@@ -94,7 +94,7 @@ test_that("replace_outliers() detects and replaces outliers with median", {
     expect_length(result, length(x))
     expect_lt(result[5], 100) # outlier replaced
     expect_equal(result[5], median(x[c(3:7)])) # outlier replaced
-    expect_false(any(is.na(result)))
+    expect_false(anyNA(result))
 
     ## span
     result <- replace_outliers(x, span = 3)
@@ -103,7 +103,7 @@ test_that("replace_outliers() detects and replaces outliers with median", {
     expect_length(result, length(x))
     expect_lt(result[5], 100) # outlier replaced
     expect_equal(result[5], median(x[c(3:7)])) # outlier replaced
-    expect_false(any(is.na(result)))
+    expect_false(anyNA(result))
 })
 
 test_that("replace_outliers() detects and replaces outliers with NA", {

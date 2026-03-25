@@ -145,13 +145,13 @@ recycle_span <- function(span) {
         ))
     }
     ## positive shifts end, negative shifts start
-    if (span >= 0) c(0, span) else c(span, 0)
+    return(if (span >= 0) c(0, span) else c(span, 0))
 }
 
 
-#' resolve a single mnirs_interval object to integer row indices
+#' resolve a single mnirs_interval object to time values
 #' @keywords internal
-resolve_interval_indices <- function(
+find_interval_time <- function(
     interval,
     time_vec,
     event_vec = NULL,
@@ -159,9 +159,8 @@ resolve_interval_indices <- function(
 ) {
     switch(
         interval$type,
-        ## lowest index >= each time value
-        time = findInterval(interval$by_time, time_vec, left.open = TRUE) + 1L,
-        sample = interval$by_sample,
+        time = interval$by_time,
+        sample = time_vec[interval$by_sample],
         label = {
             pattern <- paste(interval$by_label, collapse = "|")
             matches <- which(grepl(pattern, event_vec))
@@ -169,100 +168,95 @@ resolve_interval_indices <- function(
                 cli_abort(c(
                     "x" = "No events detected matching \\
                     {.val {interval$by_label}}.",
-                    "i" = "Must match contents of {.arg event_channel} exactly."
+                    "i" = "Must match contents of \\
+                    {.arg event_channel} exactly."
                 ))
             }
-            matches
+            time_vec[matches]
         },
         lap = {
-            ## convert once outside loop instead of per-iteration
+            ## convert once outside loop
             event_int <- as.integer(event_vec)
             vapply(interval$by_lap, \(lap_val) {
                 matches <- which(event_int == lap_val)
                 if (length(matches) == 0L) {
                     cli_abort(c(
-                        "x" = "No samples found for lap {.val {lap_val}}.",
-                        "i" = "Check that {.arg event_channel} contains \\
+                        "x" = "No samples found for \\
+                        lap {.val {lap_val}}.",
+                        "i" = "Check that \\
+                        {.arg event_channel} contains \\
                         lap numbers."
                     ))
                 }
-                matches[if (position == "first") 1L
-                    else length(matches)]
-            }, integer(1))
+                idx <- if (position == "first") 1L else length(matches)
+                time_vec[matches[idx]]
+            }, numeric(1))
         }
     )
 }
 
 
-#' resolve start/end into raw index vectors (no span applied)
+#' resolve start/end into time value vectors (no span applied)
 #' @keywords internal
 resolve_interval <- function(
-    start_interval,
-    end_interval,
+    start,
+    end,
     time_vec,
     event_vec = NULL
 ) {
-    has_start <- !is.null(start_interval)
-    has_end <- !is.null(end_interval)
-    interval <- start_interval %||% end_interval
+    has_start <- !is.null(start)
+    has_end <- !is.null(end)
+    interval <- start %||% end
 
     ## single-boundary lap: resolve to full lap (first + last)
     if (interval$type == "lap" && xor(has_start, has_end)) {
-        start_idx <- resolve_interval_indices(
-            interval, time_vec, event_vec, position = "first"
-        )
-        end_idx <- resolve_interval_indices(
-            interval, time_vec, event_vec, position = "last"
-        )
+        start_time <- find_interval_time(interval, time_vec, event_vec, "first")
+        end_time <- find_interval_time(interval, time_vec, event_vec, "last")
         return(list(
-            start_idx = start_idx,
-            end_idx = end_idx,
+            start_time = start_time,
+            end_time = end_time,
             has_start = TRUE,
             has_end = TRUE
         ))
     }
 
-    ## single-boundary non-lap: reference point for span window
+    ## single-boundary non-lap: reference point for span
     if (xor(has_start, has_end)) {
-        ref_idx <- resolve_interval_indices(
-            interval, 
-            time_vec, 
+        start_time <- find_interval_time(
+            interval,
+            time_vec,
             event_vec,
             position = if (has_start) "first" else "last"
         )
         return(list(
-            start_idx = ref_idx,
-            end_idx = NULL,
+            start_time = start_time,
+            end_time = NULL,
             has_start = has_start,
             has_end = has_end
         ))
     }
 
     ## both boundaries specified
-    start_idx <- resolve_interval_indices(
-        start_interval, time_vec, event_vec, position = "first"
-    )
-    end_idx <- resolve_interval_indices(
-        end_interval, time_vec, event_vec, position = "last"
-    )
+    start_time <- find_interval_time(start, time_vec, event_vec, "first")
+    end_time <- find_interval_time(end, time_vec, event_vec, "last")
 
-    ## warn and truncate if lengths differ — only paired intervals
-    n_start <- length(start_idx)
-    n_end <- length(end_idx)
+    ## warn and truncate if lengths differ
+    n_start <- length(start_time)
+    n_end <- length(end_time)
     if (n_start != n_end) {
         n_intervals <- min(n_start, n_end)
         cli_warn(c(
-            "!" = "{.arg start} ({col_blue(n_start)}) and {.arg end} \\
-            ({col_blue(n_end)}) have unequal lengths.",
+            "!" = "{.arg start} ({col_blue(n_start)}) and \\
+            {.arg end} ({col_blue(n_end)}) have unequal lengths.",
             "i" = "Returning {col_blue(n_intervals)} paired interval{?s}."
         ))
-        start_idx <- start_idx[seq_len(n_intervals)]
-        end_idx <- end_idx[seq_len(n_intervals)]
+        start_time <- start_time[seq_len(n_intervals)]
+        end_time <- end_time[seq_len(n_intervals)]
     }
 
     return(list(
-        start_idx = start_idx,
-        end_idx = end_idx,
+        start_time = start_time,
+        end_time = end_time,
         has_start = TRUE,
         has_end = TRUE
     ))
@@ -311,7 +305,12 @@ recycle_to_length <- function(
 #' the number of events.
 #'
 #' @keywords internal
-recycle_param <- function(param, n_events, event_groups, verbose = TRUE) {
+recycle_param <- function(
+    param,
+    n_events,
+    event_groups,
+    verbose = TRUE
+) {
     ## flatten nested lists to single-depth list
     param <- if (is.list(param)) {
         lapply(param, \(.x) if (is.list(.x)) unlist(.x) else .x)
@@ -349,62 +348,53 @@ recycle_param <- function(param, n_events, event_groups, verbose = TRUE) {
 }
 
 
-#' apply span to raw indices and build interval_spec data frame
+#' apply span to resolved times and build interval_spec data frame
 #' @keywords internal
-apply_span_to_indices <- function(
-    interval_idx,
+apply_span <- function(
+    interval_list,
     time_vec,
     span,
     verbose = TRUE
 ) {
-    n_obs <- length(time_vec)
-    n_intervals <- length(interval_idx$start_idx)
-
-    ## extract span values (already recycled to n_intervals by recycle_param)
+    ## extract span values (recycled by recycle_param)
     span_before <- vapply(span, `[`, numeric(1), 1L)
     span_after <- vapply(span, `[`, numeric(1), 2L)
-    event_times <- time_vec[pmin(interval_idx$start_idx, n_obs)]
+    event_times <- interval_list$start_time
 
-    if (interval_idx$has_start && interval_idx$has_end) {
+    if (interval_list$has_start && interval_list$has_end) {
         ## span[1] shifts starts, span[2] shifts ends
         start_times <- event_times + span_before
-        end_times <- time_vec[pmin(interval_idx$end_idx, n_obs)] + span_after
-        ## two-element c(start, end) when both boundaries defined
-        interval_times <- Map(
-            c,
-            time_vec[interval_idx$start_idx],
-            time_vec[interval_idx$end_idx]
-        )
+        end_times <- interval_list$end_time + span_after
+        ## original boundary times for metadata
+        interval_times <- Map(c, event_times, interval_list$end_time)
     } else {
-        ## start-only or end-only: both span values apply to the reference
+        ## single-boundary: both span values on reference
         start_times <- event_times + span_before
         end_times <- event_times + span_after
         interval_times <- as.list(event_times)
     }
 
-    ## convert boundary times to boundary indices
-    ## greatest idx LTE start_times
-    start_idx <- findInterval(start_times, time_vec)
-    end_idx <- findInterval(end_times, time_vec)
+    ## data time bounds
+    t_min <- time_vec[1L]
+    t_max <- time_vec[length(time_vec)]
 
     ## check for entirely out of bounds intervals
-    entirely_oob <- end_idx <= 0L | start_idx >= n_obs
+    entirely_oob <- end_times < t_min | start_times > t_max
     if (any(entirely_oob)) {
         oob_ids <- which(entirely_oob)
         n_oob <- qty(length(oob_ids))
         cli_abort(c(
-            "x" = "{n_oob} Interval{?s} {.val {oob_ids}} {n_oob} {?is/are} \\
-            entirely outside data bounds.",
+            "x" = "{n_oob} Interval{?s} {.val {oob_ids}} {n_oob} \\
+            {?is/are} entirely outside data bounds.",
             "i" = "Intervals must be specified within existing data bounds."
         ))
     }
 
-    ## check for partial out of bounds
-    partial_oob <- start_idx < 1L | end_idx > n_obs
-    ## reduce to valid range
+    ## clamp partial out of bounds to data range
+    partial_oob <- start_times < t_min | end_times > t_max
     if (any(partial_oob)) {
-        start_idx <- pmax(1L, start_idx)
-        end_idx <- pmin(n_obs, end_idx)
+        start_times <- pmax(t_min, start_times)
+        end_times <- pmin(t_max, end_times)
 
         if (verbose) {
             oob_ids <- which(partial_oob)
@@ -422,8 +412,6 @@ apply_span_to_indices <- function(
         span_after = span_after,
         start_times = start_times,
         end_times = end_times,
-        start_idx = start_idx,
-        end_idx = end_idx,
         stringsAsFactors = FALSE
     )
     result$interval_times <- interval_times
@@ -431,18 +419,19 @@ apply_span_to_indices <- function(
 }
 
 
-#' Extract interval data by index
+#' Extract interval data by time range
 #' @keywords internal
-extract_interval_list <- function(
+extract_df_list <- function(
     data,
+    time_vec,
     interval_spec,
     nirs_channels ## as list
 ) {
     n_vec <- seq_len(nrow(interval_spec))
-    interval_list <- lapply(n_vec, \(.i) {
-        ## local indices for event
-        idx_range <- interval_spec$start_idx[.i]:interval_spec$end_idx[.i]
-        interval_data <- data[idx_range, , drop = FALSE]
+    df_list <- lapply(n_vec, \(.i) {
+        time_range <- time_vec >= interval_spec$start_times[.i] &
+            time_vec <= interval_spec$end_times[.i]
+        interval_data <- data[time_range, , drop = FALSE]
 
         ## return interval_data with metadata
         create_mnirs_data(
@@ -456,8 +445,8 @@ extract_interval_list <- function(
         )
     })
 
-    names(interval_list) <- sprintf("interval_%d", n_vec)
-    return(interval_list)
+    names(df_list) <- sprintf("interval_%d", n_vec)
+    return(df_list)
 }
 
 
@@ -473,15 +462,15 @@ zero_offset_data <- function(data, time_channel, t0) {
 #' Ensemble average multiple intervals
 #' @keywords internal
 ensemble_intervals <- function(
-    interval_list,
+    df_list,
     nirs_channels,
     metadata,
     verbose = TRUE
 ) {
     time_channel <- metadata$time_channel
     sample_rate <- metadata$sample_rate
-    ## extract data & metadata from interval_list
-    interval_data <- lapply(interval_list, \(.df) {
+    ## extract data & metadata from df_list
+    interval_data <- lapply(df_list, \(.df) {
         interval_times <- attr(.df, "interval_times")
         time_channel <- attr(.df, "time_channel")
         ## zero-offset to start time (first element of interval_times)
@@ -525,23 +514,12 @@ ensemble_intervals <- function(
     ## vapply returns channels x times (or vector if 1 channel)
     ## coerce to times x channels data frame
     if (col_n == 1L) {
-        result_df <- data.frame(
-            setNames(list(result_matrix), nirs_channels)
-        )
+        result_df <- data.frame(setNames(list(result_matrix), nirs_channels))
     } else {
         result_df <- as.data.frame(t(result_matrix))
         names(result_df) <- nirs_channels
     }
-    result <- data.frame(
-        setNames(list(unique_times), time_channel),
-        ## TODO janky solution to different default dimensions as single...
-        ## vs multiple column matrix
-        # setNames(
-        #     as.data.frame(if (col_n == 1L) result_matrix else t(result_matrix)),
-        #     nirs_channels
-        # )
-        result_df
-    )
+    result <- data.frame(setNames(list(unique_times), time_channel), result_df)
 
     ## return with metadata
     return(
@@ -590,7 +568,7 @@ preserve_metadata <- function(data, metadata, zero_time = FALSE) {
 #' Apply grouping to intervals
 #' @keywords internal
 group_intervals <- function(
-    interval_list,
+    df_list,
     nirs_channels,
     metadata,
     event_groups,
@@ -598,23 +576,21 @@ group_intervals <- function(
     verbose = TRUE
 ) {
     time_channel <- metadata$time_channel
-    n_intervals <- length(interval_list)
+    n_intervals <- length(df_list)
 
     ## return distinct intervals
     if (n_intervals == 1L || event_groups[[1L]][1L] == "distinct") {
-        return(
-            lapply(interval_list, \(.x) {
-                preserve_metadata(.x, metadata, zero_time)
-            })
-        )
+        return(lapply(df_list, \(.x) {
+            preserve_metadata(.x, metadata, zero_time)
+        }))
     }
 
     ## return ensembled intervals
     if (event_groups[[1L]][1L] == "ensemble") {
         return(list(
             ensemble = ensemble_intervals(
-                interval_list,
-                nirs_channels = unique(unlist(nirs_channels)),
+                df_list,
+                unique(unlist(nirs_channels)),
                 metadata,
                 verbose
             )
@@ -640,11 +616,11 @@ group_intervals <- function(
     }
 
     ## warn for duplicated intervals across groups
-    dup <- grouped_ids[duplicated(grouped_ids)]
-    if (verbose && length(dup) > 0) {
+    dupes <- grouped_ids[duplicated(grouped_ids)]
+    if (verbose && length(dupes) > 0) {
         cli_warn(c(
-            "!" = "Duplicates detected of {qty(length(dup))} \\
-            interval{?s} {.val {dup}}.",
+            "!" = "Duplicates detected of {qty(length(dupes))} \\
+            interval{?s} {.val {dupes}}.",
             "i" = "Re-specify {.arg event_groups} to remove duplicates."
         ))
     }
@@ -652,18 +628,11 @@ group_intervals <- function(
     ## process each group
     result <- lapply(event_groups, \(.g) {
         if (length(.g) == 1L) {
-            return(
-                preserve_metadata(interval_list[[.g]], metadata, zero_time)
-            )
+            return(preserve_metadata(df_list[[.g]], metadata, zero_time))
         }
         ## multi-interval group: ensemble-average
         group_nirs <- unique(unlist(nirs_channels[.g]))
-        ensemble_intervals(
-            interval_list[.g],
-            nirs_channels = group_nirs,
-            metadata,
-            verbose
-        )
+        ensemble_intervals(df_list[.g], group_nirs, metadata, verbose)
     })
 
     names(result) <- vapply(event_groups, \(.g) {

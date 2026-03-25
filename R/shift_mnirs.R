@@ -134,7 +134,7 @@ shift_mnirs <- function(
     ## calculate shift_to values ====================================
     ## validate
     position <- match.arg(position)
-    validate_width_span(width, span, verbose)
+    validate_width_span(width, span, verbose, "for `shift_mnirs()`.")
     time_vec <- data[[time_channel]]
 
     if (position == "first") {
@@ -147,7 +147,6 @@ shift_mnirs <- function(
         )
     } else if (position %in% c("min", "max")) {
         ## find local windows within width/span centred around idx
-        ## TODO need to fix edges. Should be partial = FALSE
         window_idx <- compute_local_windows(
             t = time_vec, width = width, span = span,
         )

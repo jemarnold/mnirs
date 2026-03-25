@@ -503,8 +503,6 @@ test_that("within is equivalent to dplyr::between()", {
         dplyr::between(c(0, 5, 10, 15), 1, 10)
     )
 
-    ## TODO should it have the same non-numeric NA behaviour?
-    # expect_equal(within(NA, c(1, 10)), dplyr::between(NA, 1, 10))
     expect_equal(within(NA_real_, c(1, 10)), dplyr::between(NA_real_, 1, 10))
     expect_equal(
         within(c(1, NA, 5), c(1, 10)),
@@ -676,6 +674,15 @@ test_that("validate_width_span() validates inputs", {
     expect_error(
         validate_width_span(span = -1),
         "span.*valid.*numeric"
+    )
+})
+
+test_that("validate_width_span() reports message", {
+    expect_error(
+        validate_width_span(
+            width = NULL, span = NULL, msg = "for this function."
+        ),
+        "width.*span.*must be defined.*for this function."
     )
 })
 

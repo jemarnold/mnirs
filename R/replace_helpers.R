@@ -130,7 +130,6 @@ compute_outliers <- function(
     local_mad <- local_stats[2L, ]
 
     ## robust variance threshold based on minimum sample difference
-    ## TODO need to verifybehaviour in edge cases
     abs_diffs <- abs(diff(x[!is.na(x)]))
     smallest_var <- suppressWarnings(min(abs_diffs[abs_diffs > 1e-5]))
 
@@ -210,7 +209,7 @@ compute_valid_neighbours <- function(
 }
 
 
-#' Preserve and Restore NA Information Within a Vector
+#' Preserve and restore NA information within a vector
 #'
 #' `preserve_na()` stores `NA` vector positions and extracts valid non-`NA`
 #' values for later restoration with `restore_na()`.
@@ -237,7 +236,7 @@ preserve_na <- function(x) {
 }
 
 
-#' Preserve and Restore NA Information Within a Vector
+#' Preserve and restore NA information within a vector
 #'
 #' `restore_na()` restores `NA` values to their original vector positions
 #' after processing valid non-`NA` values returned from `preserve_na()`.

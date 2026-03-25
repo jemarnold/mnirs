@@ -10,7 +10,7 @@ knitr::opts_chunk$set(
     comment = "#>",
     fig.path = "man/figures/README-",
     out.width = "100%",
-    dpi = 300
+    dpi = 96
 )
 ```
 
@@ -26,22 +26,22 @@ knitr::opts_chunk$set(
 
 ## Installation
 
+``` r
+install.packages("mnirs")
+```
+
 You can install the development version of *{mnirs}* from [GitHub](https://github.com/jemarnold/mnirs) with:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("jemarnold/mnirs")
+# install.packages("pak")
+pak::pak("jemarnold/mnirs")
 ```
-
-## Citation
-
-`<coming soon>`
 
 ## Online App
 
 A very basic implementation of this package is hosted at https://jemarnold-mnirs-app.share.connect.posit.cloud/ and can currently be used for reading and pre-processing mNIRS data.
 
-[![mnirs processing shiny app](man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
+[![mnirs processing shiny app](https://raw.githubusercontent.com/jemarnold/mnirs/main/man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
 
 ## Usage
 
@@ -56,7 +56,6 @@ A more detailed vignette for common usage can be found on the package website: [
 ### `read_mnirs()` Read data from file
 
 ```{r}
-# remotes::install_github("jemarnold/mnirs") ## install development version
 library(ggplot2) ## load for plotting
 library(mnirs)
 
@@ -65,7 +64,7 @@ example_mnirs()
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
-data_table <- read_mnirs(
+data_raw <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example data file
     nirs_channels = c(
         smo2_left = "SmO2 Live",            ## identify and rename channels
@@ -83,11 +82,11 @@ data_table <- read_mnirs(
 ## Note the above info message that sample_rate was estimated correctly at 2 Hz 👆
 ## ignore the warnings about irregular sampling for now, we will resample later
 
-data_table
+data_raw
 
 ## note the `time_labels` plot argument to display time values as `h:mm:ss`
 plot(
-    data_table,
+    data_raw,
     time_labels = TRUE,
     n.breaks = 5,
     na.omit = FALSE
@@ -97,8 +96,12 @@ plot(
 ### Metadata stored in `mnirs` data frames
 
 ```{r}
-## view metadata (omitting item two, a list of row numbers)
-attributes(data_table)[-2]
+## view metadata
+attr(data_raw, "nirs_channels")
+
+attr(data_raw, "time_channel")
+
+attr(data_raw, "sample_rate")
 ```
 
 
@@ -107,7 +110,7 @@ attributes(data_table)[-2]
 
 ```{r}
 data_cleaned <- replace_mnirs(
-    data_table,         ## blank channels will be retrieved from metadata
+    data_raw,           ## blank channels will be retrieved from metadata
     invalid_values = 0, ## known invalid values in the data
     invalid_above = 90, ## remove data spikes above 90
     outlier_cutoff = 3, ## recommended default value
@@ -142,7 +145,7 @@ data_filtered <- filter_mnirs(
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
     type = "low",           ## specify a "low-pass" filter
-    na.rm = TRUE            ## explicitly preserve NAs
+    na.rm = TRUE            ## explicitly ignore NAs
 )
 
 ## we will add the non-filtered data back to the plot to compare

@@ -3,20 +3,22 @@
 #' Create a simple plot for objects returned from [create_mnirs_data()].
 #'
 #' @param x Object of class *"mnirs"* returned from [create_mnirs_data()]
-#' @param time_labels A logical to display x-axis time values formatted as
-#'   *"hh:mm:ss"* using [format_hmmss()]. `time_labels = FALSE` (the
-#'   *default*) will display simple numeric values on the x-axis.
-#' @param n.breaks A numeric value to define the number of breaks in both
-#'   x- and y-axes.
-#' @param na.omit A logical to omit missing (`NA`) values for better display
-#'   of connected lines. `na.omit = FALSE` (the *default*) can be used to
-#'   identify missing values.
-#' @param ... Additional arguments (currently unused).
+#' @param points Logical. Default is `FALSE`. If `TRUE` displays 
+#'   `ggplot2::geom_points()`. Otherwise only `ggplot2::geom_lines()` 
+#'   is displayed.
+#' @param time_labels Logical. Default is `FALSE`. If `TRUE` displays x-axis
+#'   time values formatted as *"hh:mm:ss"* using [format_hmmss()]. Otherwise, 
+#'   x-axis values are displayed as numeric.
+#' @param n.breaks A numeric value specifying the number of breaks in both
+#'   x- and y-axes. Default is `5`.
+#' @param na.omit Logical. Default is `FALSE`. If `TRUE` omits missing (`NA`)
+#'   and non-finite `c(Inf, -Inf, NaN)` from display.
+#' @param ... Additional arguments.
 #'
 #' @returns A [ggplot2][ggplot2::ggplot()] object.
 #'
 #' @examplesIf rlang::is_installed(c("ggplot2", "scales"))
-#' data_table <- read_mnirs(
+#' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_left = "SmO2 Live",
 #'                       smo2_right = "SmO2 Live(2)"),
@@ -25,14 +27,18 @@
 #' )
 #'
 #' ## note the options to display time values as `h:mm:ss` with 8 breaks
-#' plot(data_table, time_labels = TRUE, n.breaks = 8)
+#' plot(data, time_labels = TRUE, n.breaks = 8)
 #'
 #' @export
-plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...) {
-    rlang::check_installed(
-        c("ggplot2", "scales"),
-        reason = "to plot mNIRS data"
-    )
+plot.mnirs <- function(
+    x,
+    points = FALSE,
+    time_labels = FALSE,
+    n.breaks = 5,
+    na.omit = FALSE,
+    ...
+) {
+    check_installed(c("ggplot2", "scales"), reason = "to plot mNIRS data")
 
     nirs_channels <- attr(x, "nirs_channels")
     time_channel <- attr(x, "time_channel")
@@ -61,7 +67,7 @@ plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ..
         ggplot2::waiver()
     }
 
-    ## pivot_longer all `nirs_channels` to `y`
+    ## pivot_longer all `nirs_channels` to grouped `y` column
     plot_data <- setNames(
         utils::stack(x[nirs_channels]),
         c("y", "nirs_channels")
@@ -72,8 +78,9 @@ plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ..
         x[other_cols], rep, times = length(nirs_channels)
     )
 
+    ## exclude non-finite values from `y` col with all nirs_channels
     if (na.omit) {
-        plot_data <- plot_data[stats::complete.cases(plot_data["y"]), ]
+        plot_data <- plot_data[is.finite(plot_data[["y"]]), ]
     }
 
     ## plot
@@ -101,7 +108,8 @@ plot.mnirs <- function(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ..
         ggplot2::guides(
             colour = ggplot2::guide_legend(override.aes = list(linewidth = 1))
         ) +
-        ggplot2::geom_line()
+        ggplot2::geom_line() + 
+        if (points) ggplot2::geom_point(size = 3)
 
     return(plot)
 }
@@ -161,7 +169,7 @@ theme_mnirs <- function(
     accent = "#0080ff",
     ...
 ) {
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
+    check_installed("ggplot2", reason = "to plot mNIRS data")
     border <- match.arg(border)
     half_line <- base_size * 0.5
 
@@ -209,25 +217,27 @@ theme_mnirs <- function(
 
 #' Custom *{mnirs}* colour palette
 #'
-#' @param n A numeric vector specifying the number of colours to return.
-#' @param names A character vector specifying colour names to return.
+#' @param ... Either a single numeric specifying the number of colours to
+#'   return, or character strings specifying colour names. If empty, all
+#'   colours are returned.
 #'
-#' @returns Named or unnamed character vector of hex colours.
+#' @returns Named (when selecting by name) or unnamed character vector of
+#'   hex colours.
 #'
 #' @seealso [theme_mnirs()], [scale_colour_mnirs()]
 #'
 #' @examplesIf rlang::is_installed("scales")
 #' scales::show_col(palette_mnirs())
-#' scales::show_col(palette_mnirs(n = 2))
-#' scales::show_col(palette_mnirs(names = c("red", "orange")))
+#' scales::show_col(palette_mnirs(2))
+#' scales::show_col(palette_mnirs("red", "orange"))
 #'
 #' @export
-palette_mnirs <- function(n = NULL, names = NULL) {
+palette_mnirs <- function(...) {
     # fmt: skip
-    colours <- c(
+    colours <- c(                         ## NIRS location codes
         `light blue`  = "#0080ff",      ## "VL"
         `dark red`    = "#ba2630",      ## "FCR"
-        `light green` = "#5b8c52",      ## "BB" "#7dbf70"
+        `light green` = "#5b8c52",      ## "BB" "#7dbf70" alt
         `pink`        = "#ff80ff",      ## "VM"
         `orange`      = "#ff7f00",      ## "SCM"
         `dark blue`   = "#00468Bff",    ## "TA"
@@ -239,25 +249,35 @@ palette_mnirs <- function(n = NULL, names = NULL) {
         `red`         = "#ED0000FF"     ## "O2Hb"
     )
 
-    if (!is.null(names) && !is.null(n)) {
-        cli_abort(c("x" = "Cannot specify both {.arg n} and {.arg names}"))
+    dots <- list(...)
+
+    if (length(dots) == 0L) {
+        return(colours)
     }
 
-    if (!is.null(names)) {
-        names <- match.arg(names, choices = names(colours), several.ok = TRUE)
-        return(colours[names])
+    ## numeric -> subset by count
+    if (length(dots) == 1L && is.numeric(dots[[1L]])) {
+        n <- dots[[1L]]
+        validate_numeric(n, 1, c(1, Inf), msg1 = "one-element positive")
+        if (n <= length(colours)) {
+            return(unname(colours[seq_len(n)]))
+        }
+        ## interpolate if more colours needed, but this probably won't look good!
+        return(grDevices::colorRampPalette(colours)(n))
     }
 
-    if (is.null(n)) {
-        return(unname(colours))
-    }
+    ## character args -> subset by name
+    names <- unlist(dots)
 
-    validate_numeric(n, 1, c(1, Inf), msg1 = "one-element positive")
-    if (n <= length(colours)) {
-        return(unname(colours[seq_len(n)]))
+    if (!is.character(names)) {
+        ## covers condition of multiple numeric vals
+        cli_abort(c(
+            "x" = "{.fn palette_mnirs} expects a single numeric value \\
+            for the number of colours to return, or character colour names."
+        ))
     }
-    ## interpolate if more colours needed, but this probably won't look good!
-    return(grDevices::colorRampPalette(colours)(n))
+    names <- match.arg(names, choices = names(colours), several.ok = TRUE)
+    return(colours[names])
 }
 
 
@@ -273,7 +293,7 @@ palette_mnirs <- function(n = NULL, names = NULL) {
 #'
 #' @examplesIf rlang::is_installed(c("ggplot2", "scales"))
 #' ## plot example data
-#' df <- read_mnirs(
+#' data <- read_mnirs(
 #'     file_path = example_mnirs("moxy_ramp"),
 #'     nirs_channels = c(smo2_left = "SmO2 Live",
 #'                       smo2_right = "SmO2 Live(2)"),
@@ -281,7 +301,7 @@ palette_mnirs <- function(n = NULL, names = NULL) {
 #'     verbose = FALSE
 #' )
 #'
-#' ggplot2::ggplot(df, ggplot2::aes(x = time)) +
+#' ggplot2::ggplot(data, ggplot2::aes(x = time)) +
 #'     theme_mnirs() +
 #'     scale_colour_mnirs(name = NULL) +
 #'     ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +
@@ -290,7 +310,7 @@ palette_mnirs <- function(n = NULL, names = NULL) {
 #' @rdname scale_colour_mnirs
 #' @export
 scale_colour_mnirs <- function(..., aesthetics = "colour") {
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
+    check_installed("ggplot2", reason = "to plot mNIRS data")
 
     ggplot2::discrete_scale(
         aesthetics = aesthetics,
@@ -307,7 +327,7 @@ scale_color_mnirs <- scale_colour_mnirs
 #' @rdname scale_colour_mnirs
 #' @export
 scale_fill_mnirs <- function(..., aesthetics = "fill") {
-    rlang::check_installed("ggplot2", reason = "to plot mNIRS data")
+    check_installed("ggplot2", reason = "to plot mNIRS data")
 
     ggplot2::discrete_scale(
         aesthetics = aesthetics,
@@ -419,7 +439,7 @@ format_hmmss <- function(x) {
     # validate_numeric(x)
     x <- as.numeric(x)
     ## logical whether to handle NAs
-    handle_na <- any(is.na(x))
+    handle_na <- anyNA(x)
 
     if (handle_na) {
         na_info <- preserve_na(x)

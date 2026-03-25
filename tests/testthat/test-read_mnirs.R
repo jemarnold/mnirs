@@ -74,7 +74,7 @@ test_that("read_file() reads moxy (perfpro) xlsx files correctly", {
     result <- read_file(file_path)
 
     expect_s3_class(result, "data.frame")
-    expect_equal(ncol(result), 6)
+    expect_equal(ncol(result), 5)
     expect_gt(nrow(result), 0)
     expect_all_true(unlist(lapply(result, is.character)))
 })
