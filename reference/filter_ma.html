@@ -9,7 +9,7 @@ filter_moving_average() is an alias of filter_ma()."><meta name="twitter:card" c
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +20,6 @@ filter_moving_average() is an alias of filter_ma()."><meta name="twitter:card" c
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
-    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -99,16 +98,16 @@ centred on <code>idx</code>, between
 
 
 <dt id="arg-partial">partial<a class="anchor" aria-label="anchor" href="#arg-partial"></a></dt>
-<dd><p>A logical specifying whether to perform the operation over a
-subset of available data within the local rolling window (<code>TRUE</code>), or
-requiring a complete window of valid samples (<code>FALSE</code>, by <em>default</em>). See
-<em>Details</em>.</p></dd>
+<dd><p>Logical; default is <code>FALSE</code>, requires local windows to have
+complete number of samples specified by <code>width</code> or <code>span</code>. If <code>TRUE</code>,
+processes available samples within the local window. See <em>Details</em>.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
-<dd><p>A logical indicating whether missing values should be preserved
-and passed through the filter (<code>TRUE</code>). Otherwise <code>FALSE</code> (the <em>default</em>)
-will throw an error if there are any <code>NA</code>s (see <em>Details</em>).</p></dd>
+<dd><p>Logical; default is <code>FALSE</code>, propagates any <code>NA</code>s to the
+returned vector. If <code>TRUE</code>, ignores <code>NA</code>s and processes available valid
+samples within the local window. May return errors or warnings. (see
+<em>Details</em>).</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
@@ -127,13 +126,40 @@ global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Applies a centred (symmetrical) moving average filter in a local window
-defined by either <code>width</code> as the number of samples around <code>idx</code> between
-<code>[idx - floor(width/2),</code> <code>idx + floor(width/2)]</code>. Or by <code>span</code> as the
-timespan in units of <code>time_channel</code> between <code>[t - span/2, t + span/2]</code>.</p>
-<p>Specifying <code>width</code> is often faster than <code>span</code>.</p>
-<p>If there are no valid values within the calculation window, will return <code>NA</code>.
-A partial moving average will be calculated at the edges of the data.</p>
+
+<div class="section">
+<h3 id="rolling-window">Rolling window<a class="anchor" aria-label="anchor" href="#rolling-window"></a></h3>
+
+
+<p>Applies a centred (symmetrical) moving average filter in a local
+window, defined by either <code>width</code> as the number of samples around
+<code>idx</code> between <code>[idx - floor(width/2), idx + floor(width/2)]</code>. Or by
+<code>span</code> as the timespan in units of <code>time_channel</code> between
+<code>[t - span/2, t + span/2]</code>.</p>
+</div>
+
+<div class="section">
+<h3 id="partial-windows">Partial windows<a class="anchor" aria-label="anchor" href="#partial-windows"></a></h3>
+
+
+<p>The default <code>partial = FALSE</code> requires a complete number of samples
+specified by <code>width</code> or <code>span</code> (estimated from the sample rate of <code>t</code> when
+<code>span</code> is used). <code>NA</code> is returned if fewer samples are present in the
+local window.</p>
+<p>Setting <code>partial = TRUE</code> allows computation with only a single valid sample,
+such as at edge conditions. But these values will be more sensitive to
+noise and should be used with caution.</p>
+</div>
+
+<div class="section">
+<h3 id="missing-values">Missing values<a class="anchor" aria-label="anchor" href="#missing-values"></a></h3>
+
+
+<p><code>na.rm</code> controls whether missing values (<code>NA</code>s) within each local window are
+either propagated to the returned vector when <code>na.rm = FALSE</code> (the default),
+or ignored before processing if <code>na.rm = TRUE</code>.</p>
+</div>
+
     </div>
 
     <div class="section level2">
@@ -155,10 +181,12 @@ A partial moving average will be calculated at the edges of the data.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## na.rm = FALSE (default): any NA in the window propagates to the result</span></span></span>
 <span class="r-in"><span><span class="va">x_na</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="cn">NA</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span>, <span class="cn">NA</span>, <span class="fl">7</span>, <span class="fl">8</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">filter_ma</span><span class="op">(</span><span class="va">x_na</span>, width <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">filter_ma</span><span class="op">(</span><span class="va">x_na</span>, width <span class="op">=</span> <span class="fl">3</span>, na.rm <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> `x` contains internal <span style="color: #0000BB;">NA</span>'s.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Set `na.rm = TRUE` to ignore <span style="color: #0000BB;">NA</span>'s.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA NA NA  4 NA NA NA NA</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## na.rm = TRUE: skip NAs within the window and return the mean of valid values</span></span></span>
+<span class="r-in"><span><span class="co">## na.rm = TRUE: skip NAs and return the local mean of local valid values</span></span></span>
 <span class="r-in"><span><span class="fu">filter_ma</span><span class="op">(</span><span class="va">x_na</span>, width <span class="op">=</span> <span class="fl">3</span>, partial <span class="op">=</span> <span class="cn">TRUE</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.0 2.0 3.5 4.0 4.5 6.0 7.5 7.5</span>
 <span class="r-in"><span></span></span>

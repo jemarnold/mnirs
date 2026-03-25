@@ -7,7 +7,14 @@ Create a simple plot for objects returned from
 
 ``` r
 # S3 method for class 'mnirs'
-plot(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...)
+plot(
+  x,
+  points = FALSE,
+  time_labels = FALSE,
+  n.breaks = 5,
+  na.omit = FALSE,
+  ...
+)
 ```
 
 ## Arguments
@@ -17,27 +24,32 @@ plot(x, time_labels = FALSE, n.breaks = 5, na.omit = FALSE, ...)
   Object of class *"mnirs"* returned from
   [`create_mnirs_data()`](https://jemarnold.github.io/mnirs/reference/create_mnirs_data.md)
 
+- points:
+
+  Logical. Default is `FALSE`. If `TRUE` displays
+  `ggplot2::geom_points()`. Otherwise only `ggplot2::geom_lines()` is
+  displayed.
+
 - time_labels:
 
-  A logical to display x-axis time values formatted as *"hh:mm:ss"*
-  using
+  Logical. Default is `FALSE`. If `TRUE` displays x-axis time values
+  formatted as *"hh:mm:ss"* using
   [`format_hmmss()`](https://jemarnold.github.io/mnirs/reference/format_hmmss.md).
-  `time_labels = FALSE` (the *default*) will display simple numeric
-  values on the x-axis.
+  Otherwise, x-axis values are displayed as numeric.
 
 - n.breaks:
 
-  A numeric value to define the number of breaks in both x- and y-axes.
+  A numeric value specifying the number of breaks in both x- and y-axes.
+  Default is `5`.
 
 - na.omit:
 
-  A logical to omit missing (`NA`) values for better display of
-  connected lines. `na.omit = FALSE` (the *default*) can be used to
-  identify missing values.
+  Logical. Default is `FALSE`. If `TRUE` omits missing (`NA`) and
+  non-finite `c(Inf, -Inf, NaN)` from display.
 
 - ...:
 
-  Additional arguments (currently unused).
+  Additional arguments.
 
 ## Value
 
@@ -46,7 +58,7 @@ A [ggplot2](https://ggplot2.tidyverse.org/reference/ggplot.html) object.
 ## Examples
 
 ``` r
-data_table <- read_mnirs(
+data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_left = "SmO2 Live",
                       smo2_right = "SmO2 Live(2)"),
@@ -55,5 +67,5 @@ data_table <- read_mnirs(
 )
 
 ## note the options to display time values as `h:mm:ss` with 8 breaks
-plot(data_table, time_labels = TRUE, n.breaks = 8)
+plot(data, time_labels = TRUE, n.breaks = 8)
 ```

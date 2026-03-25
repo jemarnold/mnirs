@@ -52,16 +52,16 @@ filter_moving_average(
 
 - partial:
 
-  A logical specifying whether to perform the operation over a subset of
-  available data within the local rolling window (`TRUE`), or requiring
-  a complete window of valid samples (`FALSE`, by *default*). See
-  *Details*.
+  Logical; default is `FALSE`, requires local windows to have complete
+  number of samples specified by `width` or `span`. If `TRUE`, processes
+  available samples within the local window. See *Details*.
 
 - na.rm:
 
-  A logical indicating whether missing values should be preserved and
-  passed through the filter (`TRUE`). Otherwise `FALSE` (the *default*)
-  will throw an error if there are any `NA`s (see *Details*).
+  Logical; default is `FALSE`, propagates any `NA`s to the returned
+  vector. If `TRUE`, ignores `NA`s and processes available valid samples
+  within the local window. May return errors or warnings. (see
+  *Details*).
 
 - verbose:
 
@@ -79,16 +79,29 @@ A numeric vector the same length as `x`.
 
 ## Details
 
-Applies a centred (symmetrical) moving average filter in a local window
+### Rolling window
+
+Applies a centred (symmetrical) moving average filter in a local window,
 defined by either `width` as the number of samples around `idx` between
-`[idx - floor(width/2),` `idx + floor(width/2)]`. Or by `span` as the
+`[idx - floor(width/2), idx + floor(width/2)]`. Or by `span` as the
 timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
 
-Specifying `width` is often faster than `span`.
+### Partial windows
 
-If there are no valid values within the calculation window, will return
-`NA`. A partial moving average will be calculated at the edges of the
-data.
+The default `partial = FALSE` requires a complete number of samples
+specified by `width` or `span` (estimated from the sample rate of `t`
+when `span` is used). `NA` is returned if fewer samples are present in
+the local window.
+
+Setting `partial = TRUE` allows computation with only a single valid
+sample, such as at edge conditions. But these values will be more
+sensitive to noise and should be used with caution.
+
+### Missing values
+
+`na.rm` controls whether missing values (`NA`s) within each local window
+are either propagated to the returned vector when `na.rm = FALSE` (the
+default), or ignored before processing if `na.rm = TRUE`.
 
 ## Examples
 
@@ -110,10 +123,12 @@ filter_ma(x, t, span = 2)
 
 ## na.rm = FALSE (default): any NA in the window propagates to the result
 x_na <- c(1, NA, 3, 4, 5, NA, 7, 8)
-filter_ma(x_na, width = 3)
+filter_ma(x_na, width = 3, na.rm = FALSE)
+#> Warning: ! `x` contains internal NA's.
+#> ℹ Set `na.rm = TRUE` to ignore NA's.
 #> [1] NA NA NA  4 NA NA NA NA
 
-## na.rm = TRUE: skip NAs within the window and return the mean of valid values
+## na.rm = TRUE: skip NAs and return the local mean of local valid values
 filter_ma(x_na, width = 3, partial = TRUE, na.rm = TRUE)
 #> [1] 1.0 2.0 3.5 4.0 4.5 6.0 7.5 7.5
 ```

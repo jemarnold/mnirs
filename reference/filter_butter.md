@@ -10,11 +10,12 @@ which handles 'edges' better at the start and end of the data.
 ``` r
 filter_butter(
   x,
-  order = 2,
+  order = 2L,
   W,
   type = c("low", "high", "stop", "pass"),
   edges = c("rev", "rep1", "none"),
-  na.rm = FALSE
+  na.rm = FALSE,
+  ...
 )
 ```
 
@@ -26,19 +27,16 @@ filter_butter(
 
 - order:
 
-  An integer defining the filter order for `method = "butterworth"`
-  (*default* `order = 2`).
+  An integer defining the filter order (*default* `order = 2`).
 
 - W:
 
   A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = "butterworth"`, as a fraction of the
-  Nyquist frequency (see *Details*).
+  frequency(ies) as a fraction of the Nyquist frequency (see *Details*).
 
 - type:
 
-  A character string indicating the digital filter type for
-  `method = "butterworth"` (see *Details*).
+  A character string indicating the digital filter type (see *Details*).
 
   `"low"`
 
@@ -58,12 +56,12 @@ filter_butter(
 
 - edges:
 
-  A character string indicating how to pad `x` for edge detection.
+  A character string indicating edge detection padding for `x`.
 
   `"rev"`
 
-  :   (*the default*) Will pad `x` with the preceding 5% data in reverse
-      sequence.
+  :   Will pad `x` with the preceding 5% data in reverse sequence (*the
+      default*).
 
   `"rep1"`
 
@@ -77,9 +75,15 @@ filter_butter(
 
 - na.rm:
 
-  A logical indicating whether missing values should be preserved and
-  passed through the filter (`TRUE`). Otherwise `FALSE` (the *default*)
-  will throw an error if there are any `NA`s (see *Details*).
+  Logical; default is `FALSE`, propagates any `NA`s to the returned
+  vector. If `TRUE`, ignores `NA`s and processes available valid samples
+  within the local window. May return errors or warnings. (see
+  *Details*).
+
+- ...:
+
+  Additional method-specific arguments must be specified (see
+  *Details*).
 
 ## Value
 
@@ -114,7 +118,7 @@ frequency in the range `W = [0, 1]`, where `1` is the Nyquist frequency,
 i.e., half the sample rate of the data in Hz.
 
 Missing values (`NA`) in `x` will cause an error unless `na.rm = TRUE`.
-Then `NA`s will be preserved and passed through in the returned vector.
+Then `NA`s will be ignored and passed through to the returned vector.
 
 ## See also
 

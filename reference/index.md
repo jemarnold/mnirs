@@ -67,18 +67,6 @@ Detect and extract intervals for further analysis
   [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md) :
   Specify interval boundaries by time, label, lap, or sample
 
-## Process kinetics
-
-Estimate response dynamics and kinetic parameters
-
-- [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
-  : Find peak linear slope
-- [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  [`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  : Self-starting monoexponential models
-- [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
-  : Monoexponential function with 4 parameters
-
 ## Printing & plotting
 
 Tools for printing functions and pretty plotting with

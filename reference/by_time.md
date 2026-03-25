@@ -79,20 +79,20 @@ data <- read_mnirs(
 extract_intervals(data, start = by_time(66), end = by_time(357))
 #> ℹ `nirs_channels` grouped together by default.
 #> $interval_1
-#> # A tibble: 4,151 × 4
+#> # A tibble: 4,150 × 4
 #>     time   lap smo2_left smo2_right
 #>    <dbl> <int>     <dbl>      <dbl>
-#>  1  6.04     1      67.6       71.8
-#>  2  6.24     1      67.6       71.4
-#>  3  6.24     1      67.6       71.7
-#>  4  6.30     1      67.6       71.6
-#>  5  6.39     1      65.7       70.9
-#>  6  6.48     1      67.4       72.0
-#>  7  6.63     1      67.0       72.2
-#>  8  6.69     1      67.6       70.8
-#>  9  7.61     1      68.4       71.5
+#>  1  6.04     1      67.6       70.7
+#>  2  6.04     1      67.6       71.8
+#>  3  6.24     1      67.6       71.4
+#>  4  6.24     1      67.6       71.7
+#>  5  6.30     1      67.6       71.6
+#>  6  6.39     1      65.7       70.9
+#>  7  6.48     1      67.4       72.0
+#>  8  6.63     1      67.0       72.2
+#>  9  6.69     1      67.6       70.8
 #> 10  7.61     1      68.4       71.5
-#> # ℹ 4,141 more rows
+#> # ℹ 4,140 more rows
 #> 
 
 ## start by lap
@@ -139,56 +139,58 @@ data <- create_mnirs_data(data, event_channel = "event")
 ## start by label, end by time
 extract_intervals(data, start = by_label("start"), end = by_time(1500))
 #> ℹ `nirs_channels` grouped together by default.
+#> Warning: !  Interval 1 is partially outside data bounds.
+#> ℹ Returning available data only.
 #> $interval_1
-#> # A tibble: 11,608 × 5
+#> # A tibble: 11,607 × 5
 #>     time   lap smo2_left smo2_right event
 #>    <dbl> <int>     <dbl>      <dbl> <chr>
-#>  1  38.8     1      68.1       69.2 NA   
-#>  2  39.0     1      67.8       69.3 NA   
-#>  3  39.0     1      67.8       69.1 NA   
-#>  4  39.2     1      68.0       70.1 NA   
-#>  5  39.2     1      68.0       69.8 NA   
-#>  6  39.3     1      68.2       69.4 NA   
-#>  7  39.4     1      68.2       69.7 NA   
-#>  8  39.5     1      68.0       69.2 NA   
-#>  9  39.6     1      68.5       69.2 NA   
-#> 10  39.7     1      68.5       70.0 NA   
-#> # ℹ 11,598 more rows
+#>  1  39.0     1      67.8       69.3 NA   
+#>  2  39.0     1      67.8       69.1 NA   
+#>  3  39.2     1      68.0       70.1 NA   
+#>  4  39.2     1      68.0       69.8 NA   
+#>  5  39.3     1      68.2       69.4 NA   
+#>  6  39.4     1      68.2       69.7 NA   
+#>  7  39.5     1      68.0       69.2 NA   
+#>  8  39.6     1      68.5       69.2 NA   
+#>  9  39.7     1      68.5       70.0 NA   
+#> 10  39.9     1      68.5       69.8 NA   
+#> # ℹ 11,597 more rows
 #> 
 
 ## multiple intervals by sample index
 extract_intervals(data, start = by_sample(1000, 1500), end = by_sample(2000, 2600))
 #> ℹ `nirs_channels` grouped together by default.
 #> $interval_1
-#> # A tibble: 2,211 × 5
+#> # A tibble: 2,210 × 5
 #>     time   lap smo2_left smo2_right event
 #>    <dbl> <int>     <dbl>      <dbl> <chr>
-#>  1  38.8     1      68.1       69.2 NA   
-#>  2  39.0     1      67.8       69.3 NA   
-#>  3  39.0     1      67.8       69.1 NA   
-#>  4  39.2     1      68.0       70.1 NA   
-#>  5  39.2     1      68.0       69.8 NA   
-#>  6  39.3     1      68.2       69.4 NA   
-#>  7  39.4     1      68.2       69.7 NA   
-#>  8  39.5     1      68.0       69.2 NA   
-#>  9  39.6     1      68.5       69.2 NA   
-#> 10  39.7     1      68.5       70.0 NA   
-#> # ℹ 2,201 more rows
+#>  1  39.0     1      67.8       69.3 NA   
+#>  2  39.0     1      67.8       69.1 NA   
+#>  3  39.2     1      68.0       70.1 NA   
+#>  4  39.2     1      68.0       69.8 NA   
+#>  5  39.3     1      68.2       69.4 NA   
+#>  6  39.4     1      68.2       69.7 NA   
+#>  7  39.5     1      68.0       69.2 NA   
+#>  8  39.6     1      68.5       69.2 NA   
+#>  9  39.7     1      68.5       70.0 NA   
+#> 10  39.9     1      68.5       69.8 NA   
+#> # ℹ 2,200 more rows
 #> 
 #> $interval_2
-#> # A tibble: 2,312 × 5
+#> # A tibble: 2,311 × 5
 #>     time   lap smo2_left smo2_right event
 #>    <dbl> <int>     <dbl>      <dbl> <chr>
-#>  1  88.4     2      59.0       65.6 NA   
-#>  2  88.5     2      58.7       65.2 NA   
-#>  3  88.7     2      59.7       65.0 NA   
-#>  4  88.7     2      59.7       65.6 NA   
+#>  1  88.5     2      58.7       65.2 NA   
+#>  2  88.7     2      59.7       65.0 NA   
+#>  3  88.7     2      59.7       65.6 NA   
+#>  4  88.9     2      58.6       66.4 NA   
 #>  5  88.9     2      58.6       66.4 NA   
-#>  6  88.9     2      58.6       66.4 NA   
-#>  7  89.1     2      58.9       65.3 NA   
-#>  8  89.1     2      58.9       64.8 NA   
-#>  9  89.2     2      58.9       65.7 NA   
-#> 10  89.3     2      58.9       65.0 NA   
-#> # ℹ 2,302 more rows
+#>  6  89.1     2      58.9       65.3 NA   
+#>  7  89.1     2      58.9       64.8 NA   
+#>  8  89.2     2      58.9       65.7 NA   
+#>  9  89.3     2      58.9       65.0 NA   
+#> 10  89.4     2      58.8       65.1 NA   
+#> # ℹ 2,301 more rows
 #> 
 ```

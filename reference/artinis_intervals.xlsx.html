@@ -13,7 +13,7 @@ muscle site."><meta name="twitter:card" content="summary"><meta name="twitter:cr
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,6 @@ muscle site."><meta name="twitter:card" content="summary"><meta name="twitter:cr
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
-    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -57,12 +56,46 @@ muscle site.</p>
 
     <div class="section level2">
     <h2 id="format">Format<a class="anchor" aria-label="anchor" href="#format"></a></h2>
-    <p>.xlsx file with header metadata and with five columns and 20919 rows.</p><ul><li><p><code>nirs_channels = c(O2Hb = 2, HHb = 3)</code></p></li>
+    <p>.xlsx file with header metadata and five columns and 20919 rows:</p><dl><dt>Column 1</dt>
+<dd><p>Sample index (divide by sample rate for seconds).</p></dd>
+
+<dt>Column 2</dt>
+<dd><p>O2Hb: oxyhaemoglobin concentration change (\(\mu\)M).</p></dd>
+
+<dt>Column 3</dt>
+<dd><p>HHb: deoxyhaemoglobin concentration change (\(\mu\)M).</p></dd>
+
+<dt>Column 4</dt>
+<dd><p>Event marker (character).</p></dd>
+
+<dt>Column 5</dt>
+<dd><p>Unmarked event label (character).</p></dd>
+
+
+</dl><p>Channel mapping for <code><a href="read_mnirs.html">read_mnirs()</a></code>:</p><ul><li><p><code>nirs_channels = c(O2Hb = 2, HHb = 3)</code></p></li>
 <li><p><code>time_channel = c(sample = 1)</code></p></li>
 <li><p><code>event_channel = c(event = 4, label = "col_5")</code></p></li>
+<li><p><code>interval_times = list(start = c(158, 999, 1750) end = c(493, 1333, 1961))</code> two intervals and post-exercise occlusion</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
+    <p>Artinis Medical Systems. Oxymon MKIII, exported via Oxysoft desktop
+software (https://www.artinis.com/)</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="read_mnirs.html">read_mnirs()</a></code>, <code><a href="example_mnirs.html">example_mnirs()</a></code></p></div>
+    </div>
 
-  </main></div>
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"artinis_intervals"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/home/runner/work/_temp/Library/mnirs/extdata/artinis_intervals.xlsx"</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

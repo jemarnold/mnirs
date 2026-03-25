@@ -39,7 +39,7 @@ estimate_sample_rate(x)
 
 validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
 
-validate_width_span(width = NULL, span = NULL, verbose = TRUE)
+validate_width_span(width = NULL, span = NULL, verbose = TRUE, msg = "")
 
 validate_x_t(x, t, invalid = FALSE)
 ```

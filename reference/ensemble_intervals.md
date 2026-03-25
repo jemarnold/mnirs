@@ -5,5 +5,5 @@ Ensemble average multiple intervals
 ## Usage
 
 ``` r
-ensemble_intervals(interval_list, nirs_channels, metadata, verbose = TRUE)
+ensemble_intervals(df_list, nirs_channels, metadata, verbose = TRUE)
 ```

@@ -16,15 +16,7 @@ filter_mnirs(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  sample_rate = NULL,
   method = c("smooth_spline", "butterworth", "moving_average"),
-  spar = NULL,
-  order = 2,
-  W = NULL,
-  fc = NULL,
-  type = c("low", "high", "stop", "pass"),
-  width = NULL,
-  span = NULL,
   na.rm = FALSE,
   verbose = TRUE,
   ...
@@ -54,12 +46,6 @@ filter_mnirs(
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
 
-- sample_rate:
-
-  A numeric value for the sample rate in Hz for
-  `method = "butterworth"`. Will be taken from metadata or estimated
-  from `time_channel` if not defined explicitly.
-
 - method:
 
   A character string indicating how to filter the data (see *Details*).
@@ -70,72 +56,18 @@ filter_mnirs(
 
   `"butterworth"`
 
-  :   Uses a centred Butterworth digital filter. `type` must be defined
-      (see *Details*).
+  :   Uses a centred Butterworth digital filter.
 
   `"moving_average"`
 
   :   Uses a centred moving average filter.
 
-- spar:
-
-  A numeric value defining the smoothing parameter for
-  `method = "smooth_spline"`.
-
-- order:
-
-  An integer defining the filter order for `method = "butterworth"`
-  (*default* `order = 2`).
-
-- W:
-
-  A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = "butterworth"`, as a fraction of the
-  Nyquist frequency (see *Details*).
-
-- fc:
-
-  A one- or two-element numeric vector defining the filter cutoff
-  frequency(ies) for `method = "butterworth"`, in Hz (see *Details*).
-
-- type:
-
-  A character string indicating the digital filter type for
-  `method = "butterworth"` (see *Details*).
-
-  `"low"`
-
-  :   For a *low-pass* filter (the *default*).
-
-  `"high"`
-
-  :   For a *high-pass* filter.
-
-  `"stop"`
-
-  :   For a *stop-band* (band-reject) filter.
-
-  `"pass"`
-
-  :   For a *pass-band* filter.
-
-- width:
-
-  An integer defining the local window in number of samples around `idx`
-  in which to perform the operation for `method = "moving_average"`.
-  Between `[idx - floor(width/2), idx + floor(width/2)]`.
-
-- span:
-
-  A numeric value defining the local window timespan around `idx` in
-  which to perform the operation for `method = "moving_average"`. In
-  units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
-
 - na.rm:
 
-  A logical indicating whether missing values should be preserved and
-  passed through the filter (`TRUE`). Otherwise `FALSE` (the *default*)
-  will throw an error if there are any `NA`s (see *Details*).
+  Logical; default is `FALSE`, propagates any `NA`s to the returned
+  vector. If `TRUE`, ignores `NA`s and processes available valid samples
+  within the local window. May return errors or warnings. (see
+  *Details*).
 
 - verbose:
 
@@ -145,7 +77,8 @@ filter_mnirs(
 
 - ...:
 
-  Additional arguments.
+  Additional method-specific arguments must be specified (see
+  *Details*).
 
 ## Value
 
@@ -155,66 +88,126 @@ of class *"mnirs"* with metadata available with
 
 ## Details
 
-- `method = "smooth_spline"`:
+### filtering method
 
-  Applies a non-parametric cubic smoothing spline from
+#### `method = "smooth_spline"`
+
+Applies a non-parametric cubic smoothing spline from
+[`stats::smooth.spline()`](https://rdrr.io/r/stats/smooth.spline.html).
+Smoothing is defined by the parameter `spar`, which can be left as
+`NULL` and automatically determined via penalised log likelihood. This
+usually works well for responses occurring on the order of minutes or
+longer. `spar` can be specified typically, but not necessarily, in the
+range `spar = [0, 1]`.
+
+Additional arguments (`...`) accepted when `method = "smooth_spline"`:
+
+- `spar`:
+
+  A numeric smoothing parameter passed to
   [`stats::smooth.spline()`](https://rdrr.io/r/stats/smooth.spline.html).
-  Smoothing is defined by the parameter `spar`, which can be left as
-  `NULL` and automatically determined via penalised log liklihood. This
-  usually works well for smoothing responses occurring on the order of
-  minutes or longer. `spar` can be defined explicitly, typically (but
-  not necessarily) in the range `spar = [0, 1]`.
+  If `NULL` (*default*), automatically determined via penalised log
+  likelihood.
 
-- `method = "butterworth"`:
+#### `method = "butterworth"`
 
-  Applies a centred (two-pass symmetrical) Butterworth digital filter
-  from [`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html)
-  and
-  [`signal::filtfilt()`](https://rdrr.io/pkg/signal/man/filtfilt.html).
+Applies a centred (two-pass symmetrical) Butterworth digital filter from
+[`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html) and
+[`signal::filtfilt()`](https://rdrr.io/pkg/signal/man/filtfilt.html).
 
-  Filter `type` defines how the desired signal frequencies are either
-  passed or rejected from the output signal. *Low-pass* and *high-pass*
-  filters allow only frequencies *lower* or *higher* than the cutoff
-  frequency `W` to be passed through as the output signal, respectively.
-  *Stop-band* defines a critical range of frequencies which are rejected
-  from the output signal. *Pass-band* defines a critical range of
-  frequencies which are passed through as the output signal.
+Filter `type` defines how the desired signal frequencies are either
+passed or rejected from the output signal. *Low-pass* and *high-pass*
+filters allow only frequencies *lower* or *higher* than the cutoff
+frequency, respectively to be passed through to the output signal.
+*Stop-band* defines a critical range of frequencies which are rejected
+from the output signal. *Pass-band* defines a critical range of
+frequencies which are passed through as the output signal.
 
-  The filter order (number of passes) is defined by `order`, typically
-  in the range `order = [1, 10]`. Higher filter order tends to capture
-  more rapid changes in amplitude, but also causes more distortion
-  around those change points in the signal. General advice is to use the
-  lowest filter order which sufficiently captures the desired rapid
-  responses in the data.
+The filter order (number of passes) is defined by `order`, typically in
+the range `order = [1, 10]`. Higher filter order tends to capture more
+rapid changes in amplitude, but also causes more distortion around those
+change points in the signal. General advice is to use the lowest filter
+order which sufficiently captures the desired rapid responses in the
+data.
 
-  The critical (cutoff) frequency is defined by `W`, a numeric value for
-  *low-pass* and *high-pass* filters, or a two-element vector
-  `c(low, high)` defining the lower and upper bands for *stop-band* and
-  *pass-band* filters. `W` represents the desired fractional cutoff
-  frequency in the range `W = [0, 1]`, where `1` is the Nyquist
-  frequency, i.e., half the sample rate of the data in Hz.
+The critical (cutoff) frequency can be defined by `W`, a numeric value
+for *low-pass* and *high-pass* filters, or a two-element vector
+`c(low, high)` defining the lower and upper bands for *stop-band* and
+*pass-band* filters. `W` represents the desired fractional cutoff
+frequency in the range `W = [0, 1]`, where `1` is the Nyquist frequency,
+i.e., half the `sample_rate` of the data in Hz.
 
-  Alternatively, the cutoff frequency can be defined by `fc` and
-  `sample_rate` together. `fc` represents the desired cutoff frequency
-  in Hz, and `sample_rate` is the sample rate of the recorded data in
-  Hz. `W = fc / (sample_rate / 2)`.
+Alternatively, the cutoff frequency can be defined by `fc` and
+`sample_rate` together. `fc` represents the desired cutoff frequency
+directly in Hz, and `sample_rate` is the sample rate of the recorded
+data in Hz. Where `W = fc / (sample_rate / 2)`.
 
-  Only one of either `W` or `fc` should be defined. If both are defined,
-  `W` will be preferred over `fc`.
+Only one of either `W` or `fc` should be defined. If both are defined,
+`W` will be preferred over `fc`.
 
-- `method = "moving_average"`:
+Additional arguments (`...`) accepted when `method = "butterworth"`:
 
-  Applies a centred (symmetrical) moving average filter in a local
-  window, defined by either `width` as the number of samples around
-  `idx` between `[idx - floor(width/2),` `idx + floor(width/2)]`. Or by
-  `span` as the timespan in units of `time_channel` between
-  `[t - span/2, t + span/2]`. Specifying `width` is often faster than
-  `span`. A partial moving average will be calculated at the edges of
-  the data.
+- `order`:
+
+  An integer for the filter order (*default* `2`).
+
+- `W`:
+
+  A numeric fractional cutoff frequency within `[0, 1]`. One of either
+  `W` or `fc` must be specified.
+
+- `fc`:
+
+  A numeric absolute cutoff frequency in Hz. Used with `sample_rate` to
+  compute `W`.
+
+- `sample_rate`:
+
+  A numeric sample rate in Hz. Will be taken from metadata or estimated
+  from `time_channel` if not defined.
+
+- `type`:
+
+  A character string specifying filter type, one of:
+  `c("low", "high", "stop", "pass")` (`"low"` is the default).
+
+- `edges`:
+
+  A character string specifying the edge padding, one of:
+  `c("rev", "rep1", "none")` (`"rev"` is the default). See
+  [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md).
+
+#### `method = "moving_average"`
+
+Applies a centred (symmetrical) moving average filter in a local window,
+defined by either `width` as the number of samples around `idx` between
+`[idx - floor(width/2), idx + floor(width/2)]`. Or by `span` as the
+timespan in units of `time_channel` between `[t - span/2, t + span/2]`.
+
+Additional arguments (`...`) accepted when `method = "moving_average"`:
+
+- `width` or `span`:
+
+  Either an integer number of samples, or a numeric time duration in
+  units of `time_channel` within the local window. One of either `width`
+  or `span` must be specified.
+
+- `partial`:
+
+  Logical; `FALSE` by default, only returns values where a full window
+  of valid (non-`NA`) samples are available. If `TRUE`, ignores `NA` and
+  allows calculation over partial windows at the edges of the data.
+
+### Missing values
 
 Missing values (`NA`) in `nirs_channels` will cause an error for
 `method = "smooth_spline"` or `"butterworth"`, unless `na.rm = TRUE`.
-Then `NA`s will be preserved and passed through in the returned data.
+Then `NA`s will be ignored and passed through to the returned data.
+
+For `method = "moving_average"`, `na.rm` controls whether `NA`s within
+each local window are either propagated to the returned vector when
+`na.rm = FALSE` (the default), or ignored before processing if
+`na.rm = TRUE`.
 
 ## Examples
 
@@ -255,7 +248,7 @@ data_filtered <- filter_mnirs(
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
     type = "low",           ## specify a "low-pass" filter
-    na.rm = TRUE            ## explicitly preserve NAs
+    na.rm = TRUE            ## explicitly ignore NAs
 )
 
 ## note the smoothed `smo2` values

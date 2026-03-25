@@ -6,7 +6,7 @@ Apply grouping to intervals
 
 ``` r
 group_intervals(
-  interval_list,
+  df_list,
   nirs_channels,
   metadata,
   event_groups,

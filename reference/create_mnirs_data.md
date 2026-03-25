@@ -50,13 +50,13 @@ Typically will only be called internally, but can be used to inject
 ## Examples
 
 ``` r
-df <- data.frame(
+data <- data.frame(
     A = 1:3,
     B = seq(10, 30, 10),
     C = seq(11, 33, 11)
 )
 
-attributes(df)
+attributes(data)
 #> $names
 #> [1] "A" "B" "C"
 #> 
@@ -69,21 +69,15 @@ attributes(df)
 
 ## inject metadata
 nirs_data <- create_mnirs_data(
-    df,
+    data,
     nirs_channels = c("B", "C"),
     time_channel = "A",
     sample_rate = 1
 )
 
 attributes(nirs_data)
-#> $class
-#> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
-#> 
 #> $row.names
 #> [1] 1 2 3
-#> 
-#> $names
-#> [1] "A" "B" "C"
 #> 
 #> $nirs_channels
 #> [1] "B" "C"
@@ -93,5 +87,11 @@ attributes(nirs_data)
 #> 
 #> $sample_rate
 #> [1] 1
+#> 
+#> $names
+#> [1] "A" "B" "C"
+#> 
+#> $class
+#> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
 #> 
 ```

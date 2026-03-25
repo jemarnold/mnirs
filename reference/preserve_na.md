@@ -1,4 +1,4 @@
-# Preserve and Restore NA Information Within a Vector
+# Preserve and restore NA information within a vector
 
 `preserve_na()` stores `NA` vector positions and extracts valid non-`NA`
 values for later restoration with `restore_na()`.
