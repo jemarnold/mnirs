@@ -1,0 +1,278 @@
+---
+title: "mnirs: An R Package for Reading, Processing, and Analysing Muscle Near-Infrared Spectroscopy Data"
+author:
+  - name: Jem Arnold
+    orcid: 0000-0003-3908-9447
+    affiliation:
+      - name: The University of British Columnia
+        department: School of Kinesiology
+    email: jem.arnold@ubc.ca
+date: last-modified
+format:
+    html:
+        embed-resources: true
+        toc: true
+# bibliography: manuscript-citations.bib
+csl: vancouver.csl
+abstract: |
+    Muscle near-infrared spectroscopy (mNIRS) is a widely used tool in exercise physiology research, sports science, and clinical rehabilitation for non-invasive assessment of local muscle oxygenation and metabolic responses. With the commercial availability of wearable mNIRS devices, data collection has become increasingly accessible. However, data processing and analysis remains inconsistent, with centres often using ad hoc scripts and spreadsheets for signal processing and analysis. This fragmentation limits reproducibility and holds back standardisation of interpretations and applications in the field. This paper introduces {mnirs}, an open-source R package providing a standardised, reproducible pipeline for reading files, cleaning, filtering, transforming, extracting, and visualising time series data from mNIRS devices. Along with the flexible R package, a basic no-code workflow is available as a free online Shiny app. This tool is designed for researchers, practitioners, and aspiring NIRS users with minimal coding experience, emphasising accessibility, reproducibility, and transparent processing decisions.
+highlights: |
+  - Flexible file recognition and automatic detection and extraction of many common wearable mNIRS device data formats.
+  - Simplified processing functions with extensive, clear documention to help guide decision making.
+  - Includes built-in demo data files, beginner-friendly vignette covering typical workflow, and a no-code online app for basic processing functionality and rapid visualisation.
+keywords:
+  - near-infrared spectroscopy
+  - muscle oxygenation
+  - signal processing
+  - R package
+  - reproducibility
+  - exercise physiology
+---
+
+<!-- ============================================================ -->
+
+# Introduction
+
+<!-- cover previous lit -->
+
+
+## Background
+
+Near-infrared spectroscopy (NIRS) is a non-invasive optical technology used to evaluate the dynamic balance of local oxygen (O<sub>2</sub>) delivery and extraction in vivo within biological tissue. NIRS has been used in human biology research for nearly half a century looking predominantly at cerebral (functional; fNIRS) and muscle (mNIRS) tissues {Jobsis, 1977}. In recent years, the emergence of commercial wearable mNIRS devices has rapidly expanded use outside of advanced research laboratory environments, and facilitated the ease of data collection in field conditions for more diverse real-world applications in exercise physiology, sport science, clinical applications, and high performance sport {Grassi, 2016; Perrey, 2024; Jan, 2026}.
+
+Today, wearable  mNIRS devices are relatively affordable, and valid and reliable for field use {Yogev, 2023}. 
+
+- Brief overview of near-infrared spectroscopy (NIRS) principles
+  and their application to skeletal muscle monitoring
+- Key physiological variables measured (e.g., SmO~2~, THb, O~2~Hb,
+  HHb) and their relevance to exercise and clinical contexts
+- Growth of wearable, portable mNIRS devices in research and
+  applied settings (cite adoption trends)
+
+## Current Landscape and Gaps
+
+- Existing device-specific proprietary software for data export
+  and basic visualisation (Artinis OxySoft, Moxy, Train.Red, etc.)
+- Lack of standardised, open-source tools for mNIRS data
+  processing — contrast with mature ecosystems in other domains
+  (e.g., {kinfitr} for PET modelling, {signal} for general DSP)
+- Common pain points: manual spreadsheet workflows, inconsistent
+  processing steps across labs, poor reproducibility, difficulty
+  handling multi-device datasets
+
+## Statement of Need
+
+- Researchers need a single tool that can:
+  - Import data from multiple mNIRS devices
+  - Apply validated cleaning, resampling, and filtering routines
+  - Extract intervals and perform kinetics analysis
+  - Produce publication-ready visualisations
+  - Document every processing step for reproducible reporting
+- {mnirs} addresses these needs as an open-source, pipe-friendly R
+  package with a standardised processing pipeline
+
+
+<!-- ============================================================ -->
+
+# Package Design
+
+## Architecture Overview
+
+- Data model: standard tibble data frames augmented with a custom
+  `"mnirs"` S3 class and metadata attributes (`nirs_channels`,
+  `time_channel`, `sample_rate`)
+- Metadata system avoids repetitive specification of channel names
+  and sample rates across function calls
+- Pipe-friendly design: all processing functions accept and return
+  `mnirs` objects, enabling `|>` chaining
+- Modular pipeline stages: read → clean → resample → filter →
+  transform → extract → analyse → visualise
+
+## Design Principles
+
+- Standardisation: consistent, documented methods replace ad hoc
+  processing decisions
+- Accessibility: minimal R experience required; verbose messaging
+  via `{cli}` guides users through processing choices
+- Flexibility: works across devices and adapts to different
+  experimental protocols
+- Transparency: processing parameters are explicit and logged,
+  supporting reproducible reporting
+
+## Dependencies
+
+- Core: `{data.table}`, `{readxl}`, `{tibble}`, `{tidyselect}`,
+  `{cli}`, `{rlang}`, `{lifecycle}`
+- Suggested: `{ggplot2}`, `{signal}`, `{zoo}`, `{dplyr}`,
+  `{patchwork}`, `{scales}`
+- Rationale for key dependency choices (e.g., `{data.table}` for
+  efficient time-series operations, `{readxl}` for Excel support)
+
+
+<!-- ============================================================ -->
+
+# Current Capabilities
+
+## Reading Data
+
+- `read_mnirs()`: imports raw .csv and .xlsx files with automatic
+  detection of device format, column mapping, and metadata
+  extraction (sample rate, channel names, time column)
+- `example_mnirs()`: provides bundled example datasets from five
+  supported devices for teaching and demonstration
+- `create_mnirs_data()`: creates `mnirs` objects programmatically
+  from existing data frames with user-specified metadata
+
+## Supported Devices
+
+- Artinis (OxySoft .csv and .xlsx export)
+- Moxy (direct .csv export)
+- Portamon (PerfPro .xlsx export)
+- Train.Red (app .csv export)
+- VO2 Master (Manager app .xlsx export)
+- Designed for extensibility to additional NIRS devices
+
+## Data Cleaning
+
+- `replace_mnirs()`: unified interface for cleaning operations
+- `replace_invalid()`: detects and replaces physiologically
+  implausible or device-specific invalid values
+- `replace_outliers()`: identifies and replaces local outliers
+  using configurable detection criteria
+- `replace_missing()`: interpolates missing values using
+  appropriate methods for time-series data
+
+## Resampling
+
+- `resample_mnirs()`: regularises irregular sampling periods to a
+  consistent sample rate; supports up- and down-sampling
+- Importance of regular sampling for downstream filtering and
+  interval extraction
+
+## Digital Filtering
+
+- `filter_mnirs()`: unified filtering interface
+- `filter_butter()`: Butterworth low-pass filter for removing
+  high-frequency noise while preserving physiological signal
+- `filter_ma()`: moving average filter as a simpler alternative
+- Discussion of filter parameter selection (cutoff frequency,
+  filter order) and its impact on signal fidelity
+
+## Data Transformation
+
+- `shift_mnirs()`: shifts channel values to a reference point
+  (e.g., baseline normalisation)
+- `rescale_mnirs()`: rescales dynamic range (e.g., normalising
+  SmO~2~ to a calibrated range for between-subject comparison)
+
+## Interval Extraction
+
+- `extract_intervals()`: detects and extracts discrete
+  time-based intervals from continuous recordings
+- `by_time()`: helper for specifying extraction windows
+- Supports both individual interval extraction and
+  ensemble-averaged intervals across repeated bouts
+
+## Visualisation
+
+- `plot.mnirs()`: S3 plot method producing `{ggplot2}` time-series
+  plots with automatic channel colouring and time-axis formatting
+- `theme_mnirs()`: custom publication-ready theme
+- `palette_mnirs()`, `scale_colour_mnirs()`, `scale_fill_mnirs()`:
+  colour palettes designed for mNIRS channel conventions
+- `breaks_timespan()`, `format_hmmss()`: intelligent time-axis
+  labels for exercise-duration data
+
+
+<!-- ============================================================ -->
+
+# Example Usage
+
+- Walk through a complete analysis pipeline using one of the
+  bundled example datasets (e.g., `example_mnirs("moxy_ramp")`)
+- Steps demonstrated:
+  1. Read raw data file
+  2. Clean invalid values and outliers
+  3. Resample to regular grid
+  4. Apply Butterworth low-pass filter
+  5. Shift channels to baseline reference
+  6. Plot processed time series
+  7. Extract analysis intervals
+- Show pipe-chained code alongside output plots
+- Emphasise that each step is optional and order can be adapted
+  to the research question
+
+```{r}
+#| label: example-pipeline
+#| eval: false
+
+# example pipeline code here
+```
+
+
+<!-- ============================================================ -->
+
+# Comparison with Existing Tools
+
+## Proprietary Device Software
+
+- Artinis OxySoft, Moxy software, Train.Red app, etc.
+- Typically limited to single-device data, GUI-based, not
+  scriptable or reproducible
+
+## General Signal Processing in R
+
+- `{signal}`: provides filter implementations but no mNIRS-specific
+  workflows, data model, or device readers
+- `{zoo}`, `{tsibble}`: time-series infrastructure but no domain
+  tooling for NIRS data
+
+## Related Domain Packages
+
+- `{kinfitr}`: analogous approach for PET pharmacokinetic modelling
+  — similar motivation of reproducibility and flexibility, but
+  different domain
+- `{SimplyAgree}`: example of a well-designed domain-specific
+  package for physiological measurement agreement analysis
+- No existing R package addresses the full mNIRS processing
+  pipeline from raw device export to analysis-ready intervals
+
+## Unique Contributions of {mnirs}
+
+- Multi-device reader with automatic format detection
+- Metadata-aware data model that reduces boilerplate
+- Complete pipeline from import to extraction in a single package
+- Designed for the mNIRS practitioner, not just the R programmer
+
+
+<!-- ============================================================ -->
+
+# Future Development
+
+- Oxygenation kinetics processing:
+  - Monoexponential and sigmoidal curve fitting to SmO~2~ recovery
+    and deoxygenation responses
+  - Non-parametric kinetics analysis
+- Critical oxygenation breakpoint analysis:
+  - Manual and automation-assisted detection of breakpoints during
+    incremental exercise protocols
+- Additional device format support as new devices enter the market
+- Community contributions and extensibility via GitHub
+- Companion Shiny application for interactive exploration
+  (already available at Posit Cloud)
+
+
+<!-- ============================================================ -->
+
+# Acknowledgements
+
+- Collaborators, testers, and funding sources
+- Open-source community and package dependencies
+
+
+<!-- ============================================================ -->
+
+# References
+
+::: {#refs}
+:::
