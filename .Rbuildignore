@@ -24,3 +24,4 @@ mnirs-hex.*\.png$
 ^tests/testthat/testdata$
 ^\.claude$
 ^man/figures/README-mnirs-app\.gif$
+^CRAN-SUBMISSION$
