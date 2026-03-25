@@ -36,16 +36,18 @@ test_that("palettes subset by number works", {
 })
 
 test_that("palettes subset by name works", {
-    red <- palette_mnirs(names = "red")
+    red <- palette_mnirs("red")
     expect_named(red, "red")
     expect_equal(red[["red"]], "#ED0000FF")
-    expect_error(palette_mnirs(names = "invalid"), "should be one of")
-    expect_error(palette_mnirs(n = 2, names = "red"), "Cannot specify both")
+    expect_error(palette_mnirs("invalid"), "should be one of")
 
-    multi <- palette_mnirs(names = c("red", "blue"))
+    multi <- palette_mnirs("red", "blue")
     expect_length(multi, 2)
     expect_named(multi, c("red", "blue"))
-    expect_equal(palette_mnirs(names = c("red", "invalid")), red)
+    expect_equal(palette_mnirs("red", "invalid"), red)
+
+    ## mixed types error
+    expect_error(palette_mnirs(TRUE), "expects")
 })
 
 test_that("palette_mnirs interpolates when n > 12", {
@@ -81,13 +83,13 @@ test_that("scale functions use palette_mnirs", {
     expect_equal(scale_colour_mnirs()$palette(5), palette_mnirs(5))
     expect_equal(scale_fill_mnirs()$palette(5), palette_mnirs(5))
 
-    # Test with NULL argument
-    expect_equal(scale_colour_mnirs()$palette(NULL), palette_mnirs(NULL))
+    # Test with no argument (all colours)
+    expect_equal(scale_colour_mnirs()$palette(), palette_mnirs())
 
     # Test with character argument
     expect_equal(
-        scale_colour_mnirs()$palette(names = c("light blue", "dark red")),
-        palette_mnirs(names = c("light blue", "dark red"))
+        scale_colour_mnirs()$palette("light blue", "dark red"),
+        palette_mnirs("light blue", "dark red")
     )
 
     ## test with na.value

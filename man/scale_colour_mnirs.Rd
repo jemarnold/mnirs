@@ -27,7 +27,7 @@ Scales for custom \emph{{mnirs}} palette
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "scales"))) withAutoprint(\{ # examplesIf}
 ## plot example data
-df <- read_mnirs(
+data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_left = "SmO2 Live",
                       smo2_right = "SmO2 Live(2)"),
@@ -35,7 +35,7 @@ df <- read_mnirs(
     verbose = FALSE
 )
 
-ggplot2::ggplot(df, ggplot2::aes(x = time)) +
+ggplot2::ggplot(data, ggplot2::aes(x = time)) +
     theme_mnirs() +
     scale_colour_mnirs(name = NULL) +
     ggplot2::geom_line(ggplot2::aes(y = smo2_left, colour = "smo2_left")) +

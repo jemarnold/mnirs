@@ -220,8 +220,7 @@ filter_mnirs.smooth_spline <- function(
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     metadata <- attributes(data)
-    args <- list(...)
-    spar <- args$spar
+    spar <- list(...)$spar
     validate_numeric(spar, 1, c(0, Inf), FALSE, msg1 = "one-element positive")
 
     ## processing ==========================================
@@ -306,7 +305,8 @@ filter_mnirs.butterworth <- function(
     if (is.null(c(W, fc))) {
         cli_abort(c(
             "x" = "Cutoff frequency undefined.",
-            "i" = "One of {.arg W} or {.arg fc} must be defined."
+            "i" = "One of {.arg W} or {.arg fc} must be defined for a \\
+            Butterworth filter."
         ))
     }
 
@@ -478,7 +478,7 @@ filter_ma <- function(
         }
     }
     validate_x_t(x, t)
-    validate_width_span(width, span, verbose)
+    validate_width_span(width, span, verbose, "for a moving average filter.")
 
     ## handle NAs
     if (verbose && !na.rm && anyNA(x)) {
@@ -503,10 +503,9 @@ filter_ma <- function(
         ## error if fewer valid samples than min_obs
         if (sum(is.finite(x)) < min_obs) {
             cli_abort(c(
-                "x" = "Insufficient valid samples detected in \\
-                {.fn filter_moving_average}.",
+                "x" = "Insufficient valid samples detected.",
                 "i" = "{.arg width} or {.arg span} must be smaller than \\
-                the range of {.arg x}."
+                the range of {.arg x} when {.arg partial} = {.val {FALSE}}."
             ))
         }
 

@@ -3,7 +3,7 @@
 \name{preserve_na}
 \alias{preserve_na}
 \alias{restore_na}
-\title{Preserve and Restore NA Information Within a Vector}
+\title{Preserve and restore NA information within a vector}
 \usage{
 preserve_na(x)
 

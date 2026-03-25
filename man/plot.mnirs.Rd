@@ -40,7 +40,7 @@ Create a simple plot for objects returned from \code{\link[=create_mnirs_data]{c
 }
 \examples{
 \dontshow{if (rlang::is_installed(c("ggplot2", "scales"))) withAutoprint(\{ # examplesIf}
-data_table <- read_mnirs(
+data <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"),
     nirs_channels = c(smo2_left = "SmO2 Live",
                       smo2_right = "SmO2 Live(2)"),
@@ -49,6 +49,6 @@ data_table <- read_mnirs(
 )
 
 ## note the options to display time values as `h:mm:ss` with 8 breaks
-plot(data_table, time_labels = TRUE, n.breaks = 8)
+plot(data, time_labels = TRUE, n.breaks = 8)
 \dontshow{\}) # examplesIf}
 }

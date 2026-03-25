@@ -264,17 +264,17 @@ read_mnirs <- function(
 #'   as attributes and can be accessed with `attributes(data)`.
 #'
 #' @examples
-#' df <- data.frame(
+#' data <- data.frame(
 #'     A = 1:3,
 #'     B = seq(10, 30, 10),
 #'     C = seq(11, 33, 11)
 #' )
 #'
-#' attributes(df)
+#' attributes(data)
 #'
 #' ## inject metadata
 #' nirs_data <- create_mnirs_data(
-#'     df,
+#'     data,
 #'     nirs_channels = c("B", "C"),
 #'     time_channel = "A",
 #'     sample_rate = 1

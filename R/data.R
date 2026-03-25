@@ -56,8 +56,7 @@ NULL
 #'     \item{SmO2 Live}{Muscle oxygen saturation, raw signal (%).}
 #'     \item{SmO2 Averaged}{Muscle oxygen saturation, rolling average (%).}
 #'     \item{THb}{Total haemoglobin (arbitrary units).}
-#'     \item{Lap}{Lap marker (integer): but I don't think there is an onboard
-#'       lap function, so it's kind of redundant.}
+#'     \item{Lap}{Lap marker (integer). Not typically in use.}
 #'     \item{Session Ct}{Session count of recordings.}
 #'   }
 #'

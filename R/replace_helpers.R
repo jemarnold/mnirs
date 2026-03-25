@@ -210,7 +210,7 @@ compute_valid_neighbours <- function(
 }
 
 
-#' Preserve and Restore NA Information Within a Vector
+#' Preserve and restore NA information within a vector
 #'
 #' `preserve_na()` stores `NA` vector positions and extracts valid non-`NA`
 #' values for later restoration with `restore_na()`.
@@ -237,7 +237,7 @@ preserve_na <- function(x) {
 }
 
 
-#' Preserve and Restore NA Information Within a Vector
+#' Preserve and restore NA information within a vector
 #'
 #' `restore_na()` restores `NA` values to their original vector positions
 #' after processing valid non-`NA` values returned from `preserve_na()`.

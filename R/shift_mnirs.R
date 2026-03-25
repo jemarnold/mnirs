@@ -134,7 +134,7 @@ shift_mnirs <- function(
     ## calculate shift_to values ====================================
     ## validate
     position <- match.arg(position)
-    validate_width_span(width, span, verbose)
+    validate_width_span(width, span, verbose, "for `shift_mnirs()`.")
     time_vec <- data[[time_channel]]
 
     if (position == "first") {

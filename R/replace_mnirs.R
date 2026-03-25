@@ -163,7 +163,7 @@ replace_mnirs <- function(
     time_vec <- data[[time_channel]]
 
     if (check_conditions[2L] || method == "median") {
-        validate_width_span(width, span, verbose)
+        validate_width_span(width, span, verbose, "for `replace_mnirs()`.")
     }
 
     ## remove invalid, outliers, and NA ==============================
@@ -298,7 +298,7 @@ replace_invalid <- function(
 
     if (method == "median") {
         if (!bypass_checks) {
-            validate_width_span(width, span, verbose)
+            validate_width_span(width, span, verbose, "for median replacement.")
         }
 
         window_idx <- compute_local_windows(t, invalid_idx, width, span)
@@ -372,7 +372,7 @@ replace_outliers <- function(
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
         validate_x_t(x, t)
-        validate_width_span(width, span, verbose)
+        validate_width_span(width, span, verbose, "for `replace_outliers()`.")
     }
     validate_numeric(
         outlier_cutoff, 1, c(0, Inf), msg1 = "one-element positive"
@@ -475,7 +475,7 @@ replace_missing <- function(
             if (missing(verbose)) {
                 verbose <- getOption("mnirs.verbose", default = TRUE)
             }
-            validate_width_span(width, span, verbose)
+            validate_width_span(width, span, verbose, "for median replacement.")
         }
         ## median of width or span VALID values to either side of sequential NAs
         y <- x

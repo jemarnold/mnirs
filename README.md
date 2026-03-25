@@ -24,8 +24,8 @@ You can install the development version of *{mnirs}* from
 [GitHub](https://github.com/jemarnold/mnirs) with:
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("jemarnold/mnirs")
+# install.packages("pak")
+pak::pak("jemarnold/mnirs")
 ```
 
 ## Citation
@@ -39,7 +39,7 @@ A very basic implementation of this package is hosted at
 currently be used for reading and pre-processing mNIRS data.
 
 [![mnirs processing shiny
-app](man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
+app](https://raw.githubusercontent.com/jemarnold/mnirs/main/man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
 
 ## Usage
 
@@ -57,7 +57,6 @@ same processing steps. Enjoy!
 ### `read_mnirs()` Read data from file
 
 ``` r
-# remotes::install_github("jemarnold/mnirs") ## install development version
 library(ggplot2) ## load for plotting
 library(mnirs)
 
@@ -69,7 +68,7 @@ example_mnirs()
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
-data_table <- read_mnirs(
+data_raw <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example data file
     nirs_channels = c(
         smo2_left = "SmO2 Live",            ## identify and rename channels
@@ -92,7 +91,7 @@ data_table <- read_mnirs(
 ## Note the above info message that sample_rate was estimated correctly at 2 Hz 👆
 ## ignore the warnings about irregular sampling for now, we will resample later
 
-data_table
+data_raw
 #> # A tibble: 2,203 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
@@ -110,7 +109,7 @@ data_table
 
 ## note the `time_labels` plot argument to display time values as `h:mm:ss`
 plot(
-    data_table,
+    data_raw,
     time_labels = TRUE,
     n.breaks = 5,
     na.omit = FALSE
@@ -122,35 +121,22 @@ plot(
 ### Metadata stored in `mnirs` data frames
 
 ``` r
-## view metadata (omitting item two, a list of row numbers)
-attributes(data_table)[-2]
-#> $class
-#> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
-#> 
-#> $names
-#> [1] "time"       "smo2_left"  "smo2_right"
-#> 
-#> $nirs_device
-#> [1] "Moxy"
-#> 
-#> $nirs_channels
+## view metadata
+attr(data_raw, "nirs_channels")
 #> [1] "smo2_left"  "smo2_right"
-#> 
-#> $time_channel
+
+attr(data_raw, "time_channel")
 #> [1] "time"
-#> 
-#> $sample_rate
+
+attr(data_raw, "sample_rate")
 #> [1] 2
-#> 
-#> $start_timestamp
-#> [1] "2026-03-23 00:29:00 PDT"
 ```
 
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
 
 ``` r
 data_cleaned <- replace_mnirs(
-    data_table,         ## blank channels will be retrieved from metadata
+    data_raw,           ## blank channels will be retrieved from metadata
     invalid_values = 0, ## known invalid values in the data
     invalid_above = 90, ## remove data spikes above 90
     outlier_cutoff = 3, ## recommended default value

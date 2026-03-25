@@ -679,6 +679,15 @@ test_that("validate_width_span() validates inputs", {
     )
 })
 
+test_that("validate_width_span() reports message", {
+    expect_error(
+        validate_width_span(
+            width = NULL, span = NULL, msg = "for this function."
+        ),
+        "width.*span.*must be defined.*for this function."
+    )
+})
+
 ## validate_x_t =================================
 test_that("validate_x_t() validates inputs", {
     expect_error(validate_x_t(x = 1:10, t = 1:5), "numeric.*equal length")

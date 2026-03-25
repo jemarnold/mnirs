@@ -1,12 +1,8 @@
-* Create `analyse_kinetics()` to process mNIRS kinetics on nested `nirs_channels` within a list of data.frames.
-    * Currently implemented for `method = "peak_slope"` only, with other methods coming soon.
-    * Includes generic `print()` function.
-    
-# mnirs 0.5.3
+# mnirs 0.6.0
 
 ### Updated core functions
 
-* `filter_mnirs()` Method-specific arguments (e.g. `order` for `method = "butterworth"`, or `width` for `method = "moving_average"`) removed from the generic function call. Continue to be passed to the appropriate method via `...`. Documentation updated.
+* `filter_mnirs()`: Method-specific arguments (e.g. `order` for `method = "butterworth"`, or `width` for `method = "moving_average"`) removed from the generic function call. Continue to be passed to the appropriate method via `...`. Documentation and info/warning/abort messages updated.
 
 * `filter_ma()` better separates effects of `partial` and `na.rm` args:
     * `partial = FALSE` by default returns NA at edges where insufficient number of samples are available compared to the specified `width` or `span`.
@@ -18,6 +14,8 @@
 * `plot.mnirs()`
     * Add new arg: `points = TRUE` will plot points in addition to lines, as a useful quick shortcut.
     * Update `na.omit` now omits non-valid `c(NA, NaN, Inf, -Inf)` values from plotting, not just `NA`.
+
+* `palette_mnirs()` can now accept either a single numeric value specifying the number of colours to return, or any number of (valid) character colour names.
 
 
 # mnirs 0.5.2

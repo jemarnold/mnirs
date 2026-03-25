@@ -4,15 +4,16 @@
 \alias{palette_mnirs}
 \title{Custom \emph{{mnirs}} colour palette}
 \usage{
-palette_mnirs(n = NULL, names = NULL)
+palette_mnirs(...)
 }
 \arguments{
-\item{n}{A numeric vector specifying the number of colours to return.}
-
-\item{names}{A character vector specifying colour names to return.}
+\item{...}{Either a single numeric specifying the number of colours to
+return, or character strings specifying colour names. If empty, all
+colours are returned.}
 }
 \value{
-Named or unnamed character vector of hex colours.
+Named (when selecting by name) or unnamed character vector of
+hex colours.
 }
 \description{
 Custom \emph{{mnirs}} colour palette
@@ -20,8 +21,8 @@ Custom \emph{{mnirs}} colour palette
 \examples{
 \dontshow{if (rlang::is_installed("scales")) withAutoprint(\{ # examplesIf}
 scales::show_col(palette_mnirs())
-scales::show_col(palette_mnirs(n = 2))
-scales::show_col(palette_mnirs(names = c("red", "orange")))
+scales::show_col(palette_mnirs(2))
+scales::show_col(palette_mnirs("red", "orange"))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

@@ -454,11 +454,19 @@ validate_sample_rate <- function(
 }
 
 #' @rdname validate_mnirs
-validate_width_span <- function(width = NULL, span = NULL, verbose = TRUE) {
+validate_width_span <- function(
+    width = NULL,
+    span = NULL,
+    verbose = TRUE,
+    msg = ""
+) {
     if (is.null(c(width, span))) {
         cli_abort(c(
             "x" = "Window size undefined",
-            "i" = "One of {.arg width} or {.arg span} must be defined."
+            "i" = paste(
+                "One of {.arg width} or {.arg span} must be defined",
+                msg
+            )
         ))
     }
     validate_numeric(
