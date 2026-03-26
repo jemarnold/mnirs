@@ -130,6 +130,7 @@ compute_outliers <- function(
     local_mad <- local_stats[2L, ]
 
     ## robust variance threshold based on minimum sample difference
+    ## TODO need to verifybehaviour in edge cases
     abs_diffs <- abs(diff(x[!is.na(x)]))
     smallest_var <- suppressWarnings(min(abs_diffs[abs_diffs > 1e-5]))
 

@@ -57,6 +57,13 @@ reference:
   contents:
   - extract_intervals
   - by_time
+- title: Process kinetics
+  desc: |
+    Estimate response dynamics and kinetic parameters
+  contents:
+  - analyse_kinetics
+  - peak_slope
+  - matches("monoexp")
 - title: Printing & plotting
   desc: |
     Tools for printing functions and pretty plotting with `{ggplot2}`.
@@ -67,6 +74,7 @@ reference:
   - starts_with("scale")
   - breaks_timespan
   - format_hmmss
+  - print.mnirs_kinetics
 - title: Files
   desc: |
     Example data files included in the package
