@@ -20,6 +20,10 @@ minimal coding experience required.
 
 ## Installation
 
+``` r
+install.packages("mnirs")
+```
+
 You can install the development version of *{mnirs}* from
 [GitHub](https://github.com/jemarnold/mnirs) with:
 
@@ -27,10 +31,6 @@ You can install the development version of *{mnirs}* from
 # install.packages("pak")
 pak::pak("jemarnold/mnirs")
 ```
-
-## Citation
-
-`<coming soon>`
 
 ## Online App
 

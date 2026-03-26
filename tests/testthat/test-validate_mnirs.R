@@ -503,8 +503,6 @@ test_that("within is equivalent to dplyr::between()", {
         dplyr::between(c(0, 5, 10, 15), 1, 10)
     )
 
-    ## TODO should it have the same non-numeric NA behaviour?
-    # expect_equal(within(NA, c(1, 10)), dplyr::between(NA, 1, 10))
     expect_equal(within(NA_real_, c(1, 10)), dplyr::between(NA_real_, 1, 10))
     expect_equal(
         within(c(1, NA, 5), c(1, 10)),

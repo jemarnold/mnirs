@@ -147,7 +147,6 @@ shift_mnirs <- function(
         )
     } else if (position %in% c("min", "max")) {
         ## find local windows within width/span centred around idx
-        ## TODO need to fix edges. Should be partial = FALSE
         window_idx <- compute_local_windows(
             t = time_vec, width = width, span = span,
         )
