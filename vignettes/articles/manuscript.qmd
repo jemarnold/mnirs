@@ -36,11 +36,34 @@ keywords:
 <!-- cover previous lit -->
 
 
+
+
+Near-infrared spectroscopy (NIRS) is a non-invasive optical technology used to evaluate the dynamic balance of local oxygen (O<sub>2</sub>) delivery and extraction in vivo within biological tissue. NIRS has been used in human biology research for nearly half a century looking predominantly at cerebral (functional; fNIRS) and muscle (mNIRS) tissues {Jobsis, 1977}. In the past 15 years, the emergence of commercial wearable continuous-wave (CW) mNIRS devices has rapidly expanded use outside of advanced research laboratory environments. Wearable mNIRS devices have facilitated data collection in field conditions for diverse real-world applications in exercise physiology, sport science, clinical applications, and high performance sport {Grassi, 2016; Perrey, 2024; Jan, 2026}. Today, wearable  mNIRS devices are relatively affordable, valid, and reliable for widespread use across these domains {Ryan, 2013; Barstow, 2019; Yogev, 2023}.
+
+While collecting NIRS data is easier than ever, processing, analysing, and interpreting those data remain a challenge. NIRS signals can be relatively noisy and notoriously sensitive to differences in tissue composition {van Beekvelt, 2001; McManus, 2018}. The major limitation of CW-NIRS is that it is a relative measure where the denominator is unknown: scattering and absorption coefficients are assumed as fixed values, and calibration is sensitive to initial tissue conditions during recording {Barstow, 2019; Hammer, 2019; Pirovano, 2021}. 
+
+During a single recording, the direction and rate of change of NIRS signals can be confidently interpreted: where e.g., higher values represent greater relative concentrations and lower values represent lower concentrations; decreasing oxygenation implies greater (O<sub>2</sub>) extraction than (O<sub>2</sub>) delivery, vise-versa for increasing oxygenation, and steeper response kinetics in either direction implies a greater mismatch of these underlying metabolic rates {Barstow, 2019}. However, cross-sectional research between individuals where tissue composition, optical properties, and initial metabolic conditions are unknown, requires more cautious interpretation.
+
+As a result of these technological challenges and the wide variety of applications in which NIRS is used, it is difficult to provide standardised processing and analysis methods which will be universally appropriate. Each centre using NIRS for a unique application must therefore also develop custom processing and analysis tools to suit their needs. Often, this takes the form of an ad hoc script or spreadsheet developed iteratively and passed down from grad student to grad student. Where previous processing decisions can be carried forward via inertia while the original rationale for them is lost, or the application for which they were intended has shifted. Different centres using mNIRS will build their own custom processing tools, compromising cross-centre collaboration and reproducibility {Sendra-Perez, 2025}.
+
+## filtering
+
+For example, digital filtering and smoothing recommendations for a given mNIRS device with a sample rate of 10 Hz {Rodriguez, 2018} might not be appropriate for another device with a sample rate of 0.5 Hz, when observing physiological phenomena that might be dynamically occuring on time scales from fractions of a second, to steady-state responses monitored over minutes and longer.
+
+{Rodriguez, 2018}
+{Dans, 2021}
+{Bopp, 2011}
+{Costalat, 2025}
+
+## normalisation
+
+{Sendra-Perez, 2025}
+{Rosenberry, 2020}
+{Grassi, 2016}
+
+
+
 ## Background
-
-Near-infrared spectroscopy (NIRS) is a non-invasive optical technology used to evaluate the dynamic balance of local oxygen (O<sub>2</sub>) delivery and extraction in vivo within biological tissue. NIRS has been used in human biology research for nearly half a century looking predominantly at cerebral (functional; fNIRS) and muscle (mNIRS) tissues {Jobsis, 1977}. In recent years, the emergence of commercial wearable mNIRS devices has rapidly expanded use outside of advanced research laboratory environments, and facilitated the ease of data collection in field conditions for more diverse real-world applications in exercise physiology, sport science, clinical applications, and high performance sport {Grassi, 2016; Perrey, 2024; Jan, 2026}.
-
-Today, wearable  mNIRS devices are relatively affordable, and valid and reliable for field use {Yogev, 2023}. 
 
 - Brief overview of near-infrared spectroscopy (NIRS) principles
   and their application to skeletal muscle monitoring
