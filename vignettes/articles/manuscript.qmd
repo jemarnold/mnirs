@@ -36,15 +36,122 @@ keywords:
 <!-- cover previous lit -->
 
 
+Near-infrared spectroscopy (NIRS) is a non-invasive optical technology used to evaluate the dynamic balance of local oxygen (O<sub>2</sub>) delivery and extraction in vivo within biological tissue. NIRS records the change in optical reflectancy and absorbance as specific wavelengths of light pass through tissue between the sensor emitter and receiver (technical details of NIRS can be found elsewhere: {Barstow, 2019; Hamaoka & McCully, 2019}). These signals are resolved as the relative change in oxygenation, or O<sub>2</sub> saturated primarily on haemoglobin and myoglobin within the field of insonation (i.e., Hb, HbMb, or haeme; oxygenated oxy[haeme] or O2Hb; and deoxygenated deoxy[haeme] or HHb, respectively). Relative muscle or tissue oxygen saturation can be resolved as a percent (SmO<sub>2</sub>).
+
+NIRS has been used in human biology research for nearly half a century looking predominantly at cerebral (functional; fNIRS) and muscle (mNIRS) tissues {Jobsis, 1977}. In the past 15 years, the emergence of commercial wearable continuous-wave (CW) mNIRS devices has rapidly expanded use outside of advanced research laboratory environments. Wearable mNIRS devices have facilitated data collection in field conditions for diverse real-world applications in exercise physiology, sport science, clinical applications, and high performance sport {Grassi, 2016; Perrey, 2024; Jan, 2026}. Today, wearable  mNIRS devices are relatively affordable, valid, reliable, and in widespread use across these domains {Ryan, 2013; Barstow, 2019; Yogev, 2023}.
+
+## Current Landscape and Gaps
+
+While collecting NIRS data is easier than ever, processing, analysing, and interpreting those data remain a challenge. NIRS signals can be relatively noisy and notoriously sensitive to differences in tissue composition {van Beekvelt, 2001; McManus, 2018}. The major limitation of CW-NIRS is that it is a relative measure where the denominator is unknown: scattering and absorption coefficients are assumed to be fixed values (which they are not), and calibration is sensitive to initial tissue conditions during recording {Barstow, 2019; Hammer, 2019; Pirovano, 2021}. 
+
+During a single recording, the direction and rate of change of NIRS signals can be confidently interpreted: where e.g., higher values represent greater relative concentrations and lower values represent lower concentrations; decreasing oxygenation implies greater (O<sub>2</sub>) extraction than (O<sub>2</sub>) delivery, vise-versa for increasing oxygenation, and steeper response kinetics in either direction implies a greater mismatch of these underlying metabolic rates {Barstow, 2019; Arnold, 2024}. However, comparing NIRS values between individuals, between recording sessions, or even between recording sites simultaneously in the same individual can have lower reliability and agreement {Yogev, 2023; Sendra-Pérez, 2023; Skotzke, 2024}. Thus, cross-sectional research between individuals where tissue composition, optical properties, and initial metabolic conditions are unknown, requires more cautious interpretation.
+
+As a result of these technological challenges and the wide variety of applications in which NIRS is used, it is difficult to provide standardised processing and analysis methods which will be universally appropriate. Each centre using NIRS for a unique application must therefore also develop custom processing and analysis tools to suit their needs. Often, this takes the form of an ad hoc script or spreadsheet developed iteratively and passed down from grad student to grad student. Where previous processing decisions can be carried forward with inertia while the original rationale for them is lost, or the application for which they were intended has shifted. Different NIRS centres employing their own custom processing tools may be compromising cross-centre collaboration and reproducibility {Sendra-Perez, 2025}.
+
+## Statement of Need
+
+The open-source R packge `{mnirs}` was developed with the intention of reducing these hurdles to cross-centre collaboration. The aim is to provide standardised, reproducible methods for reading, processing, and analysing mNIRS data, accessible to researchers, practitioners, and NIRS users with minimal coding experience, to reduce the burden of having to re-interpret processing methods scattered across multiple published studies. The goal is to help NIRS practitioners focus on detecting meaningful signal from noise, and improve our confidence in interpreting and applying information to the clients we work with.
+
+## Processing Functionality
+
+`{mnirs}` is currently released as v0.6.0 on the comprehensive R archive network (CRAN). The official CRAN release can be downloaded directly in the R working environment by calling:
+
+`install.packages("mnirs")`
+
+The latest development version can be downloaded from:
+
+`pak::pak("jemarnold/mnirs")`
+
+The package website has comprehensive documentation of the functions discussed below, and includes vignettes demonstrating common mNIRS data processing pipelines:
+
+`https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html`
+
+A free online app is available as a 'no-code' workflow with basic `{mnirs}` functionality, for rapid visualisation and comparing processing methods:
+
+`https://jemarnold-mnirs-app.share.connect.posit.cloud/`
+
+### Reading Data
+
+The first step of processing is to retrieve the data from a file exported from the NIRS device. Each NIRS device exports data in a different format, and files often have header metadata at the top of the file for human-readability. However, this makes it more difficult to extract the intended time-series NIRS data into a standard data frame format.
+
+`read_mnirs()`: This will typically be the first function called from `{mnirs}` in a new project. This is used to read data from *.csv* or *.xls(x)* files, and can automatically recognise most file formats exported from common wearable NIRS devices. Users can extract and rename the target NIRS channels (e.g. SmO2, O2Hb, etc.) for further processing. Similarly, they can specify the time or sample channel, or let it be detected automatically. An optional channel for event labels or lap integers can also be specified, which can be used to detect and extract intervals for further analysis.
+
+Metadata such as sample rate and recording start time will also be extracted and preserved along with the NIRS and time channels as metadata embedded in the returned data frame. This metadata is carried along with the data frame and is automatically recalled by subsequent `{mnirs}` functions. This reduces the need to specify which channels should be processed, and if metadata are modified (such as when resampling), those data are updated for subsequent processing. Metadata can be manually added to data frames not initially read with `read_mnirs()` by using `create_mnirs_data()`.
+
+## Visualisation
+
+...
+
+`plot.mnirs()`
+
+## Data Cleaning
+
+`replace_mnirs()`: This function is used to detect local outliers and specify either specific invalid values, or a range outside of which values are considered invalid. This is useful where devices might return default invalid values - e.g. `0` or `100` %SmO2 - when they cannot determine the NIRS signal. Or where brief movement artefacts might cause the signal to spike well beyond the range of physiological data. 
+
+Explicit Local outlier detection is common in signal processing for physiological data, e.g. for expired gas exchange {Nolte, 2023}, whereas it is less commonly used in NIRS research in favour of digital filtering (see below) {Dans, 2021; Rodriguez, 2018}. However, data spikes can be large enough that filtered data can still be strongly influenced. Outlier detection may not be required for all data sets, but it is recommended before futher filtering when large data spikes are present, such as the simulated example in Figure 1.
+
+<FIGURE SHOWING FILTERED WITH & WITHOUT OUTLIER REPLACEMENT OF SPIKES>
+
+## Resampling
+
+mNIRS devices can have sample rates anywhere from less than 1 Hz to 100 Hz. This gives us greater precision observing rapid, highly dynamic responses. However, issues can arise with irregular sampling where time samples occur at inconsistent frequencies, are repeated, or are lost. Manually synchronising data channels by matching columns in a spreadsheet can lead to inaccurate time lag between signals. Even algorithmically synchronising signals between devices at these time scales can be challenging if sample times are off by fractions of a second, resulting in an apparent lack of matching timestamps between recordings. 
+
+`resample_mnirs()`: This function can resample data to regularise timestamps to the nearest time value according to the known sample rate. This will improve synchronisation and can make subsequent processing steps easier, such as if ensemble-averaging across multiple trials (see below). In addition, this function can be used to up- or downsample mNIRS data to match the sample rate of another device, e.g. to a 1 Hz heart rate signal, or a 1000 Hz electromyography (EMG) signal. 
+
+Downsampling can be useful to reduce data size and processing requirement, although should not be used primarily as a data filtering/smoothing strategy (see below for digital filtering recommendations). Upsampling can be done with interpolation over newly created samples (caution should always be taken with sample interpolation), or new samples can be left as blank.
+
+## Digital Filtering
+
+Digital filtering and data smoothing is one of the most important steps in processing mNIRS data. This is the primary way to improve signal-to-noise and identify the relevant biological phenomena or task-specific signal from the many sources of extraneous noise {Dans, 2021}. However, over-filtering data can also introduce data artefacts which can negatively influence signal analysis and interpretations, just as much as trying to analyse overly-noisy raw data.
+
+Specific filtering parameters are difficult to recommend universally for mNIRS signals. The wide variation in device capabilities (primarily sample rate) and the diversity in the possible response signals of interest in NIRS applications means that no single filtering method can be recommended as a 'gold-standard'.
+
+`filter_mnirs`: This function currently contains three different filtering methods which can be specified by the user for their particular application. The default method is a non-parametric smoothing spline (`method = "smooth_spline"`), automatically determined from the data characteristics, and therefore a good default for rapidly visualising NIRS signals.
+
+The most common filtering methods in published mNIRS research is probably a Butterworth low-pass digital filter (`method = "butterworth"`) {Dans, 2021; Rodriguez, 2018}. This is a powerful and flexible filter method, however if over-parameterised, it can reduce meaningful signal amplitude. For example, recommended filter parameters based on data recorded at 10 Hz {Rodriguez, 2018} may not be appropriate for another device with a sample rate of 0.5 Hz.
+
+The most accessible method to many NIRS practitioners is using a simple moving average (`method = "moving_average"`), which can be applied manually in spreadsheets, and is often employed onboard mNIRS devices for real-time smoothing (although, real-time smoothing can introduce a time delay in signal resolution, and post-processing raw signals is preferred). For lower sample rate recordings and for signals occuring over longer time frames (e.g. minutes or longer), moving averaging is often sufficient to capture the target response.
+
+It is perfectly valid to choose a digital filter by iteratively testing filter parameters until the signal or response of interest appears to be visually optimised with minimal data artefacts, to your satisfaction.
+
+<FIGURE RAW VS FILTERED>
+
+## Shifting and Rescaling Data
+
+As previously mentioned, the arbitrary scaling of NIRS values is one of the major limitations to interpretation. NIRS values are for the most part not comparable between devices, trials, or individuals. Rescaling is often used to help standardise NIRS signals to reduce measurement variance and improve signal detection {Murias, 2014; Perrey, 2024; Sendra-Perez, 2025}. Barstow {2019} suggests signal amplitue normalisation is not requires for spatially-resolved spectroscopy SmO2, however differenNIRS devices may resolve SmO2 over very different dynamic ranges, meaning signal normalisation may still be required {McManus, 2018}.
+
+NIRS signals can be rescaled to the task-specific 'functional range'; e.g. between the minimum and maximum values recorded during an exercise task {}. Or, an ischaemic occlusion calibration can be performed to rescale values to the 'physiological range', where the minimum value during occlusion theoretically represents the tissue minimum oxygenation (maximum deoxygenation), and the maximum during hyperaemia recovery represents... {Rosenberry, 2020}
 
 
-Near-infrared spectroscopy (NIRS) is a non-invasive optical technology used to evaluate the dynamic balance of local oxygen (O<sub>2</sub>) delivery and extraction in vivo within biological tissue. NIRS has been used in human biology research for nearly half a century looking predominantly at cerebral (functional; fNIRS) and muscle (mNIRS) tissues {Jobsis, 1977}. In the past 15 years, the emergence of commercial wearable continuous-wave (CW) mNIRS devices has rapidly expanded use outside of advanced research laboratory environments. Wearable mNIRS devices have facilitated data collection in field conditions for diverse real-world applications in exercise physiology, sport science, clinical applications, and high performance sport {Grassi, 2016; Perrey, 2024; Jan, 2026}. Today, wearable  mNIRS devices are relatively affordable, valid, and reliable for widespread use across these domains {Ryan, 2013; Barstow, 2019; Yogev, 2023}.
 
-While collecting NIRS data is easier than ever, processing, analysing, and interpreting those data remain a challenge. NIRS signals can be relatively noisy and notoriously sensitive to differences in tissue composition {van Beekvelt, 2001; McManus, 2018}. The major limitation of CW-NIRS is that it is a relative measure where the denominator is unknown: scattering and absorption coefficients are assumed as fixed values, and calibration is sensitive to initial tissue conditions during recording {Barstow, 2019; Hammer, 2019; Pirovano, 2021}. 
+* signal values are arbitrary
+* sensitive to ATT & initial conditions
+* various normalisation strategies
+* 'functional range' exercise min/max (removing outliers/spikes)
+* 'physiological range' ischaemic calibration
+* delta change from baseline mean
 
-During a single recording, the direction and rate of change of NIRS signals can be confidently interpreted: where e.g., higher values represent greater relative concentrations and lower values represent lower concentrations; decreasing oxygenation implies greater (O<sub>2</sub>) extraction than (O<sub>2</sub>) delivery, vise-versa for increasing oxygenation, and steeper response kinetics in either direction implies a greater mismatch of these underlying metabolic rates {Barstow, 2019}. However, cross-sectional research between individuals where tissue composition, optical properties, and initial metabolic conditions are unknown, requires more cautious interpretation.
+{Sendra-Perez, 2025}
+normalisation to smo2min {Rosenberry, 2020}
+{Grassi, 2016}
 
-As a result of these technological challenges and the wide variety of applications in which NIRS is used, it is difficult to provide standardised processing and analysis methods which will be universally appropriate. Each centre using NIRS for a unique application must therefore also develop custom processing and analysis tools to suit their needs. Often, this takes the form of an ad hoc script or spreadsheet developed iteratively and passed down from grad student to grad student. Where previous processing decisions can be carried forward via inertia while the original rationale for them is lost, or the application for which they were intended has shifted. Different centres using mNIRS will build their own custom processing tools, compromising cross-centre collaboration and reproducibility {Sendra-Perez, 2025}.
+
+
+
+
+## reading data
+
+* automatic detection of common file formats
+* detect sample rate from time channel or metadata
+* detect start time, add system timestamp
+
+## outlier detection & filtering invalid values
+
+## resampling
+
+* irregular samples
+* repeated & lost samples
+* synchronisation between devies
 
 ## filtering
 
@@ -57,9 +164,40 @@ For example, digital filtering and smoothing recommendations for a given mNIRS d
 
 ## normalisation
 
+* signal values are arbitrary
+* sensitive to ATT & initial conditions
+* various normalisation strategies
+* 'functional range' exercise min/max (removing outliers/spikes)
+* 'physiological range' ischaemic calibration
+* delta change from baseline mean
+
 {Sendra-Perez, 2025}
-{Rosenberry, 2020}
+normalisation to smo2min {Rosenberry, 2020}
 {Grassi, 2016}
+
+## extract intervals
+
+* specification by time, event label, lap, or sample number
+* span buffer to boundaries
+* ensemble-averaging (importance of regular sampling)
+
+* ensemble averaging {de Aguiar, 2022}
+* ensemble-averaging mVO2 trials (can also just average k) {Rasica, 2024}
+
+# Comparison with Existing Tools
+
+* No existing CRAN-published R package specific to mnirs processing
+* Oxysoft onboard filtering 
+* Moxy & Train.Red real-time filtering: introduces delay
+* compare to broad domain-specific tools?
+
+# Future Development
+
+
+
+
+
+
 
 
 
