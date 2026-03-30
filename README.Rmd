@@ -37,6 +37,11 @@ You can install the development version of *{mnirs}* from [GitHub](https://githu
 pak::pak("jemarnold/mnirs")
 ```
 
+## Citation
+
+`<coming soon>`
+
+
 ## Online App
 
 A very basic implementation of this package is hosted at https://jemarnold-mnirs-app.share.connect.posit.cloud/ and can currently be used for reading and pre-processing mNIRS data.

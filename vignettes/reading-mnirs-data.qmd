@@ -20,7 +20,7 @@ knitr:
 
 # Introduction
 
-With modern wearable **muscle near-infrared spectroscopy (mNIRS)** devices it is growing ever easier to collect local muscle oxygenation data during dynamic activities. 
+Modern wearable muscle near-infrared spectroscopy (mNIRS) devices make it easier than ever to monitor local muscle oxygenation during dynamic activities.
 
 The real challenge comes with deciding how to clean, filter, process, and eventually interpret those data.
 
@@ -28,7 +28,7 @@ The `{mnirs}` package aims to provide standardised, reproducible methods for rea
 
 In this vignette we will demonstrate how to:
 
-* 📂 Read data files exported from commercially available wearable NIRS devices, and import NIRS channels into a standard data frame format with metadata, ready for further processing.
+* 📂 Read data files exported from commercial wearable wearable NIRS devices, and import NIRS channels into a standard data frame format with metadata, ready for further processing.
 
 * 📊 Plot and visualise data frames of class *`"mnirs"`*.
 
@@ -36,7 +36,7 @@ In this vignette we will demonstrate how to:
 
 * 🧹 Detect and replace local outliers, invalid values, and interpolate across missing data.
 
-* ⏱️ Resample data to a higher or lower sample rate, to correct irregular sampling periods or match the frequency of other data sources.
+* ⏱️ Resample data to a higher or lower sample rate, to correct irregular sampling periods, or match the frequency of other data sources for synchronisation.
 
 * 📈️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.
 
@@ -199,15 +199,19 @@ plot(
 
 # 🔍 Metadata stored in *`mnirs`* data frames
 
-Data frames generated or read by *`mnirs`* functions will return `class = *"mnirs"*` and contain metadata, which can be retrieved with `attributes(data)`. 
+Data frames generated or read by *`mnirs`* functions will return `class = *"mnirs"*` and contain metadata, which can be retrieved with `attributes()`. 
 
 Instead of re-defining values like our channel names or sample rate, certain *`mnirs`* functions can automatically retrieve them from metadata. They can always be overwritten manually in subsequent functions, or by using a helper function `create_mnirs_data()`.
 
 See `create_mnirs_data()` for more details about metadata.
 
 ```{r}
-## view metadata (omitting item two, a list of row numbers)
-attributes(data_raw)[-2]
+## view metadata
+attr(data_raw, "nirs_channels")
+
+attr(data_raw, "time_channel")
+
+attr(data_raw, "sample_rate")
 ```
 
 
