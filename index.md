@@ -20,6 +20,10 @@ You can install the development version of *{mnirs}* from
 pak::pak("jemarnold/mnirs")
 ```
 
+## Citation
+
+`<coming soon>`
+
 ## Online App
 
 A very basic implementation of this package is hosted at

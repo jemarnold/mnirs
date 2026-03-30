@@ -2,6 +2,8 @@
 
 ## mnirs 0.6.0
 
+CRAN release: 2026-03-30
+
 ### Prepare for CRAN submission
 
 - *NEWS.md* is truncated to the most recent relevant release updates.
