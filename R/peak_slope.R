@@ -46,9 +46,10 @@ slope <- function(
     }
     slope_val <- (n * sum_tx - sum_t * sum_x) / denom
 
-    if (args$intercept %||% FALSE) {
-        attr(slope_val, "intercept") <- (sum_x - slope_val * sum_t) / n
-    }
+    ## ! obsolete
+    # if (args$intercept %||% FALSE) {
+    #     attr(slope_val, "intercept") <- (sum_x - slope_val * sum_t) / n
+    # }
 
     return(slope_val)
 }
@@ -102,20 +103,28 @@ rolling_slope <- function(
     args <- list(...)
     n <- length(x)
 
+    insufficient_warn <- c(
+        "!" = "Insufficient valid samples detected in {.fn froll_slope}.",
+        "i" = "Check length of {.arg x} and {.arg width} or {.arg span}, \\
+        or specify {.arg partial} = {.val {TRUE}}."
+    )
+
     if (!(args$bypass_checks %||% FALSE)) {
         validate_x_t(x, t, invalid = TRUE)
         align <- sub("^center$", "centre", align)
         align <- match.arg(align)
 
-        ## informative warning message for length zero without aborting
+        ## return NA with warning
         if (n == 0L) {
-            cli_warn(c(
-                "!" = "Slopes cannot be calculated over an empty vector."
-            ))
+            if (verbose) {
+                cli_warn(insufficient_warn)
+            }
             return(numeric(0))
         }
-        ## validate all t values identical
-        if (all(diff(t) == 0)) {
+        if (n == 1L || all(diff(t) == 0)) {
+            if (verbose) {
+                cli_warn(insufficient_warn)
+            }
             return(rep(NA_real_, n))
         }
 
@@ -135,11 +144,9 @@ rolling_slope <- function(
     }
 
     if (n < min_obs) {
-        cli_warn(c(
-            "!" = "Insufficient valid samples detected in {.fn rolling_slope}.",
-            "i" = "{.arg width} or {.arg span} must be smaller than \\
-            the range of {.arg x}."
-        ))
+        if (verbose) {
+            cli_warn(insufficient_warn)
+        }
         return(rep(NA_real_, n))
     }
 
@@ -149,12 +156,7 @@ rolling_slope <- function(
     )
 
     if (verbose && all(lengths(window_idx) < min_obs)) {
-        cli_warn(c(
-            "!" = "Insufficient valid samples detected in \\
-            {.fn rolling_slope} windows.",
-            "i" = "Specify greater {.arg width} or {.arg span} to include \\
-            more samples."
-        ))
+        cli_warn(insufficient_warn)
     }
 
     slopes <- vapply(window_idx, \(.idx) {
@@ -288,7 +290,8 @@ peak_slope <- function(
         intercept = NA_real_,
         idx = NA_integer_,
         fitted = NA_real_,
-        window_idx = NA_integer_
+        window_idx = NA_integer_,
+        model = NA
     )
 
     if (all(is.na(slopes))) {
@@ -335,29 +338,23 @@ peak_slope <- function(
     ## get window indices at peak
     window_idx <- attr(slopes, "window_idx")[[peak_idx]]
 
-    ## calculate peak slope, intercept, and predicted y val
-    peak_slope_val <- slope(
-        x[window_idx],
-        t[window_idx],
-        na.rm = TRUE,
-        intercept = TRUE,
-        bypass_checks = TRUE
-    )
-    intercept <- attr(peak_slope_val, "intercept")
-    peak_slope_val <- as.numeric(peak_slope_val) ## remove attribute
-    t_peak <- t[peak_idx]
-    y_peak <- intercept + peak_slope_val * t_peak
-    fitted <- intercept + peak_slope_val * t[window_idx]
+    ## fit lm on peak window
+    model <- stats::lm(x ~ t, data.frame(x = x[window_idx], t = t[window_idx]))
 
-    ## return
+    slope_val <- unname(stats::coef(model)[["t"]])
+    intercept_val <- unname(stats::coef(model)[["(Intercept)"]])
+    t_peak <- t[peak_idx]
+    y_peak <- intercept_val + slope_val * t_peak
+
     return(list(
-        slope = peak_slope_val,
-        intercept = intercept,
+        slope = slope_val,
+        intercept = intercept_val,
         y = y_peak,
         t = t_peak,
         idx = peak_idx,
-        fitted = fitted,
-        window_idx = window_idx
+        fitted = unname(stats::fitted(model)),
+        window_idx = window_idx,
+        model = model
     ))
 }
 
