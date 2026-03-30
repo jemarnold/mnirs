@@ -12,10 +12,10 @@
 
 ## Formatting
 
-- Enforce per-line 80-character limit, closer is better. Adhere to `Air` formatting.
+- Enforce per-line 80-character limit, closer to 80 is better.
 - Comments in the form: `## lower case comment`.
 - Comments should briefly explain the "why" of the operation.
-- Comments should not describe refactoring changes; describe the new functionality
+- Comments should not describe refactoring changes or reference prompt decisions.
 - Use explicit `return()` expression at the end of custom functions.
 
 ## Architecture

@@ -215,6 +215,9 @@ signif_pvalue <- function(
         msg2 = "between {col_blue('[0, 1]')}"
     )
 
+    ## p-values cannot be infinite; coerce before branching
+    x[is.infinite(x)] <- NA_real_
+
     if (display == "symbol" && symbol_repeat) {
         return(strrep(symbol, 3L - findInterval(x, c(0.001, 0.01, alpha))))
     }
@@ -231,7 +234,7 @@ signif_pvalue <- function(
     return(ifelse(
         x < threshold,
         sprintf("< %.*f", digits, threshold),
-        signif_trailing(x, digits, format, trim = FALSE)
+        paste0("= ", signif_trailing(x, digits, format, trim = FALSE))
     ))
 }
 

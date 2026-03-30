@@ -290,24 +290,27 @@ test_that("signif_pvalue formats values correctly with display = 'value'", {
 
     result <- signif_pvalue(p_vals, digits = 3)
     expect_type(result, "character")
-    expect_setequal(result, c("< 0.001", "0.003", "0.020", "0.080", "0.150"))
+    expect_setequal(
+        result,
+        c("< 0.001", "= 0.003", "= 0.020", "= 0.080", "= 0.150")
+    )
 })
 
 test_that("signif_pvalue respects digits for threshold", {
     expect_equal(signif_pvalue(0.005, digits = 2), "< 0.01")
-    expect_equal(signif_pvalue(0.005, digits = 3), "0.005")
+    expect_equal(signif_pvalue(0.005, digits = 3), "= 0.005")
     expect_equal(signif_pvalue(0.0005, digits = 3), "< 0.001")
 })
 
 test_that("signif_pvalue uses alpha as threshold when digits = 1", {
     # Default alpha = 0.05
     expect_equal(signif_pvalue(0.03, digits = 1), "< 0.05")
-    expect_equal(signif_pvalue(0.06, digits = 1), "0.06")
+    expect_equal(signif_pvalue(0.06, digits = 1), "= 0.06")
 
     # Custom alpha = 0.01
     expect_equal(signif_pvalue(0.005, digits = 1, alpha = 0.01), "< 0.01")
     expect_equal(signif_pvalue(0.005, digits = 2, alpha = 0.01), "< 0.01")
-    expect_equal(signif_pvalue(0.02, digits = 1, alpha = 0.01), "0.02")
+    expect_equal(signif_pvalue(0.02, digits = 1, alpha = 0.01), "= 0.02")
 })
 
 test_that("signif_pvalue returns symbols", {
@@ -364,13 +367,12 @@ test_that("signif_pvalue handles boundary values for symbol_repeat", {
 
 test_that("signif_pvalue handles edge case p-values", {
     expect_equal(signif_pvalue(0, digits = 3), "< 0.001")
-    expect_equal(signif_pvalue(1, digits = 3), "1.000")
-    expect_equal(signif_pvalue(0.9995, digits = 3), "1.000")
+    expect_equal(signif_pvalue(1, digits = 3), "= 1.000")
+    expect_equal(signif_pvalue(0.9995, digits = 3), "= 1.000")
 
-    ## what do I want Inf, NaN to display?
     expect_setequal(
         signif_pvalue(c(1, NA, NaN, Inf, -Inf)),
-        c("1.000", NA, NA, "Inf", "< 0.001")
+        c("= 1.000", NA, NA, NA, NA)
     )
 })
 
