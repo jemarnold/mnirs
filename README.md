@@ -73,16 +73,16 @@ example_mnirs()
 data_raw <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example data file
     nirs_channels = c(
-        smo2_left = "SmO2 Live",            ## identify and rename channels
+        smo2_left = "SmO2 Live",    ## identify and rename channels
         smo2_right = "SmO2 Live(2)"
     ),
-    time_channel = c(time = "hh:mm:ss"),    ## date-time format will be converted to numeric
-    event_channel = NULL,                   ## leave blank if unused
-    sample_rate = NULL,                     ## if blank, will be estimated from time_channel
-    add_timestamp = FALSE,                  ## omit a date-time timestamp column
-    zero_time = TRUE,                       ## recalculate time values from zero
-    keep_all = FALSE,                       ## return only the specified data channels
-    verbose = TRUE                          ## show warnings & messages
+    time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
+    event_channel = NULL,           ## leave blank if unused
+    sample_rate = NULL,             ## if blank, will be estimated from time_channel
+    add_timestamp = FALSE,          ## omit a date-time timestamp column
+    zero_time = TRUE,               ## recalculate time values from zero
+    keep_all = FALSE,               ## return only the specified data channels
+    verbose = TRUE                  ## show warnings & messages
 )
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
