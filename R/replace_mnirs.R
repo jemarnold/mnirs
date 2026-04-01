@@ -155,10 +155,7 @@ replace_mnirs <- function(
 
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    ## verbose = FALSE because grouping irrelevant
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     time_vec <- data[[time_channel]]
 

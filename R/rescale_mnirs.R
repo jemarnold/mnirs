@@ -91,7 +91,7 @@ rescale_mnirs <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose
+        enquo(nirs_channels), data, verbose = TRUE, as_list = TRUE
     )
     validate_numeric(
         range, 2, 

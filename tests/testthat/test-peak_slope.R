@@ -1226,58 +1226,61 @@ test_that("analyse_frollslope benchmark", {
         resample_mnirs(verbose = FALSE) |>
         extract_intervals(
             start = by_time(368, 1093),
-            event_groups = "ensemble",
+            event_groups = "distinct",
             span = c(-20, 90),
             zero_time = TRUE,
             verbose = FALSE
         )
-    df <- df[[1L]]
+    # df <- df[[1L]]
 
     # bench::mark(
     #     slope = slope(df$smo2_left, df$time, na.rm = TRUE),
-    #     lsq_slope = lsq_slope(df$smo2_left, df$time),
     #     check = TRUE,
     #     iterations = 500
     # )
 
     # bench::mark(
     #     rolling_slope = rolling_slope(
-    #         df$smo2_left,
-    #         df$time,
-    #         width = 11,
+    #         df[[1L]]$smo2_left,
+    #         df[[1L]]$time,
+    #         span = 10,
     #         align = "right",
     #         partial = FALSE,
-    #     ),
-    #     frollapply = data.table::frollapply(
-    #         X = seq_along(df$smo2_left),
-    #         N = 11,
-    #         FUN = \(.idx) lsq_slope(df$smo2_left[.idx], df$time[.idx]),
-    #         align = "right",
-    #         partial = FALSE
     #     ),
     #     check = TRUE,
     #     iterations = 50
     # )
 
-    # for (i in seq_len(3)) {
-    # bm <- bench::mark(
-    #     # analyse_frollslope = analyse_frollslope(
-    #     #     df,
-    #     #     nirs_channels = c(smo2_left, smo2_right),
-    #     #     span = 10,
-    #     #     partial = TRUE,
-    #     #     verbose = FALSE
-    #     # ),
+    # bench::mark(
     #     analyse_peak_slope = analyse_peak_slope(
-    #         df,
-    #         nirs_channels = c(smo2_left, smo2_right),
+    #         df[[1L]],
+    #         nirs_channels = c(smo2_left),
     #         span = 10,
-    #         partial = TRUE,
+    #         partial = FALSE,
     #         verbose = FALSE
     #     ),
-    #     iterations = 5,
+    #     iterations = 20,
     #     check = FALSE
     # )
-    #     print(bm)
-    # }
+
+    # bench::mark(
+    #     peak_slope = analyse_kinetics(
+    #         df[[1L]],
+    #         nirs_channels = c(smo2_left),
+    #         method = "peak_slope",
+    #         span = 10,
+    #         partial = FALSE,
+    #         verbose = FALSE
+    #     ),
+    #     monoexponential = analyse_kinetics(
+    #         df[[1L]],
+    #         nirs_channels = c(smo2_left),
+    #         method = "monoexp",
+    #         time_delay = TRUE,
+    #         partial = FALSE,
+    #         verbose = FALSE
+    #     ),
+    #     check = FALSE,
+    #     iterations = 5
+    # )
 })

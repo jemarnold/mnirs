@@ -106,7 +106,7 @@ shift_mnirs <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
+        enquo(nirs_channels), data, verbose = TRUE, as_list = TRUE
     )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_numeric(to, 1, msg1 = "one-element")

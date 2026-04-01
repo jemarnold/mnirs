@@ -423,9 +423,7 @@ analyse_peak_slope <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     validate_mnirs_data(data)
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
     align <- sub("^center$", "centre", align)

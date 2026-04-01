@@ -322,8 +322,6 @@ test_that("shift_mnirs handles multiple channel groups", {
         ch3 = c(5, 35)
     )
     nirs_channels <- list(c("ch1", "ch2"), "ch3")
-    # parse_channel_name(enquo(nirs_channels), data)
-    # validate_nirs_channels(enquo(nirs_channels), data)
     result <- shift_mnirs(data, nirs_channels, time, to = 0, width = 1)
 
     ## check grouping together: min shuold come from ch1 and ch3
