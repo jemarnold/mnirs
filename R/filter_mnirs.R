@@ -181,16 +181,13 @@ filter_mnirs <- function(
 ) {
     ## validation ====================================
     validate_mnirs_data(data)
-    ## using method aliases
-    method <- match.arg(method, c(
-        "smooth_spline", "butterworth", "moving_average", "spline", "ma"
-    ))
-    method <- switch(
-        method,
-        spline = "smooth_spline",
-        ma = "moving_average",
-        method
-    )
+    ## normalise method aliases before matching
+    method <- gsub("^(ma|moving[_ ]average)$", "moving_average",
+        method, ignore.case = TRUE)
+    method <- gsub("^(spline|smooth[_ ]spline)$", "smooth_spline",
+        method, ignore.case = TRUE)
+    method <- match.arg(method)
+    
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }

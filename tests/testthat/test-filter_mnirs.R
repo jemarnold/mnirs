@@ -375,28 +375,38 @@ test_that("filter_mnirs validates input data", {
 })
 
 test_that("filter_mnirs method aliases work", {
-    result_spline <- filter_mnirs(moxy_data, method = "spline", verbose = FALSE)
-    result_ma <- filter_mnirs(
-        moxy_data,
-        method = "ma",
-        width = 5,
-        verbose = FALSE
+    result_ma <- filter_mnirs(moxy_data, method = "moving_average", width = 5)
+    result_spl <- filter_mnirs(
+        moxy_data, method = "smooth_spline", verbose = FALSE
     )
 
-    expect_s3_class(result_spline, "mnirs")
-    expect_s3_class(result_ma, "mnirs")
     expect_equal(
-        result_spline,
-        filter_mnirs(moxy_data, method = "smooth_spline", verbose = FALSE)
+        filter_mnirs(moxy_data, method = "moving average", width = 5),
+        result_ma
     )
     expect_equal(
-        result_ma,
-        filter_mnirs(
-            moxy_data,
-            method = "moving_average",
-            width = 5,
-            verbose = FALSE
-        )
+        filter_mnirs(moxy_data, method = "Moving Average", width = 5),
+        result_ma
+    )
+    expect_equal(
+        filter_mnirs(moxy_data, method = "MA", width = 5),
+        result_ma
+    )
+    expect_equal(
+        filter_mnirs(moxy_data, verbose = FALSE),
+        result_spl
+    )
+    expect_equal(
+        filter_mnirs(moxy_data, method = "spline", verbose = FALSE),
+        result_spl
+    )
+    expect_equal(
+        filter_mnirs(moxy_data, method = "smooth spline", verbose = FALSE),
+        result_spl
+    )
+    expect_equal(
+        filter_mnirs(moxy_data, method = "Smooth Spline", verbose = FALSE),
+        result_spl
     )
 })
 

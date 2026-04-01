@@ -110,7 +110,7 @@ Downsampling can be useful to reduce data size and processing requirement, altho
 
 ## Digital Filtering
 
-Digital filtering and data smoothing is one of the most important steps in processing mNIRS data. This is the primary method to improve signal-to-noise and extract the relevant biological phenomena or task-specific signal from the many sources of extraneous noise {Dans, 2021}. However, over-filtering data can also introduce data artefacts which can negatively influence signal analysis and interpretations, just as much as trying to analyse overly-noisy raw data.
+Digital filtering and data smoothing is one of the most important steps in processing mNIRS data. This is the primary method to improve signal-to-noise and extract the relevant biological phenomena or task-specific signal from the many sources of extraneous noise {Dans, 2021}. However, over-filtering data can also introduce distortion which can negatively influence signal analysis and interpretations, just as much as trying to analyse overly-noisy raw data.
 
 Specific filtering parameters are difficult to recommend universally for mNIRS signals. The wide variation in device capabilities (primarily sample rate) and the diversity in the possible physiologic responses of interest in mNIRS applications means that no single filtering method can be recommended as a 'gold-standard'.
 
@@ -120,7 +120,7 @@ The most common filtering method in published mNIRS research is probably a Butte
 
 The most accessible method to many NIRS practitioners is using a simple moving average (`method = "moving_average"`), which can be applied manually in spreadsheets, and is often employed onboard mNIRS devices for real-time smoothing (although, a one-sided real-time smoothing kernal can introduce a time delay in signal response and post-processing raw signals with a symmetrical two-way kernel is preferred {Smith, 1997, 8363}). For lower sample rate recordings and for signals occurring over longer time frames (e.g. minutes or longer), moving averaging is often sufficient to capture the target response.
 
-It is perfectly valid to choose a digital filter by iteratively testing filter parameters until the signal or response of interest appears to be visually optimised with minimal data artefacts, to your satisfaction.
+It is perfectly valid to choose a digital filter by iteratively testing filter parameters until the signal or response of interest appears to be visually optimised with minimal distortion, to your satisfaction.
 
 ![](../../man/figures/README-filter_mnirs-1.png){fig-alt="Data filtered with a Butterworth low-pass digital filter" width=\"90%\" fig-align="center"}
 
