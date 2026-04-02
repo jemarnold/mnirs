@@ -1,5 +1,38 @@
 # Changelog
 
+## mnirs 0.6.1
+
+### Bug fixes
+
+- Core functions updated to accept `nirs_channel` args as a list.
+
+  - An info message will be displayed when a list is not required,
+    instead of erroring.
+  - Additional info messages will be displayed for
+    [`shift_mnirs()`](https://jemarnold.github.io/mnirs/reference/shift_mnirs.md),
+    [`rescale_mnirs()`](https://jemarnold.github.io/mnirs/reference/rescale_mnirs.md),
+    and
+    [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+    when `nirs_channels` has not been specified as a list, nor retrieved
+    from metadata. As a reminder of the grouping requirements in those
+    functions.
+
+- Core functions now properly update `nirs_channels` metadata when
+  re-specified.
+
+  - Previously, specifying `nirs_channels` in a function would only add
+    any additional column name strings to the existing metadata rather
+    than overwrite it. Meaning `nirs_channels` could only be removed
+    from metadata by using `create_mnirs_data(nirs_channels = "...")`.
+    The updated behaviour should mean channels need to be re-specified
+    less often.
+
+- [`filter_mnirs()`](https://jemarnold.github.io/mnirs/reference/filter_mnirs.md):
+  Fixed an error matching `method` arguments when left blank.
+
+- *README* and *“Reading and Cleaning Data with {mnirs}”* vignette
+  updated to fix typos and small edits.
+
 ## mnirs 0.6.0
 
 CRAN release: 2026-03-30

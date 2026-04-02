@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,23 @@
       <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.1" id="mnirs-061">mnirs 0.6.1<a class="anchor" aria-label="anchor" href="#mnirs-061"></a></h2>
+<div class="section level3">
+<h3 id="bug-fixes-0-6-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6-1"></a></h3>
+<ul><li>
+<p>Core functions updated to accept <code>nirs_channel</code> args as a list.</p>
+<ul><li>An info message will be displayed when a list is not required, instead of erroring.</li>
+<li>Additional info messages will be displayed for <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/rescale_mnirs.html">rescale_mnirs()</a></code>, and <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> when <code>nirs_channels</code> has not been specified as a list, nor retrieved from metadata. As a reminder of the grouping requirements in those functions.</li>
+</ul></li>
+<li>
+<p>Core functions now properly update <code>nirs_channels</code> metadata when re-specified.</p>
+<ul><li>Previously, specifying <code>nirs_channels</code> in a function would only add any additional column name strings to the existing metadata rather than overwrite it. Meaning <code>nirs_channels</code> could only be removed from metadata by using <code>create_mnirs_data(nirs_channels = "...")</code>. The updated behaviour should mean channels need to be re-specified less often.</li>
+</ul></li>
+<li><p><code><a href="../reference/filter_mnirs.html">filter_mnirs()</a></code>: Fixed an error matching <code>method</code> arguments when left blank.</p></li>
+<li><p><em>README</em> and <em>“Reading and Cleaning Data with {mnirs}”</em> vignette updated to fix typos and small edits.</p></li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.0" id="mnirs-060">mnirs 0.6.0<a class="anchor" aria-label="anchor" href="#mnirs-060"></a></h2><p class="text-muted">CRAN release: 2026-03-30</p>
 <div class="section level3">

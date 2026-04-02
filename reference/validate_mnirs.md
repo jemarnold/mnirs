@@ -22,7 +22,8 @@ validate_mnirs_data(data, ncol = 2L)
 validate_nirs_channels(
   nirs_channels,
   data,
-  verbose = TRUE,
+  verbose = FALSE,
+  as_list = FALSE,
   env = rlang::caller_env()
 )
 
@@ -96,6 +97,14 @@ validate_x_t(x, t, invalid = FALSE)
   Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
   warnings and information messages helpful for troubleshooting. A
   global default can be set via `options(mnirs.verbose = FALSE)`.
+
+- as_list:
+
+  Logical. Default is `FALSE`. If `nirs_channels` is specified as a
+  list, it will be coerced to a flat character vector and an information
+  message is displayed (when `verbose = TRUE`). If `TRUE`,
+  `nirs_channels` is returned as-is, i.e. as a list for callers which
+  require it.
 
 - time_channel:
 

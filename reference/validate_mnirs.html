@@ -9,7 +9,7 @@ checks."><meta name="twitter:card" content="summary"><meta name="twitter:creator
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,8 @@ checks.</p>
 <span><span class="fu">validate_nirs_channels</span><span class="op">(</span></span>
 <span>  <span class="va">nirs_channels</span>,</span>
 <span>  <span class="va">data</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as_list <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  env <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -137,6 +138,14 @@ used.</p></li>
 <dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
 <code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
 global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
+
+
+<dt id="arg-as-list">as_list<a class="anchor" aria-label="anchor" href="#arg-as-list"></a></dt>
+<dd><p>Logical. Default is <code>FALSE</code>. If <code>nirs_channels</code> is specified
+as a list, it will be coerced to a flat character vector and an
+information message is displayed (when <code>verbose = TRUE</code>). If <code>TRUE</code>,
+<code>nirs_channels</code> is returned as-is, i.e. as a list for callers which
+require it.</p></dd>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
