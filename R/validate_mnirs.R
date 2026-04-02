@@ -238,7 +238,7 @@ validate_nirs_channels <- function(
     if (is.null(nirs_unlisted) || length(nirs_unlisted) == 0) {
         nirs_channels <- attr(data, "nirs_channels") ## should be vector
         nirs_unlisted <- nirs_channels
-        if (verbose && !is.null(nirs_unlisted)) {
+        if (verbose && as_list && !is.null(nirs_unlisted)) {
             cli_inform(c(
                 "i" = "{.arg nirs_channels} = \\
                 {col_blue({deparse(nirs_unlisted)})} \\

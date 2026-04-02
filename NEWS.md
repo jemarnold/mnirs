@@ -1,6 +1,6 @@
 # mnirs 0.6.1
 
-## Updates
+## Bug fixes
 
 * Core functions updated to accept `nirs_channel` args as a list. 
     * An info message will be displayed when a list is not required, instead of erroring.
@@ -9,9 +9,9 @@
 * Core functions now properly update `nirs_channels` metadata when re-specified.
     * Previously, specifying `nirs_channels` in a function would only add any additional column name strings to the existing metadata rather than overwrite it. Meaning `nirs_channels` could only be removed from metadata by using `create_mnirs_data(nirs_channels = "...")`. The updated behaviour should mean channels need to be re-specified less often.
 
-* Fixed an error in `filter_mnirs` to properly match *"method"* arguments when left blank.
+* `filter_mnirs()`: Fixed an error matching `method` arguments when left blank.
 
-* *README* and *"Reading and Cleaning Data with {mnirs}"* vignette updated with small edits and typo fixes.
+* *README* and *"Reading and Cleaning Data with {mnirs}"* vignette updated to fix typos and small edits.
 
 # mnirs 0.6.0
 

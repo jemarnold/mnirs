@@ -213,9 +213,7 @@ filter_mnirs.smooth_spline <- function(
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     spar <- list(...)$spar
     validate_numeric(spar, 1, c(0, Inf), FALSE, msg1 = "one-element positive")
@@ -283,9 +281,7 @@ filter_mnirs.butterworth <- function(
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     args <- list(...)
     sample_rate <- args$sample_rate
@@ -363,9 +359,7 @@ filter_mnirs.moving_average <- function(
 ) {
     ## validation ==========================================
     metadata <- attributes(data)
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     args <- list(...)
     width <- args$width

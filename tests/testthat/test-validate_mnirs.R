@@ -250,7 +250,9 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
 
     attr(data, "nirs_channels") <- nirs_vec
     expect_message(
-        result <- validate_nirs_channels(NULL, data, verbose = TRUE),
+        result <- validate_nirs_channels(
+            NULL, data, verbose = TRUE, as_list = TRUE
+        ),
         "`nirs_channels`.*grouped"
     )
     expect_equal(result, nirs_vec)
@@ -503,8 +505,6 @@ test_that("within is equivalent to dplyr::between()", {
         dplyr::between(c(0, 5, 10, 15), 1, 10)
     )
 
-    ## TODO should it have the same non-numeric NA behaviour?
-    # expect_equal(within(NA, c(1, 10)), dplyr::between(NA, 1, 10))
     expect_equal(within(NA_real_, c(1, 10)), dplyr::between(NA_real_, 1, 10))
     expect_equal(
         within(c(1, NA, 5), c(1, 10)),
