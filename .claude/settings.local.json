@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls -la /c/R-Projects/mnirs/R/*.R)",
-      "Bash(grep -n \"^within\" /c/R-Projects/mnirs/R/*.R)"
-    ]
-  }
-}

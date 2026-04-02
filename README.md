@@ -24,7 +24,7 @@ minimal coding experience required.
 install.packages("mnirs")
 ```
 
-You can install the development version of *{mnirs}* from
+You can install the development version of *`mnirs`* from
 [GitHub](https://github.com/jemarnold/mnirs) with:
 
 ``` r
@@ -51,17 +51,15 @@ A more detailed vignette for common usage can be found on the package
 website: [Reading and Cleaning Data with
 {mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
 
-*{mnirs}* is currently in experimental development and functionality may
-change. Stay updated on development and follow releases !
-
-*{mnirs}* is designed to process NIRS data, but it can be used to read,
-clean, and process other time series datasets which require many of the
-same processing steps. Enjoy!
+*`mnirs`* is designed for mNIRS data, but it can be used to read, clean,
+and process other time series datasets which require many of the same
+processing steps. Enjoy!
 
 ### `read_mnirs()` Read data from file
 
 ``` r
-library(ggplot2) ## load for plotting
+library(ggplot2) ## for plotting
+library(patchwork) ## for plotting
 library(mnirs)
 
 ## {mnirs} includes sample files from a few mNIRS devices
@@ -75,16 +73,16 @@ example_mnirs()
 data_raw <- read_mnirs(
     file_path = example_mnirs("moxy_ramp"), ## call an example data file
     nirs_channels = c(
-        smo2_left = "SmO2 Live",            ## identify and rename channels
+        smo2_left = "SmO2 Live",    ## identify and rename channels
         smo2_right = "SmO2 Live(2)"
     ),
-    time_channel = c(time = "hh:mm:ss"),    ## date-time format will be converted to numeric
-    event_channel = NULL,                   ## leave blank if unused
-    sample_rate = NULL,                     ## if blank, will be estimated from time_channel
-    add_timestamp = FALSE,                  ## omit a date-time timestamp column
-    zero_time = TRUE,                       ## recalculate time values from zero
-    keep_all = FALSE,                       ## return only the specified data channels
-    verbose = TRUE                          ## show warnings & messages
+    time_channel = c(time = "hh:mm:ss"), ## date-time format will be converted to numeric
+    event_channel = NULL,           ## leave blank if unused
+    sample_rate = NULL,             ## if blank, will be estimated from time_channel
+    add_timestamp = FALSE,          ## omit a date-time timestamp column
+    zero_time = TRUE,               ## recalculate time values from zero
+    keep_all = FALSE,               ## return only the specified data channels
+    verbose = TRUE                  ## show warnings & messages
 )
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
@@ -120,7 +118,7 @@ plot(
 )
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" alt="" width="100%" />
+<img src="man/figures/README-read_mnirs-1.png" alt="" width="100%" />
 
 ### Metadata stored in `mnirs` data frames
 
@@ -151,7 +149,7 @@ data_cleaned <- replace_mnirs(
 plot(data_cleaned, time_labels = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" alt="" width="100%" />
+<img src="man/figures/README-replace_mnirs-1.png" alt="" width="100%" />
 
 ### `resample_mnirs()`: Resample data
 
@@ -205,7 +203,7 @@ plot(data_filtered, time_labels = TRUE) +
     )
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" alt="" width="100%" />
+<img src="man/figures/README-filter_mnirs-1.png" alt="" width="100%" />
 
 ### `shift_mnirs()` & `rescale_mnirs()`: Shift and rescale data
 
@@ -222,7 +220,7 @@ plot(data_shifted, time_labels = TRUE) +
     geom_hline(yintercept = 0, linetype = "dotted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" alt="" width="100%" />
+<img src="man/figures/README-shift_mnirs-1.png" alt="" width="100%" />
 
 ``` r
 data_rescaled <- rescale_mnirs(
@@ -235,7 +233,7 @@ plot(data_rescaled, time_labels = TRUE) +
     geom_hline(yintercept = c(0, 100), linetype = "dotted")
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" alt="" width="100%" />
+<img src="man/figures/README-rescale_mnirs-1.png" alt="" width="100%" />
 
 ### Pipe-friendly functions
 
@@ -278,58 +276,61 @@ nirs_data <- read_mnirs(
 plot(nirs_data, time_labels = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" alt="" width="100%" />
+<img src="man/figures/README-pipeline-1.png" alt="" width="100%" />
 
 ### `extract_intervals()`: detect events and extract intervals
 
 ``` r
 ## return each interval independently with `event_groups = "distinct"`
-distinct_list <- extract_intervals(
-    nirs_data,                  ## channels blank for "distinct" grouping
-    start = by_time(177, 904),  ## manually identified interval start times
-    end = by_time(357, 1084),   ## interval end time (start + 180 sec)
-    event_groups = "distinct",  ## return a list of data frames for each (2) event
-    span = c(0, 0),             ## no modification to the 3-min intervals
-    zero_time = FALSE           ## return original time values
+distinct <- extract_intervals(
+    nirs_data,                 ## channels blank for "distinct" grouping
+    start = by_time(36, 751),  ## manually identified interval start times
+    end = by_time(186, 901),   ## interval end time (start + 150 sec)
+    event_groups = "distinct", ## return a list of data frames for each (2) event
+    span = c(0, 0),            ## no boundary modification
+    zero_time = FALSE          ## return original time values
 )
 
-## use `{patchwork}` package to plot intervals side by side
-library(patchwork)
-
-plot(distinct_list[[1L]]) + plot(distinct_list[[2L]])
+plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" alt="" width="100%" />
+<img src="man/figures/README-extract_intervals_distinct-1.png" alt="" width="100%" />
 
 ``` r
 ## ensemble average both intervals with `event_groups = "ensemble"`
-ensemble_list <- extract_intervals(
-    nirs_data,                  ## channels recycled to all intervals by default
+ensemble <- extract_intervals(
+    nirs_data,                 ## channels recycled to all intervals by default
     nirs_channels = c(smo2_left, smo2_right),
-    start = by_time(177, 904),  ## alternatively specify start times + 180 sec
-    event_groups = "ensemble",  ## ensemble-average across two intervals
-    span = c(0, 180),           ## span recycled to all intervals by default
-    zero_time = TRUE            ## re-calculate common time to start from `0`
+    start = by_time(66, 781),  ## alternatively specify start times + span
+    event_groups = "ensemble", ## ensemble-average across two intervals
+    span = c(-30, 120),        ## span recycled to all intervals by default
+    zero_time = TRUE           ## re-calculate common time to start from `0`
 )
 
-plot(ensemble_list[[1L]])
+plot(ensemble[[1L]], time_labels = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" alt="" width="100%" />
+<img src="man/figures/README-extract_intervals_ensemble-1.png" alt="" width="100%" />
 
-## Future *{mnirs}* development
+## Future *`mnirs`* development
 
 - Process oxygenation kinetics
 
-  - Monoexponential & sigmoidal curve fitting
+  - Monoexponential & sigmoidal non-linear curve fitting
 
-  - non-parametric kinetics & slope analysis
+  - Non-parametric half-response time & slope analysis
 
 - Critical oxygenation breakpoint analysis
 
   - Manual selection and automation-assisted breakpoint detection
     (combine expert evaluation with robust probabilistic breakpoint
     detection)
+
+- Oxidative capacity assessment
+
+  - Repeated occlusion ensemble-averaging and model fitting
+
+  - Blood volume correction
 
 ## mNIRS device compatibility
 
@@ -350,4 +351,4 @@ the following devices and apps:
 ------------------------------------------------------------------------
 
 *Generative chatbots are used to assist with code optimisation. All code
-is thoroughly reviewed and validated by the package author.*
+is thoroughly reviewed, validated, and tested by the package author.*

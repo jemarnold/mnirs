@@ -14,3 +14,5 @@ docs
 **/_extensions
 *mnirs-hex*.png
 **/*.quarto_ipynb
+/.claude/
+CLAUDE.md
