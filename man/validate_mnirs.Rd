@@ -29,7 +29,8 @@ validate_mnirs_data(data, ncol = 2L)
 validate_nirs_channels(
   nirs_channels,
   data,
-  verbose = TRUE,
+  verbose = FALSE,
+  as_list = FALSE,
   env = rlang::caller_env()
 )
 
@@ -82,6 +83,12 @@ used.
 \item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
+
+\item{as_list}{Logical. Default is \code{FALSE}. If \code{nirs_channels} is specified
+as a list, it will be coerced to a flat character vector and an
+information message is displayed (when \code{verbose = TRUE}). If \code{TRUE},
+\code{nirs_channels} is returned as-is, i.e. as a list for callers which
+require it.}
 
 \item{time_channel}{A character string giving the name of the time or sample
 column. Must match a column name in \code{data} exactly.

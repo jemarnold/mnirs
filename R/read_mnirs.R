@@ -163,10 +163,7 @@ read_mnirs <- function(
 
     ## attempt to detect `time_channel` automatically
     time_channel <- detect_time_channel(
-        data,
-        time_channel,
-        nirs_device,
-        verbose
+        data, time_channel, nirs_device, verbose
     )
 
     ## rename from channel names, make duplicates unique, keep columns

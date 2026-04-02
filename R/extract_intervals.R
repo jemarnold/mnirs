@@ -201,7 +201,9 @@ extract_intervals <- function(
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
-    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose, as_list = TRUE
+    )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     ## avoid floating point precision issues downstream with findIntervals()
     time_vec <- round(data[[time_channel]], 6)
@@ -248,6 +250,19 @@ extract_intervals <- function(
             event_channel, data, required = FALSE
         )
         event_vec <- NULL
+    }
+
+    if (
+        verbose &&
+            event_groups[1L] != "distinct" &&
+            is.null(attr(data, "nirs_channels")) &&
+            !is.list(nirs_channels)
+    ) {
+        cli_inform(c(
+            "!" = "{.fn extract_intervals} accepts {.arg nirs_channels} = \\
+            {col_blue('list()')} for channel grouping when \\
+            ensemble-averaging. See `?extract_intervals`."
+        ))
     }
 
     ## expand parameters ====================================

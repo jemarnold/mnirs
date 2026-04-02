@@ -21,6 +21,12 @@
 #'   - If `NULL` (default), the `event_channel` metadata attribute of `data` is
 #'     used.
 #'
+#' @param as_list Logical. Default is `FALSE`. If `nirs_channels` is specified
+#'   as a list, it will be coerced to a flat character vector and an
+#'   information message is displayed (when `verbose = TRUE`). If `TRUE`,  
+#'   `nirs_channels` is returned as-is, i.e. as a list for callers which 
+#'   require it. 
+#'
 #' @param required Logical. Default is `TRUE`. `event_channel` must be
 #'   present or detected in metadata. If `FALSE`, `event_channel` may be `NULL`.
 #'
@@ -218,7 +224,8 @@ parse_channel_name <- function(channel, data, env = rlang::caller_env()) {
 validate_nirs_channels <- function(
     nirs_channels,
     data,
-    verbose = TRUE,
+    verbose = FALSE, ## only for functions requiring list()
+    as_list = FALSE,
     env = rlang::caller_env()
 ) {
     ## parse NSE input
@@ -231,9 +238,11 @@ validate_nirs_channels <- function(
     if (is.null(nirs_unlisted) || length(nirs_unlisted) == 0) {
         nirs_channels <- attr(data, "nirs_channels") ## should be vector
         nirs_unlisted <- nirs_channels
-        if (verbose && !is.null(nirs_unlisted)) {
+        if (verbose && as_list && !is.null(nirs_unlisted)) {
             cli_inform(c(
-                "i" = "{.arg nirs_channels} grouped together by default."
+                "i" = "{.arg nirs_channels} = \\
+                {col_blue({deparse(nirs_unlisted)})} \\
+                grouped together from metadata."
             ))
         }
     }
@@ -266,9 +275,22 @@ validate_nirs_channels <- function(
         ))
     }
 
+    ## preserve list grouping for callers that need it
+    if (as_list) {
+        return(nirs_channels)
+    }
+
+    ## default: coerce to flat vector
+    if (verbose && is.list(nirs_channels)) {
+        cli_inform(c(
+            "i" = "{.arg nirs_channels} = \\
+            {col_blue({deparse(nirs_unlisted)})} passed through unlisted."
+        ))
+    }
+
     ## returns explicitly grouped nirs_channels
     ## or nirs_unlisted if retrieved from metadata
-    return(nirs_channels)
+    return(nirs_unlisted)
 }
 
 

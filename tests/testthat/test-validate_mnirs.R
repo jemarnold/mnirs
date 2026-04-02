@@ -250,16 +250,18 @@ test_that("validate_nirs_channels() works with nirs_channels = list()", {
 
     attr(data, "nirs_channels") <- nirs_vec
     expect_message(
-        result <- validate_nirs_channels(NULL, data, verbose = TRUE),
+        result <- validate_nirs_channels(
+            NULL, data, verbose = TRUE, as_list = TRUE
+        ),
         "`nirs_channels`.*grouped"
     )
     expect_equal(result, nirs_vec)
 
     nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
-    result <- validate_nirs_channels(nirs_list, data)
+    result <- validate_nirs_channels(nirs_list, data, as_list = TRUE)
     expect_equal(result, nirs_list)
 
-    result <- validate_nirs_channels(enquo(nirs_list), data)
+    result <- validate_nirs_channels(enquo(nirs_list), data, as_list = TRUE)
     expect_equal(result, nirs_list)
 })
 

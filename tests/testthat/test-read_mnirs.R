@@ -1257,7 +1257,7 @@ test_that("parse_sample_rate handles Artinis device", {
         nirs_channels = c(HHb = 2, O2Hb = 3),
         time_channel = c(sample = 1),
         event_channel = NULL,
-        verbose = TRUE
+        verbose = FALSE
     ) |>
         dplyr::select(-time)
 
@@ -1465,6 +1465,7 @@ test_that("read_mnirs auto-detects Artinis channels when nirs_channels = NULL", 
         ),
         "Artinis.*detected"
     ) |>
+        expect_message("Oxysoft.*sample.*column") |> 
         expect_message("Oxysoft.*sample_rate.*10")
 
     expect_s3_class(df, "mnirs")
@@ -1602,16 +1603,13 @@ test_that("read_mnirs moxy .csv works converting time to numeric", {
 test_that("read_mnirs moxy invalid channel names", {
     file_path <- example_mnirs("moxy_ramp.xlsx")
 
-    old_verbose <- getOption("mnirs.verbose")
-    on.exit(options(mnirs.verbose = old_verbose), add = TRUE)
-    options(mnirs.verbose = FALSE)
-
     ## invalid channel names
     expect_error(
         read_mnirs(
             file_path = file_path,
             nirs_channels = c(""),
             time_channel = c(time = "hh:mm:ss"),
+            verbose = FALSE
         ),
         "not detected"
     )
@@ -1621,6 +1619,7 @@ test_that("read_mnirs moxy invalid channel names", {
             file_path = file_path,
             nirs_channels = c(smo2_left = "smo2_doesnt_exist"),
             time_channel = c(time = "hh:mm:ss"),
+            verbose = FALSE
         ),
         "not detected"
     )
@@ -1637,7 +1636,8 @@ test_that("read_mnirs moxy invalid channel names", {
         ),
         "Estimated.*sample_rate.*2"
     ) |>
-        expect_warning("irregular")
+        expect_warning("irregular") |> 
+        expect_message("Detected.*time_channel")
 
     expect_equal(attr(df, "time_channel"), "hh:mm:ss")
 
@@ -1795,10 +1795,6 @@ test_that("read_mnirs train.red works with zero_time", {
 test_that("read_mnirs train.red invalid channel names", {
     file_path <- example_mnirs("train.red_intervals.csv")
 
-    old_verbose <- getOption("mnirs.verbose")
-    on.exit(options(mnirs.verbose = old_verbose), add = TRUE)
-    options(mnirs.verbose = FALSE)
-
     ## invalid channel names
     expect_error(
         read_mnirs(
@@ -1830,6 +1826,7 @@ test_that("read_mnirs train.red invalid channel names", {
         ),
         "Estimated.*sample_rate.*10"
     ) |>
+        expect_message("Detected.*time_channel") |> 
         expect_warning("irregular")
 
     expect_equal(attr(df, "time_channel"), "Timestamp (seconds passed)")
@@ -1892,10 +1889,6 @@ test_that("read_mnirs oxysoft works", {
 test_that("read_mnirs Oxysoft Portamon works", {
     file_path <- example_mnirs("portamon")
 
-    old_verbose <- getOption("mnirs.verbose")
-    on.exit(options(mnirs.verbose = old_verbose), add = TRUE)
-    options(mnirs.verbose = FALSE)
-
     expect_equal(
         read_file(file_path) |>
             detect_mnirs_device(),
@@ -1909,7 +1902,8 @@ test_that("read_mnirs Oxysoft Portamon works", {
         file_path = example_mnirs("portamon-oxcap.xlsx"),
         nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
         time_channel = NULL,
-        event_channel = c(event = "col_6")
+        event_channel = c(event = "col_6"),
+        verbose = FALSE
     )
 
     expect_true(all(
@@ -1921,7 +1915,7 @@ test_that("read_mnirs Oxysoft Portamon works", {
         file_path,
         nirs_channels = NULL,
         time_channel = NULL,
-        verbose = TRUE
+        verbose = FALSE
     )
 
     expect_true(all(
