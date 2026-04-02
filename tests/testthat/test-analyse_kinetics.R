@@ -767,7 +767,7 @@ test_that("analyse_kinetics$data elements are mnirs tibbles with metadata", {
 
     result <- analyse_kinetics(
         data,
-        nirs_channels = c("smo2_left", "smo2_right"),
+        nirs_channels = c("smo2_left"),
         method = "peak_slope",
         width = 5,
         verbose = FALSE
@@ -778,7 +778,9 @@ test_that("analyse_kinetics$data elements are mnirs tibbles with metadata", {
 
     aug <- result$data[[1]]
     expect_s3_class(aug, "mnirs")
-    expect_equal(attr(aug, "nirs_channels"), c("smo2_left", "smo2_right"))
+    ## ! should update the one removed channel
+    ## ! add `create_mnirs_data` to `analyse_*` functions
+    expect_equal(attr(aug, "nirs_channels"), c("smo2_left"))
     expect_equal(attr(aug, "time_channel"), "time")
     expect_equal(attr(aug, "sample_rate"), 10)
 })

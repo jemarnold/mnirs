@@ -241,7 +241,7 @@ validate_nirs_channels <- function(
         if (verbose && !is.null(nirs_unlisted)) {
             cli_inform(c(
                 "i" = "{.arg nirs_channels} = \\
-                {col_blue({deparse(list(nirs_unlisted))})} \\
+                {col_blue({deparse(nirs_unlisted)})} \\
                 grouped together from metadata."
             ))
         }
@@ -277,7 +277,7 @@ validate_nirs_channels <- function(
 
     ## preserve list grouping for callers that need it
     if (as_list) {
-        return(make_list(nirs_channels))
+        return(nirs_channels)
     }
 
     ## default: coerce to flat vector

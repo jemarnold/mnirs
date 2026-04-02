@@ -155,7 +155,9 @@ replace_mnirs <- function(
 
     validate_mnirs_data(data)
     metadata <- attributes(data)
-    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose = FALSE
+    )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     time_vec <- data[[time_channel]]
 
@@ -201,7 +203,7 @@ replace_mnirs <- function(
     })
 
     ## Metadata =================================
-    metadata$nirs_channels <- unique(c(metadata$nirs_channels, nirs_channels))
+    metadata$nirs_channels <- unique(nirs_channels)
     metadata$time_channel <- time_channel
 
     return(create_mnirs_data(data, metadata))
@@ -404,7 +406,7 @@ replace_outliers <- function(
 
 #' Replace missing values
 #'
-#' `replace_missing()` detects missing (`NA`) values in a numeric vector and 
+#' `replace_missing()` detects missing (`NA`) values in a numeric vector and
 #' replaces via interpolation.
 #'
 #' @param ... Additional arguments.
@@ -415,7 +417,7 @@ replace_outliers <- function(
 #' ## Interpolation with `replace_missing()`
 #'
 #' `method = "linear"` and `method = "locf"` use [stats::approx()] with
-#' `rule = 2`, so leading `NA`s are filled by *"nocb"* 
+#' `rule = 2`, so leading `NA`s are filled by *"nocb"*
 #' (*"next observation carried backward"*) and trailing `NA`s by *"locf"*.
 #'
 #' `method = "median"` calculates the local median of valid (non-`NA`)
@@ -431,7 +433,7 @@ replace_outliers <- function(
 #' valid sample on either side is used (equivalent to
 #' `replace_missing(x, width = 1)`).
 #'
-#' @returns `replace_missing()` returns a numeric vector the same length as 
+#' @returns `replace_missing()` returns a numeric vector the same length as
 #' `x` with missing values replaced.
 #'
 #' @rdname replace_mnirs
@@ -477,12 +479,7 @@ replace_missing <- function(
         ## median of width or span VALID values to either side of sequential NAs
         y <- x
         na_idx <- which(is.na(x))
-        window_idx <- compute_valid_neighbours(
-            x = x,
-            t = t,
-            width = width,
-            span = span
-        )
+        window_idx <- compute_valid_neighbours(x, t, width, span, verbose)
         local_medians <- compute_local_fun(x, window_idx, median, na.rm = TRUE)
         y[na_idx] <- local_medians
     }

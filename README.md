@@ -294,7 +294,7 @@ distinct <- extract_intervals(
 plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
 ```
 
-<img src="man/figures/README-extract_intervals distinct-1.png" alt="" width="100%" />
+<img src="man/figures/README-extract_intervals_distinct-1.png" alt="" width="100%" />
 
 ``` r
 ## ensemble average both intervals with `event_groups = "ensemble"`
@@ -310,7 +310,7 @@ ensemble <- extract_intervals(
 plot(ensemble[[1L]], time_labels = TRUE)
 ```
 
-<img src="man/figures/README-extract_intervals ensemble-1.png" alt="" width="100%" />
+<img src="man/figures/README-extract_intervals_ensemble-1.png" alt="" width="100%" />
 
 ## Future *`mnirs`* development
 

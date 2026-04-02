@@ -236,7 +236,7 @@ plot(nirs_data, time_labels = TRUE)
 
 ### `extract_intervals()`: detect events and extract intervals
 
-```{r extract_intervals distinct}
+```{r extract_intervals_distinct}
 #| fig.width: 8
 #| fig.asp: 0.55
 
@@ -253,7 +253,7 @@ distinct <- extract_intervals(
 plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
 ```
 
-```{r extract_intervals ensemble}
+```{r extract_intervals_ensemble}
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble <- extract_intervals(
     nirs_data,                 ## channels recycled to all intervals by default

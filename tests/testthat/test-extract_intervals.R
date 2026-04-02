@@ -1746,8 +1746,80 @@ test_that("extract_intervals respects nirs_channels metadata", {
         verbose = TRUE
     )
 
-    # expect_equal(attr(result[[1]], "nirs_channels"), all_channels)
     expect_equal(attr(result[[1]], "nirs_channels"), "smo2_left")
+})
+
+
+test_that("extract_intervals informs when nirs_channels is not a list()", {
+    data <- create_mock_mnirs(n = 60, sample_rate = 10)
+    attr(data, "nirs_channels") <- NULL  ## remove metadata
+
+    ## fires: verbose=TRUE, ensemble, no metadata, non-list channels
+    expect_message(
+        extract_intervals(
+            data,
+            nirs_channels = "smo2_left",
+            time_channel = "time",
+            start = by_time(1, 4),
+            span = c(-0.5, 0.5),
+            event_groups = "ensemble",
+            verbose = TRUE
+        ),
+        "list\\(\\).*channel grouping"
+    )
+
+    ## silent: verbose=FALSE
+    expect_no_message(
+        extract_intervals(
+            data,
+            nirs_channels = "smo2_left",
+            time_channel = "time",
+            start = by_time(1, 4),
+            span = c(-0.5, 0.5),
+            event_groups = "ensemble",
+            verbose = FALSE
+        )
+    )
+
+    ## silent: nirs_channels already a list()
+    expect_no_message(
+        extract_intervals(
+            data,
+            nirs_channels = list("smo2_left"),
+            time_channel = "time",
+            start = by_time(1, 4),
+            span = c(-0.5, 0.5),
+            event_groups = "ensemble",
+            verbose = TRUE
+        )
+    )
+
+    ## silent: event_groups = "distinct"
+    expect_no_message(
+        extract_intervals(
+            data,
+            nirs_channels = "smo2_left",
+            time_channel = "time",
+            start = by_time(1, 4),
+            span = c(-0.5, 0.5),
+            event_groups = "distinct",
+            verbose = TRUE
+        )
+    )
+
+    ## silent: data has nirs_channels metadata
+    attr(data, "nirs_channels") <- "smo2_left"
+    expect_no_message(
+        extract_intervals(
+            data,
+            nirs_channels = "smo2_left",
+            time_channel = "time",
+            start = by_time(1, 4),
+            span = c(-0.5, 0.5),
+            event_groups = "ensemble",
+            verbose = TRUE
+        )
+    )
 })
 
 

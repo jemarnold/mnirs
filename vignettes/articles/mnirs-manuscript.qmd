@@ -154,11 +154,11 @@ Ultimately, after processing a NIRS recording it is unlikely we will be analysin
 
 Certain applications in NIRS research benefit from using ensemble-averaging of multiple intervals to increase signal-to-noise ratio and improve signal detection. For example, measuring oxidative capacity with a repeated occlusion technique is suggested to benefit from averaging multiple trials {de Aguiar, 2022, 4092; Rasica, 2024, 7469}. This approach is common when modelling gas exchange kinetics {Bell, 2001}, and given the variability in NIRS signals, other applications might benefit from ensemble-averaging multiple trials.
 
-![](../../man/figures/README-extract_intervals distinct-1.png){fig-alt="The start of two exercise intervals extracted from another example file included in `mnirs`." width=\"90%\" fig-align="center"}
+![](../../man/figures/README-extract_intervals_distinct-1.png){fig-alt="The start of two exercise intervals extracted from another example file included in `mnirs`." width=\"90%\" fig-align="center"}
 
 Figure 6: The start of two exercise intervals extracted from another example file included in `mnirs`.
 
-![](../../man/figures/README-extract_intervals ensemble-1.png){fig-alt="The same two intervals ensemble-averaged to return the mean deoxygenation response." width=\"60%\"}
+![](../../man/figures/README-extract_intervals_ensemble-1.png){fig-alt="The same two intervals ensemble-averaged to return the mean deoxygenation response." width=\"60%\"}
 
 Figure 7: The same two intervals ensemble-averaged to return the mean deoxygenation response.
 

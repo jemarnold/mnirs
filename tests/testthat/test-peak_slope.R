@@ -729,7 +729,7 @@ test_that("analyse_peak_slope returns correct structure", {
         nirs_channels = c("x", "q"),
         time_channel = "this_time"
     )
-    results <- analyse_peak_slope(df, width = 5)
+    results <- analyse_peak_slope(df, width = 5, verbose = FALSE)
 
     expect_s3_class(results, "data.frame")
     expect_equal(nrow(results), 2)
@@ -766,7 +766,10 @@ test_that("analyse_peak_slope handles edge cases", {
         nirs_channels = c("x", "q"),
         time_channel = "t"
     )
-    expect_error(analyse_peak_slope(df, width = 3), "valid.*numeric")
+    expect_error(
+        analyse_peak_slope(df, width = 3, verbose = FALSE),
+        "valid.*numeric"
+    )
 
     ## all identical values = NA (no positive/negative slopes)
     df <- create_mnirs_data(
@@ -783,7 +786,10 @@ test_that("analyse_peak_slope handles edge cases", {
         nirs_channels = c("x", "q"),
         time_channel = "t"
     )
-    expect_error(analyse_peak_slope(df, width = 3), "valid.*numeric")
+    expect_error(
+        analyse_peak_slope(df, width = 3, verbose = FALSE),
+        "valid.*numeric"
+    )
 
     ## all t values identical = NA
     df <- create_mnirs_data(
@@ -834,7 +840,10 @@ test_that("analyse_peak_slope validates data structure", {
         time_channel = "t"
     )
     attr(df, "time_channel") <- NULL
-    expect_error(analyse_peak_slope(df, width = 3), "time_channel")
+    expect_error(
+        analyse_peak_slope(df, width = 3, verbose = FALSE),
+        "time_channel"
+    )
 })
 
 test_that("analyse_peak_slope handles width/span validation", {
@@ -846,7 +855,7 @@ test_that("analyse_peak_slope handles width/span validation", {
     )
 
     ## missing both width and span
-    expect_error(analyse_peak_slope(df), "width.*span")
+    expect_error(analyse_peak_slope(df, verbose = FALSE), "width.*span")
 
     ## width > n without partial = NA
     results <- analyse_peak_slope(df, width = 50, verbose = FALSE)

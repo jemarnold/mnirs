@@ -271,7 +271,9 @@ analyse_monoexponential <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     validate_mnirs_data(data)
-    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
+    nirs_channels <- validate_nirs_channels(
+        enquo(nirs_channels), data, verbose = FALSE
+    )
     time_channel <- validate_time_channel(enquo(time_channel), data)
     if (!is.logical(time_delay) || length(time_delay) != 1L) {
         cli_abort(c(

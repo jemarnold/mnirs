@@ -409,7 +409,6 @@ compute_diagnostics <- function(
     n_params = 1L,
     verbose = TRUE
 ) {
-    
     ## ! check redundant validity check
     complete_cases <- which(is.finite(x) & is.finite(t))
     x <- x[complete_cases]

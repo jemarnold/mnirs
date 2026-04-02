@@ -283,7 +283,7 @@ detect_time_channel <- function(
         if (verbose) {
             cli_inform(c(
                 "!" = "Detected {.arg time_channel} = \\
-                {.val {col_names[time_idx]}}."
+                {col_blue(col_names[time_idx])}."
             ))
         }
         return(col_names[time_idx])
