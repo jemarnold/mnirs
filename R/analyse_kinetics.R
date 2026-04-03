@@ -436,15 +436,21 @@ as_data_list <- function(data) {
 #'   number of free parameters fit by the solver.
 #' @inheritParams peak_slope
 #'
+#' @details
+#' 
+#' ## `adj_r2`
+#' 
+#' Adjusted `R^2` penalised by `n_params`. Appropriate for OLS linear models;
+#'   interpret with caution for non-linear fits.
+#' 
+#' ## `pseudo_r2`
+#' 
+#' Squared Pearson correlation between observed and fitted values. Equivalent
+#'   to `R^2` for OLS but well-defined for non-linear and multivariate models.
+#'   Preferred for `"monoexponential"` and `"sigmoidal"` methods.
+#' 
 #' @returns A 1-row `data.frame` with columns `n_obs`, `r2`, `adj_r2`,
 #'   `pseudo_r2`, `rmse`, `snr`, and `cv_rmse`.
-#'
-#'   - `adj_r2`: adjusted `R^2` penalised by `n_params`. Appropriate for
-#'     OLS linear models; interpret with caution for non-linear fits.
-#'   - `pseudo_r2`: squared Pearson correlation between observed and fitted
-#'     values. Equivalent to `R^2` for OLS but well-defined for non-linear
-#'     and multivariate models. Preferred for `"monoexponential"` and
-#'     `"sigmoidal"` methods.
 #'
 #' @keywords internal
 compute_diagnostics <- function(
@@ -471,6 +477,10 @@ compute_diagnostics <- function(
         cv_rmse = NA_real_
     )
 
+    if (n_params < 1L || n_obs < 2L) {
+        return(return_na)
+    }
+
     if (length(x) != length(t) || length(x) != n_obs) {
         if (verbose) {
             cli_warn(c(
@@ -479,10 +489,6 @@ compute_diagnostics <- function(
                 diagnostics."
             ))
         }
-        return(return_na)
-    }
-
-    if (n_obs < 2L) {
         return(return_na)
     }
 
@@ -526,15 +532,13 @@ compute_diagnostics <- function(
     x_mean <- mean(x)
     cv_rmse <- if (x_mean == 0) NA_real_ else rmse / abs(x_mean)
 
-    return(
-        data.frame(
-            n_obs = n_obs,
-            r2 = r2,
-            adj_r2 = adj_r2,
-            pseudo_r2 = pseudo_r2,
-            rmse = rmse,
-            snr = snr,
-            cv_rmse = cv_rmse
-        )
-    )
+    return(data.frame(
+        n_obs = n_obs,
+        r2 = r2,
+        adj_r2 = adj_r2,
+        pseudo_r2 = pseudo_r2,
+        rmse = rmse,
+        snr = snr,
+        cv_rmse = cv_rmse
+    ))
 }

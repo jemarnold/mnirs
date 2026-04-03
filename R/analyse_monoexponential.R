@@ -314,10 +314,7 @@ analyse_monoexponential <- function(
 
         ## filter for valid finite idx before first extreme + end_fit_span
         valid <- find_kinetics_idx(
-            data[[.nirs]],
-            time_vec,
-            end_fit_span,
-            direction
+            data[[.nirs]], time_vec, end_fit_span, direction
         )
         x_fit <- data[[.nirs]][valid]
         t_fit <- time_vec[valid]

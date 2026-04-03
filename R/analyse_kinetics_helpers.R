@@ -50,16 +50,16 @@ find_kinetics_idx <- function(
     }
 
     ## all finite indices (including t < 0)
-    finite_mask <- which(is.finite(x) & is.finite(t))
+    which_valid <- which(is.finite(x) & is.finite(t))
     ## subset where t >= 0 for extreme detection
-    positive_mask <- finite_mask[t[finite_mask] >= 0]
-    x_valid <- x[positive_mask]
-    t_valid <- t[positive_mask]
+    which_positive <- which_valid[t[which_valid] >= 0]
+    x_valid <- x[which_positive]
+    t_valid <- t[which_positive]
     n_valid <- length(x_valid)
 
     ## early returns for degenerate inputs
     if (n_valid < 2L) {
-        return(finite_mask)
+        return(which_valid)
     }
 
     ## direction detection ========================================
@@ -85,7 +85,7 @@ find_kinetics_idx <- function(
     ## monotonic: if global extreme is the last x value
     ## horizontal: if all x values equal
     if (which_fn(x_valid) == n_valid || all(x_valid == x_valid[1L])) {
-        return(finite_mask)
+        return(which_valid)
     }
 
     ## process ==================================================
@@ -101,11 +101,9 @@ find_kinetics_idx <- function(
     bin_idx <- findInterval(t_valid, bin_breaks, rightmost.closed = TRUE)
 
     ## extreme index per bin (first occurrence for ties)
-    bin_extreme_idx <- unname(
-        tapply(seq_len(n_valid), bin_idx, \(.idx) {
-                .idx[which_fn(x_valid[.idx])]
-        }, simplify = TRUE)
-    )
+    bin_extreme_idx <- unname(tapply(seq_len(n_valid), bin_idx, \(.idx) {
+        .idx[which_fn(x_valid[.idx])]
+    }, simplify = TRUE))
 
     ## find first bin-extreme where no forward mod_span value exceeds
     ## add tolerance for where mod_span loses floating point precision
@@ -117,14 +115,14 @@ find_kinetics_idx <- function(
     }, bin_extreme_idx)
 
     if (!is.null(extreme_idx)) {
-        ## map extreme back to original index space via positive_mask
-        orig_extreme <- positive_mask[extreme_idx]
+        ## map extreme back to original index space via which_positive
+        orig_extreme <- which_positive[extreme_idx]
         t_cutoff <- t[orig_extreme] + end_fit_span
-        return(finite_mask[t[finite_mask] <= t_cutoff])
+        return(which_valid[t[which_valid] <= t_cutoff])
     }
 
-    ## fallback: no qualifying extreme found
-    return(finite_mask)
+    ## fallback to all values: no qualifying extreme found
+    return(which_valid)
 }
 
 
