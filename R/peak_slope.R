@@ -423,9 +423,7 @@ analyse_peak_slope <- function(
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
     validate_mnirs_data(data)
-    nirs_channels <- validate_nirs_channels(
-        enquo(nirs_channels), data, verbose = FALSE
-    )
+    nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
     align <- sub("^center$", "centre", align)
@@ -454,10 +452,7 @@ analyse_peak_slope <- function(
 
         ## filter for valid finite idx before first extreme + end_fit_span
         valid <- find_kinetics_idx(
-            data[[.nirs]],
-            time_vec,
-            end_fit_span,
-            direction
+            data[[.nirs]], time_vec, end_fit_span, direction
         )
         x_fit <- data[[.nirs]][valid]
         t_fit <- time_vec[valid]

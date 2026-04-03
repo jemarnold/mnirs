@@ -6,7 +6,7 @@
 #' @usage
 #' rescale_mnirs(
 #'   data,
-#'   nirs_channels = list(NULL),
+#'   nirs_channels = list(),
 #'   range,
 #'   verbose = TRUE
 #' )
@@ -80,7 +80,7 @@
 #' @export
 rescale_mnirs <- function(
     data,
-    nirs_channels = list(NULL),
+    nirs_channels = list(),
     range,
     verbose = TRUE
 ) {

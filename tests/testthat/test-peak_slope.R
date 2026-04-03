@@ -730,6 +730,7 @@ test_that("analyse_peak_slope returns correct structure", {
         time_channel = "this_time"
     )
     results <- analyse_peak_slope(df, width = 5, verbose = FALSE)
+    # attributes(results)
 
     expect_s3_class(results, "data.frame")
     expect_equal(nrow(results), 2)

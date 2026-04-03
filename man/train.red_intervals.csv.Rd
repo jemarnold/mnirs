@@ -5,7 +5,7 @@
 \alias{train.red_intervals.csv}
 \title{10 Hz Train.Red App export}
 \format{
-.csv file with header metadata and 10 columns and 12000 rows:
+.csv file with header metadata and 10 columns and 11995 rows:
 \describe{
 \item{Timestamp (seconds passed)}{Elapsed time (s).}
 \item{Lap/Event}{Lap number (numeric).}

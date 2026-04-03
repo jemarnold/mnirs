@@ -65,7 +65,7 @@ The package website has comprehensive documentation of the functions discussed b
 
 `https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html`
 
-A free online app is available as a 'no-code' workflow with basic `mnirs` functionality, for rapid visualisation and comparison of processing methods:
+A free online app is available as a 'no-code' workflow with basic `mnirs` processing functionality, for rapid visualisation and comparison of processing methods:
 
 `https://jemarnold-mnirs-app.share.connect.posit.cloud/`
 

@@ -87,7 +87,7 @@ NULL
 #'
 #' @docType data
 #'
-#' @format .csv file with header metadata and 10 columns and 12000 rows:
+#' @format .csv file with header metadata and 10 columns and 11995 rows:
 #'   \describe{
 #'     \item{Timestamp (seconds passed)}{Elapsed time (s).}
 #'     \item{Lap/Event}{Lap number (numeric).}
