@@ -481,6 +481,7 @@ analyse_peak_slope <- function(
         )
         coefs <- data.frame(
             nirs_channels = .nirs,
+            time_channel  = time_channel,
             slope         = slopes$slope,
             intercept     = slopes$intercept,
             fitted        = slopes$y, ## predicted response value at idx

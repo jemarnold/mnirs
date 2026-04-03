@@ -734,10 +734,10 @@ test_that("analyse_peak_slope returns correct structure", {
 
     expect_s3_class(results, "data.frame")
     expect_equal(nrow(results), 2)
-    expect_named(
-        results,
-        c("nirs_channels", "slope", "intercept", "fitted", "this_time", "idx")
-    )
+    expect_named(results, c(
+        "nirs_channels", "time_channel", 
+        "slope", "intercept", "fitted", "this_time", "idx"
+    ))
 
     expect_type(results$nirs_channels, "character")
     expect_equal(results$nirs_channels, c("x", "q"))

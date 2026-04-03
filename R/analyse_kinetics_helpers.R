@@ -144,7 +144,9 @@ find_kinetics_idx <- function(
 build_kinetics_results <- function(
     data_list,
     result_list,
-    interval_names
+    interval_names,
+    method,
+    call
 ) {
     ## extract per channel attrs; bind to df; add "interval" col; drop rownames
     flatten_attr <- function(attr_name) {
@@ -170,8 +172,12 @@ build_kinetics_results <- function(
         names(fitted_cols) <- paste0(names(fitted_data), "_fitted")
         ## agument `<nirs_channels>_fitted` columns to df
         augmented <- cbind(.df, as.data.frame(fitted_cols))
-        ## preserve metadata to augmented data frames
-        create_mnirs_data(augmented, attributes(.df))
+        
+        ## metadata ==================================================
+        metadata <- attributes(.df)
+        metadata$nirs_channels <- unique(.result$nirs_channels)
+        metadata$time_channel <- unique(.result$time_channel)
+        create_mnirs_data(augmented, metadata)
     }, data_list, result_list)
 
     ## extract interval_times from each data_list attributes, if exist
@@ -190,13 +196,18 @@ build_kinetics_results <- function(
     coefs <- coefs[, c("interval", setdiff(names(coefs), "interval"))]
     rownames(coefs) <- NULL
 
-    return(list(
-        coefficients = coefs,
-        model = model_list,
-        data = fitted_data_list,
-        interval_times = interval_times_df,
-        diagnostics = diagnostics,
-        channel_args = channel_args
+    return(structure(
+        list(
+            method = method,
+            model = model_list,
+            coefficients = coefs,
+            data = fitted_data_list,
+            interval_times = interval_times_df,
+            diagnostics = diagnostics,
+            channel_args = channel_args,
+            call = call
+        ),
+        class = "mnirs_kinetics"
     ))
 }
 

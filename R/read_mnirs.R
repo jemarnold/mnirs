@@ -233,6 +233,19 @@ read_mnirs <- function(
     return(create_mnirs_data(data, metadata))
 }
 
+#' Metadata names  of class `"mnirs"`, retrieved with `attr()`
+#' @keywords: internal
+mnirs_metadata <- c(
+    "nirs_device",
+    "nirs_channels",
+    "time_channel",
+    "event_channel",
+    "sample_rate",
+    "start_timestamp",
+    "interval_times",
+    "interval_span"
+)
+
 
 #' Create an *{mnirs}* data frame with metadata
 #'

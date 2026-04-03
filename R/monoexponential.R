@@ -291,6 +291,7 @@ analyse_monoexponential <- function(
     ## NA scaffold for convergence failure
     na_coefs <- data.frame(
         nirs_channels = NA_character_,
+        time_channel = time_channel,
         A = NA_real_,
         B = NA_real_,
         tau = NA_real_,
@@ -391,6 +392,7 @@ analyse_monoexponential <- function(
         ## ! fix cases where `zero_time = FALSE`: esp. for half_time
         coefs <- data.frame(
             nirs_channels = .nirs,
+            time_channel = time_channel,
             A = coefs[["A"]],
             B = coefs[["B"]],
             tau = coefs[["tau"]],

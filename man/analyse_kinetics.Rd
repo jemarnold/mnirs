@@ -2,6 +2,7 @@
 % Please edit documentation in R/analyse_kinetics.R
 \name{analyse_kinetics}
 \alias{analyse_kinetics}
+\alias{analyse_kinetics.HRT}
 \alias{analyse_kinetics.peak_slope}
 \alias{analyse_kinetics.monoexponential}
 \title{Analyse mNIRS kinetics across intervals}
@@ -10,7 +11,7 @@ analyse_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("peak_slope", "monoexponential"),
+  method = c("HRT", "peak_slope", "monoexponential", "sigmoidal"),
   direction = c("auto", "positive", "negative"),
   end_fit_span = 20,
   channel_args = list(),
@@ -40,7 +41,7 @@ used.
 \verb{<under development>}. Additional arguments must be specified for each
 method. See \emph{Details}.
 \describe{
-\item{\code{"half_time"}}{\verb{<under development>}.}
+\item{\code{"HRT"}}{\verb{<under development>}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
 arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
@@ -71,7 +72,7 @@ See \emph{Details}.}
 A formatted table of printed results, with individual elements
 accessable as a list of class \emph{"mnirs_kinetics"} containing:
 
-\item{\code{method}}{The method used, e.g. \code{"half_time"}.}
+\item{\code{method}}{The method used, e.g. \code{"HRT"}.}
 \item{\code{model}}{A named list of model objects (per interval,
 per \code{nirs_channel}). For \code{"peak_slope"}, each element is an
 \link[stats:lm]{lm} object; for \code{"monoexponential"}, an
@@ -112,12 +113,16 @@ separate intervals.
 }
 
 \subsection{kinetics analysis method}{
-\subsection{\code{method = "half_time"}}{
+\subsection{\code{method = "HRT"}}{
+
+Aliases: \code{c("half response time", "half time")}
 
 \verb{<under development>}
 }
 
 \subsection{\code{method = "peak_slope"}}{
+
+Aliases: \code{c("peak slope", "slope")}
 
 The \code{"peak_slope"} method identifies the maximum local linear slope within
 each \code{nirs_channel} using rolling least-squares regression. The local window
@@ -143,6 +148,8 @@ propagates any \code{NA}s to the returned vector.}
 
 \subsection{\code{method = "monoexponential"}}{
 
+Aliases: \code{c("monoexp", "exponential", "MRT", "tau")}
+
 The \code{"monoexponential"} method fits a self-starting monoexponential
 curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp3]{SS_monoexp3()}}
 (3-parameter: A, B, tau) or \code{\link[=SS_monoexp4]{SS_monoexp4()}} (4-parameter: A, B, tau,
@@ -160,6 +167,8 @@ reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).
 }
 
 \subsection{\code{method = "sigmoidal"}}{
+
+Aliases: \code{c("logistic", "xmid")}
 
 \verb{<under development>}
 }

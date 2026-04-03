@@ -10,7 +10,7 @@
 #'   `<under development>`. Additional arguments must be specified for each
 #'   method. See *Details*.
 #'   \describe{
-#'      \item{`"half_time"`}{`<under development>`.}
+#'      \item{`"HRT"`}{`<under development>`.}
 #'      \item{`"peak_slope"`}{Peak local linear regression slope. Additional
 #'      arguments: `width` or `span`, `align`, `direction`, `partial`, `na.rm`.}
 #'      \item{`"monoexponential"`}{Monoexponential curve fit via
@@ -44,11 +44,15 @@
 #'
 #' ## kinetics analysis method
 #'
-#' #### `method = "half_time"`
+#' #### `method = "HRT"`
+#' 
+#' Aliases: `c("half response time", "half time")`
 #'
 #' `<under development>`
 #'
 #' #### `method = "peak_slope"`
+#' 
+#' Aliases: `c("peak slope", "slope")`
 #'
 #' The `"peak_slope"` method identifies the maximum local linear slope within
 #' each `nirs_channel` using rolling least-squares regression. The local window
@@ -72,6 +76,8 @@
 #' }
 #'
 #' #### `method = "monoexponential"`
+#' 
+#' Aliases: `c("monoexp", "exponential", "MRT", "tau")`
 #'
 #' The `"monoexponential"` method fits a self-starting monoexponential
 #' curve to each `nirs_channel` using [stats::nls()] with [SS_monoexp3()]
@@ -89,6 +95,8 @@
 #' }
 #'
 #' #### `method = "sigmoidal"`
+#' 
+#' Aliases: `c("logistic", "xmid")`
 #'
 #' `<under development>`
 #'
@@ -114,7 +122,7 @@
 #' @returns A formatted table of printed results, with individual elements
 #'   accessable as a list of class *"mnirs_kinetics"* containing:
 #'
-#'   \item{`method`}{The method used, e.g. `"half_time"`.}
+#'   \item{`method`}{The method used, e.g. `"HRT"`.}
 #'   \item{`model`}{A named list of model objects (per interval,
 #'       per `nirs_channel`). For `"peak_slope"`, each element is an
 #'       [lm][stats::lm] object; for `"monoexponential"`, an
@@ -178,13 +186,38 @@ analyse_kinetics <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    method = c("peak_slope", "monoexponential"),
+    method = c("HRT", "peak_slope", "monoexponential", "sigmoidal"),
     direction = c("auto", "positive", "negative"),
     end_fit_span = 20,
     channel_args = list(),
     verbose = TRUE,
     ...
 ) {
+    ## normalise method aliases before matching
+    method <- gsub(
+        "^half[ _-]response[ _-]time$|^half[ _-]time$",
+        "HRT",
+        method,
+        ignore.case = TRUE
+    )
+    method <- gsub(
+        "^peak[ _-]slope$|^slope$",
+        "peak_slope",
+        method,
+        ignore.case = TRUE
+    )
+    method <- gsub(
+        "^monoexp$|^exponential$|^MRT$|^tau$",
+        "monoexponential",
+        method,
+        ignore.case = TRUE
+    )
+    method <- gsub(
+        "^logistic$|^xmid$",
+        "sigmoidal",
+        method,
+        ignore.case = TRUE
+    )
     method <- match.arg(method)
     direction <- match.arg(direction)
     if (missing(verbose)) {
@@ -195,6 +228,43 @@ analyse_kinetics <- function(
         "analyse_kinetics",
         structure(data, class = c(method, "mnirs_kinetics"))
     )
+}
+
+#' @rdname analyse_kinetics
+#' @usage NULL
+#' @export
+analyse_kinetics.HRT <- function(
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    method,
+    direction = c("auto", "positive", "negative"),
+    end_fit_span = 20,
+    channel_args = list(),
+    verbose = TRUE,
+    ...
+) {
+    args <- list(...)
+    ## normalise input to named list of data frames
+    data_list <- as_data_list(data)
+
+    ## iterate over each interval
+    result_list <- lapply(seq_along(data_list), \(.i) {
+        ## ! IMPLEMENT analyse_HRT()
+        result <- analyse_HRT()
+
+        result$interval <- names(data_list)[[.i]]
+        result
+    })
+
+    ## collate and return mnirs_kinetics object
+    return(build_kinetics_results(
+        data_list,
+        result_list,
+        names(data_list),
+        method,
+        match.call()
+    ))
 }
 
 
@@ -213,15 +283,16 @@ analyse_kinetics.peak_slope <- function(
     ...
 ) {
     args <- list(...)
-
     ## normalise input to named list of data frames
     data_list <- as_data_list(data)
-    interval_names <- names(data_list)
 
     ## iterate over each interval
     result_list <- lapply(seq_along(data_list), \(.i) {
+        .df <- data_list[[.i]]
+        metadata <- attributes(.df)
+        
         result <- analyse_peak_slope(
-            data = data_list[[.i]],
+            data = .df,
             nirs_channels = !!enquo(nirs_channels),
             time_channel = !!enquo(time_channel),
             width = args$width %||% NULL,
@@ -234,25 +305,18 @@ analyse_kinetics.peak_slope <- function(
             channel_args = channel_args,
             verbose = verbose
         )
-        result$interval <- interval_names[[.i]]
+
+        result$interval <- names(data_list)[[.i]]
         result
     })
 
-    ## collate into mnirs_kinetics fields
-    gathered <- build_kinetics_results(data_list, result_list, interval_names)
-
-    return(structure(
-        list(
-            method = method,
-            model = gathered$model,
-            coefficients = gathered$coefficients,
-            data = gathered$data,
-            interval_times = gathered$interval_times,
-            diagnostics = gathered$diagnostics,
-            channel_args = gathered$channel_args,
-            call = match.call()
-        ),
-        class = "mnirs_kinetics"
+    ## collate and return mnirs_kinetics object
+    return(build_kinetics_results(
+        data_list,
+        result_list,
+        names(data_list),
+        method,
+        match.call()
     ))
 }
 
@@ -274,10 +338,8 @@ analyse_kinetics.monoexponential <- function(
     ## ! implement stats::nls() additional args
     ## ! implement `direction`
     args <- list(...)
-
     ## normalise input to named list of data frames
     data_list <- as_data_list(data)
-    interval_names <- names(data_list)
 
     ## iterate over each interval
     result_list <- lapply(seq_along(data_list), \(.i) {
@@ -289,27 +351,20 @@ analyse_kinetics.monoexponential <- function(
             end_fit_span = end_fit_span,
             channel_args = channel_args,
             verbose = verbose,
-            interval_names = interval_names
+            interval_names = names(data_list) ## ! is this needed?
         )
-        result$interval <- interval_names[[.i]]
+
+        result$interval <- names(data_list)[[.i]]
         result
     })
 
-    ## collate into mnirs_kinetics fields
-    gathered <- build_kinetics_results(data_list, result_list, interval_names)
-
-    return(structure(
-        list(
-            method = method,
-            model = gathered$model,
-            coefficients = gathered$coefficients,
-            data = gathered$data,
-            interval_times = gathered$interval_times,
-            diagnostics = gathered$diagnostics,
-            channel_args = gathered$channel_args,
-            call = match.call()
-        ),
-        class = "mnirs_kinetics"
+    ## collate and return mnirs_kinetics object
+    return(build_kinetics_results(
+        data_list,
+        result_list,
+        names(data_list),
+        method,
+        match.call()
     ))
 }
 
@@ -342,17 +397,7 @@ as_data_list <- function(data) {
         ## copy mnirs metadata down to each df in the list
         ## TODO need to test when a list has been rbinded and has vectors from original list
         data_list <- lapply(data_list, \(.df) {
-            create_mnirs_data(
-                .df,
-                attributes(data)[c(
-                    "nirs_channels",
-                    "time_channel",
-                    "event_channel",
-                    "sample_rate",
-                    "interval_times",
-                    "interval_span"
-                )]
-            )
+            create_mnirs_data(.df, attributes(data)[mnirs_metadata])
         })
         names(data_list) <- keys
 

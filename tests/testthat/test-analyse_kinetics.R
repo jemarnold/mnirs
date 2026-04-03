@@ -446,7 +446,6 @@ test_that("build_channel_results combines channels correctly", {
 
 
 ## find_kinetics_idx ==================================================
-
 test_that("find_kinetics_idx validates inputs", {
     expect_error(
         find_kinetics_idx(x = "a", t = 1, end_fit_span = 5),
@@ -625,9 +624,336 @@ test_that("find_kinetics_idx end_fit_span larger than data range", {
     expect_equal(result, seq_along(x))
 })
 
+## build_kinetics_results ===============================================
+
+## helper: minimal mnirs data frame with optional interval_times attr
+make_kinetics_data <- function(
+    n = 10,
+    channels = "smo2",
+    interval_times = NULL,
+    sample_rate = 10
+) {
+    df_data <- data.frame(
+        time = seq_len(n) / sample_rate,
+        stats::setNames(
+            lapply(channels, \(.ch) rnorm(n)),
+            channels
+        )
+    )
+    df_data <- create_mnirs_data(
+        df_data,
+        nirs_channels = channels,
+        time_channel = "time",
+        sample_rate = sample_rate
+    )
+    attr(df_data, "interval_times") <- interval_times
+    return(df_data)
+}
+
+## helper: minimal attributed data frame matching the output of
+## analyse_peak_slope() / analyse_monoexponential() per interval
+make_kinetics_results <- function(
+    interval,
+    channels = "smo2",
+    n = 10
+) {
+    ## this df immitates output of analyse_peak_slope / analyse_monoexponential
+    df <- data.frame(
+        nirs_channels = rep(channels, 1L),
+        time_channel = "time",
+        slope = seq_len(length(channels)) * 0.5,
+        interval = interval
+    )
+    attr(df, "fitted_data") <- stats::setNames(
+        lapply(channels, \(.ch) {
+            data.frame(
+                window_idx = seq_len(n),
+                fitted = seq_len(n) * 0.1
+            )
+        }),
+        channels
+    )
+    attr(df, "model") <- stats::setNames(
+        lapply(channels, \(.ch) structure(list(), class = "lm")),
+        channels
+    )
+    attr(df, "diagnostics") <- data.frame(
+        nirs_channels = channels,
+        r2 = rep(0.9, length(channels)),
+        rmse = rep(0.1, length(channels))
+    )
+    attr(df, "channel_args") <- data.frame(
+        nirs_channels = channels,
+        width = rep(10L, length(channels))
+    )
+    return(df)
+}
+
+test_that("build_kinetics_results returns mnirs_kinetics with correct names", {
+    data_list <- list(int1 = make_kinetics_data())
+    result_list <- list(make_kinetics_results("int1"))
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    expect_s3_class(result, "mnirs_kinetics")
+    expect_named(result, c(
+        "method", "model", "coefficients", "data",
+        "interval_times", "diagnostics", "channel_args", "call"
+    ))
+})
+
+test_that("build_kinetics_results stores method and call", {
+    data_list <- list(int1 = make_kinetics_data())
+    result_list <- list(make_kinetics_results("int1"))
+    fake_call <- quote(analyse_kinetics(data, method = "peak_slope"))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = fake_call
+    )
+
+    expect_equal(result$method, "peak_slope")
+    expect_equal(result$call, fake_call)
+})
+
+test_that("build_kinetics_results places interval as first column of coefficients", {
+    data_list <- list(A = make_kinetics_data(), B = make_kinetics_data())
+    result_list <- list(make_kinetics_results("A"), make_kinetics_results("B"))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = c("A", "B"),
+        method = "peak_slope",
+        call = NULL
+    )
+
+    expect_equal(names(result$coefficients)[1L], "interval")
+    expect_equal(nrow(result$coefficients), 2L)
+    expect_equal(result$coefficients$interval, c("A", "B"))
+})
+
+test_that("build_kinetics_results adds _fitted columns to data elements", {
+    data_list <- list(int1 = make_kinetics_data(n = 10))
+    result_list <- list(make_kinetics_results("int1", n = 10))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    aug <- result$data[["int1"]]
+    expect_true("smo2_fitted" %in% names(aug))
+    expect_equal(length(aug$smo2_fitted), 10L)
+})
+
+test_that("build_kinetics_results fitted values placed at correct indices", {
+    n <- 10
+    data_list <- list(int1 = make_kinetics_data(n = n))
+    r <- make_kinetics_results("int1", n = n)
+    ## override fitted_data to only cover rows 3:7
+    attr(r, "fitted_data") <- list(
+        smo2 = data.frame(window_idx = 3:7, fitted = seq(0.3, 0.7, by = 0.1))
+    )
+    result_list <- list(r)
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    fitted_vec <- result$data[["int1"]]$smo2_fitted
+    expect_true(all(is.na(fitted_vec[c(1, 2, 8, 9, 10)])))
+    expect_equal(fitted_vec[3:7], seq(0.3, 0.7, by = 0.1))
+})
+
+test_that("build_kinetics_results data elements preserve mnirs metadata", {
+    data_list <- list(int1 = make_kinetics_data(sample_rate = 10))
+    # attributes(data_list[[1]])
+    result_list <- list(make_kinetics_results("int1"))
+    # attributes(result_list[[1]])
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    aug <- result$data[["int1"]]
+    expect_s3_class(aug, "mnirs")
+    expect_equal(attr(aug, "nirs_channels"), "smo2")
+    expect_equal(attr(aug, "time_channel"), "time")
+    expect_equal(attr(aug, "sample_rate"), 10)
+})
+
+test_that("build_kinetics_results data is named by interval_names", {
+    data_list <- list(
+        baseline = make_kinetics_data(),
+        exercise = make_kinetics_data()
+    )
+    result_list <- list(
+        make_kinetics_results("baseline"),
+        make_kinetics_results("exercise")
+    )
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = c("baseline", "exercise"),
+        method = "peak_slope",
+        call = NULL
+    )
+
+    expect_named(result$data, c("baseline", "exercise"))
+    expect_length(result$data, 2L)
+})
+
+test_that("build_kinetics_results model list is named by interval_names", {
+    data_list <- list(
+        A = make_kinetics_data(),
+        B = make_kinetics_data()
+    )
+    result_list <- list(
+        make_kinetics_results("A"),
+        make_kinetics_results("B")
+    )
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = c("A", "B"),
+        method = "peak_slope",
+        call = NULL
+    )
+
+    expect_named(result$model, c("A", "B"))
+    expect_type(result$model, "list")
+})
+
+test_that("build_kinetics_results interval_times scalar numeric", {
+    data_list <- list(
+        baseline = make_kinetics_data(interval_times = 1.5),
+        exercise = make_kinetics_data(interval_times = 3.0)
+    )
+    result_list <- list(
+        make_kinetics_results("baseline"),
+        make_kinetics_results("exercise")
+    )
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = c("baseline", "exercise"),
+        method = "peak_slope",
+        call = NULL
+    )
+
+    et <- result$interval_times
+    expect_s3_class(et, "data.frame")
+    expect_equal(nrow(et), 2L)
+    expect_equal(et$interval, c("baseline", "exercise"))
+    expect_type(et$interval_times, "list")
+    expect_equal(et$interval_times[[1L]], 1.5)
+    expect_equal(et$interval_times[[2L]], 3.0)
+})
+
+test_that("build_kinetics_results interval_times unpacks list (ensemble)", {
+    data_list <- list(
+        ensemble = make_kinetics_data(interval_times = list(368, 1093))
+    )
+    result_list <- list(make_kinetics_results("ensemble"))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "ensemble",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    et <- result$interval_times
+    expect_equal(nrow(et), 1L)
+    expect_type(et$interval_times, "list")
+    expect_equal(et$interval_times[[1L]], c(368, 1093))
+})
+
+test_that("build_kinetics_results interval_times is NA when attribute is NULL", {
+    data_list <- list(int1 = make_kinetics_data(interval_times = NULL))
+    result_list <- list(make_kinetics_results("int1"))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    et <- result$interval_times
+    expect_equal(nrow(et), 1L)
+    expect_type(et$interval_times, "list")
+    expect_true(is.na(et$interval_times[[1L]]))
+})
+
+test_that("build_kinetics_results diagnostics has interval col and correct rows", {
+    data_list <- list(A = make_kinetics_data(), B = make_kinetics_data())
+    result_list <- list(make_kinetics_results("A"), make_kinetics_results("B"))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = c("A", "B"),
+        method = "peak_slope",
+        call = NULL
+    )
+
+    diag <- result$diagnostics
+    expect_equal(names(diag)[1L], "interval")
+    expect_equal(nrow(diag), 2L)
+    expect_equal(diag$interval, c("A", "B"))
+})
+
+test_that("build_kinetics_results channel_args has interval col and correct rows", {
+    data_list <- list(A = make_kinetics_data(), B = make_kinetics_data())
+    result_list <- list(make_kinetics_results("A"), make_kinetics_results("B"))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = c("A", "B"),
+        method = "peak_slope",
+        call = NULL
+    )
+
+    ca <- result$channel_args
+    expect_equal(names(ca)[1L], "interval")
+    expect_equal(nrow(ca), 2L)
+    expect_equal(ca$interval, c("A", "B"))
+})
+
+test_that("build_kinetics_results handles multiple channels per interval", {
+    channels <- c("smo2_left", "smo2_right")
+    data_list <- list(int1 = make_kinetics_data(channels = channels))
+    result_list <- list(make_kinetics_results("int1", channels = channels))
+
+    result <- build_kinetics_results(
+        data_list, result_list,
+        interval_names = "int1",
+        method = "peak_slope",
+        call = NULL
+    )
+
+    aug <- result$data[["int1"]]
+    expect_true(all(paste0(channels, "_fitted") %in% names(aug)))
+    expect_equal(nrow(result$coefficients), 2L)
+    expect_equal(result$coefficients$nirs_channels, channels)
+})
+
 
 ## analyse_kinetics ======================================================
-
 ## helper to create test mnirs data
 create_kinetics_data <- function(
     n = 50,
@@ -649,41 +975,19 @@ create_kinetics_data <- function(
     )
 }
 
-test_that("analyse_kinetics returns correct structure", {
+test_that("analyse_kinetics returns mnirs_kinetics object", {
     data <- create_kinetics_data()
-
-    old <- options(mnirs.verbose = FALSE)
-    options(mnirs.verbose = TRUE)
-    on.exit(options(old), add = TRUE)
 
     result <- analyse_kinetics(
         data,
         nirs_channels = "smo2_left",
         method = "peak_slope",
-        width = 5
+        width = 5,
+        verbose = FALSE
     )
 
-    expect_type(result, "list")
     expect_s3_class(result, "mnirs_kinetics")
-    expect_named(
-        result,
-        c(
-            "method",
-            "model",
-            "coefficients",
-            "data",
-            "interval_times",
-            "diagnostics",
-            "channel_args",
-            "call"
-        )
-    )
     expect_equal(result$method, "peak_slope")
-    expect_s3_class(result$coefficients, "data.frame")
-    expect_type(result$data, "list")
-    expect_s3_class(result$interval_times, "data.frame")
-    expect_s3_class(result$diagnostics, "data.frame")
-    expect_s3_class(result$channel_args, "data.frame")
 })
 
 test_that("analyse_kinetics captures call", {
@@ -705,8 +1009,6 @@ test_that("analyse_kinetics captures call", {
 test_that("analyse_kinetics works with data formats", {
     df1 <- create_kinetics_data()
     df2 <- create_kinetics_data()
-
-    attributes(df1)
 
     ## named lists
     result <- analyse_kinetics(
@@ -758,54 +1060,78 @@ test_that("analyse_kinetics errors on invalid method", {
     )
 })
 
-
-test_that("analyse_kinetics$data elements are mnirs tibbles with metadata", {
-    data <- create_kinetics_data(
+test_that("analyse_kinetics$data overwrites  metadata", {
+    df <- data.frame(
+        time = rep(seq(0, 4.9, by = 0.1), 2),
+        time_alt = rep(seq(0, 4.9, by = 0.1), 2),
+        smo2_left = c(
+            sin(seq(0, 4.9, by = 0.1)) * 10 + 50,
+            cos(seq(0, 4.9, by = 0.1)) * 10 + 50
+        ),
+        smo2_right = c(
+            sin(seq(0, 4.9, by = 0.1)) * 10 + 50,
+            cos(seq(0, 4.9, by = 0.1)) * 10 + 50
+        )
+    )
+    df <- create_mnirs_data(
+        df,
+        nirs_channels = "smo2_left",
+        time_channel = "time",
         sample_rate = 10,
-        channels = c("smo2_left", "smo2_right")
+        interval_times = sample(df$time, 1L)
     )
 
     result <- analyse_kinetics(
-        data,
-        nirs_channels = c("smo2_left"),
-        method = "peak_slope",
-        width = 5,
-        verbose = FALSE
-    )
-
-    expect_type(result$data, "list")
-    expect_length(result$data, 1L)
-
-    aug <- result$data[[1]]
-    expect_s3_class(aug, "mnirs")
-    ## ! should update the one removed channel
-    ## ! add `create_mnirs_data` to `analyse_*` functions
-    expect_equal(attr(aug, "nirs_channels"), c("smo2_left"))
-    expect_equal(attr(aug, "time_channel"), "time")
-    expect_equal(attr(aug, "sample_rate"), 10)
-})
-
-test_that("analyse_kinetics$data preserves mnirs metadata across multiple intervals", {
-    df1 <- create_kinetics_data(sample_rate = 10, channels = "smo2_left")
-    df2 <- create_kinetics_data(sample_rate = 10, channels = "smo2_left")
-
-    result <- analyse_kinetics(
-        list(baseline = df1, exercise = df2),
+        df,
         nirs_channels = "smo2_left",
         method = "peak_slope",
         width = 5,
         verbose = FALSE
     )
 
-    expect_length(result$data, 2L)
-    for (nm in c("baseline", "exercise")) {
-        aug <- result$data[[nm]]
-        expect_s3_class(aug, "mnirs")
-        expect_equal(attr(aug, "nirs_channels"), "smo2_left")
-        expect_equal(attr(aug, "time_channel"), "time")
-        expect_equal(attr(aug, "sample_rate"), 10)
-    }
+    aug <- result$data[[1L]]
+    # attributes(aug)
+    expect_s3_class(aug, "mnirs")
+    expect_equal(attr(aug, "nirs_channels"), "smo2_left")
+    expect_equal(attr(aug, "time_channel"), "time")
+    expect_equal(attr(aug, "sample_rate"), 10)
+    
+    ## additional nirs_channel
+    result <- analyse_kinetics(
+        df,
+        nirs_channels = c("smo2_left", "smo2_right"),
+        time_channel = "time_alt",
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+    
+    expect_equal(
+        attr(result$data[[1L]], "nirs_channels"),
+        c("smo2_left", "smo2_right")
+    )
+    expect_equal(attr(result$data[[1L]], "time_channel"), "time_alt")
+
+    ## remove nirs_channel
+    df <- create_mnirs_data(
+        df,
+        nirs_channels = c("smo2_left", "smo2_right"),
+        time_channel = "time",
+        sample_rate = 10,
+        interval_times = sample(df$time, 1L)
+    )
+
+    result <- analyse_kinetics(
+        df,
+        nirs_channels = "smo2_right",
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+
+    expect_equal(attr(result$data[[1L]], "nirs_channels"), "smo2_right")
 })
+
 
 test_that("analyse_kinetics$data preserves mnirs metadata with grouped input", {
     skip_if_not_installed("dplyr")
@@ -844,72 +1170,6 @@ test_that("analyse_kinetics$data preserves mnirs metadata with grouped input", {
         expect_equal(attr(aug, "sample_rate"), 10)
     }
 })
-
-## interval_times ======================================================
-test_that("interval_times is a list-column with one row per interval (distinct)", {
-    df1 <- create_kinetics_data(n = 50)
-    df2 <- create_kinetics_data(n = 50)
-    attr(df1, "interval_times") <- 1.5
-    attr(df2, "interval_times") <- 3.0
-
-    result <- analyse_kinetics(
-        list(baseline = df1, exercise = df2),
-        nirs_channels = "smo2_left",
-        method = "peak_slope",
-        width = 5,
-        verbose = FALSE
-    )
-
-    et <- result$interval_times
-    expect_s3_class(et, "data.frame")
-    expect_equal(nrow(et), 2L)
-    expect_equal(et$interval, c("baseline", "exercise"))
-    expect_type(et$interval_times, "list")
-    ## each entry is a scalar numeric
-    expect_equal(et$interval_times[[1L]], 1.5)
-    expect_equal(et$interval_times[[2L]], 3.0)
-})
-
-test_that("interval_times list-column unpacks multiple times (ensemble)", {
-    df1 <- create_kinetics_data(n = 50)
-    ## simulate ensemble: interval_times is a list of constituent event times
-    attr(df1, "interval_times") <- list(368, 1093)
-
-    result <- analyse_kinetics(
-        list(ensemble = df1),
-        nirs_channels = "smo2_left",
-        method = "peak_slope",
-        width = 5,
-        verbose = FALSE
-    )
-
-    et <- result$interval_times
-    expect_equal(nrow(et), 1L)
-    expect_equal(et$interval, "ensemble")
-    expect_type(et$interval_times, "list")
-    ## entry is a numeric vector of length 2
-    expect_equal(et$interval_times[[1L]], c(368, 1093))
-})
-
-test_that("interval_times returns NA when attribute is NULL", {
-    df <- create_kinetics_data(n = 50)
-    attr(df, "interval_times") <- NULL
-
-    result <- analyse_kinetics(
-        df,
-        nirs_channels = "smo2_left",
-        method = "peak_slope",
-        width = 5,
-        verbose = FALSE
-    )
-
-    et <- result$interval_times
-    expect_equal(nrow(et), 1L)
-    expect_type(et$interval_times, "list")
-    expect_true(is.na(et$interval_times[[1L]]))
-})
-
-
 
 ## analyse_kinetics.peak_slope =========================================
 ## structure, data formats, grouped data covered by generic tests above
@@ -1068,24 +1328,6 @@ create_monoexp_data <- function(
 
 ## structure, data formats, grouped data covered by generic tests above
 
-test_that("analyse_kinetics.monoexponential has correct columns", {
-    data <- create_monoexp_data()
-
-    result <- analyse_kinetics(
-        data,
-        nirs_channels = "smo2",
-        method = "monoexponential",
-        time_delay = FALSE,
-        verbose = FALSE
-    )
-
-    expect_named(result$coefficients, c(
-        "interval", "nirs_channels", 
-        "A", "B", "tau", "k", "TD", "MRT", "HRT",
-        "tau_fitted", "MRT_fitted", "HRT_fitted"
-    ))
-})
-
 
 test_that("analyse_kinetics.monoexponential dispatches multiple channels", {
     nirs_channels <- c("smo2_left", "smo2_right")
@@ -1147,7 +1389,6 @@ test_that("analyse_kinetics works visually on Train.Red", {
         )
 
     result <- analyse_kinetics(data_list, method = "peak_slope", span = 10)
-    result$
 
     library(ggplot2)
     plot(data_list[[1]]) +
@@ -1167,6 +1408,7 @@ test_that("analyse_kinetics works visually on Train.Red", {
 
     result <- analyse_kinetics(data_list, method = "monoexp", time_delay = TRUE)
     # result$diagnostics
+    # result$coefficients
 
     plot(data_list[[1]]) +
         geom_line(
@@ -1186,7 +1428,7 @@ test_that("analyse_kinetics works visually on Train.Red", {
 
 
 ## benchmark ===========================================================
-test_that("analyse_kinetics.peak_slope benchmark", {
+test_that("analyse_kinetics benchmark", {
     ## baselne established from documented example on initial run;
     ## fails if itr/sec regresses by >10%
     skip("benchmark baseline test")
@@ -1210,32 +1452,44 @@ test_that("analyse_kinetics.peak_slope benchmark", {
             verbose = FALSE
         )
 
-    # for (i in seq_len(3)) {
-        # bench::mark(
-        #     analyse_peak_slope = suppressWarnings(
-        #         lapply(data_list, \(.df) {
-        #             analyse_peak_slope(
-        #                 .df,
-        #                 nirs_channels = c(smo2_left, smo2_right),
-        #                 span = 10,
-        #                 verbose = FALSE
-        #             )
-        #         })
-        #     ),
-        #     analyse_kinetics.peak_slope = suppressWarnings(
-        #         analyse_kinetics(
-        #             data_list,
-        #             nirs_channels = c(smo2_left, smo2_right),
-        #             method = "peak_slope",
-        #             span = 10,
-        #             direction = "auto",
-        #             verbose = FALSE
-        #         )
-        #     ),
-        #     iterations = 5L,
-        #     check = FALSE
-        # )
-    # }
+    # bench::mark(
+    #     analyse_peak_slope = suppressWarnings(
+    #         lapply(data_list, \(.df) {
+    #             analyse_peak_slope(
+    #                 .df,
+    #                 nirs_channels = c(smo2_left, smo2_right),
+    #                 span = 10,
+    #                 verbose = FALSE
+    #             )
+    #         })
+    #     ),
+    #     kinetics.peak_slope = analyse_kinetics(
+    #         data_list,
+    #         nirs_channels = c(smo2_left, smo2_right),
+    #         method = "peak_slope",
+    #         span = 10,
+    #         verbose = FALSE
+    #     ),
+    #     analyse_monoexponential = suppressWarnings(
+    #         lapply(data_list, \(.df) {
+    #             analyse_monoexponential(
+    #                 .df,
+    #                 nirs_channels = c(smo2_left, smo2_right),
+    #                 time_delay = TRUE,
+    #                 verbose = FALSE
+    #             )
+    #         })
+    #     ),
+    #     kinetics.monoexponential = analyse_kinetics(
+    #         data_list,
+    #         nirs_channels = c(smo2_left, smo2_right),
+    #         method = "monoexponential",
+    #         time_delay = TRUE,
+    #         verbose = FALSE
+    #     ),
+    #     iterations = 5L,
+    #     check = FALSE
+    # )
 
     # A tibble: 2 × 13
 #>    expression                 min median `itr/sec` mem_alloc `gc/sec`

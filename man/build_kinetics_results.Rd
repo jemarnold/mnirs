@@ -4,7 +4,7 @@
 \alias{build_kinetics_results}
 \title{Gather per-interval \code{mnirs_kinetics} into results structure}
 \usage{
-build_kinetics_results(data_list, result_list, interval_names)
+build_kinetics_results(data_list, result_list, interval_names, method, call)
 }
 \arguments{
 \item{data_list}{Named list of original interval data frames.}

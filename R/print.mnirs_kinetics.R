@@ -36,6 +36,9 @@
 #' @export
 print.mnirs_kinetics <- function(x, ...) {
     coefs <- x$coefficients
+    ## remove columns unnecessary for display
+    drop_cols <- c("time_channel", grep("_fitted$", names(coefs), value = TRUE))
+    coefs <- coefs[, !names(coefs) %in% drop_cols, drop = FALSE]
     nrows <- nrow(coefs)
 
     ## prep numeric values for display; ignore all na cols
