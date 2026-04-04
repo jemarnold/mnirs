@@ -29,9 +29,17 @@ detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative
 \item{...}{Additional arguments.}
 }
 \value{
-An integer vector of indices into \code{x} (and \code{t}) where both
-values are finite, truncated at the last index where
-\code{t <= t[extreme] + end_fit_span}.
+A named list with three elements:
+\describe{
+\item{\code{direction}}{Character; the resolved direction used —
+\code{"positive"} (peak) or \code{"negative"} (trough).}
+\item{\code{extreme}}{Integer or \code{NULL}; the index of the
+first qualifying peak or trough in original \code{x}
+space, or \code{NULL} if no qualifying extreme was found
+(monotonic, horizontal, or degenerate input).}
+\item{\code{idx}}{Integer vector of all valid finite indices,
+truncated at \code{t[extreme] + end_fit_span}.}
+}
 }
 \description{
 Filters \code{x} and \code{t} to valid finite values, locates the first valid peak

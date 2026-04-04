@@ -461,74 +461,93 @@ test_that("find_kinetics_idx validates inputs", {
     )
 })
 
+test_that("find_kinetics_idx returns a named list", {
+    x <- c(1, 5, 10, 5, 1)
+    t <- seq_along(x)
+    result <- find_kinetics_idx(x, t, end_fit_span = 0)
+    expect_type(result, "list")
+    expect_named(result, c("direction", "extreme", "idx"))
+    expect_equal(result$extreme, 3L)
+    expect_equal(result$idx, seq_len(3L))
+})
+
 test_that("find_kinetics_idx works on edge cases", {
     ## single element
     result <- find_kinetics_idx(x = 5, t = 1)
-    expect_equal(result, 1L)
+    expect_equal(result$idx, 1L)
+    expect_null(result$extreme)
 
     ## all-equal values
     x <- rep(5, 20)
     t <- seq_along(x)
     result <- find_kinetics_idx(x, t)
-    expect_equal(result, seq_along(x))
+    expect_equal(result$idx, seq_along(x))
+    expect_null(result$extreme)
 
     ## monotonic increasing
     x <- 1:50
     t <- seq_along(x)
     result <- find_kinetics_idx(x, t)
-    expect_equal(result, seq_along(x))
+    expect_equal(result$idx, seq_along(x))
+    expect_null(result$extreme)
 
     ## monotonic decreasing
     x <- 50:1
     t <- seq_along(x)
     result <- find_kinetics_idx(x, t)
-    expect_equal(result, seq_along(x))
+    expect_equal(result$idx, seq_along(x))
+    expect_null(result$extreme)
 })
 
 test_that("find_kinetics_idx finds peak in rise-then-fall", {
     ## peak at index 20 (value 20), then decline
     x <- c(seq(1, 20, length.out = 20), seq(19, 1, length.out = 19))
     t <- seq_along(x)
-    
+
     result <- find_kinetics_idx(x, t, end_fit_span = 0)
-    expect_equal(result, seq_len(20L))
-    expect_equal(x[result[length(result)]], max(x))
+    expect_equal(result$idx, seq_len(20L))
+    expect_equal(result$extreme, 20L)
+    expect_equal(x[result$extreme], max(x))
 })
 
 test_that("find_kinetics_idx finds trough in fall-then-rise", {
     ## trough at index 20 (value 1), then rise
     x <- c(seq(20, 1, length.out = 20), seq(2, 20, length.out = 19))
     t <- seq_along(x)
-    
+
     result <- find_kinetics_idx(x, t, end_fit_span = 0, direction = "negative")
-    expect_equal(result, seq_len(20L))
-    expect_equal(x[result[length(result)]], min(x))
+    expect_equal(result$idx, seq_len(20L))
+    expect_equal(result$extreme, 20L)
+    expect_equal(x[result$extreme], min(x))
 })
 
 test_that("find_kinetics_idx works on irregular t with end_fit_span = 0", {
     ## peak at index 20 (value 20), then decline
     x <- c(seq(1, 20, length.out = 20), seq(19, 1, length.out = 19))
     t <- c(1:10, 10, 10, 13:39)/10
+
+    result <- find_kinetics_idx(x, t, end_fit_span = 0, direction = "positive")
+    expect_equal(result$idx, seq_len(12L))
+    expect_equal(result$extreme, 12L)
+    
+    x <- c(1:10, 10, 10, 13:20, seq(19, 1, length.out = 19))
+    t <- c(1:10, 10, 10, 13:39)/10
     
     result <- find_kinetics_idx(x, t, end_fit_span = 0, direction = "positive")
-    expect_equal(result, seq_len(12L))
-
     ## TODO this fails but negligible real-world concern
-    # x <- c(1:10, 10, 10, 13:20, seq(19, 1, length.out = 19))
-    # t <- c(1:10, 10, 10, 13:39)/10
-    # plot(t, x)
-    # result <- find_kinetics_idx(x, t, end_fit_span = 0, direction = "positive")
-    # expect_equal(result, seq_len(10L)) 
+    # expect_equal(result$idx, seq_len(10L))
+    expect_equal(result$extreme, 10L)
 })
 
 test_that("find_kinetics_idx auto-detects positive direction", {
     ## net positive slope with peak before end
     x <- c(seq(1, 20, length.out = 15), seq(19, 10, length.out = 15))
     t <- seq_along(x)
-    
+
     result <- find_kinetics_idx(x, t, end_fit_span = 0)
     ## should find the peak, not return n
-    expect_equal(result, seq_len(15L))
+    expect_equal(result$idx, seq_len(15L))
+    expect_equal(result$extreme, 15L)
 })
 
 test_that("find_kinetics_idx auto-detects negative direction", {
@@ -538,7 +557,8 @@ test_that("find_kinetics_idx auto-detects negative direction", {
 
     result <- find_kinetics_idx(x, t, end_fit_span = 0)
     ## should find the trough, not return n
-    expect_equal(result, seq_len(15L))
+    expect_equal(result$idx, seq_len(15L))
+    expect_equal(result$extreme, 15L)
 })
 
 test_that("find_kinetics_idx auto falls back to positive when net slope is zero and max_pos >= min_neg", {
@@ -549,7 +569,8 @@ test_that("find_kinetics_idx auto falls back to positive when net slope is zero 
 
     result <- find_kinetics_idx(x, t, end_fit_span = 0)
     ## positive direction: peak at index 3, indices up to peak
-    expect_equal(result, seq_len(3L))
+    expect_equal(result$idx, seq_len(3L))
+    expect_equal(result$extreme, 3L)
 })
 
 test_that("find_kinetics_idx auto falls back to negative when net slope is zero and max_pos < min_neg", {
@@ -560,14 +581,15 @@ test_that("find_kinetics_idx auto falls back to negative when net slope is zero 
 
     result <- find_kinetics_idx(x, t, end_fit_span = 0)
     ## negative direction: trough at index 3, indices up to trough
-    expect_equal(result, seq_len(3L))
+    expect_equal(result$idx, seq_len(3L))
+    expect_equal(result$extreme, 3L)
 })
 
 test_that("find_kinetics_idx ignores negative t values", {
     ## peak in negative-t region should be ignored
     x <- c(20, 20, 0, 1, 2, 10, 9, 8, 7, 6)
     t <- c(-2, -1, 0, 1, 2,  3, 4, 5, 6, 7)
-    
+
     result <- find_kinetics_idx(
         x,
         t,
@@ -575,26 +597,30 @@ test_that("find_kinetics_idx ignores negative t values", {
         direction = "positive"
     )
     ## should not find the peak at t <= 0
-    expect_equal(t[result[length(result)]], 5)
+    expect_equal(t[result$idx[length(result$idx)]], 5)
+    expect_equal(result$extreme, 6L)
 })
 
 test_that("find_kinetics_idx returns n when all t <= 0", {
     x <- c(5, 10, 3)
     t <- c(-3, -2, -1)
     result <- find_kinetics_idx(x, t, end_fit_span = 1)
-    expect_equal(result, seq_along(x))
+    expect_equal(result$idx, seq_along(x))
+    ## no positive-t samples, so n_valid < 2 for extreme detection
+    expect_null(result$extreme)
 })
 
 test_that("find_kinetics_idx handles invalid values", {
     x <- c(1, NA, 5, 10, Inf, 6, 4, 3)
     t <- c(1, 2, NA, 4, NA, 6, 7, 8)
-    
+
     result <- find_kinetics_idx(
         x,
         t,
         end_fit_span = 3
     )
-    expect_equal(result, c(1, 4, 6, 7))
+    expect_equal(result$idx, c(1, 4, 6, 7))
+    expect_equal(result$extreme, 4L)
 })
 
 test_that("find_kinetics_idx returns first tie", {
@@ -608,7 +634,8 @@ test_that("find_kinetics_idx returns first tie", {
         direction = "positive"
     )
     ## should find first peak (index 5), not second (index 15)
-    expect_equal(result, seq_len(5L + 3))
+    expect_equal(result$idx, seq_len(5L + 3))
+    expect_equal(result$extreme, 5L)
 })
 
 test_that("find_kinetics_idx end_fit_span larger than data range", {
@@ -621,7 +648,8 @@ test_that("find_kinetics_idx end_fit_span larger than data range", {
         end_fit_span = 100,
         direction = "positive"
     )
-    expect_equal(result, seq_along(x))
+    expect_equal(result$idx, seq_along(x))
+    expect_equal(result$extreme, 2L)
 })
 
 ## build_kinetics_results ===============================================

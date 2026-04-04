@@ -20,7 +20,7 @@ slope <- function(
     ## validation =================================================
     args <- list(...)
     if (!(args$bypass_checks %||% FALSE)) {
-        validate_x_t(x, t, invalid = TRUE)
+        validate_x_t(x, t, allow_na = TRUE)
     }
 
     if (length(x) < max(args$min_obs, 2L) || !na.rm && anyNA(x)) {
@@ -110,7 +110,7 @@ rolling_slope <- function(
     )
 
     if (!(args$bypass_checks %||% FALSE)) {
-        validate_x_t(x, t, invalid = TRUE)
+        validate_x_t(x, t, allow_na = TRUE)
         align <- sub("^center$", "centre", align)
         align <- match.arg(align)
 
@@ -298,21 +298,8 @@ peak_slope <- function(
         return(na_result)
     }
 
-    ## auto-detect direction from net trend
-    if (direction == "auto") {
-        net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
-
-        direction <- if (is.na(net_slope) || net_slope == 0) {
-            ## fallback to slope magnitude comparison when net slope is zero/NA
-            max_pos <- abs(max(slopes, na.rm = TRUE))
-            min_neg <- abs(min(slopes, na.rm = TRUE))
-            if (max_pos >= min_neg) "positive" else "negative"
-        } else if (net_slope > 0) {
-            "positive"
-        } else {
-            "negative"
-        }
-    }
+    ## detect direction from net trend, fallbackt to abs peak slope
+    direction <- detect_direction(x, t, slopes, direction)
 
     ## manual direction calculation
     candidates <- switch(
@@ -436,6 +423,7 @@ analyse_peak_slope <- function(
         span = span,
         align = align,
         direction = direction,
+        end_fit_span = end_fit_span,
         partial = partial,
         na.rm = na.rm,
         verbose = verbose,
@@ -446,39 +434,19 @@ analyse_peak_slope <- function(
     ## process per-channel =================================
     results <- lapply(nirs_channels, \(.nirs) {
         all_args <- utils::modifyList(
-            default_args,
-            channel_args[[.nirs]] %||% list()
+            default_args, channel_args[[.nirs]] %||% list()
         )
 
         ## filter for valid finite idx before first extreme + end_fit_span
         valid <- find_kinetics_idx(
-            data[[.nirs]], time_vec, end_fit_span, direction
+            data[[.nirs]], time_vec, all_args$end_fit_span, all_args$direction
         )
-        x_fit <- data[[.nirs]][valid]
-        t_fit <- time_vec[valid]
+        all_args$direction <- valid$direction
+        x_fit <- data[[.nirs]][valid$idx]
+        t_fit <- time_vec[valid$idx]
 
         slopes <- do.call(peak_slope, c(list(x = x_fit, t = t_fit), all_args))
-
-        ## fit lm on peak window for model object
-        model <- if (!anyNA(slopes$window_idx)) {
-            stats::lm(
-                x ~ t,
-                data = data.frame(
-                    x = x_fit[slopes$window_idx],
-                    t = t_fit[slopes$window_idx]
-                )
-            )
-        } else {
-            NULL
-        }
-
-        diag <- compute_diagnostics(
-            x = x_fit[slopes$window_idx],
-            t = t_fit[slopes$window_idx],
-            fitted = slopes$fitted,
-            n_params = 1L,
-            verbose = verbose
-        )
+        
         coefs <- data.frame(
             nirs_channels = .nirs,
             time_channel  = time_channel,
@@ -489,13 +457,20 @@ analyse_peak_slope <- function(
             idx           = slopes$idx
         )
         names(coefs)[names(coefs) == "t"] <- time_channel
+        diag <- compute_diagnostics(
+            x             = x_fit[slopes$window_idx],
+            t             = t_fit[slopes$window_idx],
+            fitted        = slopes$fitted,
+            n_params      = 1L,
+            verbose       = verbose
+        )
 
         list(
-            coefficients = coefs,
-            model = model,
+            coefficients   = coefs,
+            model          = slopes$model,
             fitted_data = data.frame(
                 window_idx = slopes$window_idx,
-                fitted = slopes$fitted
+                fitted     = slopes$fitted
             ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = build_channel_args(.nirs, all_args)

@@ -1,3 +1,48 @@
+#' Resolve the direction of a response signal
+#'
+#' Detects whether a signal is predominantly increasing (`"positive"`) or
+#' decreasing (`"negative"`) by computing the net slope of `x` over `t`.
+#' Used internally to disambiguate peak (maximum) from trough (minimum)
+#' detection when `direction = "auto"`.
+#'
+#' @param x A numeric vector of the response variable.
+#' @param t An optional numeric vector of the predictor variable (time or
+#'   sample number). Default is `seq_along(x)`.
+#' @param fallback A numeric vector used to resolve direction when the net
+#'   slope of `x` is zero or `NA`. The absolute maximum and minimum of
+#'   `fallback` are compared; if `abs(max) >= abs(min)`, `"positive"` is
+#'   returned. Defaults to `x`; may differ (e.g. rolling slopes).
+#' @param direction A character string — `"auto"` (*default*), `"positive"`,
+#'   or `"negative"`. When not `"auto"`, returned unchanged.
+#'
+#' @returns A character string: `"positive"` or `"negative"`.
+#'
+#' @keywords internal
+detect_direction <- function(
+    x,
+    t = seq_along(x),
+    fallback = x,
+    direction = c("auto", "positive", "negative")
+) {
+    if (direction == "auto") {
+        net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
+
+        direction <- if (is.na(net_slope) || net_slope == 0) {
+            ## fallback to abs magnitude comparison when net slope is zero/NA
+            max_pos <- abs(max(fallback, na.rm = TRUE))
+            min_neg <- abs(min(fallback, na.rm = TRUE))
+            if (max_pos >= min_neg) "positive" else "negative"
+        } else if (net_slope > 0) {
+            "positive"
+        } else {
+            "negative"
+        }
+    }
+
+    return(direction)
+}
+
+
 #' Find valid model-fitting indices up to the first extreme
 #'
 #' Filters `x` and `t` to valid finite values, locates the first valid peak 
@@ -25,9 +70,17 @@
 #' However, indices where `t < 0` are included in the returned vector
 #' provided they are finite.
 #'
-#' @returns An integer vector of indices into `x` (and `t`) where both
-#'   values are finite, truncated at the last index where
-#'   `t <= t[extreme] + end_fit_span`.
+#' @returns A named list with three elements:
+#'   \describe{
+#'     \item{`direction`}{Character; the resolved direction used —
+#'       `"positive"` (peak) or `"negative"` (trough).}
+#'     \item{`extreme`}{Integer or `NULL`; the index of the
+#'       first qualifying peak or trough in original `x`
+#'       space, or `NULL` if no qualifying extreme was found
+#'       (monotonic, horizontal, or degenerate input).}
+#'     \item{`idx`}{Integer vector of all valid finite indices,
+#'       truncated at `t[extreme] + end_fit_span`.}
+#'   }
 #'
 #' @keywords internal
 find_kinetics_idx <- function(
@@ -42,7 +95,7 @@ find_kinetics_idx <- function(
     n <- length(x)
 
     if (!(args$bypass_checks %||% FALSE)) {
-        validate_x_t(x, t, invalid = TRUE)
+        validate_x_t(x, t, allow_na = TRUE)
         validate_numeric(
             end_fit_span, 1, c(0, Inf), msg1 = "one-element positive"
         )
@@ -57,35 +110,28 @@ find_kinetics_idx <- function(
     t_valid <- t[which_positive]
     n_valid <- length(x_valid)
 
+    invalid_return <- list(
+        direction = "positive",
+        extreme = NULL,
+        idx = which_valid
+    )
+
     ## early returns for degenerate inputs
     if (n_valid < 2L) {
-        return(which_valid)
+        return(invalid_return)
     }
 
-    ## direction detection ========================================
-    if (direction == "auto") {
-        net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
-
-        direction <- if (is.na(net_slope) || net_slope == 0) {
-            ## compare abs magnitudes of global max vs global min
-            max_pos <- abs(max(x, na.rm = TRUE))
-            min_neg <- abs(min(x, na.rm = TRUE))
-            if (max_pos >= min_neg) "positive" else "negative"
-        } else if (net_slope > 0) {
-            "positive"
-        } else {
-            "negative"
-        }
-    }
-
+    ## direction detection, fallback to abs magnitude
+    direction <- detect_direction(x, t, x, direction)
     extreme_fn <- if (direction == "positive") max else min
     compare_fn <- if (direction == "positive") `>=` else `<=`
     which_fn   <- if (direction == "positive") which.max else which.min
+    invalid_return$direction <- direction
 
     ## monotonic: if global extreme is the last x value
     ## horizontal: if all x values equal
     if (which_fn(x_valid) == n_valid || all(x_valid == x_valid[1L])) {
-        return(which_valid)
+        return(invalid_return)
     }
 
     ## process ==================================================
@@ -115,14 +161,20 @@ find_kinetics_idx <- function(
     }, bin_extreme_idx)
 
     if (!is.null(extreme_idx)) {
-        ## map extreme back to original index space via which_positive
+        ## map extreme back to original index space
         orig_extreme <- which_positive[extreme_idx]
         t_cutoff <- t[orig_extreme] + end_fit_span
-        return(which_valid[t[which_valid] <= t_cutoff])
+        truncated <- which_valid[t[which_valid] <= t_cutoff]
+        
+        return(list(
+            direction = direction,
+            extreme = orig_extreme,
+            idx = truncated
+        ))
     }
 
-    ## fallback to all values: no qualifying extreme found
-    return(which_valid)
+    ## fallback: no qualifying extreme found
+    return(invalid_return)
 }
 
 

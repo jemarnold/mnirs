@@ -284,6 +284,8 @@ analyse_monoexponential <- function(
 
     default_args <- list(
         time_delay = time_delay,
+        direction = direction,
+        end_fit_span = end_fit_span,
         verbose = verbose,
         ...
     )
@@ -314,10 +316,11 @@ analyse_monoexponential <- function(
 
         ## filter for valid finite idx before first extreme + end_fit_span
         valid <- find_kinetics_idx(
-            data[[.nirs]], time_vec, end_fit_span, direction
+            data[[.nirs]], time_vec, all_args$end_fit_span, all_args$direction
         )
-        x_fit <- data[[.nirs]][valid]
-        t_fit <- time_vec[valid]
+        all_args$direction <- valid$direction
+        x_fit <- data[[.nirs]][valid$idx]
+        t_fit <- time_vec[valid$idx]
 
         fit_data <- data.frame(.x = x_fit, .t = t_fit)
         model <- NULL ## pre-allocate for 3-param condition
@@ -409,7 +412,10 @@ analyse_monoexponential <- function(
         list(
             coefficients = coefs,
             model = model,
-            fitted_data = data.frame(window_idx = valid, fitted = fitted_vals),
+            fitted_data = data.frame(
+                window_idx = valid$idx, 
+                fitted     = fitted_vals
+            ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = build_channel_args(.nirs, all_args)
         )

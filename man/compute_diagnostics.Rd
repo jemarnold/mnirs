@@ -26,16 +26,22 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 \value{
 A 1-row \code{data.frame} with columns \code{n_obs}, \code{r2}, \code{adj_r2},
 \code{pseudo_r2}, \code{rmse}, \code{snr}, and \code{cv_rmse}.
-\itemize{
-\item \code{adj_r2}: adjusted \code{R^2} penalised by \code{n_params}. Appropriate for
-OLS linear models; interpret with caution for non-linear fits.
-\item \code{pseudo_r2}: squared Pearson correlation between observed and fitted
-values. Equivalent to \code{R^2} for OLS but well-defined for non-linear
-and multivariate models. Preferred for \code{"monoexponential"} and
-\code{"sigmoidal"} methods.
-}
 }
 \description{
 Compute model diagnostics
+}
+\details{
+\subsection{\code{adj_r2}}{
+
+Adjusted \code{R^2} penalised by \code{n_params}. Appropriate for OLS linear models;
+interpret with caution for non-linear fits.
+}
+
+\subsection{\code{pseudo_r2}}{
+
+Squared Pearson correlation between observed and fitted values. Equivalent
+to \code{R^2} for OLS but well-defined for non-linear and multivariate models.
+Preferred for \code{"monoexponential"} and \code{"sigmoidal"} methods.
+}
 }
 \keyword{internal}
