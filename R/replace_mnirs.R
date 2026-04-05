@@ -214,13 +214,10 @@ replace_mnirs <- function(
 #' numeric vector and replace them with the local median value or `NA`.
 #'
 #' @param x A numeric vector of the response variable.
-#'
-#' @param t An *optional* numeric vector of the predictor variable (time or
-#'   sample number). Default is `seq_along(x)`.
-#'
+#' @param t An *optional* numeric vector of the predictor variable (e.g. time). 
+#'   Default is `seq_along(x)`.
 #' @param bypass_checks Logical allowing wrapper functions to bypass
 #'   redundant checks and validations.
-#'
 #' @inheritParams replace_mnirs
 #'
 #' @details
@@ -247,7 +244,7 @@ replace_invalid <- function(
     width = NULL,
     span = NULL,
     method = c("median", "none"),
-    bypass_checks = FALSE,
+    bypass_checks = FALSE, ## ! convert to hidden arg
     verbose = TRUE
 ) {
     ## validate ===============================================

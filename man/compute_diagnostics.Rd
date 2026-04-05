@@ -9,8 +9,8 @@ compute_diagnostics(x, t, fitted, n_params = 1L, verbose = TRUE)
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
-sample number). Default is \code{seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
+Default is \code{seq_along(x)}.}
 
 \item{fitted}{A numeric vector of the predicted values.}
 

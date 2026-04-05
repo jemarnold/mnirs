@@ -228,7 +228,7 @@ SS_monoexp4 <- selfStart(
 )
 
 
-#' Analyse monoexponential kinetics per channel
+#' Analyse monoexponential kinetics across NIRS channels
 #'
 #' Fit a monoexponential curve to each `nirs_channel` within a single
 #' data frame. Called by [analyse_kinetics()] when `method = "monoexponential"`.
@@ -239,6 +239,25 @@ SS_monoexp4 <- selfStart(
 #'   reduced 3-parameter [SS_monoexp3()] model (A, B, tau).
 #' @inheritParams validate_mnirs
 #' @inheritParams analyse_kinetics
+#' 
+#' @details
+#' ## Per-channel argument overrides
+#'
+#' Arguments passed to `analyse_monoexponential()` apply to all `nirs_channels`
+#' by default. `channel_args` allows overriding any argument for individual
+#' channels, e.g.:
+#'
+#' ```r
+#' analyse_monoexponential(
+#'     data = df,
+#'     nirs_channels = c(hhb, smo2),
+#'     time_delay = TRUE,
+#'     direction = "positive",
+#'     channel_args = list(
+#'         hhb = list(direction = "negative")
+#'     )
+#' )
+#' ```
 #'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
 #'   `nirs_channels`, `A`, `B`, `tau`, `k`, `TD`, `MRT`, `HRT`, `tau_fitted`,

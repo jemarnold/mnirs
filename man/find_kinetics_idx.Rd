@@ -15,14 +15,14 @@ find_kinetics_idx(
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
-sample number). Default is \code{seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
+Default is \code{seq_along(x)}.}
 
 \item{end_fit_span}{A numeric value in units of \code{t} specifying the
 forward-looking window used to check for subsequent greater/lesser
 values than the candidate extreme.}
 
-\item{direction}{A character string specifying the slope direction to
+\item{direction}{A character string specifying the kinetics direction to
 detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 

@@ -20,8 +20,8 @@ peak_slope(
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
-sample number). Default is \code{seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
+Default is \code{seq_along(x)}.}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}

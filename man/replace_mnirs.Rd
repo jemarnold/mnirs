@@ -121,8 +121,8 @@ global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An \emph{optional} numeric vector of the predictor variable (time or
-sample number). Default is \code{seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
+Default is \code{seq_along(x)}.}
 
 \item{bypass_checks}{Logical allowing wrapper functions to bypass
 redundant checks and validations.}

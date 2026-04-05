@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_kinetics_helpers.R
 \name{detect_direction}
 \alias{detect_direction}
-\title{Resolve the direction of a response signal}
+\title{Detect the direction of a response signal}
 \usage{
 detect_direction(
   x,
@@ -14,22 +14,23 @@ detect_direction(
 \arguments{
 \item{x}{A numeric vector of the response variable.}
 
-\item{t}{An optional numeric vector of the predictor variable (time or
-sample number). Default is \code{seq_along(x)}.}
+\item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
+Default is \code{seq_along(x)}.}
 
-\item{fallback}{A numeric vector used to resolve direction when the net
-slope of \code{x} is zero or \code{NA}. The absolute maximum and minimum of
-\code{fallback} are compared; if \code{abs(max) >= abs(min)}, \code{"positive"} is
-returned. Defaults to \code{x}; may differ (e.g. rolling slopes).}
+\item{fallback}{A numeric vector (\emph{defaults} to \code{x}) used to resolve
+direction when the net slope of \code{x} is zero or \code{NA}. The absolute
+maximum and minimum of \code{fallback} are compared; if \code{abs(max) >= abs(min)},
+\code{"positive"} is returned.}
 
-\item{direction}{A character string — \code{"auto"} (\emph{default}), \code{"positive"},
-or \code{"negative"}. When not \code{"auto"}, returned unchanged.}
+\item{direction}{A character string specifying the kinetics direction to
+detect when \code{"auto"} (\emph{default}). When \code{"positive"} or \code{"negative"}
+returns unchanged.}
 }
 \value{
 A character string: \code{"positive"} or \code{"negative"}.
 }
 \description{
-Detects whether a signal is predominantly increasing (\code{"positive"}) or
+Resolves whether a signal is predominantly increasing (\code{"positive"}) or
 decreasing (\code{"negative"}) by computing the net slope of \code{x} over \code{t}.
 Used internally to disambiguate peak (maximum) from trough (minimum)
 detection when \code{direction = "auto"}.

@@ -1,19 +1,18 @@
-#' Resolve the direction of a response signal
+#' Detect the direction of a response signal
 #'
-#' Detects whether a signal is predominantly increasing (`"positive"`) or
+#' Resolves whether a signal is predominantly increasing (`"positive"`) or
 #' decreasing (`"negative"`) by computing the net slope of `x` over `t`.
 #' Used internally to disambiguate peak (maximum) from trough (minimum)
 #' detection when `direction = "auto"`.
 #'
-#' @param x A numeric vector of the response variable.
-#' @param t An optional numeric vector of the predictor variable (time or
-#'   sample number). Default is `seq_along(x)`.
-#' @param fallback A numeric vector used to resolve direction when the net
-#'   slope of `x` is zero or `NA`. The absolute maximum and minimum of
-#'   `fallback` are compared; if `abs(max) >= abs(min)`, `"positive"` is
-#'   returned. Defaults to `x`; may differ (e.g. rolling slopes).
-#' @param direction A character string — `"auto"` (*default*), `"positive"`,
-#'   or `"negative"`. When not `"auto"`, returned unchanged.
+#' @param fallback A numeric vector (*defaults* to `x`) used to resolve 
+#'   direction when the net slope of `x` is zero or `NA`. The absolute 
+#'   maximum and minimum of `fallback` are compared; if `abs(max) >= abs(min)`,
+#'   `"positive"` is returned.
+#' @param direction A character string specifying the kinetics direction to
+#'   detect when `"auto"` (*default*). When `"positive"` or `"negative"`
+#'   returns unchanged.
+#' @inheritParams replace_invalid
 #'
 #' @returns A character string: `"positive"` or `"negative"`.
 #'
@@ -52,7 +51,10 @@ detect_direction <- function(
 #' @param end_fit_span A numeric value in units of `t` specifying the
 #'   forward-looking window used to check for subsequent greater/lesser
 #'   values than the candidate extreme.
-#' @inheritParams peak_slope
+#' @param direction A character string specifying the kinetics direction to
+#'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
+#'   *Details*.
+#' @inheritParams replace_invalid
 #'
 #' @details
 #' ## Direction detection
@@ -165,7 +167,7 @@ find_kinetics_idx <- function(
         orig_extreme <- which_positive[extreme_idx]
         t_cutoff <- t[orig_extreme] + end_fit_span
         truncated <- which_valid[t[which_valid] <= t_cutoff]
-        
+
         return(list(
             direction = direction,
             extreme = orig_extreme,
@@ -342,7 +344,8 @@ build_na_results <- function(
 #' the single attributed data frame that [build_kinetics_results()]
 #' expects.
 #'
-#' @param results Named list of per-channel result lists.
+#' @param results List of per-channel result lists.
+#' @param nirs_channels Names to pass to list items
 #'
 #' @returns A `data.frame` with attributes `"model"`, `"fitted_data"`,
 #'   `"diagnostics"`, and `"channel_args"`.

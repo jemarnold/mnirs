@@ -351,4 +351,4 @@ the following devices and apps:
 ------------------------------------------------------------------------
 
 *Generative chatbots are used to assist with code optimisation. All code
-is thoroughly reviewed, validated, and tested by the package author.*
+is thoroughly reviewed and validated by the package author.*

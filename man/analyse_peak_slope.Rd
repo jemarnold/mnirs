@@ -108,8 +108,8 @@ channels, e.g.:
     span = 3,
     direction = "positive",
     channel_args = list(
-        hhb  = list(span = 5),
-        smo2 = list(direction = "negative")
+        smo2 = list(span = 5),
+        hhb  = list(direction = "negative")
     )
 )
 }\if{html}{\out{</div>}}

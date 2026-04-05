@@ -4,10 +4,12 @@
 \alias{build_channel_results}
 \title{Assemble per-channel results into an attributed data frame}
 \usage{
-build_channel_results(results)
+build_channel_results(results, nirs_channels)
 }
 \arguments{
-\item{results}{Named list of per-channel result lists.}
+\item{results}{List of per-channel result lists.}
+
+\item{nirs_channels}{Names to pass to list items}
 }
 \value{
 A \code{data.frame} with attributes \code{"model"}, \code{"fitted_data"},
