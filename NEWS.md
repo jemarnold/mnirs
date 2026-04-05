@@ -1,3 +1,9 @@
+# mnirs 0.6.2
+
+## Potentially breaking change
+
+* `resample_mnirs`: Update default `method = "none"`. Less opinionated default to force users to explicitly opt-in to specifying either "linear" or "locf" methods to fill/interpolate across new samples. Updated package documentation.
+
 # mnirs 0.6.1
 
 ## Bug fixes

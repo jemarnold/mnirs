@@ -106,7 +106,7 @@ mNIRS devices may record at sample rates anywhere from less than 1 Hz to 100 Hz 
 
 `resample_mnirs()`: This function can resample data to regularise timestamps to the nearest time value according to the known sample rate. This will improve synchronisation and can make subsequent processing steps easier, such as if ensemble-averaging across multiple trials (see below). In addition, this function can be used to up- or downsample NIRS data to match the sample rate of another device, e.g. to a 1 Hz heart rate signal, or a 1000 Hz electromyography (EMG) signal. 
 
-Downsampling can be useful to reduce data size and processing requirement, although should not be used primarily as a data filtering/smoothing strategy (see below for digital filtering recommendations). Upsampling can be done with interpolation over newly created samples (caution should always be taken with sample interpolation), or new samples can be left blank.
+Downsampling can be useful to reduce data size and processing requirement, although should not be used primarily as a data filtering/smoothing strategy (see below for digital filtering recommendations). Upsampling can be done with interpolation over newly created samples although caution should always be taken with creating new samples without any additional information. New samples created with resampling will be left blank (`NA`) by default.
 
 ## Digital Filtering
 

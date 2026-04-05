@@ -364,7 +364,7 @@ moxy_data <- read_mnirs(
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>
-    resample_mnirs(verbose = FALSE)
+    resample_mnirs(method = "linear", verbose = FALSE)
 
 ## Input validation tests =======================================
 test_that("filter_mnirs validates input data", {
@@ -464,7 +464,7 @@ test_that("smooth_spline handles NAs", {
         time_channel = c(time = "hh:mm:ss"),
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE, method = "none")
+        resample_mnirs(method = "none", verbose = FALSE)
 
     result <- filter_mnirs(
         moxy_data,
@@ -696,7 +696,7 @@ test_that("butterworth handles NAs with na.rm = TRUE", {
         time_channel = c(time = "hh:mm:ss"),
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE, method = "none")
+        resample_mnirs(method = "none", verbose = FALSE)
 
     result <- filter_mnirs(
         moxy_data,
@@ -907,7 +907,7 @@ test_that("filter_mnirs works visually on Moxy data", {
         time_channel = c(time = "hh:mm:ss"),
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE) |>
+        resample_mnirs(method = "linear", verbose = FALSE) |>
         dplyr::mutate(
             dplyr::across(
                 smo2,

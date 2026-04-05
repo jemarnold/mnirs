@@ -1433,7 +1433,7 @@ test_that("analyse_kinetics works visually on Train.Red", {
         zero_time = TRUE,
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE) |>
+        resample_mnirs(method = "linear", verbose = FALSE) |>
         extract_intervals(
             start = by_time(368),
             span = c(10, 90),
@@ -1496,7 +1496,7 @@ test_that("analyse_kinetics benchmark", {
         zero_time = TRUE,
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE) |>
+        resample_mnirs(method = "linear", verbose = FALSE) |>
         extract_intervals(
             start = by_time(368, 1093),
             event_groups = "distinct",

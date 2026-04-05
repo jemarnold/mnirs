@@ -1220,7 +1220,7 @@ test_that("analyse_frollslope benchmark", {
         zero_time = TRUE,
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE) |>
+        resample_mnirs(method = "linear", verbose = FALSE) |>
         extract_intervals(
             start = by_time(368, 1093),
             event_groups = "distinct",

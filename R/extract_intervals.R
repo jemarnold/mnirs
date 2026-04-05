@@ -160,7 +160,8 @@
 #'     zero_time = TRUE,
 #'     verbose = FALSE
 #' ) |>
-#'     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
+#'     ## avoid issues ensemble-averaging irregular samples
+#'     resample_mnirs(method = "linear", verbose = FALSE) 
 #'
 #' ## ensemble-average across multiple intervals
 #' interval_list <- extract_intervals(

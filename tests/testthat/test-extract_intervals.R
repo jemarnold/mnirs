@@ -1868,7 +1868,7 @@ test_that("extract_intervals works on train.red data", {
         time_channel = c(time = "Timestamp (seconds passed)"),
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE)
+        resample_mnirs(method = "linear", verbose = FALSE)
 
     result <- extract_intervals(
         data,
@@ -1940,7 +1940,7 @@ test_that("extract_intervals benchmark", {
         zero_time = TRUE,
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE)
+        resample_mnirs(method = "linear", verbose = FALSE)
 
     # for (i in seq_len(3)) {
     #     bm <- bench::mark(

@@ -62,8 +62,9 @@ reference:
     Estimate response dynamics and kinetic parameters
   contents:
   - analyse_kinetics
-  - peak_slope
+  - matches("slope")
   - matches("monoexp")
+  - matches("response_time")
 - title: Printing & plotting
   desc: |
     Tools for printing functions and pretty plotting with `{ggplot2}`.

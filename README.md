@@ -134,30 +134,15 @@ attr(data_raw, "sample_rate")
 #> [1] 2
 ```
 
-### `replace_mnirs`: Replace local outliers, invalid values, and missing values
-
-``` r
-data_cleaned <- replace_mnirs(
-    data_raw,           ## blank channels will be retrieved from metadata
-    invalid_values = 0, ## known invalid values in the data
-    invalid_above = 90, ## remove data spikes above 90
-    outlier_cutoff = 3, ## recommended default value
-    width = 10,         ## window to detect and replace outliers/missing values
-    method = "linear"   ## linear interpolation over `NA`s
-)
-
-plot(data_cleaned, time_labels = TRUE)
-```
-
-<img src="man/figures/README-replace_mnirs-1.png" alt="" width="100%" />
-
 ### `resample_mnirs()`: Resample data
 
 ``` r
 data_resampled <- resample_mnirs(
-    data_cleaned,      ## blank channels will be retrieved from metadata
-    resample_rate = 2, ## blank by default will resample to `sample_rate`
-    method = "linear"  ## linear interpolation across resampled indices
+    data_raw,            ## blank channels will be retrieved from metadata
+    time_channel = time, ## channels can be left blank or specified explicitly
+    sample_rate = NULL,  ## blank by default will be retrieved from metadata
+    resample_rate = 2,   ## blank by default will resample to `sample_rate`
+    method = "linear"    ## linear interpolation across resampled indices
 )
 #> ℹ Output is resampled at 2 Hz.
 
@@ -179,11 +164,28 @@ data_resampled
 #> # ℹ 2,409 more rows
 ```
 
+### `replace_mnirs`: Replace local outliers, invalid values, and missing values
+
+``` r
+data_cleaned <- replace_mnirs(
+    data_resampled,     ## blank channels will be retrieved from metadata
+    invalid_values = 0, ## known invalid values in the data
+    invalid_above = 90, ## remove data spikes above 90
+    outlier_cutoff = 3, ## recommended default value
+    width = 7,          ## window to detect and replace outliers/missing values
+    method = "linear"   ## linear interpolation over `NA`s
+)
+
+plot(data_cleaned, time_labels = TRUE)
+```
+
+<img src="man/figures/README-replace_mnirs-1.png" alt="" width="100%" />
+
 ### `filter_mnirs()`: Digital filtering
 
 ``` r
 data_filtered <- filter_mnirs(
-    data_resampled,         ## blank channels will be retrieved from metadata
+    data_cleaned,           ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
@@ -250,7 +252,7 @@ nirs_data <- read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |> ## default settings will resample to the same `sample_rate`
+    resample_mnirs(method = "linear") |> ## default settings will resample to the same `sample_rate`
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,
