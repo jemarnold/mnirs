@@ -531,26 +531,13 @@ test_that("peak_slope returns correct structure", {
     expect_length(result$window_idx, 5L)
 })
 
-test_that("peak_slope auto-detects direction from net trend", {
-    ## positive trend
+test_that("peak_slope propagates auto-detected direction", {
+    ## direction detection logic tested in test-detect_direction.R
     x_pos <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
-    result_pos <- peak_slope(x_pos, width = 5, verbose = FALSE)
-    expect_gt(result_pos$slope, 0)
+    expect_gt(peak_slope(x_pos, width = 5, verbose = FALSE)$slope, 0)
 
-    ## negative trend
     x_neg <- rev(x_pos)
-    result_neg <- peak_slope(x_neg, width = 5, verbose = FALSE)
-    expect_lt(result_neg$slope, 0)
-
-    ## fallback to magnitude when net slope = 0
-    x_sym <- c(1, 3, 5, 3, 1)
-    result_sym <- peak_slope(x_sym, width = 3, verbose = FALSE)
-    expect_true(result_sym$slope != 0)
-
-    ## detect slope from max abs local slope
-    x <- c(0, 1, 3, 0, 0.5)
-    result <- peak_slope(x, width = 2, verbose = FALSE)
-    expect_lt(result$slope, 0)
+    expect_lt(peak_slope(x_neg, width = 5, verbose = FALSE)$slope, 0)
 })
 
 test_that("peak_slope respects manual direction", {

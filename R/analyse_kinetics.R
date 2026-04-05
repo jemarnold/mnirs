@@ -195,7 +195,7 @@ analyse_kinetics <- function(
 ) {
     ## normalise method aliases before matching
     method <- gsub(
-        "^half[ _-]response[ _-]time$|^half[ _-]time$",
+        "^(?:((half[ _-])?response[ _-]time)|half[ _-]time)$",
         "HRT",
         method,
         ignore.case = TRUE
@@ -250,8 +250,18 @@ analyse_kinetics.HRT <- function(
 
     ## iterate over each interval
     result_list <- lapply(seq_along(data_list), \(.i) {
-        ## ! IMPLEMENT analyse_HRT()
-        result <- analyse_HRT()
+        result <- analyse_response_time(
+            data = data_list[[.i]],
+            nirs_channels = !!enquo(nirs_channels),
+            time_channel = !!enquo(time_channel),
+            t0 = args$t0 %||% 0,
+            fraction = args$fraction %||% 0.5,
+            direction = direction,
+            end_fit_span = end_fit_span,
+            channel_args = channel_args,
+            verbose = verbose,
+            bypass_checks = TRUE
+        )
 
         result$interval <- names(data_list)[[.i]]
         result
@@ -288,11 +298,8 @@ analyse_kinetics.peak_slope <- function(
 
     ## iterate over each interval
     result_list <- lapply(seq_along(data_list), \(.i) {
-        .df <- data_list[[.i]]
-        metadata <- attributes(.df)
-        
         result <- analyse_peak_slope(
-            data = .df,
+            data = data_list[[.i]],
             nirs_channels = !!enquo(nirs_channels),
             time_channel = !!enquo(time_channel),
             width = args$width %||% NULL,
@@ -303,7 +310,8 @@ analyse_kinetics.peak_slope <- function(
             partial = args$partial %||% FALSE,
             na.rm = args$na.rm %||% TRUE, ## TODO do I want less opinionated?
             channel_args = channel_args,
-            verbose = verbose
+            verbose = verbose,
+            bypass_checks = TRUE
         )
 
         result$interval <- names(data_list)[[.i]]
@@ -351,7 +359,8 @@ analyse_kinetics.monoexponential <- function(
             end_fit_span = end_fit_span,
             channel_args = channel_args,
             verbose = verbose,
-            interval_names = names(data_list) ## ! is this needed?
+            interval_names = names(data_list), ## ! is this needed?
+            bypass_checks = TRUE
         )
 
         result$interval <- names(data_list)[[.i]]
@@ -395,7 +404,7 @@ as_data_list <- function(data) {
         data_list <- dplyr::group_split(df_grp, .keep = TRUE)
 
         ## copy mnirs metadata down to each df in the list
-        ## TODO need to test when a list has been rbinded and has vectors from original list
+        ## ! need to test when a list has been rbinded and has vectors from original list
         data_list <- lapply(data_list, \(.df) {
             create_mnirs_data(.df, attributes(data)[mnirs_metadata])
         })

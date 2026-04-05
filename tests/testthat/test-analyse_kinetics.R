@@ -1,3 +1,58 @@
+## detect_direction ====================================================
+test_that("detect_direction returns 'positive' & 'negative' unchanged", {
+    result <- detect_direction(1:10, direction = "positive")
+    expect_equal(result, "positive")
+    
+    result <- detect_direction(1:10, direction = "negative")
+    expect_equal(result, "negative")
+})
+
+test_that("detect_direction detects slope", {
+    x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 14)
+    expect_equal(detect_direction(x), "positive")
+    
+    x <- c(14, 11, 12, 9, 7, 8, 5, 2, 3, 1)
+    expect_equal(detect_direction(x), "negative")
+})
+
+test_that("detect_direction uses custom t vector", {
+    ## x rises from 1 to 5, but t is reversed so lm slope is negative
+    x <- c(1, 3, 5)
+    t <- c(10, 5, 1)
+    expect_equal(detect_direction(x, t), "negative")
+})
+
+test_that("detect_direction falls back appropriately", {
+    ## positive when abs(max) >= abs(min)
+    ## symmetric pulse: net slope ~ 0, max = 10, min = 0
+    x <- c(0, 5, 10, 5, 0)
+    expect_equal(detect_direction(x), "positive")
+
+    ## negative when abs(max) < abs(min)
+    ## symmetric trough: net slope ~ 0, max = 0, min = -10
+    x <- c(0, -5, -10, -5, 0)
+    expect_equal(detect_direction(x), "negative")
+})
+
+test_that("detect_direction falls back to positive on magnitude tie", {
+    ## symmetric around zero: abs(max) == abs(min) => positive (>=)
+    x <- c(-5, 0, 5, 0, -5)
+    expect_equal(detect_direction(x), "positive")
+})
+
+test_that("detect_direction handles edge cases", {
+    ## falls back when net slope is NA
+    expect_equal(detect_direction(c(5, 5, 5, 5, 5)), "positive")
+
+    ## falls back when all x are NA
+    expect_equal(detect_direction(rep(NA_real_, 5)), "positive")
+
+    ## x has zero net slope, but fallback indicates negative
+    x <- c(0, 5, 10, 5, 0)
+    fallback <- c(-1, -8, -2, -1, -3)
+    expect_equal(detect_direction(x, fallback = fallback), "negative")
+})
+
 ## compute_diagnostics ====================================================
 test_that("compute_diagnostics returns correct structure", {
     x <- c(1, 3, 2, 5, 8)
@@ -413,8 +468,9 @@ test_that("build_channel_results combines channels correctly", {
         diagnostics = data.frame(nirs_channels = "ch2", r2 = 0.85),
         channel_args = data.frame(nirs_channels = "ch2", width = 10)
     )
-
-    result <- build_channel_results(list(ch1 = ch1, ch2 = ch2))
+    
+    nirs_channels <- c("ch1", "ch2")
+    result <- build_channel_results(list(ch1 = ch1, ch2 = ch2), nirs_channels)
 
     ## coefficient rows are combined
     expect_equal(nrow(result), 2L)
@@ -539,50 +595,19 @@ test_that("find_kinetics_idx works on irregular t with end_fit_span = 0", {
     expect_equal(result$extreme, 10L)
 })
 
-test_that("find_kinetics_idx auto-detects positive direction", {
-    ## net positive slope with peak before end
-    x <- c(seq(1, 20, length.out = 15), seq(19, 10, length.out = 15))
-    t <- seq_along(x)
+test_that("find_kinetics_idx propagates auto-detected direction", {
+    ## direction detection logic tested in test-detect_direction.R
+    ## positive net slope => finds peak
+    x_pos <- c(seq(1, 20, length.out = 15), seq(19, 10, length.out = 15))
+    res_pos <- find_kinetics_idx(x_pos, seq_along(x_pos), end_fit_span = 0)
+    expect_equal(res_pos$extreme, 15L)
+    expect_equal(res_pos$direction, "positive")
 
-    result <- find_kinetics_idx(x, t, end_fit_span = 0)
-    ## should find the peak, not return n
-    expect_equal(result$idx, seq_len(15L))
-    expect_equal(result$extreme, 15L)
-})
-
-test_that("find_kinetics_idx auto-detects negative direction", {
-    ## net negative slope with trough before end
-    x <- c(seq(20, 1, length.out = 15), seq(2, 10, length.out = 15))
-    t <- seq_along(x)
-
-    result <- find_kinetics_idx(x, t, end_fit_span = 0)
-    ## should find the trough, not return n
-    expect_equal(result$idx, seq_len(15L))
-    expect_equal(result$extreme, 15L)
-})
-
-test_that("find_kinetics_idx auto falls back to positive when net slope is zero and max_pos >= min_neg", {
-    ## symmetric pulse: goes up then back down, net slope ~ 0
-    ## abs(max) = 10 > abs(min) = 0 => positive direction
-    x <- c(0, 5, 10, 5, 0)
-    t <- seq_along(x)
-
-    result <- find_kinetics_idx(x, t, end_fit_span = 0)
-    ## positive direction: peak at index 3, indices up to peak
-    expect_equal(result$idx, seq_len(3L))
-    expect_equal(result$extreme, 3L)
-})
-
-test_that("find_kinetics_idx auto falls back to negative when net slope is zero and max_pos < min_neg", {
-    ## symmetric trough: goes down then back up, net slope ~ 0
-    ## abs(max) = 0 < abs(min) = 10 => negative direction
-    x <- c(0, -5, -10, -5, 0)
-    t <- seq_along(x)
-
-    result <- find_kinetics_idx(x, t, end_fit_span = 0)
-    ## negative direction: trough at index 3, indices up to trough
-    expect_equal(result$idx, seq_len(3L))
-    expect_equal(result$extreme, 3L)
+    ## negative net slope => finds trough
+    x_neg <- c(seq(20, 1, length.out = 15), seq(2, 10, length.out = 15))
+    res_neg <- find_kinetics_idx(x_neg, seq_along(x_neg), end_fit_span = 0)
+    expect_equal(res_neg$extreme, 15L)
+    expect_equal(res_neg$direction, "negative")
 })
 
 test_that("find_kinetics_idx ignores negative t values", {
@@ -1088,7 +1113,7 @@ test_that("analyse_kinetics errors on invalid method", {
     )
 })
 
-test_that("analyse_kinetics$data overwrites  metadata", {
+test_that("analyse_kinetics$data overwrites metadata", {
     df <- data.frame(
         time = rep(seq(0, 4.9, by = 0.1), 2),
         time_alt = rep(seq(0, 4.9, by = 0.1), 2),
