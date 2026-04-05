@@ -216,8 +216,6 @@ replace_mnirs <- function(
 #' @param x A numeric vector of the response variable.
 #' @param t An *optional* numeric vector of the predictor variable (e.g. time). 
 #'   Default is `seq_along(x)`.
-#' @param bypass_checks Logical allowing wrapper functions to bypass
-#'   redundant checks and validations.
 #' @inheritParams replace_mnirs
 #'
 #' @details
@@ -244,10 +242,11 @@ replace_invalid <- function(
     width = NULL,
     span = NULL,
     method = c("median", "none"),
-    bypass_checks = FALSE, ## ! convert to hidden arg
-    verbose = TRUE
+    verbose = TRUE,
+    ...
 ) {
     ## validate ===============================================
+    args <- list(...)
     if (is.null(c(invalid_values, invalid_above, invalid_below))) {
         cli_abort(c(
             "x" = "No replacement criteria specified",
@@ -255,7 +254,7 @@ replace_invalid <- function(
             {.arg invalid_above}, or {.arg invalid_below} must be specified."
         ))
     }
-    if (!bypass_checks) {
+    if (!(args$bypass_checks %||% FALSE)) {
         validate_x_t(x, t)
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
@@ -282,7 +281,7 @@ replace_invalid <- function(
     y[invalid_idx] <- NA_real_
 
     if (method == "median") {
-        if (!bypass_checks) {
+        if (!(args$bypass_checks %||% FALSE)) {
             validate_width_span(width, span, verbose, "for median replacement.")
         }
 
@@ -348,11 +347,12 @@ replace_outliers <- function(
     width = NULL,
     span = NULL,
     method = c("median", "none"),
-    bypass_checks = FALSE,
-    verbose = TRUE
+    verbose = TRUE,
+    ...
 ) {
     ## validate ===============================================
-    if (!bypass_checks) {
+    args <- list(...)
+    if (!(args$bypass_checks %||% FALSE)) {
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
@@ -422,12 +422,12 @@ replace_missing <- function(
     width = NULL,
     span = NULL,
     method = c("linear", "median", "locf"),
-    bypass_checks = FALSE,
     verbose = TRUE,
     ...
 ) {
     ## validate ===============================================
-    if (!bypass_checks) {
+    args <- list(...)
+    if (!(args$bypass_checks %||% FALSE)) {
         validate_x_t(x, t)
     }
     method <- match.arg(method)
@@ -440,14 +440,14 @@ replace_missing <- function(
         y <- stats::approx(
             x = t,
             y = x,
-            xout = list(...)$xout %||% t, ## = t unless explicitly specified by hidden option
+            xout = args$xout %||% t, ## = t unless explicitly specified by hidden option
             method = method, ## c("linear", "constant")
             rule = 2, ## fill leading and trailing `NA`s
             f = 0, ## locf if method = "constant"
             ties = list("ordered", mean) ## assume ordered, take mean of ties
         )$y
     } else if (method == "median") {
-        if (!bypass_checks) {
+        if (!(args$bypass_checks %||% FALSE)) {
             if (missing(verbose)) {
                 verbose <- getOption("mnirs.verbose", default = TRUE)
             }

@@ -287,7 +287,7 @@ plot(nirs_data, time_labels = TRUE)
 distinct <- extract_intervals(
     nirs_data,                 ## channels blank for "distinct" grouping
     start = by_time(36, 751),  ## manually identified interval start times
-    end = by_time(186, 901),   ## interval end time (start + 150 sec)
+    end = by_time(156, 871),   ## interval end time (start + 150 sec)
     event_groups = "distinct", ## return a list of data frames for each (2) event
     span = c(0, 0),            ## no boundary modification
     zero_time = FALSE          ## return original time values
@@ -305,7 +305,7 @@ ensemble <- extract_intervals(
     nirs_channels = c(smo2_left, smo2_right),
     start = by_time(66, 781),  ## alternatively specify start times + span
     event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(-30, 120),        ## span recycled to all intervals by default
+    span = c(-30, 90),         ## span recycled to all intervals by default
     zero_time = TRUE           ## re-calculate common time to start from `0`
 )
 
