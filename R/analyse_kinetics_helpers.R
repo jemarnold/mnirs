@@ -23,7 +23,11 @@ detect_direction <- function(
     fallback = x,
     direction = c("auto", "positive", "negative")
 ) {
+    direction <- match.arg(direction)
     if (direction == "auto") {
+        if (all(!is.finite(x))) {
+            return("positive")
+        }
         net_slope <- slope(x, t, na.rm = TRUE, bypass_checks = TRUE)
 
         direction <- if (is.na(net_slope) || net_slope == 0) {
@@ -350,11 +354,13 @@ build_na_results <- function(
 #' @returns A `data.frame` with attributes `"model"`, `"fitted_data"`,
 #'   `"diagnostics"`, and `"channel_args"`.
 #' @keywords internal
-build_channel_results <- function(results) {
+build_channel_results <- function(results, nirs_channels) {
     return(structure(
         do.call(rbind, lapply(results, `[[`, "coefficients")),
-        model = lapply(results, `[[`, "model"),
-        fitted_data = lapply(results, `[[`, "fitted_data"),
+        model = setNames(lapply(results, `[[`, "model"), nirs_channels),
+        fitted_data = setNames(
+            lapply(results, `[[`, "fitted_data"), nirs_channels
+        ),
         diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
         channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))
     ))

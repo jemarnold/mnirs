@@ -278,7 +278,7 @@ analyse_monoexponential <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    time_delay = TRUE,
+    time_delay = TRUE, ## ! better arg name?
     direction = c("auto", "positive", "negative"),
     end_fit_span = 20,
     channel_args = list(),
@@ -286,27 +286,35 @@ analyse_monoexponential <- function(
     ...
 ) {
     ## validation ==================================================
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
-    }
     validate_mnirs_data(data)
+    args <- list(...)
+    if (!(args$bypass_checks %||% FALSE)) {
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
+        direction <- match.arg(direction)
+    }
     nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     if (!is.logical(time_delay) || length(time_delay) != 1L) {
         cli_abort(c(
-            "x" = "{.arg time_delay} must be a single {.cls logical} value."
+            "x" = "{.arg time_delay} must be a {.cls logical} \\
+            either {.val {TRUE}} or {.val {FALSE}}."
         ))
     }
+    validate_numeric(
+        end_fit_span, 1L, c(0, Inf), "left", msg2 = ">= {col_blue('0')}."
+    )
 
     time_vec <- data[[time_channel]]
-    interval_names <- list(...)$interval_names %||% substitute(data)
+    interval_names <- args$interval_names %||% substitute(data)
 
     default_args <- list(
         time_delay = time_delay,
         direction = direction,
         end_fit_span = end_fit_span,
         verbose = verbose,
-        ...
+        args
     )
 
     ## NA scaffold for convergence failure
@@ -411,17 +419,17 @@ analyse_monoexponential <- function(
         ## ! fix cases where `zero_time = FALSE`: esp. for half_time
         coefs <- data.frame(
             nirs_channels = .nirs,
-            time_channel = time_channel,
-            A = coefs[["A"]],
-            B = coefs[["B"]],
-            tau = coefs[["tau"]],
-            k = 1 / coefs[["tau"]],
-            TD = TD_val,
-            MRT = MRT_val,
-            HRT = HRT_val,
-            tau_fitted = tau_fitted,
-            MRT_fitted = MRT_fitted,
-            HRT_fitted = HRT_fitted
+            time_channel  = time_channel,
+            A             = coefs[["A"]],
+            B             = coefs[["B"]],
+            tau           = coefs[["tau"]],
+            k             = 1 / coefs[["tau"]],
+            TD            = TD_val,
+            MRT           = MRT_val,
+            HRT           = HRT_val,
+            tau_fitted    = tau_fitted,
+            MRT_fitted    = MRT_fitted,
+            HRT_fitted    = HRT_fitted
         )
 
         diag <- compute_diagnostics(
@@ -439,9 +447,8 @@ analyse_monoexponential <- function(
             channel_args = build_channel_args(.nirs, all_args)
         )
     })
-    names(results) <- nirs_channels
 
-    return(build_channel_results(results))
+    return(build_channel_results(results, nirs_channels))
 }
 
 

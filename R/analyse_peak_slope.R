@@ -406,16 +406,22 @@ analyse_peak_slope <- function(
     ...
 ) {
     ## validation ==============================================
-    if (missing(verbose)) {
-        verbose <- getOption("mnirs.verbose", default = TRUE)
-    }
     validate_mnirs_data(data)
+    args <- list(...)
+    if (!(args$bypass_checks %||% FALSE)) {
+        if (missing(verbose)) {
+            verbose <- getOption("mnirs.verbose", default = TRUE)
+        }
+        direction <- match.arg(direction)
+    }
     nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     validate_width_span(width, span, verbose)
     align <- sub("^center$", "centre", align)
     align <- match.arg(align)
-    direction <- match.arg(direction)
+    validate_numeric(
+        end_fit_span, 1L, c(0, Inf), "left", msg2 = ">= {col_blue('0')}."
+    )
 
     time_vec <- data[[time_channel]]
     default_args <- list(
@@ -428,7 +434,7 @@ analyse_peak_slope <- function(
         na.rm = na.rm,
         verbose = verbose,
         bypass_checks = TRUE,
-        ...
+        args
     )
 
     ## process per-channel =================================
@@ -476,8 +482,7 @@ analyse_peak_slope <- function(
             channel_args = build_channel_args(.nirs, all_args)
         )
     })
-    names(results) <- nirs_channels
 
     ## coefs tibble with per-channel metadata as attributes
-    return(build_channel_results(results))
+    return(build_channel_results(results, nirs_channels))
 }
