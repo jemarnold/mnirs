@@ -4,7 +4,11 @@
 
 * `resample_mnirs()`: Update default `method = "none"`. Less opinionated default to force users to explicitly opt-in to specifying either "linear" or "locf" methods to fill/interpolate across new samples. Updated package documentation.
 
-* `replace_invalid()`, `replace_outliers()`, `replace_missing()`: Remove `bypass_checks` arg as intended for internal use only, to bypass redundant checks when calling from `replace_mnirs()`.
+* `replace_invalid()`, `replace_outliers()`, `replace_missing()`: Remove `bypass_checks` arg intended for internal use only, to bypass redundant checks when calling from `replace_mnirs()`.
+
+## Small edits
+
+* `plot.mnirs()`: No longer coerces to long format data behind the scenes.
 
 # mnirs 0.6.1
 
