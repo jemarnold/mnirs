@@ -6,9 +6,6 @@ test_that("slope returns correct structure", {
     expect_type(result, "double")
     expect_equal(length(result), 1)
     expect_gt(result, 0)
-
-    # ! obsolete ## attribute for intercept
-    # expect_equal(attr(slope(x, intercept = TRUE), "intercept"), -0.6)
 })
 
 test_that("slope handles negative values correctly", {

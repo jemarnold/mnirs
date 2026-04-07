@@ -10,7 +10,7 @@
 #'   `<under development>`. Additional arguments must be specified for each
 #'   method. See *Details*.
 #'   \describe{
-#'      \item{`"HRT"`}{`<under development>`.}
+#'      \item{`"half_response_time"`}{`<under development>`.}
 #'      \item{`"peak_slope"`}{Peak local linear regression slope. Additional
 #'      arguments: `width` or `span`, `align`, `direction`, `partial`, `na.rm`.}
 #'      \item{`"monoexponential"`}{Monoexponential curve fit via
@@ -44,9 +44,9 @@
 #'
 #' ## kinetics analysis method
 #'
-#' #### `method = "HRT"`
+#' #### `method = "half_response_time"`
 #' 
-#' Aliases: `c("half response time", "half time")`
+#' Aliases: `c("half time", "response time", "half recovery time", "HRT")`
 #'
 #' `<under development>`
 #'
@@ -122,7 +122,7 @@
 #' @returns A formatted table of printed results, with individual elements
 #'   accessable as a list of class *"mnirs_kinetics"* containing:
 #'
-#'   \item{`method`}{The method used, e.g. `"HRT"`.}
+#'   \item{`method`}{The method used, e.g. `"half_response_time"`.}
 #'   \item{`model`}{A named list of model objects (per interval,
 #'       per `nirs_channel`). For `"peak_slope"`, each element is an
 #'       [lm][stats::lm] object; for `"monoexponential"`, an
@@ -167,7 +167,7 @@
 #'     analyse_kinetics(
 #'         nirs_channels = c(smo2_left, smo2_right),
 #'         method = "peak_slope",
-#'         span = 10, ## 10-second rolling window
+#'         span = 10,          ## 10-second rolling window
 #'         direction = "auto", ## auto-detect slope direction
 #'         verbose = FALSE
 #'     )
@@ -186,7 +186,7 @@ analyse_kinetics <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    method = c("HRT", "peak_slope", "monoexponential", "sigmoidal"),
+    method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
     direction = c("auto", "positive", "negative"),
     end_fit_span = 20,
     channel_args = list(),
@@ -195,8 +195,8 @@ analyse_kinetics <- function(
 ) {
     ## normalise method aliases before matching
     method <- gsub(
-        "^(?:((half[ _-])?response[ _-]time)|half[ _-]time)$",
-        "HRT",
+        "^HRT$|^(?:((half[ _-])?(response|recovery)[ _-]time)|half[ _-]time)$",
+        "half_response_time",
         method,
         ignore.case = TRUE
     )
@@ -233,7 +233,7 @@ analyse_kinetics <- function(
 #' @rdname analyse_kinetics
 #' @usage NULL
 #' @export
-analyse_kinetics.HRT <- function(
+analyse_kinetics.half_response_time <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,

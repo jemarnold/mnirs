@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_kinetics.R
 \name{analyse_kinetics}
 \alias{analyse_kinetics}
-\alias{analyse_kinetics.HRT}
+\alias{analyse_kinetics.half_response_time}
 \alias{analyse_kinetics.peak_slope}
 \alias{analyse_kinetics.monoexponential}
 \title{Analyse mNIRS kinetics across intervals}
@@ -11,7 +11,7 @@ analyse_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("HRT", "peak_slope", "monoexponential", "sigmoidal"),
+  method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
   direction = c("auto", "positive", "negative"),
   end_fit_span = 20,
   channel_args = list(),
@@ -41,7 +41,7 @@ used.
 \verb{<under development>}. Additional arguments must be specified for each
 method. See \emph{Details}.
 \describe{
-\item{\code{"HRT"}}{\verb{<under development>}.}
+\item{\code{"half_response_time"}}{\verb{<under development>}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
 arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
@@ -72,7 +72,7 @@ See \emph{Details}.}
 A formatted table of printed results, with individual elements
 accessable as a list of class \emph{"mnirs_kinetics"} containing:
 
-\item{\code{method}}{The method used, e.g. \code{"HRT"}.}
+\item{\code{method}}{The method used, e.g. \code{"half_response_time"}.}
 \item{\code{model}}{A named list of model objects (per interval,
 per \code{nirs_channel}). For \code{"peak_slope"}, each element is an
 \link[stats:lm]{lm} object; for \code{"monoexponential"}, an
@@ -113,9 +113,9 @@ separate intervals.
 }
 
 \subsection{kinetics analysis method}{
-\subsection{\code{method = "HRT"}}{
+\subsection{\code{method = "half_response_time"}}{
 
-Aliases: \code{c("half response time", "half time")}
+Aliases: \code{c("half time", "response time", "half recovery time", "HRT")}
 
 \verb{<under development>}
 }
@@ -216,7 +216,7 @@ result <- read_mnirs(
     analyse_kinetics(
         nirs_channels = c(smo2_left, smo2_right),
         method = "peak_slope",
-        span = 10, ## 10-second rolling window
+        span = 10,          ## 10-second rolling window
         direction = "auto", ## auto-detect slope direction
         verbose = FALSE
     )
