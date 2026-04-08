@@ -2,21 +2,22 @@
 
 ## Review package functionality
 
-- Review .R files associated with target functions mentioned by the user.
+- Review .R files for target functions mentioned by the user.
 - Review `*_helpers.R` files associated with target functions.
-- Unit tests live in `tests/testthat/`. Review tests associated with target functions.
+- Review tests associated with target functions. Unit tests live in `tests/testthat/`.
 - Test files should not be modified without asking user confirmation first.
-- Input validation lives in [R/validate_mnirs.R](R/validate_mnirs.R).
 - Use `cli_abort()`, `cli_warn()`, or `cli_inform()` for user-facing messages.
+- Input validation lives in [R/validate_mnirs.R](R/validate_mnirs.R).
 - Don't run devtool commands.
-- Don't check previous git commits, only look at current state.
+- Don't search for or read previous git commits, only look at current state.
+- Don't run git commands which will change the current state.
 
 ## Formatting
 
-- Loose 80-character per line limit.
+- 80-character per line limit.
 - Comments: `## lower case comment`.
-- Comments should briefly explain the purpose of the operation
-- Comments should not describe refactoring changes or reference prompt decisions.
+- Comments: briefly explain the purpose of the operation
+- Comments: don't describe refactoring changes or reference prompt decisions.
 - Use explicit `return()` for custom functions.
 
 ### Documentation

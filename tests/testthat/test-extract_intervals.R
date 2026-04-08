@@ -1946,7 +1946,7 @@ test_that("extract_intervals benchmark", {
     #     bm <- bench::mark(
     #         extract_intervals = extract_intervals(
     #             data_list,
-    #             start = by_time(368, 1093),
+    #             start = by_time(368, 1084),
     #             event_groups = "distinct",
     #             span = c(-20, 90),
     #             zero_time = TRUE,

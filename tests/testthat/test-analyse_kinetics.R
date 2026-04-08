@@ -1498,7 +1498,7 @@ test_that("analyse_kinetics benchmark", {
     ) |>
         resample_mnirs(method = "linear", verbose = FALSE) |>
         extract_intervals(
-            start = by_time(368, 1093),
+            start = by_time(368, 1084),
             event_groups = "distinct",
             span = c(-20, 90),
             zero_time = TRUE,
