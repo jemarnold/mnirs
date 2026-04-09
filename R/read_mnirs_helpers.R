@@ -28,7 +28,7 @@ read_file <- function(file_path) {
 
         ## read with explicit sep and column count to handle
         ## irregular header rows with fewer columns than data
-        data_raw <- tibble::tibble(
+        data_raw <- data.frame(
             data.table::fread(
                 text = lines,
                 header = FALSE,
@@ -59,6 +59,7 @@ read_file <- function(file_path) {
                 }
             }
         )
+        data_raw <- data.frame(data_raw)
     } else {
         ## validation: check file types
         cli_abort(c(
@@ -235,6 +236,39 @@ read_data_table <- function(
 }
 
 
+#' Extract earliest POSIXct value from file header metadata
+#' @keywords internal
+extract_start_timestamp <- function(file_header) {
+    header_values <- unlist(file_header, use.names = FALSE)
+    header_values <- header_values[!is_empty(header_values)]
+
+    ## search for POSIXct values, return the earliest time value
+    ## vulnerable to invalid timestamps
+    parsed <- which(
+        !is.na(
+            vapply(header_values, \(.x) {
+                as.POSIXct(
+                    as.character(as.POSIXct(
+                        .x,
+                        tz = "UTC",
+                        tryFormats = datetime_formats,
+                        optional = TRUE
+                    )),
+                    tz = Sys.timezone()
+                )
+        }, numeric(1L))
+        )
+    )
+
+    if (length(parsed) == 0L) {
+        return(NULL)
+    }
+
+    ## return the earliest character string timestamp, assuming start time
+    return(min(header_values[parsed]))
+}
+
+
 #' Detect time_channel from header row
 #' @keywords internal
 detect_time_channel <- function(
@@ -392,10 +426,9 @@ select_rename_data <- function(
     was_renamed <- user_vec !=
         unlist(lapply(channel_list, names), use.names = FALSE)
     if (verbose && any(was_renamed)) {
-        old <- unlist(
-            lapply(channel_list, names),
-            use.names = FALSE
-        )[was_renamed]
+        old <- unlist(lapply(channel_list, names), use.names = FALSE)[
+            was_renamed
+        ]
         new <- user_vec[was_renamed]
         cli_warn(c(
             "!" = "Duplicate channel names detected.",
@@ -474,29 +507,6 @@ remove_empty_rows_cols <- function(data) {
 }
 
 
-#' Extract earliest POSIXct value from file header metadata
-#' @keywords internal
-extract_start_timestamp <- function(file_header) {
-    header_values <- unlist(file_header, use.names = FALSE)
-    header_values <- header_values[!is_empty(header_values)]
-
-    ## search for POSIXct values, return the earliest time value
-    ## vulnerable to invalid timestamps
-    parsed <- which(!is.na(
-        vapply(header_values, \(.x) {
-            as.POSIXct(.x, tryFormats = datetime_formats, optional = TRUE)
-        }, numeric(1L))
-    ))
-
-    if (length(parsed) == 0L) {
-        return(NULL)
-    }
-
-    ## return the earliest character string timestamp, assuming start time
-    return(min(header_values[parsed]))
-}
-
-
 #' Parse time_channel character or dttm to numeric
 #' @keywords internal
 parse_time_channel <- function(
@@ -508,6 +518,18 @@ parse_time_channel <- function(
 ) {
     time_vec <- data[[time_channel]]
 
+    ## fractional unix time to POSIXct
+    if (is.numeric(time_vec) && all(time_vec <= 1, na.rm = TRUE)) {
+        time_vec <- as.POSIXct(
+            as.character(as.POSIXct(
+                time_vec * 86400,
+                tz = "UTC",
+                optional = TRUE
+            )),
+            tz = Sys.timezone()
+        )
+    }
+
     ## recalculate numeric time to start from zero
     if (zero_time && is.numeric(time_vec)) {
         time_vec <- time_vec - time_vec[1L]
@@ -516,9 +538,13 @@ parse_time_channel <- function(
     ## character time to POSIXct
     if (is.character(time_vec)) {
         time_vec <- as.POSIXct(
-            time_vec,
-            tryFormats = datetime_formats,
-            optional = TRUE
+            as.character(as.POSIXct(
+                time_vec,
+                tz = "UTC",
+                tryFormats = datetime_formats,
+                optional = TRUE
+            )),
+            tz = Sys.timezone()
         )
     }
 
@@ -544,9 +570,13 @@ parse_time_channel <- function(
         ## then return NULL and don't append column
         if (!is.null(start_timestamp)) {
             start_time <- as.POSIXct(
-                start_timestamp,
-                tryFormats = datetime_formats,
-                optional = TRUE
+                as.character(as.POSIXct(
+                    start_timestamp,
+                    tz = "UTC",
+                    tryFormats = datetime_formats,
+                    optional = TRUE
+                )),
+                tz = Sys.timezone()
             )
             data$timestamp <- start_time + time_vec
         } else if (!is.null(timestamp_vec)) {

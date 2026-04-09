@@ -1,5 +1,11 @@
 # mnirs 0.6.2
 
+## Core updates
+
+* `read_mnirs()`: 
+    * Now properly parses `time_channel` as fractional unix values; i.e. timestamp (e.g. "hh:mm:ss") values are saved by Excel in all its infinite wisdom as numeric fractional Unix timestamps. Will now be properly coerced to numeric and POSIXct timestamp values can be returned.
+    * Timestamps should now be returned in the user's local time zone.
+
 ## Potentially breaking changes
 
 * `resample_mnirs()`: Update default `method = "none"`. Less opinionated default to force users to explicitly opt-in to specifying either "linear" or "locf" methods to fill/interpolate across new samples. Updated package documentation.
@@ -9,6 +15,8 @@
 ## Small edits
 
 * `plot.mnirs()`: No longer coerces to long format data behind the scenes.
+* `plot.mnirs()`: y-axis title changed from "signal" to "mNIRS".
+
 
 # mnirs 0.6.1
 
