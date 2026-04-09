@@ -54,7 +54,8 @@ detect_direction <- function(
 #'
 #' @param end_fit_span A numeric value in units of `t` specifying the
 #'   forward-looking window used to check for subsequent greater/lesser
-#'   values than the candidate extreme.
+#'   values than the candidate extreme. `end_fit_span = Inf` (*default*) 
+#'   returns the global extreme from the full range of `x`.
 #' @param direction A character string specifying the kinetics direction to
 #'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
 #'   *Details*.
@@ -92,7 +93,7 @@ detect_direction <- function(
 find_kinetics_idx <- function(
     x,
     t = seq_along(x),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     direction = c("auto", "positive", "negative"),
     ...
 ) {
@@ -142,6 +143,11 @@ find_kinetics_idx <- function(
 
     ## process ==================================================
     ## bin by end_fit_span, find extreme per bin, then check forward window
+
+    ## expand end_fit_span to global extreme
+    if (end_fit_span == Inf) {
+        end_fit_span <- t_valid[length(t_valid)]
+    }
 
     ## ensure end_fit_span covers at least one adjacent sample when
     ## end_fit_span is smaller than the minimum time step

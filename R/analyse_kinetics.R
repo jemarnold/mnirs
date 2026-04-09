@@ -17,18 +17,13 @@
 #'      [stats::nls()] with arguments: `time_delay`.}
 #'      \item{`"sigmoidal"`}{`<under development>`.}
 #'   }
-#' @param direction A character string specifying the kinetics direction to
-#'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
-#'   *Details*.
-#' @param end_fit_span A numeric value in units of `time_channel` specifying 
-#'   the forward-looking window used to check for subsequent greater/lesser 
-#'   values than the candidate extreme.
 #' @param channel_args An *optional* `list()` with names corresponding to
 #'   `nirs_channels` for unique per-channel arguments to override global
 #'   default arguments (see *Details*).
 #' @param ... Additional arguments passed to the underlying method function.
 #'   See *Details*.
 #' @inheritParams validate_mnirs
+#' @inheritParams find_kinetics_idx
 #'
 #' @details
 #' ## data input formats
@@ -188,7 +183,7 @@ analyse_kinetics <- function(
     time_channel = NULL,
     method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     channel_args = list(),
     verbose = TRUE,
     ...
@@ -239,7 +234,7 @@ analyse_kinetics.half_response_time <- function(
     time_channel = NULL,
     method,
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     channel_args = list(),
     verbose = TRUE,
     ...
@@ -287,7 +282,7 @@ analyse_kinetics.peak_slope <- function(
     time_channel = NULL,
     method,
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     channel_args = list(),
     verbose = TRUE,
     ...
@@ -338,7 +333,7 @@ analyse_kinetics.monoexponential <- function(
     time_channel = NULL,
     method,
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     channel_args = list(),
     verbose = TRUE,
     ...

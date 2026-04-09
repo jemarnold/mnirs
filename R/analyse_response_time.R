@@ -4,8 +4,8 @@
 #' total response amplitude relative to a baseline period (e.g. *half-response
 #' time* at 50% fractional amplitude).
 #'
-#' @param t0 A numeric value specifying the start of the kinetics response 
-#'   in units of `t`. Observations where `t <= t0` define the baseline window. 
+#' @param t0 A numeric value specifying the start of the kinetics response
+#'   in units of `t`. Observations where `t <= t0` define the baseline window.
 #'   Defaults to `0`.
 #' @param fraction A numeric value in `[0, 1]` specifying the fractional
 #'   response amplitude to detect. Defaults to `0.5` (50% response, i.e.
@@ -25,7 +25,7 @@
 #' `response_fitted = A + (B - A) * fraction`
 #'
 #' where `A` is the mean baseline (`t <= t0`) and `B` is the extreme (peak
-#' or trough) value after `t0`. The response time is the elapsed time from `t0` 
+#' or trough) value after `t0`. The response time is the elapsed time from `t0`
 #' to the first sample where `x` reaches or exceeds the `response_fitted` value
 #' (or where it falls to or below, for negative direction).
 #'
@@ -38,7 +38,7 @@
 #'
 #' ## Baseline
 #'
-#' When no observations exist where `t <= t0`, the first sample `x[1]` is used 
+#' When no observations exist where `t <= t0`, the first sample `x[1]` is used
 #' as the baseline. `t0` cannot exceed the maximum of `t`.
 #'
 #' @returns A named list containing:
@@ -59,13 +59,13 @@
 #' set.seed(13)
 #' t <- 0:60
 #' x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) + rnorm(length(t), 0, 1)
-#' 
+#'
 #' ## estimated half-response time
 #' HRT <- response_time(x, t, t0 = 10, fraction = 0.5)
-#' 
+#'
 #' ## estimated mean response time (time constant; tau ~= 63.2% amplitude)
 #' MRT <- response_time(x, t, t0 = 10, fraction = 0.632)
-#' 
+#'
 #' plot(t, x, type = "l", col = "grey60", xlab = "t", ylab = "x")
 #' ## baseline mean across baseline_idx
 #' segments(
@@ -85,16 +85,12 @@ response_time <- function(
     t = seq_along(x),
     t0 = 0,
     fraction = 0.5,
-    end_fit_span = 20,
     direction = c("auto", "positive", "negative"),
     verbose = TRUE,
     ...
 ) {
     validate_numeric(
         fraction, 1L, c(0, 1), msg2 = "between {col_blue('[0, 1]')}."
-    )
-    validate_numeric(
-        end_fit_span, 1L, c(0, Inf), "left", msg2 = ">= {col_blue('0')}."
     )
 
     if (!(list(...)$bypass_checks %||% FALSE)) {
@@ -220,7 +216,7 @@ analyse_response_time <- function(
     t0 = 0,
     fraction = 0.5,
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     channel_args = list(),
     verbose = TRUE,
     ...

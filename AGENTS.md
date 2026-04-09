@@ -304,16 +304,16 @@ by_lap(...)      # integer lap numbers
 
 ```r
 analyse_kinetics(
-    data,                   # "mnirs" df, named list of "mnirs" dfs,
-                            # or dplyr grouped df (requires {dplyr})
+    data,                    # "mnirs" df, named list of "mnirs" dfs,
+                             # or dplyr grouped df (requires {dplyr})
     nirs_channels  = NULL,
     time_channel   = NULL,
     method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
     direction = c("auto", "positive", "negative"),
-    end_fit_span   = 20,    # time units; truncate fit after extreme
+    end_fit_span   = Inf,    # time units; truncate fit after extreme; Inf returns global extreme
     channel_args   = list(),
     verbose        = TRUE,
-    ...                     # method-specific arguments (see below)
+    ...                      # method-specific arguments (see below)
 )
 ```
 
@@ -409,7 +409,7 @@ response_time(
     t = seq_along(x),
     t0 = 0, 
     fraction = 0.5, 
-    end_fit_span = 20,
+    end_fit_span = Inf,
     direction = c("auto", "positive", "negative"),
     verbose = TRUE
 )

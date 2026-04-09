@@ -12,7 +12,7 @@ analyse_peak_slope(
   span = NULL,
   align = c("centre", "left", "right"),
   direction = c("auto", "positive", "negative"),
-  end_fit_span = 20,
+  end_fit_span = Inf,
   partial = FALSE,
   na.rm = FALSE,
   channel_args = list(),
@@ -53,9 +53,10 @@ is \emph{backward looking} from the current sample.}
 detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{end_fit_span}{A numeric value in units of \code{time_channel} specifying
-the forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme.}
+\item{end_fit_span}{A numeric value in units of \code{t} specifying the
+forward-looking window used to check for subsequent greater/lesser
+values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
+returns the global extreme from the full range of \code{x}.}
 
 \item{partial}{Logical; default is \code{FALSE}, requires local windows to have
 complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},

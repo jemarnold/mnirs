@@ -511,6 +511,7 @@ test_that("find_kinetics_idx validates inputs", {
         find_kinetics_idx(x = 1:5, t = 1:5, end_fit_span = -1),
         "positive"
     )
+    expect_silent(find_kinetics_idx(x = 1:5, t = 0:4, end_fit_span = Inf))
     expect_error(
         find_kinetics_idx(x = 1:5, t = 1:3, end_fit_span = 5),
         "equal length"

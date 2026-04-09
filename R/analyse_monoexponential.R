@@ -239,7 +239,7 @@ SS_monoexp4 <- selfStart(
 #'   reduced 3-parameter [SS_monoexp3()] model (A, B, tau).
 #' @inheritParams validate_mnirs
 #' @inheritParams analyse_kinetics
-#' 
+#'
 #' @details
 #' ## Per-channel argument overrides
 #'
@@ -270,7 +270,7 @@ SS_monoexp4 <- selfStart(
 #'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
 #'     recording the resolved arguments used.
 #'
-#' @seealso [analyse_kinetics()], [monoexponential()], [SS_monoexp3()], 
+#' @seealso [analyse_kinetics()], [monoexponential()], [SS_monoexp3()],
 #'   [SS_monoexp4()]
 #'
 #' @keywords internal
@@ -280,7 +280,7 @@ analyse_monoexponential <- function(
     time_channel = NULL,
     time_delay = TRUE, ## ! better arg name?
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     channel_args = list(),
     verbose = TRUE,
     ...
@@ -303,7 +303,7 @@ analyse_monoexponential <- function(
         ))
     }
     validate_numeric(
-        end_fit_span, 1L, c(0, Inf), "left", msg2 = ">= {col_blue('0')}."
+        end_fit_span, 1, c(0, Inf), msg1 = "one-element positive"
     )
 
     time_vec <- data[[time_channel]]

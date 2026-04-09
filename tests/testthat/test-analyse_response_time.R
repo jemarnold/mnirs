@@ -52,10 +52,7 @@ test_that("response_time validates inputs", {
         response_time(1:5, fraction = -0.1),
         "fraction.*valid.*numeric"
     )
-    expect_error(
-        response_time(1:5, end_fit_span = -1),
-        "end_fit_span.*valid.*numeric"
-    )
+    expect_silent(response_time(1:5, t = 0:4, end_fit_span = Inf))
     expect_error(
         response_time(x = "a"),
         "x.*valid.*numeric"

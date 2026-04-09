@@ -7,7 +7,7 @@
 find_kinetics_idx(
   x,
   t = seq_along(x),
-  end_fit_span = 20,
+  end_fit_span = Inf,
   direction = c("auto", "positive", "negative"),
   ...
 )
@@ -20,7 +20,8 @@ Default is \code{seq_along(x)}.}
 
 \item{end_fit_span}{A numeric value in units of \code{t} specifying the
 forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme.}
+values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
+returns the global extreme from the full range of \code{x}.}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See

@@ -10,7 +10,7 @@ analyse_monoexponential(
   time_channel = NULL,
   time_delay = TRUE,
   direction = c("auto", "positive", "negative"),
-  end_fit_span = 20,
+  end_fit_span = Inf,
   channel_args = list(),
   verbose = TRUE,
   ...
@@ -43,9 +43,10 @@ reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).
 detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{end_fit_span}{A numeric value in units of \code{time_channel} specifying
-the forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme.}
+\item{end_fit_span}{A numeric value in units of \code{t} specifying the
+forward-looking window used to check for subsequent greater/lesser
+values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
+returns the global extreme from the full range of \code{x}.}
 
 \item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
 \code{nirs_channels} for unique per-channel arguments to override global

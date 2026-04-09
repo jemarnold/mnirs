@@ -9,7 +9,6 @@ response_time(
   t = seq_along(x),
   t0 = 0,
   fraction = 0.5,
-  end_fit_span = 20,
   direction = c("auto", "positive", "negative"),
   verbose = TRUE,
   ...
@@ -28,10 +27,6 @@ Defaults to \code{0}.}
 \item{fraction}{A numeric value in \verb{[0, 1]} specifying the fractional
 response amplitude to detect. Defaults to \code{0.5} (50\% response, i.e.
 half-response time).}
-
-\item{end_fit_span}{A numeric value in units of \code{t} specifying the
-forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme.}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See

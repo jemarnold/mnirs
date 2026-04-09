@@ -398,7 +398,7 @@ analyse_peak_slope <- function(
     span = NULL,
     align = c("centre", "left", "right"),
     direction = c("auto", "positive", "negative"),
-    end_fit_span = 20,
+    end_fit_span = Inf,
     partial = FALSE,
     na.rm = FALSE,
     channel_args = list(),
@@ -420,7 +420,7 @@ analyse_peak_slope <- function(
     align <- sub("^center$", "centre", align)
     align <- match.arg(align)
     validate_numeric(
-        end_fit_span, 1L, c(0, Inf), "left", msg2 = ">= {col_blue('0')}."
+        end_fit_span, 1, c(0, Inf), msg1 = "one-element positive"
     )
 
     time_vec <- data[[time_channel]]
