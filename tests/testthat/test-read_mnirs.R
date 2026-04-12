@@ -1154,6 +1154,7 @@ test_that("parse_time_channel() returns start_timestamp from POSIXct time_channe
 
     ## start_timestamp is extracted from the POSIXct column when not in header
     expect_false(is.null(result$start_timestamp))
+    expect_equal(result$start_timestamp, t0, ignore_attr = TRUE)
 })
 
 test_that("parse_time_channel() add_timestamp=TRUE adds POSIXct column after time_channel", {
@@ -1221,6 +1222,31 @@ test_that("parse_time_channel() add_timestamp=TRUE with no timestamps skips colu
     ## no timestamp available — column not added
     expect_false("timestamp" %in% names(result$data))
     expect_null(result$start_timestamp)
+})
+
+test_that("parse_time_channel works on fractional unix time", {
+    ## Moxy.csv saved as excel will coerce date-time
+    ## to numeric fractional Unix time.
+    file_path <- test_path("testdata/moxy-occlusion.xlsx")
+    skip_if_not(file.exists(file_path), "testdata not available")
+    
+    data <- suppressMessages(readxl::read_excel(file_path)[-(1:2), 1:2])
+    names(data)[2L] <- "time"
+    data$time <- as.numeric(data$time)
+
+    result <- parse_time_channel(
+        data,
+        time_channel = "time",
+        start_timestamp = NULL,
+        add_timestamp = TRUE
+    )
+
+    expect_equal(class(result$data$time), "numeric")
+    expect_equal(result$data$time[1L], 0)
+    expect_equal(median(diff(result$data$time)), 2)
+    expect_equal(class(result$data$timestamp), c("POSIXct", "POSIXt"))
+    expect_equal(class(result$start_timestamp), c("POSIXct", "POSIXt"))
+    expect_equal(as.character(result$start_timestamp), "1970-01-01 13:52:59")
 })
 
 ## parse_sample_rate() ================================================

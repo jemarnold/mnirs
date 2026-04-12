@@ -108,30 +108,15 @@ attr(data_raw, "sample_rate")
 ```
 
 
-### `replace_mnirs`: Replace local outliers, invalid values, and missing values
-
-
-```{r replace_mnirs}
-data_cleaned <- replace_mnirs(
-    data_raw,           ## blank channels will be retrieved from metadata
-    invalid_values = 0, ## known invalid values in the data
-    invalid_above = 90, ## remove data spikes above 90
-    outlier_cutoff = 3, ## recommended default value
-    width = 10,         ## window to detect and replace outliers/missing values
-    method = "linear"   ## linear interpolation over `NA`s
-)
-
-plot(data_cleaned, time_labels = TRUE)
-```
-
-
 ### `resample_mnirs()`: Resample data
 
 ```{r resample_mnirs}
 data_resampled <- resample_mnirs(
-    data_cleaned,      ## blank channels will be retrieved from metadata
-    resample_rate = 2, ## blank by default will resample to `sample_rate`
-    method = "linear"  ## linear interpolation across resampled indices
+    data_raw,            ## blank channels will be retrieved from metadata
+    time_channel = time, ## channels can be left blank or specified explicitly
+    sample_rate = NULL,  ## blank by default will be retrieved from metadata
+    resample_rate = 2,   ## blank by default will resample to `sample_rate`
+    method = "linear"    ## linear interpolation across resampled indices
 )
 
 ## note the altered "time" values from the original data frame 👇
@@ -139,11 +124,29 @@ data_resampled
 ```
 
 
+### `replace_mnirs`: Replace local outliers, invalid values, and missing values
+
+```{r replace_mnirs}
+data_cleaned <- replace_mnirs(
+    data_resampled,     ## blank channels will be retrieved from metadata
+    invalid_values = 0, ## known invalid values in the data
+    invalid_above = 90, ## remove data spikes above 90
+    outlier_cutoff = 3, ## recommended default value
+    width = 7,          ## window to detect and replace outliers/missing values
+    method = "linear"   ## linear interpolation over `NA`s
+)
+
+plot(data_cleaned, time_labels = TRUE)
+```
+
+
+
+
 ### `filter_mnirs()`: Digital filtering
 
 ```{r filter_mnirs}
 data_filtered <- filter_mnirs(
-    data_resampled,         ## blank channels will be retrieved from metadata
+    data_cleaned,           ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
@@ -207,7 +210,7 @@ nirs_data <- read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |> ## default settings will resample to the same `sample_rate`
+    resample_mnirs(method = "linear") |> ## default settings will resample to the same `sample_rate`
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,
@@ -242,12 +245,12 @@ plot(nirs_data, time_labels = TRUE)
 
 ## return each interval independently with `event_groups = "distinct"`
 distinct <- extract_intervals(
-    nirs_data,                 ## channels blank for "distinct" grouping
-    start = by_time(36, 751),  ## manually identified interval start times
-    end = by_time(186, 901),   ## interval end time (start + 150 sec)
-    event_groups = "distinct", ## return a list of data frames for each (2) event
-    span = c(0, 0),            ## no boundary modification
-    zero_time = FALSE          ## return original time values
+    nirs_data,                  ## channels blank for "distinct" grouping
+    start = by_time(348, 1064), ## manually identified interval start times
+    end = by_time(458, 1174),   ## interval end time (start + 150 sec)
+    event_groups = "distinct",  ## return a list of data frames for each (2) event
+    span = c(0, 0),             ## no boundary modification
+    zero_time = FALSE           ## return original time values
 )
 
 plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
@@ -256,15 +259,16 @@ plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TR
 ```{r extract_intervals_ensemble}
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble <- extract_intervals(
-    nirs_data,                 ## channels recycled to all intervals by default
+    nirs_data,                  ## channels recycled to all intervals by default
     nirs_channels = c(smo2_left, smo2_right),
-    start = by_time(66, 781),  ## alternatively specify start times + span
-    event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(-30, 120),        ## span recycled to all intervals by default
-    zero_time = TRUE           ## re-calculate common time to start from `0`
+    start = by_time(368, 1084), ## alternatively specify start times + span
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    span = c(-20, 90),          ## span recycled to all intervals by default
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
-plot(ensemble[[1L]], time_labels = TRUE)
+plot(ensemble[[1L]], time_labels = TRUE) + 
+    geom_vline(xintercept = 0, linetype = "dotted")
 ```
 
 

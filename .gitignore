@@ -15,4 +15,5 @@ docs
 *mnirs-hex*.png
 **/*.quarto_ipynb
 /.claude/
-CLAUDE.md
+^CLAUDE\.md$
+.vscode/

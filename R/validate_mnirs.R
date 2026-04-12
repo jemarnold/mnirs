@@ -49,9 +49,13 @@
 #' @param integer Logical. Default is `FALSE`. If `TRUE`, validate `x` as
 #'   integer-like values using [rlang::is_integerish()]. Otherwise tested as a
 #'   numeric value.
+#' 
+#' @param allow_na Logical. Default is `FALSE`. If `TRUE`, allows pass through
+#'   of `NA` to the returned numeric/integer vector.
 #'
 #' @param msg1,msg2 A character string appended to the [cli::cli_abort()]
 #'   message when numeric validation fails.
+#' 
 #' @inheritParams read_mnirs
 #'
 #' @details
@@ -94,7 +98,7 @@ validate_numeric <- function(
     range = NULL,
     inclusive = c("left", "right"),
     integer = FALSE,
-    invalid = FALSE,
+    allow_na = FALSE,
     msg1 = "",
     msg2 = ""
 ) {
@@ -110,8 +114,8 @@ validate_numeric <- function(
         abort_validation(name, integer, msg1, msg2)
     }
 
-    ## valid elements length — skip NA scan when invalid = TRUE
-    if (!invalid) {
+    ## valid elements length — skip NA scan when allow_na = TRUE
+    if (!allow_na) {
         valid <- !is.na(x)
         n_valid <- sum(valid)
         if (n_valid == 0L) {
@@ -128,7 +132,7 @@ validate_numeric <- function(
 
     ## subset once for range/integer checks
     needs_subset <- !is.null(range) || integer
-    if (needs_subset && !invalid) {
+    if (needs_subset && !allow_na) {
         x_valid <- if (n_valid < length(x)) x[valid] else x
     }
 
@@ -504,12 +508,12 @@ validate_width_span <- function(
 
 
 #' @rdname validate_mnirs
-validate_x_t <- function(x, t, invalid = FALSE) {
-    ## exclude NULL by defaulting to invalid character
+validate_x_t <- function(x, t, allow_na = FALSE) {
+    ## exclude NULL by defaulting to allow_na character
     x <- x %||% character()
     t <- t %||% character()
-    validate_numeric(x, invalid = invalid)
-    validate_numeric(t, invalid = invalid)
+    validate_numeric(x, allow_na = allow_na)
+    validate_numeric(t, allow_na = allow_na)
     if (length(x) != length(t)) {
         cli_abort(c(
             "x" = "{.arg x} and {.arg t} must be {.cls numeric} vectors \\

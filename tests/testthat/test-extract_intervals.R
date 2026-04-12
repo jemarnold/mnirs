@@ -1551,6 +1551,20 @@ test_that("extract_intervals coerces raw numeric to by_time", {
     expect_length(result, 1)
     expect_equal(result[[1]]$time[1], 2 - 1)
     expect_equal(rev(result[[1]]$time)[1], 2 + 1)
+
+
+    obj <- 2
+    result <- extract_intervals(
+        data = data,
+        start = obj,
+        event_groups = "distinct",
+        span = c(-0.5, 0.5),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    expect_equal(result[[1]]$time[1], 2 - 0.5)
+    expect_equal(rev(result[[1]]$time)[1], 2 + 0.5)
 })
 
 test_that("extract_intervals coerces raw character to by_label", {
@@ -1867,7 +1881,7 @@ test_that("extract_intervals works on train.red data", {
         time_channel = c(time = "Timestamp (seconds passed)"),
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE)
+        resample_mnirs(method = "linear", verbose = FALSE)
 
     result <- extract_intervals(
         data,
@@ -1939,13 +1953,13 @@ test_that("extract_intervals benchmark", {
         zero_time = TRUE,
         verbose = FALSE
     ) |>
-        resample_mnirs(verbose = FALSE)
+        resample_mnirs(method = "linear", verbose = FALSE)
 
     # for (i in seq_len(3)) {
     #     bm <- bench::mark(
     #         extract_intervals = extract_intervals(
     #             data_list,
-    #             start = by_time(368, 1093),
+    #             start = by_time(368, 1084),
     #             event_groups = "distinct",
     #             span = c(-20, 90),
     #             zero_time = TRUE,

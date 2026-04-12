@@ -33,8 +33,8 @@
 #'   or [by_sample()].
 #'
 #' @param span A one- or two-element numeric vector `c(before, after)` in units 
-#'   of `time_channel`, or a `list()` of such vectors. Applied additively to
-#'   interval boundaries:
+#'   of `time_channel`, or a `list()` of such vectors. (*default* 
+#'   `span = c(-60, 60)`. Applied additively to interval boundaries:
 #'   - When both `start` and `end` are specified: `span[1]` shifts start times,
 #'     `span[2]` shifts end times.
 #'   - When only `start` or only `end` is specified: both `span[1]` and
@@ -160,13 +160,14 @@
 #'     zero_time = TRUE,
 #'     verbose = FALSE
 #' ) |>
-#'     resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
+#'     ## avoid issues ensemble-averaging irregular samples
+#'     resample_mnirs(method = "linear", verbose = FALSE) 
 #'
 #' ## ensemble-average across multiple intervals
 #' interval_list <- extract_intervals(
 #'     data,                       ## channels recycled to all intervals by default
 #'     nirs_channels = c(smo2_left, smo2_right),
-#'     start = by_time(368, 1093), ## manually identified interval start times
+#'     start = by_time(368, 1084), ## manually identified interval start times
 #'     span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
 #'     event_groups = "ensemble",  ## ensemble-average across two intervals
 #'     zero_time = TRUE            ## re-calculate common time to start from `0`

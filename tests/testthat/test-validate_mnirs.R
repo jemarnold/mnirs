@@ -300,6 +300,18 @@ test_that("validate_nirs_channels() errors when < 2 valid values", {
     )
 })
 
+test_that("validate_nirs_channels() informs when list coerced to vector", {
+    data <- create_test_data()
+    nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
+    expect_message(
+        result <- validate_nirs_channels(
+            nirs_list, data, verbose = TRUE, as_list = FALSE
+        ),
+        "`nirs_channels`.*unlisted"
+    )
+    expect_equal(result, c("nirs1", "nirs2", "nirs3"))
+})
+
 
 ## validate_time_channel() ========================================
 test_that("validate_time_channel() uses metadata when NULL", {
@@ -694,5 +706,5 @@ test_that("validate_x_t() validates inputs", {
     expect_error(validate_x_t(x = NULL, t = 1:10), "valid.*numeric")
     expect_error(validate_x_t(x = 1:10, t = NULL), "valid.*numeric")
     expect_error(validate_x_t(x = NA_real_, t = 1), "valid.*numeric")
-    expect_silent(validate_x_t(x = NA_real_, t = 1, invalid = TRUE))
+    expect_silent(validate_x_t(x = NA_real_, t = 1, allow_na = TRUE))
 })

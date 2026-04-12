@@ -22,9 +22,11 @@
 #' @inheritParams validate_mnirs
 #'
 #' @details
-#' ## filtering method
+#' ## filtering methods
 #'
-#' #### `method = "smooth_spline"`
+#' ### `method = "smooth_spline"`
+#' 
+#' Aliases: `c("smooth spline", "spline")`
 #'
 #' Applies a non-parametric cubic smoothing spline from
 #' [stats::smooth.spline()]. Smoothing is defined by the parameter `spar`,
@@ -42,6 +44,8 @@
 #' }
 #'
 #' #### `method = "butterworth"`
+#' 
+#' Aliases: `c("butter")`
 #'
 #' Applies a centred (two-pass symmetrical) Butterworth digital filter
 #' from [signal::butter()] and [signal::filtfilt()].
@@ -94,6 +98,8 @@
 #' }
 #'
 #' #### `method = "moving_average"`
+#' 
+#' Aliases: `c("moving average", "ma")`
 #'
 #' Applies a centred (symmetrical) moving average filter in a local
 #' window, defined by either `width` as the number of samples around
@@ -182,10 +188,18 @@ filter_mnirs <- function(
     ## validation ====================================
     validate_mnirs_data(data)
     ## normalise method aliases before matching
-    method <- gsub("^(ma|moving[_ ]average)$", "moving_average",
-        method, ignore.case = TRUE)
-    method <- gsub("^(spline|smooth[_ ]spline)$", "smooth_spline",
-        method, ignore.case = TRUE)
+    method <- gsub(
+        "^(ma|moving[ _-]average)$",
+        "moving_average",
+        method,
+        ignore.case = TRUE
+    )
+    method <- gsub(
+        "^(spline|smooth[ _-]spline)$",
+        "smooth_spline",
+        method,
+        ignore.case = TRUE
+    )
     method <- match.arg(method)
     
     if (missing(verbose)) {
