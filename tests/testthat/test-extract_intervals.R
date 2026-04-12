@@ -1552,6 +1552,20 @@ test_that("extract_intervals coerces raw numeric to by_time", {
     expect_length(result, 1)
     expect_equal(result[[1]]$time[1], 2 - 1)
     expect_equal(rev(result[[1]]$time)[1], 2 + 1)
+
+
+    obj <- 2
+    result <- extract_intervals(
+        data = data,
+        start = obj,
+        event_groups = "distinct",
+        span = c(-0.5, 0.5),
+        verbose = FALSE
+    )
+
+    expect_length(result, 1)
+    expect_equal(result[[1]]$time[1], 2 - 0.5)
+    expect_equal(rev(result[[1]]$time)[1], 2 + 0.5)
 })
 
 test_that("extract_intervals coerces raw character to by_label", {

@@ -1227,11 +1227,10 @@ test_that("parse_time_channel() add_timestamp=TRUE with no timestamps skips colu
 test_that("parse_time_channel works on fractional unix time", {
     ## Moxy.csv saved as excel will coerce date-time
     ## to numeric fractional Unix time.
+    file_path <- test_path("testdata/moxy-occlusion.xlsx")
     skip_if_not(file.exists(file_path), "testdata not available")
     
-    data <- suppressMessages(readxl::read_excel(
-        test_path("testdata/moxy-occlusion.xlsx")
-    )[-(1:2), 1:2])
+    data <- suppressMessages(readxl::read_excel(file_path)[-(1:2), 1:2])
     names(data)[2L] <- "time"
     data$time <- as.numeric(data$time)
 

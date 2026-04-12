@@ -21,6 +21,7 @@
 ^mnirs_hexSticker\.R$
 mnirs-hex.*\.png$
 ^CLAUDE\.md$
+^AGENTS\.md$
 ^tests/testthat/testdata$
 ^\.claude$
 ^man/figures/README-mnirs-app\.gif$

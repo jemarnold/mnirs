@@ -670,7 +670,8 @@ test_that("replace_mnirs global verbose works", {
             file_path = example_mnirs("moxy_ramp.xlsx"),
             nirs_channels = c(smo2 = "SmO2 Live"),
             time_channel = c(time = "hh:mm:ss")
-        ),
+        ) |> 
+            replace_mnirs(),
         "irregular.*detected"
     ) |>
         expect_message("Estimated.*sample_rate.*2")
@@ -684,7 +685,8 @@ test_that("replace_mnirs global verbose works", {
             file_path = example_mnirs("moxy_ramp.xlsx"),
             nirs_channels = c(smo2 = "SmO2 Live"),
             time_channel = c(time = "hh:mm:ss")
-        )
+        ) |>
+            replace_mnirs()
     )
 })
 

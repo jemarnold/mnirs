@@ -62,8 +62,8 @@ for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\li
 or \code{\link[=by_sample]{by_sample()}}.}
 
 \item{span}{A one- or two-element numeric vector \code{c(before, after)} in units
-of \code{time_channel}, or a \code{list()} of such vectors. Applied additively to
-interval boundaries:
+of \code{time_channel}, or a \code{list()} of such vectors. (\emph{default}
+\code{span = c(-60, 60)}. Applied additively to interval boundaries:
 \itemize{
 \item When both \code{start} and \code{end} are specified: \code{span[1]} shifts start times,
 \code{span[2]} shifts end times.

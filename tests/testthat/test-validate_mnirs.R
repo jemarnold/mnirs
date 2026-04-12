@@ -300,6 +300,18 @@ test_that("validate_nirs_channels() errors when < 2 valid values", {
     )
 })
 
+test_that("validate_nirs_channels() informs when list coerced to vector", {
+    data <- create_test_data()
+    nirs_list <- list(c("nirs1", "nirs2"), "nirs3")
+    expect_message(
+        result <- validate_nirs_channels(
+            nirs_list, data, verbose = TRUE, as_list = FALSE
+        ),
+        "`nirs_channels`.*unlisted"
+    )
+    expect_equal(result, c("nirs1", "nirs2", "nirs3"))
+})
+
 
 ## validate_time_channel() ========================================
 test_that("validate_time_channel() uses metadata when NULL", {

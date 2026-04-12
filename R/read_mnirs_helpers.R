@@ -181,23 +181,23 @@ detect_device_channels <- function(
     }
 
     ## successfully detected `nirs_device` with `nirs_channels = NULL`
-    channel_list <- device_patterns[[nirs_device]]
-    channel_list <- list(
+    ch_list <- device_patterns[[nirs_device]]
+    ch_list <- list(
         ## user-specified `time_channel` takes priority here
-        time_channel = time_channel %||% channel_list$time_channel,
-        nirs_channels = channel_list$nirs_channels,
+        time_channel = time_channel %||% ch_list$time_channel,
+        nirs_channels = ch_list$nirs_channels,
         keep_all = TRUE ## return all cols to view potential nirs_channels
     )
 
     if (verbose) {
         cli_inform(c(
             "!" = "{.val {nirs_device}} file format detected. \\
-            {.arg nirs_channels} set to {.val {channel_list$nirs_channels}}.",
+            {.arg nirs_channels} set to {.val {ch_list$nirs_channels}}.",
             "i" = "Override by specifying {.arg nirs_channels} explicitly."
         ))
     }
 
-    return(channel_list)
+    return(ch_list)
 }
 
 
@@ -244,21 +244,11 @@ extract_start_timestamp <- function(file_header) {
 
     ## search for POSIXct values, return the earliest time value
     ## vulnerable to invalid timestamps
-    parsed <- which(
-        !is.na(
-            vapply(header_values, \(.x) {
-                as.POSIXct(
-                    as.character(as.POSIXct(
-                        .x,
-                        tz = "UTC",
-                        tryFormats = datetime_formats,
-                        optional = TRUE
-                    )),
-                    tz = Sys.timezone()
-                )
-        }, numeric(1L))
+    parsed <- which(!is.na(vapply(header_values, \(.x) {
+        localise_POSIXct(
+            .x, tryFormats = datetime_formats, optional = TRUE
         )
-    )
+    }, numeric(1L))))
 
     if (length(parsed) == 0L) {
         return(NULL)
@@ -373,7 +363,7 @@ select_rename_data <- function(
     verbose = TRUE
 ) {
     ## ensure all channel inputs are named (name = original_col_name)
-    channel_list <- list(
+    ch_list <- list(
         time_channel = time_channel,
         event_channel = event_channel,
         nirs_channels = nirs_channels
@@ -382,10 +372,10 @@ select_rename_data <- function(
 
     ## original column names (values) mapped to user names (names)
     ## rename_duplicates makes user-facing names unique
-    orig_names <- lapply(channel_list, \(.x) {
+    orig_names <- lapply(ch_list, \(.x) {
         if (is.null(.x)) NULL else rename_duplicates(as.character(.x))
     })
-    user_names <- lapply(channel_list, \(.x) {
+    user_names <- lapply(ch_list, \(.x) {
         if (is.null(.x)) NULL else rename_duplicates(names(.x))
     })
 
@@ -423,13 +413,10 @@ select_rename_data <- function(
     names(result)[channel_idx] <- user_vec
 
     ## warn if any channels were renamed from their input names
-    was_renamed <- user_vec !=
-        unlist(lapply(channel_list, names), use.names = FALSE)
-    if (verbose && any(was_renamed)) {
-        old <- unlist(lapply(channel_list, names), use.names = FALSE)[
-            was_renamed
-        ]
-        new <- user_vec[was_renamed]
+    renamed <- user_vec != unlist(lapply(ch_list, names), use.names = FALSE)
+    if (verbose && any(renamed)) {
+        old <- unlist(lapply(ch_list, names), use.names = FALSE)[renamed]
+        new <- user_vec[renamed]
         cli_warn(c(
             "!" = "Duplicate channel names detected.",
             "i" = "Renamed: {.val {paste(old, new, sep = ' = ')}}",
@@ -462,18 +449,13 @@ convert_type <- function(
     )
     for (col in char_cols) {
         data.table::set(
-            data,
-            j = col,
-            value = gsub(",", ".", data[[col]], fixed = TRUE)
+            data, j = col, value = gsub(",", ".", data[[col]], fixed = TRUE)
         )
     }
 
     ## convert column types
     data <- utils::type.convert(
-        data,
-        na.strings = c("NA", ""),
-        dec = ".",
-        as.is = TRUE
+        data, na.strings = c("NA", ""), dec = ".", as.is = TRUE
     )
 
     ## coerce integer columns to numeric (except event_channel)
@@ -507,6 +489,13 @@ remove_empty_rows_cols <- function(data) {
 }
 
 
+#' Convert POSIXct timestamp to system local time
+#' @keywords internal
+localise_POSIXct <- function(x, ...) {
+    as.POSIXct(as.character(as.POSIXct(x, "UTC", ...)), tz = Sys.timezone())
+}
+
+
 #' Parse time_channel character or dttm to numeric
 #' @keywords internal
 parse_time_channel <- function(
@@ -520,14 +509,7 @@ parse_time_channel <- function(
 
     ## fractional unix time to POSIXct
     if (is.numeric(time_vec) && all(time_vec <= 1, na.rm = TRUE)) {
-        time_vec <- as.POSIXct(
-            as.character(as.POSIXct(
-                time_vec * 86400,
-                tz = "UTC",
-                optional = TRUE
-            )),
-            tz = Sys.timezone()
-        )
+        time_vec <- localise_POSIXct(time_vec * 86400, optional = TRUE)
     }
 
     ## recalculate numeric time to start from zero
@@ -537,14 +519,8 @@ parse_time_channel <- function(
 
     ## character time to POSIXct
     if (is.character(time_vec)) {
-        time_vec <- as.POSIXct(
-            as.character(as.POSIXct(
-                time_vec,
-                tz = "UTC",
-                tryFormats = datetime_formats,
-                optional = TRUE
-            )),
-            tz = Sys.timezone()
+        time_vec <- localise_POSIXct(
+            time_vec, tryFormats = datetime_formats, optional = TRUE
         )
     }
 
@@ -569,14 +545,8 @@ parse_time_channel <- function(
         ## if neither header start_timestamp or timestamp_vec exist
         ## then return NULL and don't append column
         if (!is.null(start_timestamp)) {
-            start_time <- as.POSIXct(
-                as.character(as.POSIXct(
-                    start_timestamp,
-                    tz = "UTC",
-                    tryFormats = datetime_formats,
-                    optional = TRUE
-                )),
-                tz = Sys.timezone()
+            start_time <- localise_POSIXct(
+                start_timestamp, tryFormats = datetime_formats, optional = TRUE
             )
             data$timestamp <- start_time + time_vec
         } else if (!is.null(timestamp_vec)) {
@@ -662,9 +632,7 @@ detect_irregular_samples <- function(
     ## find duplicated, unordered, or big gaps in samples
     diffs <- diff(x)
     irregular_idx <- c(
-        which(duplicated(x)),
-        which(diffs < 0),
-        which(diffs >= 3600)
+        which(duplicated(x)), which(diffs < 0), which(diffs >= 3600)
     )
 
     ## silence if no irregular samples
