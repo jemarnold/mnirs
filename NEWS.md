@@ -8,7 +8,7 @@
 
     * Timestamps should now be returned in the user's local time zone.
 
-## Potentially breaking changes
+## Core function argument changes
 
 * `resample_mnirs()`: Update default `method = "none"`. Less opinionated default to force users to explicitly opt-in to specifying either "linear" or "locf" methods to fill/interpolate across new samples. Updated package documentation.
 
@@ -19,6 +19,18 @@
 * `plot.mnirs()`: No longer coerces to long format data behind the scenes.
 
 * `plot.mnirs()`: y-axis title changed from "signal" to "mNIRS".
+
+* Create `AGENTS.md` for LLM-friendly instructions. Added to `.Rbuildignore` until better packaging solution found.
+
+* Fix lap marker inconsistency in `train.red_intervals.csv`. Updated relevant interval times in documentation.
+
+* `README.md` & *"reading-mnirs-data.qmd"* vignette updates.
+
+    * Update recommended core processing sequence: `read_mnirs()` -> `resample_mnirs()` -> `replace_mnirs()` -> ...
+
+    * Update `extract_intervals()` vignette to `train.red_intervals.csv` end-interval reoxygenation events.
+
+* Small documentation changes.
 
 
 # mnirs 0.6.1
@@ -58,6 +70,7 @@
     * `partial = TRUE` calculates mean values at edges, as long as one valid non-`NA` sample is available.
     
     * `na.rm = FALSE` by default behaves as expected with `mean(na.rm = FALSE)`, propagating any `NA`s in the local window to the calculated mean with a warning.
+        
         * **NOTE** This differs from the behaviour of `na.rm = FALSE` in `filter_butter()`, which errors if there are any internal `NA`s present. This has not been changed.
     
     * `na.rm = TRUE` ignores `NA`s and calculates local means as long as one valid sample is present.

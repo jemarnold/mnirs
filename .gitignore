@@ -16,3 +16,4 @@ docs
 **/*.quarto_ipynb
 /.claude/
 ^CLAUDE\.md$
+.vscode/
