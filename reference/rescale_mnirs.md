@@ -9,7 +9,7 @@ new amplitude/dynamic range, e.g. re-scale the range of NIRS data to
 ``` r
 rescale_mnirs(
   data,
-  nirs_channels = list(NULL),
+  nirs_channels = list(),
   range,
   verbose = TRUE
 )

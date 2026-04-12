@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -171,31 +171,16 @@
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
 </div>
 <div class="section level3">
-<h3 id="replace_mnirs-replace-local-outliers-invalid-values-and-missing-values">
-<code>replace_mnirs</code>: Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace_mnirs-replace-local-outliers-invalid-values-and-missing-values"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data_cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_raw</span>,           <span class="co">## blank channels will be retrieved from metadata</span></span>
-<span>    invalid_values <span class="op">=</span> <span class="fl">0</span>, <span class="co">## known invalid values in the data</span></span>
-<span>    invalid_above <span class="op">=</span> <span class="fl">90</span>, <span class="co">## remove data spikes above 90</span></span>
-<span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, <span class="co">## recommended default value</span></span>
-<span>    width <span class="op">=</span> <span class="fl">10</span>,         <span class="co">## window to detect and replace outliers/missing values</span></span>
-<span>    method <span class="op">=</span> <span class="st">"linear"</span>   <span class="co">## linear interpolation over `NA`s</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_cleaned</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-replace_mnirs-1.png" alt="" width="100%"></p>
-</div>
-<div class="section level3">
 <h3 id="resample_mnirs-resample-data">
 <code>resample_mnirs()</code>: Resample data<a class="anchor" aria-label="anchor" href="#resample_mnirs-resample-data"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_resampled</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_cleaned</span>,      <span class="co">## blank channels will be retrieved from metadata</span></span>
-<span>    resample_rate <span class="op">=</span> <span class="fl">2</span>, <span class="co">## blank by default will resample to `sample_rate`</span></span>
-<span>    method <span class="op">=</span> <span class="st">"linear"</span>  <span class="co">## linear interpolation across resampled indices</span></span>
+<span>    <span class="va">data_raw</span>,            <span class="co">## blank channels will be retrieved from metadata</span></span>
+<span>    time_channel <span class="op">=</span> <span class="va">time</span>, <span class="co">## channels can be left blank or specified explicitly</span></span>
+<span>    sample_rate <span class="op">=</span> <span class="cn">NULL</span>,  <span class="co">## blank by default will be retrieved from metadata</span></span>
+<span>    resample_rate <span class="op">=</span> <span class="fl">2</span>,   <span class="co">## blank by default will resample to `sample_rate`</span></span>
+<span>    method <span class="op">=</span> <span class="st">"linear"</span>    <span class="co">## linear interpolation across resampled indices</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ℹ Output is resampled at 2 Hz.</span></span>
 <span></span>
@@ -217,12 +202,29 @@
 <span><span class="co">#&gt; # ℹ 2,409 more rows</span></span></code></pre></div>
 </div>
 <div class="section level3">
+<h3 id="replace_mnirs-replace-local-outliers-invalid-values-and-missing-values">
+<code>replace_mnirs</code>: Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace_mnirs-replace-local-outliers-invalid-values-and-missing-values"></a>
+</h3>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
+<span>    <span class="va">data_resampled</span>,     <span class="co">## blank channels will be retrieved from metadata</span></span>
+<span>    invalid_values <span class="op">=</span> <span class="fl">0</span>, <span class="co">## known invalid values in the data</span></span>
+<span>    invalid_above <span class="op">=</span> <span class="fl">90</span>, <span class="co">## remove data spikes above 90</span></span>
+<span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, <span class="co">## recommended default value</span></span>
+<span>    width <span class="op">=</span> <span class="fl">7</span>,          <span class="co">## window to detect and replace outliers/missing values</span></span>
+<span>    method <span class="op">=</span> <span class="st">"linear"</span>   <span class="co">## linear interpolation over `NA`s</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_cleaned</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-replace_mnirs-1.png" alt="" width="100%"></p>
+</div>
+<div class="section level3">
 <h3 id="filter_mnirs-digital-filtering">
 <code>filter_mnirs()</code>: Digital filtering<a class="anchor" aria-label="anchor" href="#filter_mnirs-digital-filtering"></a>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_resampled</span>,         <span class="co">## blank channels will be retrieved from metadata</span></span>
+<span>    <span class="va">data_cleaned</span>,           <span class="co">## blank channels will be retrieved from metadata</span></span>
 <span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span>
 <span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span>
 <span>    W <span class="op">=</span> <span class="fl">0.02</span>,               <span class="co">## filter fractional critical frequency `[0, 1]`</span></span>
@@ -285,7 +287,7 @@
 <span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"Timestamp (seconds passed)"</span><span class="op">)</span>,</span>
 <span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co">## default settings will resample to the same `sample_rate`</span></span>
+<span>    <span class="fu"><a href="reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co">## default settings will resample to the same `sample_rate`</span></span>
 <span>    <span class="fu"><a href="reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
 <span>        invalid_above <span class="op">=</span> <span class="fl">73</span>,</span>
 <span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span>
@@ -318,12 +320,12 @@
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## return each interval independently with `event_groups = "distinct"`</span></span>
 <span><span class="va">distinct</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
-<span>    <span class="va">nirs_data</span>,                 <span class="co">## channels blank for "distinct" grouping</span></span>
-<span>    start <span class="op">=</span> <span class="fu"><a href="reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">36</span>, <span class="fl">751</span><span class="op">)</span>,  <span class="co">## manually identified interval start times</span></span>
-<span>    end <span class="op">=</span> <span class="fu"><a href="reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">186</span>, <span class="fl">901</span><span class="op">)</span>,   <span class="co">## interval end time (start + 150 sec)</span></span>
-<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>, <span class="co">## return a list of data frames for each (2) event</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,            <span class="co">## no boundary modification</span></span>
-<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>          <span class="co">## return original time values</span></span>
+<span>    <span class="va">nirs_data</span>,                  <span class="co">## channels blank for "distinct" grouping</span></span>
+<span>    start <span class="op">=</span> <span class="fu"><a href="reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">348</span>, <span class="fl">1064</span><span class="op">)</span>, <span class="co">## manually identified interval start times</span></span>
+<span>    end <span class="op">=</span> <span class="fu"><a href="reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">458</span>, <span class="fl">1174</span><span class="op">)</span>,   <span class="co">## interval end time (start + 150 sec)</span></span>
+<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>,  <span class="co">## return a list of data frames for each (2) event</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,             <span class="co">## no boundary modification</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>           <span class="co">## return original time values</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span><span class="op">[[</span><span class="fl">2L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -331,15 +333,16 @@
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## ensemble average both intervals with `event_groups = "ensemble"`</span></span>
 <span><span class="va">ensemble</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
-<span>    <span class="va">nirs_data</span>,                 <span class="co">## channels recycled to all intervals by default</span></span>
+<span>    <span class="va">nirs_data</span>,                  <span class="co">## channels recycled to all intervals by default</span></span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>,</span>
-<span>    start <span class="op">=</span> <span class="fu"><a href="reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">66</span>, <span class="fl">781</span><span class="op">)</span>,  <span class="co">## alternatively specify start times + span</span></span>
-<span>    event_groups <span class="op">=</span> <span class="st">"ensemble"</span>, <span class="co">## ensemble-average across two intervals</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">120</span><span class="op">)</span>,        <span class="co">## span recycled to all intervals by default</span></span>
-<span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co">## re-calculate common time to start from `0`</span></span>
+<span>    start <span class="op">=</span> <span class="fu"><a href="reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">368</span>, <span class="fl">1084</span><span class="op">)</span>, <span class="co">## alternatively specify start times + span</span></span>
+<span>    event_groups <span class="op">=</span> <span class="st">"ensemble"</span>,  <span class="co">## ensemble-average across two intervals</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">20</span>, <span class="fl">90</span><span class="op">)</span>,          <span class="co">## span recycled to all intervals by default</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>            <span class="co">## re-calculate common time to start from `0`</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-extract_intervals_ensemble-1.png" alt="" width="100%"></p>
 </div>
 </div>
@@ -387,7 +390,7 @@
 <a href="https://vo2master.com/features/" class="external-link">VO2 Master Manager</a> app (.xlsx)</li>
 </ul>
 <hr>
-<p><em>Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed, validated, and tested by the package author.</em></p>
+<p><em>Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed and validated by the package author.</em></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

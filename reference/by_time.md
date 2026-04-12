@@ -101,7 +101,7 @@ extract_intervals(data, start = by_lap(2, 4), span = 0)
 #> ℹ `nirs_channels` = c("smo2_left", "smo2_right") grouped together from
 #>   metadata.
 #> $interval_1
-#> # A tibble: 2,937 × 4
+#> # A tibble: 3,051 × 4
 #>     time   lap smo2_left smo2_right
 #>    <dbl> <int>     <dbl>      <dbl>
 #>  1  65.9     2      68.4       71.6
@@ -114,23 +114,23 @@ extract_intervals(data, start = by_lap(2, 4), span = 0)
 #>  8  66.6     2      68.8       72.9
 #>  9  66.8     2      68.8       73.3
 #> 10  66.9     2      68.0       72.1
-#> # ℹ 2,927 more rows
+#> # ℹ 3,041 more rows
 #> 
 #> $interval_2
-#> # A tibble: 2,943 × 4
+#> # A tibble: 2,863 × 4
 #>     time   lap smo2_left smo2_right
 #>    <dbl> <int>     <dbl>      <dbl>
-#>  1  781.     4      69.5       70.7
-#>  2  781      4      69.5       70.6
-#>  3  781.     4      70.2       70.2
-#>  4  781.     4      70.2       69.4
-#>  5  781.     4      70.2       70.4
-#>  6  781.     4      69.8       70.2
-#>  7  782.     4      69.8       70.1
-#>  8  782.     4      68.6       70.0
-#>  9  782.     4      68.6       69.7
-#> 10  782.     4      69.9       69.3
-#> # ℹ 2,933 more rows
+#>  1  788.     4      69.4       70.2
+#>  2  788.     4      69.5       69.2
+#>  3  788.     4      69.5       69.2
+#>  4  789.     4      67.3       70.2
+#>  5  789.     4      69.0       71.9
+#>  6  789.     4      69.3       69.7
+#>  7  789.     4      69.7       69.3
+#>  8  789.     4      69.6       69.1
+#>  9  789.     4      69.6       68.6
+#> 10  789.     4      68.8       69.3
+#> # ℹ 2,853 more rows
 #> 
 
 ## introduce event_channel with "start" string
@@ -145,7 +145,7 @@ extract_intervals(data, start = by_label("start"), end = by_time(1500))
 #> Warning: !  Interval 1 is partially outside data bounds.
 #> ℹ Returning available data only.
 #> $interval_1
-#> # A tibble: 11,607 × 5
+#> # A tibble: 11,601 × 5
 #>     time   lap smo2_left smo2_right event
 #>    <dbl> <int>     <dbl>      <dbl> <chr>
 #>  1  39.0     1      67.8       69.3 NA   
@@ -158,7 +158,7 @@ extract_intervals(data, start = by_label("start"), end = by_time(1500))
 #>  8  39.6     1      68.5       69.2 NA   
 #>  9  39.7     1      68.5       70.0 NA   
 #> 10  39.9     1      68.5       69.8 NA   
-#> # ℹ 11,597 more rows
+#> # ℹ 11,591 more rows
 #> 
 
 ## multiple intervals by sample index

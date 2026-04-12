@@ -88,9 +88,11 @@ of class *"mnirs"* with metadata available with
 
 ## Details
 
-### filtering method
+### filtering methods
 
 #### `method = "smooth_spline"`
+
+Aliases: `c("smooth spline", "spline")`
 
 Applies a non-parametric cubic smoothing spline from
 [`stats::smooth.spline()`](https://rdrr.io/r/stats/smooth.spline.html).
@@ -109,7 +111,9 @@ Additional arguments (`...`) accepted when `method = "smooth_spline"`:
   If `NULL` (*default*), automatically determined via penalised log
   likelihood.
 
-#### `method = "butterworth"`
+##### `method = "butterworth"`
+
+Aliases: `c("butter")`
 
 Applies a centred (two-pass symmetrical) Butterworth digital filter from
 [`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html) and
@@ -177,7 +181,9 @@ Additional arguments (`...`) accepted when `method = "butterworth"`:
   `c("rev", "rep1", "none")` (`"rev"` is the default). See
   [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md).
 
-#### `method = "moving_average"`
+##### `method = "moving_average"`
+
+Aliases: `c("moving average", "ma")`
 
 Applies a centred (symmetrical) moving average filter in a local window,
 defined by either `width` as the number of samples around `idx` between

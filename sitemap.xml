@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://jemarnold.github.io/mnirs/404.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/AGENTS.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/LICENSE-text.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/LICENSE.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/articles/index.html</loc></url>
@@ -35,8 +36,10 @@
 <url><loc>https://jemarnold.github.io/mnirs/reference/group_intervals.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/index.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/is_empty.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/localise_POSIXct.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/make_list.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/mnirs-package.html</loc></url>
+<url><loc>https://jemarnold.github.io/mnirs/reference/mnirs_metadata.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/moxy_intervals.csv.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.html</loc></url>
 <url><loc>https://jemarnold.github.io/mnirs/reference/name_channels.html</loc></url>

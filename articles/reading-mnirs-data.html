@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,8 +84,8 @@
 <li><p>📂 Read data files exported from commercial wearable NIRS devices, and import NIRS channels into a standard data frame format with metadata, ready for further processing.</p></li>
 <li><p>📊 Plot and visualise data frames of class <em><code>"mnirs"</code></em>.</p></li>
 <li><p>🔍 Retrieve metadata stored with data frames of class <em><code>"mnirs"</code></em> to avoid repetitively specifying which channels to process.</p></li>
+<li><p>⏱️ Resample data to a higher or lower sample rate, to correct irregular sampling periods, or to match the frequency of other data sources for synchronisation.</p></li>
 <li><p>🧹 Detect and replace local outliers, invalid values, and interpolate across missing data.</p></li>
-<li><p>⏱️ Resample data to a higher or lower sample rate, to correct irregular sampling periods, or match the frequency of other data sources for synchronisation.</p></li>
 <li><p>📈️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.</p></li>
 <li><p>⚖️ Shift and rescale across multiple NIRS channels, to normalise signal dynamic range while preserving absolute or relative scaling between muscle sites and NIRS channels.</p></li>
 <li><p>🔀 Demonstrate a complete data wrangling process using pipe-friendly functions.</p></li>
@@ -223,7 +223,7 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 </div>
 </section></section><section class="section level2"><h2 id="plot-mnirs-data">📊 Plot <em><code>mnirs</code></em> data<a class="anchor" aria-label="anchor" href="#plot-mnirs-data"></a>
 </h2>
-<p><em><code>mnirs</code></em> data can be easily viewed by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>. This generic plot function uses <em><code>ggplot2</code></em> and will work on data frames generated or read by <em><code>mnirs</code></em> functions where the metadata contains <code>class = *"mnirs"*</code>.</p>
+<p><em><code>mnirs</code></em> data can be easily viewed by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (explicitly documented as <code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>). This generic plot function uses <em><code>ggplot2</code></em> and will work on data frames generated or read by <em><code>mnirs</code></em> functions where the metadata contains <code>class = *"mnirs"*</code>.</p>
 <section class="level2"><h3 id="plot-mnirs">
 <code>plot.mnirs</code><a class="anchor" aria-label="anchor" href="#plot-mnirs"></a>
 </h3>
@@ -231,6 +231,10 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <li>
 <p><code>data</code></p>
 <p>This function takes in a data frame of class <em><code>mnirs</code></em> and returns a formatted <em><code>ggplot2</code></em> plot.</p>
+</li>
+<li>
+<p><code>points</code></p>
+<p><code>FALSE</code> by default; a quick way to plot individual points for more precise sample visualisation.</p>
 </li>
 <li>
 <p><code>time_labels</code></p>
@@ -250,6 +254,7 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <code class="sourceCode R"><span><span class="co">## note the `time_labels` plot argument to display time values as `h:mm:ss`</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_raw</span>,</span>
+<span>    points <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>    time_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>    n.breaks <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>    na.omit <span class="op">=</span> <span class="cn">FALSE</span></span>
@@ -279,13 +284,12 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">data_raw</span>, <span class="st">"sample_rate"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
 </div>
-</section><section class="section level2"><h2 id="replace-local-outliers-invalid-values-and-missing-values">🧹 Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace-local-outliers-invalid-values-and-missing-values"></a>
+</section><section class="section level2"><h2 id="resample-data">⏱️ Resample data<a class="anchor" aria-label="anchor" href="#resample-data"></a>
 </h2>
-<p>We can see some data issues in the plot above, so let’s clean those with a single wrangling function <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, to prepare our data for digital filtering and smoothing.</p>
-<p><em><code>mnirs</code></em> tries to include basic functions which work on vector data, and convenience wrappers which combine functionality and can be used on multiple channels in a data frame at once.</p>
-<p>Let’s explain the functionality of this data-wide function, and for more details about the vector-specific functions see <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>.</p>
-<section class="level2"><h3 id="replace_mnirs">
-<code>replace_mnirs()</code><a class="anchor" aria-label="anchor" href="#replace_mnirs"></a>
+<p>mNIRS devices may have sample rates anywhere from 0.5 to 100+ Hz. Higher sample rates gives greater precision. However, issues can arise with irregular sampling where time samples occur at inconsistent frequencies, are repeated, or are lost. Resampling to a consistent sample rate can be used to regularise timestamps to the nearest time value according to the known data sample rate. This can make subsequent processing steps easier, as well as synchronisation with other devices.</p>
+<p>Downsampling can be useful to reduce data size and processing requirement, although should not be used primarily as a data filtering/smoothing strategy (see <strong>Digital filtering</strong> section below). Upsampling can be done with interpolation over newly created samples, although caution should always be taken with creating new samples without any additional information. New samples created with resampling will be left blank (<code>NA</code>) by default.</p>
+<section class="level2"><h3 id="resample_mnirs">
+<code>resample_mnirs()</code><a class="anchor" aria-label="anchor" href="#resample_mnirs"></a>
 </h3>
 <ul>
 <li>
@@ -293,81 +297,31 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <p>This function takes in a data frame, applies processing to all channels specified explicitly or implicitly from <em><code>mnirs</code></em> metadata, then returns the processed data frame. <em><code>mnirs</code></em> metadata will be passed to and from this function.<br><br><em><code>mnirs</code></em> functions are also pipe-friendly for Base R 4.1+ (<code>|&gt;</code>) or <a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a> (<code>%&gt;%</code>) pipes to chain operations together (see below).</p>
 </li>
 <li>
-<p><code>nirs_channels</code></p>
-<p>Specify which column names in <code>data</code> to process, i.e. the response variables. If the data contain <em><code>mnirs</code></em> metadata, these channels will be detected automatically. Channels not explicitly specified will be passed through unprocessed to the returned data frame.</p>
-</li>
-<li>
 <p><code>time_channel</code></p>
-<p>If the data contain <em><code>mnirs</code></em> metadata, this channel will be detected automatically, or it can be specified explicitly.</p>
+<p>The column name of time series values in <code>data</code>. If the data contain <em><code>mnirs</code></em> metadata, this channel will be detected automatically, or it can be specified explicitly.<br><br>
+This function processes all columns in <code>data</code>, so <code>nirs_channels</code> does not need to be specified.</p>
 </li>
 <li>
-<p><code>invalid_values</code>, <code>invalid_above</code>, or <code>invalid_below</code></p>
-<p>Specific invalid values can be replaced, e.g. if a NIRS device exports <code>0</code>, <code>100</code>, or some other fixed value when signal recording is in error. If spikes or drops are present in the data, these can be replaced by specifying values above or below which to consider invalid. If left as <code>NULL</code>, no values will be replaced.</p>
-</li>
-<li>
-<p><code>outlier_cutoff</code></p>
-<p>Local outliers can be detected using a cutoff calculated from the local median value. A default value of <code>3</code> is recommended and corresponds to Pearson’s rule (i.e., ± 3 SD about the local median). If left as <code>NULL</code>, no outliers will be replaced.</p>
-</li>
-<li>
-<p><code>width</code> or <code>span</code></p>
-<p>Local outlier detection and median interpolation use a rolling local window specified by one of either <code>width</code> or <code>span</code>. <code>width</code> defines a number of samples centred around the local index being evaluated (<code>idx</code>), whereas <code>span</code> defines a range of time in units of <code>time_channel</code>.</p>
-</li>
-<li>
-<p><code>method</code></p>
-<p>Missing data (<code>NA</code>), invalid values, and local outliers specified above can be replaced via interpolation or fill methods; either <code>"linear"</code> interpolation (the default), fill with local <code>"median"</code>, or <code>"locf"</code> (<em>“last observation carried forward”</em>).<br><br><code>NA</code>s can be passed through to the returned data frame with <code>method = "none"</code>. However, subsequent processing &amp; analysis steps may return errors when <code>NA</code>s are present. Therefore, it is good practice to deal with missing data early during data processing.</p>
-</li>
-<li>
-<p><code>verbose</code></p>
-<p>As above, an option to toggle warnings and info messages.</p>
-</li>
-</ul>
-<div class="cell" data-layout-align="centre">
-<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data_cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_raw</span>,           <span class="co">## blank channels will be retrieved from metadata</span></span>
-<span>    invalid_values <span class="op">=</span> <span class="fl">0</span>, <span class="co">## known invalid values in the data</span></span>
-<span>    invalid_above <span class="op">=</span> <span class="fl">90</span>, <span class="co">## remove data spikes above 90</span></span>
-<span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, <span class="co">## recommended default value</span></span>
-<span>    width <span class="op">=</span> <span class="fl">10</span>,         <span class="co">## window to detect and replace outliers/missing values</span></span>
-<span>    method <span class="op">=</span> <span class="st">"linear"</span>   <span class="co">## linear interpolation over `NA`s</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_cleaned</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-centre">
-<figure><p><img src="reading-mnirs-data_files/figure-html/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-centre" style="width:100.0%"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>That cleaned up all the obvious data issues.</p>
-</section></section><section class="section level2"><h2 id="resample-data">⏱️ Resample data<a class="anchor" aria-label="anchor" href="#resample-data"></a>
-</h2>
-<p>Say we have NIRS data recorded at 25 Hz, but we are only interested in exercise responses over a time span of 5 minutes, and our other outcome measure heart rate data are only recorded at 1 Hz anyway. It may be easier and faster to work with our NIRS data down-sampled from 25 to 1 Hz.</p>
-<p>Alternatively, if we have something like high-frequency EMG data, we may want to up-sample our NIRS data to match samples for easier synchronisation and analysis (<em>although, we should be cautious with up-sampling as this can artificially inflate statistical confidence with subsequent analysis or modelling methods</em>).</p>
-<section class="level2"><h3 id="resample_mnirs">
-<code>resample_mnirs()</code><a class="anchor" aria-label="anchor" href="#resample_mnirs"></a>
-</h3>
-<ul>
-<li>
-<p><code>data</code></p>
-<p>This function takes in a data frame, resamples all data frame columns to the new sample rate, then returns the processed data frame. <em><code>mnirs</code></em> metadata will be passed to and from this function.</p>
-</li>
-<li>
-<p><code>time_channel</code> &amp; <code>sample_rate</code></p>
-<p>If the data contain <em><code>mnirs</code></em> metadata, these will be detected automatically, or they can be specified explicitly.</p>
+<p><code>sample_rate</code></p>
+<p>The sample rate (in Hz) of <code>data</code>. If the data contain <em><code>mnirs</code></em> metadata, this channel will be detected automatically, or it can be specified explicitly.</p>
 </li>
 <li>
 <p><code>resample_rate</code></p>
 <p>Resampling is specified as the desired number of samples per second (Hz). The default <code>resample_rate</code> will resample back to the existing <code>sample_rate</code> of the data. This can be useful to accommodate irregular sampling with unequal time values. Linear interpolation is used to resample <code>time_channel</code> to round values of the <code>sample_rate</code>.</p>
 </li>
+<li>
+<p><code>method</code></p>
+<p>Any new samples created by resampling (i.e. samples fill in between gaps, or up-sampled indices) can be filled in or left blank as <code>NA</code>. The default <code>method</code> is to leave new samples blank, and interpolation must be explicitly specified as either <em>“locf”</em> to repeat the last observation carried forward, or <em>“linear”</em> interpolation.</p>
+</li>
 </ul>
 <div class="cell" data-layout-align="centre">
-<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_resampled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_cleaned</span>,      <span class="co">## blank channels will be retrieved from metadata</span></span>
-<span>    resample_rate <span class="op">=</span> <span class="fl">2</span>, <span class="co">## blank by default will resample to `sample_rate`</span></span>
-<span>    method <span class="op">=</span> <span class="st">"linear"</span>  <span class="co">## linear interpolation across resampled indices</span></span>
+<span>    <span class="va">data_raw</span>,            <span class="co">## blank channels will be retrieved from metadata</span></span>
+<span>    time_channel <span class="op">=</span> <span class="va">time</span>, <span class="co">## channels can be left blank or specified explicitly</span></span>
+<span>    sample_rate <span class="op">=</span> <span class="cn">NULL</span>,  <span class="co">## blank by default will be retrieved from metadata</span></span>
+<span>    resample_rate <span class="op">=</span> <span class="fl">2</span>,   <span class="co">## blank by default will resample to `sample_rate`</span></span>
+<span>    method <span class="op">=</span> <span class="st">"linear"</span>    <span class="co">## linear interpolation across resampled indices</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; ℹ Output is resampled at 2 Hz.</span></span>
 <span></span>
@@ -395,6 +349,68 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <p>Note: if we perform both of these steps in a piped function call, we will still see the warning appear about irregular sampling at the end of the pipe. This warning is returned by <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>. But viewing the data frame can confirm that <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code> has resolved the issue.</p>
 </blockquote>
 </div>
+</section></section><section class="section level2"><h2 id="replace-local-outliers-invalid-values-and-missing-values">🧹 Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace-local-outliers-invalid-values-and-missing-values"></a>
+</h2>
+<p>We can see some data issues in the plot above, so let’s clean those with a single wrangling function <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, to prepare our data for digital filtering and smoothing.</p>
+<p><em><code>mnirs</code></em> tries to include basic functions which work on vector data, and convenience wrappers which combine functionality and can be used on multiple channels in a data frame at once.</p>
+<p>Let’s explain the functionality of this data-wide function, and for more details about the vector-specific functions see <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>.</p>
+<section class="level2"><h3 id="replace_mnirs">
+<code>replace_mnirs()</code><a class="anchor" aria-label="anchor" href="#replace_mnirs"></a>
+</h3>
+<ul>
+<li>
+<p><code>data</code></p>
+<p>This function takes in a data frame, resamples all data frame columns to the new sample rate, then returns the processed data frame. <em><code>mnirs</code></em> metadata will be passed to and from this function.</p>
+</li>
+<li>
+<p><code>nirs_channels</code></p>
+<p>Specify which column names in <code>data</code> to process, i.e. the response variables. If the data contain <em><code>mnirs</code></em> metadata, these channels will be detected automatically. Channels not explicitly specified will be passed through unprocessed to the returned data frame.</p>
+</li>
+<li>
+<p><code>time_channel</code> &amp; <code>sample_rate</code></p>
+<p>If the data contain <em><code>mnirs</code></em> metadata, these will be detected automatically, or they can be specified explicitly.</p>
+</li>
+<li>
+<p><code>invalid_values</code>, <code>invalid_above</code>, or <code>invalid_below</code></p>
+<p>Specific invalid values can be replaced, e.g. if a NIRS device exports <code>0</code>, <code>100</code>, or some other fixed value when signal recording is in error. If spikes or drops are present in the data, these can be replaced by specifying values above or below which to consider invalid. If left as <code>NULL</code>, no values will be replaced.</p>
+</li>
+<li>
+<p><code>outlier_cutoff</code></p>
+<p>Local outliers can be detected using a cutoff calculated from the local median value. A default value of <code>3</code> is recommended and corresponds to Pearson’s rule (i.e., ± 3 SD about the local median). If left as <code>NULL</code>, no outliers will be replaced.</p>
+</li>
+<li>
+<p><code>width</code> or <code>span</code></p>
+<p>Local outlier detection and median interpolation use a rolling local window specified by one of either <code>width</code> or <code>span</code>. <code>width</code> defines a number of samples centred around the local index being evaluated (<code>idx</code>), whereas <code>span</code> defines a range of time in units of <code>time_channel</code>.</p>
+</li>
+<li>
+<p><code>method</code></p>
+<p>Missing data (<code>NA</code>), invalid values, and local outliers specified above can be replaced via interpolation or fill methods; either <code>"linear"</code> interpolation (the default), fill with local <code>"median"</code>, or <code>"locf"</code> (<em>“last observation carried forward”</em>).<br><br><code>NA</code>s can be passed through to the returned data frame with <code>method = "none"</code>. However, subsequent processing &amp; analysis steps may return errors when <code>NA</code>s are present. Therefore, it is good practice to deal with missing data early during data processing.</p>
+</li>
+<li>
+<p><code>verbose</code></p>
+<p>As above, an option to toggle warnings and info messages.</p>
+</li>
+</ul>
+<div class="cell" data-layout-align="centre">
+<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data_cleaned</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
+<span>    <span class="va">data_resampled</span>,     <span class="co">## blank channels will be retrieved from metadata</span></span>
+<span>    invalid_values <span class="op">=</span> <span class="fl">0</span>, <span class="co">## known invalid values in the data</span></span>
+<span>    invalid_above <span class="op">=</span> <span class="fl">90</span>, <span class="co">## remove data spikes above 90</span></span>
+<span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>, <span class="co">## recommended default value</span></span>
+<span>    width <span class="op">=</span> <span class="fl">7</span>,          <span class="co">## window to detect and replace outliers/missing values</span></span>
+<span>    method <span class="op">=</span> <span class="st">"linear"</span>   <span class="co">## linear interpolation over `NA`s</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_cleaned</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-centre">
+<figure><p><img src="reading-mnirs-data_files/figure-html/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-centre" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>That cleaned up all the obvious data issues.</p>
 </section></section><section class="section level2"><h2 id="digital-filtering">📈 Digital filtering<a class="anchor" aria-label="anchor" href="#digital-filtering"></a>
 </h2>
 <p>To improve the signal-to-noise ratio in our dataset without losing information, we should apply digital filtering to smooth the data.</p>
@@ -472,7 +488,7 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <div class="cell" data-layout-align="centre">
 <div class="sourceCode cell-code" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/filter_mnirs.html">filter_mnirs</a></span><span class="op">(</span></span>
-<span>    <span class="va">data_resampled</span>,         <span class="co">## blank channels will be retrieved from metadata</span></span>
+<span>    <span class="va">data_cleaned</span>,           <span class="co">## blank channels will be retrieved from metadata</span></span>
 <span>    method <span class="op">=</span> <span class="st">"butterworth"</span>, <span class="co">## Butterworth digital filter is a common choice</span></span>
 <span>    order <span class="op">=</span> <span class="fl">2</span>,              <span class="co">## filter order number</span></span>
 <span>    W <span class="op">=</span> <span class="fl">0.02</span>,               <span class="co">## filter fractional critical frequency `[0, 1]`</span></span>
@@ -622,7 +638,7 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 <span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"Timestamp (seconds passed)"</span><span class="op">)</span>,</span>
 <span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="../reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co">## default settings will resample to the same `sample_rate`</span></span>
+<span>    <span class="fu"><a href="../reference/resample_mnirs.html">resample_mnirs</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"linear"</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="co">## default settings will resample to the same `sample_rate`</span></span>
 <span>    <span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
 <span>        invalid_above <span class="op">=</span> <span class="fl">73</span>,</span>
 <span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span>
@@ -701,12 +717,12 @@ When ensemble-averaging across intervals, time will always be re-calculated from
 <div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## return each interval independently with `event_groups = "distinct"`</span></span>
 <span><span class="va">distinct</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
-<span>    <span class="va">nirs_data</span>,                 <span class="co">## channels blank for "distinct" grouping</span></span>
-<span>    start <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">36</span>, <span class="fl">751</span><span class="op">)</span>,  <span class="co">## manually identified interval start times</span></span>
-<span>    end <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">186</span>, <span class="fl">901</span><span class="op">)</span>,   <span class="co">## interval end time (start + 150 sec)</span></span>
-<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>, <span class="co">## return a list of data frames for each (2) event</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,            <span class="co">## no boundary modification</span></span>
-<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>          <span class="co">## return original time values</span></span>
+<span>    <span class="va">nirs_data</span>,                  <span class="co">## channels blank for "distinct" grouping</span></span>
+<span>    start <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">348</span>, <span class="fl">1064</span><span class="op">)</span>, <span class="co">## manually identified interval start times</span></span>
+<span>    end <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">458</span>, <span class="fl">1174</span><span class="op">)</span>,   <span class="co">## interval end time (start + 150 sec)</span></span>
+<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>,  <span class="co">## return a list of data frames for each (2) event</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,             <span class="co">## no boundary modification</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>           <span class="co">## return original time values</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span><span class="op">[[</span><span class="fl">2L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -721,15 +737,16 @@ When ensemble-averaging across intervals, time will always be re-calculated from
 <div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## ensemble average both intervals with `event_groups = "ensemble"`</span></span>
 <span><span class="va">ensemble</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
-<span>    <span class="va">nirs_data</span>,                 <span class="co">## channels recycled to all intervals by default</span></span>
+<span>    <span class="va">nirs_data</span>,                  <span class="co">## channels recycled to all intervals by default</span></span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>,</span>
-<span>    start <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">66</span>, <span class="fl">781</span><span class="op">)</span>,  <span class="co">## alternatively specify start times + span</span></span>
-<span>    event_groups <span class="op">=</span> <span class="st">"ensemble"</span>, <span class="co">## ensemble-average across two intervals</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">120</span><span class="op">)</span>,        <span class="co">## span recycled to all intervals by default</span></span>
-<span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>           <span class="co">## re-calculate common time to start from `0`</span></span>
+<span>    start <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_time</a></span><span class="op">(</span><span class="fl">368</span>, <span class="fl">1084</span><span class="op">)</span>, <span class="co">## alternatively specify start times + span</span></span>
+<span>    event_groups <span class="op">=</span> <span class="st">"ensemble"</span>,  <span class="co">## ensemble-average across two intervals</span></span>
+<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">20</span>, <span class="fl">90</span><span class="op">)</span>,          <span class="co">## span recycled to all intervals by default</span></span>
+<span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>            <span class="co">## re-calculate common time to start from `0`</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-centre">
 <figure><p><img src="reading-mnirs-data_files/figure-html/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-centre" style="width:100.0%"></p>

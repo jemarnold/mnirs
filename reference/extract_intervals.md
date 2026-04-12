@@ -95,7 +95,8 @@ extract_intervals(
 
   A one- or two-element numeric vector `c(before, after)` in units of
   `time_channel`, or a [`list()`](https://rdrr.io/r/base/list.html) of
-  such vectors. Applied additively to interval boundaries:
+  such vectors. (*default* `span = c(-60, 60)`. Applied additively to
+  interval boundaries:
 
   - When both `start` and `end` are specified: `span[1]` shifts start
     times, `span[2]` shifts end times.
@@ -271,13 +272,14 @@ data <- read_mnirs(
     zero_time = TRUE,
     verbose = FALSE
 ) |>
-    resample_mnirs(verbose = FALSE) ## avoid issues ensemble-averaging irregular samples
+    ## avoid issues ensemble-averaging irregular samples
+    resample_mnirs(method = "linear", verbose = FALSE) 
 
 ## ensemble-average across multiple intervals
 interval_list <- extract_intervals(
     data,                       ## channels recycled to all intervals by default
     nirs_channels = c(smo2_left, smo2_right),
-    start = by_time(368, 1093), ## manually identified interval start times
+    start = by_time(368, 1084), ## manually identified interval start times
     span = c(-20, 90),          ## include the last 180-sec of each interval (recycled)
     event_groups = "ensemble",  ## ensemble-average across two intervals
     zero_time = TRUE            ## re-calculate common time to start from `0`
@@ -287,16 +289,16 @@ interval_list[[1L]]
 #> # A tibble: 1,101 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
-#>  1 -20        56.2       58.9
-#>  2 -19.9      56.2       58.9
-#>  3 -19.8      55.4       59.0
-#>  4 -19.7      55.4       59.2
-#>  5 -19.6      55.4       60.2
-#>  6 -19.5      55.4       60.2
-#>  7 -19.4      56.0       58.9
-#>  8 -19.3      56.0       60.0
-#>  9 -19.2      56.2       59.8
-#> 10 -19.1      55.8       59.0
+#>  1 -20        56.3       59.2
+#>  2 -19.9      56.1       59.2
+#>  3 -19.8      56.1       59.2
+#>  4 -19.7      56.2       58.9
+#>  5 -19.6      56.4       58.9
+#>  6 -19.5      56.5       58.9
+#>  7 -19.4      56.9       58.7
+#>  8 -19.3      57.0       58.7
+#>  9 -19.2      56.9       59.0
+#> 10 -19.1      56.7       58.8
 #> # ℹ 1,091 more rows
 
 # \donttest{

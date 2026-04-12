@@ -9,7 +9,7 @@ checks."><meta name="twitter:card" content="summary"><meta name="twitter:creator
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@ checks.</p>
 <span>  range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  inclusive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
 <span>  integer <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  invalid <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  allow_na <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  msg1 <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  msg2 <span class="op">=</span> <span class="st">""</span></span>
 <span><span class="op">)</span></span>
@@ -85,7 +85,7 @@ checks.</p>
 <span></span>
 <span><span class="fu">validate_width_span</span><span class="op">(</span>width <span class="op">=</span> <span class="cn">NULL</span>, span <span class="op">=</span> <span class="cn">NULL</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, msg <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">validate_x_t</span><span class="op">(</span><span class="va">x</span>, <span class="va">t</span>, invalid <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">validate_x_t</span><span class="op">(</span><span class="va">x</span>, <span class="va">t</span>, allow_na <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -115,6 +115,11 @@ exclude both endpoints.</p></dd>
 <dd><p>Logical. Default is <code>FALSE</code>. If <code>TRUE</code>, validate <code>x</code> as
 integer-like values using <code><a href="https://rlang.r-lib.org/reference/is_integerish.html" class="external-link">rlang::is_integerish()</a></code>. Otherwise tested as a
 numeric value.</p></dd>
+
+
+<dt id="arg-allow-na">allow_na<a class="anchor" aria-label="anchor" href="#arg-allow-na"></a></dt>
+<dd><p>Logical. Default is <code>FALSE</code>. If <code>TRUE</code>, allows pass through
+of <code>NA</code> to the returned numeric/integer vector.</p></dd>
 
 
 <dt id="arg-msg-msg-">msg1, msg2<a class="anchor" aria-label="anchor" href="#arg-msg-msg-"></a></dt>

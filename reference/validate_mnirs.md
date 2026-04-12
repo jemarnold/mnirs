@@ -12,7 +12,7 @@ validate_numeric(
   range = NULL,
   inclusive = c("left", "right"),
   integer = FALSE,
-  invalid = FALSE,
+  allow_na = FALSE,
   msg1 = "",
   msg2 = ""
 )
@@ -42,7 +42,7 @@ validate_sample_rate(data, time_channel, sample_rate, verbose = TRUE)
 
 validate_width_span(width = NULL, span = NULL, verbose = TRUE, msg = "")
 
-validate_x_t(x, t, invalid = FALSE)
+validate_x_t(x, t, allow_na = FALSE)
 ```
 
 ## Arguments
@@ -72,6 +72,11 @@ validate_x_t(x, t, invalid = FALSE)
   values using
   [`rlang::is_integerish()`](https://rlang.r-lib.org/reference/is_integerish.html).
   Otherwise tested as a numeric value.
+
+- allow_na:
+
+  Logical. Default is `FALSE`. If `TRUE`, allows pass through of `NA` to
+  the returned numeric/integer vector.
 
 - msg1, msg2:
 

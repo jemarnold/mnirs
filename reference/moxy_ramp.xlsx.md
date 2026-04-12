@@ -40,8 +40,8 @@ Channel mapping for
 
 - `event_channel = c("Lap")`
 
-- `interval_times = list(start = c(204, 878))` (occlusion and
-  hyperaemia)
+- `interval_times = list(start = c(204, 878))` (start and end of
+  exercise)
 
 ## Source
 

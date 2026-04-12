@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,13 +40,42 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.2" id="mnirs-062">mnirs 0.6.2<a class="anchor" aria-label="anchor" href="#mnirs-062"></a></h2>
+<div class="section level3">
+<h3 id="core-updates-0-6-2">Core updates<a class="anchor" aria-label="anchor" href="#core-updates-0-6-2"></a></h3>
+<ul><li>
+<p><code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>:</p>
+<ul><li><p>Now properly parses <code>time_channel</code> as fractional unix values; i.e. timestamp (e.g. “hh:mm:ss”) values are saved by Excel in all its infinite wisdom as numeric fractional Unix timestamps. Will now be properly coerced to numeric and POSIXct timestamp values can be returned.</p></li>
+<li><p>Timestamps should now be returned in the user’s local time zone.</p></li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="core-function-argument-changes-0-6-2">Core function argument changes<a class="anchor" aria-label="anchor" href="#core-function-argument-changes-0-6-2"></a></h3>
+<ul><li><p><code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code>: Update default <code>method = "none"</code>. Less opinionated default to force users to explicitly opt-in to specifying either “linear” or “locf” methods to fill/interpolate across new samples. Updated package documentation.</p></li>
+<li><p><code><a href="../reference/replace_mnirs.html">replace_invalid()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_outliers()</a></code>, <code><a href="../reference/replace_mnirs.html">replace_missing()</a></code>: Remove <code>bypass_checks</code> arg intended for internal use only, to bypass redundant checks when calling from <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>.</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="small-edits-0-6-2">Small edits<a class="anchor" aria-label="anchor" href="#small-edits-0-6-2"></a></h3>
+<ul><li><p><code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>: No longer coerces to long format data behind the scenes.</p></li>
+<li><p><code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>: y-axis title changed from “signal” to “mNIRS”.</p></li>
+<li><p>Create <code>AGENTS.md</code> for LLM-friendly instructions. Added to <code>.Rbuildignore</code> until better packaging solution found.</p></li>
+<li><p>Fix lap marker inconsistency in <code>train.red_intervals.csv</code>. Updated relevant interval times in documentation.</p></li>
+<li>
+<p><code>README.md</code> &amp; <em>“reading-mnirs-data.qmd”</em> vignette updates.</p>
+<ul><li><p>Update recommended core processing sequence: <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> -&gt; <code><a href="../reference/resample_mnirs.html">resample_mnirs()</a></code> -&gt; <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code> -&gt; …</p></li>
+<li><p>Update <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> vignette to <code>train.red_intervals.csv</code> end-interval reoxygenation events.</p></li>
+</ul></li>
+<li><p>Small documentation changes.</p></li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.1" id="mnirs-061">mnirs 0.6.1<a class="anchor" aria-label="anchor" href="#mnirs-061"></a></h2>
 <div class="section level3">
 <h3 id="bug-fixes-0-6-1">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6-1"></a></h3>
 <ul><li>
 <p>Core functions updated to accept <code>nirs_channel</code> args as a list.</p>
-<ul><li>An info message will be displayed when a list is not required, instead of erroring.</li>
-<li>Additional info messages will be displayed for <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/rescale_mnirs.html">rescale_mnirs()</a></code>, and <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> when <code>nirs_channels</code> has not been specified as a list, nor retrieved from metadata. As a reminder of the grouping requirements in those functions.</li>
+<ul><li><p>An info message will be displayed when a list is not required, instead of erroring.</p></li>
+<li><p>Additional info messages will be displayed for <code><a href="../reference/shift_mnirs.html">shift_mnirs()</a></code>, <code><a href="../reference/rescale_mnirs.html">rescale_mnirs()</a></code>, and <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> when <code>nirs_channels</code> has not been specified as a list, nor retrieved from metadata. As a reminder of the grouping requirements in those functions.</p></li>
 </ul></li>
 <li>
 <p>Core functions now properly update <code>nirs_channels</code> metadata when re-specified.</p>
@@ -67,22 +96,19 @@
 <ul><li><p><code><a href="../reference/filter_mnirs.html">filter_mnirs()</a></code>: Method-specific arguments (e.g. <code>order</code> for <code>method = "butterworth"</code>, or <code>width</code> for <code>method = "moving_average"</code>) removed from the generic function call. Continue to be passed to the appropriate method via <code>...</code>. Documentation and info/warning/abort messages updated.</p></li>
 <li>
 <p><code><a href="../reference/filter_ma.html">filter_ma()</a></code> better separates effects of <code>partial</code> and <code>na.rm</code> args:</p>
-<ul><li>
-<code>partial = FALSE</code> by default returns NA at edges where insufficient number of samples are available compared to the specified <code>width</code> or <code>span</code>.</li>
+<ul><li><p><code>partial = FALSE</code> by default returns NA at edges where insufficient number of samples are available compared to the specified <code>width</code> or <code>span</code>.</p></li>
+<li><p><code>partial = TRUE</code> calculates mean values at edges, as long as one valid non-<code>NA</code> sample is available.</p></li>
 <li>
-<code>partial = TRUE</code> calculates mean values at edges, as long as one valid non-<code>NA</code> sample is available.</li>
-<li>
-<code>na.rm = FALSE</code> by default behaves as expected with <code>mean(na.rm = FALSE)</code>, propagating any <code>NA</code>s in the local window to the calculated mean with a warning.
+<p><code>na.rm = FALSE</code> by default behaves as expected with <code>mean(na.rm = FALSE)</code>, propagating any <code>NA</code>s in the local window to the calculated mean with a warning.</p>
 <ul><li>
 <strong>NOTE</strong> This differs from the behaviour of <code>na.rm = FALSE</code> in <code><a href="../reference/filter_butter.html">filter_butter()</a></code>, which errors if there are any internal <code>NA</code>s present. This has not been changed.</li>
 </ul></li>
-<li>
-<code>na.rm = TRUE</code> ignores <code>NA</code>s and calculates local means as long as one valid sample is present.</li>
+<li><p><code>na.rm = TRUE</code> ignores <code>NA</code>s and calculates local means as long as one valid sample is present.</p></li>
 </ul></li>
 <li>
 <p><code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code></p>
-<ul><li>Add new arg: <code>points = TRUE</code> will plot points in addition to lines, as a useful quick shortcut.</li>
-<li>Update <code>na.omit</code> now omits non-valid <code>c(NA, NaN, Inf, -Inf)</code> values from plotting, not just <code>NA</code>.</li>
+<ul><li><p>Add new arg: <code>points = TRUE</code> will plot points in addition to lines, as a useful quick shortcut.</p></li>
+<li><p>Update <code>na.omit</code> now omits non-valid <code>c(NA, NaN, Inf, -Inf)</code> values from plotting, not just <code>NA</code>.</p></li>
 </ul></li>
 <li><p><code><a href="../reference/palette_mnirs.html">palette_mnirs()</a></code> can now accept either a single numeric value specifying the number of colours to return, or any number of (valid) character colour names.</p></li>
 </ul></div>
@@ -108,17 +134,16 @@
 <div class="section level4">
 <h4 id="updated-core-functions-0-5-0">Updated core functions<a class="anchor" aria-label="anchor" href="#updated-core-functions-0-5-0"></a></h4>
 <ul><li>
-<code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> expands <code>event_channel</code> to work with integer <em>“lap”</em> numbers, or character event label as previous.
-<ul><li>Should now work on more .csv file formats; previously read errors may have occured where the file contained header rows above the data table, resulting in improper detection of columns.</li>
-<li>
-<code>event_channel</code> can now be specified as an integer <code>lap</code> column, in addition to a character column as previous.</li>
-<li>Other {mnirs} functions may expect <code>event_channel</code> to be either character or integer-ish.</li>
+<p><code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> expands <code>event_channel</code> to work with integer <em>“lap”</em> numbers, or character event label as previous.</p>
+<ul><li><p>Should now work on more .csv file formats; previously read errors may have occured where the file contained header rows above the data table, resulting in improper detection of columns.</p></li>
+<li><p><code>event_channel</code> can now be specified as an integer <code>lap</code> column, in addition to a character column as previous.</p></li>
+<li><p>Other {mnirs} functions may expect <code>event_channel</code> to be either character or integer-ish.</p></li>
 </ul></li>
 <li>
-<code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>:
-<ul><li>Function arguments <code>start</code> and <code>end</code> are used to specify one or both of a start and end point to the target interval.</li>
-<li>Specify <code>start</code>/<code>end</code> values with helper functions <code><a href="../reference/by_time.html">by_time()</a></code>, <code><a href="../reference/by_time.html">by_label()</a></code>, <code><a href="../reference/by_time.html">by_lap()</a></code>, and <code><a href="../reference/by_time.html">by_sample()</a></code>.</li>
-<li>Numeric values are automatically coerced to “time” values; Explicit integer values (e.g. <code>2L</code>) are coerced to “lap”; Character strings are coerced to event “label”.</li>
+<p><code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>:</p>
+<ul><li><p>Function arguments <code>start</code> and <code>end</code> are used to specify one or both of a start and end point to the target interval.</p></li>
+<li><p>Specify <code>start</code>/<code>end</code> values with helper functions <code><a href="../reference/by_time.html">by_time()</a></code>, <code><a href="../reference/by_time.html">by_label()</a></code>, <code><a href="../reference/by_time.html">by_lap()</a></code>, and <code><a href="../reference/by_time.html">by_sample()</a></code>.</p></li>
+<li><p>Numeric values are automatically coerced to “time” values; Explicit integer values (e.g. <code>2L</code>) are coerced to “lap”; Character strings are coerced to event “label”.</p></li>
 </ul></li>
 </ul></div>
 <div class="section level4">

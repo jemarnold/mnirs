@@ -11,7 +11,7 @@ resample_mnirs(
   time_channel = NULL,
   sample_rate = NULL,
   resample_rate = sample_rate,
-  method = c("locf", "linear", "none"),
+  method = c("none", "linear", "locf"),
   verbose = TRUE
 )
 ```
@@ -48,7 +48,13 @@ resample_mnirs(
 - method:
 
   A character string specifying how new samples are filled. Default is
-  *"locf"* (see *Details* for more on each method):
+  *"none"*. Filling must be opted into explicitly (see *Details*):
+
+  `"none"`
+
+  :   Matches each new sample to the nearest original `time_channel`
+      value without any interpolation, to within tolerance of half a
+      sample-interval. New samples are returned as `NA`.
 
   `"locf"`
 
@@ -63,13 +69,6 @@ resample_mnirs(
       [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html).
       Suitable for numeric columns only; non-numeric columns will fall
       back to `"locf"` behaviour.
-
-  `"none"`
-
-  :   Matches each new sample to the nearest original `time_channel`
-      value within half a sample-interval tolerance, without any
-      interpolation. New samples that fall between original values are
-      returned as `NA`.
 
 - verbose:
 
@@ -93,12 +92,12 @@ to interpolate across new samples in the resampled data range.
 ### Sample rate and time channel
 
 `time_channel` and `sample_rate` are retrieved automatically from `data`
-of class *"mnirs"* which has been processed with `{mnirs}`, if not
-defined explicitly.
+of class *"mnirs"*, if not defined explicitly.
 
 Otherwise, `sample_rate` will be estimated from the values in
 `time_channel`. However, this may return unexpected values, and it is
-safer to define `sample_rate` explicitly.
+safer to define `sample_rate` explicitly or retrieve it from *"mnirs"*
+metadata.
 
 ### Default behaviour
 
@@ -111,20 +110,17 @@ without changing the nominal rate.
 
 Numeric columns are interpolated according to `method` (see
 [`?replace_missing`](https://jemarnold.github.io/mnirs/reference/replace_mnirs.md)).
-Non-numeric columns (character event labels, integer lap numbers) are
-always filled by last-observation-carried-forward, regardless of
+Non-numeric columns (e.g. character event labels, integer lap numbers)
+are always filled by last-observation-carried-forward, regardless of
 `method`:
-
-- When down-sampling, the first non-`NA` value in each output bin is
-  used.
-
-- When up-sampling or regularising, the most recent original value is
-  carried forward into new samples.
 
 - For `method = "none"`, existing rows are matched to the nearest
   original values of `time_channel` without interpolation or filling,
   meaning newly created samples and any `NA`s in the original data are
   returned as `NA`.
+
+- When down-sampling, numeric columns use time-weighted averaging.
+  Non-numeric columns use the first valid value in each output bin.
 
 ## Examples
 
@@ -160,10 +156,10 @@ data
 #> # ℹ 2,193 more rows
 
 data_resampled <- resample_mnirs(
-    data,
-    resample_rate = 2,  ## blank channels will be retrieved from metadata
-    method = "linear",  ## blank by default will resample to `sample_rate`
-    verbose = TRUE      ## linear interpolation across resampled indices
+    data,               ## blank channels will be retrieved from metadata
+    resample_rate = 2,  ## blank by default will resample to `sample_rate`
+    method = "linear",  ## linear interpolation across resampled indices
+    verbose = TRUE      
 )
 #> ℹ Output is resampled at 2 Hz.
 

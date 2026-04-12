@@ -19,7 +19,7 @@ A simple moving average.
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,12 +137,13 @@ available with <code><a href="https://rdrr.io/r/base/attributes.html" class="ext
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
 <div class="section">
-<h3 id="filtering-method">filtering method<a class="anchor" aria-label="anchor" href="#filtering-method"></a></h3>
+<h3 id="filtering-methods">filtering methods<a class="anchor" aria-label="anchor" href="#filtering-methods"></a></h3>
 
 <div class="section">
 <h4 id="method-smooth-spline-"><code>method = "smooth_spline"</code><a class="anchor" aria-label="anchor" href="#method-smooth-spline-"></a></h4>
 
 
+<p>Aliases: <code>c("smooth spline", "spline")</code></p>
 <p>Applies a non-parametric cubic smoothing spline from
 <code><a href="https://rdrr.io/r/stats/smooth.spline.html" class="external-link">stats::smooth.spline()</a></code>. Smoothing is defined by the parameter <code>spar</code>,
 which can be left as <code>NULL</code> and automatically determined via penalised
@@ -156,12 +157,11 @@ necessarily, in the range <code>spar = [0, 1]</code>.</p>
 determined via penalised log likelihood.</p></dd>
 
 
-</dl></div>
-
-<div class="section">
-<h4 id="method-butterworth-"><code>method = "butterworth"</code><a class="anchor" aria-label="anchor" href="#method-butterworth-"></a></h4>
+</dl><div class="section">
+<h5 id="method-butterworth-"><code>method = "butterworth"</code><a class="anchor" aria-label="anchor" href="#method-butterworth-"></a></h5>
 
 
+<p>Aliases: <code>c("butter")</code></p>
 <p>Applies a centred (two-pass symmetrical) Butterworth digital filter
 from <code><a href="https://rdrr.io/pkg/signal/man/butter.html" class="external-link">signal::butter()</a></code> and <code><a href="https://rdrr.io/pkg/signal/man/filtfilt.html" class="external-link">signal::filtfilt()</a></code>.</p>
 <p>Filter <code>type</code> defines how the desired signal frequencies are either
@@ -218,9 +218,10 @@ See <code><a href="filter_butter.html">filter_butter()</a></code>.</p></dd>
 </dl></div>
 
 <div class="section">
-<h4 id="method-moving-average-"><code>method = "moving_average"</code><a class="anchor" aria-label="anchor" href="#method-moving-average-"></a></h4>
+<h5 id="method-moving-average-"><code>method = "moving_average"</code><a class="anchor" aria-label="anchor" href="#method-moving-average-"></a></h5>
 
 
+<p>Aliases: <code>c("moving average", "ma")</code></p>
 <p>Applies a centred (symmetrical) moving average filter in a local
 window, defined by either <code>width</code> as the number of samples around
 <code>idx</code> between <code>[idx - floor(width/2), idx + floor(width/2)]</code>. Or by
@@ -240,6 +241,9 @@ at the edges of the data.</p></dd>
 
 
 </dl></div>
+
+
+</div>
 
 
 </div>

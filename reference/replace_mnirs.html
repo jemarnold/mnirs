@@ -23,7 +23,7 @@ replaces via interpolation.'><meta name="twitter:card" content="summary"><meta n
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -93,8 +93,8 @@ replaces via interpolation.</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  bypass_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">replace_outliers</span><span class="op">(</span></span>
@@ -104,8 +104,8 @@ replaces via interpolation.</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"median"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
-<span>  bypass_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">replace_missing</span><span class="op">(</span></span>
@@ -114,7 +114,6 @@ replaces via interpolation.</p>
 <span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  span <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"linear"</span>, <span class="st">"median"</span>, <span class="st">"locf"</span><span class="op">)</span>,</span>
-<span>  bypass_checks <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -212,13 +211,8 @@ global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></
 
 
 <dt id="arg-t">t<a class="anchor" aria-label="anchor" href="#arg-t"></a></dt>
-<dd><p>An <em>optional</em> numeric vector of the predictor variable (time or
-sample number). Default is <code>seq_along(x)</code>.</p></dd>
-
-
-<dt id="arg-bypass-checks">bypass_checks<a class="anchor" aria-label="anchor" href="#arg-bypass-checks"></a></dt>
-<dd><p>Logical allowing wrapper functions to bypass
-redundant checks and validations.</p></dd>
+<dd><p>An <em>optional</em> numeric vector of the predictor variable (e.g. time).
+Default is <code>seq_along(x)</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

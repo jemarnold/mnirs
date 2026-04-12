@@ -41,8 +41,8 @@ compute_valid_neighbours(
 
 - t:
 
-  An *optional* numeric vector of the predictor variable (time or sample
-  number). Default is `seq_along(x)`.
+  An *optional* numeric vector of the predictor variable (e.g. time).
+  Default is `seq_along(x)`.
 
 - idx:
 

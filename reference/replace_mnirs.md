@@ -40,8 +40,8 @@ replace_invalid(
   width = NULL,
   span = NULL,
   method = c("median", "none"),
-  bypass_checks = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 
 replace_outliers(
@@ -51,8 +51,8 @@ replace_outliers(
   width = NULL,
   span = NULL,
   method = c("median", "none"),
-  bypass_checks = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 
 replace_missing(
@@ -61,7 +61,6 @@ replace_missing(
   width = NULL,
   span = NULL,
   method = c("linear", "median", "locf"),
-  bypass_checks = FALSE,
   verbose = TRUE,
   ...
 )
@@ -164,13 +163,8 @@ replace_missing(
 
 - t:
 
-  An *optional* numeric vector of the predictor variable (time or sample
-  number). Default is `seq_along(x)`.
-
-- bypass_checks:
-
-  Logical allowing wrapper functions to bypass redundant checks and
-  validations.
+  An *optional* numeric vector of the predictor variable (e.g. time).
+  Default is `seq_along(x)`.
 
 - ...:
 

@@ -26,12 +26,12 @@ In this vignette we will demonstrate how to:
 - 🔍 Retrieve metadata stored with data frames of class *`"mnirs"`* to
   avoid repetitively specifying which channels to process.
 
+- ⏱️ Resample data to a higher or lower sample rate, to correct
+  irregular sampling periods, or to match the frequency of other data
+  sources for synchronisation.
+
 - 🧹 Detect and replace local outliers, invalid values, and interpolate
   across missing data.
-
-- ⏱️ Resample data to a higher or lower sample rate, to correct
-  irregular sampling periods, or match the frequency of other data
-  sources for synchronisation.
 
 - 📈️ Apply digital filtering to optimise signal-to-noise ratio for the
   responses observed in our data.
@@ -235,9 +235,11 @@ data_raw
 ## 📊 Plot *`mnirs`* data
 
 *`mnirs`* data can be easily viewed by calling
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html). This generic
-plot function uses *`ggplot2`* and will work on data frames generated or
-read by *`mnirs`* functions where the metadata contains
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) (explicitly
+documented as
+[`plot.mnirs()`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)).
+This generic plot function uses *`ggplot2`* and will work on data frames
+generated or read by *`mnirs`* functions where the metadata contains
 `class = *"mnirs"*`.
 
 ### `plot.mnirs`
@@ -246,6 +248,11 @@ read by *`mnirs`* functions where the metadata contains
 
   This function takes in a data frame of class *`mnirs`* and returns a
   formatted *`ggplot2`* plot.
+
+- `points`
+
+  `FALSE` by default; a quick way to plot individual points for more
+  precise sample visualisation.
 
 - `time_labels`
 
@@ -270,6 +277,7 @@ read by *`mnirs`* functions where the metadata contains
 ## note the `time_labels` plot argument to display time values as `h:mm:ss`
 plot(
     data_raw,
+    points = FALSE,
     time_labels = TRUE,
     n.breaks = 5,
     na.omit = FALSE
@@ -313,6 +321,115 @@ attr(data_raw, "sample_rate")
 #> [1] 2
 ```
 
+## ⏱️ Resample data
+
+mNIRS devices may have sample rates anywhere from 0.5 to 100+ Hz. Higher
+sample rates gives greater precision. However, issues can arise with
+irregular sampling where time samples occur at inconsistent frequencies,
+are repeated, or are lost. Resampling to a consistent sample rate can be
+used to regularise timestamps to the nearest time value according to the
+known data sample rate. This can make subsequent processing steps
+easier, as well as synchronisation with other devices.
+
+Downsampling can be useful to reduce data size and processing
+requirement, although should not be used primarily as a data
+filtering/smoothing strategy (see **Digital filtering** section below).
+Upsampling can be done with interpolation over newly created samples,
+although caution should always be taken with creating new samples
+without any additional information. New samples created with resampling
+will be left blank (`NA`) by default.
+
+### `resample_mnirs()`
+
+- `data`
+
+  This function takes in a data frame, applies processing to all
+  channels specified explicitly or implicitly from *`mnirs`* metadata,
+  then returns the processed data frame. *`mnirs`* metadata will be
+  passed to and from this function.  
+    
+  *`mnirs`* functions are also pipe-friendly for Base R 4.1+ (`|>`) or
+  [magrittr](https://magrittr.tidyverse.org) (`%>%`) pipes to chain
+  operations together (see below).
+
+- `time_channel`
+
+  The column name of time series values in `data`. If the data contain
+  *`mnirs`* metadata, this channel will be detected automatically, or it
+  can be specified explicitly.  
+    
+  This function processes all columns in `data`, so `nirs_channels` does
+  not need to be specified.
+
+- `sample_rate`
+
+  The sample rate (in Hz) of `data`. If the data contain *`mnirs`*
+  metadata, this channel will be detected automatically, or it can be
+  specified explicitly.
+
+- `resample_rate`
+
+  Resampling is specified as the desired number of samples per second
+  (Hz). The default `resample_rate` will resample back to the existing
+  `sample_rate` of the data. This can be useful to accommodate irregular
+  sampling with unequal time values. Linear interpolation is used to
+  resample `time_channel` to round values of the `sample_rate`.
+
+- `method`
+
+  Any new samples created by resampling (i.e. samples fill in between
+  gaps, or up-sampled indices) can be filled in or left blank as `NA`.
+  The default `method` is to leave new samples blank, and interpolation
+  must be explicitly specified as either *“locf”* to repeat the last
+  observation carried forward, or *“linear”* interpolation.
+
+``` r
+data_resampled <- resample_mnirs(
+    data_raw,            ## blank channels will be retrieved from metadata
+    time_channel = time, ## channels can be left blank or specified explicitly
+    sample_rate = NULL,  ## blank by default will be retrieved from metadata
+    resample_rate = 2,   ## blank by default will resample to `sample_rate`
+    method = "linear"    ## linear interpolation across resampled indices
+)
+#> ℹ Output is resampled at 2 Hz.
+
+## note the altered "time" values from the original data frame 👇
+data_resampled
+#> # A tibble: 2,419 × 3
+#>     time smo2_left smo2_right
+#>    <dbl>     <dbl>      <dbl>
+#>  1   0        54         68  
+#>  2   0.5      54         68  
+#>  3   1        54         67.9
+#>  4   1.5      54         66.0
+#>  5   2        54         66  
+#>  6   2.5      54         66  
+#>  7   3        54         66  
+#>  8   3.5      55.9       66.6
+#>  9   4        57         67  
+#> 10   4.5      57         67  
+#> # ℹ 2,409 more rows
+```
+
+> **Use
+> [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
+> to smooth over irregular or skipped samples**
+>
+> If we see a warning from
+> [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
+> about duplicated or irregular samples like we saw above, we can use
+> [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
+> to restore `time_channel` to a regular sample rate and interpolate
+> across skipped samples.
+>
+> Note: if we perform both of these steps in a piped function call, we
+> will still see the warning appear about irregular sampling at the end
+> of the pipe. This warning is returned by
+> [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md).
+> But viewing the data frame can confirm that
+> [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
+> has resolved the issue.
+
 ## 🧹 Replace local outliers, invalid values, and missing values
 
 We can see some data issues in the plot above, so let’s clean those with
@@ -332,14 +449,9 @@ details about the vector-specific functions see
 
 - `data`
 
-  This function takes in a data frame, applies processing to all
-  channels specified explicitly or implicitly from *`mnirs`* metadata,
-  then returns the processed data frame. *`mnirs`* metadata will be
-  passed to and from this function.  
-    
-  *`mnirs`* functions are also pipe-friendly for Base R 4.1+ (`|>`) or
-  [magrittr](https://magrittr.tidyverse.org) (`%>%`) pipes to chain
-  operations together (see below).
+  This function takes in a data frame, resamples all data frame columns
+  to the new sample rate, then returns the processed data frame.
+  *`mnirs`* metadata will be passed to and from this function.
 
 - `nirs_channels`
 
@@ -348,10 +460,10 @@ details about the vector-specific functions see
   be detected automatically. Channels not explicitly specified will be
   passed through unprocessed to the returned data frame.
 
-- `time_channel`
+- `time_channel` & `sample_rate`
 
-  If the data contain *`mnirs`* metadata, this channel will be detected
-  automatically, or it can be specified explicitly.
+  If the data contain *`mnirs`* metadata, these will be detected
+  automatically, or they can be specified explicitly.
 
 - `invalid_values`, `invalid_above`, or `invalid_below`
 
@@ -394,100 +506,20 @@ details about the vector-specific functions see
 
 ``` r
 data_cleaned <- replace_mnirs(
-    data_raw,           ## blank channels will be retrieved from metadata
+    data_resampled,     ## blank channels will be retrieved from metadata
     invalid_values = 0, ## known invalid values in the data
     invalid_above = 90, ## remove data spikes above 90
     outlier_cutoff = 3, ## recommended default value
-    width = 10,         ## window to detect and replace outliers/missing values
+    width = 7,          ## window to detect and replace outliers/missing values
     method = "linear"   ## linear interpolation over `NA`s
 )
 
 plot(data_cleaned, time_labels = TRUE)
 ```
 
-![](reading-mnirs-data_files/figure-html/unnamed-chunk-5-1.png)
+![](reading-mnirs-data_files/figure-html/unnamed-chunk-6-1.png)
 
 That cleaned up all the obvious data issues.
-
-## ⏱️ Resample data
-
-Say we have NIRS data recorded at 25 Hz, but we are only interested in
-exercise responses over a time span of 5 minutes, and our other outcome
-measure heart rate data are only recorded at 1 Hz anyway. It may be
-easier and faster to work with our NIRS data down-sampled from 25 to 1
-Hz.
-
-Alternatively, if we have something like high-frequency EMG data, we may
-want to up-sample our NIRS data to match samples for easier
-synchronisation and analysis (*although, we should be cautious with
-up-sampling as this can artificially inflate statistical confidence with
-subsequent analysis or modelling methods*).
-
-### `resample_mnirs()`
-
-- `data`
-
-  This function takes in a data frame, resamples all data frame columns
-  to the new sample rate, then returns the processed data frame.
-  *`mnirs`* metadata will be passed to and from this function.
-
-- `time_channel` & `sample_rate`
-
-  If the data contain *`mnirs`* metadata, these will be detected
-  automatically, or they can be specified explicitly.
-
-- `resample_rate`
-
-  Resampling is specified as the desired number of samples per second
-  (Hz). The default `resample_rate` will resample back to the existing
-  `sample_rate` of the data. This can be useful to accommodate irregular
-  sampling with unequal time values. Linear interpolation is used to
-  resample `time_channel` to round values of the `sample_rate`.
-
-``` r
-data_resampled <- resample_mnirs(
-    data_cleaned,      ## blank channels will be retrieved from metadata
-    resample_rate = 2, ## blank by default will resample to `sample_rate`
-    method = "linear"  ## linear interpolation across resampled indices
-)
-#> ℹ Output is resampled at 2 Hz.
-
-## note the altered "time" values from the original data frame 👇
-data_resampled
-#> # A tibble: 2,419 × 3
-#>     time smo2_left smo2_right
-#>    <dbl>     <dbl>      <dbl>
-#>  1   0        54         68  
-#>  2   0.5      54         68  
-#>  3   1        54         67.9
-#>  4   1.5      54         66.0
-#>  5   2        54         66  
-#>  6   2.5      54         66  
-#>  7   3        54         66  
-#>  8   3.5      55.9       66.6
-#>  9   4        57         67  
-#> 10   4.5      57         67  
-#> # ℹ 2,409 more rows
-```
-
-> **Use
-> [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
-> to smooth over irregular or skipped samples**
->
-> If we see a warning from
-> [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
-> about duplicated or irregular samples like we saw above, we can use
-> [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
-> to restore `time_channel` to a regular sample rate and interpolate
-> across skipped samples.
->
-> Note: if we perform both of these steps in a piped function call, we
-> will still see the warning appear about irregular sampling at the end
-> of the pipe. This warning is returned by
-> [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md).
-> But viewing the data frame can confirm that
-> [`resample_mnirs()`](https://jemarnold.github.io/mnirs/reference/resample_mnirs.md)
-> has resolved the issue.
 
 ## 📈 Digital filtering
 
@@ -616,7 +648,7 @@ respective parameters.
 
 ``` r
 data_filtered <- filter_mnirs(
-    data_resampled,         ## blank channels will be retrieved from metadata
+    data_cleaned,           ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
     order = 2,              ## filter order number
     W = 0.02,               ## filter fractional critical frequency `[0, 1]`
@@ -851,7 +883,7 @@ nirs_data <- read_mnirs(
     time_channel = c(time = "Timestamp (seconds passed)"),
     zero_time = TRUE
 ) |>
-    resample_mnirs() |> ## default settings will resample to the same `sample_rate`
+    resample_mnirs(method = "linear") |> ## default settings will resample to the same `sample_rate`
     replace_mnirs(
         invalid_above = 73,
         outlier_cutoff = 3,
@@ -980,12 +1012,12 @@ for more details.
 ``` r
 ## return each interval independently with `event_groups = "distinct"`
 distinct <- extract_intervals(
-    nirs_data,                 ## channels blank for "distinct" grouping
-    start = by_time(36, 751),  ## manually identified interval start times
-    end = by_time(186, 901),   ## interval end time (start + 150 sec)
-    event_groups = "distinct", ## return a list of data frames for each (2) event
-    span = c(0, 0),            ## no boundary modification
-    zero_time = FALSE          ## return original time values
+    nirs_data,                  ## channels blank for "distinct" grouping
+    start = by_time(348, 1064), ## manually identified interval start times
+    end = by_time(458, 1174),   ## interval end time (start + 150 sec)
+    event_groups = "distinct",  ## return a list of data frames for each (2) event
+    span = c(0, 0),             ## no boundary modification
+    zero_time = FALSE           ## return original time values
 )
 
 plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
@@ -996,15 +1028,16 @@ plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TR
 ``` r
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble <- extract_intervals(
-    nirs_data,                 ## channels recycled to all intervals by default
+    nirs_data,                  ## channels recycled to all intervals by default
     nirs_channels = c(smo2_left, smo2_right),
-    start = by_time(66, 781),  ## alternatively specify start times + span
-    event_groups = "ensemble", ## ensemble-average across two intervals
-    span = c(-30, 120),        ## span recycled to all intervals by default
-    zero_time = TRUE           ## re-calculate common time to start from `0`
+    start = by_time(368, 1084), ## alternatively specify start times + span
+    event_groups = "ensemble",  ## ensemble-average across two intervals
+    span = c(-20, 90),          ## span recycled to all intervals by default
+    zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
-plot(ensemble[[1L]], time_labels = TRUE)
+plot(ensemble[[1L]], time_labels = TRUE) + 
+    geom_vline(xintercept = 0, linetype = "dotted")
 ```
 
 ![](reading-mnirs-data_files/figure-html/unnamed-chunk-12-1.png)
