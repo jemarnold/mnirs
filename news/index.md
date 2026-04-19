@@ -39,9 +39,6 @@ CRAN release: 2026-04-18
 - [`plot.mnirs()`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md):
   y-axis title changed from “signal” to “mNIRS”.
 
-- Create `AGENTS.md` for LLM-friendly instructions. Added to
-  `.Rbuildignore` until better packaging solution found.
-
 - Fix lap marker inconsistency in `train.red_intervals.csv`. Updated
   relevant interval times in documentation.
 
