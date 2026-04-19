@@ -20,8 +20,6 @@
 
 * `plot.mnirs()`: y-axis title changed from "signal" to "mNIRS".
 
-* Create `AGENTS.md` for LLM-friendly instructions. Added to `.Rbuildignore` until better packaging solution found.
-
 * Fix lap marker inconsistency in `train.red_intervals.csv`. Updated relevant interval times in documentation.
 
 * `README.md` & *"reading-mnirs-data.qmd"* vignette updates.
