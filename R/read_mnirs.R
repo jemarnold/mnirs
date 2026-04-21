@@ -143,7 +143,13 @@ read_mnirs <- function(
     ## resolve channels: use user input if provided, otherwise detect from
     ## known device channel names. Errors if neither available.
     channels <- detect_device_channels(
-        nirs_device, nirs_channels, time_channel, keep_all, verbose
+        data,
+        header_row,
+        nirs_device,
+        nirs_channels,
+        time_channel,
+        keep_all,
+        verbose
     )
     nirs_channels <- channels$nirs_channels
     time_channel <- channels$time_channel

@@ -2,6 +2,8 @@
 
 ## Core updates
 
+* `read_mnirs()`: Fix detection of *"PerfPro"* file formats with another small bug fix to improve timestamp parsing.
+
 * `resample_mnirs()`: Now resamples to an inclusive time range around existing data, rounded to the nearest resampled rate. Better handles edge cases where the last sample was being dropped in certain rounding conditions.
 
 

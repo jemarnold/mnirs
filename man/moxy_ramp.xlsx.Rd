@@ -5,7 +5,7 @@
 \alias{moxy_ramp.xlsx}
 \title{2 Hz PerfPro export of Moxy data}
 \format{
-.xlsx file with five columns and 2202 rows:
+.xlsx file with five columns and 2201 rows:
 \describe{
 \item{mm-dd}{Recording date (dd-MMM format).}
 \item{hh:mm:ss}{Time of day (hh:mm:ss format).}
