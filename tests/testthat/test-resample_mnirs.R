@@ -303,21 +303,19 @@ test_that("resample_mnirs works on Moxy", {
         verbose = FALSE
     )[1:15, ]
 
-    df$time <- df$time + 0.01
-
     ## works with metadata
     expect_message(
         result <- resample_mnirs(df, resample_rate = 1),
         "Output is resampled at .*1.*Hz"
     )
-    expect_equal(result$time, 0:7)
+    expect_equal(result$time, 0:8)
     expect_s3_class(result, "mnirs")
 
     ## time-weighted average
     df2 <- df |>
         dplyr::mutate(
             diff = c(diff(time), diff(time)[length(diff(time))]),
-            time = floor(time * 1) / 1,
+            time = round(time * 1) / 1,
         ) |>
         dplyr::summarise(
             .by = time,
@@ -325,7 +323,7 @@ test_that("resample_mnirs works on Moxy", {
         )
 
     ## expect close enough to time-weighted average
-    expect_equal(result, df2, ignore_attr = TRUE, tolerance = 2)
+    expect_equal(result, df2, ignore_attr = TRUE, tolerance = 1)
 
     ## should overwrite metadata
     df3 <- resample_mnirs(

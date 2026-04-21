@@ -1,3 +1,10 @@
+# mnirs 0.6.3
+
+## Core updates
+
+* `resample_mnirs()`: Now resamples to an inclusive time range around existing data, rounded to the nearest resampled rate. Better handles edge cases where the last sample was being dropped in certain rounding conditions.
+
+
 # mnirs 0.6.2
 
 ## Core updates
