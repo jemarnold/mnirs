@@ -39,17 +39,13 @@ signif_trailing <- function(
     if (format == "digits") {
         validate_numeric(x)
         validate_numeric(digits, 1, c(-Inf, Inf), FALSE, TRUE)
-        if (trim) {
-            digits <- min(digits, count_decimals(x))
-        }
+        if (trim) digits <- min(digits, count_decimals(x))
         formatC_x <- round(x, digits)
         formatC_format <- "f"
     } else {
         ## if whole digits >= sig figs, return rounded whole number
         ## x & digits validated by `signif_whole`
-        if (trim) {
-            digits <- min(digits, count_sigfigs(x))
-        }
+        if (trim) digits <- min(digits, count_sigfigs(x))
         formatC_x <- signif_whole(x, digits)
         formatC_format <- "fg"
     }

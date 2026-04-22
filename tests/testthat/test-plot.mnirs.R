@@ -224,7 +224,7 @@ test_that("time_labels controls x-axis name and formatting", {
 
     # With time_labels = TRUE
     p2 <- plot(x, time_labels = TRUE)
-    expect_equal(p2$labels$x, "time (mm:ss)")
+    expect_equal(p2$labels$x, "time (h:mm:ss)")
     expect_false(ggplot2::is_waiver(p2$scales$get_scales("x")$labels))
 })
 

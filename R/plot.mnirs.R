@@ -45,7 +45,7 @@ plot.mnirs <- function(
 
     ## pre-compute conditionals
     x_name <- if (time_labels) {
-        paste(time_channel, "(mm:ss)")
+        paste(time_channel, "(h:mm:ss)")
     } else {
         ggplot2::waiver()
     }
@@ -436,8 +436,8 @@ format_hmmss <- function(x) {
     }
 
     sign <- ifelse(x < 0, "-", "")
-    hrs <- abs(x) %/% 3600
-    mins <- (abs(x) %% 3600) %/% 60
+    hrs <- as.integer(abs(x) %/% 3600)
+    mins <- as.integer((abs(x) %% 3600) %/% 60)
     secs <- abs(x) %% 60
 
     hmmss_string <- if (any(hrs > 0, na.rm = TRUE)) {
