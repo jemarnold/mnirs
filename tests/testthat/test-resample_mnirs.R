@@ -283,6 +283,28 @@ test_that("non-numeric columns: character and factor types", {
     expect_s3_class(result$factor_col, "factor")
 })
 
+test_that("resample_mnirs forward-fills when rates exceed actual rate", {
+    data <- data.frame(
+        time = c(0, 1, 2), ## actual sample_rate == 1
+        value = c(10, 20, 30),
+        category = c("A", "B", "C")
+    )
+
+    result <- resample_mnirs(
+        data,
+        time_channel = "time",
+        sample_rate = 5,
+        resample_rate = 2,
+        method = "linear",
+        verbose = FALSE
+    )
+
+    expect_equal(nrow(result), length(seq(0, 2, by = 1 / 2)))
+    expect_false(anyNA(result$category))
+    expect_equal(result$category, c("A", "A", "B", "B", "C"))
+})
+
+
 test_that("resample_mnirs handles edge cases", {
     ## Intentional that this should return error, even though technically
     ## resampling from one sample to one sample should be ok

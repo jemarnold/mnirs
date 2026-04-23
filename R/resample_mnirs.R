@@ -160,16 +160,16 @@ resample_mnirs <- function(
         if (method == "none") {
             ## tolerance-matched index computed above
             result[idx_cols] <- lapply(data[idx_cols], \(.x) .x[idx])
-        } else if (resample_rate < sample_rate) {
+        } else if (length(resampled_times) < length(time_vec)) {
             ## down-sample: first non-NA per bin
-            bin <- findInterval(
+            idx <- findInterval(
                 time_vec, resampled_times, rightmost.closed = FALSE
             )
-            bin[bin == 0] <- 1
+            idx[idx == 0] <- 1
             result[idx_cols] <- lapply(data[idx_cols], \(.x) {
                 unname(unsplit(
-                    lapply(split(.x, bin), \(.v) .v[!is.na(.v)][1L]),
-                    unique(bin)
+                    lapply(split(.x, idx), \(.v) .v[!is.na(.v)][1L]),
+                    unique(idx)
                 ))
             })
         } else {
@@ -187,9 +187,7 @@ resample_mnirs <- function(
     metadata$sample_rate <- resample_rate
 
     if (verbose) {
-        cli_inform(c(
-            "i" = "Output is resampled at {.val {resample_rate}} Hz."
-        ))
+        cli_inform(c("i" = "Output is resampled at {.val {resample_rate}} Hz."))
     }
 
     ## column order same as input

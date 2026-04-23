@@ -4,7 +4,11 @@
 
 * `read_mnirs()`: Fix detection of *"PerfPro"* file formats with another small bug fix to improve timestamp parsing.
 
-* `resample_mnirs()`: Now resamples to an inclusive time range around existing data, rounded to the nearest resampled rate. Better handles edge cases where the last sample was being dropped in certain rounding conditions.
+* `resample_mnirs()`: 
+
+    * Now resamples to an inclusive time range around existing data, rounded to the nearest resampled rate. Better handles edge cases where the last sample was being dropped in certain rounding conditions.
+
+    * Fix a condition where a specified `sample_rate` greater than the actual sample_rate of the data led to an error. Now more robustly fills non-numeric columns.
 
 
 # mnirs 0.6.2
