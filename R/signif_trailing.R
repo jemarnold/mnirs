@@ -69,7 +69,6 @@ signif_trailing <- function(
 #' `format = "digits"`.
 #'
 #' @param x A numeric vector.
-#'
 #' @returns A single non-negative integer.
 #'
 #' @keywords internal
@@ -97,7 +96,6 @@ count_decimals <- function(x) {
 #' `format = "signif"`.
 #'
 #' @param x A numeric vector.
-#'
 #' @returns A single positive integer (minimum 1).
 #'
 #' @keywords internal
@@ -164,6 +162,10 @@ signif_whole <- function(x, digits = 5L) {
 #' `signif_pvalue()` displays p-values as either formatted numeric strings
 #' or significance symbols.
 #'
+#' @param format Indicates how to treat `digits`. Either the desired 
+#'   significance criteria over which to display the absolute p value 
+#'   (`format = "digits"`, the *default*), or the smallest significance
+#'   criteria to print as less than (`format = "signif"`).
 #' @param display Specifies output type, either *"value"* (the *default*) for
 #'   formatted numbers or *"symbol"* for significance symbols.
 #' @param symbol Character string specifying the significance symbol.
@@ -176,10 +178,15 @@ signif_whole <- function(x, digits = 5L) {
 #' @details
 #' `signif_pvalue()`
 #'
-#' - When `display = "value"` and e.g. `digits = 3`, `x` will be either
-#'   rounded to 3 decimal places with `signif_trailing()`, or appear as e.g.
-#'   *"< 0.001"*.
-#' - `digits = 1` will display *"less than `alpha`"*, e.g. *"< 0.05"*.
+#' - When `format = "digits"` and e.g. `digits = 3`, `x` is rounded to 3
+#'   decimal places, or shown as *"p < 0.001"* below a 3-decimal place 
+#'   significance threshold.
+#' - `digits = 1` with `format = "digits"` displays *"p < `alpha`"*,
+#'   e.g. *"p < 0.05"*.
+#' - When `format = "signif"`, `digits` sets the lowest threshold
+#'   (e.g. `digits = 3` gives thresholds `alpha`, `0.01`, `0.001`). Values
+#'   below `alpha` show the nearest threshold above them, e.g. `p = 0.04`
+#'   gives *"p < 0.05"*; `p = 0.009` gives *"p < 0.01"*.
 #' - When `display = "symbol"`, if `symbol_repeat = TRUE`: Uses repeated
 #'   symbols based on thresholds
 #'   `(0.001 = "***", 0.01 = "**", alpha = "*", ns = "")`.
@@ -195,7 +202,7 @@ signif_whole <- function(x, digits = 5L) {
 signif_pvalue <- function(
     x,
     digits = 3L,
-    format = c("digits", "signif"),
+    format = c("digits", "threshold"),
     display = c("value", "symbol"),
     symbol = "*",
     symbol_repeat = FALSE,
@@ -207,8 +214,7 @@ signif_pvalue <- function(
     validate_numeric(digits, 1, c(0, Inf), FALSE, TRUE)
     validate_numeric(
         alpha, 1, c(0, 1), FALSE, 
-        msg1 = "one-element",
-        msg2 = "between {col_blue('[0, 1]')}"
+        msg1 = "one-element", msg2 = "between {col_blue('[0, 1]')}"
     )
 
     ## p-values cannot be infinite; coerce before branching
@@ -221,16 +227,42 @@ signif_pvalue <- function(
         return(ifelse(x >= alpha, "", symbol))
     }
 
-    threshold <- 10^-digits
-    if (digits == 1) {
-        digits <- -floor(log10(alpha))
-        threshold <- alpha
+    if (format == "digits") {
+        threshold <- 10^-digits
+        if (digits == 1) {
+            digits <- -floor(log10(alpha))
+            threshold <- alpha
+        }
+        return(ifelse(
+            x < threshold,
+            sprintf("p < %.*f", digits, threshold),
+            paste0("p = ", signif_trailing(x, digits, format, trim = FALSE))
+        ))
+    }
+
+    ## format = "threshold": find nearest conventional threshold above x;
+    ## digits defines the lowest threshold (e.g. digits = 3 -> 0.001)
+    alpha_exp <- -floor(log10(alpha))
+    thresholds <- unique(c(alpha, 10^-(alpha_exp:digits)))
+    nearest <- vapply(x, \(.p) {
+        above <- thresholds[thresholds > .p]
+        if (length(above) == 0L) NA_real_ else min(above)
+    }, numeric(1))
+    # compute formatted_threshold only for non-NA nearest values
+    formatted_threshold <- rep(NA_character_, length(nearest))
+    valid <- !is.na(nearest)
+    if (any(valid)) {
+        fd <- as.integer(-floor(log10(nearest[valid])))
+        formatted_threshold[valid] <- sprintf("%.*f", fd, nearest[valid])
     }
 
     return(ifelse(
-        x < threshold,
-        sprintf("< %.*f", digits, threshold),
-        paste0("= ", signif_trailing(x, digits, format, trim = FALSE))
+        is.na(x) | x >= alpha,
+        paste0(
+            "p = ",
+            signif_trailing(x, digits, format = "digits", trim = FALSE)
+        ),
+        paste0("p < ", formatted_threshold)
     ))
 }
 

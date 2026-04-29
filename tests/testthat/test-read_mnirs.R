@@ -1247,7 +1247,7 @@ test_that("parse_time_channel() works on fractional unix time", {
     ## should return today's date, local time zone, precise timestamp
     expect_equal(as.Date(result$start_timestamp), Sys.Date())
     expect_equal(format(result$start_timestamp, "%Z"), format(Sys.time(), "%Z"))
-    expect_equal(format(result$start_timestamp, "%H:%M:%OS"), "13:52:59")
+    expect_equal(format(result$start_timestamp, "%H:%M:%OS"), "13:52:59.000")
 })
 
 test_that("parse_time_channel() returns local time zonel", {

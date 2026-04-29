@@ -13,7 +13,7 @@ signif_whole(x, digits = 5L)
 signif_pvalue(
   x,
   digits = 3L,
-  format = c("digits", "signif"),
+  format = c("digits", "threshold"),
   display = c("value", "symbol"),
   symbol = "*",
   symbol_repeat = FALSE,
@@ -27,9 +27,10 @@ signif_pvalue(
 \emph{significant figures} to preserve. Negative \code{digits} values will round to
 the nearest whole value of \code{10^(digits)}.}
 
-\item{format}{Indicates how to treat \code{digits}. Either the desired number of
-decimal places (\code{format = "digits"}, the \emph{default}) or significant figures
-after the decimal place (\code{format = "signif"}).}
+\item{format}{Indicates how to treat \code{digits}. Either the desired
+significance criteria over which to display the absolute p value
+(\code{format = "digits"}, the \emph{default}), or the smallest significance
+criteria to print as less than (\code{format = "signif"}).}
 
 \item{trim}{Logical; if \code{TRUE} (the \emph{default}), caps \code{digits} at the
 number of decimal places or significant figures observed in \code{x}. If
@@ -86,10 +87,15 @@ e.g. \code{signif_whole(123, digits = -5)} still returns \code{123}.
 
 \code{signif_pvalue()}
 \itemize{
-\item When \code{display = "value"} and e.g. \code{digits = 3}, \code{x} will be either
-rounded to 3 decimal places with \code{signif_trailing()}, or appear as e.g.
-\emph{"< 0.001"}.
-\item \code{digits = 1} will display \emph{"less than \code{alpha}"}, e.g. \emph{"< 0.05"}.
+\item When \code{format = "digits"} and e.g. \code{digits = 3}, \code{x} is rounded to 3
+decimal places, or shown as \emph{"p < 0.001"} below a 3-decimal place
+significance threshold.
+\item \code{digits = 1} with \code{format = "digits"} displays \emph{"p < \code{alpha}"},
+e.g. \emph{"p < 0.05"}.
+\item When \code{format = "signif"}, \code{digits} sets the lowest threshold
+(e.g. \code{digits = 3} gives thresholds \code{alpha}, \code{0.01}, \code{0.001}). Values
+below \code{alpha} show the nearest threshold above them, e.g. \code{p = 0.04}
+gives \emph{"p < 0.05"}; \code{p = 0.009} gives \emph{"p < 0.01"}.
 \item When \code{display = "symbol"}, if \code{symbol_repeat = TRUE}: Uses repeated
 symbols based on thresholds
 \verb{(0.001 = "***", 0.01 = "**", alpha = "*", ns = "")}.
