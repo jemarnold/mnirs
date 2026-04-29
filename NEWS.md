@@ -7,6 +7,12 @@
 * Update `analyse_kinetics()` to return `results$data` as a list of `class = "mnirs"`.
 * Create `print.mnirs()` generic to avoid displaying extra `NextMethod()` calls when printing lists with `class = "mnirs"`.
 
+
+# mnirs 0.6.4
+
+* `extract_intervals()`: when specifying `by_lap()`, now `start` will only specify the first sample of the lap, and `end` the last sample, rather than `start = by_lap()` including the entire lap. This allows better control when multiple lap lengths are variable.
+
+
 # mnirs 0.6.3
 
 * `read_mnirs()`: Fix detection of *"PerfPro"* file formats with another small bug fix to improve timestamp parsing.
