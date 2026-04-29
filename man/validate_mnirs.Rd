@@ -93,15 +93,15 @@ information message is displayed (when \code{verbose = TRUE}). If \code{TRUE},
 \code{nirs_channels} is returned as-is, i.e. as a list for callers which
 require it.}
 
-\item{time_channel}{A character string giving the name of the time or sample
-column. Must match a column name in \code{data} exactly.
+\item{time_channel}{A character string naming the time or sample column.
+Must match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
 used.
 }}
 
-\item{event_channel}{A character string giving the name of the event/lap
-column. Must match a column name in \code{data} exactly.
+\item{event_channel}{A character string naming the event/lap column. Must
+match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{event_channel} metadata attribute of \code{data} is
 used.

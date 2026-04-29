@@ -28,8 +28,8 @@ operate on. Must match column names in \code{data} exactly.
 used.
 }}
 
-\item{time_channel}{A character string giving the name of the time or sample
-column. Must match a column name in \code{data} exactly.
+\item{time_channel}{A character string naming the time or sample column.
+Must match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
 used.

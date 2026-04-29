@@ -11,13 +11,13 @@
 #'   - If `NULL` (default), the `nirs_channels` metadata attribute of `data` is
 #'     used.
 #'
-#' @param time_channel A character string giving the name of the time or sample
-#'   column. Must match a column name in `data` exactly.
+#' @param time_channel A character string naming the time or sample column. 
+#'   Must match a column name in `data` exactly.
 #'   - If `NULL` (default), the `time_channel` metadata attribute of `data` is
 #'     used.
 #'
-#' @param event_channel A character string giving the name of the event/lap
-#'   column. Must match a column name in `data` exactly.
+#' @param event_channel A character string naming the event/lap column. Must 
+#'   match a column name in `data` exactly.
 #'   - If `NULL` (default), the `event_channel` metadata attribute of `data` is
 #'     used.
 #'

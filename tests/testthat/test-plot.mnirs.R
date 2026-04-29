@@ -303,6 +303,41 @@ test_that("plot.mnirs uses waiver() for breaks when scales is unavailable", {
     )
 })
 
+test_that("plot.mnirs works on lists", {
+    df_list <- read_mnirs(
+        file_path = example_mnirs("train.red"),
+        nirs_channels = c(
+            smo2_left = "SmO2",
+            smo2_right = "SmO2 unfiltered"
+        ),
+        time_channel = c(time = "Timestamp (seconds passed)"),
+        event_channel = c(lap = "Lap/Event"),
+        verbose = FALSE
+    ) |>
+        resample_mnirs(method = "linear", verbose = FALSE) |>
+        extract_intervals(
+            start = by_lap(3, 5),
+            span = c(-30, 120),
+            zero_time = TRUE,
+            verbose = FALSE
+        )
+
+    expect_type(df_list, "list")
+    expect_s3_class(df_list, "mnirs")
+    expect_length(df_list, 2)
+
+    ## visual check
+    p <- plot(df_list)
+    expect_s3_class(p, "ggplot")
+
+    ## facet wrap present for multi-element list
+    facet_layers <- Filter(\(l) inherits(l, "FacetWrap"), list(p$facet))
+    expect_length(facet_layers, 1)
+
+    ## renders without error
+    expect_no_error(ggplot2::ggplot_build(p))
+})
+
 test_that("plot.mnirs moxy.perfpro works", {
     df <- read_mnirs(
         file_path = example_mnirs("moxy_ramp"),

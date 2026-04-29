@@ -66,8 +66,8 @@ operate on. Must match column names in \code{data} exactly.
 used.
 }}
 
-\item{time_channel}{A character string giving the name of the time or sample
-column. Must match a column name in \code{data} exactly.
+\item{time_channel}{A character string naming the time or sample column.
+Must match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
 used.
@@ -257,7 +257,7 @@ data_clean <- replace_mnirs(
     invalid_values = 0,    ## known invalid values in the data
     invalid_above = 90,    ## remove data spikes above 90
     outlier_cutoff = 3,    ## Pearson's 3 sigma edit rule
-    width = 10,            ## window for outlier detection and interpolation
+    width = 7,            ## window for outlier detection and interpolation
     method = "linear"      ## linear interpolation over NAs
 )
 

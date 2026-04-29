@@ -17,8 +17,8 @@ resample_mnirs(
 \item{data}{A data frame of class \emph{"mnirs"} containing time series data and
 metadata.}
 
-\item{time_channel}{A character string giving the name of the time or sample
-column. Must match a column name in \code{data} exactly.
+\item{time_channel}{A character string naming the time or sample column.
+Must match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
 used.

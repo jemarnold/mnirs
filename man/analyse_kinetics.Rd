@@ -30,8 +30,8 @@ operate on. Must match column names in \code{data} exactly.
 used.
 }}
 
-\item{time_channel}{A character string giving the name of the time or sample
-column. Must match a column name in \code{data} exactly.
+\item{time_channel}{A character string naming the time or sample column.
+Must match a column name in \code{data} exactly.
 \itemize{
 \item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
 used.
@@ -114,6 +114,8 @@ separate intervals.
 }
 
 \subsection{kinetics analysis method}{
+}
+
 \subsection{\code{method = "half_response_time"}}{
 
 Aliases: \code{c("half time", "response time", "half recovery time", "HRT")}
@@ -172,8 +174,6 @@ reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).
 Aliases: \code{c("logistic", "xmid")}
 
 \verb{<under development>}
-}
-
 }
 
 \subsection{channel_args per nirs_channel}{

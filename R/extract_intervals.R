@@ -64,17 +64,15 @@
 #' @details
 #' ## Interval specification
 #'
-#' Interval boundaries are specified using helper functions, or by passing
-#' raw values directly:
+#' Interval `start` and `end` boundaries are specified using helper functions, 
+#' or by passing raw values directly:
 #'
 #' \describe{
-#'   \item{[by_time()] or numeric}{Time values in units of `time_channel`.}
-#'   \item{[by_label()] or character}{Strings to match in `event_channel`.
+#'   \item{[by_time()]}{Time values in units of `time_channel`.}
+#'   \item{[by_label()]}{Strings to match in `event_channel`.
 #'   All matching occurrences are returned.}
-#'   \item{[by_lap()] or explicit integer (e.g. `2L`)}{Lap numbers to match
-#'   in `event_channel`. Resolves to the first sample of each lap for
-#'   `start`, and the last sample for `end`, or all samples of the lap if only 
-#'   one of either `start` or `end` is specified.}
+#'   \item{[by_lap()]}{Lap numbers to match in `event_channel`. Resolves to the
+#'   first sample of each lap for `start`, and the last lap sample for `end`}
 #'   \item{[by_sample()]}{Integer sample indices (row numbers).}
 #' }
 #'
@@ -89,22 +87,25 @@
 #'
 #' ## The `span` window
 #'
-#' `span` applies an additive time shift to interval boundaries. A single
-#' numeric value is recycled: `span = 60` becomes `c(0, 60)` and
-#' `span = -60` becomes `c(-60, 0)`.
-#'
-#' - **`start` + `end`**: `span[1]` shifts starts, `span[2]` shifts ends.
-#'   For example, `start = by_time(30), end = by_time(60), span = c(-5, 10)`
-#'   gives an interval of `[25, 70]`.
-#' - **`start` only** or **`end` only**: both span values apply to the single
-#'   boundary, like a window around an event. For example,
-#'   `start = by_time(30), span = c(-5, 60)` gives `[25, 90]`.
+#' `span` additively expands the timespan window around interval boundaries. 
+#' 
+#' - A two-value vector expands the `start` and `end`, respectively:
+#'   `span = c(-60, 60)` expands the `start` earlier by `60`, and the `end` 
+#'   later by `60`. For example, 
+#'   `start = by_time(30), end = by_time(60), span = c(-5, 10)` returns an
+#'   interval of `[25, 70]`.
+#' - A single numeric value is recycled according to the sign: `span = -60` 
+#'   becomes `c(-60, 0)` to expand the `start` earlier. `span = 60` becomes 
+#'   `c(0, 60)` to expand the `end` later.
+#' - If only `start` is specified alone, both span values expand the single
+#'   boundary window: `start = by_time(30), span = c(-5, 60)` returns 
+#'   `[25, 90]`.
 #'
 #' ## Per-interval `nirs_channels` for ensemble-averaging
 #'
 #' When `event_groups = "ensemble"` or a list of numeric grouped intervals,
 #' `nirs_channels` can be specified as a list of column names to override
-#' ensemble-averaging across interval. For example, to exclude a bad channel
+#' ensemble-averaging across interval. For example, to exclude a channel
 #' in one interval:
 #'
 #' ```r
@@ -146,7 +147,7 @@
 #' Extra items are ignored.
 #'
 #' @returns A named `list()` of [tibbles][tibble::tibble-package] of class
-#'   *"mnirs"*, with metadata available via `attributes()`.
+#'   *"mnirs"*, each with metadata available via `attributes()`.
 #'
 #' @examples
 #' ## read example data
@@ -254,10 +255,8 @@ extract_intervals <- function(
     }
 
     if (
-        verbose &&
-            event_groups[1L] != "distinct" &&
-            is.null(attr(data, "nirs_channels")) &&
-            !is.list(nirs_channels)
+        verbose && event_groups[1L] != "distinct" &&
+            is.null(attr(data, "nirs_channels")) && !is.list(nirs_channels)
     ) {
         cli_inform(c(
             "!" = "{.fn extract_intervals} accepts {.arg nirs_channels} = \\
@@ -299,6 +298,9 @@ extract_intervals <- function(
         zero_time,
         verbose
     )
+
+    ## add class "mnirs" ========================================
+    class(result) <- c("mnirs", class(result))
 
     return(result)
 }

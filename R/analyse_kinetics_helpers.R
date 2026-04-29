@@ -248,6 +248,8 @@ build_kinetics_results <- function(
         interval_times <- attr(.df, "interval_times")
         if (is.null(interval_times)) NA_real_ else unlist(interval_times)
     })
+    ## add `class = "mnirs"` for `plot.mnirs`
+    class(fitted_data_list) <- c("mnirs", class(fitted_data_list))
 
     ## extract per-interval model lists (named by nirs_channel)
     model_list <- lapply(result_list, attr, "model")

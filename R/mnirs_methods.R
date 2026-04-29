@@ -1,17 +1,52 @@
+#' Methods for mnirs objects
+#'
+#' Generic methods for objects of class `"mnirs"`.
+#'
+#' @param x Object of class `"mnirs"`.
+#' @param ... Additional arguments passed to [print()].
+#'
+#' @returns
+#' \item{`print`}{Returns `x` without class attributes.}
+#'
+#' @examples
+#' x <- read_mnirs(
+#'     example_mnirs("train.red"),
+#'     nirs_channels = c(smo2 = "SmO2"),
+#'     time_channel = c(time = "Timestamp (seconds passed)"),
+#'     verbose = FALSE
+#' ) |>
+#'     resample_mnirs(method = "linear", verbose = FALSE) |>
+#'     extract_intervals(
+#'         start = by_time(2452, 3168),
+#'         span = c(-60, 120),
+#'         verbose = FALSE
+#'     )
+#' 
+#' print(x)
+#'
+#' @export
+print.mnirs <- function(x, ...) {
+    class(x) <- setdiff(class(x), "mnirs")
+    print(x, ...)
+    invisible(x)
+}
+
+
 #' Methods for mnirs_kinetics objects
 #'
 #' Generic methods for objects returned from [analyse_kinetics()].
 #'
-#' @param x Object of class `mnirs_kinetics` returned from [analyse_kinetics()].
+#' @param x Object of class `"mnirs_kinetics"` returned from 
+#'   [analyse_kinetics()].
 #' @param ... Additional arguments.
 #'
-#' @returns Return:
-#'      \item{`print`}{Returns a model summary}
+#' @returns
+#' \item{`print`}{Returns a model summary}
 #'
 #' @examples
 #' result <- read_mnirs(
 #'     example_mnirs("train.red"),
-#'     nirs_channels = c(smo2 = "SmO2 unfiltered"),
+#'     nirs_channels = c(smo2 = "SmO2"),
 #'     time_channel = c(time = "Timestamp (seconds passed)"),
 #'     zero_time = TRUE,
 #'     verbose = FALSE
@@ -46,12 +81,10 @@ print.mnirs_kinetics <- function(x, ...) {
         is.numeric(.x) && !all(is.na(.x))
     }, logical(1))
     ## prep only non-NA values
-    coefs[, numeric_cols] <- lapply(
-        coefs[, numeric_cols, drop = FALSE], 
-        \(.x) {
-            .x[!is.na(.x)] <- signif_trailing(.x[!is.na(.x)], 4L, "signif")
-            .x[is.na(.x)] <- "NA"
-            .x
+    coefs[, numeric_cols] <- lapply(coefs[, numeric_cols, drop = FALSE], \(.x) {
+        .x[!is.na(.x)] <- signif_trailing(.x[!is.na(.x)], 4L, "signif")
+        .x[is.na(.x)] <- "NA"
+        .x
     })
 
     cat("\n")

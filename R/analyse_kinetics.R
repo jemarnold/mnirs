@@ -39,13 +39,13 @@
 #'
 #' ## kinetics analysis method
 #'
-#' #### `method = "half_response_time"`
+#' ## `method = "half_response_time"`
 #' 
 #' Aliases: `c("half time", "response time", "half recovery time", "HRT")`
 #'
 #' `<under development>`
 #'
-#' #### `method = "peak_slope"`
+#' ## `method = "peak_slope"`
 #' 
 #' Aliases: `c("peak slope", "slope")`
 #'
@@ -70,7 +70,7 @@
 #'       propagates any `NA`s to the returned vector.}
 #' }
 #'
-#' #### `method = "monoexponential"`
+#' ## `method = "monoexponential"`
 #' 
 #' Aliases: `c("monoexp", "exponential", "MRT", "tau")`
 #'
@@ -89,7 +89,7 @@
 #'   \item{`stats::nls()`}{Other arguments can be passed to [stats::nls()]}
 #' }
 #'
-#' #### `method = "sigmoidal"`
+#' ## `method = "sigmoidal"`
 #' 
 #' Aliases: `c("logistic", "xmid")`
 #'

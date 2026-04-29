@@ -87,7 +87,7 @@
 #'     invalid_values = 0,    ## known invalid values in the data
 #'     invalid_above = 90,    ## remove data spikes above 90
 #'     outlier_cutoff = 3,    ## Pearson's 3 sigma edit rule
-#'     width = 10,            ## window for outlier detection and interpolation
+#'     width = 7,            ## window for outlier detection and interpolation
 #'     method = "linear"      ## linear interpolation over NAs
 #' )
 #'

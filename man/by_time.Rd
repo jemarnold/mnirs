@@ -2,18 +2,18 @@
 % Please edit documentation in R/extract_interval_helpers.R
 \name{by_time}
 \alias{by_time}
-\alias{by_sample}
 \alias{by_label}
 \alias{by_lap}
+\alias{by_sample}
 \title{Specify interval boundaries by time, label, lap, or sample}
 \usage{
 by_time(...)
 
-by_sample(...)
-
 by_label(...)
 
 by_lap(...)
+
+by_sample(...)
 }
 \arguments{
 \item{...}{Specify start or end boundaries.

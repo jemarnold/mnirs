@@ -75,6 +75,7 @@ reference:
   - starts_with("scale")
   - breaks_timespan
   - format_hmmss
+  - print.mnirs
   - print.mnirs_kinetics
 - title: Files
   desc: |

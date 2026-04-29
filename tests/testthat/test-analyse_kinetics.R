@@ -832,12 +832,11 @@ test_that("build_kinetics_results fitted values placed at correct indices", {
 
 test_that("build_kinetics_results data elements preserve mnirs metadata", {
     data_list <- list(int1 = make_kinetics_data(sample_rate = 10))
-    # attributes(data_list[[1]])
     result_list <- list(make_kinetics_results("int1"))
-    # attributes(result_list[[1]])
 
     result <- build_kinetics_results(
-        data_list, result_list,
+        data_list,
+        result_list,
         interval_names = "int1",
         method = "peak_slope",
         call = NULL
@@ -848,6 +847,40 @@ test_that("build_kinetics_results data elements preserve mnirs metadata", {
     expect_equal(attr(aug, "nirs_channels"), "smo2")
     expect_equal(attr(aug, "time_channel"), "time")
     expect_equal(attr(aug, "sample_rate"), 10)
+})
+
+test_that("build_kinetics_results data list has class = mnirs", {
+    data_list <- list(
+        int1 = make_kinetics_data(sample_rate = 10),
+        int2 = make_kinetics_data(sample_rate = 10)
+    )
+    result_list <- list(
+        make_kinetics_results("int1"),
+        make_kinetics_results("int2")
+    )
+
+    result <- build_kinetics_results(
+        data_list,
+        result_list,
+        interval_names = c("int1", "int2"),
+        method = "peak_slope",
+        call = NULL
+    )
+    
+    expect_type(result$data, "list")
+    expect_s3_class(result$data, "mnirs")
+    expect_length(result$data, 2)
+
+    ## visual check
+    p <- plot(result$data)
+    expect_s3_class(p, "ggplot")
+
+    ## facet wrap present for multi-element list
+    facet_layers <- Filter(\(l) inherits(l, "FacetWrap"), list(p$facet))
+    expect_length(facet_layers, 1)
+
+    ## renders without error
+    expect_no_error(ggplot2::ggplot_build(p))
 })
 
 test_that("build_kinetics_results data is named by interval_names", {

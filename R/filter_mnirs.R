@@ -145,7 +145,7 @@
 #'     replace_mnirs(
 #'         invalid_values = c(0, 100),
 #'         outlier_cutoff = 3,
-#'         width = 10,
+#'         width = 7,
 #'         verbose = FALSE
 #'     )
 #' 

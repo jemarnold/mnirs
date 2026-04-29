@@ -1,6 +1,13 @@
-# mnirs 0.6.3
+# mnirs 0.7.0
 
-## Core updates
+## `plot.mnirs()` update
+
+* `plot.mnirs()` generic can now plot data frames from within a list of `class = "mnirs"` as facets.
+* Update `extract_intervals()` to return a list of `class = "mnirs"`.
+* Update `analyse_kinetics()` to return `results$data` as a list of `class = "mnirs"`.
+* Create `print.mnirs()` generic to avoid displaying extra `NextMethod()` calls when printing lists with `class = "mnirs"`.
+
+# mnirs 0.6.3
 
 * `read_mnirs()`: Fix detection of *"PerfPro"* file formats with another small bug fix to improve timestamp parsing.
 
