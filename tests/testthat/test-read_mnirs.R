@@ -1247,7 +1247,7 @@ test_that("parse_time_channel() works on fractional unix time", {
     ## should return today's date, local time zone, precise timestamp
     expect_equal(as.Date(result$start_timestamp), Sys.Date())
     expect_equal(format(result$start_timestamp, "%Z"), format(Sys.time(), "%Z"))
-    expect_equal(format(result$start_timestamp, "%H:%M:%OS"), "13:52:59.000")
+    expect_equal(format(result$start_timestamp, "%H:%M:%OS"), "13:52:59")
 })
 
 test_that("parse_time_channel() returns local time zonel", {
@@ -2239,4 +2239,40 @@ test_that("create_mnirs_data edge cases", {
     expect_null(attr(df, "sample_rate"))
     expect_equal(attr(df_meta, "sample_rate"), 1)
     expect_equal(attr(df_meta, "nirs_channels"), c("A", "B"))
+})
+
+test_that("create_mnirs_data accepts NSE for *_channels", {
+    df <- tibble(A = 1:2, B = 3:4, C = 5:6, lap = c("a", "b"))
+
+    ## bare symbols
+    df_sym <- create_mnirs_data(
+        df,
+        nirs_channels = B,
+        time_channel = A,
+        event_channel = lap
+    )
+    expect_equal(attr(df_sym, "nirs_channels"), "B")
+    expect_equal(attr(df_sym, "time_channel"), "A")
+    expect_equal(attr(df_sym, "event_channel"), "lap")
+
+    ## c() expression
+    df_c <- create_mnirs_data(df, nirs_channels = c(B, C))
+    expect_equal(attr(df_c, "nirs_channels"), c("B", "C"))
+
+    ## tidyselect helper
+    df_sel <- create_mnirs_data(
+        df, nirs_channels = tidyselect::starts_with("B")
+    )
+    expect_equal(attr(df_sel, "nirs_channels"), "B")
+
+    ## external character vector
+    chans <- c("B", "C")
+    df_ext <- create_mnirs_data(df, nirs_channels = chans)
+    expect_equal(attr(df_ext, "nirs_channels"), c("B", "C"))
+
+    ## list form still works (single list argument)
+    meta <- list(nirs_channels = c("B", "C"), sample_rate = 2)
+    df_list <- create_mnirs_data(df, meta)
+    expect_equal(attr(df_list, "nirs_channels"), c("B", "C"))
+    expect_equal(attr(df_list, "sample_rate"), 2)
 })

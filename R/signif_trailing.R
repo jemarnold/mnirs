@@ -208,16 +208,15 @@ signif_pvalue <- function(
     symbol_repeat = FALSE,
     alpha = 0.05
 ) {
-    format <- match.arg(format)
-    display <- match.arg(display)
     validate_numeric(x)
     validate_numeric(digits, 1, c(0, Inf), FALSE, TRUE)
+    format <- match.arg(format)
+    display <- match.arg(display)
     validate_numeric(
         alpha, 1, c(0, 1), FALSE, 
         msg1 = "one-element", msg2 = "between {col_blue('[0, 1]')}"
     )
 
-    ## p-values cannot be infinite; coerce before branching
     x[is.infinite(x)] <- NA_real_
 
     if (display == "symbol" && symbol_repeat) {
@@ -236,7 +235,7 @@ signif_pvalue <- function(
         return(ifelse(
             x < threshold,
             sprintf("p < %.*f", digits, threshold),
-            paste0("p = ", signif_trailing(x, digits, format, trim = FALSE))
+            paste0("p = ", signif_trailing(x, digits, format, FALSE))
         ))
     }
 
@@ -248,6 +247,7 @@ signif_pvalue <- function(
         above <- thresholds[thresholds > .p]
         if (length(above) == 0L) NA_real_ else min(above)
     }, numeric(1))
+    
     # compute formatted_threshold only for non-NA nearest values
     formatted_threshold <- rep(NA_character_, length(nearest))
     valid <- !is.na(nearest)
@@ -258,10 +258,7 @@ signif_pvalue <- function(
 
     return(ifelse(
         is.na(x) | x >= alpha,
-        paste0(
-            "p = ",
-            signif_trailing(x, digits, format = "digits", trim = FALSE)
-        ),
+        paste0("p = ", signif_trailing(x, digits, "digits", FALSE)),
         paste0("p < ", formatted_threshold)
     ))
 }

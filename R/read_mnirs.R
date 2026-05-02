@@ -284,9 +284,19 @@ mnirs_metadata <- c(
 create_mnirs_data <- function(data, ...) {
     validate_mnirs_data(data, 1L)
 
+    ## NSE ========================================================
+    ## capture quosures so bare symbols / tidyselect resolve against `data`
+    dots <- rlang::enquos(...)
+    args <- Map(\(.q, .nm) {
+        if (.nm %in% c("nirs_channels", "time_channel", "event_channel")) {
+            parse_channel_name(.q, data)
+        } else {
+            rlang::eval_tidy(.q)
+        }
+    }, dots, names(dots) %||% rep("", length(dots)))
+
     ## overwrite existing attributes and add from incoming metadata
     ## incoming metadata from `...` can be either listed or un-listed
-    args <- list(...)
     incoming_metadata <- if (length(args) == 1L && is.list(args[[1L]])) {
         args[[1L]]
     } else {

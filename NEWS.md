@@ -1,16 +1,20 @@
-# mnirs 0.7.0
-
-## `plot.mnirs()` update
-
-* `plot.mnirs()` generic can now plot data frames from within a list of `class = "mnirs"` as facets.
-* Update `extract_intervals()` to return a list of `class = "mnirs"`.
-* Update `analyse_kinetics()` to return `results$data` as a list of `class = "mnirs"`.
-* Create `print.mnirs()` generic to avoid displaying extra `NextMethod()` calls when printing lists with `class = "mnirs"`.
-
-
 # mnirs 0.6.4
 
+## Plotting improvements
+
+* `plot.mnirs()` generic can now plot from a list of data frames with `class = "mnirs"` as facets.
+
+* `extract_intervals()` now returns data frames in a list of `class = "mnirs"`. Otherwise, a manually created list of data frames will have to be manually edited with `class(list) <- c("mnirs", class(list))`.
+
+* `print.mnirs()` generic created to avoid displaying extra `NextMethod()` calls when printing lists with `class = "mnirs"`.
+
+## Modified lap extraction behaviour
+
 * `extract_intervals()`: when specifying `by_lap()`, now `start` will only specify the first sample of the lap, and `end` the last sample, rather than `start = by_lap()` including the entire lap. This allows better control when multiple lap lengths are variable.
+
+## Updated core functions
+
+* `create_mnirs_data()` now properly accepts non-standard name evaluation for primary *channels*. e.g.; `create_mnirs_data(df, nirs_channels = c(o2hb, hhb))`.
 
 
 # mnirs 0.6.3
