@@ -373,6 +373,34 @@ analyse_kinetics.monoexponential <- function(
 }
 
 
+#' @rdname analyse_kinetics
+#' @export
+analyze_kinetics <- function(
+    data,
+    nirs_channels = NULL,
+    time_channel = NULL,
+    method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+    direction = c("auto", "positive", "negative"),
+    end_fit_span = Inf,
+    channel_args = list(),
+    verbose = TRUE,
+    ...
+) {
+    analyse_kinetics(
+        data = data,
+        nirs_channels = nirs_channels,
+        time_channel = time_channel,
+        method = method,
+        direction = direction,
+        end_fit_span = end_fit_span,
+        channel_args = channel_args,
+        verbose = verbose,
+        ...
+    )
+}
+
+
+
 #' Coerce `data` input to a named list of data frames
 #' @keywords internal
 as_data_list <- function(data) {

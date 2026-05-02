@@ -5,9 +5,22 @@
 \alias{analyse_kinetics.half_response_time}
 \alias{analyse_kinetics.peak_slope}
 \alias{analyse_kinetics.monoexponential}
+\alias{analyze_kinetics}
 \title{Analyse mNIRS kinetics across intervals}
 \usage{
 analyse_kinetics(
+  data,
+  nirs_channels = NULL,
+  time_channel = NULL,
+  method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+  direction = c("auto", "positive", "negative"),
+  end_fit_span = Inf,
+  channel_args = list(),
+  verbose = TRUE,
+  ...
+)
+
+analyze_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
