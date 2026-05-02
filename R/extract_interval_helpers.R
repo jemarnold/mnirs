@@ -17,9 +17,9 @@
 #' @details
 #' These helpers can be used explicitly for arguments `start`/`end`, or raw
 #' values can be passed directly:
-#'   - Numeric → [by_time()]
-#'   - Character → [by_label()],
-#'   - Explicit integer (e.g. `2L`) → [by_lap()].
+#'   - Numeric -> [by_time()]
+#'   - Character -> [by_label()],
+#'   - Explicit integer (e.g. `2L`) -> [by_lap()].
 #'   - Use [by_sample()] explicitly for sample indices.
 #'
 #' @returns An object of class `"mnirs_interval"` for use with the `start`
@@ -132,7 +132,7 @@ as_mnirs_interval <- function(x, arg = "start") {
 
 
 #' recycle a single-element span to c(before, after)
-#' positive → c(0, x), negative → c(x, 0)
+#' positive -> c(0, x), negative -> c(x, 0)
 #' @keywords internal
 recycle_span <- function(span) {
     if (is.numeric(span) && length(span) == 2L) {

@@ -31,23 +31,22 @@
 #' `analyse_kinetics()` can accept `data` in multiple formats:
 #'
 #' - A **single *"mnirs"* data frame** will be processed as a single interval.
-#' - A **list of *"mnirs"* data frames** — each interval data frame will be
+#' - A **list of *"mnirs"* data frames** -- each interval data frame will be
 #'   processed seperately
-#' - A **grouped *"mnirs"* data frame**, e.g. with `dplyr::group_by()` —
+#' - A **grouped *"mnirs"* data frame**, e.g. with `dplyr::group_by()` --
 #'   the data frame will be split by grouping levels and processed as
 #'   separate intervals.
 #'
-#' ## kinetics analysis method
-#'
-#' ## `method = "half_response_time"`
+#' ## method = "half_response_time"
 #' 
-#' Aliases: `c("half time", "response time", "half recovery time", "HRT")`
+#' Aliases:
+#' `method = c("half time", "response time", "half recovery time", "HRT")`
 #'
 #' `<under development>`
 #'
-#' ## `method = "peak_slope"`
+#' ## method = "peak_slope"
 #' 
-#' Aliases: `c("peak slope", "slope")`
+#' Aliases: `method = c("peak slope", "slope")`
 #'
 #' The `"peak_slope"` method identifies the maximum local linear slope within
 #' each `nirs_channel` using rolling least-squares regression. The local window
@@ -60,7 +59,7 @@
 #'   \item{`width` or `span`}{Either the number of samples (integer), or the
 #'       time duration in units of `time_channel` (numeric) in the local
 #'       rolling window. One of either `width` or `span` must be specified.}
-#'   \item{`align`}{Character; window alignment — `"centre"` (default),
+#'   \item{`align`}{Character; window alignment -- `"centre"` (default),
 #'       `"left"`, or `"right"`.}
 #'   \item{`partial`}{Logical; default is `FALSE`, requires local windows
 #'       to have complete number of samples specified by `width` or `span`.
@@ -70,14 +69,14 @@
 #'       propagates any `NA`s to the returned vector.}
 #' }
 #'
-#' ## `method = "monoexponential"`
+#' ## method = "monoexponential"
 #' 
-#' Aliases: `c("monoexp", "exponential", "MRT", "tau")`
+#' Aliases: `method = c("monoexp", "exponential", "MRT", "tau")`
 #'
 #' The `"monoexponential"` method fits a self-starting monoexponential
-#' curve to each `nirs_channel` using [stats::nls()] with [SS_monoexp3()]
-#' (3-parameter: A, B, tau) or [SS_monoexp4()] (4-parameter: A, B, tau,
-#' TD). See [monoexponential()] for model equations.
+#' curve to each `nirs_channel` using [stats::nls()] with [SS_monoexp4()] 
+#' (4-parameter: A, B, tau, TD), or [SS_monoexp3()] (3-parameter: A, B, tau).
+#' See [monoexponential()] for model equations.
 #'
 #' Additional arguments (`...`) accepted when `method = "monoexponential"`:
 #'
@@ -89,9 +88,9 @@
 #'   \item{`stats::nls()`}{Other arguments can be passed to [stats::nls()]}
 #' }
 #'
-#' ## `method = "sigmoidal"`
+#' ## method = "sigmoidal"
 #' 
-#' Aliases: `c("logistic", "xmid")`
+#' Aliases: `method = c("logistic", "xmid")`
 #'
 #' `<under development>`
 #'
@@ -470,12 +469,12 @@ as_data_list <- function(data) {
 #'
 #' @details
 #' 
-#' ## `adj_r2`
+#' ## adj_r2
 #' 
 #' Adjusted `R^2` penalised by `n_params`. Appropriate for OLS linear models;
 #'   interpret with caution for non-linear fits.
 #' 
-#' ## `pseudo_r2`
+#' ## pseudo_r2
 #' 
 #' Squared Pearson correlation between observed and fitted values. Equivalent
 #'   to `R^2` for OLS but well-defined for non-linear and multivariate models.

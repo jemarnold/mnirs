@@ -50,7 +50,7 @@ in which to perform the operation, according to \code{align}. In units of
 is \emph{backward looking} from the current sample.}
 
 \item{direction}{A character string specifying the slope direction to
-detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
 \item{end_fit_span}{A numeric value in units of \code{t} specifying the

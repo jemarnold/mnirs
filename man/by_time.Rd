@@ -39,9 +39,9 @@ Helper functions to define interval start or end boundaries for
 These helpers can be used explicitly for arguments \code{start}/\code{end}, or raw
 values can be passed directly:
 \itemize{
-\item Numeric → \code{\link[=by_time]{by_time()}}
-\item Character → \code{\link[=by_label]{by_label()}},
-\item Explicit integer (e.g. \code{2L}) → \code{\link[=by_lap]{by_lap()}}.
+\item Numeric -> \code{\link[=by_time]{by_time()}}
+\item Character -> \code{\link[=by_label]{by_label()}},
+\item Explicit integer (e.g. \code{2L}) -> \code{\link[=by_lap]{by_lap()}}.
 \item Use \code{\link[=by_sample]{by_sample()}} explicitly for sample indices.
 }
 }

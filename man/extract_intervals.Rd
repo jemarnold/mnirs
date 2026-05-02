@@ -51,14 +51,14 @@ lap numbers.
 values for ensemble-averaging. If \code{NULL}, will be estimated from
 \code{time_channel} (see \emph{Details}).}
 
-\item{start}{Specifies where intervals begin. Either raw values — numeric
+\item{start}{Specifies where intervals begin. Either raw values -- numeric
 for time values, character for event labels, explicit integer (e.g. \code{2L})
-for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
+for lap numbers -- or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
 or \code{\link[=by_sample]{by_sample()}}.}
 
-\item{end}{Specifies where intervals end. Either raw values — numeric for
+\item{end}{Specifies where intervals end. Either raw values -- numeric for
 time values, character for event labels, explicit integer (e.g. \code{2L})
-for lap numbers — or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
+for lap numbers -- or created with \code{\link[=by_time]{by_time()}}, \code{\link[=by_label]{by_label()}}, \code{\link[=by_lap]{by_lap()}},
 or \code{\link[=by_sample]{by_sample()}}.}
 
 \item{span}{A one- or two-element numeric vector \code{c(before, after)} in units
@@ -120,9 +120,9 @@ first sample of each lap for \code{start}, and the last lap sample for \code{end
 
 Raw values supplied to \code{start}/\code{end} are auto-coerced:
 \itemize{
-\item Numeric → \code{\link[=by_time]{by_time()}}
-\item Character → \code{\link[=by_label]{by_label()}},
-\item Explicit integer (e.g. \code{2L}) → \code{\link[=by_lap]{by_lap()}}.
+\item Numeric -> \code{\link[=by_time]{by_time()}}
+\item Character -> \code{\link[=by_label]{by_label()}},
+\item Explicit integer (e.g. \code{2L}) -> \code{\link[=by_lap]{by_lap()}}.
 \item Use \code{\link[=by_sample]{by_sample()}} explicitly for sample indices.
 }
 
@@ -130,7 +130,7 @@ Raw values supplied to \code{start}/\code{end} are auto-coerced:
 label, end by time). When lengths differ, the shorter is recycled.
 }
 
-\subsection{The \code{span} window}{
+\subsection{Timespan window}{
 
 \code{span} additively expands the timespan window around interval boundaries.
 \itemize{
@@ -148,7 +148,7 @@ boundary window: \verb{start = by_time(30), span = c(-5, 60)} returns
 }
 }
 
-\subsection{Per-interval \code{nirs_channels} for ensemble-averaging}{
+\subsection{Per-interval nirs_channels for ensemble-averaging}{
 
 When \code{event_groups = "ensemble"} or a list of numeric grouped intervals,
 \code{nirs_channels} can be specified as a list of column names to override

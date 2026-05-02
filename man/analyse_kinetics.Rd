@@ -63,7 +63,7 @@ arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{pa
 }}
 
 \item{direction}{A character string specifying the kinetics direction to
-detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
 \item{end_fit_span}{A numeric value in units of \code{t} specifying the
@@ -118,27 +118,25 @@ data frames.
 \code{analyse_kinetics()} can accept \code{data} in multiple formats:
 \itemize{
 \item A \strong{single \emph{"mnirs"} data frame} will be processed as a single interval.
-\item A \strong{list of \emph{"mnirs"} data frames} — each interval data frame will be
+\item A \strong{list of \emph{"mnirs"} data frames} -- each interval data frame will be
 processed seperately
-\item A \strong{grouped \emph{"mnirs"} data frame}, e.g. with \code{dplyr::group_by()} —
+\item A \strong{grouped \emph{"mnirs"} data frame}, e.g. with \code{dplyr::group_by()} --
 the data frame will be split by grouping levels and processed as
 separate intervals.
 }
 }
 
-\subsection{kinetics analysis method}{
-}
+\subsection{method = "half_response_time"}{
 
-\subsection{\code{method = "half_response_time"}}{
-
-Aliases: \code{c("half time", "response time", "half recovery time", "HRT")}
+Aliases:
+\code{method = c("half time", "response time", "half recovery time", "HRT")}
 
 \verb{<under development>}
 }
 
-\subsection{\code{method = "peak_slope"}}{
+\subsection{method = "peak_slope"}{
 
-Aliases: \code{c("peak slope", "slope")}
+Aliases: \code{method = c("peak slope", "slope")}
 
 The \code{"peak_slope"} method identifies the maximum local linear slope within
 each \code{nirs_channel} using rolling least-squares regression. The local window
@@ -151,7 +149,7 @@ Additional arguments (\code{...}) accepted when \code{method = "peak_slope"}:
 \item{\code{width} or \code{span}}{Either the number of samples (integer), or the
 time duration in units of \code{time_channel} (numeric) in the local
 rolling window. One of either \code{width} or \code{span} must be specified.}
-\item{\code{align}}{Character; window alignment — \code{"centre"} (default),
+\item{\code{align}}{Character; window alignment -- \code{"centre"} (default),
 \code{"left"}, or \code{"right"}.}
 \item{\code{partial}}{Logical; default is \code{FALSE}, requires local windows
 to have complete number of samples specified by \code{width} or \code{span}.
@@ -162,14 +160,14 @@ propagates any \code{NA}s to the returned vector.}
 }
 }
 
-\subsection{\code{method = "monoexponential"}}{
+\subsection{method = "monoexponential"}{
 
-Aliases: \code{c("monoexp", "exponential", "MRT", "tau")}
+Aliases: \code{method = c("monoexp", "exponential", "MRT", "tau")}
 
 The \code{"monoexponential"} method fits a self-starting monoexponential
-curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp3]{SS_monoexp3()}}
-(3-parameter: A, B, tau) or \code{\link[=SS_monoexp4]{SS_monoexp4()}} (4-parameter: A, B, tau,
-TD). See \code{\link[=monoexponential]{monoexponential()}} for model equations.
+curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp4]{SS_monoexp4()}}
+(4-parameter: A, B, tau, TD), or \code{\link[=SS_monoexp3]{SS_monoexp3()}} (3-parameter: A, B, tau).
+See \code{\link[=monoexponential]{monoexponential()}} for model equations.
 
 Additional arguments (\code{...}) accepted when \code{method = "monoexponential"}:
 
@@ -182,9 +180,9 @@ reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).
 }
 }
 
-\subsection{\code{method = "sigmoidal"}}{
+\subsection{method = "sigmoidal"}{
 
-Aliases: \code{c("logistic", "xmid")}
+Aliases: \code{method = c("logistic", "xmid")}
 
 \verb{<under development>}
 }

@@ -35,7 +35,7 @@ in which to perform the operation, according to \code{align}. In units of
 is \emph{backward looking} from the current sample.}
 
 \item{direction}{A character string specifying the slope direction to
-detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
 \item{partial}{Logical; default is \code{FALSE}, requires local windows to have

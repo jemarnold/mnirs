@@ -57,7 +57,7 @@ detect_direction <- function(
 #'   values than the candidate extreme. `end_fit_span = Inf` (*default*) 
 #'   returns the global extreme from the full range of `x`.
 #' @param direction A character string specifying the kinetics direction to
-#'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
+#'   detect -- `"auto"` (*default*), `"positive"`, or `"negative"`. See
 #'   *Details*.
 #' @inheritParams replace_invalid
 #'
@@ -79,7 +79,7 @@ detect_direction <- function(
 #'
 #' @returns A named list with three elements:
 #'   \describe{
-#'     \item{`direction`}{Character; the resolved direction used —
+#'     \item{`direction`}{Character; the resolved direction used --
 #'       `"positive"` (peak) or `"negative"` (trough).}
 #'     \item{`extreme`}{Integer or `NULL`; the index of the
 #'       first qualifying peak or trough in original `x`

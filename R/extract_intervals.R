@@ -22,14 +22,14 @@
 #'   values for ensemble-averaging. If `NULL`, will be estimated from
 #'   `time_channel` (see *Details*).
 #'
-#' @param start Specifies where intervals begin. Either raw values — numeric 
-#'   for time values, character for event labels, explicit integer (e.g. `2L`) 
-#'   for lap numbers — or created with [by_time()], [by_label()], [by_lap()],
+#' @param start Specifies where intervals begin. Either raw values -- numeric
+#'   for time values, character for event labels, explicit integer (e.g. `2L`)
+#'   for lap numbers -- or created with [by_time()], [by_label()], [by_lap()],
 #'   or [by_sample()].
 #'
-#' @param end Specifies where intervals end. Either raw values — numeric for 
-#'   time values, character for event labels, explicit integer (e.g. `2L`) 
-#'   for lap numbers — or created with [by_time()], [by_label()], [by_lap()],
+#' @param end Specifies where intervals end. Either raw values -- numeric for
+#'   time values, character for event labels, explicit integer (e.g. `2L`)
+#'   for lap numbers -- or created with [by_time()], [by_label()], [by_lap()],
 #'   or [by_sample()].
 #'
 #' @param span A one- or two-element numeric vector `c(before, after)` in units 
@@ -77,15 +77,15 @@
 #' }
 #'
 #' Raw values supplied to `start`/`end` are auto-coerced: 
-#'   - Numeric → [by_time()]
-#'   - Character → [by_label()], 
-#'   - Explicit integer (e.g. `2L`) → [by_lap()]. 
+#'   - Numeric -> [by_time()]
+#'   - Character -> [by_label()],
+#'   - Explicit integer (e.g. `2L`) -> [by_lap()]. 
 #'   - Use [by_sample()] explicitly for sample indices.
 #'
 #' `start` and `end` can use different specification types (e.g., start by
 #' label, end by time). When lengths differ, the shorter is recycled.
 #'
-#' ## The `span` window
+#' ## Timespan window
 #'
 #' `span` additively expands the timespan window around interval boundaries. 
 #' 
@@ -101,7 +101,7 @@
 #'   boundary window: `start = by_time(30), span = c(-5, 60)` returns 
 #'   `[25, 90]`.
 #'
-#' ## Per-interval `nirs_channels` for ensemble-averaging
+#' ## Per-interval nirs_channels for ensemble-averaging
 #'
 #' When `event_groups = "ensemble"` or a list of numeric grouped intervals,
 #' `nirs_channels` can be specified as a list of column names to override

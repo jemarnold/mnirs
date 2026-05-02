@@ -40,7 +40,7 @@ If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
 
 \item{direction}{A character string specifying the kinetics direction to
-detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
 \item{end_fit_span}{A numeric value in units of \code{t} specifying the

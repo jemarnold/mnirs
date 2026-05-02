@@ -62,7 +62,7 @@ the number of standard deviations from the local median.
 \item Lower values are more sensitive and flag more outliers; higher values
 are more conservative.
 \item \code{outlier_cutoff = 3} Pearson's 3 sigma edit rule.
-\code{outlier_cutoff = 2} approximates a Tukey-style 1.5×IQR rule.
+\code{outlier_cutoff = 2} approximates a Tukey-style 1.5*IQR rule.
 \code{outlier_cutoff = 0} Tukey's median filter.
 }}
 

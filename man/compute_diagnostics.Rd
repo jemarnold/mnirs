@@ -31,13 +31,13 @@ A 1-row \code{data.frame} with columns \code{n_obs}, \code{r2}, \code{adj_r2},
 Compute model diagnostics
 }
 \details{
-\subsection{\code{adj_r2}}{
+\subsection{adj_r2}{
 
 Adjusted \code{R^2} penalised by \code{n_params}. Appropriate for OLS linear models;
 interpret with caution for non-linear fits.
 }
 
-\subsection{\code{pseudo_r2}}{
+\subsection{pseudo_r2}{
 
 Squared Pearson correlation between observed and fitted values. Equivalent
 to \code{R^2} for OLS but well-defined for non-linear and multivariate models.

@@ -178,7 +178,7 @@ rolling_slope <- function(
 #' of regression parameters for the peak window.
 #'
 #' @param direction A character string specifying the slope direction to
-#'   detect — `"auto"` (*default*), `"positive"`, or `"negative"`. See
+#'   detect -- `"auto"` (*default*), `"positive"`, or `"negative"`. See
 #'   *Details*.
 #' @param ... Additional arguments.
 #' @inheritParams compute_local_windows

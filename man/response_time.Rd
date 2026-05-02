@@ -29,7 +29,7 @@ response amplitude to detect. Defaults to \code{0.5} (50\% response, i.e.
 half-response time).}
 
 \item{direction}{A character string specifying the kinetics direction to
-detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
 \item{verbose}{Logical; if \code{TRUE} (\emph{default}), informational messages are

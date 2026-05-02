@@ -24,7 +24,7 @@ values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
 returns the global extreme from the full range of \code{x}.}
 
 \item{direction}{A character string specifying the kinetics direction to
-detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
+detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
 \item{...}{Additional arguments.}
@@ -32,7 +32,7 @@ detect — \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative
 \value{
 A named list with three elements:
 \describe{
-\item{\code{direction}}{Character; the resolved direction used —
+\item{\code{direction}}{Character; the resolved direction used --
 \code{"positive"} (peak) or \code{"negative"} (trough).}
 \item{\code{extreme}}{Integer or \code{NULL}; the index of the
 first qualifying peak or trough in original \code{x}
