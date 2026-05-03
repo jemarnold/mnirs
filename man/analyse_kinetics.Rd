@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_kinetics.R
 \name{analyse_kinetics}
 \alias{analyse_kinetics}
-\alias{analyse_kinetics.half_response_time}
+\alias{analyse_kinetics.response_time}
 \alias{analyse_kinetics.peak_slope}
 \alias{analyse_kinetics.monoexponential}
 \alias{analyze_kinetics}
@@ -12,7 +12,8 @@ analyse_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+  method = c("response_time", "peak_slope", "monoexponential", "sigmoidal"),
+  t0 = NULL,
   direction = c("auto", "positive", "negative"),
   end_fit_span = Inf,
   channel_args = list(),
@@ -24,7 +25,8 @@ analyze_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+  method = c("response_time", "peak_slope", "monoexponential", "sigmoidal"),
+  t0 = NULL,
   direction = c("auto", "positive", "negative"),
   end_fit_span = Inf,
   channel_args = list(),
@@ -54,13 +56,19 @@ used.
 \verb{<under development>}. Additional arguments must be specified for each
 method. See \emph{Details}.
 \describe{
-\item{\code{"half_response_time"}}{\verb{<under development>}.}
+\item{\code{"response_time"}}{Fractional (e.g. 50\%, 63.2\%, 90\%) response
+time. Additional arguments: \code{fraction}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
 arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
 \code{\link[stats:nls]{stats::nls()}} with arguments: \code{time_delay}.}
 \item{\code{"sigmoidal"}}{\verb{<under development>}.}
 }}
+
+\item{t0}{A numeric value specifying the start of the kinetics response
+in units of \code{time_channel}. Observations where \code{time_channel <= t0}
+define the pre-response baseline. Retrieves \code{interval_times} from
+\emph{"mnirs"} metadata or default to \code{0}.}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
@@ -86,7 +94,7 @@ See \emph{Details}.}
 A formatted table of printed results, with individual elements
 accessable as a list of class \emph{"mnirs_kinetics"} containing:
 
-\item{\code{method}}{The method used, e.g. \code{"half_response_time"}.}
+\item{\code{method}}{The method used, e.g. \code{"response_time"}.}
 \item{\code{model}}{A named list of model objects (per interval,
 per \code{nirs_channel}). For \code{"peak_slope"}, each element is an
 \link[stats:lm]{lm} object; for \code{"monoexponential"}, an
@@ -126,12 +134,25 @@ separate intervals.
 }
 }
 
-\subsection{method = "half_response_time"}{
+\subsection{method = "response_time"}{
 
 Aliases:
-\code{method = c("half time", "response time", "half recovery time", "HRT")}
+\code{method = c("response time", "half recovery time", "half time", "HRT")}
 
-\verb{<under development>}
+The \code{response_time} method identifies the time at which a signal reaches the
+specified fraction of its total response amplitude relative to a baseline
+period. e.g. the time to reach 50\% of the total change in amplitude would
+be the \emph{half-response time}. See \code{\link[=response_time]{response_time()}} for details.
+
+The target fractional response value is computed as:
+
+\code{response_fitted = A + (B - A) * fraction}
+
+where \code{A} is the mean baseline value (where \code{time_channel <= t0}) and \code{B}
+is the extreme (peak or trough) value after \code{t0}. The response time is the
+elapsed time from \code{t0} to the first sample where the signal reaches or
+exceeds (above or below, depending on \code{direction}) the \code{response_fitted}
+value.
 }
 
 \subsection{method = "peak_slope"}{
@@ -162,7 +183,7 @@ propagates any \code{NA}s to the returned vector.}
 
 \subsection{method = "monoexponential"}{
 
-Aliases: \code{method = c("monoexp", "exponential", "MRT", "tau")}
+Aliases: \code{method = c("monoexp", "exponential", "tau", "MRT")}
 
 The \code{"monoexponential"} method fits a self-starting monoexponential
 curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp4]{SS_monoexp4()}}

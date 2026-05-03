@@ -4,7 +4,7 @@
 \alias{build_channel_results}
 \title{Assemble per-channel results into an attributed data frame}
 \usage{
-build_channel_results(results, nirs_channels)
+build_channel_results(results, nirs_channels, t0, verbose = TRUE)
 }
 \arguments{
 \item{results}{List of per-channel result lists.}

@@ -246,7 +246,7 @@ analyse_kinetics(
     data,           # "mnirs" df | named list of "mnirs" dfs | {dplyr} grouped df
     nirs_channels  = NULL,
     time_channel   = NULL,
-    method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+    method = c("response_time", "peak_slope", "monoexponential", "sigmoidal"),
     direction = c("auto", "positive", "negative"),
     end_fit_span   = Inf,    # truncate fit after extreme; Inf = global extreme
     channel_args   = list(), # per nirs_channel argument overrides
@@ -272,7 +272,7 @@ analyse_kinetics(
 
 | Canonical | Aliases |
 |---|---|
-| `"half_response_time"` | `"half time"`, `"response\|recovery time"`, `"HRT"` |
+| `"response_time"` | `"half time"`, `"response\|recovery time"`, `"HRT"` |
 | `"peak_slope"` | `"peak slope"`, `"slope"` |
 | `"monoexponential"` | `"monoexp"`, `"exponential"`, `"MRT"`, `"tau"` |
 | `"sigmoidal"` | `"logistic"`, `"xmid"` |
@@ -281,7 +281,7 @@ analyse_kinetics(
 
 **Per-method args `...`:**
 
-`"half_response_time"`: `t0` (default `0`), `fraction` (default `0.5`; `0.632` ≈ MRT)
+`"response_time"`: `t0` (default `0`), `fraction` (default `0.5`; `0.632` ≈ MRT)
 
 `"peak_slope"`: `width` or `span` (one required); `align` (`"centre"`, `"left"`, `"right"`); `partial` (default `FALSE`)
 
@@ -296,7 +296,7 @@ Names must match `nirs_channels` exactly; unrecognised names silently ignored.
 
 **Coefficients:**
 
-`"half_response_time"`: `interval`, `nirs_channels`, `time_channel`, `A`, `B`, `response_time`, `response_value`, `fitted`, `idx`
+`"response_time"`: `interval`, `nirs_channels`, `time_channel`, `A`, `B`, `response_time`, `response_value`, `fitted`, `idx`
 
 `"peak_slope"`: `interval`, `nirs_channels`, `time_channel`, `slope`, `intercept`, `fitted`, `<time_channel>`, `idx`
 
@@ -384,7 +384,7 @@ format_hmmss(x)              # numeric seconds → "mm:ss" or "h:mm:ss"
 | Ensemble needs regular samples | `event_groups = "ensemble"` warns if irregular |
 | `nirs_channels = list()` default | auto-retrieves and groups all channels; see §3.5 |
 | `channel_args` names must match exactly | unrecognised names silently ignored |
-| `monoexponential` fallback | 4-param → 3-param → `"half_response_time"` with warnings |
+| `monoexponential` fallback | 4-param → 3-param → `"response_time"` with warnings |
 | Single df to `analyse_kinetics()` | `interval = "interval_1"` in coefficients |
 
 ---

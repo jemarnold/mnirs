@@ -279,6 +279,7 @@ analyse_monoexponential <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     time_delay = TRUE, ## ! better arg name?
+    t0 = NULL,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -288,11 +289,12 @@ analyse_monoexponential <- function(
     ## validation ==================================================
     validate_mnirs_data(data)
     args <- list(...)
+    direction <- match.arg(direction)
+
     if (!(args$bypass_checks %||% FALSE)) {
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
-        direction <- match.arg(direction)
     }
     nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
@@ -305,12 +307,13 @@ analyse_monoexponential <- function(
     validate_numeric(
         end_fit_span, 1, c(0, Inf), msg1 = "one-element positive"
     )
-
     time_vec <- data[[time_channel]]
+    t0 <- validate_t0(t0, data, time_vec, verbose)
     interval_names <- args$interval_names %||% substitute(data)
 
     default_args <- list(
         time_delay = time_delay,
+        t0 = t0,
         direction = direction,
         end_fit_span = end_fit_span,
         verbose = verbose,
@@ -386,7 +389,9 @@ analyse_monoexponential <- function(
                             "x" = "3-parameter {.fn SS_monoexp3} fit failed \\
                             for {.field {(.nirs)}} in \\
                             {.field {interval_names}}.",
-                            "!" = "{conditionMessage(e)}"
+                            "!" = "{conditionMessage(e)}",
+                            "i" = "Falling back to estimated response time \\
+                            jwith {.fn response_time}."
                         ))
                     }
                     NULL
@@ -394,29 +399,27 @@ analyse_monoexponential <- function(
             )
         }
 
+        ## ! implement fallback HRT method
         if (is.null(model)) {
             return(build_na_results(.nirs, na_coefs, all_args, n_params))
         }
 
         fitted_vals <- stats::predict(model)
         coefs <- stats::coef(model)
-        TD_arg <- if (n_params == 4L) coefs[["TD"]] else NULL
+        TD_arg <- if (n_params == 4L) coefs[["TD"]] - t0 else NULL
         TD_val <- TD_arg %||% NA_real_
         MRT_val <- sum(TD_arg, coefs[["tau"]])
         HRT_val <- sum(TD_arg, coefs[["tau"]] * log(2))
 
-        ## predict response at tau and MRT using the fitted model
-        tau_fitted <- monoexponential(
-            coefs[["tau"]], coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
-        )
-        MRT_fitted <- monoexponential(
-            MRT_val, coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
-        )
-        HRT_fitted <- monoexponential(
-            HRT_val, coefs[["A"]], coefs[["B"]], coefs[["tau"]], TD_arg
+        ## predict response at tau, MRT, and HRT using the fitted model
+        fitted_params <- monoexponential(
+            t = c(coefs[["tau"]], MRT_val, HRT_val),
+            A = coefs[["A"]],
+            B = coefs[["B"]],
+            tau = coefs[["tau"]],
+            TD = TD_arg
         )
 
-        ## ! fix cases where `zero_time = FALSE`: esp. for half_time
         coefs <- data.frame(
             nirs_channels = .nirs,
             time_channel  = time_channel,
@@ -427,9 +430,9 @@ analyse_monoexponential <- function(
             TD            = TD_val,
             MRT           = MRT_val,
             HRT           = HRT_val,
-            tau_fitted    = tau_fitted,
-            MRT_fitted    = MRT_fitted,
-            HRT_fitted    = HRT_fitted
+            tau_fitted    = fitted_params[[1L]],
+            MRT_fitted    = fitted_params[[2L]],
+            HRT_fitted    = fitted_params[[3L]]
         )
 
         diag <- compute_diagnostics(
@@ -448,7 +451,7 @@ analyse_monoexponential <- function(
         )
     })
 
-    return(build_channel_results(results, nirs_channels))
+    return(build_channel_results(results, nirs_channels, t0, verbose))
 }
 
 

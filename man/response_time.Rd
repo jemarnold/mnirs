@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_response_time.R
 \name{response_time}
 \alias{response_time}
-\title{Calculate fractional kinetics response time}
+\title{Compute fractional kinetics response time}
 \usage{
 response_time(
   x,
@@ -24,16 +24,17 @@ Default is \code{seq_along(x)}.}
 in units of \code{t}. Observations where \code{t <= t0} define the baseline window.
 Defaults to \code{0}.}
 
-\item{fraction}{A numeric value in \verb{[0, 1]} specifying the fractional
-response amplitude to detect. Defaults to \code{0.5} (50\% response, i.e.
-half-response time).}
+\item{fraction}{A numeric value in the range \verb{[0, 1]} specifying the
+fractional response amplitude to detect. Defaults to \code{0.5} (50\% response,
+i.e. half-response time).}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{verbose}{Logical; if \code{TRUE} (\emph{default}), informational messages are
-shown. Controlled by \code{getOption("mnirs.verbose")}.}
+\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
+\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
 }

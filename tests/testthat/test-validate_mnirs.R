@@ -577,7 +577,7 @@ test_that("validate_sample_rate() uses metadata when NULL", {
 test_that("validate_sample_rate() uses explicit value with warning when provided", {
     data <- create_test_data(sample_rate = 10)
     expect_equal(validate_sample_rate(data, "time", 20), 20) |>
-        expect_warning("appears to be inconsistent with estimated")
+        expect_warning("appears to be inconsistent")
     ## uses explicit without warning
     expect_equal(validate_sample_rate(data, "time", 20, verbose = FALSE), 20) |>
         expect_silent()
@@ -711,4 +711,53 @@ test_that("validate_x_t() validates inputs", {
     expect_error(validate_x_t(x = 1:10, t = NULL), "valid.*numeric")
     expect_error(validate_x_t(x = NA_real_, t = 1), "valid.*numeric")
     expect_silent(validate_x_t(x = NA_real_, t = 1, allow_na = TRUE))
+})
+
+
+## validate_t0() ==============================
+test_that("validate_t0() uses explicit t0 when provided", {
+    data <- create_test_data()
+    attr(data, "interval_times") <- 3
+    expect_equal(validate_t0(5, data, data[["time"]]), 5)
+})
+
+test_that("validate_t0() falls back to interval_times attribute", {
+    data <- create_test_data()
+    attr(data, "interval_times") <- 3
+    expect_equal(validate_t0(NULL, data, data[["time"]]), 3)
+})
+
+test_that("validate_t0() falls back to zero when no t0 or attribute", {
+    data <- create_test_data()
+    expect_equal(validate_t0(NULL, data, data[["time"]]), 0)
+})
+
+test_that("validate_t0() rejects non-numeric or multi-element t0", {
+    data <- create_test_data()
+    expect_error(validate_t0("5", data, data[["time"]]), "numeric")
+    expect_error(validate_t0(c(1, 2), data, data[["time"]]), "numeric")
+    expect_error(validate_t0(NA, data, data[["time"]]), "numeric")
+})
+
+test_that("validate_t0() warns and resets when no observations <= t0", {
+    data <- create_test_data()
+    expect_warning(
+        result <- validate_t0(-1, data, data[["time"]]),
+        "No observations.*time_channel"
+    )
+    expect_equal(result, data[["time"]][1L])
+
+    ## verbose = FALSE suppresses warning, still resets
+    expect_silent(
+        result <- validate_t0(-1, data, data[["time"]], verbose = FALSE)
+    )
+    expect_equal(result, data[["time"]][1L])
+})
+
+test_that("validate_t0() errors when t0 exceeds time range", {
+    data <- create_test_data(time_max = 10)
+    expect_error(
+        validate_t0(100, data, data[["time"]]),
+        "No observations.*before"
+    )
 })

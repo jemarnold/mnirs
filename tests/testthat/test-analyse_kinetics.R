@@ -466,7 +466,9 @@ test_that("build_channel_results combines channels correctly", {
     )
     
     nirs_channels <- c("ch1", "ch2")
-    result <- build_channel_results(list(ch1 = ch1, ch2 = ch2), nirs_channels)
+    result <- build_channel_results(
+        list(ch1 = ch1, ch2 = ch2), t0 = 0, nirs_channels
+    )
 
     ## coefficient rows are combined
     expect_equal(nrow(result), 2L)
@@ -493,6 +495,37 @@ test_that("build_channel_results combines channels correctly", {
     ## channel_args combined
     ca <- attr(result, "channel_args")
     expect_equal(nrow(ca), 2L)
+})
+
+test_that("build_channel_results warns for time coefficients < t0", {
+    ch1 <- list(
+        coefficients = data.frame(
+            nirs_channels = "ch1", slope = 1.0, peak_slope_time = 0
+        ),
+        model = data.frame(temp = "object"),
+        fitted_data = data.frame(window_idx = 1:3, fitted = c(1, 2, 3)),
+        diagnostics = data.frame(nirs_channels = "ch1", r2 = 0.95),
+        channel_args = data.frame(nirs_channels = "ch1", width = 10)
+    )
+    ch2 <- list(
+        coefficients = data.frame(
+            nirs_channels = "ch2", slope = 2.0, peak_slope_time = -2),
+        model = data.frame(temp = "object"),
+        fitted_data = data.frame(window_idx = 1:3, fitted = c(4, 5, 6)),
+        diagnostics = data.frame(nirs_channels = "ch2", r2 = 0.85),
+        channel_args = data.frame(nirs_channels = "ch2", width = 10)
+    )
+
+    nirs_channels <- c("ch1", "ch2")
+
+    expect_warning(
+        result <- build_channel_results(
+            list(ch1 = ch1, ch2 = ch2), nirs_channels, t0 = 0, verbose = TRUE
+        ),
+        "Negative.*coefficients"
+    )
+
+    expect_equal(result$peak_slope_time, c(0, -2))
 })
 
 
@@ -1357,13 +1390,8 @@ test_that("analyse_kinetics.peak_slope results have correct columns", {
     )
 
     expected_cols <- c(
-        "interval",
-        "nirs_channels",
-        "slope",
-        "intercept",
-        "fitted",
-        "time",
-        "idx"
+        "interval", "nirs_channels", "slope", "intercept", 
+        "fitted", "peak_slope_time", "idx"
     )
     expect_true(all(expected_cols %in% names(result$coefficients)))
 })

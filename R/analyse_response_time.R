@@ -1,4 +1,4 @@
-#' Calculate fractional kinetics response time
+#' Compute fractional kinetics response time
 #'
 #' Identify the time at which a signal reaches a specified fraction of its
 #' total response amplitude relative to a baseline period (e.g. *half-response
@@ -7,11 +7,9 @@
 #' @param t0 A numeric value specifying the start of the kinetics response
 #'   in units of `t`. Observations where `t <= t0` define the baseline window.
 #'   Defaults to `0`.
-#' @param fraction A numeric value in `[0, 1]` specifying the fractional
-#'   response amplitude to detect. Defaults to `0.5` (50% response, i.e.
-#'   half-response time).
-#' @param verbose Logical; if `TRUE` (*default*), informational messages are
-#'   shown. Controlled by `getOption("mnirs.verbose")`.
+#' @param fraction A numeric value in the range `[0, 1]` specifying the
+#'   fractional response amplitude to detect. Defaults to `0.5` (50% response,
+#'   i.e. half-response time).
 #' @param ... Additional arguments.
 #' @inheritParams replace_invalid
 #' @inheritParams find_kinetics_idx
@@ -92,37 +90,42 @@ response_time <- function(
     validate_numeric(
         fraction, 1L, c(0, 1), msg2 = "between {col_blue('[0, 1]')}."
     )
+    direction <- match.arg(direction)
 
     if (!(list(...)$bypass_checks %||% FALSE)) {
         validate_x_t(x, t, allow_na = TRUE)
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
-        direction <- match.arg(direction)
         ## detect direction from net trend, fallback to abs magnitude
         direction <- detect_direction(x, t, x, direction)
     }
 
-    ## process =====================================================
-    compare_fn <- if (direction == "positive") `>=` else `<=`
     baseline_idx <- which(t <= t0)
-    if (length(baseline_idx) == 0L) {
-        if (verbose) {
-            cli_warn(c(
-                "!" = "No observations where {.arg t} <= {.val {t0}}. \\
-                {.code x[1]} used as baseline."
+
+    if (!(list(...)$bypass_checks %||% FALSE)) {
+        validate_numeric(t0, 1L)
+        if (length(baseline_idx) == 0L) {
+            if (verbose) {
+                cli_warn(c(
+                    "!" = "No observations where {.arg t} <= {.arg t0} = \\
+                    {.val {t0}}.",
+                    "i" = "{.code x[1]} used as response baseline."
+                ))
+            }
+            baseline_idx <- 1L
+            t0 <- t[baseline_idx]
+        }
+        if (t0 > t[length(t)]) {
+            cli_abort(c(
+                "x" = "No observations in {.arg t} before {.arg t0}.",
+                "i" = "{.arg t0} must be specified within the range of \\
+                {.arg t}."
             ))
         }
-        baseline_idx <- 1L
-        t0 <- t[baseline_idx]
-    }
-    if (t0 > rev(t)[1L]) {
-        cli_abort(c(
-            "x" = "No observations in {.arg t} before {.arg t0}.",
-            "i" = "{.arg t0} must be specified within the range of {.arg t}."
-        ))
     }
 
+    ## process =====================================================
     ## look for extreme after t0
     x_valid <- c(rep(NA_real_, length(baseline_idx)), x[t > t0])
     extreme_idx <- if (direction == "positive") {
@@ -134,12 +137,14 @@ response_time <- function(
     A <- mean(x[baseline_idx], na.rm = TRUE)
     B <- x[extreme_idx]
     response_fitted <- A + (B - A) * fraction
+    compare_fn <- if (direction == "positive") `>=` else `<=`
     response_idx <- which(compare_fn(x_valid, response_fitted))[1L]
 
     if (is.na(response_idx)) {
         if (verbose) {
             cli_warn(c(
-                "!" = "No valid {.val {direction}} extremes after {.arg t0}. \\ Returning {.val {NA}}."
+                "!" = "No valid {.val {direction}} extremes after {.arg t0}. \\
+                Returning {.val {NA}}."
             ))
         }
         response_fitted <- NA_real_
@@ -158,17 +163,13 @@ response_time <- function(
 }
 
 
-#' Analyse fractional response time across NIRS channels
+#' Analyse fractional kinetics response time across NIRS channels
 #'
 #' Compute the fractional response time for each `nirs_channel` within a
 #' single *"mnirs"* data frame and return a data frame of parameters with
 #' per-channel metadata as attributes. Called by [analyse_kinetics()] when
-#' `method = "response_time"` or `"HRT"`.
+#' `method = "response_time"`.
 #'
-#' @param t0 A numeric value specifying the start of the kinetics response,
-#'   in units of `time_channel`. Observations where `t <= t0` define the 
-#'   baseline window. Defaults to `0` or retrieves `interval_times` from 
-#'   *"mnirs"* metadata.
 #' @inheritParams validate_mnirs
 #' @inheritParams analyse_kinetics
 #' @inheritParams response_time
@@ -213,7 +214,7 @@ analyse_response_time <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    t0 = 0,
+    t0 = NULL,
     fraction = 0.5,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
@@ -229,10 +230,11 @@ analyse_response_time <- function(
     nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
     direction <- match.arg(direction)
-
     time_vec <- data[[time_channel]]
+    t0 <- validate_t0(t0, data, time_vec, verbose)
+
     default_args <- list(
-        t0 = t0, ## ! implement t0 (interval_times?) in other analyse_* fns
+        t0 = t0,
         fraction = fraction,
         direction = direction,
         end_fit_span = end_fit_span,
@@ -243,7 +245,6 @@ analyse_response_time <- function(
 
     ## process per-channel =================================
     results <- lapply(nirs_channels, \(.nirs) {
-        ## TODO consider refactoring explicitly for lower overhead
         all_args <- utils::modifyList(
             default_args, channel_args[[.nirs]] %||% list()
         )
@@ -302,5 +303,5 @@ analyse_response_time <- function(
     })
 
     ## coefs tibble with per-channel metadata as attributes
-    return(build_channel_results(results, nirs_channels))
+    return(build_channel_results(results, nirs_channels, verbose))
 }

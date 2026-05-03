@@ -102,6 +102,8 @@ rolling_slope <- function(
     ## validation =================================================
     args <- list(...)
     n <- length(x)
+    align <- sub("^center$", "centre", align)
+    align <- match.arg(align)
 
     insufficient_warn <- c(
         "!" = "Insufficient valid samples detected in {.fn froll_slope}.",
@@ -111,8 +113,6 @@ rolling_slope <- function(
 
     if (!(args$bypass_checks %||% FALSE)) {
         validate_x_t(x, t, allow_na = TRUE)
-        align <- sub("^center$", "centre", align)
-        align <- match.arg(align)
 
         ## return NA with warning
         if (n == 0L) {
@@ -261,8 +261,9 @@ peak_slope <- function(
     ...
 ) {
     args <- list(...)
+    direction <- match.arg(direction)
+
     if (!(args$bypass_checks %||% FALSE)) {
-        direction <- match.arg(direction)
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
@@ -394,6 +395,7 @@ analyse_peak_slope <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
+    t0 = NULL,
     width = NULL,
     span = NULL,
     align = c("centre", "left", "right"),
@@ -408,11 +410,12 @@ analyse_peak_slope <- function(
     ## validation ==============================================
     validate_mnirs_data(data)
     args <- list(...)
+    direction <- match.arg(direction)
+    
     if (!(args$bypass_checks %||% FALSE)) {
         if (missing(verbose)) {
             verbose <- getOption("mnirs.verbose", default = TRUE)
         }
-        direction <- match.arg(direction)
     }
     nirs_channels <- validate_nirs_channels(enquo(nirs_channels), data, verbose)
     time_channel <- validate_time_channel(enquo(time_channel), data)
@@ -422,9 +425,11 @@ analyse_peak_slope <- function(
     validate_numeric(
         end_fit_span, 1, c(0, Inf), msg1 = "one-element positive"
     )
-
     time_vec <- data[[time_channel]]
+    t0 <- validate_t0(t0, data, time_vec, verbose)
+
     default_args <- list(
+        t0 = t0,
         width = width,
         span = span,
         align = align,
@@ -454,29 +459,29 @@ analyse_peak_slope <- function(
         slopes <- do.call(peak_slope, c(list(x = x_fit, t = t_fit), all_args))
         
         coefs <- data.frame(
-            nirs_channels = .nirs,
-            time_channel  = time_channel,
-            slope         = slopes$slope,
-            intercept     = slopes$intercept,
-            fitted        = slopes$y, ## predicted response value at idx
-            t             = slopes$t,
-            idx           = slopes$idx
+            nirs_channels   = .nirs,
+            time_channel    = time_channel,
+            slope           = slopes$slope,
+            intercept       = slopes$intercept,
+            fitted          = slopes$y, ## predicted response value at idx
+            peak_slope_time = slopes$t - t0,
+            idx             = slopes$idx
         )
-        names(coefs)[names(coefs) == "t"] <- time_channel
+        
         diag <- compute_diagnostics(
-            x             = x_fit[slopes$window_idx],
-            t             = t_fit[slopes$window_idx],
-            fitted        = slopes$fitted,
-            n_params      = 1L,
-            verbose       = verbose
+            x               = x_fit[slopes$window_idx],
+            t               = t_fit[slopes$window_idx],
+            fitted          = slopes$fitted,
+            n_params        = 1L,
+            verbose         = verbose
         )
 
         list(
-            coefficients   = coefs,
-            model          = slopes$model,
+            coefficients    = coefs,
+            model           = slopes$model,
             fitted_data = data.frame(
-                window_idx = slopes$window_idx,
-                fitted     = slopes$fitted
+                window_idx  = slopes$window_idx,
+                fitted      = slopes$fitted
             ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = build_channel_args(.nirs, all_args)
@@ -484,5 +489,5 @@ analyse_peak_slope <- function(
     })
 
     ## coefs tibble with per-channel metadata as attributes
-    return(build_channel_results(results, nirs_channels))
+    return(build_channel_results(results, nirs_channels, t0, verbose))
 }

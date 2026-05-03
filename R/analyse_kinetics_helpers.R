@@ -48,13 +48,13 @@ detect_direction <- function(
 
 #' Find valid model-fitting indices up to the first extreme
 #'
-#' Filters `x` and `t` to valid finite values, locates the first valid peak 
-#' (maximum) or trough (minimum) where `t >= 0`, and returns the integer 
+#' Filters `x` and `t` to valid finite values, locates the first valid peak
+#' (maximum) or trough (minimum) where `t >= 0`, and returns the integer
 #' indices of all finite observations up to `end_fit_span` past that extreme.
 #'
 #' @param end_fit_span A numeric value in units of `t` specifying the
 #'   forward-looking window used to check for subsequent greater/lesser
-#'   values than the candidate extreme. `end_fit_span = Inf` (*default*) 
+#'   values than the candidate extreme. `end_fit_span = Inf` (*default*)
 #'   returns the global extreme from the full range of `x`.
 #' @param direction A character string specifying the kinetics direction to
 #'   detect -- `"auto"` (*default*), `"positive"`, or `"negative"`. See
@@ -100,13 +100,13 @@ find_kinetics_idx <- function(
     ## validation =================================================
     args <- list(...)
     n <- length(x)
+    direction <- match.arg(direction)
 
     if (!(args$bypass_checks %||% FALSE)) {
         validate_x_t(x, t, allow_na = TRUE)
         validate_numeric(
             end_fit_span, 1, c(0, Inf), msg1 = "one-element positive"
         )
-        direction <- match.arg(direction)
     }
 
     ## all finite indices (including t < 0)
@@ -132,7 +132,7 @@ find_kinetics_idx <- function(
     direction <- detect_direction(x, t, x, direction)
     extreme_fn <- if (direction == "positive") max else min
     compare_fn <- if (direction == "positive") `>=` else `<=`
-    which_fn   <- if (direction == "positive") which.max else which.min
+    which_fn <- if (direction == "positive") which.max else which.min
     invalid_return$direction <- direction
 
     ## monotonic: if global extreme is the last x value
@@ -362,8 +362,8 @@ build_na_results <- function(
 #' @returns A `data.frame` with attributes `"model"`, `"fitted_data"`,
 #'   `"diagnostics"`, and `"channel_args"`.
 #' @keywords internal
-build_channel_results <- function(results, nirs_channels) {
-    return(structure(
+build_channel_results <- function(results, nirs_channels, t0, verbose = TRUE) {
+    result <- structure(
         do.call(rbind, lapply(results, `[[`, "coefficients")),
         model = setNames(lapply(results, `[[`, "model"), nirs_channels),
         fitted_data = setNames(
@@ -371,5 +371,23 @@ build_channel_results <- function(results, nirs_channels) {
         ),
         diagnostics = do.call(rbind, lapply(results, `[[`, "diagnostics")),
         channel_args = do.call(rbind, lapply(results, `[[`, "channel_args"))
-    ))
+    )
+
+    if (verbose) {
+        check_cols <- intersect(
+            c("TD", "tau", "response_time", "peak_slope_time"), names(result)
+        )
+
+        if (any(unlist(result[check_cols]) < 0, na.rm = TRUE)) {
+            cli_warn(c(
+                "!" = "Negative {.arg time_channel} coefficients imply the \\
+                response occured before {.arg t0}. This may indicate a \\
+                poorly fitting or misparameterised model.",
+                "i" = "Check {.arg time_channel} and {.arg t0} values, or \\
+                consider using a different {.fn analyse_kinetics} method."
+            ))
+        }
+    }
+
+    return(result)
 }

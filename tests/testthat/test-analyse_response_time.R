@@ -63,6 +63,24 @@ test_that("response_time validates inputs", {
     )
 })
 
+test_that("response_time respects `bypass_checks`", {
+    ## expect NOT warning "No observations.*t.*<=.*t0"
+    expect_warning(
+        response_time(
+            1:5, t0 = -5, bypass_checks = TRUE
+        ),
+        "No valid.*auto"
+    )
+    ## expect NOT error "No observations in.*t.*before.*st0"
+    expect_warning(
+        response_time(
+            1:5, t0 = 10, bypass_checks = TRUE
+        ),
+        "No valid.*auto"
+    )
+    
+})
+
 test_that("response_time respects fraction parameter", {
     x <- c(rep(0, 5), seq(0, 100, length.out = 20))
     t <- seq_along(x) - 1

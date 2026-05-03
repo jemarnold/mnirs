@@ -365,7 +365,8 @@ validate_event_channel <- function(
     if (is.null(event_channel) && required) {
         cli_abort(c(
             "x" = "{.arg event_channel} not detected in metadata.",
-            "i" = "Check your data attributes or define {.arg event_channel} \\ explicitly."
+            "i" = "Check your data attributes or define {.arg event_channel} \\
+            explicitly."
         ))
     } else if (is.null(event_channel) && !required) {
         ## return event_channel = NULL if not required
@@ -410,6 +411,7 @@ validate_event_channel <- function(
 estimate_sample_rate <- function(x) {
     ## estimate samples per second
     sample_rate_raw <- 1 / median(diff(x), na.rm = TRUE)
+    
     if (!is.finite(sample_rate_raw) || sample_rate_raw == 0) {
         cli_abort(c(
             "x" = "Unable to estimate {.arg sample_rate}.",
@@ -418,11 +420,11 @@ estimate_sample_rate <- function(x) {
         ))
     }
 
-    mags <- 10^floor(log10(sample_rate_raw))
-    val <- sample_rate_raw / mags
-    pretty_base <- c(1, 2, 5, 10)
-    rounded <- pretty_base[which.min(abs(pretty_base - val))]
-    return(rounded * mags)
+    pretty_vals <- c(
+        0.25, 0.5, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 50, 60, 75, 100
+    )
+    rounded <- pretty_vals[which.min(abs(pretty_vals - sample_rate_raw))]
+    return(rounded)
 }
 
 
@@ -463,14 +465,16 @@ validate_sample_rate <- function(
     ## if provided sample rate seems off and time_channel doesn't appear
     ## to be integer values, report warning
     if (
-        verbose &&
-            !isTRUE(all.equal(1, sample_rate_est, tolerance = 0.001)) &
-            !isTRUE(all.equal(sample_rate_est, sample_rate, tolerance = 0.5))
+        verbose && !isTRUE(
+            all.equal(1, sample_rate_est, tolerance = 0.001, scale = 1)
+        ) & !isTRUE(
+            all.equal(sample_rate_est, sample_rate, tolerance = 0.5, scale = 1)
+        )
     ) {
         cli_warn(c(
-            "!" = "{.arg sample_rate} = {.val {sample_rate}} appears to be \\
-            inconsistent with estimated sample_rate = \\
-            {.val {sample_rate_est}}.",
+            "!" = "`sample_rate = {.val {sample_rate}}` appears to be \\
+            inconsistent with {.arg time_channel}. Estimated \\
+            `sample_rate = {.val {sample_rate_est}}`.",
             "i" = "Check that your sample rate and {.arg time_channel} \\
             values are consistent."
         ))
@@ -531,4 +535,36 @@ make_list <- function(x) {
     } else {
         return(list(x))
     }
+}
+
+
+
+
+
+#' Validate t0
+#' @keywords internal
+validate_t0 <- function(t0, data, time_vec, verbose = TRUE) {
+    ## fall back to metadata or zero
+    t0 <- t0 %||% attr(data, "interval_times") %||% 0
+    validate_numeric(t0, 1L)
+
+    if (length(which(time_vec <= t0)) == 0L) {
+        if (verbose) {
+            cli_warn(c(
+                "!" = "No observations where {.arg time_channel} <= \\
+                `t0 = {.val {t0}}`.",
+                "i" = "All samples included in response."
+            ))
+        }
+        t0 <- time_vec[1L]
+    }
+    if (t0 > time_vec[length(time_vec)]) {
+        cli_abort(c(
+            "x" = "No observations in {.arg time_channel} before {.arg t0}.",
+            "i" = "{.arg t0} must be specified within the range of \\
+            {.arg time_channel}."
+        ))
+    }
+
+    return(t0)
 }

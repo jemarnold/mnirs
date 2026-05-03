@@ -166,7 +166,7 @@ Figure 7: The same two intervals ensemble-averaged to return the mean deoxygenat
 
 The initial publication of `mnirs` version 0.6.0 to CRAN represents the core processing functionality common to most mNIRS applications. Subsequent analysis functions are currently being developed, covering common and emerging protocols used in exercise physiology and sport science research, including:
 
-* Oxygenation kinetics modelling with parametric (e.g. monoexponential and sigmoidal non-linear curves, and linear regression slope analysis) or non-parametric methods (e.g. half-response time), used for reoxygenation kinetics {van Hooff, 2022, 4547} or microvascular responsiveness assessment {Bopp, 2011}.
+* Oxygenation kinetics modelling with parametric (e.g. monoexponential and sigmoidal non-linear curves, and linear regression slope analysis) or non-parametric methods (e.g. response time), used for reoxygenation kinetics {van Hooff, 2022, 4547} or microvascular responsiveness assessment {Bopp, 2011}.
 
 * Critical oxygenation breakpoint analysis {Kirby, 2021, 3067; Sendra-Perez, 2023, 7626}, eventually integrating both expert visual evaluation and algorithmic breakpoint analysis, similar to recent developments in evaluating ventilatory thresholds from metabolic gas exchange {Keir, 2026}.
 

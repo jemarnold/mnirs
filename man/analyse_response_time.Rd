@@ -2,13 +2,13 @@
 % Please edit documentation in R/analyse_response_time.R
 \name{analyse_response_time}
 \alias{analyse_response_time}
-\title{Analyse fractional response time across NIRS channels}
+\title{Analyse fractional kinetics response time across NIRS channels}
 \usage{
 analyse_response_time(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  t0 = 0,
+  t0 = NULL,
   fraction = 0.5,
   direction = c("auto", "positive", "negative"),
   end_fit_span = Inf,
@@ -35,14 +35,14 @@ Must match a column name in \code{data} exactly.
 used.
 }}
 
-\item{t0}{A numeric value specifying the start of the kinetics response,
-in units of \code{time_channel}. Observations where \code{t <= t0} define the
-baseline window. Defaults to \code{0} or retrieves \code{interval_times} from
-\emph{"mnirs"} metadata.}
+\item{t0}{A numeric value specifying the start of the kinetics response
+in units of \code{time_channel}. Observations where \code{time_channel <= t0}
+define the pre-response baseline. Retrieves \code{interval_times} from
+\emph{"mnirs"} metadata or default to \code{0}.}
 
-\item{fraction}{A numeric value in \verb{[0, 1]} specifying the fractional
-response amplitude to detect. Defaults to \code{0.5} (50\% response, i.e.
-half-response time).}
+\item{fraction}{A numeric value in the range \verb{[0, 1]} specifying the
+fractional response amplitude to detect. Defaults to \code{0.5} (50\% response,
+i.e. half-response time).}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
@@ -84,7 +84,7 @@ recording the resolved arguments used.
 Compute the fractional response time for each \code{nirs_channel} within a
 single \emph{"mnirs"} data frame and return a data frame of parameters with
 per-channel metadata as attributes. Called by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when
-\code{method = "response_time"} or \code{"HRT"}.
+\code{method = "response_time"}.
 }
 \details{
 \subsection{Per-channel argument overrides}{

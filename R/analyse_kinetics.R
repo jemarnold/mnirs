@@ -10,13 +10,18 @@
 #'   `<under development>`. Additional arguments must be specified for each
 #'   method. See *Details*.
 #'   \describe{
-#'      \item{`"half_response_time"`}{`<under development>`.}
+#'      \item{`"response_time"`}{Fractional (e.g. 50%, 63.2%, 90%) response 
+#'      time. Additional arguments: `fraction`.}
 #'      \item{`"peak_slope"`}{Peak local linear regression slope. Additional
 #'      arguments: `width` or `span`, `align`, `direction`, `partial`, `na.rm`.}
 #'      \item{`"monoexponential"`}{Monoexponential curve fit via
 #'      [stats::nls()] with arguments: `time_delay`.}
 #'      \item{`"sigmoidal"`}{`<under development>`.}
 #'   }
+#' @param t0 A numeric value specifying the start of the kinetics response
+#'   in units of `time_channel`. Observations where `time_channel <= t0`
+#'   define the pre-response baseline. Retrieves `interval_times` from 
+#'   *"mnirs"* metadata or default to `0`.
 #' @param channel_args An *optional* `list()` with names corresponding to
 #'   `nirs_channels` for unique per-channel arguments to override global
 #'   default arguments (see *Details*).
@@ -37,12 +42,25 @@
 #'   the data frame will be split by grouping levels and processed as
 #'   separate intervals.
 #'
-#' ## method = "half_response_time"
+#' ## method = "response_time"
 #' 
 #' Aliases:
-#' `method = c("half time", "response time", "half recovery time", "HRT")`
+#' `method = c("response time", "half recovery time", "half time", "HRT")`
 #'
-#' `<under development>`
+#' The `response_time` method identifies the time at which a signal reaches the
+#' specified fraction of its total response amplitude relative to a baseline
+#' period. e.g. the time to reach 50% of the total change in amplitude would
+#' be the *half-response time*. See [response_time()] for details.
+#' 
+#' The target fractional response value is computed as:
+#'
+#' `response_fitted = A + (B - A) * fraction`
+#'
+#' where `A` is the mean baseline value (where `time_channel <= t0`) and `B` 
+#' is the extreme (peak or trough) value after `t0`. The response time is the
+#' elapsed time from `t0` to the first sample where the signal reaches or 
+#' exceeds (above or below, depending on `direction`) the `response_fitted` 
+#' value.
 #'
 #' ## method = "peak_slope"
 #' 
@@ -71,7 +89,7 @@
 #'
 #' ## method = "monoexponential"
 #' 
-#' Aliases: `method = c("monoexp", "exponential", "MRT", "tau")`
+#' Aliases: `method = c("monoexp", "exponential", "tau", "MRT")`
 #'
 #' The `"monoexponential"` method fits a self-starting monoexponential
 #' curve to each `nirs_channel` using [stats::nls()] with [SS_monoexp4()] 
@@ -116,7 +134,7 @@
 #' @returns A formatted table of printed results, with individual elements
 #'   accessable as a list of class *"mnirs_kinetics"* containing:
 #'
-#'   \item{`method`}{The method used, e.g. `"half_response_time"`.}
+#'   \item{`method`}{The method used, e.g. `"response_time"`.}
 #'   \item{`model`}{A named list of model objects (per interval,
 #'       per `nirs_channel`). For `"peak_slope"`, each element is an
 #'       [lm][stats::lm] object; for `"monoexponential"`, an
@@ -180,7 +198,8 @@ analyse_kinetics <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+    method = c("response_time", "peak_slope", "monoexponential", "sigmoidal"),
+    t0 = NULL,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -190,7 +209,7 @@ analyse_kinetics <- function(
     ## normalise method aliases before matching
     method <- gsub(
         "^HRT$|^(?:((half[ _-])?(response|recovery)[ _-]time)|half[ _-]time)$",
-        "half_response_time",
+        "response_time",
         method,
         ignore.case = TRUE
     )
@@ -227,11 +246,12 @@ analyse_kinetics <- function(
 #' @rdname analyse_kinetics
 #' @usage NULL
 #' @export
-analyse_kinetics.half_response_time <- function(
+analyse_kinetics.response_time <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
     method,
+    t0 = NULL,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -248,7 +268,7 @@ analyse_kinetics.half_response_time <- function(
             data = data_list[[.i]],
             nirs_channels = !!enquo(nirs_channels),
             time_channel = !!enquo(time_channel),
-            t0 = args$t0 %||% 0,
+            t0 = t0,
             fraction = args$fraction %||% 0.5,
             direction = direction,
             end_fit_span = end_fit_span,
@@ -280,6 +300,7 @@ analyse_kinetics.peak_slope <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     method,
+    t0 = NULL,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -331,6 +352,7 @@ analyse_kinetics.monoexponential <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     method,
+    t0 = NULL,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -378,7 +400,8 @@ analyze_kinetics <- function(
     data,
     nirs_channels = NULL,
     time_channel = NULL,
-    method = c("half_response_time", "peak_slope", "monoexponential", "sigmoidal"),
+    method = c("response_time", "peak_slope", "monoexponential", "sigmoidal"),
+    t0 = NULL,
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -390,6 +413,7 @@ analyze_kinetics <- function(
         nirs_channels = nirs_channels,
         time_channel = time_channel,
         method = method,
+        t0 = t0,
         direction = direction,
         end_fit_span = end_fit_span,
         channel_args = channel_args,
@@ -516,7 +540,7 @@ compute_diagnostics <- function(
         if (verbose) {
             cli_warn(c(
                 "!" = "{.arg x}, {.arg t}, and {.arg fitted} must be \\
-                {.cls numeric} vectors of equal lengths to return model \\ 
+                {.cls numeric} vectors of equal lengths to return model \\
                 diagnostics."
             ))
         }

@@ -9,6 +9,7 @@ analyse_monoexponential(
   nirs_channels = NULL,
   time_channel = NULL,
   time_delay = TRUE,
+  t0 = NULL,
   direction = c("auto", "positive", "negative"),
   end_fit_span = Inf,
   channel_args = list(),
@@ -38,6 +39,11 @@ used.
 4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model (A, B, tau, TD) with a time delay.
 If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
+
+\item{t0}{A numeric value specifying the start of the kinetics response
+in units of \code{time_channel}. Observations where \code{time_channel <= t0}
+define the pre-response baseline. Retrieves \code{interval_times} from
+\emph{"mnirs"} metadata or default to \code{0}.}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See

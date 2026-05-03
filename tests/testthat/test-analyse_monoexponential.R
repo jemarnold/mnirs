@@ -443,6 +443,97 @@ test_that("analyse_monoexponential() recovers 4-param known parameters", {
     )
 })
 
+test_that("analyse_monoexponential() uses t0 correctly", {
+    A <- 50
+    B <- 80
+    tau <- 25
+    TD <- 10
+    t0 <- 12
+
+    data <- create_monoexp_data(
+        A = A, B = B, tau = tau, TD = TD, n = 100, noise_sd = 0.3
+    )
+    data$time <- data$time + t0
+
+    result <- analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = TRUE,
+        t0 = t0,
+        verbose = FALSE
+    )
+
+    ## visual check
+    # plot(data) +
+    #     ggplot2::coord_cartesian(xlim = c(0, NA)) +
+    #     ggplot2::geom_vline(xintercept = t0) +
+    #     ggplot2::geom_line(
+    #         ggplot2::aes(y = attributes(result)$fitted$smo2$fitted)
+    #     )
+
+    expect_true(all.equal(result$A, A, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$B, B, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$tau, tau, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$TD, TD, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$MRT, TD + tau, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$k, 1 / tau, tolerance = 1, scale = 1))
+    expect_true(
+        all.equal(result$HRT, tau * log(2) + TD, tolerance = 1, scale = 1)
+    )
+
+    data <- create_monoexp_data(
+        A = A, B = B, tau = tau, TD = TD, n = 100, noise_sd = 0.3
+    )
+    analyse_monoexponential(
+        data,
+        nirs_channels = "smo2",
+        time_delay = TRUE,
+        t0 = 5,
+        verbose = FALSE
+    )
+})
+
+test_that("analyse_monoexponential() t0 edge cases", {
+    A <- 50
+    B <- 80
+    tau <- 25
+    TD <- 10
+    t0 <- 12
+
+    data <- create_monoexp_data(
+        A = A, B = B, tau = tau, TD = TD, n = 100, noise_sd = 0.3
+    )
+    data$time <- data$time + t0
+
+    ## t0 specified before time start, falls forward to t[1L]
+    expect_warning(
+        result <- analyse_monoexponential(
+            data,
+            nirs_channels = "smo2",
+            time_delay = TRUE,
+            t0 = 0,
+            verbose = TRUE
+        ),
+        "No observations.*t0 =.*0"
+    )
+
+    expect_true(all.equal(result$TD, TD, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$MRT, TD + tau, tolerance = 1, scale = 1))
+    expect_true(
+        all.equal(result$HRT, tau * log(2) + TD, tolerance = 1, scale = 1)
+    )
+
+    ## t0 beyond time range
+    expect_error(
+        analyse_monoexponential(
+            data,
+            nirs_channels = "smo2",
+            time_delay = TRUE,
+            t0 = max(data$time) + 10,
+            verbose = TRUE
+        ),
+        "No observations.*before.*t0"
+    )
 })
 
 test_that("analyse_monoexponential() falls back from 4-param to 3-param", {

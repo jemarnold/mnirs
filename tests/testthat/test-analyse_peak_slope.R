@@ -706,12 +706,12 @@ test_that("peak_slope fitted values match window", {
 test_that("analyse_peak_slope returns correct structure", {
     x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
     q <- c(1, 3, NA, 5, 8, 7, 9, 12, NA, NA, NA, 17, 18)
-    t <- seq_along(x)
+    t <- as.numeric(seq_along(x))
 
     df <- create_mnirs_data(
-        data = data.frame(this_time = t, x, q),
+        data = data.frame(time = t, x, q),
         nirs_channels = c("x", "q"),
-        time_channel = "this_time"
+        time_channel = "time"
     )
     results <- analyse_peak_slope(df, width = 5, verbose = FALSE)
     # attributes(results)
@@ -720,7 +720,7 @@ test_that("analyse_peak_slope returns correct structure", {
     expect_equal(nrow(results), 2)
     expect_named(results, c(
         "nirs_channels", "time_channel", 
-        "slope", "intercept", "fitted", "this_time", "idx"
+        "slope", "intercept", "fitted", "peak_slope_time", "idx"
     ))
 
     expect_type(results$nirs_channels, "character")
@@ -728,7 +728,7 @@ test_that("analyse_peak_slope returns correct structure", {
     expect_type(results$slope, "double")
     expect_type(results$intercept, "double")
     expect_type(results$fitted, "double")
-    expect_type(results$this_time, "integer")
+    expect_type(results$peak_slope_time, "double")
     expect_type(results$idx, "integer")
 
     ## metadata carried as attributes

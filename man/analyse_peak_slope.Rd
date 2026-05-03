@@ -8,6 +8,7 @@ analyse_peak_slope(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
+  t0 = NULL,
   width = NULL,
   span = NULL,
   align = c("centre", "left", "right"),
@@ -37,6 +38,11 @@ Must match a column name in \code{data} exactly.
 \item If \code{NULL} (default), the \code{time_channel} metadata attribute of \code{data} is
 used.
 }}
+
+\item{t0}{A numeric value specifying the start of the kinetics response
+in units of \code{time_channel}. Observations where \code{time_channel <= t0}
+define the pre-response baseline. Retrieves \code{interval_times} from
+\emph{"mnirs"} metadata or default to \code{0}.}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}

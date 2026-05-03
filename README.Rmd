@@ -277,7 +277,7 @@ plot(ensemble, time_labels = TRUE) +
 
     * Monoexponential & sigmoidal non-linear curve fitting
     
-    * Non-parametric half-response time & slope analysis
+    * Non-parametric response time & slope analysis
 
 * Critical oxygenation breakpoint analysis
 
