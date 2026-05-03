@@ -121,7 +121,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
     expect_true(all(steps_sec %in% nice_steps_sec))
     expect_type(breaks_sec, "double")
     expect_true(all(breaks_sec >= 0 & breaks_sec <= 150))
-    expect_equal(length(breaks_sec), 5, tolerance = 2)
+    expect_true(all.equal(length(breaks_sec), 5, tolerance = 2, scale = 1))
 
     # Test scale = 60 (5 * 60 < diff <= 5 * 3600)
     nice_steps_min <- c(1, 2, 5, 10, 15, 20, 30, 60, 120) * 60
@@ -131,7 +131,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
     expect_true(all(steps_min %in% nice_steps_min))
     expect_type(breaks_min, "double")
     expect_true(all(breaks_min >= 0 & breaks_min <= 7200))
-    expect_equal(length(breaks_min), 5, tolerance = 2)
+    expect_true(all.equal(length(breaks_min), 5, tolerance = 2, scale = 1))
 
     # Test scale = 3600 (5 * 3600 < diff <= 5 * 86400)
     nice_steps_hr <- c(0.25, 0.5, 1, 2, 3, 4, 6, 8, 12, 24) * 3600
@@ -141,7 +141,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
     expect_true(all(steps_hr %in% nice_steps_hr))
     expect_type(breaks_hr, "double")
     expect_true(all(breaks_hr >= 0 & breaks_hr <= 86400))
-    expect_equal(length(breaks_hr), 5, tolerance = 2)
+    expect_true(all.equal(length(breaks_hr), 5, tolerance = 2, scale = 1))
 
     # Test scale = 86400 (diff > 5 * 86400)
     nice_steps_day <- c(1, 7, 28) * 86400
@@ -151,7 +151,7 @@ test_that(" breaks_timespan corresponds to nice_steps for each scale level", {
     expect_true(all(steps_day %in% nice_steps_day))
     expect_type(breaks_day, "double")
     expect_true(all(breaks_day >= 0 & breaks_day <= 86400 * 28))
-    expect_equal(length(breaks_day), 5, tolerance = 2)
+    expect_true(all.equal(length(breaks_day), 5, tolerance = 2, scale = 1))
 })
 
 ## format_hmmss() ==================================================

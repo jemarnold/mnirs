@@ -88,10 +88,10 @@ test_that("resample_mnirs handles resample_rate == sample_rate", {
     set.seed(13)
     data <- data.frame(time = 1:3 + rnorm(3, 0, 0.1), value = c(10, 20, 30))
     result <- resample_mnirs(data, "time", 1, 1, verbose = FALSE)
-    expect_equal(result$value, data$value, tolerance = 1)
+    expect_true(all.equal(result$value, data$value, tolerance = 1, scale = 1))
 
     result <- resample_mnirs(data, "time", 1, verbose = FALSE)
-    expect_equal(result$value, data$value, tolerance = 1)
+    expect_true(all.equal(result$value, data$value, tolerance = 1, scale = 1))
 
     result <- resample_mnirs(
         data,
@@ -345,7 +345,9 @@ test_that("resample_mnirs works on Moxy", {
         )
 
     ## expect close enough to time-weighted average
-    expect_equal(result, df2, ignore_attr = TRUE, tolerance = 1)
+    expect_true(all.equal(
+        result, df2, tolerance = 1, scale = 1, check.attributes = FALSE
+    ))
 
     ## should overwrite metadata
     df3 <- resample_mnirs(

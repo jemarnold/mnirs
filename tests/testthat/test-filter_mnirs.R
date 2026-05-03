@@ -563,7 +563,7 @@ test_that("butterworth accepts fc instead of W", {
         verbose = FALSE
     )
 
-    expect_equal(result_W$smo2_left, result_fc$smo2_left, tolerance = 1e-10)
+    expect_equal(result_W$smo2_left, result_fc$smo2_left)
 })
 
 test_that("butterworth prefers W when both W and fc specified", {

@@ -22,7 +22,9 @@ test_that("monoexponential() approaches asymptote B", {
     result <- monoexponential(t, A = 10, B = B, tau = 8, TD = 15)
 
     # At t >> TD + tau, should approach B
-    expect_equal(tail(result, 1), B, tolerance = 0.01)
+    expect_true(
+        all.equal(result[length(result)], B, tolerance = 0.01, scale = 1)
+    )
 })
 
 test_that("monoexponential() handles rising curves (B > A)", {
@@ -50,7 +52,7 @@ test_that("monoexponential() tau determines rate correctly", {
 
     # At t = TD + tau, should be ~63.2% of amplitude
     idx <- which(t == TD + tau)
-    expect_equal(result[idx], 63.2, tolerance = 1)
+    expect_true(all.equal(result[idx], 63.2, tolerance = 1, scale = 1))
 })
 
 test_that("monoexponential() handles zero and negative TD", {
@@ -70,7 +72,6 @@ test_that("monoexponential() handles zero and negative TD", {
 
 
 ## SS_monoexp4() ========================================================
-
 test_that("SS_monoexp4() converges on known parameters", {
     set.seed(13)
     t <- 1:60
@@ -94,10 +95,18 @@ test_that("SS_monoexp4() converges on known parameters", {
     expect_named(coef(model), c("A", "B", "tau", "TD"))
 
     coefs <- coef(model)
-    expect_equal(coefs[["A"]], A_true, tolerance = A_true * 0.1)
-    expect_equal(coefs[["B"]], B_true, tolerance = B_true * 0.1)
-    expect_equal(coefs[["tau"]], tau_true, tolerance = tau_true * 0.1)
-    expect_equal(coefs[["TD"]], TD_true, tolerance = TD_true * 0.1)
+    expect_true(
+        all.equal(coefs[["A"]], A_true, tolerance = A_true * 0.1, scale = 1)
+    )
+    expect_true(
+        all.equal(coefs[["B"]], B_true, tolerance = B_true * 0.1, scale = 1)
+    )
+    expect_true(all.equal(
+            coefs[["tau"]], tau_true, tolerance = tau_true * 0.1, scale = 1
+    ))
+    expect_true(
+        all.equal(coefs[["TD"]], TD_true, tolerance = TD_true * 0.1, scale = 1)
+    )
 })
 
 test_that("SS_monoexp4() handles falling exponentials", {
@@ -143,7 +152,7 @@ test_that("SS_monoexp4() predict() returns correct length", {
 ## SS_monoexp3() ========================================================
 test_that("SS_monoexp3() converges on known parameters", {
     set.seed(13)
-    t <- 1:60
+    t <- 1:60-1
     A_true <- 10
     B_true <- 100
     TD_true <- 0
@@ -152,21 +161,29 @@ test_that("SS_monoexp3() converges on known parameters", {
     x <- monoexponential(t, A_true, B_true, tau_true, TD_true) +
         rnorm(length(t), 0, 3)
     data <- data.frame(t, x)
-
+    
+    model <- nls(x ~ SS_monoexp3(t, A, B, tau), data = data)
+    
+    ## visual check
+    # y <- fitted(model)
     # ggplot2::ggplot(data, ggplot2::aes(t, x)) +
     #     theme_mnirs() +
-    #     ggplot2::geom_point() #+
+    #     ggplot2::geom_point() +
     # ggplot2::geom_line(ggplot2::aes(y = y))
-
-    model <- nls(x ~ SS_monoexp3(t, A, B, tau), data = data)
 
     expect_s3_class(model, "nls")
     expect_named(coef(model), c("A", "B", "tau"))
 
     coefs <- coef(model)
-    expect_equal(coefs[["A"]], A_true, tolerance = A_true * 0.1)
-    expect_equal(coefs[["B"]], B_true, tolerance = B_true * 0.1)
-    expect_equal(coefs[["tau"]], tau_true, tolerance = tau_true * 0.1)
+    expect_true(
+        all.equal(coefs[["A"]], A_true, tolerance = 3, scale = 1)
+    )
+    expect_true(
+        all.equal(coefs[["B"]], B_true, tolerance = 1, scale = 1)
+    )
+    expect_true(all.equal(
+            coefs[["tau"]], tau_true, tolerance = 1, scale = 1
+        ))
     expect_disjoint(names(coefs), "TD")
 })
 
@@ -202,7 +219,7 @@ test_that("SS_monoexp3() handles data with TD near zero", {
     )
 
     expect_s3_class(model, "nls")
-    expect_equal(coef(model)[["tau"]], 8, tolerance = 1)
+    expect_true(all.equal(coef(model)[["tau"]], 8, tolerance = 1, scale = 1))
     expect_disjoint(names(coef(model)), "TD")
 })
 
@@ -233,9 +250,21 @@ test_that("SS_monoexp3() handles OxCap with few data points same as SSasymp", {
     )
     asym_tau <- exp(-coef(model_asym)[["lrc"]])
 
-    expect_equal(coef(model)[["A"]], coef(model_asym)[["R0"]], tolerance = 0.1)
-    expect_equal(coef(model)[["B"]], coef(model_asym)[["Asym"]], tolerance = 0.1)
-    expect_equal(coef(model)[["tau"]], asym_tau, tolerance = 0.1)
+    expect_true(all.equal(
+        coef(model)[["A"]],
+        coef(model_asym)[["R0"]],
+        tolerance = 0.1,
+        scale = 1
+    ))
+    expect_true(all.equal(
+        coef(model)[["B"]],
+        coef(model_asym)[["Asym"]],
+        tolerance = 0.1,
+        scale = 1
+    ))
+    expect_true(all.equal(
+        coef(model)[["tau"]], asym_tau, tolerance = 0.1, scale = 1
+    ))
 })
 
 test_that("SS_monoexp3() handles OxCap with few data points better than SSasymp", {
@@ -369,11 +398,7 @@ test_that("analyse_monoexponential() recovers 3-param known parameters", {
     tau <- 25
 
     data <- create_monoexp_data(
-        A = A,
-        B = B,
-        tau = tau,
-        n = 100,
-        noise_sd = 0.3
+        A = A, B = B, tau = tau, n = 100, noise_sd = 0.3
     )
 
     result <- analyse_monoexponential(
@@ -388,7 +413,7 @@ test_that("analyse_monoexponential() recovers 3-param known parameters", {
     expect_equal(result$tau, tau, tolerance = 1)
     expect_true(is.na(result$TD))
     expect_equal(result$k, 1 / tau, tolerance = 1)
-    # expect_equal(result$half_time, tau * log(2), tolerance = 1)
+    expect_equal(result$HRT, tau * log(2), tolerance = 1)
 })
 
 test_that("analyse_monoexponential() recovers 4-param known parameters", {
@@ -398,12 +423,7 @@ test_that("analyse_monoexponential() recovers 4-param known parameters", {
     TD <- 10
 
     data <- create_monoexp_data(
-        A = A,
-        B = B,
-        tau = tau,
-        TD = TD,
-        n = 100,
-        noise_sd = 0.3
+        A = A, B = B, tau = tau, TD = TD, n = 100, noise_sd = 0.3
     )
 
     result <- analyse_monoexponential(
@@ -413,12 +433,16 @@ test_that("analyse_monoexponential() recovers 4-param known parameters", {
         verbose = FALSE
     )
 
-    expect_equal(result$A, A, tolerance = 1)
-    expect_equal(result$B, B, tolerance = 1)
-    expect_equal(result$tau, tau, tolerance = 1)
-    expect_equal(result$TD, TD, tolerance = 1)
-    expect_equal(result$k, 1 / tau, tolerance = 1)
-    # expect_equal(result$half_time, tau * log(2), tolerance = 1)
+    expect_true(all.equal(result$A, A, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$B, B, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$tau, tau, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$TD, TD, tolerance = 1, scale = 1))
+    expect_true(all.equal(result$k, 1 / tau, tolerance = 1, scale = 1))
+    expect_true(
+        all.equal(result$HRT, tau * log(2) + TD, tolerance = 1, scale = 1)
+    )
+})
+
 })
 
 test_that("analyse_monoexponential() falls back from 4-param to 3-param", {
@@ -429,13 +453,7 @@ test_that("analyse_monoexponential() falls back from 4-param to 3-param", {
 
     ## short series with small TD makes 4-param hard to converge
     data <- create_monoexp_data(
-        A = A,
-        B = B,
-        tau = tau,
-        TD = TD,
-        n = 10,
-        noise_sd = 2,
-        seed = 101
+        A = A, B = B, tau = tau, TD = TD, n = 10, noise_sd = 2, seed = 101
     )
 
     expect_warning(
@@ -554,7 +572,6 @@ test_that("analyse_monoexponential() diagnostics contain expected columns", {
 
 
 ## fix_coefs() =========================================================
-
 test_that("fix_coefs() fixes single parameter correctly", {
     set.seed(303)
     t <- 1:60
@@ -681,6 +698,6 @@ test_that("extract model coefs", {
 
     model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
     tau <- coef(model)[["tau"]]
-    expect_equal(tau, 8, tolerance = 1)
+    expect_true(all.equal(tau, 8, tolerance = 1, scale = 1))
 
 })

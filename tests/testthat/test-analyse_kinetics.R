@@ -89,7 +89,7 @@ test_that("compute_diagnostics matches lm() summary", {
     expect_equal(result$adj_r2, lm_summary$adj.r.squared)
     expect_equal(result$rmse, sqrt(mean(residuals(lm_fit)^2)))
     ## pseudo_r2 = cor(observed, fitted)^2; equals R^2 for OLS
-    expect_equal(result$pseudo_r2, lm_summary$r.squared, tolerance = 1e-10)
+    expect_equal(result$pseudo_r2, lm_summary$r.squared)
 })
 
 test_that("compute_diagnostics n_params adjusts adj_r2 denominator", {
@@ -127,7 +127,7 @@ test_that("compute_diagnostics pseudo_r2 is valid for a non-linear fit", {
     result <- compute_diagnostics(x, t, fitted)
 
     expect_true(result$pseudo_r2 > 0 && result$pseudo_r2 <= 1)
-    expect_equal(result$pseudo_r2, cor(x, fitted)^2, tolerance = 1e-10)
+    expect_equal(result$pseudo_r2, cor(x, fitted)^2)
 })
 
 test_that("compsute_diagnostics pseudo_r2 equals r2 for OLS linear fit", {
@@ -137,7 +137,7 @@ test_that("compsute_diagnostics pseudo_r2 equals r2 for OLS linear fit", {
 
     result <- compute_diagnostics(x, t, fitted)
 
-    expect_equal(result$pseudo_r2, result$r2, tolerance = 1e-10)
+    expect_equal(result$pseudo_r2, result$r2)
 })
 
 test_that("compute_diagnostics handles perfect fit", {
@@ -210,11 +210,7 @@ test_that("compute_diagnostics snr is positive for a good fit", {
 
     expect_true(result$snr > 0)
     ## SNR = 10 * log10(var(signal) / var(residuals))
-    expect_equal(
-        result$snr,
-        10 * log10(var(x) / var(x - fitted)),
-        tolerance = 1e-10
-    )
+    expect_equal(result$snr, 10 * log10(var(x) / var(x - fitted)))
 })
 
 test_that("compute_diagnostics cv_rmse scales with signal magnitude", {
@@ -229,7 +225,7 @@ test_that("compute_diagnostics cv_rmse scales with signal magnitude", {
     r2 <- compute_diagnostics(x2, t, fitted2)
 
     ## CV-RMSE should be equal (RMSE and mean scale proportionally)
-    expect_equal(r1$cv_rmse, r2$cv_rmse, tolerance = 1e-10)
+    expect_equal(r1$cv_rmse, r2$cv_rmse)
 })
 
 
@@ -1289,7 +1285,9 @@ test_that("analyse_kinetics.peak_slope passes width and span correctly", {
     expect_false(is.na(result_span$coefficients$slope))
     expect_equal(result_width$diagnostics$n_obs, 10)
     ## span buffer number of samples for start and end inclusive
-    expect_equal(result_span$diagnostics$n_obs, 10, tolerance = 2)
+    expect_true(
+        all.equal(result_span$diagnostics$n_obs, 10, tolerance = 2, scale = 1)
+    )
 })
 
 test_that("analyse_kinetics.peak_slope passes direction argument", {

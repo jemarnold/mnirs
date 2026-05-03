@@ -539,9 +539,13 @@ test_that("estimate_sample_rate works correctly", {
     set.seed(13)
     x <- seq(0, 1, by = 0.02)
     x <- x + rnorm(length(x), 0, 0.001)
-    expect_equal(estimate_sample_rate(x), 50, tolerance = 1)
     expect_true(estimate_sample_rate(x) %in% c(49.5, 50, 50.5))
-    expect_equal(estimate_sample_rate(x), 50, tolerance = 1)
+    expect_true(
+        all.equal(estimate_sample_rate(x), 50, tolerance = 1, scale = 1)
+    )
+    expect_true(
+        all.equal(estimate_sample_rate(x), 50, tolerance = 1, scale = 1)
+    )
 
     # With NAs in diffs (not in x directly, as diff removes one element)
     time_with_gaps <- c(0, 0.01, NA, 0.03, 0.04)

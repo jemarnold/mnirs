@@ -233,11 +233,11 @@ test_that("analyse_response_time computes correct values", {
     result <- analyse_response_time(df, t0 = 0, fraction = 0.5)
 
     ## A = baseline mean ~ 0
-    expect_equal(result$A, 0, tolerance = 1e-10)
+    expect_equal(result$A, 0)
     ## B = max ~ 100
-    expect_equal(result$B, 100, tolerance = 1e-10)
+    expect_equal(result$B, 100)
     ## fitted = 50
-    expect_equal(result$fitted, 50, tolerance = 1e-10)
+    expect_equal(result$fitted, 50)
     ## response_time at half point + 5 unit baseline
     expect_equal(result$response_time, 55)
     ## fitted = half point

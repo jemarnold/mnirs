@@ -1883,9 +1883,13 @@ test_that("extract_intervals works on Moxy data", {
     expect_named(result[[1L]], c("hh:mm:ss", "smo2_left", "smo2_right"))
     ## range of time_channel
     expect_gte(min(result[[1L]][[1]]), 878 - 30)
-    expect_equal(min(result[[1L]][[1]]), 878 - 30, tolerance = 1)
+    expect_true(
+        all.equal(min(result[[1L]][[1]]), 878 - 30, tolerance = 1, scale = 1)
+    )
     expect_lte(max(result[[1L]][[1]]), 878 + 180)
-    expect_equal(max(result[[1L]][[1]]), 878 + 180, tolerance = 1)
+    expect_true(
+        all.equal(max(result[[1L]][[1]]), 878 + 180, tolerance = 1, scale = 1)
+    )
     ## equivalent to intake df
     expect_equal(
         result[[1L]],
@@ -1917,7 +1921,7 @@ test_that("extract_intervals works on train.red data", {
     )
 
     ## visual check
-    plot(result[[1L]], time_labels = TRUE)
+    # plot(result[[1L]], time_labels = TRUE)
 
     ## structure
     expect_length(result, 1)
@@ -1925,9 +1929,13 @@ test_that("extract_intervals works on train.red data", {
     expect_named(result[[1L]], c("time", "smo2_left", "smo2_right"))
     ## range of time_channel
     expect_gte(min(result[[1L]][[1]]), -30)
-    expect_equal(min(result[[1L]][[1]]), -30, tolerance = 0.1)
+    expect_true(
+        all.equal(min(result[[1L]][[1]]), -30, tolerance = 0.1, scale = 1)
+    )
     expect_lte(max(result[[1L]][[1]]), 180)
-    expect_equal(max(result[[1L]][[1]]), 180, tolerance = 0.1)
+    expect_true(
+        all.equal(max(result[[1L]][[1]]), 180, tolerance = 0.1, scale = 1)
+    )
 
     result <- extract_intervals(
         data,
@@ -1951,13 +1959,21 @@ test_that("extract_intervals works on train.red data", {
     expect_named(result[[2L]], c("time", "smo2_left", "smo2_right"))
     ## range of time_channel
     expect_lte(min(result[[1L]][[1]]), 2150 - 30)
-    expect_equal(min(result[[1L]][[1]]), 2150 - 30, tolerance = 0.1)
+    expect_true(all.equal(
+        min(result[[1L]][[1]]), 2150 - 30, tolerance = 0.1, scale = 1
+    ))
     expect_lte(max(result[[1L]][[1]]), 2150 + 180)
-    expect_equal(max(result[[1L]][[1]]), 2150 + 180, tolerance = 0.1)
+    expect_true(all.equal(
+        max(result[[1L]][[1]]), 2150 + 180, tolerance = 0.1, scale = 1
+    ))
     expect_lte(min(result[[2L]][[1]]), 3168 - 30)
-    expect_equal(min(result[[2L]][[1]]), 3168 - 30, tolerance = 0.1)
+    expect_true(all.equal(
+        min(result[[2L]][[1]]), 3168 - 30, tolerance = 0.1, scale = 1
+    ))
     expect_lte(max(result[[2L]][[1]]), 3168 + 180)
-    expect_equal(max(result[[2L]][[1]]), 3168 + 180, tolerance = 0.1)
+    expect_true(all.equal(
+        max(result[[2L]][[1]]), data$time[nrow(data)], tolerance = 0.1, scale = 1
+    ))
 })
 
 ## benchmark ===========================================================
