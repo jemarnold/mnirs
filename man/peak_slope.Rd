@@ -26,7 +26,7 @@ Default is \code{seq_along(x)}.}
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}
 
-\item{span}{A numeric value defining the local window timespan around \code{idx}
+\item{span}{A numeric value defining the local window time span around \code{idx}
 in which to perform the operation, according to \code{align}. In units of
 \code{time_channel} or \code{t}.}
 
@@ -34,7 +34,7 @@ in which to perform the operation, according to \code{align}. In units of
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
 is \emph{backward looking} from the current sample.}
 
-\item{direction}{A character string specifying the slope direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
@@ -47,8 +47,8 @@ returned vector. If \code{TRUE}, ignores \code{NA}s and processes available vali
 samples within the local window. May return errors or warnings. (see
 \emph{Details}).}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
@@ -67,8 +67,9 @@ window.}
 }
 \description{
 Identify the maximum positive or negative local linear slope within a
-numeric vector using rolling least-squares regression and return a list
-of regression parameters for the peak window.
+numeric vector using rolling least-squares regression, and return a list
+of regression parameters for the peak window. Vector-level companion to
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "peak_slope"}.
 }
 \details{
 \subsection{Rolling window}{
@@ -86,33 +87,28 @@ When \code{span} is specified with \code{align = "centre"}, the window spans
 
 \subsection{Direction detection}{
 
-When \code{direction = "auto"}, the net slope across all of \code{x} is computed to
-determine the overall trend (positive or negative), and the greatest local
-slope in that direction is returned.
-
-If the net slope equals zero or is \code{NA}, the greatest absolute local slope
-is returned. When \code{direction = "positive"} or \code{"negative"}, the greatest
-respective directional slope is returned. If no slopes in the requested
-direction exist, \code{NA} is returned with a warning.
+When \code{direction = "auto"}, the net slope across all of \code{x} determines the
+overall trend (positive or negative), and the greatest local slope in that
+direction is returned. If the net slope equals zero or is \code{NA}, the greatest
+absolute local slope is returned.
 }
 
 \subsection{Partial windows}{
 
-The default \code{partial = FALSE} requires a complete number of samples
-specified by \code{width} or \code{span} (estimated from the sample rate of \code{t} when
-\code{span} is used). \code{NA} is returned if fewer samples are present in the
-local window.
+The default \code{partial = FALSE} requires the complete number of samples
+specified by \code{width} or \code{span}. \code{NA} is returned if fewer samples are
+present in the local window.
 
-Setting \code{partial = TRUE} allows computation with at least 2 valid samples,
-such as at edge conditions. But these values will be more sensitive to
-noise and should be used with caution.
+Setting \code{partial = TRUE} allows computation with as few as 2 valid samples.
+These windows, such as at edge conditions, will be more sensitive to noise
+and this setting should be used with caution.
 }
 
 \subsection{Missing values}{
 
-\code{na.rm} controls whether missing values (\code{NA}s) within each local window are
-either propagated to the returned vector when \code{na.rm = FALSE} (the default),
-or ignored before processing if \code{na.rm = TRUE}.
+When \code{na.rm = FALSE} (the default), any \code{NA} in a window propagates \code{NA}
+to the returned slope. When \code{na.rm = TRUE}, \code{NA}s are ignored and the slope
+is computed from the remaining valid samples.
 }
 }
 \examples{
@@ -124,5 +120,6 @@ peak_slope(x_dec, width = 5)
 
 }
 \seealso{
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=response_time]{response_time()}}, \code{\link[=monoexponential]{monoexponential()}},
 \code{\link[=rolling_slope]{rolling_slope()}}
 }

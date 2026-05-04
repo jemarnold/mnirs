@@ -18,12 +18,12 @@ find_kinetics_idx(
 \item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
 Default is \code{seq_along(x)}.}
 
-\item{end_fit_span}{A numeric value in units of \code{t} specifying the
-forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
-returns the global extreme from the full range of \code{x}.}
+\item{end_fit_span}{A numeric value in units of \code{time_channel} or \code{t}
+specifying the forward-looking window used to check for subsequent
+greater/lesser values than the candidate extreme. \code{end_fit_span = Inf}
+(\emph{default}) returns the global extreme from the full range of \code{x}.}
 
-\item{direction}{A character string specifying the kinetics direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 

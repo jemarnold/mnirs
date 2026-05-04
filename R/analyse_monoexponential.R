@@ -1,6 +1,9 @@
-#' Monoexponential function with 4 parameters
+#' Monoexponential function
 #'
-#' Calculate a four-parameter monoexponential curve.
+#' Calculate a 3- or 4-parameter monoexponential curve. This is the model
+#' family fit by [analyse_kinetics()] when `method = "monoexponential"`,
+#' and by [stats::nls()] via the self-starting wrappers [SS_monoexp3()] and
+#' [SS_monoexp4()].
 #'
 #' @param t A numeric vector of the predictor variable; time or sample number.
 #' @param A A numeric parameter for the starting (baseline) value of the
@@ -14,19 +17,23 @@
 #'   (*default*), a 3-parameter model without time delay is used.
 #'
 #' @details
-#' 3-parameter model equation:
+#' ## Model equations
+#'
+#' 3-parameter model:
 #'   `A + (B - A) * (1 - exp(-t / tau))`
 #'
-#' 4-parameter model equation:
+#' 4-parameter model:
 #'   `ifelse(t <= TD, A, A + (B - A) * (1 - exp(-(t - TD) / tau)))`
 #'
-#' `tau` is the time constant and equal to the reciprocal of `k`, the rate
-#'   constant (`k = 1/tau`).
+#' `tau` is the time constant, equal to the reciprocal of the rate constant
+#' `k` (`k = 1 / tau`). Common derived quantities include the mean response
+#' time `MRT = TD + tau` and the half-response time `HRT = TD + tau * log(2)`.
 #'
-#' @returns A numeric vector of predicted values the same length as
-#'  the predictor variable `t`.
+#' @returns A numeric vector of predicted values the same length as the
+#'   predictor variable `t`.
 #'
-#' @seealso [SS_monoexp3()], [SS_monoexp4()]
+#' @seealso [analyse_kinetics()], [SS_monoexp3()], [SS_monoexp4()],
+#'   [response_time()], [peak_slope()]
 #'
 #' @examples
 #' set.seed(13)
@@ -59,13 +66,12 @@ monoexponential <- function(t, A, B, tau, TD = NULL) {
     if (is.null(TD)) {
         ## 3-parameter: no time delay
         y <- A + (B - A) * (1 - exp(-t / tau))
-        return(y)
     } else {
         ## 4-parameter: with time delay
         y <- A + (B - A) * (1 - exp(-(t - TD) / tau))
         y[t < TD] <- A
-        return(y)
     }
+    return(y)
 }
 
 
@@ -228,191 +234,35 @@ SS_monoexp4 <- selfStart(
 )
 
 
-#' Fit a monoexponential model to a numeric vector
+#' Analyse monoexponential kinetics across NIRS channels
 #'
-#' Fit a monoexponential curve to a numeric vector `x` against a predictor
-#' vector `t` via [stats::nls()] using a self-starting model. Attempts a
-#' 4-parameter fit ([SS_monoexp4()]) by default, with fallback to a
-#' 3-parameter fit ([SS_monoexp3()]) on convergence failure.
+#' Internal channel-level dispatch for
+#' `analyse_kinetics(method = "monoexponential")`. Fits a monoexponential
+#' curve to each `nirs_channel` within a single *"mnirs"* data frame. See
+#' [analyse_kinetics()] for user-facing documentation.
 #'
 #' @param use_time_delay Logical; default is `TRUE` to attempt to fit a
 #'   4-parameter [SS_monoexp4()] model (A, B, tau, TD) with a time delay.
 #'   If the 4-parameter fit fails, or if `use_time_delay = FALSE`, fits a
 #'   reduced 3-parameter [SS_monoexp3()] model (A, B, tau).
-#' @param ... Additional arguments. `bypass_checks` suppresses input
-#'   validation.
-#' @inheritParams response_time
-#' @inheritParams replace_invalid
-#'
-#' @returns A named list containing:
-#'   \item{`model`}{The fitted [stats::nls()] model object, or `NULL` on
-#'   convergence failure.}
-#'   \item{`A`, `B`, `tau`}{Fitted model coefficients.}
-#'   \item{`TD`}{Time-delay relative to `t0` (4-parameter), or `NA_real_`
-#'   for a 3-parameter fit.}
-#'   \item{`MRT`, `HRT`}{Mean and half response times relative to `t0`.}
-#'   \item{`tau_fitted`, `MRT_fitted`, `HRT_fitted`}{Predicted response
-#'   values at `tau`, `MRT`, and `HRT`.}
-#'   \item{`fitted`}{A numeric vector of predicted values the same length
-#'   as `x`.}
-#'   \item{`n_params`}{Integer; `4L` or `3L`, or `NA_integer_` on failure.}
-#'
-#' @seealso [analyse_monoexponential()], [monoexponential()],
-#'   [SS_monoexp3()], [SS_monoexp4()]
-#'
-#' @export
-fit_monoexponential <- function(
-    x,
-    t = seq_along(x),
-    t0 = 0,
-    use_time_delay = TRUE,
-    verbose = TRUE,
-    ...
-) {
-    ## validation ==================================================
-    args <- list(...)
-
-    if (!(args$bypass_checks %||% FALSE)) {
-        validate_x_t(x, t, allow_na = TRUE)
-        if (!is.logical(use_time_delay) || length(use_time_delay) != 1L) {
-            cli_abort(c(
-                "x" = "{.arg use_time_delay} must be a {.cls logical} \\
-                either {.val {TRUE}} or {.val {FALSE}}."
-            ))
-        }
-        if (missing(verbose)) {
-            verbose <- getOption("mnirs.verbose", default = TRUE)
-        }
-    }
-
-    fit_data <- data.frame(.x = x, .t = t)
-    n_params <- if (use_time_delay) 4L else 3L
-    model <- NULL
-
-    ## attempt 4-param fit, fallback to 3
-    if (n_params == 4L) {
-        model <- tryCatch(
-            stats::nls(.x ~ SS_monoexp4(.t, A, B, tau, TD), fit_data),
-            error = \(e) {
-                if (verbose) {
-                    cli_warn(c(
-                        "x" = "4-parameter {.fn SS_monoexp4} fit failed.",
-                        "!" = "{conditionMessage(e)}",
-                        "i" = "Attempting 3-parameter fit with \\
-                        {.fn SS_monoexp3}."
-                    ))
-                }
-                NULL
-            }
-        )
-        if (is.null(model)) n_params <- 3L
-    }
-
-    if (n_params == 3L) {
-        model <- tryCatch(
-            stats::nls(.x ~ SS_monoexp3(.t, A, B, tau), fit_data),
-            error = \(e) {
-                if (verbose) {
-                    cli_warn(c(
-                        "x" = "3-parameter {.fn SS_monoexp3} fit failed.",
-                        "!" = "{conditionMessage(e)}",
-                        "i" = "Returning {.val {NA}} coefficients."
-                    ))
-                }
-                NULL
-            }
-        )
-    }
-
-    if (is.null(model)) {
-        return(list(
-            model      = NULL,
-            A          = NA_real_,
-            B          = NA_real_,
-            tau        = NA_real_,
-            TD         = NA_real_,
-            MRT        = NA_real_,
-            HRT        = NA_real_,
-            tau_fitted = NA_real_,
-            MRT_fitted = NA_real_,
-            HRT_fitted = NA_real_,
-            fitted     = rep(NA_real_, length(x)),
-            n_params   = NA_integer_
-        ))
-    }
-
-    coefs <- stats::coef(model)
-    TD_arg <- if (n_params == 4L) coefs[["TD"]] - t0 else NULL
-    MRT_val <- sum(TD_arg, coefs[["tau"]])
-    HRT_val <- sum(TD_arg, coefs[["tau"]] * log(2))
-
-    ## predict response at tau, MRT, and HRT using the fitted model
-    fitted_params <- monoexponential(
-        t    = c(coefs[["tau"]], MRT_val, HRT_val),
-        A    = coefs[["A"]],
-        B    = coefs[["B"]],
-        tau  = coefs[["tau"]],
-        TD   = TD_arg
-    )
-
-    return(list(
-        model      = model,
-        A          = coefs[["A"]],
-        B          = coefs[["B"]],
-        tau        = coefs[["tau"]],
-        TD         = TD_arg %||% NA_real_,
-        MRT        = MRT_val,
-        HRT        = HRT_val,
-        tau_fitted = fitted_params[[1L]],
-        MRT_fitted = fitted_params[[2L]],
-        HRT_fitted = fitted_params[[3L]],
-        fitted     = unname(stats::predict(model)),
-        n_params   = n_params
-    ))
-}
-
-
-#' Analyse monoexponential kinetics across NIRS channels
-#'
-#' Fit a monoexponential curve to each `nirs_channel` within a single
-#' data frame. Called by [analyse_kinetics()] when `method = "monoexponential"`.
-#'
-#' @inheritParams fit_monoexponential
 #' @inheritParams validate_mnirs
 #' @inheritParams analyse_kinetics
 #'
-#' @details
-#' ## Per-channel argument overrides
-#'
-#' Arguments passed to `analyse_monoexponential()` apply to all `nirs_channels`
-#' by default. `channel_args` allows overriding any argument for individual
-#' channels, e.g.:
-#'
-#' ```r
-#' analyse_monoexponential(
-#'     data = df,
-#'     nirs_channels = c(hhb, smo2),
-#'     use_time_delay = TRUE,
-#'     direction = "positive",
-#'     channel_args = list(
-#'         hhb = list(direction = "negative")
-#'     )
-#' )
-#' ```
-#'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
 #'   `nirs_channels`, `A`, `B`, `tau`, `k`, `TD`, `MRT`, `HRT`, `tau_fitted`,
-#'   `MRT_fitted`, `HRT_fitted`.
-#'   Per-channel metadata are attached as attributes:
-#'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
-#'     with columns `window_idx` and `fitted`.
+#'   `MRT_fitted`, `HRT_fitted`. Per-channel metadata are attached as
+#'   attributes:
+#'   - `"model"`: an [nls][stats::nls] model object, or `NULL` for channels
+#'     where fitting failed.
+#'   - `"fitted_data"`: a named list of per-channel data frames with
+#'     columns `window_idx` and `fitted`.
 #'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
 #'     containing model fit diagnostics.
 #'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
 #'     recording the resolved arguments used.
 #'
-#' @seealso [analyse_kinetics()], [fit_monoexponential()], [monoexponential()],
-#'   [SS_monoexp3()], [SS_monoexp4()]
+#' @seealso [analyse_kinetics()], [monoexponential()], [SS_monoexp3()],
+#'   [SS_monoexp4()]
 #'
 #' @keywords internal
 analyse_monoexponential <- function(
@@ -420,7 +270,7 @@ analyse_monoexponential <- function(
     nirs_channels = NULL,
     time_channel = NULL,
     use_time_delay = TRUE, ## ! better arg name?
-    t0 = NULL,
+    t0 = NULL, ## ! better arg name?
     direction = c("auto", "positive", "negative"),
     end_fit_span = Inf,
     channel_args = list(),
@@ -458,7 +308,6 @@ analyse_monoexponential <- function(
         direction = direction,
         end_fit_span = end_fit_span,
         verbose = verbose,
-        bypass_checks = TRUE,
         args
     )
 
@@ -478,11 +327,33 @@ analyse_monoexponential <- function(
         HRT_fitted = NA_real_
     )
 
+    ## construct warning messages for fit failure
+    fit_failed_warning <- function(.nirs, n, e, verbose) {
+        if (!verbose) {
+            return(invisible(NULL))
+        }
+        msg <- c(
+            "x" = "{n}-parameter {.fn SS_monoexp{n}} fit failed for \\
+            {.field {(.nirs)}} in {.field {interval_names}}.",
+            "!" = "{conditionMessage(e)}"
+        )
+        if (n == "3") {
+            msg <- c(
+                msg,
+                "i" = "Attempting 3-parameter fit with {.fn SS_monoexp3}."
+            )
+        }
+        cli_warn(msg)
+        return(invisible(NULL))
+    }
+
     ## process per-channel ============================================
     results <- lapply(nirs_channels, \(.nirs) {
         all_args <- utils::modifyList(
             default_args, channel_args[[.nirs]] %||% list()
         )
+        ## derive n_params from use_time_delay for internal use
+        n_params <- if (all_args$use_time_delay) 4L else 3L
 
         ## filter for valid finite idx before first extreme + end_fit_span
         valid <- find_kinetics_idx(
@@ -492,64 +363,77 @@ analyse_monoexponential <- function(
         x_fit <- data[[.nirs]][valid$idx]
         t_fit <- time_vec[valid$idx]
 
-        fit <- fit_monoexponential(
-            x = x_fit,
-            t = t_fit,
-            t0 = t0,
-            use_time_delay = all_args$use_time_delay,
-            verbose = FALSE,
-            bypass_checks = TRUE
-        )
+        fit_data <- data.frame(.x = x_fit, .t = t_fit)
 
-        ## emit contextualised warnings at the data-frame level
-        if (verbose) {
-            if (is.null(fit$model)) {
-                cli_warn(c(
-                    "x" = "Monoexponential fit failed for \\
-                    {.field {.nirs}} in {.field {interval_names}}.",
-                    "i" = "Returning {.val {NA}} coefficients."
-                ))
-            } else if (all_args$use_time_delay && fit$n_params == 3L) {
-                cli_warn(c(
-                    "x" = "4-parameter {.fn SS_monoexp4} fit failed for \\
-                    {.field {.nirs}} in {.field {interval_names}}.",
-                    "i" = "Fitted 3-parameter {.fn SS_monoexp3} instead."
-                ))
-            }
+        ## attempt nls fit on 4-param then fall back to 3-param on failure
+        model <- NULL
+        if (n_params == 4L) {
+            model <- tryCatch(
+                stats::nls(.x ~ SS_monoexp4(.t, A, B, tau, TD), fit_data),
+                error = \(e) {
+                    fit_failed_warning(.nirs, "4", e, verbose)
+                    NULL
+                }
+            )
+            if (is.null(model)) n_params <- 3L
+        }
+
+        if (n_params == 3L) {
+            model <- tryCatch(
+                stats::nls(.x ~ SS_monoexp3(.t, A, B, tau), fit_data),
+                error = \(e) {
+                    fit_failed_warning(.nirs, "3", e, verbose)
+                    NULL
+                }
+            )
         }
 
         ## ! implement fallback HRT method
-        if (is.null(fit$model)) {
-            return(build_na_results(
-                .nirs, na_coefs, all_args, n_params = 3L
-            ))
+        if (is.null(model)) {
+            return(build_na_results(.nirs, na_coefs, all_args, n_params))
         }
+
+        fitted_vals <- stats::predict(model)
+        coefs <- stats::coef(model)
+        TD_arg <- if (n_params == 4L) coefs[["TD"]] - t0 else NULL
+        TD_val <- TD_arg %||% NA_real_
+        MRT_val <- sum(TD_arg, coefs[["tau"]])
+        HRT_val <- sum(TD_arg, coefs[["tau"]] * log(2))
+
+        ## predict response at tau, MRT, and HRT using the fitted model
+        fitted_params <- monoexponential(
+            t = c(coefs[["tau"]], MRT_val, HRT_val),
+            A = coefs[["A"]],
+            B = coefs[["B"]],
+            tau = coefs[["tau"]],
+            TD = TD_arg
+        )
 
         coefs <- data.frame(
             nirs_channels = .nirs,
             time_channel  = time_channel,
-            A             = fit$A,
-            B             = fit$B,
-            tau           = fit$tau,
-            k             = 1 / fit$tau,
-            TD            = fit$TD,
-            MRT           = fit$MRT,
-            HRT           = fit$HRT,
-            tau_fitted    = fit$tau_fitted,
-            MRT_fitted    = fit$MRT_fitted,
-            HRT_fitted    = fit$HRT_fitted
+            A             = coefs[["A"]],
+            B             = coefs[["B"]],
+            tau           = coefs[["tau"]],
+            k             = 1 / coefs[["tau"]],
+            TD            = TD_val,
+            MRT           = MRT_val,
+            HRT           = HRT_val,
+            tau_fitted    = fitted_params[[1L]],
+            MRT_fitted    = fitted_params[[2L]],
+            HRT_fitted    = fitted_params[[3L]]
         )
 
         diag <- compute_diagnostics(
-            x_fit, t_fit, fit$fitted, fit$n_params, verbose
+            x_fit, t_fit, fitted_vals, n_params, verbose
         )
 
         list(
             coefficients = coefs,
-            model = fit$model,
+            model = model,
             fitted_data = data.frame(
-                window_idx = valid$idx,
-                fitted     = fit$fitted
+                window_idx = valid$idx, 
+                fitted     = fitted_vals
             ),
             diagnostics = cbind(data.frame(nirs_channels = .nirs), diag),
             channel_args = build_channel_args(.nirs, all_args)

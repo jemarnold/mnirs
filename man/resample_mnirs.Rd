@@ -50,8 +50,8 @@ using \code{\link[stats:approxfun]{stats::approx()}}. Suitable for numeric colum
 columns will fall back to \code{"locf"} behaviour.}
 }}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{

@@ -90,8 +90,8 @@ all detected intervals, returning a single data frame.}
 numeric \code{time_channel} values to start from zero within each interval
 data frame.}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
@@ -130,9 +130,9 @@ Raw values supplied to \code{start}/\code{end} are auto-coerced:
 label, end by time). When lengths differ, the shorter is recycled.
 }
 
-\subsection{Timespan window}{
+\subsection{Time span window}{
 
-\code{span} additively expands the timespan window around interval boundaries.
+\code{span} additively expands the time span window around interval boundaries.
 \itemize{
 \item A two-value vector expands the \code{start} and \code{end}, respectively:
 \code{span = c(-60, 60)} expands the \code{start} earlier by \code{60}, and the \code{end}

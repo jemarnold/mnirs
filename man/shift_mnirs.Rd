@@ -44,7 +44,7 @@ channels will be shifted, e.g. shift all values up by 10 units.}
 centred on \code{idx}, between
 \verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value defining the local window timespan around
+\item{span}{A numeric value defining the local window time span around
 \code{idx} in units of \code{time_channel} or \code{t}, between
 \verb{[t - span/2, t + span/2]}.}
 
@@ -58,8 +58,8 @@ specified values.}
 values.}
 }}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{

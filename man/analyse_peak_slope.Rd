@@ -41,13 +41,13 @@ used.
 
 \item{t0}{A numeric value specifying the start of the kinetics response
 in units of \code{time_channel}. Observations where \code{time_channel <= t0}
-define the pre-response baseline. Retrieves \code{interval_times} from
-\emph{"mnirs"} metadata or default to \code{0}.}
+define the pre-response baseline window. If \code{NULL} (\emph{default}), retrieves
+\code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}.}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}
 
-\item{span}{A numeric value defining the local window timespan around \code{idx}
+\item{span}{A numeric value defining the local window time span around \code{idx}
 in which to perform the operation, according to \code{align}. In units of
 \code{time_channel} or \code{t}.}
 
@@ -55,14 +55,14 @@ in which to perform the operation, according to \code{align}. In units of
 \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is \emph{forward looking}, and \emph{"right"}
 is \emph{backward looking} from the current sample.}
 
-\item{direction}{A character string specifying the slope direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{end_fit_span}{A numeric value in units of \code{t} specifying the
-forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
-returns the global extreme from the full range of \code{x}.}
+\item{end_fit_span}{A numeric value in units of \code{time_channel} or \code{t}
+specifying the forward-looking window used to check for subsequent
+greater/lesser values than the candidate extreme. \code{end_fit_span = Inf}
+(\emph{default}) returns the global extreme from the full range of \code{x}.}
 
 \item{partial}{Logical; default is \code{FALSE}, requires local windows to have
 complete number of samples specified by \code{width} or \code{span}. If \code{TRUE},
@@ -73,24 +73,24 @@ returned vector. If \code{TRUE}, ignores \code{NA}s and processes available vali
 samples within the local window. May return errors or warnings. (see
 \emph{Details}).}
 
-\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
-\code{nirs_channels} for unique per-channel arguments to override global
-default arguments (see \emph{Details}).}
+\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
+to \code{nirs_channels} for unique per-channel arguments that override the
+global defaults (see \emph{Details}).}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
-\code{nirs_channels}, \code{slope}, \code{intercept}, \code{y}, \verb{<time_channel>}, \code{idx}.
+\code{nirs_channels}, \code{slope}, \code{intercept}, \code{y}, \code{peak_slope_time}, \code{idx}.
 Per-channel metadata are attached as attributes:
 \itemize{
-\item \code{"model"}: a linear regression model object via \code{stats::lm()}.
-\item \code{"fitted_data"}: a named list of data frames (per \code{nirs_channel})
-with columns \code{window_idx} and \code{fitted}.
+\item \code{"model"}: a linear regression model object via \code{\link[stats:lm]{stats::lm()}}.
+\item \code{"fitted_data"}: a named list of per-channel data frames with
+columns \code{window_idx} and \code{fitted}.
 \item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
 containing model fit diagnostics.
 \item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
@@ -98,29 +98,10 @@ recording the resolved arguments used.
 }
 }
 \description{
-Compute the maximum local linear slope for each \code{nirs_channel} within a
-\emph{"mnirs"} data frame and return a data frame of regression parameters
-with per-channel metadata as attributes.
-}
-\details{
-\subsection{Per-channel argument overrides}{
-
-Arguments passed to \code{analyse_peak_slope()} apply to all \code{nirs_channels}
-by default. \code{channel_args} allows overriding any argument for individual
-channels, e.g.:
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_peak_slope(
-    data = df,
-    nirs_channels = c(hhb, smo2),
-    span = 3,
-    direction = "positive",
-    channel_args = list(
-        smo2 = list(span = 5),
-        hhb  = list(direction = "negative")
-    )
-)
-}\if{html}{\out{</div>}}
-}
+Internal channel-level dispatch for
+\code{analyse_kinetics(method = "peak_slope")}. Computes the maximum local
+linear slope for each \code{nirs_channel} within a single \emph{"mnirs"} data
+frame. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing documentation.
 }
 \seealso{
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=peak_slope]{peak_slope()}}

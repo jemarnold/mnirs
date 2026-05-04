@@ -41,37 +41,40 @@ If the 4-parameter fit fails, or if \code{use_time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
 
 \item{t0}{A numeric value specifying the start of the kinetics response
-in units of \code{t}. Observations where \code{t <= t0} define the baseline window.
-Defaults to \code{0}.}
+in units of \code{time_channel}. Observations where \code{time_channel <= t0}
+define the pre-response baseline window. If \code{NULL} (\emph{default}), retrieves
+\code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}.}
 
-\item{direction}{A character string specifying the kinetics direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{end_fit_span}{A numeric value in units of \code{t} specifying the
-forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
-returns the global extreme from the full range of \code{x}.}
+\item{end_fit_span}{A numeric value in units of \code{time_channel} or \code{t}
+specifying the forward-looking window used to check for subsequent
+greater/lesser values than the candidate extreme. \code{end_fit_span = Inf}
+(\emph{default}) returns the global extreme from the full range of \code{x}.}
 
-\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
-\code{nirs_channels} for unique per-channel arguments to override global
-default arguments (see \emph{Details}).}
+\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
+to \code{nirs_channels} for unique per-channel arguments that override the
+global defaults (see \emph{Details}).}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
-\item{...}{Additional arguments. \code{bypass_checks} suppresses input
-validation.}
+\item{...}{Additional arguments passed to the underlying method function.
+See \emph{Details}.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
 \code{nirs_channels}, \code{A}, \code{B}, \code{tau}, \code{k}, \code{TD}, \code{MRT}, \code{HRT}, \code{tau_fitted},
-\code{MRT_fitted}, \code{HRT_fitted}.
-Per-channel metadata are attached as attributes:
+\code{MRT_fitted}, \code{HRT_fitted}. Per-channel metadata are attached as
+attributes:
 \itemize{
-\item \code{"fitted_data"}: a named list of data frames (per \code{nirs_channel})
-with columns \code{window_idx} and \code{fitted}.
+\item \code{"model"}: an \link[stats:nls]{nls} model object, or \code{NULL} for channels
+where fitting failed.
+\item \code{"fitted_data"}: a named list of per-channel data frames with
+columns \code{window_idx} and \code{fitted}.
 \item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
 containing model fit diagnostics.
 \item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
@@ -79,30 +82,13 @@ recording the resolved arguments used.
 }
 }
 \description{
-Fit a monoexponential curve to each \code{nirs_channel} within a single
-data frame. Called by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "monoexponential"}.
-}
-\details{
-\subsection{Per-channel argument overrides}{
-
-Arguments passed to \code{analyse_monoexponential()} apply to all \code{nirs_channels}
-by default. \code{channel_args} allows overriding any argument for individual
-channels, e.g.:
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_monoexponential(
-    data = df,
-    nirs_channels = c(hhb, smo2),
-    use_time_delay = TRUE,
-    direction = "positive",
-    channel_args = list(
-        hhb = list(direction = "negative")
-    )
-)
-}\if{html}{\out{</div>}}
-}
+Internal channel-level dispatch for
+\code{analyse_kinetics(method = "monoexponential")}. Fits a monoexponential
+curve to each \code{nirs_channel} within a single \emph{"mnirs"} data frame. See
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing documentation.
 }
 \seealso{
-\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=fit_monoexponential]{fit_monoexponential()}}, \code{\link[=monoexponential]{monoexponential()}},
-\code{\link[=SS_monoexp3]{SS_monoexp3()}}, \code{\link[=SS_monoexp4]{SS_monoexp4()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=monoexponential]{monoexponential()}}, \code{\link[=SS_monoexp3]{SS_monoexp3()}},
+\code{\link[=SS_monoexp4]{SS_monoexp4()}}
 }
 \keyword{internal}

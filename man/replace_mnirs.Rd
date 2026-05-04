@@ -96,7 +96,7 @@ are more conservative.
 centred on \code{idx}, between
 \verb{[idx - floor(width/2), idx + floor(width/2)]}.}
 
-\item{span}{A numeric value defining the local window timespan around
+\item{span}{A numeric value defining the local window time span around
 \code{idx} in units of \code{time_channel} or \code{t}, between
 \verb{[t - span/2, t + span/2]}.}
 
@@ -114,8 +114,8 @@ values within a centred window defined by \code{width} or \code{span}.}
 \item{\code{"none"}}{Returns \code{NA}s without replacement.}
 }}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{x}{A numeric vector of the response variable.}
@@ -165,7 +165,7 @@ listed in \code{nirs_channels} are passed through unprocessed.
 \code{replace_outliers()} and \code{replace_missing()} (when \code{method = "median"})
 operate over a local rolling window for outlier detection and median
 interpolation. The window is specified by either \code{width} as the number
-of samples, or \code{span} as the timespan in units of \code{time_channel}.
+of samples, or \code{span} as the time span in units of \code{time_channel}.
 A partial window is calculated at the edges of the data.
 }
 
@@ -181,7 +181,7 @@ values themselves.
 \subsection{Outlier detection with replace_outliers()}{
 
 Rolling local medians are computed across \code{x} within a window defined
-by \code{width} (number of samples) or \code{span} (timespan in units of \code{t}).
+by \code{width} (number of samples) or \code{span} (time span in units of \code{t}).
 
 Outliers are detected with robust median absolute deviation (MAD),
 adapted from \code{pracma::hampel()}. Deviations equal to or less than the
@@ -221,7 +221,7 @@ replaced by local median).
 
 \code{method = "median"} calculates the local median of valid (non-\code{NA})
 values to either side of \code{NA}s, within a window defined by \code{width}
-(number of samples) or \code{span} (timespan in units of \code{t}). Sequential
+(number of samples) or \code{span} (time span in units of \code{t}). Sequential
 \code{NA}s are all replaced by the same median value.
 }
 

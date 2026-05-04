@@ -28,12 +28,12 @@ Defaults to \code{0}.}
 fractional response amplitude to detect. Defaults to \code{0.5} (50\% response,
 i.e. half-response time).}
 
-\item{direction}{A character string specifying the kinetics direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}
@@ -52,9 +52,10 @@ in units of \code{t}.}
 \item{\code{extreme_idx}}{Integer index at the extreme value (\code{B}).}
 }
 \description{
-Identify the time at which a signal reaches a specified fraction of its
-total response amplitude relative to a baseline period (e.g. \emph{half-response
-time} at 50\% fractional amplitude).
+Identify the time at which a numeric signal reaches a specified fraction
+of its total response amplitude relative to a baseline period (e.g.
+\emph{half-response time} at 50\% fractional amplitude). Vector-level companion
+to \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "response_time"}.
 }
 \details{
 \subsection{Method}{
@@ -64,23 +65,26 @@ The target response value is computed as:
 \code{response_fitted = A + (B - A) * fraction}
 
 where \code{A} is the mean baseline (\code{t <= t0}) and \code{B} is the extreme (peak
-or trough) value after \code{t0}. The response time is the elapsed time from \code{t0}
-to the first sample where \code{x} reaches or exceeds the \code{response_fitted} value
-(or where it falls to or below, for negative direction).
+or trough) value after \code{t0}. The response time is the elapsed time from
+\code{t0} to the first sample where \code{x} reaches the \code{response_fitted} value
+(above for positive direction, below for negative).
 }
 
 \subsection{Direction}{
 
 When \code{direction = "auto"}, the net slope across \code{x} determines the overall
-trend. If the net slope is zero or \code{NA}, the direction of greatest absolute
-change is used. When \code{direction = "positive"} or \code{"negative"}, the signal
-extreme is the maximum or minimum value after \code{t0}, respectively.
+trend, and the corresponding extreme (maximum for positive, minimum for
+negative) is used as \code{B}. If the net slope is zero or \code{NA}, the direction
+of greatest absolute change is used. When \code{direction = "positive"} or
+\code{"negative"}, the extreme is the maximum or minimum value after \code{t0},
+respectively.
 }
 
 \subsection{Baseline}{
 
-When no observations exist where \code{t <= t0}, the first sample \code{x[1]} is used
-as the baseline. \code{t0} cannot exceed the maximum of \code{t}.
+When no observations exist where \code{t <= t0}, the first sample \code{x[1]} is
+used as the baseline and a warning is issued. \code{t0} cannot exceed the
+maximum of \code{t}.
 }
 }
 \examples{
@@ -109,5 +113,5 @@ points(t[MRT$response_idx], MRT$response_value, col = "blue", pch = 19)
 
 }
 \seealso{
-\code{\link[=analyse_response_time]{analyse_response_time()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=peak_slope]{peak_slope()}}, \code{\link[=monoexponential]{monoexponential()}}
 }

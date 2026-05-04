@@ -37,28 +37,28 @@ used.
 
 \item{t0}{A numeric value specifying the start of the kinetics response
 in units of \code{time_channel}. Observations where \code{time_channel <= t0}
-define the pre-response baseline. Retrieves \code{interval_times} from
-\emph{"mnirs"} metadata or default to \code{0}.}
+define the pre-response baseline window. If \code{NULL} (\emph{default}), retrieves
+\code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}.}
 
 \item{fraction}{A numeric value in the range \verb{[0, 1]} specifying the
 fractional response amplitude to detect. Defaults to \code{0.5} (50\% response,
 i.e. half-response time).}
 
-\item{direction}{A character string specifying the kinetics direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{end_fit_span}{A numeric value in units of \code{t} specifying the
-forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
-returns the global extreme from the full range of \code{x}.}
+\item{end_fit_span}{A numeric value in units of \code{time_channel} or \code{t}
+specifying the forward-looking window used to check for subsequent
+greater/lesser values than the candidate extreme. \code{end_fit_span = Inf}
+(\emph{default}) returns the global extreme from the full range of \code{x}.}
 
-\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
-\code{nirs_channels} for unique per-channel arguments to override global
-default arguments (see \emph{Details}).}
+\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
+to \code{nirs_channels} for unique per-channel arguments that override the
+global defaults (see \emph{Details}).}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments passed to the underlying method function.
@@ -67,12 +67,11 @@ See \emph{Details}.}
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
 \code{nirs_channels}, \code{A}, \code{B}, \code{response_time}, \code{response_value},
-\code{fitted}, \code{idx}.
-Per-channel metadata are attached as attributes:
+\code{fitted}, \code{idx}. Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"model"}: \code{NULL} (no parametric model is fitted).
-\item \code{"fitted_data"}: a named list of data frames (per \code{nirs_channel})
-with columns \code{window_idx} and \code{fitted}, containing the baseline,
+\item \code{"fitted_data"}: a named list of per-channel data frames with
+columns \code{window_idx} and \code{fitted}, containing the baseline,
 response, and extreme key points.
 \item \code{"diagnostics"}: a \code{data.frame} with one row per \code{nirs_channel}
 containing model fit diagnostics.
@@ -81,30 +80,10 @@ recording the resolved arguments used.
 }
 }
 \description{
-Compute the fractional response time for each \code{nirs_channel} within a
-single \emph{"mnirs"} data frame and return a data frame of parameters with
-per-channel metadata as attributes. Called by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when
-\code{method = "response_time"}.
-}
-\details{
-\subsection{Per-channel argument overrides}{
-
-Arguments passed to \code{analyse_response_time()} apply to all \code{nirs_channels}
-by default. \code{channel_args} allows overriding any argument for individual
-channels, e.g.:
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_response_time(
-    data = df,
-    nirs_channels = c(hhb, smo2),
-    fraction = 0.5,
-    direction = "positive",
-    channel_args = list(
-        smo2 = list(fraction = 0.632),
-        hhb  = list(direction = "negative")
-    )
-)
-}\if{html}{\out{</div>}}
-}
+Internal channel-level dispatch for
+\code{analyse_kinetics(method = "response_time")}. Computes the fractional
+response time for each \code{nirs_channel} within a single \emph{"mnirs"} data
+frame. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing documentation.
 }
 \seealso{
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=response_time]{response_time()}}

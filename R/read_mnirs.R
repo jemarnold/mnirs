@@ -50,8 +50,8 @@
 #'     all columns in the file data table will be returned, as an exploratory
 #'     option.
 #'
-#' @param verbose Logical. Default is `TRUE`. Will display or silence (if
-#'   `FALSE`) warnings and information messages helpful for troubleshooting. A
+#' @param verbose Logical. Default is `TRUE`. Display or silence (if `FALSE`)
+#'   warnings and information messages helpful for troubleshooting. Ad
 #'   global default can be set via `options(mnirs.verbose = FALSE)`.
 #'
 #' @details

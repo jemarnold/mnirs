@@ -465,8 +465,8 @@ test_that("analyse_monoexponential() uses t0 correctly", {
 
     ## visual check
     # plot(data) +
-    #     ggplot2::coord_cartesian(xlim = c(0, NA)) +
-    #     ggplot2::geom_vline(xintercept = t0) +
+    #     # ggplot2::coord_cartesian(xlim = c(0, NA)) +
+    #     # ggplot2::geom_vline(xintercept = t0) +
     #     ggplot2::geom_line(
     #         ggplot2::aes(y = attributes(result)$fitted$smo2$fitted)
     #     )

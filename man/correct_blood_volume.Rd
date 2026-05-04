@@ -27,8 +27,8 @@ match exactly.}
 haemoglobin and myoglobin, \emph{THb}; proxy for blood volume) column in \code{data}.
 Must match exactly.}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{

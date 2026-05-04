@@ -26,7 +26,7 @@
 #'   centred on `idx`, between
 #'   `[idx - floor(width/2), idx + floor(width/2)]`.
 #'
-#' @param span A numeric value defining the local window timespan around
+#' @param span A numeric value defining the local window time span around
 #'   `idx` in units of `time_channel` or `t`, between
 #'   `[t - span/2, t + span/2]`.
 #'
@@ -58,7 +58,7 @@
 #' `replace_outliers()` and `replace_missing()` (when `method = "median"`)
 #' operate over a local rolling window for outlier detection and median
 #' interpolation. The window is specified by either `width` as the number
-#' of samples, or `span` as the timespan in units of `time_channel`.
+#' of samples, or `span` as the time span in units of `time_channel`.
 #' A partial window is calculated at the edges of the data.
 #'
 #' @returns `replace_mnirs()` return a [tibble][tibble::tibble-package] of 
@@ -307,7 +307,7 @@ replace_invalid <- function(
 #' ## Outlier detection with replace_outliers()
 #'
 #' Rolling local medians are computed across `x` within a window defined
-#' by `width` (number of samples) or `span` (timespan in units of `t`).
+#' by `width` (number of samples) or `span` (time span in units of `t`).
 #'
 #' Outliers are detected with robust median absolute deviation (MAD),
 #' adapted from `pracma::hampel()`. Deviations equal to or less than the
@@ -399,7 +399,7 @@ replace_outliers <- function(
 #'
 #' `method = "median"` calculates the local median of valid (non-`NA`)
 #' values to either side of `NA`s, within a window defined by `width`
-#' (number of samples) or `span` (timespan in units of `t`). Sequential
+#' (number of samples) or `span` (time span in units of `t`). Sequential
 #' `NA`s are all replaced by the same median value.
 #'
 #' ## Edge behaviour for method = "median"

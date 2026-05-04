@@ -19,8 +19,8 @@ excluding the intercept (default \code{1L}). Used to compute \code{adj_r2}.
 For non-linear models (\code{"monoexponential"}, \code{"sigmoidal"}), pass the
 number of free parameters fit by the solver.}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{

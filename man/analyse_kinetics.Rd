@@ -6,7 +6,7 @@
 \alias{analyse_kinetics.peak_slope}
 \alias{analyse_kinetics.monoexponential}
 \alias{analyze_kinetics}
-\title{Analyse mNIRS kinetics across intervals}
+\title{Analyse kinetics across mNIRS channels and intervals}
 \usage{
 analyse_kinetics(
   data,
@@ -52,39 +52,40 @@ Must match a column name in \code{data} exactly.
 used.
 }}
 
-\item{method}{A character string specifying the kinetics analysis method
-\verb{<under development>}. Additional arguments must be specified for each
-method. See \emph{Details}.
+\item{method}{A character string specifying the kinetics analysis method.
+Additional arguments must be specified for each method. See \emph{Details}.
 \describe{
 \item{\code{"response_time"}}{Fractional (e.g. 50\%, 63.2\%, 90\%) response
-time. Additional arguments: \code{fraction}.}
+time. Additional arguments: \code{fraction}. See \code{\link[=response_time]{response_time()}}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
-arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
+arguments: \code{width} or \code{span}, \code{align}, \code{partial}, \code{na.rm}. See
+\code{\link[=peak_slope]{peak_slope()}}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
-\code{\link[stats:nls]{stats::nls()}} with arguments: \code{use_time_delay}.}
+\code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{use_time_delay}. See
+\code{\link[=monoexponential]{monoexponential()}}.}
 \item{\code{"sigmoidal"}}{\verb{<under development>}.}
 }}
 
 \item{t0}{A numeric value specifying the start of the kinetics response
 in units of \code{time_channel}. Observations where \code{time_channel <= t0}
-define the pre-response baseline. Retrieves \code{interval_times} from
-\emph{"mnirs"} metadata or default to \code{0}.}
+define the pre-response baseline window. If \code{NULL} (\emph{default}), retrieves
+\code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}.}
 
-\item{direction}{A character string specifying the kinetics direction to
+\item{direction}{A character string specifying the response direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
 \emph{Details}.}
 
-\item{end_fit_span}{A numeric value in units of \code{t} specifying the
-forward-looking window used to check for subsequent greater/lesser
-values than the candidate extreme. \code{end_fit_span = Inf} (\emph{default})
-returns the global extreme from the full range of \code{x}.}
+\item{end_fit_span}{A numeric value in units of \code{time_channel} or \code{t}
+specifying the forward-looking window used to check for subsequent
+greater/lesser values than the candidate extreme. \code{end_fit_span = Inf}
+(\emph{default}) returns the global extreme from the full range of \code{x}.}
 
-\item{channel_args}{An \emph{optional} \code{list()} with names corresponding to
-\code{nirs_channels} for unique per-channel arguments to override global
-default arguments (see \emph{Details}).}
+\item{channel_args}{An \emph{optional} named \code{list()} with names corresponding
+to \code{nirs_channels} for unique per-channel arguments that override the
+global defaults (see \emph{Details}).}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments passed to the underlying method function.
@@ -92,127 +93,183 @@ See \emph{Details}.}
 }
 \value{
 A formatted table of printed results, with individual elements
-accessable as a list of class \emph{"mnirs_kinetics"} containing:
+accessible as a structured list of class \emph{"mnirs_kinetics"} containing:
 
 \item{\code{method}}{The method used, e.g. \code{"response_time"}.}
-\item{\code{model}}{A named list of model objects (per interval,
-per \code{nirs_channel}). For \code{"peak_slope"}, each element is an
+\item{\code{model}}{A named list of model objects (per interval, per
+\code{nirs_channel}). For \code{"peak_slope"}, each element is an
 \link[stats:lm]{lm} object; for \code{"monoexponential"}, an
-\link[stats:nls]{nls} object. \code{NULL} for channels where fitting
-failed.}
+\link[stats:nls]{nls} object; for \code{"response_time"}, \code{NULL}. \code{NULL}
+for channels where fitting failed.}
 \item{\code{coefficients}}{A \link[tibble:tibble-package]{tibble} of coefficients
-with one row per \code{nirs_channel} and per interval, containing columns
-\code{interval}, \code{nirs_channels}, and individual method parameters.}
+with one row per \code{nirs_channel} per interval, containing columns
+\code{interval}, \code{nirs_channels}, and the method-specific parameters.}
 \item{\code{data}}{A list of the original input data frames augmented with a
-\verb{*_fitted} column of model fitted data values for each \code{nirs_channel}.}
+\verb{*_fitted} column of fitted values for each \code{nirs_channel}.}
 \item{\code{interval_times}}{A data frame of interval times for each
-\code{nirs_channel} per interval, supplied from \code{extract_intervals}, if
+\code{nirs_channel} per interval, supplied from \code{\link[=extract_intervals]{extract_intervals()}} if
 present in the metadata.}
 \item{\code{diagnostics}}{A data frame of model diagnostics (\code{n_obs}, \code{r2},
 \code{adj_r2}, \code{pseudo_r2}, \code{rmse}, \code{snr}, \code{cv_rmse}) with one row per
-\code{nirs_channel} and interval.}
+\code{nirs_channel} per interval.}
 \item{\code{channel_args}}{A data frame of the resolved arguments used for
-each \code{nirs_channel} with one row per \code{nirs_channel} and interval.}
+each \code{nirs_channel} with one row per \code{nirs_channel} per interval.}
 \item{\code{call}}{The matched call.}
 }
 \description{
-Perform kinetics analysis with parametric curve fitting or non-parametric
-estimation for \code{nirs_channels} within an \emph{"mnirs"} data frame or a list of
-data frames.
+Fit parametric curves or estimate non-parametric kinetics for each
+\code{nirs_channel} within an \emph{"mnirs"} data frame, a list of data frames,
+or a grouped data frame.
 }
 \details{
-\subsection{data input formats}{
+\subsection{Data input formats}{
 
-\code{analyse_kinetics()} can accept \code{data} in multiple formats:
+\code{analyse_kinetics()} accepts \code{data} in multiple formats:
 \itemize{
-\item A \strong{single \emph{"mnirs"} data frame} will be processed as a single interval.
-\item A \strong{list of \emph{"mnirs"} data frames} -- each interval data frame will be
-processed seperately
+\item A \strong{single \emph{"mnirs"} data frame} is processed as a single interval.
+\item A \strong{list of \emph{"mnirs"} data frames} -- each interval is processed
+separately.
 \item A \strong{grouped \emph{"mnirs"} data frame}, e.g. with \code{dplyr::group_by()} --
-the data frame will be split by grouping levels and processed as
-separate intervals.
+the data frame is split by grouping levels and each group is processed
+as a separate interval.
 }
+
+Specified \code{nirs_channels} (or channels retrieved from \emph{"mnirs"} metadata)
+will be analysed and results returned as a formatted table.
+}
+
+\subsection{Response onset (t0) and the baseline window}{
+
+\code{t0} should be specified as the time point separating the pre-response
+baseline (\code{time_channel <= t0}) from the start of the response window
+(\code{time_channel > t0}). For intervals extracted with \code{\link[=extract_intervals]{extract_intervals()}},
+\code{t0} will retrieve \code{interval_times} from \emph{"mnirs"} metadata. Otherwise
+\code{t0} defaults to \code{0}.
+
+For \code{"response_time"}, the baseline window before \code{t0} defines the mean
+starting amplitude \code{A} directly and anchors the start of the \code{response_time}
+parameter. For \code{"monoexponential"}, \code{t0} anchors the response onset for the
+time delay (\code{TD}) parameter, which provides the baseline window to fit \code{A}
+in a 4-parameter model (see \emph{method = "monoexponential"} section below).
+For \code{"peak_slope"}, \code{t0} anchors the response onset for the
+\code{peak_slope_time} parameter.
+}
+
+\subsection{Response direction and the end of the fitting window}{
+
+By default, \code{direction} is detected automatically as either \emph{"positive"}
+(upward response) or \emph{"negative"} (downward response), and can be
+overwritten manually. The end of the fitting window is set by locating the
+first peak (positive) or trough (negative) that has no greater/lesser value
+within a subsequnt window defined by \code{end_fit_span}: a time span in units of
+\code{time_channel}. The fitting window extends to the end of \code{end_fit_span}
+beyond the first local extreme peak/trough.
 }
 
 \subsection{method = "response_time"}{
 
 Aliases:
-\code{method = c("response time", "half recovery time", "half time", "HRT")}
+\code{method = c("response time", "half recovery time", "half time", "HRT")}.
 
-The \code{response_time} method identifies the time at which a signal reaches the
-specified fraction of its total response amplitude relative to a baseline
-period. e.g. the time to reach 50\% of the total change in amplitude would
-be the \emph{half-response time}. See \code{\link[=response_time]{response_time()}} for details.
+A non-parametric approach (estimated directly from the observed data without
+assuming a specific mathetmatical shape) to estimate the response time at
+which a signal reaches a specified fraction of its total response amplitude
+relative to the baseline. e.g. \emph{half-response time} (\verb{fraction = 0.5``) is the time from response onset to attain 50\% of the total amplitude change. }fraction = 0.632\verb{ approximates the time constant (}tau` (\eqn{\tau}))
+parameter from a monoexponential function.
 
-The target fractional response value is computed as:
+The target response value is:
 
-\code{response_fitted = A + (B - A) * fraction}
+\code{fitted = A + (B - A) * fraction}
 
-where \code{A} is the mean baseline value (where \code{time_channel <= t0}) and \code{B}
-is the extreme (peak or trough) value after \code{t0}. The response time is the
-elapsed time from \code{t0} to the first sample where the signal reaches or
-exceeds (above or below, depending on \code{direction}) the \code{response_fitted}
-value.
+Where \code{A} is the mean baseline value (\code{time_channel <= t0}) and \code{B} is the
+first local extreme (peak or trough) value after \code{t0}. \code{response_time} is
+the elapsed time from \code{t0} to \code{response_value}; the first observed sample
+where the signal is equal to or greater/lesser than the target \code{fitted}
+value. See \code{\link[=response_time]{response_time()}} for the full algorithm and coefficients results.
+
+Additional arguments (\code{...}) accepted when \code{method = "response_time"}:
+
+\describe{
+\item{\code{fraction}}{Numeric in the range \verb{[0, 1]}; the fractional response
+amplitude to detect. Defaults to \code{0.5} (50\% response).}
+}
 }
 
 \subsection{method = "peak_slope"}{
 
-Aliases: \code{method = c("peak slope", "slope")}
+Aliases: \code{method = c("peak slope", "slope")}.
 
-The \code{"peak_slope"} method identifies the maximum local linear slope within
-each \code{nirs_channel} using rolling least-squares regression. The local window
-is defined by \code{width} (number of samples) or by \code{span} (time units of
-\code{time_channel}). See \code{\link[=peak_slope]{peak_slope()}} for details.
+A semi-parametric approach to estimate the maximum positive or negative
+local linear slope of a signal using rolling least-squares regression. The
+steepest local rate of change can be interpreted as the moment of greatest
+mismatch between oxygen delivery and extraction. \code{peak_slope_time} is the
+time from response onset \code{t0} to this moment of greatest mismatch.
+
+The local window is defined by either \code{width} (number of samples) or \code{span}
+(in units of \code{time_channel}). See \code{\link[=peak_slope]{peak_slope()}} for window mechanics,
+partial-window behaviour, and the returned vector-level list.
 
 Additional arguments (\code{...}) accepted when \code{method = "peak_slope"}:
 
 \describe{
 \item{\code{width} or \code{span}}{Either the number of samples (integer), or the
-time duration in units of \code{time_channel} (numeric) in the local
-rolling window. One of either \code{width} or \code{span} must be specified.}
+time duration in units of \code{time_channel} (numeric), respectively, in
+the local rolling window. One of either \code{width} or \code{span} must be
+specified.}
 \item{\code{align}}{Character; window alignment -- \code{"centre"} (default),
 \code{"left"}, or \code{"right"}.}
 \item{\code{partial}}{Logical; default is \code{FALSE}, requires local windows
-to have complete number of samples specified by \code{width} or \code{span}.
-If \code{TRUE}, processes available samples within the local window.}
-\item{\code{na.rm}}{Logical; default is \code{TRUE}, ignores \code{NA}s and processes
-available valid samples within the local window. If \code{TRUE},
-propagates any \code{NA}s to the returned vector.}
+to have the complete number of samples specified by \code{width} or
+\code{span}. If \code{TRUE}, processes available samples within the local
+window returns results on partial data.}
+\item{\code{na.rm}}{Logical; default is \code{FALSE}, If \code{TRUE}, ignores \code{NA}s and
+processes available valid samples within the local window.}
 }
 }
 
 \subsection{method = "monoexponential"}{
 
-Aliases: \code{method = c("monoexp", "exponential", "tau", "MRT")}
+Aliases: \code{method = c("monoexp", "exponential", "tau", "MRT")}.
 
-The \code{"monoexponential"} method fits a self-starting monoexponential
-curve to each \code{nirs_channel} using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp4]{SS_monoexp4()}}
-(4-parameter: A, B, tau, TD), or \code{\link[=SS_monoexp3]{SS_monoexp3()}} (3-parameter: A, B, tau).
-See \code{\link[=monoexponential]{monoexponential()}} for model equations.
+A parametric approach fitting a self-starting monoexponential function to
+the response curve using \code{\link[stats:nls]{stats::nls()}} with \code{\link[=SS_monoexp4]{SS_monoexp4()}} (4-parameter:
+A, B, tau, TD), or \code{\link[=SS_monoexp3]{SS_monoexp3()}} (3-parameter: A, B, tau).
+
+Model equations:
+\itemize{
+\item 3-parameter: \code{A + (B - A) * (1 - exp(-t / tau))}
+\item 4-parameter: \code{ifelse(t <= TD, A, A + (B - A) * (1 - exp(-(t - TD) / tau)))}
+}
+
+\code{tau} is the \emph{time constant} of the response. The \emph{rate constant} \code{k} can be
+derived as the reciprocal (\code{k = 1 / tau}). The \emph{mean response time}
+\code{MRT = TD + tau} and the \emph{half-response time} \code{HRT = TD + tau * log(2)}
+can also be derived. See \code{\link[=monoexponential]{monoexponential()}} for the model family and
+\code{\link[=SS_monoexp3]{SS_monoexp3()}} / \code{\link[=SS_monoexp4]{SS_monoexp4()}} for self-start initialisation.
 
 Additional arguments (\code{...}) accepted when \code{method = "monoexponential"}:
 
 \describe{
 \item{\code{use_time_delay}}{Logical; default is \code{TRUE} to attempt to fit a
-4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model (A, B, tau, TD) with a time delay.
-If the 4-parameter fit fails, or if \code{use_time_delay = FALSE}, fits a
-reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
-\item{\code{stats::nls()}}{Other arguments can be passed to \code{\link[stats:nls]{stats::nls()}}}
+4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model with a time delay (\code{TD}). If the
+4-parameter fit fails, or if \code{use_time_delay = FALSE}, fits a
+reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model.}
+\item{\code{...}}{Other arguments passed to \code{\link[stats:nls]{stats::nls()}}.} ## !NOT IMPLEMENTED
 }
 }
 
 \subsection{method = "sigmoidal"}{
 
-Aliases: \code{method = c("logistic", "xmid")}
+Aliases: \code{method = c("logistic", "xmid")}.
 
-\verb{<under development>}
+\verb{<under development>}.
 }
 
-\subsection{channel_args per nirs_channel}{
+\subsection{Per-channel argument overrides}{
 
 Arguments in \code{analyse_kinetics()} apply to all \code{nirs_channels} by default.
-\code{channel_args} allows overriding defaults with unique values per channel,
-e.g.:
+\code{channel_args} allows overriding any argument with a unique value per
+channel, e.g.:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_kinetics(
     data,
@@ -265,5 +322,6 @@ result$diagnostics
 
 }
 \seealso{
-\code{\link[=extract_intervals]{extract_intervals()}}, \code{\link[=monoexponential]{monoexponential()}}, \code{\link[=peak_slope]{peak_slope()}}
+\code{\link[=extract_intervals]{extract_intervals()}}, \code{\link[=response_time]{response_time()}}, \code{\link[=peak_slope]{peak_slope()}},
+\code{\link[=monoexponential]{monoexponential()}}
 }

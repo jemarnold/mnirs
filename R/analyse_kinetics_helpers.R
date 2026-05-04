@@ -52,11 +52,11 @@ detect_direction <- function(
 #' (maximum) or trough (minimum) where `t >= 0`, and returns the integer
 #' indices of all finite observations up to `end_fit_span` past that extreme.
 #'
-#' @param end_fit_span A numeric value in units of `t` specifying the
-#'   forward-looking window used to check for subsequent greater/lesser
-#'   values than the candidate extreme. `end_fit_span = Inf` (*default*)
-#'   returns the global extreme from the full range of `x`.
-#' @param direction A character string specifying the kinetics direction to
+#' @param end_fit_span A numeric value in units of `time_channel` or `t`
+#'   specifying the forward-looking window used to check for subsequent 
+#'   greater/lesser values than the candidate extreme. `end_fit_span = Inf`
+#'   (*default*) returns the global extreme from the full range of `x`.
+#' @param direction A character string specifying the response direction to
 #'   detect -- `"auto"` (*default*), `"positive"`, or `"negative"`. See
 #'   *Details*.
 #' @inheritParams replace_invalid
@@ -382,7 +382,7 @@ build_channel_results <- function(results, nirs_channels, t0, verbose = TRUE) {
             cli_warn(c(
                 "!" = "Negative {.arg time_channel} coefficients imply the \\
                 response occured before {.arg t0}. This may indicate a \\
-                poorly fitting or misparameterised model.",
+                poorly fitted or misparameterised model.",
                 "i" = "Check {.arg time_channel} and {.arg t0} values, or \\
                 consider using a different {.fn analyse_kinetics} method."
             ))

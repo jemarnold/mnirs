@@ -174,13 +174,12 @@ rolling_slope <- function(
 #' Find peak linear slope
 #'
 #' Identify the maximum positive or negative local linear slope within a
-#' numeric vector using rolling least-squares regression and return a list
-#' of regression parameters for the peak window.
-#'
-#' @param direction A character string specifying the slope direction to
-#'   detect -- `"auto"` (*default*), `"positive"`, or `"negative"`. See
-#'   *Details*.
+#' numeric vector using rolling least-squares regression, and return a list
+#' of regression parameters for the peak window. Vector-level companion to
+#' [analyse_kinetics()] when `method = "peak_slope"`.
+#' 
 #' @param ... Additional arguments.
+#' @inheritParams find_kinetics_idx
 #' @inheritParams compute_local_windows
 #' @inheritParams replace_invalid
 #' @inheritParams filter_mnirs
@@ -194,38 +193,33 @@ rolling_slope <- function(
 #' `width` is specified, the window spans
 #' `[idx - floor((width - 1) / 2), idx + floor(width / 2)]`. Even `width`
 #' values bias alignment to *"left"*, placing the unequal sample forward of
-#' `idx`. 
-#' 
+#' `idx`.
+#'
 #' When `span` is specified with `align = "centre"`, the window spans
 #' `[t - span / 2, t + span / 2]`.
-#' 
+#'
 #' ## Direction detection
 #'
-#' When `direction = "auto"`, the net slope across all of `x` is computed to
-#' determine the overall trend (positive or negative), and the greatest local
-#' slope in that direction is returned. 
-#' 
-#' If the net slope equals zero or is `NA`, the greatest absolute local slope 
-#' is returned. When `direction = "positive"` or `"negative"`, the greatest 
-#' respective directional slope is returned. If no slopes in the requested 
-#' direction exist, `NA` is returned with a warning.
+#' When `direction = "auto"`, the net slope across all of `x` determines the
+#' overall trend (positive or negative), and the greatest local slope in that
+#' direction is returned. If the net slope equals zero or is `NA`, the greatest
+#' absolute local slope is returned.
 #'
 #' ## Partial windows
 #'
-#' The default `partial = FALSE` requires a complete number of samples
-#' specified by `width` or `span` (estimated from the sample rate of `t` when
-#' `span` is used). `NA` is returned if fewer samples are present in the
-#' local window. 
-#' 
-#' Setting `partial = TRUE` allows computation with at least 2 valid samples, 
-#' such as at edge conditions. But these values will be more sensitive to 
-#' noise and should be used with caution.
-#' 
+#' The default `partial = FALSE` requires the complete number of samples
+#' specified by `width` or `span`. `NA` is returned if fewer samples are
+#' present in the local window.
+#'
+#' Setting `partial = TRUE` allows computation with as few as 2 valid samples.
+#' These windows, such as at edge conditions, will be more sensitive to noise
+#' and this setting should be used with caution.
+#'
 #' ## Missing values
 #'
-#' `na.rm` controls whether missing values (`NA`s) within each local window are 
-#' either propagated to the returned vector when `na.rm = FALSE` (the default),
-#' or ignored before processing if `na.rm = TRUE`.
+#' When `na.rm = FALSE` (the default), any `NA` in a window propagates `NA` 
+#' to the returned slope. When `na.rm = TRUE`, `NA`s are ignored and the slope
+#' is computed from the remaining valid samples.
 #'
 #' @returns A named list containing:
 #'   \item{`slope`}{The peak slope value in units of `x / t`.}
@@ -233,12 +227,13 @@ rolling_slope <- function(
 #'   \item{`y`}{The predicted response value at the peak slope window index.}
 #'   \item{`t`}{The time value at the peak slope window index.}
 #'   \item{`idx`}{The integer index position of the peak slope window.}
-#'   \item{`fitted`}{A numeric vector of predicted values spanning the peak 
+#'   \item{`fitted`}{A numeric vector of predicted values spanning the peak
 #'   slope window.}
 #'   \item{`window_idx`}{An integer vector of indices spanning the peak slope
 #'   window.}
 #'
-#' @seealso [rolling_slope()]
+#' @seealso [analyse_kinetics()], [response_time()], [monoexponential()],
+#'   [rolling_slope()]
 #'
 #' @examples
 #' x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
@@ -349,40 +344,21 @@ peak_slope <- function(
 
 #' Analyse peak linear slope across NIRS channels
 #'
-#' Compute the maximum local linear slope for each `nirs_channel` within a
-#' *"mnirs"* data frame and return a data frame of regression parameters
-#' with per-channel metadata as attributes.
+#' Internal channel-level dispatch for
+#' `analyse_kinetics(method = "peak_slope")`. Computes the maximum local
+#' linear slope for each `nirs_channel` within a single *"mnirs"* data
+#' frame. See [analyse_kinetics()] for user-facing documentation.
 #'
 #' @inheritParams validate_mnirs
 #' @inheritParams peak_slope
 #' @inheritParams analyse_kinetics
 #'
-#' @details
-#' ## Per-channel argument overrides
-#'
-#' Arguments passed to `analyse_peak_slope()` apply to all `nirs_channels`
-#' by default. `channel_args` allows overriding any argument for individual
-#' channels, e.g.:
-#'
-#' ```r
-#' analyse_peak_slope(
-#'     data = df,
-#'     nirs_channels = c(hhb, smo2),
-#'     span = 3,
-#'     direction = "positive",
-#'     channel_args = list(
-#'         smo2 = list(span = 5),
-#'         hhb  = list(direction = "negative")
-#'     )
-#' )
-#' ```
-#'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
-#'   `nirs_channels`, `slope`, `intercept`, `y`, `<time_channel>`, `idx`.
+#'   `nirs_channels`, `slope`, `intercept`, `y`, `peak_slope_time`, `idx`.
 #'   Per-channel metadata are attached as attributes:
-#'   - `"model"`: a linear regression model object via `stats::lm()`.
-#'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
-#'     with columns `window_idx` and `fitted`.
+#'   - `"model"`: a linear regression model object via [stats::lm()].
+#'   - `"fitted_data"`: a named list of per-channel data frames with
+#'     columns `window_idx` and `fitted`.
 #'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
 #'     containing model fit diagnostics.
 #'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`

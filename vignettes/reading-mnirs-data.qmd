@@ -405,7 +405,7 @@ For filtering vector data and more details about Butterworth filter parameters, 
 
 * `method = "moving_average"`
 
-    The simplest smoothing method is a moving average filter applied over a specified number of samples or timespan. Commonly, this might be a 5- or 15-second centred moving average.
+    The simplest smoothing method is a moving average filter applied over a specified number of samples or time span. Commonly, this might be a 5- or 15-second centred moving average.
 
 * `width` or `span`
 

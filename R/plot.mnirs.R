@@ -437,9 +437,9 @@ scale_fill_mnirs <- function(..., aesthetics = "fill") {
 }
 
 
-#' Breaks for timespan data
+#' Breaks for time span data
 #'
-#' Pretty timespan breaks for plotting in units of 5, 15, 30, 60 sec, etc.
+#' Pretty time span breaks for plotting in units of 5, 15, 30, 60 sec, etc.
 #' Modified from [scales::breaks_timespan()].
 #'
 #' @param unit The time unit used to interpret numeric data input (*defaults*
@@ -507,9 +507,9 @@ breaks_timespan <- function(
 }
 
 
-#' Format timespan data as h:mm:ss
+#' Format time span data as h:mm:ss
 #'
-#' Convert numeric timespan data to `h:mm:ss` format for pretty plotting.
+#' Convert numeric time span data to `h:mm:ss` format for pretty plotting.
 #' Inspired by [ggplot2::scale_x_time()].
 #'
 #' @param x A numeric vector.

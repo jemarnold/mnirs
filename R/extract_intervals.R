@@ -85,9 +85,9 @@
 #' `start` and `end` can use different specification types (e.g., start by
 #' label, end by time). When lengths differ, the shorter is recycled.
 #'
-#' ## Timespan window
+#' ## Time span window
 #'
-#' `span` additively expands the timespan window around interval boundaries. 
+#' `span` additively expands the time span window around interval boundaries. 
 #' 
 #' - A two-value vector expands the `start` and `end`, respectively:
 #'   `span = c(-60, 60)` expands the `start` earlier by `60`, and the `end` 

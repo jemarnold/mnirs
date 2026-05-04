@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_monoexponential.R
 \name{monoexponential}
 \alias{monoexponential}
-\title{Monoexponential function with 4 parameters}
+\title{Monoexponential function}
 \usage{
 monoexponential(t, A, B, tau, TD = NULL)
 }
@@ -23,21 +23,28 @@ exponential response, in units of the predictor variable \code{t}. If \code{NULL
 (\emph{default}), a 3-parameter model without time delay is used.}
 }
 \value{
-A numeric vector of predicted values the same length as
-the predictor variable \code{t}.
+A numeric vector of predicted values the same length as the
+predictor variable \code{t}.
 }
 \description{
-Calculate a four-parameter monoexponential curve.
+Calculate a 3- or 4-parameter monoexponential curve. This is the model
+family fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "monoexponential"},
+and by \code{\link[stats:nls]{stats::nls()}} via the self-starting wrappers \code{\link[=SS_monoexp3]{SS_monoexp3()}} and
+\code{\link[=SS_monoexp4]{SS_monoexp4()}}.
 }
 \details{
-3-parameter model equation:
+\subsection{Model equations}{
+
+3-parameter model:
 \code{A + (B - A) * (1 - exp(-t / tau))}
 
-4-parameter model equation:
+4-parameter model:
 \code{ifelse(t <= TD, A, A + (B - A) * (1 - exp(-(t - TD) / tau)))}
 
-\code{tau} is the time constant and equal to the reciprocal of \code{k}, the rate
-constant (\code{k = 1/tau}).
+\code{tau} is the time constant, equal to the reciprocal of the rate constant
+\code{k} (\code{k = 1 / tau}). Common derived quantities include the mean response
+time \code{MRT = TD + tau} and the half-response time \code{HRT = TD + tau * log(2)}.
+}
 }
 \examples{
 set.seed(13)
@@ -67,5 +74,6 @@ y
 
 }
 \seealso{
-\code{\link[=SS_monoexp3]{SS_monoexp3()}}, \code{\link[=SS_monoexp4]{SS_monoexp4()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SS_monoexp3]{SS_monoexp3()}}, \code{\link[=SS_monoexp4]{SS_monoexp4()}},
+\code{\link[=response_time]{response_time()}}, \code{\link[=peak_slope]{peak_slope()}}
 }

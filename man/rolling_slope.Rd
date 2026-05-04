@@ -28,7 +28,7 @@ Default is \code{seq_along(x)}.}
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}
 
-\item{span}{A numeric value defining the local window timespan around \code{idx}
+\item{span}{A numeric value defining the local window time span around \code{idx}
 in which to perform the operation, according to \code{align}. In units of
 \code{time_channel} or \code{t}.}
 
@@ -45,8 +45,8 @@ returned vector. If \code{TRUE}, ignores \code{NA}s and processes available vali
 samples within the local window. May return errors or warnings. (see
 \emph{Details}).}
 
-\item{verbose}{Logical. Default is \code{TRUE}. Will display or silence (if
-\code{FALSE}) warnings and information messages helpful for troubleshooting. A
+\item{verbose}{Logical. Default is \code{TRUE}. Display or silence (if \code{FALSE})
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments.}

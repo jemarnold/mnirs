@@ -1,8 +1,9 @@
 #' Compute fractional kinetics response time
 #'
-#' Identify the time at which a signal reaches a specified fraction of its
-#' total response amplitude relative to a baseline period (e.g. *half-response
-#' time* at 50% fractional amplitude).
+#' Identify the time at which a numeric signal reaches a specified fraction
+#' of its total response amplitude relative to a baseline period (e.g.
+#' *half-response time* at 50% fractional amplitude). Vector-level companion
+#' to [analyse_kinetics()] when `method = "response_time"`.
 #'
 #' @param t0 A numeric value specifying the start of the kinetics response
 #'   in units of `t`. Observations where `t <= t0` define the baseline window.
@@ -13,7 +14,7 @@
 #' @param ... Additional arguments.
 #' @inheritParams replace_invalid
 #' @inheritParams find_kinetics_idx
-#' @inheritParams read_mnirs
+#' @inheritParams validate_mnirs
 #'
 #' @details
 #' ## Method
@@ -23,21 +24,24 @@
 #' `response_fitted = A + (B - A) * fraction`
 #'
 #' where `A` is the mean baseline (`t <= t0`) and `B` is the extreme (peak
-#' or trough) value after `t0`. The response time is the elapsed time from `t0`
-#' to the first sample where `x` reaches or exceeds the `response_fitted` value
-#' (or where it falls to or below, for negative direction).
+#' or trough) value after `t0`. The response time is the elapsed time from
+#' `t0` to the first sample where `x` reaches the `response_fitted` value
+#' (above for positive direction, below for negative).
 #'
 #' ## Direction
 #'
 #' When `direction = "auto"`, the net slope across `x` determines the overall
-#' trend. If the net slope is zero or `NA`, the direction of greatest absolute
-#' change is used. When `direction = "positive"` or `"negative"`, the signal
-#' extreme is the maximum or minimum value after `t0`, respectively.
+#' trend, and the corresponding extreme (maximum for positive, minimum for
+#' negative) is used as `B`. If the net slope is zero or `NA`, the direction
+#' of greatest absolute change is used. When `direction = "positive"` or
+#' `"negative"`, the extreme is the maximum or minimum value after `t0`,
+#' respectively.
 #'
 #' ## Baseline
 #'
-#' When no observations exist where `t <= t0`, the first sample `x[1]` is used
-#' as the baseline. `t0` cannot exceed the maximum of `t`.
+#' When no observations exist where `t <= t0`, the first sample `x[1]` is
+#' used as the baseline and a warning is issued. `t0` cannot exceed the
+#' maximum of `t`.
 #'
 #' @returns A named list containing:
 #'   \item{`A`}{Mean baseline value (mean of `x` where `t <= t0`).}
@@ -51,7 +55,7 @@
 #'   \item{`response_idx`}{Integer index at the `response_value`.}
 #'   \item{`extreme_idx`}{Integer index at the extreme value (`B`).}
 #'
-#' @seealso [analyse_response_time()], [analyse_kinetics()]
+#' @seealso [analyse_kinetics()], [peak_slope()], [monoexponential()]
 #'
 #' @examples
 #' set.seed(13)
@@ -165,42 +169,21 @@ response_time <- function(
 
 #' Analyse fractional kinetics response time across NIRS channels
 #'
-#' Compute the fractional response time for each `nirs_channel` within a
-#' single *"mnirs"* data frame and return a data frame of parameters with
-#' per-channel metadata as attributes. Called by [analyse_kinetics()] when
-#' `method = "response_time"`.
+#' Internal channel-level dispatch for
+#' `analyse_kinetics(method = "response_time")`. Computes the fractional
+#' response time for each `nirs_channel` within a single *"mnirs"* data
+#' frame. See [analyse_kinetics()] for user-facing documentation.
 #'
 #' @inheritParams validate_mnirs
 #' @inheritParams analyse_kinetics
 #' @inheritParams response_time
 #'
-#' @details
-#' ## Per-channel argument overrides
-#'
-#' Arguments passed to `analyse_response_time()` apply to all `nirs_channels`
-#' by default. `channel_args` allows overriding any argument for individual
-#' channels, e.g.:
-#'
-#' ```r
-#' analyse_response_time(
-#'     data = df,
-#'     nirs_channels = c(hhb, smo2),
-#'     fraction = 0.5,
-#'     direction = "positive",
-#'     channel_args = list(
-#'         smo2 = list(fraction = 0.632),
-#'         hhb  = list(direction = "negative")
-#'     )
-#' )
-#' ```
-#'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
 #'   `nirs_channels`, `A`, `B`, `response_time`, `response_value`,
-#'   `fitted`, `idx`.
-#'   Per-channel metadata are attached as attributes:
+#'   `fitted`, `idx`. Per-channel metadata are attached as attributes:
 #'   - `"model"`: `NULL` (no parametric model is fitted).
-#'   - `"fitted_data"`: a named list of data frames (per `nirs_channel`)
-#'     with columns `window_idx` and `fitted`, containing the baseline,
+#'   - `"fitted_data"`: a named list of per-channel data frames with
+#'     columns `window_idx` and `fitted`, containing the baseline,
 #'     response, and extreme key points.
 #'   - `"diagnostics"`: a `data.frame` with one row per `nirs_channel`
 #'     containing model fit diagnostics.
