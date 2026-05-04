@@ -36,7 +36,8 @@
 #' ensemble-shifted by a common offset so that all channels contain only
 #' positive values. Relative scaling across channels is preserved. This is
 #' modified from the method in *Beever & Tripp et al, 2020* to properly
-#' calculate `total[haeme]` and the blood volume correction factor `beta`.
+#' calculate `total[haeme]` and the blood volume correction factor `beta` when
+#' there are negative NIRS values.
 #'
 #' The correction factor `beta` is effectively the single-channel fractional
 #' (%) oxygen saturation used to normalise `oxy[haeme]` and `deoxy[haeme]`

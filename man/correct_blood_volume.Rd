@@ -65,7 +65,8 @@ If any NIRS channels have negative values, all specified channels will be
 ensemble-shifted by a common offset so that all channels contain only
 positive values. Relative scaling across channels is preserved. This is
 modified from the method in \emph{Beever & Tripp et al, 2020} to properly
-calculate \code{total[haeme]} and the blood volume correction factor \code{beta}.
+calculate \code{total[haeme]} and the blood volume correction factor \code{beta} when
+there are negative NIRS values.
 
 The correction factor \code{beta} is effectively the single-channel fractional
 (\%) oxygen saturation used to normalise \code{oxy[haeme]} and \code{deoxy[haeme]}
