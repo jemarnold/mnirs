@@ -294,3 +294,45 @@ test_that("metadata nirs_channels reflects specified channels only", {
     )
     expect_equal(attr(result, "nirs_channels"), c("oxy", "total"))
 })
+
+## integration ==============================================
+test_that("correct_blood_volume preserves metadata", {
+    data <- read_mnirs(
+        file_path = example_mnirs("artinis"),
+        nirs_channels = c(o2hb = 2, hhb = 3),
+        time_channel = c(sample = 1),
+        verbose = FALSE
+    ) |>
+        ## derive thb
+        dplyr::mutate(thb = o2hb + hhb) |>
+        ## update nirs_channels with thb
+        create_mnirs_data(nirs_channels = c(thb, o2hb, hhb))
+
+    expect_message(
+        result <- correct_blood_volume(
+            data,
+            oxy_channel = "o2hb",
+            deoxy_channel = "hhb",
+            total_channel = "thb",
+        ),
+        "o2hb.*hhb.*thb.*corrected"
+    )
+
+    expect_equal(attr(result, "nirs_device"), attr(data, "nirs_device"))
+    expect_setequal(attr(result, "nirs_channels"), attr(data, "nirs_channels"))
+    expect_equal(attr(result, "time_channel"), attr(data, "time_channel"))
+    expect_equal(attr(result, "sample_rate"), attr(data, "sample_rate"))
+
+    ## overwrite nirs_channels
+    result <- correct_blood_volume(
+        data,
+        oxy_channel = "o2hb",
+        deoxy_channel = "hhb",
+        total_channel = NULL,
+    )
+
+    expect_equal(
+        setdiff(attr(data, "nirs_channels"), attr(result, "nirs_channels")),
+        "thb"
+    )
+})

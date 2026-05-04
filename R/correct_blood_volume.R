@@ -93,7 +93,6 @@ correct_blood_volume <- function(
 ) {
     ## validation =====================================================
     validate_mnirs_data(data)
-    metadata <- attributes(data)
     if (missing(verbose)) {
         verbose <- getOption("mnirs.verbose", default = TRUE)
     }
@@ -109,7 +108,7 @@ correct_blood_volume <- function(
     specified <- !vapply(channels, is.null, logical(1))
 
     ## metadata: over-write `nirs_channels` with user-specified col names
-    metadata$nirs_channels <- unlist(channels[specified], use.names = FALSE)
+    nirs_channels <- unlist(channels[specified], use.names = FALSE)
 
     ## require at least two channels to derive the third
     if (sum(specified) < 2L) {
@@ -160,14 +159,14 @@ correct_blood_volume <- function(
     )
 
     ## write corrected values back to user-specified columns only
-    data[metadata$nirs_channels] <- corrected[specified]
+    data[nirs_channels] <- corrected[specified]
 
     if (verbose) {
         cli_inform(c(
-            "i" = "{.field {metadata$nirs_channels}} channels have been \\
-            corrected for changes in blood volume."
+            "i" = "{.field {nirs_channels}} channels have been corrected \\
+            for changes in blood volume."
         ))
     }
 
-    return(create_mnirs_data(data, metadata))
+    return(create_mnirs_data(data, nirs_channels = nirs_channels))
 }
