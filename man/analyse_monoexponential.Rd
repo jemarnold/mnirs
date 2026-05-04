@@ -8,7 +8,7 @@ analyse_monoexponential(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  time_delay = TRUE,
+  use_time_delay = TRUE,
   t0 = NULL,
   direction = c("auto", "positive", "negative"),
   end_fit_span = Inf,
@@ -35,15 +35,14 @@ Must match a column name in \code{data} exactly.
 used.
 }}
 
-\item{time_delay}{Logical; default is \code{TRUE} to attempt to fit a
+\item{use_time_delay}{Logical; default is \code{TRUE} to attempt to fit a
 4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model (A, B, tau, TD) with a time delay.
-If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
+If the 4-parameter fit fails, or if \code{use_time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
 
 \item{t0}{A numeric value specifying the start of the kinetics response
-in units of \code{time_channel}. Observations where \code{time_channel <= t0}
-define the pre-response baseline. Retrieves \code{interval_times} from
-\emph{"mnirs"} metadata or default to \code{0}.}
+in units of \code{t}. Observations where \code{t <= t0} define the baseline window.
+Defaults to \code{0}.}
 
 \item{direction}{A character string specifying the kinetics direction to
 detect -- \code{"auto"} (\emph{default}), \code{"positive"}, or \code{"negative"}. See
@@ -62,8 +61,8 @@ default arguments (see \emph{Details}).}
 \code{FALSE}) warnings and information messages helpful for troubleshooting. A
 global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
-\item{...}{Additional arguments passed to the underlying method function.
-See \emph{Details}.}
+\item{...}{Additional arguments. \code{bypass_checks} suppresses input
+validation.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
@@ -93,7 +92,7 @@ channels, e.g.:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_monoexponential(
     data = df,
     nirs_channels = c(hhb, smo2),
-    time_delay = TRUE,
+    use_time_delay = TRUE,
     direction = "positive",
     channel_args = list(
         hhb = list(direction = "negative")
@@ -103,7 +102,7 @@ channels, e.g.:
 }
 }
 \seealso{
-\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=monoexponential]{monoexponential()}}, \code{\link[=SS_monoexp3]{SS_monoexp3()}},
-\code{\link[=SS_monoexp4]{SS_monoexp4()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=fit_monoexponential]{fit_monoexponential()}}, \code{\link[=monoexponential]{monoexponential()}},
+\code{\link[=SS_monoexp3]{SS_monoexp3()}}, \code{\link[=SS_monoexp4]{SS_monoexp4()}}
 }
 \keyword{internal}

@@ -345,7 +345,7 @@ test_that("analyse_monoexponential() returns correct structure", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = FALSE,
+        use_time_delay = FALSE,
         verbose = FALSE
     )
 
@@ -370,25 +370,25 @@ test_that("analyse_monoexponential() returns correct structure", {
     expect_equal(nrow(attr(result, "channel_args")), 1L)
 })
 
-test_that("analyse_monoexponential() validates time_delay argument", {
+test_that("analyse_monoexponential() validates use_time_delay argument", {
     data <- create_monoexp_data()
 
     expect_error(
         analyse_monoexponential(
             data,
             nirs_channels = "smo2",
-            time_delay = "yes"
+            use_time_delay = "yes"
         ),
-        "time_delay.*logical"
+        "use_time_delay.*logical"
     )
 
     expect_error(
         analyse_monoexponential(
             data,
             nirs_channels = "smo2",
-            time_delay = c(TRUE, FALSE)
+            use_time_delay = c(TRUE, FALSE)
         ),
-        "time_delay.*logical"
+        "use_time_delay.*logical"
     )
 })
 
@@ -404,7 +404,7 @@ test_that("analyse_monoexponential() recovers 3-param known parameters", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = FALSE,
+        use_time_delay = FALSE,
         verbose = FALSE
     )
 
@@ -429,7 +429,7 @@ test_that("analyse_monoexponential() recovers 4-param known parameters", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = TRUE,
+        use_time_delay = TRUE,
         verbose = FALSE
     )
 
@@ -458,7 +458,7 @@ test_that("analyse_monoexponential() uses t0 correctly", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = TRUE,
+        use_time_delay = TRUE,
         t0 = t0,
         verbose = FALSE
     )
@@ -487,7 +487,7 @@ test_that("analyse_monoexponential() uses t0 correctly", {
     analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = TRUE,
+        use_time_delay = TRUE,
         t0 = 5,
         verbose = FALSE
     )
@@ -510,7 +510,7 @@ test_that("analyse_monoexponential() t0 edge cases", {
         result <- analyse_monoexponential(
             data,
             nirs_channels = "smo2",
-            time_delay = TRUE,
+            use_time_delay = TRUE,
             t0 = 0,
             verbose = TRUE
         ),
@@ -528,7 +528,7 @@ test_that("analyse_monoexponential() t0 edge cases", {
         analyse_monoexponential(
             data,
             nirs_channels = "smo2",
-            time_delay = TRUE,
+            use_time_delay = TRUE,
             t0 = max(data$time) + 10,
             verbose = TRUE
         ),
@@ -551,7 +551,7 @@ test_that("analyse_monoexponential() falls back from 4-param to 3-param", {
         result <- analyse_monoexponential(
             data,
             nirs_channels = "smo2",
-            time_delay = TRUE,
+            use_time_delay = TRUE,
             verbose = TRUE
         ),
         "SS_monoexp4.*fit failed"
@@ -573,7 +573,7 @@ test_that("analyse_monoexponential() returns NA for failed fit", {
         result <- analyse_monoexponential(
             custom_name,
             nirs_channels = "smo2",
-            time_delay = FALSE
+            use_time_delay = FALSE
         ),
         "fit failed for.*smo2.*custom_name" ## call custom interval name
     )
@@ -590,7 +590,7 @@ test_that("analyse_monoexponential() works with multiple channels", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = nirs_channels,
-        time_delay = FALSE
+        use_time_delay = FALSE
     )
 
     expect_equal(nrow(result), 2L)
@@ -607,8 +607,8 @@ test_that("analyse_monoexponential() channel_args override defaults", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = c("ch1", "ch2"),
-        time_delay = FALSE,
-        channel_args = list(ch2 = list(time_delay = TRUE))
+        use_time_delay = FALSE,
+        channel_args = list(ch2 = list(use_time_delay = TRUE))
     )
 
     ## ch1 has no TD (3-param), ch2 has TD (4-param)
@@ -617,8 +617,8 @@ test_that("analyse_monoexponential() channel_args override defaults", {
     ca <- attr(result, "channel_args")
     ch1_row <- ca[ca$nirs_channels == "ch1", ]
     ch2_row <- ca[ca$nirs_channels == "ch2", ]
-    expect_false(ch1_row$time_delay)
-    expect_true(ch2_row$time_delay)
+    expect_false(ch1_row$use_time_delay)
+    expect_true(ch2_row$use_time_delay)
 })
 
 test_that("analyse_monoexponential() fitted_data attribute is well-formed", {
@@ -627,7 +627,7 @@ test_that("analyse_monoexponential() fitted_data attribute is well-formed", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = TRUE
+        use_time_delay = TRUE
     )
 
     fitted_data <- attr(result, "fitted_data")
@@ -650,7 +650,7 @@ test_that("analyse_monoexponential() diagnostics contain expected columns", {
     result <- analyse_monoexponential(
         data,
         nirs_channels = "smo2",
-        time_delay = FALSE
+        use_time_delay = FALSE
     )
 
     diag <- attr(result, "diagnostics")

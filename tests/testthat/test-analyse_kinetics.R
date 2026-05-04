@@ -403,7 +403,7 @@ test_that("build_channel_args converts NULL to NA", {
 
 test_that("build_channel_args deparses list values", {
     args <- list(
-        time_delay = FALSE,
+        use_time_delay = FALSE,
         control = list(maxiter = 100, tol = 1e-5)
     )
     result <- build_channel_args("smo2", args)
@@ -1450,7 +1450,7 @@ test_that("analyse_kinetics.monoexponential dispatches multiple channels", {
         data,
         nirs_channels = nirs_channels,
         method = "monoexponential",
-        time_delay = FALSE,
+        use_time_delay = FALSE,
         verbose = FALSE
     )
 
@@ -1471,7 +1471,7 @@ test_that("analyse_kinetics.monoexponential uses custom interval name", {
             data,
             nirs_channels = "smo2",
             method = "monoexponential",
-            time_delay = FALSE
+            use_time_delay = FALSE
         ),
         "fit failed for.*smo2.*interval_1" ## call custom interval name
     )
@@ -1519,7 +1519,7 @@ test_that("analyse_kinetics works visually on Train.Red", {
             fill = "white"
         )
 
-    result <- analyse_kinetics(data_list, method = "monoexp", time_delay = TRUE)
+    result <- analyse_kinetics(data_list, method = "monoexp", use_time_delay = TRUE)
     # result$diagnostics
     # result$coefficients
 
@@ -1588,7 +1588,7 @@ test_that("analyse_kinetics benchmark", {
     #             analyse_monoexponential(
     #                 .df,
     #                 nirs_channels = c(smo2_left, smo2_right),
-    #                 time_delay = TRUE,
+    #                 use_time_delay = TRUE,
     #                 verbose = FALSE
     #             )
     #         })
@@ -1597,7 +1597,7 @@ test_that("analyse_kinetics benchmark", {
     #         data_list,
     #         nirs_channels = c(smo2_left, smo2_right),
     #         method = "monoexponential",
-    #         time_delay = TRUE,
+    #         use_time_delay = TRUE,
     #         verbose = FALSE
     #     ),
     #     iterations = 5L,

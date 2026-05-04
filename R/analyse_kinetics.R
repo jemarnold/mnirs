@@ -15,7 +15,7 @@
 #'      \item{`"peak_slope"`}{Peak local linear regression slope. Additional
 #'      arguments: `width` or `span`, `align`, `direction`, `partial`, `na.rm`.}
 #'      \item{`"monoexponential"`}{Monoexponential curve fit via
-#'      [stats::nls()] with arguments: `time_delay`.}
+#'      [stats::nls()] with arguments: `use_time_delay`.}
 #'      \item{`"sigmoidal"`}{`<under development>`.}
 #'   }
 #' @param t0 A numeric value specifying the start of the kinetics response
@@ -99,9 +99,9 @@
 #' Additional arguments (`...`) accepted when `method = "monoexponential"`:
 #'
 #' \describe{
-#'   \item{`time_delay`}{Logical; default is `TRUE` to attempt to fit a
+#'   \item{`use_time_delay`}{Logical; default is `TRUE` to attempt to fit a
 #'       4-parameter [SS_monoexp4()] model (A, B, tau, TD) with a time delay.
-#'       If the 4-parameter fit fails, or if `time_delay = FALSE`, fits a
+#'       If the 4-parameter fit fails, or if `use_time_delay = FALSE`, fits a
 #'       reduced 3-parameter [SS_monoexp3()] model (A, B, tau).}
 #'   \item{`stats::nls()`}{Other arguments can be passed to [stats::nls()]}
 #' }
@@ -371,7 +371,7 @@ analyse_kinetics.monoexponential <- function(
             data = data_list[[.i]],
             nirs_channels = !!enquo(nirs_channels),
             time_channel = !!enquo(time_channel),
-            time_delay = args$time_delay %||% TRUE,
+            use_time_delay = args$use_time_delay %||% TRUE,
             end_fit_span = end_fit_span,
             channel_args = channel_args,
             verbose = verbose,

@@ -285,7 +285,7 @@ analyse_kinetics(
 
 `"peak_slope"`: `width` or `span` (one required); `align` (`"centre"`, `"left"`, `"right"`); `partial` (default `FALSE`)
 
-`"monoexponential"`: `time_delay` (default `TRUE`; 4-param → 3-param fallback); accepts `stats::nls()` args
+`"monoexponential"`: `use_time_delay` (default `TRUE`; 4-param → 3-param fallback); accepts `stats::nls()` args
 
 **Per-channel overrides:**
 ```r

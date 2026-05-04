@@ -61,7 +61,7 @@ time. Additional arguments: \code{fraction}.}
 \item{\code{"peak_slope"}}{Peak local linear regression slope. Additional
 arguments: \code{width} or \code{span}, \code{align}, \code{direction}, \code{partial}, \code{na.rm}.}
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
-\code{\link[stats:nls]{stats::nls()}} with arguments: \code{time_delay}.}
+\code{\link[stats:nls]{stats::nls()}} with arguments: \code{use_time_delay}.}
 \item{\code{"sigmoidal"}}{\verb{<under development>}.}
 }}
 
@@ -193,9 +193,9 @@ See \code{\link[=monoexponential]{monoexponential()}} for model equations.
 Additional arguments (\code{...}) accepted when \code{method = "monoexponential"}:
 
 \describe{
-\item{\code{time_delay}}{Logical; default is \code{TRUE} to attempt to fit a
+\item{\code{use_time_delay}}{Logical; default is \code{TRUE} to attempt to fit a
 4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model (A, B, tau, TD) with a time delay.
-If the 4-parameter fit fails, or if \code{time_delay = FALSE}, fits a
+If the 4-parameter fit fails, or if \code{use_time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model (A, B, tau).}
 \item{\code{stats::nls()}}{Other arguments can be passed to \code{\link[stats:nls]{stats::nls()}}}
 }
