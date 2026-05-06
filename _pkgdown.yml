@@ -67,6 +67,7 @@ reference:
   - starts_with("scale")
   - breaks_timespan
   - format_hmmss
+  - print.mnirs
 - title: Files
   desc: |
     Example data files included in the package
