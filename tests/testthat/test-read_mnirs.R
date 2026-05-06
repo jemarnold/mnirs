@@ -1280,6 +1280,8 @@ test_that("parse_time_channel() returns local time zonel", {
     moxy_occl <- test_path("testdata/moxy-occlusion.xlsx")
     vo2master <- test_path("testdata/vo2master.csv")
     skip_if_not(file.exists(perfpro), "testdata not available")
+    skip("run in local time PDT/PST zone")
+    
     file_list <- c(
         perfpro, ## today's date, 0:00:00
         moxy_occl, ## today's date, 13:52:59
