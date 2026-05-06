@@ -45,6 +45,13 @@ jobs:
           extra-packages: any::rcmdcheck
           cache: false
 
+      # Windows only: quarto vignette subprocess does not see the package
+      # installed by R CMD check, so install local source to user lib first.
+      - name: Install local package (Windows)
+        if: runner.os == 'Windows'
+        run: R CMD INSTALL --no-multiarch --with-keep.source .
+        shell: bash
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
