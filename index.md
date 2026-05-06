@@ -9,6 +9,7 @@ minimal coding experience required.
 ## Installation
 
 ``` r
+
 install.packages("mnirs")
 ```
 
@@ -16,6 +17,7 @@ You can install the development version of *`mnirs`* from
 [GitHub](https://github.com/jemarnold/mnirs) with:
 
 ``` r
+
 # install.packages("pak")
 pak::pak("jemarnold/mnirs")
 ```
@@ -46,8 +48,8 @@ processing steps. Enjoy!
 ### `read_mnirs()` Read data from file
 
 ``` r
+
 library(ggplot2) ## for plotting
-library(patchwork) ## for plotting
 library(mnirs)
 
 ## {mnirs} includes sample files from a few mNIRS devices
@@ -75,27 +77,27 @@ data_raw <- read_mnirs(
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
 #> Warning: ! Duplicate or irregular `time_channel` samples detected.
-#> ℹ Investigate at `time` = 211.99 and 1184.
+#> ℹ Investigate at `time` = 211.59 and 1183.6.
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
 ## Note the above info message that sample_rate was estimated correctly at 2 Hz 👆
 ## ignore the warnings about irregular sampling for now, we will resample later
 
 data_raw
-#> # A tibble: 2,203 × 3
+#> # A tibble: 2,202 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
 #>  1 0            54         68
-#>  2 0.400        54         68
-#>  3 0.960        54         68
-#>  4 1.51         54         66
-#>  5 2.06         54         66
-#>  6 2.61         54         66
-#>  7 3.16         54         66
-#>  8 3.71         57         67
-#>  9 4.26         57         67
-#> 10 4.81         57         67
-#> # ℹ 2,193 more rows
+#>  2 0.560        54         68
+#>  3 1.11         54         66
+#>  4 1.66         54         66
+#>  5 2.21         54         66
+#>  6 2.76         54         66
+#>  7 3.31         57         67
+#>  8 3.86         57         67
+#>  9 4.41         57         67
+#> 10 4.96         57         67
+#> # ℹ 2,192 more rows
 
 ## note the `time_labels` plot argument to display time values as `h:mm:ss`
 plot(
@@ -111,6 +113,7 @@ plot(
 ### Metadata stored in `mnirs` data frames
 
 ``` r
+
 ## view metadata
 attr(data_raw, "nirs_channels")
 #> [1] "smo2_left"  "smo2_right"
@@ -125,6 +128,7 @@ attr(data_raw, "sample_rate")
 ### `resample_mnirs()`: Resample data
 
 ``` r
+
 data_resampled <- resample_mnirs(
     data_raw,            ## blank channels will be retrieved from metadata
     time_channel = time, ## channels can be left blank or specified explicitly
@@ -141,12 +145,12 @@ data_resampled
 #>    <dbl>     <dbl>      <dbl>
 #>  1   0        54         68  
 #>  2   0.5      54         68  
-#>  3   1        54         67.9
-#>  4   1.5      54         66.0
+#>  3   1        54         66.4
+#>  4   1.5      54         66  
 #>  5   2        54         66  
 #>  6   2.5      54         66  
-#>  7   3        54         66  
-#>  8   3.5      55.9       66.6
+#>  7   3        55.3       66.4
+#>  8   3.5      57         67  
 #>  9   4        57         67  
 #> 10   4.5      57         67  
 #> # ℹ 2,409 more rows
@@ -155,6 +159,7 @@ data_resampled
 ### `replace_mnirs`: Replace local outliers, invalid values, and missing values
 
 ``` r
+
 data_cleaned <- replace_mnirs(
     data_resampled,     ## blank channels will be retrieved from metadata
     invalid_values = 0, ## known invalid values in the data
@@ -172,6 +177,7 @@ plot(data_cleaned, time_labels = TRUE)
 ### `filter_mnirs()`: Digital filtering
 
 ``` r
+
 data_filtered <- filter_mnirs(
     data_cleaned,           ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
@@ -198,6 +204,7 @@ plot(data_filtered, time_labels = TRUE) +
 ### `shift_mnirs()` & `rescale_mnirs()`: Shift and rescale data
 
 ``` r
+
 data_shifted <- shift_mnirs(
     data_filtered,     ## un-grouped nirs channels to shift separately 
     nirs_channels = list(smo2_left, smo2_right), 
@@ -213,6 +220,7 @@ plot(data_shifted, time_labels = TRUE) +
 ![](reference/figures/README-shift_mnirs-1.png)
 
 ``` r
+
 data_rescaled <- rescale_mnirs(
     data_filtered,    ## un-grouped nirs channels to rescale separately 
     nirs_channels = list(smo2_left, smo2_right), 
@@ -228,6 +236,7 @@ plot(data_rescaled, time_labels = TRUE) +
 ### Pipe-friendly functions
 
 ``` r
+
 ## global option to silence info & warning messages
 options(mnirs.verbose = FALSE)
 
@@ -271,6 +280,7 @@ plot(nirs_data, time_labels = TRUE)
 ### `extract_intervals()`: detect events and extract intervals
 
 ``` r
+
 ## return each interval independently with `event_groups = "distinct"`
 distinct <- extract_intervals(
     nirs_data,                  ## channels blank for "distinct" grouping
@@ -281,12 +291,13 @@ distinct <- extract_intervals(
     zero_time = FALSE           ## return original time values
 )
 
-plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
+plot(distinct, time_labels = TRUE)
 ```
 
 ![](reference/figures/README-extract_intervals_distinct-1.png)
 
 ``` r
+
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble <- extract_intervals(
     nirs_data,                  ## channels recycled to all intervals by default
@@ -297,7 +308,7 @@ ensemble <- extract_intervals(
     zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
-plot(ensemble[[1L]], time_labels = TRUE) + 
+plot(ensemble, time_labels = TRUE) + 
     geom_vline(xintercept = 0, linetype = "dotted")
 ```
 
@@ -309,7 +320,7 @@ plot(ensemble[[1L]], time_labels = TRUE) +
 
   - Monoexponential & sigmoidal non-linear curve fitting
 
-  - Non-parametric half-response time & slope analysis
+  - Non-parametric response time & slope analysis
 
 - Critical oxygenation breakpoint analysis
 
@@ -332,7 +343,7 @@ devices, and compatibility will improve with continued development.
 Currently, it has been tested successfully with mNIRS data exported from
 the following devices and apps:
 
-- [Artinis](https://www.artinis.com/oxysoft) Oxysoft software (.csv and
+- [Artinis](https://artinis.com/oxysoft) Oxysoft software (.csv and
   .xlsx)
 - [Moxy](https://www.moxymonitor.com/) direct export (.csv)
 - [PerfPro](https://perfprostudio.com/) PC software (.xlsx)

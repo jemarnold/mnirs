@@ -19,7 +19,7 @@ A simple moving average.
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,8 +89,8 @@ used.</p></li>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
-<dd><p>A character string giving the name of the time or sample
-column. Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
+<dd><p>A character string naming the time or sample column.
+Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
 used.</p></li>
 </ul></dd>
 
@@ -118,8 +118,8 @@ samples within the local window. May return errors or warnings. (see
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
-<code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
+<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
@@ -137,13 +137,10 @@ available with <code><a href="https://rdrr.io/r/base/attributes.html" class="ext
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
 <div class="section">
-<h3 id="filtering-methods">filtering methods<a class="anchor" aria-label="anchor" href="#filtering-methods"></a></h3>
-
-<div class="section">
-<h4 id="method-smooth-spline-"><code>method = "smooth_spline"</code><a class="anchor" aria-label="anchor" href="#method-smooth-spline-"></a></h4>
+<h3 id="method-smooth-spline-">method = "smooth_spline"<a class="anchor" aria-label="anchor" href="#method-smooth-spline-"></a></h3>
 
 
-<p>Aliases: <code>c("smooth spline", "spline")</code></p>
+<p>Aliases: <code>method = c("smooth spline", "spline")</code></p>
 <p>Applies a non-parametric cubic smoothing spline from
 <code><a href="https://rdrr.io/r/stats/smooth.spline.html" class="external-link">stats::smooth.spline()</a></code>. Smoothing is defined by the parameter <code>spar</code>,
 which can be left as <code>NULL</code> and automatically determined via penalised
@@ -157,11 +154,13 @@ necessarily, in the range <code>spar = [0, 1]</code>.</p>
 determined via penalised log likelihood.</p></dd>
 
 
-</dl><div class="section">
-<h5 id="method-butterworth-"><code>method = "butterworth"</code><a class="anchor" aria-label="anchor" href="#method-butterworth-"></a></h5>
+</dl></div>
+
+<div class="section">
+<h3 id="method-butterworth-">method = "butterworth"<a class="anchor" aria-label="anchor" href="#method-butterworth-"></a></h3>
 
 
-<p>Aliases: <code>c("butter")</code></p>
+<p>Aliases: <code>method = c("butter")</code></p>
 <p>Applies a centred (two-pass symmetrical) Butterworth digital filter
 from <code><a href="https://rdrr.io/pkg/signal/man/butter.html" class="external-link">signal::butter()</a></code> and <code><a href="https://rdrr.io/pkg/signal/man/filtfilt.html" class="external-link">signal::filtfilt()</a></code>.</p>
 <p>Filter <code>type</code> defines how the desired signal frequencies are either
@@ -218,10 +217,10 @@ See <code><a href="filter_butter.html">filter_butter()</a></code>.</p></dd>
 </dl></div>
 
 <div class="section">
-<h5 id="method-moving-average-"><code>method = "moving_average"</code><a class="anchor" aria-label="anchor" href="#method-moving-average-"></a></h5>
+<h3 id="method-moving-average-">method = "moving_average"<a class="anchor" aria-label="anchor" href="#method-moving-average-"></a></h3>
 
 
-<p>Aliases: <code>c("moving average", "ma")</code></p>
+<p>Aliases: <code>method = c("moving average", "ma")</code></p>
 <p>Applies a centred (symmetrical) moving average filter in a local
 window, defined by either <code>width</code> as the number of samples around
 <code>idx</code> between <code>[idx - floor(width/2), idx + floor(width/2)]</code>. Or by
@@ -241,12 +240,6 @@ at the edges of the data.</p></dd>
 
 
 </dl></div>
-
-
-</div>
-
-
-</div>
 
 <div class="section">
 <h3 id="missing-values">Missing values<a class="anchor" aria-label="anchor" href="#missing-values"></a></h3>
@@ -275,25 +268,25 @@ each local window are either propagated to the returned vector when
 <span class="r-in"><span>    <span class="fu"><a href="replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>        invalid_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>        outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,</span></span>
-<span class="r-in"><span>        width <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>        width <span class="op">=</span> <span class="fl">7</span>,</span></span>
 <span class="r-in"><span>        verbose <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,203 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,202 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     time  smo2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 0        54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.400    54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 0.960    54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.51     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.06     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.61     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.16     54</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.71     57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.26     57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.81     57</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,193 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.560    54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 1.11     54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.66     54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.21     54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.76     54</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.31     57</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.86     57</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.41     57</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.96     57</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,192 more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">data_filtered</span> <span class="op">&lt;-</span> <span class="fu">filter_mnirs</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    <span class="va">data</span>,                   <span class="co">## blank channels will be retrieved from metadata</span></span></span>
@@ -306,20 +299,20 @@ each local window are either propagated to the returned vector when
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## note the smoothed `smo2` values</span></span></span>
 <span class="r-in"><span><span class="va">data_filtered</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,203 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,202 × 2</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     time  smo2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 0      54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.400  54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 0.960  54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.51   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.06   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.61   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.16   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.71   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.26   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.81   54.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,193 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> 0      54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 0.560  54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 1.11   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 1.66   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 2.21   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 2.76   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 3.31   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 3.86   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 4.41   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 4.96   54.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,192 more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>

@@ -83,8 +83,8 @@ replace_missing(
 
 - time_channel:
 
-  A character string giving the name of the time or sample column. Must
-  match a column name in `data` exactly.
+  A character string naming the time or sample column. Must match a
+  column name in `data` exactly.
 
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
@@ -112,7 +112,7 @@ replace_missing(
     values are more conservative.
 
   - `outlier_cutoff = 3` Pearson's 3 sigma edit rule.
-    `outlier_cutoff = 2` approximates a Tukey-style 1.5×IQR rule.
+    `outlier_cutoff = 2` approximates a Tukey-style 1.5\*IQR rule.
     `outlier_cutoff = 0` Tukey's median filter.
 
 - width:
@@ -122,7 +122,7 @@ replace_missing(
 
 - span:
 
-  A numeric value defining the local window timespan around `idx` in
+  A numeric value defining the local window time span around `idx` in
   units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 
 - method:
@@ -153,9 +153,9 @@ replace_missing(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 - x:
 
@@ -199,10 +199,10 @@ listed in `nirs_channels` are passed through unprocessed.
 `replace_outliers()` and `replace_missing()` (when `method = "median"`)
 operate over a local rolling window for outlier detection and median
 interpolation. The window is specified by either `width` as the number
-of samples, or `span` as the timespan in units of `time_channel`. A
+of samples, or `span` as the time span in units of `time_channel`. A
 partial window is calculated at the edges of the data.
 
-### Replace invalid values with with `replace_invalid()`
+### Replace invalid values with with replace_invalid()
 
 Specific `invalid_values` can be replaced, such as `c(0, 100, 102.3)`.
 Data ranges can be replaced with cutoff values specified by
@@ -210,10 +210,10 @@ Data ranges can be replaced with cutoff values specified by
 than the specified cutoff values (respectively) will be replaced,
 *inclusive* of the cutoff values themselves.
 
-### Outlier detection with `replace_outliers()`
+### Outlier detection with replace_outliers()
 
 Rolling local medians are computed across `x` within a window defined by
-`width` (number of samples) or `span` (timespan in units of `t`).
+`width` (number of samples) or `span` (time span in units of `t`).
 
 Outliers are detected with robust median absolute deviation (MAD),
 adapted from `pracma::hampel()`. Deviations equal to or less than the
@@ -230,20 +230,20 @@ identified as outliers and either replaced with the local median
 Existing `NA` values in `x` are *not* replaced. They are passed through
 to the returned vector. See `replace_missing()`.
 
-### Choosing `outlier_cutoff`
+### Choosing outlier_cutoff
 
 `outlier_cutoff` is the number of (MAD-normalised) standard deviations
 from the local median. Higher values are more conservative; lower values
 flag more outliers.
 
-- `outlier_cutoff = 3` — Pearson's 3 sigma edit rule (default).
+- `outlier_cutoff = 3` – Pearson's 3 sigma edit rule (default).
 
-- `outlier_cutoff = 2` — approximately Tukey-style 1.5×IQR rule.
+- `outlier_cutoff = 2` – approximately Tukey-style 1.5\*IQR rule.
 
-- `outlier_cutoff = 0` — Tukey's median filter (every point replaced by
+- `outlier_cutoff = 0` – Tukey's median filter (every point replaced by
   local median).
 
-### Interpolation with `replace_missing()`
+### Interpolation with replace_missing()
 
 `method = "linear"` and `method = "locf"` use
 [`stats::approx()`](https://rdrr.io/r/stats/approxfun.html) with
@@ -252,10 +252,10 @@ carried backward"*) and trailing `NA`s by *"locf"*.
 
 `method = "median"` calculates the local median of valid (non-`NA`)
 values to either side of `NA`s, within a window defined by `width`
-(number of samples) or `span` (timespan in units of `t`). Sequential
+(number of samples) or `span` (time span in units of `t`). Sequential
 `NA`s are all replaced by the same median value.
 
-### Edge behaviour for `method = "median"`
+### Edge behaviour for method = "median"
 
 If there are no valid values within `span` to one side of the `NA`, the
 median of the other side is used (i.e. for leading and trailing `NA`s).
@@ -290,7 +290,7 @@ data_clean <- replace_mnirs(
     invalid_values = 0,    ## known invalid values in the data
     invalid_above = 90,    ## remove data spikes above 90
     outlier_cutoff = 3,    ## Pearson's 3 sigma edit rule
-    width = 10,            ## window for outlier detection and interpolation
+    width = 7,            ## window for outlier detection and interpolation
     method = "linear"      ## linear interpolation over NAs
 )
 

@@ -23,7 +23,7 @@ x to either side of NAs."><meta name="twitter:card" content="summary"><meta name
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -112,7 +112,7 @@ around <code>idx</code> in which to perform the operation, according to <code>al
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>A numeric value defining the local window timespan around <code>idx</code>
+<dd><p>A numeric value defining the local window time span around <code>idx</code>
 in which to perform the operation, according to <code>align</code>. In units of
 <code>time_channel</code> or <code>t</code>.</p></dd>
 
@@ -146,14 +146,14 @@ the number of standard deviations from the local median.</p><ul><li><p>Default <
 <li><p>Lower values are more sensitive and flag more outliers; higher values
 are more conservative.</p></li>
 <li><p><code>outlier_cutoff = 3</code> Pearson's 3 sigma edit rule.
-<code>outlier_cutoff = 2</code> approximates a Tukey-style 1.5×IQR rule.
+<code>outlier_cutoff = 2</code> approximates a Tukey-style 1.5*IQR rule.
 <code>outlier_cutoff = 0</code> Tukey's median filter.</p></li>
 </ul></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
-<code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
+<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 </dl></div>
@@ -173,7 +173,7 @@ side of the invalid <code>NA</code>s.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The local rolling window can be specified by either <code>width</code> as the number of
-samples, or <code>span</code> as the timespan in units of <code>t</code>. Specifying <code>width</code>
+samples, or <code>span</code> as the time span in units of <code>t</code>. Specifying <code>width</code>
 is often faster than <code>span</code>.</p>
 <p><code>align</code> defaults to <em>"centre"</em> the local window around <code>idx</code> between
 <code>[idx - floor((width-1)/2),</code> <code>idx + floor(width/2)]</code> when <code>width</code> is

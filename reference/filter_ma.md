@@ -47,7 +47,7 @@ filter_moving_average(
 
 - span:
 
-  A numeric value defining the local window timespan around `idx` in
+  A numeric value defining the local window time span around `idx` in
   units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 
 - partial:
@@ -65,9 +65,9 @@ filter_moving_average(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
 

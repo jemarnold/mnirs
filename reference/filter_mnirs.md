@@ -40,8 +40,8 @@ filter_mnirs(
 
 - time_channel:
 
-  A character string giving the name of the time or sample column. Must
-  match a column name in `data` exactly.
+  A character string naming the time or sample column. Must match a
+  column name in `data` exactly.
 
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
@@ -71,9 +71,9 @@ filter_mnirs(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
 
@@ -88,11 +88,9 @@ of class *"mnirs"* with metadata available with
 
 ## Details
 
-### filtering methods
+### method = "smooth_spline"
 
-#### `method = "smooth_spline"`
-
-Aliases: `c("smooth spline", "spline")`
+Aliases: `method = c("smooth spline", "spline")`
 
 Applies a non-parametric cubic smoothing spline from
 [`stats::smooth.spline()`](https://rdrr.io/r/stats/smooth.spline.html).
@@ -111,9 +109,9 @@ Additional arguments (`...`) accepted when `method = "smooth_spline"`:
   If `NULL` (*default*), automatically determined via penalised log
   likelihood.
 
-##### `method = "butterworth"`
+### method = "butterworth"
 
-Aliases: `c("butter")`
+Aliases: `method = c("butter")`
 
 Applies a centred (two-pass symmetrical) Butterworth digital filter from
 [`signal::butter()`](https://rdrr.io/pkg/signal/man/butter.html) and
@@ -181,9 +179,9 @@ Additional arguments (`...`) accepted when `method = "butterworth"`:
   `c("rev", "rep1", "none")` (`"rev"` is the default). See
   [`filter_butter()`](https://jemarnold.github.io/mnirs/reference/filter_butter.md).
 
-##### `method = "moving_average"`
+### method = "moving_average"
 
-Aliases: `c("moving average", "ma")`
+Aliases: `method = c("moving average", "ma")`
 
 Applies a centred (symmetrical) moving average filter in a local window,
 defined by either `width` as the number of samples around `idx` between
@@ -228,25 +226,25 @@ data <- read_mnirs(
     replace_mnirs(
         invalid_values = c(0, 100),
         outlier_cutoff = 3,
-        width = 10,
+        width = 7,
         verbose = FALSE
     )
 
 data
-#> # A tibble: 2,203 × 2
+#> # A tibble: 2,202 × 2
 #>     time  smo2
 #>    <dbl> <dbl>
 #>  1 0        54
-#>  2 0.400    54
-#>  3 0.960    54
-#>  4 1.51     54
-#>  5 2.06     54
-#>  6 2.61     54
-#>  7 3.16     54
-#>  8 3.71     57
-#>  9 4.26     57
-#> 10 4.81     57
-#> # ℹ 2,193 more rows
+#>  2 0.560    54
+#>  3 1.11     54
+#>  4 1.66     54
+#>  5 2.21     54
+#>  6 2.76     54
+#>  7 3.31     57
+#>  8 3.86     57
+#>  9 4.41     57
+#> 10 4.96     57
+#> # ℹ 2,192 more rows
 
 data_filtered <- filter_mnirs(
     data,                   ## blank channels will be retrieved from metadata
@@ -259,20 +257,20 @@ data_filtered <- filter_mnirs(
 
 ## note the smoothed `smo2` values
 data_filtered
-#> # A tibble: 2,203 × 2
+#> # A tibble: 2,202 × 2
 #>     time  smo2
 #>    <dbl> <dbl>
-#>  1 0      54.4
-#>  2 0.400  54.4
-#>  3 0.960  54.4
-#>  4 1.51   54.4
-#>  5 2.06   54.4
-#>  6 2.61   54.4
-#>  7 3.16   54.4
-#>  8 3.71   54.4
-#>  9 4.26   54.4
-#> 10 4.81   54.4
-#> # ℹ 2,193 more rows
+#>  1 0      54.5
+#>  2 0.560  54.5
+#>  3 1.11   54.5
+#>  4 1.66   54.5
+#>  5 2.21   54.5
+#>  6 2.76   54.5
+#>  7 3.31   54.5
+#>  8 3.86   54.5
+#>  9 4.41   54.5
+#> 10 4.96   54.5
+#> # ℹ 2,192 more rows
 
 # \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {

@@ -1,6 +1,6 @@
-# Format timespan data as h:mm:ss
+# Format time span data as h:mm:ss
 
-Convert numeric timespan data to `h:mm:ss` format for pretty plotting.
+Convert numeric time span data to `h:mm:ss` format for pretty plotting.
 Inspired by
 [`ggplot2::scale_x_time()`](https://ggplot2.tidyverse.org/reference/scale_date.html).
 

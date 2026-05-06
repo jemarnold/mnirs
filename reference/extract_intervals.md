@@ -44,8 +44,8 @@ extract_intervals(
 
 - time_channel:
 
-  A character string giving the name of the time or sample column. Must
-  match a column name in `data` exactly.
+  A character string naming the time or sample column. Must match a
+  column name in `data` exactly.
 
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
@@ -71,9 +71,9 @@ extract_intervals(
 
 - start:
 
-  Specifies where intervals begin. Either raw values — numeric for time
+  Specifies where intervals begin. Either raw values – numeric for time
   values, character for event labels, explicit integer (e.g. `2L`) for
-  lap numbers — or created with
+  lap numbers – or created with
   [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
   [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
   [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
@@ -82,9 +82,9 @@ extract_intervals(
 
 - end:
 
-  Specifies where intervals end. Either raw values — numeric for time
+  Specifies where intervals end. Either raw values – numeric for time
   values, character for event labels, explicit integer (e.g. `2L`) for
-  lap numbers — or created with
+  lap numbers – or created with
   [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
   [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
   [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
@@ -138,41 +138,37 @@ extract_intervals(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
 A named [`list()`](https://rdrr.io/r/base/list.html) of
 [tibbles](https://tibble.tidyverse.org/reference/tibble-package.html) of
-class *"mnirs"*, with metadata available via
+class *"mnirs"*, each with metadata available via
 [`attributes()`](https://rdrr.io/r/base/attributes.html).
 
 ## Details
 
 ### Interval specification
 
-Interval boundaries are specified using helper functions, or by passing
-raw values directly:
+Interval `start` and `end` boundaries are specified using helper
+functions, or by passing raw values directly:
 
-- [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
-  or numeric:
+- [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md):
 
   Time values in units of `time_channel`.
 
-- [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
-  or character:
+- [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md):
 
   Strings to match in `event_channel`. All matching occurrences are
   returned.
 
-- [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
-  or explicit integer (e.g. `2L`):
+- [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md):
 
   Lap numbers to match in `event_channel`. Resolves to the first sample
-  of each lap for `start`, and the last sample for `end`, or all samples
-  of the lap if only one of either `start` or `end` is specified.
+  of each lap for `start`, and the last lap sample for `end`
 
 - [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md):
 
@@ -180,13 +176,13 @@ raw values directly:
 
 Raw values supplied to `start`/`end` are auto-coerced:
 
-- Numeric →
+- Numeric -\>
   [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
 
-- Character →
+- Character -\>
   [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
 
-- Explicit integer (e.g. `2L`) →
+- Explicit integer (e.g. `2L`) -\>
   [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md).
 
 - Use
@@ -196,27 +192,31 @@ Raw values supplied to `start`/`end` are auto-coerced:
 `start` and `end` can use different specification types (e.g., start by
 label, end by time). When lengths differ, the shorter is recycled.
 
-### The `span` window
+### Time span window
 
-`span` applies an additive time shift to interval boundaries. A single
-numeric value is recycled: `span = 60` becomes `c(0, 60)` and
-`span = -60` becomes `c(-60, 0)`.
+`span` additively expands the time span window around interval
+boundaries.
 
-- **`start` + `end`**: `span[1]` shifts starts, `span[2]` shifts ends.
-  For example,
-  `start = by_time(30), end = by_time(60), span = c(-5, 10)` gives an
+- A two-value vector expands the `start` and `end`, respectively:
+  `span = c(-60, 60)` expands the `start` earlier by `60`, and the `end`
+  later by `60`. For example,
+  `start = by_time(30), end = by_time(60), span = c(-5, 10)` returns an
   interval of `[25, 70]`.
 
-- **`start` only** or **`end` only**: both span values apply to the
-  single boundary, like a window around an event. For example,
-  `start = by_time(30), span = c(-5, 60)` gives `[25, 90]`.
+- A single numeric value is recycled according to the sign: `span = -60`
+  becomes `c(-60, 0)` to expand the `start` earlier. `span = 60` becomes
+  `c(0, 60)` to expand the `end` later.
 
-### Per-interval `nirs_channels` for ensemble-averaging
+- If only `start` is specified alone, both span values expand the single
+  boundary window: `start = by_time(30), span = c(-5, 60)` returns
+  `[25, 90]`.
+
+### Per-interval nirs_channels for ensemble-averaging
 
 When `event_groups = "ensemble"` or a list of numeric grouped intervals,
 `nirs_channels` can be specified as a list of column names to override
-ensemble-averaging across interval. For example, to exclude a bad
-channel in one interval:
+ensemble-averaging across interval. For example, to exclude a channel in
+one interval:
 
     nirs_channels = list(
       c(A, B, C),

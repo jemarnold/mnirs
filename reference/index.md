@@ -62,10 +62,10 @@ Detect and extract intervals for further analysis
   Extract intervals from *mnirs* data
 
 - [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
-  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
   [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
-  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md) :
-  Specify interval boundaries by time, label, lap, or sample
+  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  : Specify interval boundaries by time, label, lap, or sample
 
 ## Printing & plotting
 
@@ -95,10 +95,13 @@ Tools for printing functions and pretty plotting with
   Scales for custom *mnirs* palette
 
 - [`breaks_timespan()`](https://jemarnold.github.io/mnirs/reference/breaks_timespan.md)
-  : Breaks for timespan data
+  : Breaks for time span data
 
 - [`format_hmmss()`](https://jemarnold.github.io/mnirs/reference/format_hmmss.md)
-  : Format timespan data as h:mm:ss
+  : Format time span data as h:mm:ss
+
+- [`print(`*`<mnirs>`*`)`](https://jemarnold.github.io/mnirs/reference/print.mnirs.md)
+  : Methods for mnirs objects
 
 ## Files
 

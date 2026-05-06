@@ -61,9 +61,9 @@ libraries.
 *`mnirs`* can be installed with `install.packages("mnirs")`.
 
 ``` r
+
 # pak::pak("jemarnold/mnirs") ## install development version
 library(ggplot2)   ## for plotting
-library(patchwork) ## for plotting
 library(mnirs)
 ```
 
@@ -123,6 +123,7 @@ for more details.
   character vector:
 
 ``` r
+
 nirs_channels = c(
     renamed1 = "original_name1", 
     renamed2 = "original_name2"
@@ -181,6 +182,7 @@ nirs_channels = c(
   for a session by setting `options(mnirs.verbose = FALSE)`.
 
 ``` r
+
 ## {mnirs} includes sample files from a few NIRS devices
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
@@ -209,27 +211,27 @@ data_raw <- read_mnirs(
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
 #> Warning: ! Duplicate or irregular `time_channel` samples detected.
-#> ℹ Investigate at `time` = 211.99 and 1184.
+#> ℹ Investigate at `time` = 211.59 and 1183.6.
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
 ## Note the above info message that sample_rate was estimated correctly at 2 Hz ☝
 ## ignore the warnings about irregular sampling for now, we will resample later
 
 data_raw
-#> # A tibble: 2,203 × 3
+#> # A tibble: 2,202 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
 #>  1 0            54         68
-#>  2 0.400        54         68
-#>  3 0.960        54         68
-#>  4 1.51         54         66
-#>  5 2.06         54         66
-#>  6 2.61         54         66
-#>  7 3.16         54         66
-#>  8 3.71         57         67
-#>  9 4.26         57         67
-#> 10 4.81         57         67
-#> # ℹ 2,193 more rows
+#>  2 0.560        54         68
+#>  3 1.11         54         66
+#>  4 1.66         54         66
+#>  5 2.21         54         66
+#>  6 2.76         54         66
+#>  7 3.31         57         67
+#>  8 3.86         57         67
+#>  9 4.41         57         67
+#> 10 4.96         57         67
+#> # ℹ 2,192 more rows
 ```
 
 ## 📊 Plot *`mnirs`* data
@@ -274,6 +276,7 @@ generated or read by *`mnirs`* functions where the metadata contains
   are lots of missing values.
 
 ``` r
+
 ## note the `time_labels` plot argument to display time values as `h:mm:ss`
 plot(
     data_raw,
@@ -310,6 +313,7 @@ See
 for more details about metadata.
 
 ``` r
+
 ## view metadata
 attr(data_raw, "nirs_channels")
 #> [1] "smo2_left"  "smo2_right"
@@ -384,6 +388,7 @@ will be left blank (`NA`) by default.
   observation carried forward, or *“linear”* interpolation.
 
 ``` r
+
 data_resampled <- resample_mnirs(
     data_raw,            ## blank channels will be retrieved from metadata
     time_channel = time, ## channels can be left blank or specified explicitly
@@ -400,12 +405,12 @@ data_resampled
 #>    <dbl>     <dbl>      <dbl>
 #>  1   0        54         68  
 #>  2   0.5      54         68  
-#>  3   1        54         67.9
-#>  4   1.5      54         66.0
+#>  3   1        54         66.4
+#>  4   1.5      54         66  
 #>  5   2        54         66  
 #>  6   2.5      54         66  
-#>  7   3        54         66  
-#>  8   3.5      55.9       66.6
+#>  7   3        55.3       66.4
+#>  8   3.5      57         67  
 #>  9   4        57         67  
 #> 10   4.5      57         67  
 #> # ℹ 2,409 more rows
@@ -505,6 +510,7 @@ details about the vector-specific functions see
   As above, an option to toggle warnings and info messages.
 
 ``` r
+
 data_cleaned <- replace_mnirs(
     data_resampled,     ## blank channels will be retrieved from metadata
     invalid_values = 0, ## known invalid values in the data
@@ -624,7 +630,7 @@ parameters, see
 - `method = "moving_average"`
 
   The simplest smoothing method is a moving average filter applied over
-  a specified number of samples or timespan. Commonly, this might be a
+  a specified number of samples or time span. Commonly, this might be a
   5- or 15-second centred moving average.
 
 - `width` or `span`
@@ -647,6 +653,7 @@ for further details on each of these filtering methods and their
 respective parameters.
 
 ``` r
+
 data_filtered <- filter_mnirs(
     data_cleaned,           ## blank channels will be retrieved from metadata
     method = "butterworth", ## Butterworth digital filter is a common choice
@@ -760,6 +767,7 @@ protocol.
 > `starts_with()`, `matches()` can also be used.
 
 ``` r
+
 data_shifted <- shift_mnirs(
     data_filtered,     ## un-grouped nirs channels to shift separately 
     nirs_channels = list(smo2_left, smo2_right), ## 👈 channels grouped separately
@@ -824,6 +832,7 @@ the signal amplitude.
   ‘functional range’ during exercise, we could rescale them to 0-100%.
 
 ``` r
+
 data_rescaled <- rescale_mnirs(
     data_filtered,    ## un-grouped nirs channels to rescale separately 
     nirs_channels = list(smo2_left, smo2_right), ## 👈 channels grouped separately
@@ -872,6 +881,7 @@ for example when dealing with a familiar dataset. We recommend leaving
 `verbose = TRUE` by default whenever reading and exploring a new file.
 
 ``` r
+
 options(mnirs.verbose = FALSE)
 
 nirs_data <- read_mnirs(
@@ -1010,6 +1020,7 @@ for more details.
   re-calculated from `0`, since the time values have lost their meaning.
 
 ``` r
+
 ## return each interval independently with `event_groups = "distinct"`
 distinct <- extract_intervals(
     nirs_data,                  ## channels blank for "distinct" grouping
@@ -1020,12 +1031,13 @@ distinct <- extract_intervals(
     zero_time = FALSE           ## return original time values
 )
 
-plot(distinct[[1L]], time_labels = TRUE) + plot(distinct[[2L]], time_labels = TRUE)
+plot(distinct, time_labels = TRUE)
 ```
 
 ![](reading-mnirs-data_files/figure-html/unnamed-chunk-11-1.png)
 
 ``` r
+
 ## ensemble average both intervals with `event_groups = "ensemble"`
 ensemble <- extract_intervals(
     nirs_data,                  ## channels recycled to all intervals by default
@@ -1036,7 +1048,7 @@ ensemble <- extract_intervals(
     zero_time = TRUE            ## re-calculate common time to start from `0`
 )
 
-plot(ensemble[[1L]], time_labels = TRUE) + 
+plot(ensemble, time_labels = TRUE) + 
     geom_vline(xintercept = 0, linetype = "dotted")
 ```
 

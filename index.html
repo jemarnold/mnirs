@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,7 +97,6 @@
 </h3>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co">## for plotting</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span> <span class="co">## for plotting</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jemarnold.github.io/mnirs/">mnirs</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## {mnirs} includes sample files from a few mNIRS devices</span></span>
@@ -125,27 +124,27 @@
 <span><span class="co">#&gt; ! Estimated `sample_rate` = 2 Hz.</span></span>
 <span><span class="co">#&gt; ℹ Define `sample_rate` explicitly to override.</span></span>
 <span><span class="co">#&gt; Warning: ! Duplicate or irregular `time_channel` samples detected.</span></span>
-<span><span class="co">#&gt; ℹ Investigate at `time` = 211.99 and 1184.</span></span>
+<span><span class="co">#&gt; ℹ Investigate at `time` = 211.59 and 1183.6.</span></span>
 <span><span class="co">#&gt; ℹ Re-sample with `mnirs::resample_mnirs()`.</span></span>
 <span></span>
 <span><span class="co">## Note the above info message that sample_rate was estimated correctly at 2 Hz 👆</span></span>
 <span><span class="co">## ignore the warnings about irregular sampling for now, we will resample later</span></span>
 <span></span>
 <span><span class="va">data_raw</span></span>
-<span><span class="co">#&gt; # A tibble: 2,203 × 3</span></span>
+<span><span class="co">#&gt; # A tibble: 2,202 × 3</span></span>
 <span><span class="co">#&gt;     time smo2_left smo2_right</span></span>
 <span><span class="co">#&gt;    &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt;  1 0            54         68</span></span>
-<span><span class="co">#&gt;  2 0.400        54         68</span></span>
-<span><span class="co">#&gt;  3 0.960        54         68</span></span>
-<span><span class="co">#&gt;  4 1.51         54         66</span></span>
-<span><span class="co">#&gt;  5 2.06         54         66</span></span>
-<span><span class="co">#&gt;  6 2.61         54         66</span></span>
-<span><span class="co">#&gt;  7 3.16         54         66</span></span>
-<span><span class="co">#&gt;  8 3.71         57         67</span></span>
-<span><span class="co">#&gt;  9 4.26         57         67</span></span>
-<span><span class="co">#&gt; 10 4.81         57         67</span></span>
-<span><span class="co">#&gt; # ℹ 2,193 more rows</span></span>
+<span><span class="co">#&gt;  2 0.560        54         68</span></span>
+<span><span class="co">#&gt;  3 1.11         54         66</span></span>
+<span><span class="co">#&gt;  4 1.66         54         66</span></span>
+<span><span class="co">#&gt;  5 2.21         54         66</span></span>
+<span><span class="co">#&gt;  6 2.76         54         66</span></span>
+<span><span class="co">#&gt;  7 3.31         57         67</span></span>
+<span><span class="co">#&gt;  8 3.86         57         67</span></span>
+<span><span class="co">#&gt;  9 4.41         57         67</span></span>
+<span><span class="co">#&gt; 10 4.96         57         67</span></span>
+<span><span class="co">#&gt; # ℹ 2,192 more rows</span></span>
 <span></span>
 <span><span class="co">## note the `time_labels` plot argument to display time values as `h:mm:ss`</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
@@ -191,12 +190,12 @@
 <span><span class="co">#&gt;    &lt;dbl&gt;     &lt;dbl&gt;      &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt;  1   0        54         68  </span></span>
 <span><span class="co">#&gt;  2   0.5      54         68  </span></span>
-<span><span class="co">#&gt;  3   1        54         67.9</span></span>
-<span><span class="co">#&gt;  4   1.5      54         66.0</span></span>
+<span><span class="co">#&gt;  3   1        54         66.4</span></span>
+<span><span class="co">#&gt;  4   1.5      54         66  </span></span>
 <span><span class="co">#&gt;  5   2        54         66  </span></span>
 <span><span class="co">#&gt;  6   2.5      54         66  </span></span>
-<span><span class="co">#&gt;  7   3        54         66  </span></span>
-<span><span class="co">#&gt;  8   3.5      55.9       66.6</span></span>
+<span><span class="co">#&gt;  7   3        55.3       66.4</span></span>
+<span><span class="co">#&gt;  8   3.5      57         67  </span></span>
 <span><span class="co">#&gt;  9   4        57         67  </span></span>
 <span><span class="co">#&gt; 10   4.5      57         67  </span></span>
 <span><span class="co">#&gt; # ℹ 2,409 more rows</span></span></code></pre></div>
@@ -328,7 +327,7 @@
 <span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span>           <span class="co">## return original time values</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span><span class="op">[[</span><span class="fl">2L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">distinct</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-extract_intervals_distinct-1.png" alt="" width="100%"></p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">## ensemble average both intervals with `event_groups = "ensemble"`</span></span>
@@ -341,7 +340,7 @@
 <span>    zero_time <span class="op">=</span> <span class="cn">TRUE</span>            <span class="co">## re-calculate common time to start from `0`</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> </span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ensemble</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-extract_intervals_ensemble-1.png" alt="" width="100%"></p>
 </div>
@@ -354,7 +353,7 @@
 <p>Process oxygenation kinetics</p>
 <ul>
 <li><p>Monoexponential &amp; sigmoidal non-linear curve fitting</p></li>
-<li><p>Non-parametric half-response time &amp; slope analysis</p></li>
+<li><p>Non-parametric response time &amp; slope analysis</p></li>
 </ul>
 </li>
 <li>
@@ -379,7 +378,7 @@
 <p>Currently, it has been tested successfully with mNIRS data exported from the following devices and apps:</p>
 <ul>
 <li>
-<a href="https://www.artinis.com/oxysoft" class="external-link">Artinis</a> Oxysoft software (.csv and .xlsx)</li>
+<a href="https://artinis.com/oxysoft" class="external-link">Artinis</a> Oxysoft software (.csv and .xlsx)</li>
 <li>
 <a href="https://www.moxymonitor.com/" class="external-link">Moxy</a> direct export (.csv)</li>
 <li>

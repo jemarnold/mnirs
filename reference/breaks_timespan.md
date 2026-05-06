@@ -1,6 +1,6 @@
-# Breaks for timespan data
+# Breaks for time span data
 
-Pretty timespan breaks for plotting in units of 5, 15, 30, 60 sec, etc.
+Pretty time span breaks for plotting in units of 5, 15, 30, 60 sec, etc.
 Modified from
 [`scales::breaks_timespan()`](https://scales.r-lib.org/reference/breaks_timespan.html).
 

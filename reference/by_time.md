@@ -8,11 +8,11 @@ Helper functions to define interval start or end boundaries for
 ``` r
 by_time(...)
 
-by_sample(...)
-
 by_label(...)
 
 by_lap(...)
+
+by_sample(...)
 ```
 
 ## Arguments
@@ -51,11 +51,11 @@ arguments of
 These helpers can be used explicitly for arguments `start`/`end`, or raw
 values can be passed directly:
 
-- Numeric → `by_time()`
+- Numeric -\> `by_time()`
 
-- Character → `by_label()`,
+- Character -\> `by_label()`,
 
-- Explicit integer (e.g. `2L`) → `by_lap()`.
+- Explicit integer (e.g. `2L`) -\> `by_lap()`.
 
 - Use `by_sample()` explicitly for sample indices.
 
@@ -101,36 +101,16 @@ extract_intervals(data, start = by_lap(2, 4), span = 0)
 #> ℹ `nirs_channels` = c("smo2_left", "smo2_right") grouped together from
 #>   metadata.
 #> $interval_1
-#> # A tibble: 3,051 × 4
-#>     time   lap smo2_left smo2_right
-#>    <dbl> <int>     <dbl>      <dbl>
-#>  1  65.9     2      68.4       71.6
-#>  2  66.1     2      66.7       71.6
-#>  3  66.2     2      68.1       73.8
-#>  4  66.2     2      68.1       72.3
-#>  5  66.3     2      68.1       72.3
-#>  6  66.4     2      69.1       72.9
-#>  7  66.6     2      68.8       72.9
-#>  8  66.6     2      68.8       72.9
-#>  9  66.8     2      68.8       73.3
-#> 10  66.9     2      68.0       72.1
-#> # ℹ 3,041 more rows
+#> # A tibble: 1 × 4
+#>    time   lap smo2_left smo2_right
+#>   <dbl> <int>     <dbl>      <dbl>
+#> 1  65.9     2      68.4       71.6
 #> 
 #> $interval_2
-#> # A tibble: 2,863 × 4
-#>     time   lap smo2_left smo2_right
-#>    <dbl> <int>     <dbl>      <dbl>
-#>  1  788.     4      69.4       70.2
-#>  2  788.     4      69.5       69.2
-#>  3  788.     4      69.5       69.2
-#>  4  789.     4      67.3       70.2
-#>  5  789.     4      69.0       71.9
-#>  6  789.     4      69.3       69.7
-#>  7  789.     4      69.7       69.3
-#>  8  789.     4      69.6       69.1
-#>  9  789.     4      69.6       68.6
-#> 10  789.     4      68.8       69.3
-#> # ℹ 2,853 more rows
+#> # A tibble: 1 × 4
+#>    time   lap smo2_left smo2_right
+#>   <dbl> <int>     <dbl>      <dbl>
+#> 1  788.     4      69.4       70.2
 #> 
 
 ## introduce event_channel with "start" string

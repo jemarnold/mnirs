@@ -25,8 +25,8 @@ resample_mnirs(
 
 - time_channel:
 
-  A character string giving the name of the time or sample column. Must
-  match a column name in `data` exactly.
+  A character string naming the time or sample column. Must match a
+  column name in `data` exactly.
 
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
@@ -72,9 +72,9 @@ resample_mnirs(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
@@ -135,25 +135,25 @@ data <- read_mnirs(
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
 #> Warning: ! Duplicate or irregular `time_channel` samples detected.
-#> ℹ Investigate at `time` = 211.99 and 1184.
+#> ℹ Investigate at `time` = 211.59 and 1183.6.
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
 
 ## note warning about irregular sampling
 data
-#> # A tibble: 2,203 × 2
+#> # A tibble: 2,202 × 2
 #>     time  smo2
 #>    <dbl> <dbl>
 #>  1 0        54
-#>  2 0.400    54
-#>  3 0.960    54
-#>  4 1.51     54
-#>  5 2.06     54
-#>  6 2.61     54
-#>  7 3.16     54
-#>  8 3.71     57
-#>  9 4.26     57
-#> 10 4.81     57
-#> # ℹ 2,193 more rows
+#>  2 0.560    54
+#>  3 1.11     54
+#>  4 1.66     54
+#>  5 2.21     54
+#>  6 2.76     54
+#>  7 3.31     57
+#>  8 3.86     57
+#>  9 4.41     57
+#> 10 4.96     57
+#> # ℹ 2,192 more rows
 
 data_resampled <- resample_mnirs(
     data,               ## blank channels will be retrieved from metadata
@@ -174,8 +174,8 @@ data_resampled
 #>  4   1.5  54  
 #>  5   2    54  
 #>  6   2.5  54  
-#>  7   3    54  
-#>  8   3.5  55.9
+#>  7   3    55.3
+#>  8   3.5  57  
 #>  9   4    57  
 #> 10   4.5  57  
 #> # ℹ 2,409 more rows

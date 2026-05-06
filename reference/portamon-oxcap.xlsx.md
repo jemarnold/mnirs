@@ -16,19 +16,19 @@ oxidative capacity testing, each with 17 occlusions.
 
   tHb: total haemoglobin concentration change (\\\mu\\M).
 
-- Column 2:
-
-  O2Hb: oxyhaemoglobin concentration change (\\\mu\\M).
-
 - Column 3:
 
   HHb: deoxyhaemoglobin concentration change (\\\mu\\M).
 
 - Column 4:
 
-  Event marker (character).
+  O2Hb: oxyhaemoglobin concentration change (\\\mu\\M).
 
 - Column 5:
+
+  Event marker (character).
+
+- Column 6:
 
   Unmarked event label (character).
 
@@ -44,7 +44,7 @@ Channel mapping for
 ## Source
 
 Artinis Medical Systems. Portamon, exported via Oxysoft desktop software
-(https://www.artinis.com/)
+(https://artinis.com/)
 
 ## See also
 

@@ -86,9 +86,9 @@ read_mnirs(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
@@ -168,20 +168,20 @@ read_mnirs(
 #> ! Estimated `sample_rate` = 2 Hz.
 #> ℹ Define `sample_rate` explicitly to override.
 #> Warning: ! Duplicate or irregular `time_channel` samples detected.
-#> ℹ Investigate at `time` = 211.99 and 1184.
+#> ℹ Investigate at `time` = 211.59 and 1183.6.
 #> ℹ Re-sample with `mnirs::resample_mnirs()`.
-#> # A tibble: 2,203 × 3
+#> # A tibble: 2,202 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
 #>  1 0            54         68
-#>  2 0.400        54         68
-#>  3 0.960        54         68
-#>  4 1.51         54         66
-#>  5 2.06         54         66
-#>  6 2.61         54         66
-#>  7 3.16         54         66
-#>  8 3.71         57         67
-#>  9 4.26         57         67
-#> 10 4.81         57         67
-#> # ℹ 2,193 more rows
+#>  2 0.560        54         68
+#>  3 1.11         54         66
+#>  4 1.66         54         66
+#>  5 2.21         54         66
+#>  6 2.76         54         66
+#>  7 3.31         57         67
+#>  8 3.86         57         67
+#>  9 4.41         57         67
+#> 10 4.96         57         67
+#> # ℹ 2,192 more rows
 ```

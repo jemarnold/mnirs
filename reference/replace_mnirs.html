@@ -23,7 +23,7 @@ replaces via interpolation.'><meta name="twitter:card" content="summary"><meta n
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,8 +136,8 @@ used.</p></li>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
-<dd><p>A character string giving the name of the time or sample
-column. Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
+<dd><p>A character string naming the time or sample column.
+Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
 used.</p></li>
 </ul></dd>
 
@@ -160,7 +160,7 @@ the number of standard deviations from the local median.</p><ul><li><p>Default <
 <li><p>Lower values are more sensitive and flag more outliers; higher values
 are more conservative.</p></li>
 <li><p><code>outlier_cutoff = 3</code> Pearson's 3 sigma edit rule.
-<code>outlier_cutoff = 2</code> approximates a Tukey-style 1.5×IQR rule.
+<code>outlier_cutoff = 2</code> approximates a Tukey-style 1.5*IQR rule.
 <code>outlier_cutoff = 0</code> Tukey's median filter.</p></li>
 </ul></dd>
 
@@ -172,7 +172,7 @@ centred on <code>idx</code>, between
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>A numeric value defining the local window timespan around
+<dd><p>A numeric value defining the local window time span around
 <code>idx</code> in units of <code>time_channel</code> or <code>t</code>, between
 <code>[t - span/2, t + span/2]</code>.</p></dd>
 
@@ -201,8 +201,8 @@ values within a centred window defined by <code>width</code> or <code>span</code
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
-<code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
+<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
@@ -249,12 +249,12 @@ listed in <code>nirs_channels</code> are passed through unprocessed.</p>
 <p><code>replace_outliers()</code> and <code>replace_missing()</code> (when <code>method = "median"</code>)
 operate over a local rolling window for outlier detection and median
 interpolation. The window is specified by either <code>width</code> as the number
-of samples, or <code>span</code> as the timespan in units of <code>time_channel</code>.
+of samples, or <code>span</code> as the time span in units of <code>time_channel</code>.
 A partial window is calculated at the edges of the data.</p>
 </div>
 
 <div class="section">
-<h3 id="replace-invalid-values-with-with-replace-invalid-">Replace invalid values with with <code>replace_invalid()</code><a class="anchor" aria-label="anchor" href="#replace-invalid-values-with-with-replace-invalid-"></a></h3>
+<h3 id="replace-invalid-values-with-with-replace-invalid-">Replace invalid values with with replace_invalid()<a class="anchor" aria-label="anchor" href="#replace-invalid-values-with-with-replace-invalid-"></a></h3>
 
 
 <p>Specific <code>invalid_values</code> can be replaced, such as <code>c(0, 100, 102.3)</code>.
@@ -265,11 +265,11 @@ values themselves.</p>
 </div>
 
 <div class="section">
-<h3 id="outlier-detection-with-replace-outliers-">Outlier detection with <code>replace_outliers()</code><a class="anchor" aria-label="anchor" href="#outlier-detection-with-replace-outliers-"></a></h3>
+<h3 id="outlier-detection-with-replace-outliers-">Outlier detection with replace_outliers()<a class="anchor" aria-label="anchor" href="#outlier-detection-with-replace-outliers-"></a></h3>
 
 
 <p>Rolling local medians are computed across <code>x</code> within a window defined
-by <code>width</code> (number of samples) or <code>span</code> (timespan in units of <code>t</code>).</p>
+by <code>width</code> (number of samples) or <code>span</code> (time span in units of <code>t</code>).</p>
 <p>Outliers are detected with robust median absolute deviation (MAD),
 adapted from <code>pracma::hampel()</code>. Deviations equal to or less than the
 smallest absolute time series difference in <code>x</code> are excluded, to avoid
@@ -289,19 +289,19 @@ through to the returned vector. See <code>replace_missing()</code>.</p>
 </div>
 
 <div class="section">
-<h3 id="choosing-outlier-cutoff">Choosing <code>outlier_cutoff</code><a class="anchor" aria-label="anchor" href="#choosing-outlier-cutoff"></a></h3>
+<h3 id="choosing-outlier-cutoff">Choosing outlier_cutoff<a class="anchor" aria-label="anchor" href="#choosing-outlier-cutoff"></a></h3>
 
 
 <p><code>outlier_cutoff</code> is the number of (MAD-normalised) standard deviations
 from the local median. Higher values are more conservative; lower
-values flag more outliers.</p><ul><li><p><code>outlier_cutoff = 3</code> — Pearson's 3 sigma edit rule (default).</p></li>
-<li><p><code>outlier_cutoff = 2</code> — approximately Tukey-style 1.5×IQR rule.</p></li>
-<li><p><code>outlier_cutoff = 0</code> — Tukey's median filter (every point
+values flag more outliers.</p><ul><li><p><code>outlier_cutoff = 3</code> – Pearson's 3 sigma edit rule (default).</p></li>
+<li><p><code>outlier_cutoff = 2</code> – approximately Tukey-style 1.5*IQR rule.</p></li>
+<li><p><code>outlier_cutoff = 0</code> – Tukey's median filter (every point
 replaced by local median).</p></li>
 </ul></div>
 
 <div class="section">
-<h3 id="interpolation-with-replace-missing-">Interpolation with <code>replace_missing()</code><a class="anchor" aria-label="anchor" href="#interpolation-with-replace-missing-"></a></h3>
+<h3 id="interpolation-with-replace-missing-">Interpolation with replace_missing()<a class="anchor" aria-label="anchor" href="#interpolation-with-replace-missing-"></a></h3>
 
 
 <p><code>method = "linear"</code> and <code>method = "locf"</code> use <code><a href="https://rdrr.io/r/stats/approxfun.html" class="external-link">stats::approx()</a></code> with
@@ -309,12 +309,12 @@ replaced by local median).</p></li>
 (<em>"next observation carried backward"</em>) and trailing <code>NA</code>s by <em>"locf"</em>.</p>
 <p><code>method = "median"</code> calculates the local median of valid (non-<code>NA</code>)
 values to either side of <code>NA</code>s, within a window defined by <code>width</code>
-(number of samples) or <code>span</code> (timespan in units of <code>t</code>). Sequential
+(number of samples) or <code>span</code> (time span in units of <code>t</code>). Sequential
 <code>NA</code>s are all replaced by the same median value.</p>
 </div>
 
 <div class="section">
-<h3 id="edge-behaviour-for-method-median-">Edge behaviour for <code>method = "median"</code><a class="anchor" aria-label="anchor" href="#edge-behaviour-for-method-median-"></a></h3>
+<h3 id="edge-behaviour-for-method-median-">Edge behaviour for method = "median"<a class="anchor" aria-label="anchor" href="#edge-behaviour-for-method-median-"></a></h3>
 
 
 <p>If there are no valid values within <code>span</code> to one side of the <code>NA</code>,
@@ -353,7 +353,7 @@ valid sample on either side is used (equivalent to
 <span class="r-in"><span>    invalid_values <span class="op">=</span> <span class="fl">0</span>,    <span class="co">## known invalid values in the data</span></span></span>
 <span class="r-in"><span>    invalid_above <span class="op">=</span> <span class="fl">90</span>,    <span class="co">## remove data spikes above 90</span></span></span>
 <span class="r-in"><span>    outlier_cutoff <span class="op">=</span> <span class="fl">3</span>,    <span class="co">## Pearson's 3 sigma edit rule</span></span></span>
-<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">10</span>,            <span class="co">## window for outlier detection and interpolation</span></span></span>
+<span class="r-in"><span>    width <span class="op">=</span> <span class="fl">7</span>,            <span class="co">## window for outlier detection and interpolation</span></span></span>
 <span class="r-in"><span>    method <span class="op">=</span> <span class="st">"linear"</span>      <span class="co">## linear interpolation over NAs</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

@@ -76,9 +76,6 @@ nirs_data <- create_mnirs_data(
 )
 
 attributes(nirs_data)
-#> $row.names
-#> [1] 1 2 3
-#> 
 #> $nirs_channels
 #> [1] "B" "C"
 #> 
@@ -90,6 +87,9 @@ attributes(nirs_data)
 #> 
 #> $names
 #> [1] "A" "B" "C"
+#> 
+#> $row.names
+#> [1] 1 2 3
 #> 
 #> $class
 #> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"

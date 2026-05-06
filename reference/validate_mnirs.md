@@ -99,9 +99,9 @@ validate_x_t(x, t, allow_na = FALSE)
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 - as_list:
 
@@ -113,16 +113,16 @@ validate_x_t(x, t, allow_na = FALSE)
 
 - time_channel:
 
-  A character string giving the name of the time or sample column. Must
-  match a column name in `data` exactly.
+  A character string naming the time or sample column. Must match a
+  column name in `data` exactly.
 
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
 
 - event_channel:
 
-  A character string giving the name of the event/lap column. Must match
-  a column name in `data` exactly.
+  A character string naming the event/lap column. Must match a column
+  name in `data` exactly.
 
   - If `NULL` (default), the `event_channel` metadata attribute of
     `data` is used.

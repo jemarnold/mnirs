@@ -43,7 +43,7 @@ Channel mapping for
 ## Source
 
 Artinis Medical Systems. Oxymon MKIII, exported via Oxysoft desktop
-software (https://www.artinis.com/)
+software (https://artinis.com/)
 
 ## See also
 

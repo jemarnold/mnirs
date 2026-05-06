@@ -11,7 +11,7 @@ index.'><meta name="twitter:card" content="summary"><meta name="twitter:creator"
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,8 +87,8 @@ occurs.</p></li>
 
 
 <dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
-<dd><p>A character string giving the name of the time or sample
-column. Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
+<dd><p>A character string naming the time or sample column.
+Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
 used.</p></li>
 </ul></dd>
 
@@ -108,16 +108,16 @@ values for ensemble-averaging. If <code>NULL</code>, will be estimated from
 
 
 <dt id="arg-start">start<a class="anchor" aria-label="anchor" href="#arg-start"></a></dt>
-<dd><p>Specifies where intervals begin. Either raw values — numeric
+<dd><p>Specifies where intervals begin. Either raw values – numeric
 for time values, character for event labels, explicit integer (e.g. <code>2L</code>)
-for lap numbers — or created with <code><a href="by_time.html">by_time()</a></code>, <code><a href="by_time.html">by_label()</a></code>, <code><a href="by_time.html">by_lap()</a></code>,
+for lap numbers – or created with <code><a href="by_time.html">by_time()</a></code>, <code><a href="by_time.html">by_label()</a></code>, <code><a href="by_time.html">by_lap()</a></code>,
 or <code><a href="by_time.html">by_sample()</a></code>.</p></dd>
 
 
 <dt id="arg-end">end<a class="anchor" aria-label="anchor" href="#arg-end"></a></dt>
-<dd><p>Specifies where intervals end. Either raw values — numeric for
+<dd><p>Specifies where intervals end. Either raw values – numeric for
 time values, character for event labels, explicit integer (e.g. <code>2L</code>)
-for lap numbers — or created with <code><a href="by_time.html">by_time()</a></code>, <code><a href="by_time.html">by_label()</a></code>, <code><a href="by_time.html">by_lap()</a></code>,
+for lap numbers – or created with <code><a href="by_time.html">by_time()</a></code>, <code><a href="by_time.html">by_label()</a></code>, <code><a href="by_time.html">by_lap()</a></code>,
 or <code><a href="by_time.html">by_sample()</a></code>.</p></dd>
 
 
@@ -160,15 +160,15 @@ data frame.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Will display or silence (if
-<code>FALSE</code>) warnings and information messages helpful for troubleshooting. A
+<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
+warnings and information messages helpful for troubleshooting. Ad
 global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A named <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of <a href="https://tibble.tidyverse.org/reference/tibble-package.html" class="external-link">tibbles</a> of class
-<em>"mnirs"</em>, with metadata available via <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes()</a></code>.</p>
+<em>"mnirs"</em>, each with metadata available via <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -177,54 +177,55 @@ global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></
 <h3 id="interval-specification">Interval specification<a class="anchor" aria-label="anchor" href="#interval-specification"></a></h3>
 
 
-<p>Interval boundaries are specified using helper functions, or by passing
-raw values directly:</p>
-<dl><dt><code><a href="by_time.html">by_time()</a></code> or numeric</dt>
+<p>Interval <code>start</code> and <code>end</code> boundaries are specified using helper functions,
+or by passing raw values directly:</p>
+<dl><dt><code><a href="by_time.html">by_time()</a></code></dt>
 <dd><p>Time values in units of <code>time_channel</code>.</p></dd>
 
-<dt><code><a href="by_time.html">by_label()</a></code> or character</dt>
+<dt><code><a href="by_time.html">by_label()</a></code></dt>
 <dd><p>Strings to match in <code>event_channel</code>.
 All matching occurrences are returned.</p></dd>
 
-<dt><code><a href="by_time.html">by_lap()</a></code> or explicit integer (e.g. <code>2L</code>)</dt>
-<dd><p>Lap numbers to match
-in <code>event_channel</code>. Resolves to the first sample of each lap for
-<code>start</code>, and the last sample for <code>end</code>, or all samples of the lap if only
-one of either <code>start</code> or <code>end</code> is specified.</p></dd>
+<dt><code><a href="by_time.html">by_lap()</a></code></dt>
+<dd><p>Lap numbers to match in <code>event_channel</code>. Resolves to the
+first sample of each lap for <code>start</code>, and the last lap sample for <code>end</code></p></dd>
 
 <dt><code><a href="by_time.html">by_sample()</a></code></dt>
 <dd><p>Integer sample indices (row numbers).</p></dd>
 
 
-</dl><p>Raw values supplied to <code>start</code>/<code>end</code> are auto-coerced:</p><ul><li><p>Numeric → <code><a href="by_time.html">by_time()</a></code></p></li>
-<li><p>Character → <code><a href="by_time.html">by_label()</a></code>,</p></li>
-<li><p>Explicit integer (e.g. <code>2L</code>) → <code><a href="by_time.html">by_lap()</a></code>.</p></li>
+</dl><p>Raw values supplied to <code>start</code>/<code>end</code> are auto-coerced:</p><ul><li><p>Numeric -&gt; <code><a href="by_time.html">by_time()</a></code></p></li>
+<li><p>Character -&gt; <code><a href="by_time.html">by_label()</a></code>,</p></li>
+<li><p>Explicit integer (e.g. <code>2L</code>) -&gt; <code><a href="by_time.html">by_lap()</a></code>.</p></li>
 <li><p>Use <code><a href="by_time.html">by_sample()</a></code> explicitly for sample indices.</p></li>
 </ul><p><code>start</code> and <code>end</code> can use different specification types (e.g., start by
 label, end by time). When lengths differ, the shorter is recycled.</p>
 </div>
 
 <div class="section">
-<h3 id="the-span-window">The <code>span</code> window<a class="anchor" aria-label="anchor" href="#the-span-window"></a></h3>
+<h3 id="time-span-window">Time span window<a class="anchor" aria-label="anchor" href="#time-span-window"></a></h3>
 
 
-<p><code>span</code> applies an additive time shift to interval boundaries. A single
-numeric value is recycled: <code>span = 60</code> becomes <code>c(0, 60)</code> and
-<code>span = -60</code> becomes <code>c(-60, 0)</code>.</p><ul><li><p><strong><code>start</code> + <code>end</code></strong>: <code>span[1]</code> shifts starts, <code>span[2]</code> shifts ends.
-For example, <code>start = by_time(30), end = by_time(60), span = c(-5, 10)</code>
-gives an interval of <code>[25, 70]</code>.</p></li>
-<li><p><strong><code>start</code> only</strong> or <strong><code>end</code> only</strong>: both span values apply to the single
-boundary, like a window around an event. For example,
-<code>start = by_time(30), span = c(-5, 60)</code> gives <code>[25, 90]</code>.</p></li>
+<p><code>span</code> additively expands the time span window around interval boundaries.</p><ul><li><p>A two-value vector expands the <code>start</code> and <code>end</code>, respectively:
+<code>span = c(-60, 60)</code> expands the <code>start</code> earlier by <code>60</code>, and the <code>end</code>
+later by <code>60</code>. For example,
+<code>start = by_time(30), end = by_time(60), span = c(-5, 10)</code> returns an
+interval of <code>[25, 70]</code>.</p></li>
+<li><p>A single numeric value is recycled according to the sign: <code>span = -60</code>
+becomes <code>c(-60, 0)</code> to expand the <code>start</code> earlier. <code>span = 60</code> becomes
+<code>c(0, 60)</code> to expand the <code>end</code> later.</p></li>
+<li><p>If only <code>start</code> is specified alone, both span values expand the single
+boundary window: <code>start = by_time(30), span = c(-5, 60)</code> returns
+<code>[25, 90]</code>.</p></li>
 </ul></div>
 
 <div class="section">
-<h3 id="per-interval-nirs-channels-for-ensemble-averaging">Per-interval <code>nirs_channels</code> for ensemble-averaging<a class="anchor" aria-label="anchor" href="#per-interval-nirs-channels-for-ensemble-averaging"></a></h3>
+<h3 id="per-interval-nirs-channels-for-ensemble-averaging">Per-interval nirs_channels for ensemble-averaging<a class="anchor" aria-label="anchor" href="#per-interval-nirs-channels-for-ensemble-averaging"></a></h3>
 
 
 <p>When <code>event_groups = "ensemble"</code> or a list of numeric grouped intervals,
 <code>nirs_channels</code> can be specified as a list of column names to override
-ensemble-averaging across interval. For example, to exclude a bad channel
+ensemble-averaging across interval. For example, to exclude a channel
 in one interval:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">nirs_channels</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">A</span>, <span class="va">B</span>, <span class="va">C</span><span class="op">)</span>,</span>

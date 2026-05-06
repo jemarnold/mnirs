@@ -57,7 +57,7 @@ compute_valid_neighbours(
 
 - span:
 
-  A numeric value defining the local window timespan around `idx` in
+  A numeric value defining the local window time span around `idx` in
   which to perform the operation, according to `align`. In units of
   `time_channel` or `t`.
 
@@ -95,14 +95,14 @@ compute_valid_neighbours(
     values are more conservative.
 
   - `outlier_cutoff = 3` Pearson's 3 sigma edit rule.
-    `outlier_cutoff = 2` approximates a Tukey-style 1.5×IQR rule.
+    `outlier_cutoff = 2` approximates a Tukey-style 1.5\*IQR rule.
     `outlier_cutoff = 0` Tukey's median filter.
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
@@ -124,8 +124,8 @@ either side of the invalid `NA`s.
 ## Details
 
 The local rolling window can be specified by either `width` as the
-number of samples, or `span` as the timespan in units of `t`. Specifying
-`width` is often faster than `span`.
+number of samples, or `span` as the time span in units of `t`.
+Specifying `width` is often faster than `span`.
 
 `align` defaults to *"centre"* the local window around `idx` between
 `[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is

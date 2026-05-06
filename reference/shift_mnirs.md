@@ -39,8 +39,8 @@ shift_mnirs(
 
 - time_channel:
 
-  A character string giving the name of the time or sample column. Must
-  match a column name in `data` exactly.
+  A character string naming the time or sample column. Must match a
+  column name in `data` exactly.
 
   - If `NULL` (default), the `time_channel` metadata attribute of `data`
     is used.
@@ -62,7 +62,7 @@ shift_mnirs(
 
 - span:
 
-  A numeric value defining the local window timespan around `idx` in
+  A numeric value defining the local window time span around `idx` in
   units of `time_channel` or `t`, between `[t - span/2, t + span/2]`.
 
 - position:
@@ -84,9 +84,9 @@ shift_mnirs(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
+  and information messages helpful for troubleshooting. Ad global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value
 
@@ -134,28 +134,28 @@ data <- read_mnirs(
     time_channel = c(time = "hh:mm:ss"),
     verbose = FALSE
 ) |>
-    shift_mnirs(           ## un-grouped nirs channels to shift separately 
+    shift_mnirs(        ## un-grouped nirs channels to shift separately 
         nirs_channels = list(smo2_left, smo2_right), 
-        to = 0,            ## NIRS values will be shifted to zero
-        span = 120,        ## shift the *first* 120 sec of data to zero
+        to = 0,         ## NIRS values will be shifted to zero
+        span = 120,     ## shift the *first* 120 sec of data to zero
         position = "first"
     )
 
 data
-#> # A tibble: 2,203 × 3
+#> # A tibble: 2,202 × 3
 #>     time smo2_left smo2_right
 #>    <dbl>     <dbl>      <dbl>
-#>  1 0         -1.55      2.21 
-#>  2 0.400     -1.55      2.21 
-#>  3 0.960     -1.55      2.21 
-#>  4 1.51      -1.55      0.215
-#>  5 2.06      -1.55      0.215
-#>  6 2.61      -1.55      0.215
-#>  7 3.16      -1.55      0.215
-#>  8 3.71       1.45      1.21 
-#>  9 4.26       1.45      1.21 
-#> 10 4.81       1.45      1.21 
-#> # ℹ 2,193 more rows
+#>  1 0         -1.56      2.22 
+#>  2 0.560     -1.56      2.22 
+#>  3 1.11      -1.56      0.225
+#>  4 1.66      -1.56      0.225
+#>  5 2.21      -1.56      0.225
+#>  6 2.76      -1.56      0.225
+#>  7 3.31       1.44      1.22 
+#>  8 3.86       1.44      1.22 
+#>  9 4.41       1.44      1.22 
+#> 10 4.96       1.44      1.22 
+#> # ℹ 2,192 more rows
 
 # \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {
