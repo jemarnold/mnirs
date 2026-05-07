@@ -232,7 +232,7 @@ validate_nirs_channels <- function(
     as_list = FALSE,
     env = rlang::caller_env()
 ) {
-    ## parse NSE input
+    ## parse tidy eval input
     if (rlang::is_quosure(nirs_channels)) {
         nirs_channels <- parse_channel_name(nirs_channels, data, env)
     }
@@ -304,7 +304,7 @@ validate_time_channel <- function(
     data,
     env = rlang::caller_env()
 ) {
-    ## parse NSE input
+    ## parse tidy eval input
     if (rlang::is_quosure(time_channel)) {
         time_channel <- parse_channel_name(time_channel, data, env)
     }
@@ -352,7 +352,7 @@ validate_event_channel <- function(
     required = TRUE,
     env = rlang::caller_env()
 ) {
-    ## parse NSE input
+    ## parse tidy eval input
     if (rlang::is_quosure(event_channel)) {
         event_channel <- parse_channel_name(event_channel, data, env)
     }

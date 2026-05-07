@@ -155,8 +155,7 @@ as_plot_data <- function(x) {
         ))
     }
 
-    is_df <- vapply(x, is.data.frame, logical(1))
-    if (!all(is_df)) {
+    if (any(!vapply(x, is.data.frame, logical(1)))) {
         cli_abort(c(
             "x" = "{.fn plot.mnirs} must contain all {col_blue('\"mnirs\"')} \\
             data frames."
@@ -184,7 +183,7 @@ as_plot_data <- function(x) {
 
     ## auto-name unnamed list elements
     if (is.null(names(x))) {
-        names(x) <- seq_along(x)
+        names(x) <- paste0("interval_", seq_along(x))
     }
 
     ## length-1 list: unwrap to single data frame
@@ -198,8 +197,14 @@ as_plot_data <- function(x) {
         use.names = FALSE
     ))
 
+    ## pad each element with NA for any missing nirs_channels
+    x <- lapply(x, \(.df) {
+        .df[setdiff(nirs_channels, names(.df))] <- NA_real_
+        .df
+    })
+
     ## add .id column to each element, then row-bind
-    x <- Map(function(.df, .nm) {
+    x <- Map(\(.df, .nm) {
         .df[[".id"]] <- .nm
         .df
     }, x, names(x))

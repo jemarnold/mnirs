@@ -222,7 +222,7 @@ read_mnirs <- function(
 }
 
 #' Metadata names  of class `"mnirs"`, retrieved with `attr()`
-#' @keywords: internal
+#' @keywords internal
 mnirs_metadata <- c(
     "nirs_device",
     "nirs_channels",
@@ -284,7 +284,7 @@ mnirs_metadata <- c(
 create_mnirs_data <- function(data, ...) {
     validate_mnirs_data(data, 1L)
 
-    ## NSE ========================================================
+    ## tidy eval ========================================================
     ## capture quosures so bare symbols / tidyselect resolve against `data`
     dots <- rlang::enquos(...)
     args <- Map(\(.q, .nm) {

@@ -10,7 +10,6 @@ test_that("theme_mnirs returns a ggplot2 theme object", {
 test_that("theme_mnirs border argument works correctly", {
     partial <- theme_mnirs(border = "partial")
     full <- theme_mnirs(border = "full")
-
     expect_s3_class(partial$panel.border, "element_blank")
     expect_s3_class(full$panel.border, "element_rect")
 })
@@ -185,7 +184,7 @@ test_that("format_hmmss handles NA values", {
 })
 
 
-## plot.mnirs() ===============================================
+## as_plot_data() =============================================
 # Helper to create mock mNIRS object
 mock_mnirs <- function() {
     df <- data.frame(
@@ -201,6 +200,78 @@ mock_mnirs <- function() {
     )
 }
 
+test_that("as_plot_data errors on invalid lists", {
+    ## empty list
+    expect_error(as_plot_data(list()), "at least one")
+    ## not a df
+    expect_error(as_plot_data(list(mock_mnirs(), "not_a_df")), "must contain all")
+})
+
+test_that("as_plot_data errors when element missing time_channel attribute", {
+    bad <- structure(
+        data.frame(time = 1:3, HHb = 1:3),
+        class = c("mnirs", "data.frame"),
+        nirs_channels = "HHb"
+    )
+    expect_error(as_plot_data(list(bad)), "time_channel attribute")
+})
+
+test_that("as_plot_data errors when elements have differing time_channel", {
+    a <- mock_mnirs()
+    b <- structure(
+        data.frame(t = 1:10, HHb = 1:10),
+        class = c("mnirs", "data.frame"),
+        nirs_channels = "HHb",
+        time_channel = "t"
+    )
+    expect_error(as_plot_data(list(a, b)), "same.*time_channel")
+})
+
+test_that("as_plot_data unwraps single-element list", {
+    x <- mock_mnirs()
+    result <- as_plot_data(list(x))
+    expect_identical(result, x)
+})
+
+test_that("as_plot_data row-binds named list with .id factor", {
+    a <- mock_mnirs()
+    b <- mock_mnirs()
+    result <- as_plot_data(list(pre = a, post = b))
+    expect_true(".id" %in% names(result))
+    expect_s3_class(result[[".id"]], "factor")
+    expect_equal(levels(result[[".id"]]), c("pre", "post"))
+    expect_equal(nrow(result), nrow(a) + nrow(b))
+    expect_equal(attr(result, "time_channel"), "time")
+    expect_equal(attr(result, "nirs_channels"), c("HHb", "O2Hb"))
+})
+
+test_that("as_plot_data auto-names unnamed list with sequential integers", {
+    a <- mock_mnirs()
+    b <- mock_mnirs()
+    result <- as_plot_data(list(a, b))
+    expect_equal(levels(result[[".id"]]), c("interval_1", "interval_2"))
+})
+
+test_that("as_plot_data unions nirs_channels across elements", {
+    a <- structure(
+        data.frame(time = 1:3, HHb = 1:3),
+        class = c("mnirs", "data.frame"),
+        nirs_channels = "HHb",
+        time_channel = "time"
+    )
+    b <- structure(
+        data.frame(time = 1:3, O2Hb = 4:6),
+        class = c("mnirs", "data.frame"),
+        nirs_channels = "O2Hb",
+        time_channel = "time"
+    )
+    result <- as_plot_data(x = list(a, b))
+
+    # plot(result)
+    expect_equal(attr(result, "nirs_channels"), c("HHb", "O2Hb"))
+})
+
+## plot.mnirs() ===============================================
 test_that("na.omit removes rows with any NA in nirs_channels", {
     x <- mock_mnirs()
 
@@ -336,6 +407,28 @@ test_that("plot.mnirs works on lists", {
 
     ## renders without error
     expect_no_error(ggplot2::ggplot_build(p))
+})
+
+test_that("plot.mnirs() returns ggplot2 warnings for missing values", {
+    a <- structure(
+        data.frame(time = 1:3, HHb = 1:3),
+        class = c("mnirs", "data.frame"),
+        nirs_channels = "HHb",
+        time_channel = "time"
+    )
+    b <- structure(
+        data.frame(time = 1:3, O2Hb = 4:6),
+        class = c("mnirs", "data.frame"),
+        nirs_channels = "O2Hb",
+        time_channel = "time"
+    )
+    result <- as_plot_data(x = list(a, b))
+
+    w <- tryCatch(
+        print(plot(result)),
+        warning = \(w) conditionMessage(w)
+    )
+    expect_match(w, "Removed.*containing missing")
 })
 
 test_that("plot.mnirs moxy.perfpro works", {

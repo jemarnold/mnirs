@@ -320,7 +320,7 @@ plot(ensemble, time_labels = TRUE) +
 
   - Monoexponential & sigmoidal non-linear curve fitting
 
-  - Non-parametric half-response time & slope analysis
+  - Non-parametric response time & slope analysis
 
 - Critical oxygenation breakpoint analysis
 
@@ -343,7 +343,7 @@ devices, and compatibility will improve with continued development.
 Currently, it has been tested successfully with mNIRS data exported from
 the following devices and apps:
 
-- [Artinis](https://www.artinis.com/oxysoft) Oxysoft software (.csv and
+- [Artinis](https://artinis.com/oxysoft) Oxysoft software (.csv and
   .xlsx)
 - [Moxy](https://www.moxymonitor.com/) direct export (.csv)
 - [PerfPro](https://perfprostudio.com/) PC software (.xlsx)

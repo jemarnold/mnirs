@@ -284,6 +284,31 @@ test_that("detect_device_channels() detects known channels for device", {
     expect_equal(result$time_channel, device_patterns$Moxy$time_channel)
 })
 
+test_that("detect_device_channels() detects known channels for PerfPro", {
+    file_path <- test_path("testdata/perfpro-mre.xlsx")
+    skip_if_not(file.exists(file_path), "testdata not available")
+
+    data <- read_file(file_path)
+    detected_list <- detect_mnirs_device(data)
+    nirs_device <- detected_list$nirs_device
+    header_row <- detected_list$header_row
+
+    expect_match(nirs_device, "PerfPro")
+    expect_equal(header_row, 3)
+
+    result <- detect_device_channels(
+        data,
+        header_row,
+        nirs_device,
+        nirs_channels = NULL,
+        time_channel = NULL,
+        verbose = FALSE
+    )
+
+    expect_equal(result$nirs_channels, "SmO2 (1614)")
+    expect_equal(result$time_channel, "Time")
+})
+
 test_that("detect_device_channels() user time_channel overrides device default", {
     result <- detect_device_channels(
         nirs_device = "Moxy",
@@ -1255,11 +1280,13 @@ test_that("parse_time_channel() returns local time zonel", {
     moxy_occl <- test_path("testdata/moxy-occlusion.xlsx")
     vo2master <- test_path("testdata/vo2master.csv")
     skip_if_not(file.exists(perfpro), "testdata not available")
+    skip("run in local time PDT/PST zone")
+    
     file_list <- c(
         perfpro, ## today's date, 0:00:00
         moxy_occl, ## today's date, 13:52:59
         example_mnirs("moxy_intervals"), ## today's date, 13:17:13
-        example_mnirs("moxy_ramp") ## today's date 0:29:00.01
+        example_mnirs("moxy_ramp") ## today's date 0:29:00.41
     )
 
     timestamp_list <- list()
@@ -1997,14 +2024,14 @@ test_that("read_mnirs oxysoft works", {
 })
 
 test_that("read_mnirs Oxysoft Portamon works", {
-    file_path <- example_mnirs("portamon")
+    file_path <- example_mnirs("portamon-oxcap")
 
     expect_equal(
         read_file(file_path) |>
             detect_mnirs_device(),
         list(
             nirs_device = "Artinis",
-            header_row = 43
+            header_row = 42
         )
     )
 

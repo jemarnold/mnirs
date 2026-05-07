@@ -1948,8 +1948,7 @@ test_that("extract_intervals works on train.red data", {
     )
 
     ## visual check
-    # library(patchwork)
-    # plot(result[[1L]]) + plot(result[[2L]])
+    # plot(result)
 
     ## structure
     expect_length(result, 2)

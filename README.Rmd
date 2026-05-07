@@ -296,7 +296,7 @@ This package is designed to recognise mNIRS data exported as *.csv* or *.xls(x)*
 
 Currently, it has been tested successfully with mNIRS data exported from the following devices and apps:
 
-* [Artinis](https://www.artinis.com/oxysoft) Oxysoft software (.csv and .xlsx)
+* [Artinis](https://artinis.com/oxysoft) Oxysoft software (.csv and .xlsx)
 * [Moxy](https://www.moxymonitor.com/) direct export (.csv)
 * [PerfPro](https://perfprostudio.com/) PC software (.xlsx)
 * [Train.Red](https://train.red/) app (.csv)

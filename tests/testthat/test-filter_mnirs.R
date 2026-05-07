@@ -342,7 +342,7 @@ test_that("filter_butter smooths noisy signal", {
 })
 
 test_that("filter_butter works visually", {
-    skip("visual chek for filter_butter")
+    skip("visual check for filter_butter")
     set.seed(999)
     sin_wave <- sin(2 * pi * 1:100 / 20)
     x <- seq_along(sin_wave)

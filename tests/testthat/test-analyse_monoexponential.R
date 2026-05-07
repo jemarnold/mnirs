@@ -687,9 +687,9 @@ test_that("fix_coefs() fixes multiple parameters", {
         rnorm(length(t), 0, 3)
     data <- data.frame(t, x)
 
-    ggplot2::ggplot(data, ggplot2::aes(t, x)) +
-        theme_mnirs() +
-        ggplot2::geom_point()
+    # ggplot2::ggplot(data, ggplot2::aes(t, x)) +
+    #     theme_mnirs() +
+    #     ggplot2::geom_point()
 
     model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
     model_fixed <- fix_coefs(

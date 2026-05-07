@@ -1,31 +1,61 @@
-# mnirs 0.6.4
+# mnirs 0.6.3
 
 ## Plotting improvements
 
-* `plot.mnirs()` generic can now plot from a list of data frames with `class = "mnirs"` as facets.
+* Generic `plot.mnirs()` ncan now be called on a list of *"mnirs"* data frames. Each data frame will be printed as a facet. This is primarily useful for printing a list of interval data frames exported from `extract_intervals()`:
 
-* `extract_intervals()` now returns data frames in a list of `class = "mnirs"`. Otherwise, a manually created list of data frames will have to be manually edited with `class(list) <- c("mnirs", class(list))`.
+``` r
+read_mnirs() |> 
+    extract_intervals() |> 
+    plot()
+## returns a plot with a facet for each interval
+```
 
-* `print.mnirs()` generic created to avoid displaying extra `NextMethod()` calls when printing lists with `class = "mnirs"`.
+* To faciliate this, `extract_intervals()` now returns a list of data frames with `class = "mnirs"`. Otherwise, to manually plot a list of data frames, it will need to have `class(list) <- c("mnirs", class(list))` edited manually.
+
+``` r
+read_mnirs() |> 
+    extract_intervals() |> 
+    class()
+#> [1] "mnirs" "list"
+```
+
+* Backend improvement: `print.mnirs()` generic created to avoid displaying extra `NextMethod()` calls when printing lists with `class = "mnirs"`.
 
 ## Modified lap extraction behaviour
 
-* `extract_intervals()`: when specifying `by_lap()`, now `start` will only specify the first sample of the lap, and `end` the last sample, rather than `start = by_lap()` including the entire lap. This allows better control when multiple lap lengths are variable.
+* `extract_intervals()`: 
+
+    * When specifying `start` and `end` with `by_lap()`, `start` will only refer to the first sample of the lap, and `end` the last sample.
+
+    * With previous behaviour, `start = by_lap()` would include the entire specified lap(s). But this resulted in less control over displaying only parts of a lap.
+    
+    * Updated behaviour is now more consistent with `by_time`, `by_label`, and `by_sample()` methods, which reference `start` and `end` from a single sample. This allows extraction of e.g. only the first 60-sec of lap:
+
+```r
+read_mnirs() |> 
+    extract_intervals(
+        start = by_lap(1, 3),
+        span = c(0, 60),
+    )
+## returns a list of two intervals with the first 60-sec of laps 1 and 3, respectively.
+```
 
 ## Updated core functions
 
-* `create_mnirs_data()` now properly accepts non-standard name evaluation for primary *channels*. e.g.; `create_mnirs_data(df, nirs_channels = c(o2hb, hhb))`.
+* `read_mnirs()`: Fix detection issue with *"PerfPro"* file formats, and another small bug fix to improve timestamp parsing.
 
+* `create_mnirs_data()` now properly accepts tidy evaluation for `nirs_channels`, `time_channel`, and `event_channel`:
 
-# mnirs 0.6.3
-
-* `read_mnirs()`: Fix detection of *"PerfPro"* file formats with another small bug fix to improve timestamp parsing.
+```r
+create_mnirs_data(df, nirs_channels = c(o2hb, hhb))
+```
 
 * `resample_mnirs()`: 
 
     * Now resamples to an inclusive time range around existing data, rounded to the nearest resampled rate. Better handles edge cases where the last sample was being dropped in certain rounding conditions.
 
-    * Fix a condition where a specified `sample_rate` greater than the actual sample_rate of the data led to an error. Now more robustly fills non-numeric columns.
+    * Fix an edge case error when `sample_rate` was mis-specified higher than the actual sample_rate of the data. Now more robustly fills non-numeric columns.
 
 
 # mnirs 0.6.2
