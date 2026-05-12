@@ -2,6 +2,8 @@
 
 ## mnirs 0.6.3
 
+CRAN release: 2026-05-07
+
 ### Plotting improvements
 
 - Generic
