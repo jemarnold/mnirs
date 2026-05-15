@@ -1076,6 +1076,8 @@ create_kinetics_data <- function(
     sample_rate = 10,
     channels = c("smo2_left", "smo2_right")
 ) {
+    ## seed so `interval_times = sample(t, 1)` is reproducible
+    set.seed(13)
     t <- seq(0, (n - 1) / sample_rate, length.out = n)
     df <- data.frame(
         time = t,
@@ -1287,6 +1289,175 @@ test_that("analyse_kinetics$data preserves mnirs metadata with grouped input", {
     }
 })
 
+## analyse_kinetics.response_time ======================================
+## helper to create a deterministic ramp/plateau for response_time tests
+create_response_time_data <- function(
+    n_baseline = 5,
+    n_ramp = 10,
+    n_plateau = 5,
+    A = 0,
+    B = 20,
+    sample_rate = 1,
+    channels = "smo2"
+) {
+    x <- c(
+        rep(A, n_baseline),
+        seq(A, B, length.out = n_ramp),
+        rep(B, n_plateau)
+    )
+    t <- seq_along(x) - n_baseline ## t = 0 at end of baseline
+    df <- stats::setNames(
+        data.frame(t, x),
+        c("time", channels[1])
+    )
+    if (length(channels) > 1) {
+        for (ch in channels[-1]) {
+            df[[ch]] <- x
+        }
+    }
+    create_mnirs_data(
+        df,
+        nirs_channels = channels,
+        time_channel = "time",
+        sample_rate = sample_rate,
+        interval_times = 0
+    )
+}
+
+test_that("analyse_kinetics.response_time forwards fraction argument", {
+    data <- create_response_time_data()
+
+    result_25 <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "response_time",
+        fraction = 0.25,
+        direction = "positive",
+        verbose = FALSE
+    )
+    result_50 <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "response_time",
+        fraction = 0.5,
+        direction = "positive",
+        verbose = FALSE
+    )
+
+    ## response_time monotonic in fraction
+    expect_lt(
+        result_25$coefficients$response_time,
+        result_50$coefficients$response_time
+    )
+
+    ## fitted = A + (B - A) * fraction
+    A <- result_50$coefficients$A
+    B <- result_50$coefficients$B
+    expect_equal(result_25$coefficients$fitted, A + (B - A) * 0.25)
+    expect_equal(result_50$coefficients$fitted, A + (B - A) * 0.5)
+})
+
+test_that("analyse_kinetics.response_time passes direction argument", {
+    data <- create_kinetics_data(n = 100)
+
+    result_pos <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2_left",
+        method = "response_time",
+        direction = "positive",
+        verbose = FALSE
+    )
+    result_neg <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2_left",
+        method = "response_time",
+        direction = "negative",
+        verbose = FALSE
+    )
+
+    expect_gt(result_pos$coefficients$B, result_pos$coefficients$A)
+    expect_lt(result_neg$coefficients$B, result_neg$coefficients$A)
+})
+
+test_that("analyse_kinetics.response_time channel_args override defaults", {
+    data <- create_kinetics_data(n = 100)
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = c("smo2_left", "smo2_right"),
+        method = "response_time",
+        direction = "positive",
+        channel_args = list(
+            smo2_right = list(direction = "negative")
+        ),
+        verbose = FALSE
+    )
+
+    ## channel_args records per-channel settings
+    ca <- result$channel_args
+    expect_equal(
+        ca$direction[ca$nirs_channels == "smo2_left"],
+        "positive"
+    )
+    expect_equal(
+        ca$direction[ca$nirs_channels == "smo2_right"],
+        "negative"
+    )
+})
+
+test_that("analyse_kinetics.response_time results have correct columns", {
+    data <- create_response_time_data()
+
+    result <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "response_time",
+        direction = "positive",
+        verbose = FALSE
+    )
+
+    expected_cols <- c(
+        "interval", "nirs_channels", "A", "B",
+        "response_time", "response_value", "fitted"
+    )
+    expect_true(all(expected_cols %in% names(result$coefficients)))
+})
+
+test_that("analyse_kinetics.response_time handles unreachable response", {
+    data <- create_kinetics_data(n = 100, channels = c("smo2_left"))
+    data <- data[data$time >= 8, ]
+    attr(data, "interval_times") <- 9.3 ## 9.6
+
+    ## visual check
+    # plot(data) +
+    #     ggplot2::geom_vline(xintercept = 9.3)
+
+    expect_no_error(
+        result <- analyse_kinetics(
+            data,
+            nirs_channels = "smo2_left",
+            time_channel = "time",
+            method = "response_time",
+            direction = "positive",
+            verbose = FALSE
+        )
+    )
+    
+    expect_true(is.na(result$coefficients$response_time))
+    expect_true(is.na(result$coefficients$response_value))
+    expect_true(is.na(result$coefficients$fitted))
+
+    ## fitted column exists and is all-finite at baseline/extreme rows,
+    ## NA elsewhere (no error from NA subscripted assignment).
+    fitted_df <- result$data[[1L]]
+    t0 <- unlist(result$interval_times$interval_times)
+    expect_true("smo2_left_fitted" %in% names(fitted_df))
+    expect_false(is.na(fitted_df$smo2_left_fitted[fitted_df$time == t0]))
+    expect_false(
+        is.na(fitted_df$smo2_left_fitted[which(fitted_df$time == t0) + 1])
+    )
+})
+
 test_that("analyse_kinetics.response_time dispatches via method aliases", {
     data <- create_response_time_data()
     aliases <- c("response time", "HRT", "half_recovery_time", "half time")
@@ -1425,10 +1596,9 @@ create_monoexp_data <- function(
     n = 60,
     sample_rate = 1,
     noise_sd = 0.5,
-    channels = "smo2",
-    seed = 42
+    channels = "smo2"
 ) {
-    set.seed(seed)
+    set.seed(13)
     t <- seq(0, (n - 1) / sample_rate, length.out = n)
     x <- monoexponential(t, A, B, tau, TD) + rnorm(n, 0, noise_sd)
 

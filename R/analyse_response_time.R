@@ -159,10 +159,10 @@ response_time <- function(
         B = B,
         response_time = t[response_idx] - t0, ## real
         response_value = x[response_idx], ## real
-        fitted = response_fitted, ## predicted
-        baseline_idx = baseline_idx,
-        response_idx = response_idx,
-        extreme_idx = extreme_idx
+        fitted = response_fitted,    ## predicted
+        baseline_idx = baseline_idx, ## all baseline samples
+        response_idx = response_idx, ## mid sample
+        extreme_idx = extreme_idx    ## end sample
     ))
 }
 
@@ -275,6 +275,8 @@ analyse_response_time <- function(
                 response$B
             )
         )
+        ## omit NA idx
+        fitted_data <- fitted_data[!is.na(fitted_data$window_idx), ]
 
         list(
             coefficients = coefs,
