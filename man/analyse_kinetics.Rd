@@ -254,7 +254,8 @@ Additional arguments (\code{...}) accepted when \code{method = "monoexponential"
 4-parameter \code{\link[=SS_monoexp4]{SS_monoexp4()}} model with a time delay (\code{TD}). If the
 4-parameter fit fails, or if \code{use_time_delay = FALSE}, fits a
 reduced 3-parameter \code{\link[=SS_monoexp3]{SS_monoexp3()}} model.}
-\item{\code{...}}{Other arguments passed to \code{\link[stats:nls]{stats::nls()}}.} ## !NOT IMPLEMENTED
+\item{\code{...}}{Other arguments passed to \code{\link[stats:nls]{stats::nls()}}
+\verb{<NOT YET IMPLEMENTED>}.}
 }
 }
 

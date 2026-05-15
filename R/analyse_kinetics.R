@@ -159,7 +159,8 @@
 #'       4-parameter [SS_monoexp4()] model with a time delay (`TD`). If the
 #'       4-parameter fit fails, or if `use_time_delay = FALSE`, fits a
 #'       reduced 3-parameter [SS_monoexp3()] model.}
-#'   \item{`...`}{Other arguments passed to [stats::nls()].} ## !NOT IMPLEMENTED
+#'   \item{`...`}{Other arguments passed to [stats::nls()] 
+#'       `<NOT YET IMPLEMENTED>`.} 
 #' }
 #'
 #' ## method = "sigmoidal"
@@ -343,7 +344,7 @@ analyse_kinetics.response_time <- function(
         data_list,
         result_list,
         names(data_list),
-        method,
+        method = "response_time",
         match.call()
     ))
 }
@@ -395,7 +396,7 @@ analyse_kinetics.peak_slope <- function(
         data_list,
         result_list,
         names(data_list),
-        method,
+        method = "peak_slope",
         match.call()
     ))
 }
@@ -445,7 +446,7 @@ analyse_kinetics.monoexponential <- function(
         data_list,
         result_list,
         names(data_list),
-        method,
+        method = "monoexponential",
         match.call()
     ))
 }
@@ -465,18 +466,9 @@ analyze_kinetics <- function(
     verbose = TRUE,
     ...
 ) {
-    analyse_kinetics(
-        data = data,
-        nirs_channels = nirs_channels,
-        time_channel = time_channel,
-        method = method,
-        t0 = t0,
-        direction = direction,
-        end_fit_span = end_fit_span,
-        channel_args = channel_args,
-        verbose = verbose,
-        ...
-    )
+    call <- match.call()
+    call[[1L]] <- quote(analyse_kinetics)
+    eval(call, envir = parent.frame())
 }
 
 

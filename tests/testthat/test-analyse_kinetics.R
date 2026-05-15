@@ -1287,6 +1287,24 @@ test_that("analyse_kinetics$data preserves mnirs metadata with grouped input", {
     }
 })
 
+test_that("analyse_kinetics.response_time dispatches via method aliases", {
+    data <- create_response_time_data()
+    aliases <- c("response time", "HRT", "half_recovery_time", "half time")
+
+    for (alias in aliases) {
+        result <- analyse_kinetics(
+            data,
+            nirs_channels = "smo2",
+            method = alias[1],
+            direction = "positive",
+            verbose = FALSE
+        )
+        expect_equal(result$method, "response_time")
+        expect_true("response_time" %in% names(result$coefficients))
+    }
+})
+
+
 ## analyse_kinetics.peak_slope =========================================
 ## structure, data formats, grouped data covered by generic tests above
 
@@ -1481,6 +1499,228 @@ test_that("analyse_kinetics.monoexponential uses custom interval name", {
     expect_true(is.na(result$coefficients$k))
 })
 
+## analyze_kinetics (US spelling alias) ================================
+test_that("analyze_kinetics matches analyse_kinetics for peak_slope", {
+    data <- create_kinetics_data()
+
+    result_uk <- analyse_kinetics(
+        data,
+        nirs_channels = "smo2_left",
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+    result_us <- analyze_kinetics(
+        data,
+        nirs_channels = "smo2_left",
+        method = "peak slope",
+        width = 5,
+        verbose = FALSE
+    )
+
+    expect_s3_class(result_us, "mnirs_kinetics")
+    expect_s3_class(result_uk, "mnirs_kinetics")
+    ## US alias rewrites call to analyse_kinetics(), so full results match
+    expect_equal(result_us, result_uk)
+    expect_equal(result_us$call[[1L]], quote(analyse_kinetics))
+    expect_equal(result_us$call[[4L]], "peak_slope")
+})
+
+test_that("analyze_kinetics forwards method = 'response_time' and fraction", {
+    data <- create_response_time_data()
+
+    result <- analyze_kinetics(
+        data,
+        nirs_channels = "smo2",
+        method = "response time",
+        fraction = 0.5,
+        direction = "positive",
+        verbose = FALSE
+    )
+
+    expect_s3_class(result, "mnirs_kinetics")
+    expect_equal(result$method, "response_time")
+    expect_equal(result$call[[1L]], quote(analyse_kinetics))
+    expect_equal(result$call[[4L]], "response_time")
+    expect_true("response_time" %in% names(result$coefficients))
+
+    ## fraction was forwarded: fitted = A + (B - A) * 0.5
+    A <- result$coefficients$A
+    B <- result$coefficients$B
+    expect_equal(result$coefficients$fitted, A + (B - A) * 0.5)
+})
+
+
+## print.mnirs_kinetics ================================================
+## helper: minimal mnirs_kinetics fixture for print method tests
+make_print_kinetics <- function(coefs, method = "peak_slope") {
+    structure(
+        list(method = method, coefficients = coefs),
+        class = "mnirs_kinetics"
+    )
+}
+
+test_that("print.mnirs_kinetics shows peak_slope header", {
+    x <- make_print_kinetics(
+        data.frame(interval = "int1", nirs_channels = "smo2", slope = 1.5),
+        method = "peak_slope"
+    )
+    output <- capture.output(print(x))
+    expect_true(any(grepl("Peak Linear Regression Slope", output)))
+})
+
+test_that("print.mnirs_kinetics shows monoexponential header", {
+    x <- make_print_kinetics(
+        data.frame(interval = "int1", nirs_channels = "smo2", tau = 5.0),
+        method = "monoexponential"
+    )
+    output <- capture.output(print(x))
+    expect_true(any(grepl("Monoexponential non-linear Regression", output)))
+})
+
+test_that("print.mnirs_kinetics shows response_time header", {
+    x <- make_print_kinetics(
+        data.frame(interval = "int1", nirs_channels = "smo2", tau = 5.0),
+        method = "response_time"
+    )
+    output <- capture.output(print(x))
+    expect_true(any(grepl("Fractional Response Time", output)))
+})
+
+test_that("print.mnirs_kinetics always shows Model Coefficients label", {
+    for (m in c("peak_slope", "monoexponential", "response_time")) {
+        x <- make_print_kinetics(
+            data.frame(interval = "int1", nirs_channels = "smo2", slope = 1),
+            method = m
+        )
+        output <- capture.output(print(x))
+        expect_true(
+            any(grepl("Model Coefficients:", output)),
+            info = paste("method =", m)
+        )
+    }
+})
+
+test_that("print.mnirs_kinetics drops time_channel column from display", {
+    x <- make_print_kinetics(
+        data.frame(
+            interval = "int1",
+            nirs_channels = "smo2",
+            time_channel = "time",
+            slope = 1.5
+        )
+    )
+    output <- capture.output(print(x))
+    expect_false(any(grepl("time_channel", output)))
+    expect_true(any(grepl("slope", output)))
+})
+
+test_that("print.mnirs_kinetics drops 'fitted$' columns from display", {
+    x <- make_print_kinetics(
+        data.frame(
+            interval = "int1",
+            nirs_channels = "smo2",
+            MRT = 4.0,
+            MRT_fitted = 65.0,
+            response_value_fitted = 70.0,
+            fitted = 50,
+            fitted_column = 10
+        ),
+        method = "monoexponential"
+    )
+    output <- capture.output(print(x))
+    expect_false(any(grepl("MRT_fitted", output)))
+    expect_false(any(grepl("response_value_fitted", output)))
+    expect_false(any(grepl("\\bfitted\\b", output)))
+    expect_true(any(grepl("\\bMRT\\b", output)))
+    expect_true(any(grepl("fitted_column", output)))
+})
+
+test_that("print.mnirs_kinetics formats numerics to 4 sig figs", {
+    x <- make_print_kinetics(
+        data.frame(
+            interval = "int1",
+            nirs_channels = "smo2",
+            slope = 1.234567
+        )
+    )
+    output <- capture.output(print(x))
+    expect_true(any(grepl("1.235", output, fixed = TRUE)))
+    expect_false(any(grepl("1.234567", output, fixed = TRUE)))
+})
+
+test_that("print.mnirs_kinetics renders NA values as 'NA'", {
+    x <- make_print_kinetics(
+        data.frame(
+            interval = c("int1", "int2"),
+            nirs_channels = c("smo2", "smo2"),
+            slope = c(1.234, NA_real_)
+        )
+    )
+    output <- capture.output(print(x))
+    expect_true(any(grepl("\\bNA\\b", output)))
+})
+
+test_that("print.mnirs_kinetics handles all-NA numeric columns", {
+    x <- make_print_kinetics(
+        data.frame(
+            interval = "int1",
+            nirs_channels = "smo2",
+            slope = 1.5,
+            intercept = NA_real_
+        )
+    )
+    expect_no_error(output <- capture.output(print(x)))
+    expect_true(any(grepl("intercept", output)))
+})
+
+test_that("print.mnirs_kinetics prints all rows when nrow <= 10", {
+    coefs <- data.frame(
+        interval = paste0("int", 1:10),
+        nirs_channels = "smo2",
+        slope = seq(0.1, 1.0, by = 0.1)
+    )
+    x <- make_print_kinetics(coefs)
+    output <- capture.output(print(x))
+    expect_false(any(grepl("rows omitted", output)))
+    ## every interval label should appear in output
+    for (lab in coefs$interval) {
+        expect_true(
+            any(grepl(lab, output)),
+            info = paste("missing:", lab)
+        )
+    }
+})
+
+test_that("print.mnirs_kinetics truncates when nrow > 10", {
+    coefs <- data.frame(
+        interval = paste0("int", sprintf("%02d", 1:15)),
+        nirs_channels = "smo2",
+        slope = seq(0.1, 1.5, by = 0.1)
+    )
+    x <- make_print_kinetics(coefs)
+    output <- capture.output(print(x))
+
+    ## spacer reports omitted count
+    expect_true(any(grepl("--- 5 rows omitted", output, fixed = TRUE)))
+
+    ## first 5 and last 5 intervals appear
+    for (lab in coefs$interval[c(1:5, 11:15)]) {
+        expect_true(
+            any(grepl(lab, output)),
+            info = paste("missing:", lab)
+        )
+    }
+    ## middle rows do not appear
+    for (lab in coefs$interval[6:10]) {
+        expect_false(
+            any(grepl(lab, output)),
+            info = paste("unexpected:", lab)
+        )
+    }
+})
+
+
 ## integration =======================================================
 test_that("analyse_kinetics works visually on Train.Red", {
     skip_if_not_installed("ggplot2")
@@ -1600,15 +1840,32 @@ test_that("analyse_kinetics benchmark", {
     #         use_time_delay = TRUE,
     #         verbose = FALSE
     #     ),
+    #     analyse_response = suppressWarnings(
+    #         lapply(data_list, \(.df) {
+    #             analyse_response_time(
+    #                 .df,
+    #                 nirs_channels = c(smo2_left, smo2_right),
+    #                 fraction = 0.5,
+    #                 verbose = FALSE
+    #             )
+    #         })
+    #     ),
+    #     kinetics.monoexponential = analyse_kinetics(
+    #         data_list,
+    #         nirs_channels = c(smo2_left, smo2_right),
+    #         method = "response_time",
+    #         fraction = 0.5,
+    #         verbose = FALSE
+    #     ),
     #     iterations = 5L,
     #     check = FALSE
     # )
 
     # A tibble: 2 × 13
-#>    expression                 min median `itr/sec` mem_alloc `gc/sec`
-#>    <bch:expr>              <bch:> <bch:>     <dbl> <bch:byt>    <dbl>
-#>  1 analyse_peak_slope      69.3ms 73.4ms      13.8    30.4MB     22.1
-#>  2 analyse_kinetics.peak_… 72.4ms 75.4ms      13.3    30.5MB     21.2
+    #>    expression                 min median `itr/sec` mem_alloc `gc/sec`
+    #>    <bch:expr>              <bch:> <bch:>     <dbl> <bch:byt>    <dbl>
+    #>  1 analyse_peak_slope      69.3ms 73.4ms      13.8    30.4MB     22.1
+    #>  2 analyse_kinetics.peak_… 72.4ms 75.4ms      13.3    30.5MB     21.2
 
     # itr_per_sec <- bm$`itr/sec`
 

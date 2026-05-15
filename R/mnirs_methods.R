@@ -72,7 +72,7 @@ print.mnirs <- function(x, ...) {
 print.mnirs_kinetics <- function(x, ...) {
     coefs <- x$coefficients
     ## remove columns unnecessary for display
-    drop_cols <- c("time_channel", grep("_fitted$", names(coefs), value = TRUE))
+    drop_cols <- c("time_channel", grep("fitted$", names(coefs), value = TRUE))
     coefs <- coefs[, !names(coefs) %in% drop_cols, drop = FALSE]
     nrows <- nrow(coefs)
 
@@ -92,6 +92,8 @@ print.mnirs_kinetics <- function(x, ...) {
         cat("Peak Linear Regression Slope")
     } else if (x$method == "monoexponential") {
         cat("Monoexponential non-linear Regression")
+    } else if (x$method == "response_time") {
+        cat("Fractional Response Time")
     }
 
     cat("\n")
@@ -125,7 +127,7 @@ print.mnirs_kinetics <- function(x, ...) {
         cat(spacer, "\n")
         cat(bottom_lines, sep = "\n")
 
-        ## ! add instructions how to retrieve returned objec
+        ## ! add instructions how to retrieve returned object?
     }
     cat("\n\n")
 }

@@ -255,6 +255,12 @@ build_kinetics_results <- function(
     model_list <- lapply(result_list, attr, "model")
     names(model_list) <- interval_names
 
+    ## normalise call: function name to generic, method to canonical form
+    call[[1L]] <- quote(analyse_kinetics)
+    if ("method" %in% names(call)) {
+        call$method <- method
+    }
+
     ## combine scalar coefficients & relocate interval col to col[1]
     coefs <- do.call(rbind, result_list)
     coefs <- coefs[, c("interval", setdiff(names(coefs), "interval"))]
