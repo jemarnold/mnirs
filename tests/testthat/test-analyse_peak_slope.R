@@ -127,6 +127,11 @@ test_that("slope respects bypass_checks", {
     expect_warning(slope(x, t = 1:4, bypass_checks = TRUE), "not a multiple")
 })
 
+test_that("slope returns intercept", {
+    x <- c(1, 3, 2, 5, 8)
+    expect_equal(attr(slope(x, intercept = TRUE), "intercept"), -1)
+})
+
 
 ## rolling_slope ===========================================================
 test_that("rolling_slope returns correct structure", {

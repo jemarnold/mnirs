@@ -46,10 +46,9 @@ slope <- function(
     }
     slope_val <- (n * sum_tx - sum_t * sum_x) / denom
 
-    ## ! obsolete
-    # if (args$intercept %||% FALSE) {
-    #     attr(slope_val, "intercept") <- (sum_x - slope_val * sum_t) / n
-    # }
+    if (args$intercept %||% FALSE) {
+        attr(slope_val, "intercept") <- (sum_x - slope_val * sum_t) / n
+    }
 
     return(slope_val)
 }
