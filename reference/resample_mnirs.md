@@ -159,7 +159,7 @@ data_resampled <- resample_mnirs(
     data,               ## blank channels will be retrieved from metadata
     resample_rate = 2,  ## blank by default will resample to `sample_rate`
     method = "linear",  ## linear interpolation across resampled indices
-    verbose = TRUE      
+    verbose = TRUE
 )
 #> ℹ Output is resampled at 2 Hz.
 
