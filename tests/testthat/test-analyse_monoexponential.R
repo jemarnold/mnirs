@@ -788,17 +788,31 @@ test_that("enforce_direction() refits and back-transforms an inverted fit", {
         time_channel = .t
     )
     plot(fit_data)
+
+    ## nls stub: `fail` errors that refit call; `flip` mirrors the
+    ## response on that call so the refit settles on the falling truth
+    stub <- list(n = 0L, fail = 0L, flip = 0L)
+    local_mocked_bindings(nls = function(formula, data, ...) {
+        stub$n <<- stub$n + 1L
+        if (stub$n == stub$fail) stop("no convergence")
+        if (stub$n == stub$flip) data[[1L]] <- 2 * mean(data[[1L]]) - data[[1L]]
+        do.call(stats::nls, list(formula, data, ...))
+    })
     ## the inverted coefs alone trigger the refit; `model` is not read
-    result <- enforce_direction(
-        model = NULL,
-        coefs = c(A = 80, B = 50, tau = 15),
-        fit_data = fit_data,
-        direction = "positive",
-        amp_fn = quote(monoexponential),
-        lower = c(tau = diff(range(t)) * 1e-6),
-        .nirs = "smo2",
-        interval_name = "test"
-    )
+    refit <- \(fail = 0L, flip = 0L) {
+        stub <<- list(n = 0L, fail = fail, flip = flip)
+        enforce_direction(
+            model = NULL,
+            coefs = c(A = 80, B = 50, tau = 15),
+            fit_data = fit_data,
+            direction = "positive",
+            amp_fn = quote(monoexponential),
+            lower = c(tau = diff(range(t)) * 1e-6),
+            .nirs = "smo2",
+            interval_name = "test"
+        )
+    }
+    result <- refit()
 
     expect_named(result, c("model", "coefs"))
     expect_named(result$coefs, c("A", "B", "tau"))
@@ -808,6 +822,12 @@ test_that("enforce_direction() refits and back-transforms an inverted fit", {
     expect_gt(result$coefs[["B"]], result$coefs[["A"]])
     expect_equal(result$coefs[["A"]], 50, tolerance = 1e-3)
     expect_equal(result$coefs[["B"]], 80, tolerance = 1e-3)
+
+    ## a failed D refit, a failed back-transform refit, or a back-transform
+    ## settling on the wrong sign each return NULL with a direction warning
+    expect_warning(expect_null(refit(fail = 1L)), "cannot satisfy")
+    expect_warning(expect_null(refit(fail = 2L)), "cannot satisfy")
+    expect_warning(expect_null(refit(flip = 2L)), "cannot satisfy")
 })
 
 test_that("analyse_monoexponential() suppresses direction warning when verbose = FALSE", {

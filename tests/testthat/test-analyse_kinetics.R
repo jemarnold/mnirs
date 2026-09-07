@@ -2859,6 +2859,35 @@ test_that("free_params() classifies bare symbols as free", {
     expect_identical(free_params(mCall, c("A", "Q")), "A")
 })
 
+test_that("accept_port_fit() drops a non-converged fit failing acceptance", {
+    stall <- list(convInfo = list(isConv = FALSE, stopCode = 10L))
+    expect_identical(
+        accept_port_fit(stall, \(e) e, ok = FALSE),
+        simpleError("Iteration limit reached without convergence.")
+    )
+})
+
+test_that("fit_final_error() skips the reduced-model retry", {
+    attempts <- 0L
+    fit <- suppressWarnings(fit_td_fallback(
+        x_fit = 1:10,
+        t_fit = -4:5,
+        params = c("A", "B", "tau", "TD"),
+        .a = list(use_TD = TRUE, fix = list()),
+        fitter = \(.data, .params, on_error) {
+            attempts <<- attempts + 1L
+            on_error(fit_final_error("inseparable phases"))
+        },
+        fn = quote(SSmonoexponential),
+        .nirs = "smo2",
+        time_channel = "time",
+        interval_name = "test",
+        env = environment()
+    ))
+    expect_null(fit$model)
+    expect_identical(attempts, 1L)
+})
+
 test_that("enforce_direction() uses the self-start gradient on the D refit", {
     t <- seq(0, 119)
     x <- monoexponential(t, A = 50, B = 80, tau = 25)
