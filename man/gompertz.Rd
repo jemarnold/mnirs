@@ -3,7 +3,7 @@
 \name{gompertz}
 \alias{gompertz}
 \alias{gompertz_left}
-\title{Gompertz growth function}
+\title{Gompertz growth functions}
 \usage{
 gompertz(t, A, B, xmid, slope)
 
@@ -18,53 +18,43 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{xmid}{A numeric parameter for the time value at the inflection
-(steepest) point of the curve, in units of the predictor variable \code{t}.}
+\item{xmid}{A numeric parameter for the time at the \emph{inflection point} (the
+steepest point) of the curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 }
 \value{
 A numeric vector of predicted values the same length as the
 predictor variable \code{t}.
 }
 \description{
-Calculate 4-parameter Gompertz (asymmetric sigmoidal) curves.
+Calculate 4-parameter Gompertz (asymmetric sigmoidal) curves. Model
+families fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "sigmoidal"} and
+\code{shape = "gompertz"} or \code{"gompertz_left"}, and by \code{\link[stats:nls]{stats::nls()}} via the
+self-starting wrappers \code{\link[=SSgompertz]{SSgompertz()}} and \code{\link[=SSgompertz_left]{SSgompertz_left()}}.
 }
 \details{
-The \code{\link[=gompertz]{gompertz()}} curve is asymmetric, with the inflection point \code{xmid} closer
-to the starting asymptote \code{A}; i.e. the response accelerates faster away
-from \code{A}, and more slowly approaches the ending asymptote \code{B}.
+\code{gompertz()} (right-Gompertz) is asymmetric with the inflection point
+\code{xmid} closer to the starting asymptote \code{A}: early acceleration away from
+\code{A}, and a slow approach to the ending asymptote \code{B}. Appropriate for
+fast-onset, slow-tail responses.
 
-The modified \code{\link[=gompertz_left]{gompertz_left()}} curve has the inflection point closer to the
-ending asymptote \code{B} (slow departure from \code{A}, late acceleration toward \code{B}).
-\subsection{Implementation}{
-
-These models are fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "sigmoidal"} and
-\code{shape = "gompertz"} or \code{"gompertz_left"} respectively, using \code{\link[stats:nls]{stats::nls()}}
-via the self-starting wrappers \code{\link[=SSgompertz]{SSgompertz()}} and \code{\link[=SSgompertz_left]{SSgompertz_left()}}.
-}
-
+\code{gompertz_left()} (left-Gompertz) has the inflection point closer to the
+ending asymptote \code{B}: slow departure from \code{A}, and late acceleration toward
+\code{B}. Appropriate for slow-onset, fast-tail responses.
 \subsection{Model equations}{
 
-Both forms are re-parameterised so that \code{xmid} is the time at inflection
-and \code{slope} is the response rate \code{dx/dt} at the inflection point.
-
-Gompertz (right-Gompertz; early acceleration, inflection near \code{A}):
+Both forms are re-parameterised so \code{xmid} is the time at inflection and
+\code{slope} is the response rate \code{dx/dt} at the inflection, with
+\code{k = slope * e / (B - A)}.
 \itemize{
-\item \code{k = slope * e / (B - A)}
-\item \code{y = A + (B - A) * exp(-exp(-k * (t - xmid)))}
+\item \code{gompertz()}: \code{A + (B - A) * exp(-exp(-k * (t - xmid)))}. Inflection
+height fixed at \code{A + (B - A) / e}; 36.8\% of the amplitude.
+\item \code{gompertz_left()}: \code{A + (B - A) * (1 - exp(-exp(k * (t - xmid))))}.
+Inflection height fixed at \code{A + (B - A) * (1 - 1/e)}; 63.2\% of the
+amplitude.
 }
-
-Left-Gompertz (late acceleration, inflection near \code{B}):
-\itemize{
-\item \code{k = slope * e / (B - A)}
-\item \code{y = A + (B - A) * (1 - exp(-exp(k * (t - xmid))))}
-}
-
-For both forms, \code{y(xmid) = A + (B - A) / e} (right) or
-\code{y(xmid) = A + (B - A) * (1 - 1/e)} (left), corresponding to
-inflection-height fractions of \code{1/e} and \code{1 - 1/e}, respectively.
 }
 }
 \examples{
@@ -75,6 +65,7 @@ x <- gompertz(t, A = 10, B = 100, xmid = 30, slope = 4) +
     rnorm(length(t), 0, 2)
 data <- data.frame(t, x)
 
+## fit with the self-starting wrapper
 model <- nls(x ~ SSgompertz(t, A, B, xmid, slope), data = data)
 summary(model)
 
@@ -92,5 +83,5 @@ y <- predict(model, data)
 }
 \seealso{
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SSgompertz]{SSgompertz()}}, \code{\link[=SSgompertz_left]{SSgompertz_left()}},
-\code{\link[=logistic]{logistic()}}
+\code{\link[=logistic]{logistic()}}, \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}
 }

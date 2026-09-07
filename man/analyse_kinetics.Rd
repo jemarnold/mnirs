@@ -5,8 +5,8 @@
 \alias{analyse_kinetics.response_time}
 \alias{analyse_kinetics.peak_slope}
 \alias{analyse_kinetics.monoexponential}
-\alias{analyse_kinetics.biexponential}
 \alias{analyse_kinetics.exponential_drift}
+\alias{analyse_kinetics.biexponential}
 \alias{analyse_kinetics.sigmoidal}
 \alias{analyse_kinetics.sigmoidal_drift}
 \alias{analyze_kinetics}
@@ -16,8 +16,8 @@ analyse_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("response_time", "peak_slope", "monoexponential", "biexponential",
-    "exponential_drift", "sigmoidal", "sigmoidal_drift"),
+  method = c("response_time", "peak_slope", "monoexponential", "exponential_drift",
+    "biexponential", "sigmoidal", "sigmoidal_drift"),
   start_time = NULL,
   direction = c("auto", "positive", "negative"),
   end_window = Inf,
@@ -41,8 +41,8 @@ analyze_kinetics(
   data,
   nirs_channels = NULL,
   time_channel = NULL,
-  method = c("response_time", "peak_slope", "monoexponential", "biexponential",
-    "exponential_drift", "sigmoidal", "sigmoidal_drift"),
+  method = c("response_time", "peak_slope", "monoexponential", "exponential_drift",
+    "biexponential", "sigmoidal", "sigmoidal_drift"),
   start_time = NULL,
   direction = c("auto", "positive", "negative"),
   end_window = Inf,
@@ -54,9 +54,7 @@ analyze_kinetics(
 }
 \arguments{
 \item{data}{A data frame, a list of data frames, or a grouped data frame of
-class \emph{"mnirs"} containing time series data and metadata, or an
-\emph{"mnirs_kinetics"} result for recursive analysis of its coefficients
-(see \emph{Details}).}
+class \emph{"mnirs"} containing time series data and metadata (see \emph{Details}).}
 
 \item{nirs_channels}{A character vector giving the names of mNIRS columns to
 operate on. Must match column names in \code{data} exactly.
@@ -83,51 +81,51 @@ arguments: \code{width} or \code{span}, \code{align}, \code{partial}, \code{na.r
 \item{\code{"monoexponential"}}{Monoexponential curve fit via
 \code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{use_TD}, \code{fix}, \code{control}.
 See \code{\link[=monoexponential]{monoexponential()}}.}
-\item{\code{"biexponential"}}{Biexponential (fast + slow component) curve
-fit via \code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{use_TD}, \code{fix},
-\code{control}. See \code{\link[=biexponential]{biexponential()}}.}
-\item{\code{"exponential_drift"}}{Monoexponential curve with a secondary
-linear drift, fit via \code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{use_TD},
-\code{drift_fraction}, \code{fix}, \code{control}. See \code{\link[=exponential_drift]{exponential_drift()}}.}
+\item{\code{"exponential_drift"}}{Two-phase kinetics: monoexponential
+primary phase with a secondary linear drift, fit via \code{\link[stats:nls]{stats::nls()}}.
+Additional arguments: \code{use_TD}, \code{drift_fraction}, \code{fix}, \code{control}.
+See \code{\link[=exponential_drift]{exponential_drift()}}.}
+\item{\code{"biexponential"}}{Two-phase kinetics: overlapping fast primary
+and slow secondary exponential curves fit via \code{\link[stats:nls]{stats::nls()}}. Additional
+arguments: \code{use_TD}, \code{fix}, \code{control}. See \code{\link[=biexponential]{biexponential()}}.}
 \item{\code{"sigmoidal"}}{Logistic or Gompertz-family curve fit via
 \code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{shape}, \code{fix}, \code{control}.
 See \code{\link[=logistic]{logistic()}}.}
-\item{\code{"sigmoidal_drift"}}{Logistic or Gompertz-family curve with
-a secondary linear drift, fit via \code{\link[stats:nls]{stats::nls()}}. Additional
-arguments: \code{shape}, \code{drift_fraction}, \code{fix}, \code{control}. See
-\code{\link[=sigmoidal_drift]{sigmoidal_drift()}}.}
+\item{\code{"sigmoidal_drift"}}{Two-phase kinetics: Logistic or
+Gompertz-family primary phase with a secondary linear drift, fit via
+\code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{shape}, \code{drift_fraction},
+\code{fix}, \code{control}. See \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}.}
 }}
 
 \item{start_time}{A numeric value in units of \code{time_channel} specifying the
-time of response onset (effectively time = \code{0} of the response). If \code{NULL}
-(\emph{default}), retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls
-back to \code{0} or the first positive time value (see \emph{Details}).}
+response onset (effectively time = \code{0} of the fit). If \code{NULL} (\emph{default}),
+retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}
+or the first positive time value (see \emph{Details}).}
 
 \item{direction}{A character string specifying the response direction
 \code{"positive"}, or \code{"negative"}, or detect with \code{"auto"} (\emph{default}). See
 \emph{Details}.}
 
 \item{end_window}{A numeric value in units of \code{time_channel} specifying the
-window in which to look for the end of the kinetics fit; returns the
-window with no greater/lesser values within \code{end_window} after the first
-extreme value. \code{end_window = Inf} (\emph{default}) returns the global extreme
-from the full sample range (see \emph{Details}). For \emph{"biexponential"},
-\code{end_window} bounds the fast-phase (stage 1) window only, and \code{Inf}
-resolves to \code{30} time units past the first extreme; the full model is
-fit to the whole response.}
+window in which to look for the end of the kinetics fit; with no greater/
+lesser values within \code{end_window} after the first extrema (min/max).
+\code{end_window = Inf} (\emph{default}) returns the global extreme from the full
+data range (see \emph{Details}).
+
+For \emph{"biexponential"}, \code{end_window} bounds the fast-phase window only, and
+the default is \code{30} sec; the full model is then fit to the full data range.}
 
 \item{group_intervals}{Either \code{"ensemble"} (\emph{default}) to analyse all
-samples of each data frame together, or a non-empty \code{list()} of
-integer-valued numeric vectors of sample (row) numbers, each analysed as
-a separate interval, e.g. \code{list(trial1 = 1:10, trial2 = 11:20)}. List
-names become interval names (\verb{interval_<n>} when unnamed). Indices must
-be between \code{1} and the number of rows (see \emph{Details}).}
+samples of each data frame together, or a \code{list()} of integer vectors
+of sample (row) numbers, each analysed as a separate interval, e.g.
+\code{list(trial1 = 1:10, trial2 = 11:20)}.
 
-\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-calculates
-numeric \code{time_channel} values to start from zero within each interval,
-i.e. each data frame or each \code{group_intervals} sample group. Any
-\code{interval_times} metadata is shifted by the same offset so \code{start_time}
-retrieved from metadata stays aligned.}
+List names become interval names (\verb{interval_<n>} when unnamed)
+(see \emph{Details}).}
+
+\item{zero_time}{Logical. Default is \code{FALSE}. If \code{TRUE}, re-bases
+\code{time_channel} values to start from zero within each interval or
+\code{group_intervals} group.}
 
 \item{verbose}{Logical. \code{TRUE} (\emph{default}) will display, and \code{FALSE} will
 silence warnings and information messages helpful for troubleshooting.
@@ -135,28 +133,23 @@ Global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments passed to the underlying method function.
 See \emph{Details}. For the \code{\link[stats:nls]{stats::nls()}} methods (\strong{monoexponential,
-biexponential, exponential_drift, sigmoidal, sigmoidal_drift}),
-\code{control} is an
-\emph{optional} \code{list()} or \code{\link[stats:nls.control]{stats::nls.control()}} of convergence settings,
-e.g. \code{control = list(maxiter = 200)}. Values override the internal
-defaults (\code{maxiter = 500}, \code{warnOnly = TRUE} for bounded \code{"port"} fits).
-Applied globally to every channel and interval. \code{warnOnly = FALSE} turns
-a non-converged bounded fit into a fit failure (\code{NA} coefficients with a
-warning).}
+exponential_drift, biexponential, sigmoidal, sigmoidal_drift}),
+\code{control = list()} can be passed to \code{\link[stats:nls.control]{stats::nls.control()}}, e.g.
+\code{control = list(maxiter = 200)}, applied globally to all channels and
+intervals.}
 
-\item{response_fraction}{\strong{response_time}: A numeric vector of values in the range
+\item{response_fraction}{\strong{response_time}: A numeric vector in the range
 \verb{[0, 1]} specifying the fractional response amplitude(s) to detect.
 Defaults to \code{0.5} (50\% response, i.e. half-response time). Multiple
-values (e.g. \code{c(0.5, 0.632)}) return one coefficient row per response_fraction.}
+values (e.g. \code{c(0.5, 0.632)}) return one coefficient row per fraction.}
 
 \item{width}{\strong{peak_slope}: An integer defining the local window in
-number of samples around \code{idx} in which to perform the operation,
-according to \code{align}. Only one of either \code{width} or \code{span} must be defined.}
+number of samples around \code{idx} in which to calculate slopes. Only one of
+either \code{width} or \code{span} must be defined.}
 
 \item{span}{\strong{peak_slope}: A numeric value defining the local window
-time span around \code{idx} in which to perform the operation, according
-to \code{align}. In units of \code{time_channel}. Only one of either \code{width} or
-\code{span} must be defined.}
+time span in units of \code{time_channel} around \code{idx} in which to calculate
+slopes. Only one of either \code{width} or \code{span} must be defined.}
 
 \item{align}{\strong{peak_slope}: Window alignment as \emph{"centre"/"center"}
 (the \emph{default}), \emph{"left"}, or \emph{"right"}. Where \emph{"left"} is forward
@@ -165,43 +158,39 @@ sample by the \code{width} or \code{span}.}
 
 \item{partial}{\strong{peak_slope}: Logical; default is \code{FALSE}, requires
 local windows to have complete number of samples specified by
-\code{width} or \code{span}. If \code{TRUE}, processes available samples within the
-local window. See \emph{Details}.}
+\code{width} or \code{span}. If \code{TRUE}, processes local windows with at minimum
+two available samples. See \emph{Details}.}
 
 \item{na.rm}{\strong{peak_slope}: Logical; default is \code{FALSE}, propagates
-any \code{NA}s to the returned vector and may return errors or warnings.
+\code{NA}s to the returned vector and may return errors or warnings.
 If \code{TRUE}, ignores \code{NA}s and processes available valid samples within
 the local window. (see \emph{Details}).}
 
-\item{use_TD}{\strong{monoexponential, biexponential, exponential_drift}:
-Logical; default is
-\code{TRUE}, attempts to fit the model with a "time-delay" parameter \code{TD}
-before the response onset. i.e., a 4-parameter \code{\link[=SSmonoexponential]{SSmonoexponential()}} model
-(A, B, tau, TD); or a 6-parameter \code{\link[=biexponential]{biexponential()}} model (A, B, tau,
-B2, tau2, TD). If \code{use_TD = FALSE} or the fit fails (with a
-warning), attempts to fall back to a reduced model without \code{TD}.}
+\item{use_TD}{\strong{monoexponential, exponential_drift, biexponential}:
+Logical; default is \code{TRUE}, attempts to fit the model with a "time-delay"
+parameter \code{TD} between \code{start_time} and the response onset. If
+\code{use_TD = FALSE} or the fit fails (with a warning), attempts to fall back
+to a reduced parameter model without \code{TD}.}
 
 \item{shape}{\strong{sigmoidal, sigmoidal_drift}: Character; the 4-parameter
-sigmoidal shape to fit. One of \code{"symmetric"} (\emph{default}; calls
-\code{\link[=SSlogistic]{SSlogistic()}}), \code{"gompertz"} (early-inflection; calls \code{\link[=SSgompertz]{SSgompertz()}}),
-or \code{"gompertz_left"} (late-inflection; calls \code{\link[=SSgompertz_left]{SSgompertz_left()}}). For
-\strong{sigmoidal_drift} the shape is passed to \code{\link[=SSsigmoidal_drift]{SSsigmoidal_drift()}}.}
+sigmoidal shape to fit. One of \code{"symmetric"} (\emph{default}; inflection
+occurs at 50\% amplitude), \code{"gompertz"} (early-inflection; 36.8\% \code{1/e}),
+or \code{"gompertz_left"} (late-inflection; 63.2\% \code{1 - 1/e}).}
 
 \item{drift_fraction}{\strong{exponential_drift, sigmoidal_drift}: A numeric
 fraction of the primary amplitude in \verb{(0.5, 1)} at which the linear
-drift begins, where the primary response reaches
-\code{A + drift_fraction * (B - A)}: at \code{TD - tau * log(1 - drift_fraction)}
-for \strong{exponential_drift}, or the analytic inverse of the sigmoid
-\code{shape} for \strong{sigmoidal_drift}. The default \code{0.95} is always held
-constant. Specify per-channel as a list keyed by channel name, e.g.
-\code{drift_fraction = list(smo2 = 0.9)}. See \emph{Details}.}
+secondary drift begins, where the primary response reaches
+\code{A + drift_fraction * (B - A)}. \emph{Default} is \code{0.95}. Specify per-channel
+as a list keyed by channel name, e.g. \code{drift_fraction = list(smo2 = 0.9)}.
+See \emph{Details}.}
 
-\item{fix}{\strong{monoexponential, biexponential, exponential_drift,
-sigmoidal, sigmoidal_drift}: An \emph{optional}
-named list of model parameters to hold constant during fitting, e.g.
-\code{fix = list(A = 0)} fixes the starting amplitude at \code{0}. Fixed
-parameters are excluded from estimation and reported at their fixed
-values. Specify per-channel as a list of lists keyed by channel name, e.g.
+\item{fix}{\strong{monoexponential, exponential_drift, biexponential,}
+\strong{sigmoidal, sigmoidal_drift}: An \emph{optional} named list of model
+parameters (coefficients) to hold constant during fitting, e.g.
+\code{fix = list(A = 0)} fixes the starting amplitude at \code{0}.
+
+Fixed parameters are excluded from estimation and returned as constant.
+Specify per-channel as a list of lists keyed by channel name, e.g.
 \code{fix = list(smo2 = list(A = 0))}. See \emph{Details}.}
 }
 \value{
@@ -211,51 +200,43 @@ as a structured list of class \emph{"mnirs_kinetics"} containing:
 \item{\code{method}}{The method used, e.g. \code{"response_time"}.}
 \item{\code{model}}{A named list of model objects (per interval, per
 \code{nirs_channel}). For \code{"peak_slope"}; each element is an
-\link[stats:lm]{lm} object. For \code{"monoexponential"},
-\code{"biexponential"}, and \code{"sigmoidal"}; an \link[stats:nls]{nls} object.
-For \code{"response_time"}; \code{NULL}. Models are fitted on time
-\emph{elapsed from} \code{start_time}, so \link[stats:predict]{predict} expects a
-\code{time_channel} column in \code{newdata} in those units. The offset for
-each interval can be retrieved from \code{coefficients$start_times}. A
-channel or time column named after a model parameter (e.g. \code{tau},
-\code{TD}, \code{slope}) is prefixed with \code{.} in the model formula, so
-\code{newdata} uses the aliased name; coefficients and results keep
-the original names.}
+\link[stats:lm]{lm} object. For parametric models; an \link[stats:nls]{nls}
+object. For \code{"response_time"}; \code{NULL}. Models are fitted on \emph{time}
+\emph{elapsed} from \code{start_time}, so \link[stats:predict]{predict} expects a
+\code{time_channel} column in \code{newdata} with adjusted units. The offset for
+each interval can be retrieved from \code{coefficients$start_time}.}
 \item{\code{coefficients}}{A data frame of coefficients with one row per
 \code{nirs_channel} per interval, containing \code{interval}, \code{nirs_channels},
 the resolved \code{start_time} (the fit onset from which time coefficients
-are elapsed), and method-specific parameters. For
-\code{"biexponential"} and \code{"exponential_drift"}, \code{model} names the
-method each row's coefficients come from after any fallback, and
-the parameter columns are the union of the method's and those of
-any fallback model a row resolved to (\code{NA} where a row's model
-has no such parameter).}
+are elapsed), and method-specific parameters. For methods with
+fallback options; \code{model} names the final method for each row.}
 \item{\code{data}}{A list of the original input data frames augmented with a
-\verb{*_fitted} column of fitted values for each processed \code{nirs_channel}.}
+\verb{*_fitted} column of fitted values for each processed \code{nirs_channel}
+(e.g. \code{smo2_fitted}).}
 \item{\code{interval_times}}{A data frame with one row per interval and
 numeric column \code{start_times} -- the resolved response onset used for
 fitting (the supplied \code{start_time}, else the \code{\link[=extract_intervals]{extract_intervals()}}
 metadata, else 0 or the first positive time value) -- and \code{end_times}
 when any interval carries an end time from the metadata.}
 \item{\code{diagnostics}}{A data frame of model diagnostics (\code{n_obs},
-\code{n_params}, \code{r2}, \code{adj_r2}, \code{rmse}, \code{snr}, \code{cv_rmse}, \code{aic}, \code{aicc},
+\code{n_params}, \code{r2}, \code{adj_r2}, \code{rmse}, \code{cv_rmse}, \code{snr}, \code{aic}, \code{aicc},
 \code{bic}) with one row per \code{nirs_channel} per interval. \code{n_params}
 counts the free parameters estimated by the solver, excluding any
 held by \code{fix}, so a reduced-parameter fallback fit is distinguishable
-from a full one. Only model fits sharing an \code{n_obs} and \code{n_params}
-are fairly comparable by \code{aic}/\code{bic}.}
+from a full one. \code{n_obs} and \code{n_params} need to be considered
+carefully when comparing fit diagnostics between models.}
 \item{\code{channel_args}}{A data frame of the resolved arguments used for
 each \code{nirs_channel} with one row per \code{nirs_channel} per interval.}
 \item{\code{warnings}}{A data frame of warning and error messages captured
-during fitting, with columns \code{interval}, \code{nirs_channels} (\code{NA} for
+during fitting, with columns \code{interval}, \code{nirs_channels} (empty for
 interval-level warnings), \code{type} (\code{"warning"} or \code{"error"}), and
 \code{message}; zero rows when none occurred. Conditions are captured
 regardless of \code{verbose}, which controls console output only.}
 \item{\code{call}}{The matched call.}
 }
 \description{
-Model oxygenation kinetics (response time course) with various parametric
-and non-parametric methods.
+Fit oxygenation kinetics (response time course) models with various
+parametric and non-parametric methods.
 }
 \details{
 \subsection{Data input formats}{
@@ -267,13 +248,65 @@ and non-parametric methods.
 \item A \strong{grouped \emph{"mnirs"} data frame}, e.g. with \code{dplyr::group_by()}: the
 data frame is split by grouping levels and each group is processed as a
 separate interval.
-\item An \strong{\emph{"mnirs_kinetics"} result}: \code{coefficients} are split by channel
-into one data frame per channel, with a row per interval (see
-\emph{Recursive analysis}).
+\item A special case for \emph{recursive analysis}: The results from
+\code{analyse_kinetics()} can be fed into a second call to analyse the
+\code{results$coefficients} table, split into data frames by \code{nirs_channel}
+with one row per interval (see \emph{Recursive analysis}).
 }
 
 Specified \code{nirs_channels} (or channels retrieved from \emph{"mnirs"} metadata)
 will be analysed and results returned as a formatted table.
+}
+
+\subsection{Response \strong{start_time} and the baseline window}{
+
+\code{start_time} should be specified as the time point separating the
+pre-response baseline (\code{time_channel <= start_time}) from the start of the
+systematic response fit window (\code{time_channel > start_time}). This often
+corresponds to a stimulus or start/end of an intervention (e.g. start/end
+of an exercise interval).
+
+For intervals extracted with \code{\link[=extract_intervals]{extract_intervals()}}, \code{start_time} can be
+retrieved from \emph{"mnirs"} metadata. Otherwise \code{start_time} defaults to \code{0}
+or the first positive \code{time_channel} value.
+
+All methods are fitted on \emph{time elapsed} from \code{start_time}, so returned
+time & duration coefficients are relative to response onset
+(e.g. \code{start_time = 0}).
+\itemize{
+\item For \emph{"response_time"}, the baseline window before \code{start_time} defines the
+mean starting amplitude \code{A} directly and anchors the start of the
+\code{response_time} parameter.
+\item For \emph{"peak_slope"}, \code{start_time} anchors the start of the
+\code{peak_slope_time} parameter.
+\item For \emph{"exponential"}- and \emph{"sigmoidal"}-family, the baseline window before
+\code{start_time} anchors the starting fitted amplitude \code{A} and the start of
+\code{TD} and \code{MRT}, or \code{xmid} parameters. (see respective \emph{method} sections
+below).
+}
+
+The time-delay models (\emph{"exponential"}-family with \code{use_TD = TRUE}) are flat
+at \code{A} before \code{TD}, so the pre-onset baseline is included in the fit and
+anchors \code{A}. Their reduced forms (\code{use_TD = FALSE}, or a \code{TD} fit that
+failed and fell back) have no such flat region and are fitted only where
+\code{time_channel >= start_time}.
+}
+
+\subsection{Response \strong{direction} and the fit \strong{end_window}}{
+
+\code{direction} is detected automatically by default as either \emph{"positive"}
+(upward) or \emph{"negative"} (downward) response, and can be overwritten
+manually. \code{end_window} is a time span in units of \code{time_channel} defining
+the end of the kinetics fitting window by locating the first extrema
+(peak/trough, depending on \code{direction}) with no greater/lesser values
+within the subsequent \code{end_window} time span. The curve fitting window
+extends to the end of \code{end_window} beyond the detected extrema.
+
+For \emph{"exponential"}- and \emph{"sigmoidal"}-family methods, \code{direction} also
+constrains the sign of the fitted amplitude \code{B - A}, and the sigmoidal
+\code{slope}. For the \emph{"biexponential"} method, \code{direction} constrains the sign
+of the fast-phase amplitude \code{B - A}. A fit that cannot satisfy the requested
+direction returns \code{NA} coefficients with a warning.
 }
 
 \subsection{Grouping samples with group_intervals}{
@@ -281,7 +314,7 @@ will be analysed and results returned as a formatted table.
 \code{group_intervals = "ensemble"} (the \emph{default}) analyses every sample of
 each data frame together as one interval. A \code{list()} of sample (row)
 numbers instead splits each data frame into one interval per group, e.g.
-for a 24-row data frame:
+for a 20-row data frame:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_kinetics(
     data,
@@ -291,147 +324,84 @@ for a 24-row data frame:
 }\if{html}{\out{</div>}}
 \itemize{
 \item List names become interval names; unnamed groups are \verb{interval_<n>}.
-\item The same grouping is applied to every data frame of a multi-interval
-input, with interval names suffixed \verb{<group>_<df>} (e.g. \code{trial1_A}).
-For an \emph{"mnirs_kinetics"} input split by channel, the source channel
-instead prefixes the returned channel names (e.g. \code{smo2_slope}) and
-intervals keep the group names, so intervals group across source
-channels; per-interval arguments still key by \verb{<group>_<channel>}.
+\item Interval names are suffixed \verb{<group>_<df>} (e.g. \code{trial1_A}).
+\item For \emph{"mnirs_kinetics"} results analysed recursively, the source
+\code{nirs_channel} is prefixed to the analysed coefficient names (e.g.
+\code{smo2_slope})
 \item Samples in no group are excluded from analysis (with a message).
-Samples in more than one group are warned about but allowed.
+Samples in more than one group are allowed (with a warning).
 \item Row-grouped intervals no longer correspond to their
 \code{\link[=extract_intervals]{extract_intervals()}} \code{interval_times} metadata, which is dropped, so
 \code{start_time} falls back to the first non-negative \code{time_channel} value
-unless supplied (optionally per-interval, keyed by group name).
+unless supplied explicitly (optionally per-interval, keyed by group name).
 \item \code{zero_time = TRUE} rebases each group's \code{time_channel} to its first
 sample, so \code{start_time} then defaults to \code{0}.
 \item Per-interval arguments key by the group names (see below).
 }
 }
 
-\subsection{Response \strong{start_time} and the baseline window}{
-
-\code{start_time} should be specified as the time point separating the
-pre-response baseline (\code{time_channel <= start_time}) from the start of the
-response fit window (\code{time_channel > start_time}). For intervals extracted
-with \code{\link[=extract_intervals]{extract_intervals()}}, \code{start_time} will be retrieved from \emph{"mnirs"}
-metadata. Otherwise \code{start_time} defaults to \code{0} or the first positive
-\code{time_channel} value.
-
-All methods are fitted on time \emph{elapsed from} \code{start_time}, so the
-returned time coefficients are relative to response onset (e.g. \code{t = 0}).
-
-For \emph{"response_time"}, the baseline window before \code{start_time} defines the
-mean starting amplitude \code{A} directly and anchors the start of the
-\code{response_time} parameter. For \emph{"peak_slope"}, \code{start_time} anchors the
-start of the \code{peak_slope_time} parameter. For \emph{"monoexponential"},
-\emph{"biexponential"}, and \emph{"sigmoidal"}, the baseline window before
-\code{start_time} anchors the starting fitted amplitude \code{A} and the start of the
-\code{TD} and \code{MRT}, or \code{xmid} parameters. (see respective \emph{method} sections
-below).
-
-The time-delay models (\emph{"monoexponential"} and \emph{"biexponential"} with
-\code{use_TD = TRUE}) are flat at \code{A} before \code{TD}, so the pre-onset baseline is
-included in the fit and anchors \code{A}. Their reduced forms (\code{use_TD = FALSE},
-or a \code{TD} fit that failed and fell back) have no such flat region and are
-fitted only where \code{time_channel >= start_time}.
-}
-
-\subsection{Response \strong{direction} and the fit \strong{end_window}}{
-
-By default, \code{direction} is detected automatically as either \emph{"positive"}
-(upward) or \emph{"negative"} (downward) response, and can be overwritten
-manually. \code{end_window} is a time span in units of \code{time_channel} and
-defines the end of the kinetics fitting window by locating the first peak
-or trough value (depending on direction) that has no greater/lesser values
-within the subsequent \code{end_window} time span. The curve fitting window
-extends to the end of \code{end_window} beyond the detected peak/trough.
-
-For \emph{"monoexponential"}, \emph{"biexponential"}, \emph{"exponential_drift"},
-\emph{"sigmoidal"}, and \emph{"sigmoidal_drift"} methods,
-\code{direction} also constrains the sign of the fitted amplitude \code{B - A}, and
-the sigmoidal \code{slope}. For the \emph{"biexponential"} method, \code{direction}
-constrains the sign of the fast-phase amplitude \code{B - A}. A fit that
-cannot satisfy the requested direction returns \code{NA} coefficients with a
-warning.
-}
-
-\subsection{Per-channel arguments}{
+\subsection{Per-channel and per-interval arguments}{
 
 Arguments apply globally to all \code{nirs_channels} by default. Arguments can
 instead be uniquely supplied per-channel as a named \code{list()} with names
-matching \code{nirs_channels}, e.g.
+matching \code{nirs_channels}. For multi-interval input (a list of data frames or
+a grouped data frame), a named \code{list()} can also be keyed by interval name
+(the list names, group keys, or \verb{interval_<n>}) to supply values
+per-interval, and each per-interval value may itself be a per-channel
+\code{list()}, e.g.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_kinetics(
     data,
-    nirs_channels = c(smo2_left, smo2_right),
+    nirs_channels = c(o2hb, hhb),
     method = "peak_slope",
-    span = list(10, smo2_right = 20),
-    direction = list(smo2_left = "negative", smo2_right = "auto")
-)
-}\if{html}{\out{</div>}}
-\itemize{
-\item A non-list value applies to every channel (the \emph{default} behaviour).
-\item A \code{list()} named by \code{nirs_channels} applies per-channel values.
-\item A single unnamed value in the list will be applied to any unlisted channels
-(e.g. \code{span = list(10, smo2_right = 20)} gives \code{smo2_right} 20 and every
-other channel 10). If no unnamed fallback value in the list, channels not
-named in the list fall back to the argument's default.
-\item \code{list()} names not matching \code{nirs_channels} are warned about and
-ignored.
-}
-
-\code{start_time}, \code{direction}, and \code{end_window} are per-channel capable, along
-with the \code{method}-specific arguments except \code{control}, which is always
-global. \code{fix} is itself a named \code{list()} of
-model parameters, so a per-channel \code{fix} is supplied as a \code{list()} of
-\code{list()}s keyed by channel name. A plain parameter list applies to every
-channel:
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{## fix `A` at 0 for every channel
-fix = list(A = 0)
-
-## fix `A` per-channel, leaving other channels free
-fix = list(smo2_left = list(A = 0), smo2_right = list(A = 5, B = 100))
-}\if{html}{\out{</div>}}
-}
-
-\subsection{Per-interval arguments}{
-
-For multi-interval input (a list of data frames or a grouped data frame),
-the same arguments can also be supplied per-interval as a named \code{list()}
-keyed by interval name (the list names, group keys, or \verb{interval_<n>}),
-e.g.
-
-\if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_kinetics(
-    data_list,
-    method = "monoexponential",
-    end_window = list(interval_1 = 30, interval_2 = 60),
+    span = list(10, o2hb = 20),
     direction = list(
-        interval_1 = list(smo2_left = "negative", "auto"),
+        interval_1 = list(hhb = "negative", "auto"),
         interval_2 = "positive"
     )
 )
 }\if{html}{\out{</div>}}
+
+The same rules apply at both levels:
 \itemize{
-\item A resolved per-interval value may itself be a per-channel \code{list()},
-as \code{direction} above.
-\item A single unnamed value in the list is the fallback for unlisted
-intervals; otherwise intervals not named in the list fall back to the
-argument's default.
-\item \code{list()} names matching neither interval names nor \code{nirs_channels}
-are warned about and ignored.
-\item A per-interval \code{fix} is a \code{list()} of parameter lists keyed by
-interval name, e.g. \code{fix = list(interval_1 = list(A = 0))}; each
-element may itself be a per-channel map, e.g.
-\code{fix = list(interval_1 = list(smo2 = list(A = 0)))}. Triple nested
-\code{list()}s is janky, but it works for now.
+\item A non-list value applies to every interval and channel (the \emph{default}
+behaviour).
+\item A \code{list()} named by interval or \code{nirs_channels} applies to those values
+per-interval or per-channel.
+\item A single unnamed value in the list is the fallback applied to any unlisted
+intervals or channels (e.g. \code{span = list(10, o2hb = 20)} gives \code{o2hb} 20
+and every other channel 10). If no unnamed fallback value in the list,
+unlisted intervals or channels fall back to the argument's default (i.e.
+\code{NULL}, or may fail with a warning).
+\item \code{list()} names matching neither interval names nor \code{nirs_channels} are
+warned about and ignored.
 }
 
-\code{method} currently only accepts a single value applied globally to all
-intervals and \code{nirs_channels}. This is a current limitation (as of \verb{0.7.1})
-and will be improved in future updates to allow more flexible kinetics
-fitting.
+\code{start_time}, \code{direction}, and \code{end_window} are per-channel and per-interval
+capable, along with the \code{method}-specific arguments except \code{control}, which
+is always global. \code{fix} is itself a named \code{list()} of model parameters, so a
+per-channel or per-interval \code{fix} is supplied as a \code{list()} of \code{list()}s
+keyed by channel or interval name. A plain parameter list applies
+everywhere:
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{## fix `A` at 0 for every channel
+fix = list(A = 0)
+
+## fix `A` per-channel, leaving unspecified channels free
+fix = list(o2hb = list(A = 0), hhb = list(A = 5, B = 20))
+
+## fix `A` per-interval, optionally nested per-channel
+fix = list(interval_1 = list(A = 0))
+fix = list(interval_1 = list(o2hb = list(A = 0)))
+}\if{html}{\out{</div>}}
+
+Triple nested \code{list()}s is janky, but it works for now!
+
+Limitation: \code{method} itself currently only accepts a single value applied
+globally to all intervals and \code{nirs_channels}. So analysing channels or
+intervals with entirely different kinetics models must be done with
+independent \code{analyse_kinetics()} calls, or other iterative solutions
+(e.g. \code{lapply()} or \code{purrr::map()}).
 }
 
 \subsection{method = "response_time"}{
@@ -442,23 +412,27 @@ Aliases:
 A non-parametric approach (estimated directly from the observed data without
 assuming a specific mathematical shape) to estimate the response time at
 which a signal reaches a specified fraction of its total response amplitude
-relative to the baseline. e.g. \emph{half-response time} (\code{response_fraction = 0.5}) is
-the time from response onset to attain 50\% of the total amplitude change
-and approximates the inflection point (\code{xmid} of a symmetrical sigmoid
-function). \code{response_fraction = 0.632} approximates the time constant (\code{tau};
+relative to the baseline. e.g. \emph{half-response time}
+(\code{response_fraction = 0.5}) is the time from response onset to attain 50\%
+of the total amplitude change and approximates the inflection point
+(\code{xmid} of a symmetrical sigmoid function).
+
+\code{response_fraction = 0.632} approximates the time constant (\code{tau};
 \eqn{\tau}) parameter from a monoexponential function, or the inflection
-point (\code{xmid}) of an asymmetrical left-Gompertz function. \code{response_fraction = 0.368}
-approximates \code{xmid} of a right-Gompertz function.
+point (\code{xmid}) of an asymmetrical left-Gompertz function.
+\code{response_fraction = 0.368} approximates \code{xmid} of a right-Gompertz function.
+This is a good fallback estimation method if parametric methods are not
+successfully fit.
 
 The target response value is: \code{fitted = A + (B - A) * response_fraction}
 
 Where \code{A} is the mean baseline value (\code{time_channel <= start_time}) and \code{B}
 is the first local extreme (peak or trough) value with no greater extreme
 values within \code{end_window}. \code{response_value} is the first observed sample
-where the signal is equal to or greater/lesser than the target \code{fitted}
-value. \code{response_time} is the elapsed time from \code{start_time} to
-\code{response_value}. See \code{\link[=response_time]{response_time()}} for the full algorithm and
-coefficients.
+where the signal is equal to or greater/lesser than the target
+\code{response_fitted} value. \code{response_time} is the elapsed time from
+\code{start_time} to \code{response_value}. See \code{\link[=response_time]{response_time()}} for the full
+algorithm and coefficients.
 }
 
 \subsection{method = "peak_slope"}{
@@ -467,9 +441,10 @@ Aliases: \code{method = c("peak slope", "slope", "lm")}.
 
 A semi-parametric approach to estimate the maximum positive or negative
 local linear slope of a signal using rolling least-squares regression. The
-steepest local rate of change can be interpreted as the moment of greatest
-mismatch between oxygen delivery and extraction. \code{peak_slope_time} is the
-time from response onset \code{start_time} to this moment of greatest mismatch.
+steepest local rate of change in NIRS signals can be interpreted as the
+moment of greatest mismatch between oxygen delivery and extraction.
+\code{peak_slope_time} is the time from response onset \code{start_time} to this
+moment of greatest mismatch.
 
 The local window is defined by either \code{width} (number of samples) or \code{span}
 (in units of \code{time_channel}). See \code{\link[=peak_slope]{peak_slope()}} for window mechanics,
@@ -504,16 +479,49 @@ reduces the function to a lower-parameter model. \code{TD} can only be fixed whe
 specify \code{use_TD = FALSE} rather than fix \code{TD = 0}.
 }
 
+\subsection{method = "exponential_drift"}{
+
+Aliases: \code{method = c("exp_drift", "exp_linear", "monoexp_drift")}.
+
+A parametric approach fitting a self-starting two-phase curve using
+\code{\link[stats:nls]{stats::nls()}} with \code{\link[=SSexponential_drift]{SSexponential_drift()}}. A \emph{fast} \code{\link[=monoexponential]{monoexponential()}}
+primary response plus a \emph{slow} linear secondary drift beginning near the
+primary asymptote.
+
+Model equation:
+
+\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
+
+\code{A}, \code{B}, \code{tau}, \code{TD}, and the derived \code{k}, \code{MRT}, and \code{HRT} are as for
+\emph{"monoexponential"}. \code{slope_B} is the linear drift rate \code{dx/dt}. The drift
+onset is not a free estimate. \code{drift_fraction} specifies the fraction
+(\verb{(0.5, 1)}) of the primary response amplitude where the drift begins;
+\code{TD - tau * log(1 - drift_fraction)} (\emph{default} \code{0.95}; \code{TD + 3 * tau}).
+
+The excursion point \code{texc} is where the drift rate overtakes the decaying
+primary rate, \verb{TD + tau * log(|B - A| / (|slope_B| * tau))}, floored at the
+drift onset, elapsed from \code{start_time} (the same frame as \code{TD} and \code{MRT}).
+
+The drift component is kept only when the data support it. The model will
+fall back to \emph{"monoexponential"} when the fit fails or if the total drift
+amplitude is below twice the fit RMSE, with a warning recorded in
+\code{warnings}. The \code{model} column in \code{coefficients} names the final method
+for each row. A hidden argument \code{model_fallback = FALSE} will override the
+fallback process and retain the more complex model, or return an error.
+
+Parameters may be held constant with \code{fix}, e.g. \code{fix = list(A = 0)}, as
+above.
+}
+
 \subsection{method = "biexponential"}{
 
 Aliases: \code{method = c("biexp", "double exponential")}.
 
-A parametric approach fitting a self-starting biexponential
+A parametric approach fitting a self-starting two-phase biexponential
 excursion-recovery function to the response curve using \code{\link[stats:nls]{stats::nls()}} with
-\code{\link[=SSbiexponential]{SSbiexponential()}}. A \emph{fast} component (\code{B}, \code{tau}) drives the initial
-excursion while a concurrent \emph{slow} component (\code{B2}, \code{tau2}), clocked
-from the same onset, recovers the response toward a stable plateau. The
-fitted excursion point of the curve is reported as \code{texc} and \code{texc_fitted}.
+\code{\link[=SSbiexponential]{SSbiexponential()}}. A fast \emph{primary} component driving the initial
+excursion, and a slow \emph{secondary} component recovering the response toward
+a stable plateau.
 
 Model equations:
 \itemize{
@@ -524,81 +532,42 @@ Model equations:
 
 \code{A} is the starting value. \code{B} & \code{tau} are the asymptote and time
 constant of the fast response. \code{B2} & \code{tau2} are the asymptote and time
-constant of the slower response plateau as time approaches \code{Inf} (typically
-\verb{tau2 >> tau}). All three of \code{A}, \code{B}, and \code{B2} are values on the response
-scale, consistent with the \code{\link[=monoexponential]{monoexponential()}} and sigmoidal asymptotes.
+constant of the slower response plateau (typically \verb{tau2 >> tau}).
+
 Set \code{use_TD = TRUE} (\emph{default}) to specify the time-delay parameter \code{TD}.
 The fast-phase mean response time \code{MRT = TD + tau} is reported as for
-\emph{"monoexponential"}.
-See \code{\link[=biexponential]{biexponential()}} for the model family and \code{\link[=SSbiexponential]{SSbiexponential()}} for
-self-start initialisation.
+\emph{"monoexponential"}. See \code{\link[=biexponential]{biexponential()}} for the model family and
+\code{\link[=SSbiexponential]{SSbiexponential()}} for self-start initialisation.
 
-The two phases are fit sequentially. Stage 1 fits the fast phase as a
-\emph{"monoexponential"} on the \code{end_window} window (to the first
-peak/trough plus \code{end_window}), giving \code{A}, \code{tau}, and \code{TD}. Stage 2
-fits the full model to the whole response with \code{A}, \code{tau}, and \code{TD}
-held within a tight range of their stage-1 values and \code{B}, \code{B2},
-\code{tau2} free. \code{tau2} is floored above the \code{tau} range so the phases
-stay separated, and capped at ten times the record span: a slow tail
-far beyond the record identifies only its rate, not \code{tau2} and \code{B2}
-separately. \code{end_window} should be set to isolate the fast phase; the
-default \code{Inf} resolves to \code{30} time units past the first peak/trough
-(recorded in \code{channel_args}).
-
-The biexponential fit is kept only when the data support both phases.
-A channel falls back to the \emph{"exponential_drift"} model (fit on the
-whole response, with \code{A}, \code{B}, \code{tau}, and \code{TD} carried over from
-\code{fix}) when the fit fails (e.g. phases not
-separable), the fitted response is monotonic (no excursion point
-\code{texc}), \code{tau2} exceeds twice the fitted time span (a slow phase the
-record cannot tell from a linear drift), or the slow-phase amplitude
-\verb{|B2 - B|} is below twice the fit RMSE. The exponential-drift fit is
-in turn subject to its own fallback to \emph{"monoexponential"} (see
-below). Each fallback is warned about and recorded in \code{warnings}. The
-\code{model} coefficient column names the method each row comes from, and
-the coefficient columns are the union of the three models' parameters:
-\code{A}, \code{B}, \code{tau}, \code{TD}, and \code{MRT} are shared, the rest \code{NA} where a
-row's model has no such parameter.
-
-Any parameter may be held constant with \code{fix}, e.g. \code{fix = list(A = 0)}, as
-above.
+The two phases are fit sequentially.
+\itemize{
+\item Stage 1 fits the fast phase as a \emph{"monoexponential"} on the supplied
+\code{end_window} window, giving \code{A}, \code{tau}, and \code{TD} (if selected).
+\item Stage 2 fits the full model to the whole response with \code{A}, \code{tau}, and
+\code{TD} held within a tight range of their stage-1 values, and \code{B}, \code{B2},
+\code{tau2} free.
 }
 
-\subsection{method = "exponential_drift"}{
+Secondary \code{tau2} is floored above the primary \code{tau}, so the phases stay
+separated. \code{tau2} is arbitrarily capped at ten times the fit window
+timespan, functionally implying the true asymptote is linear not exponential.
+\code{end_window} should be set to isolate the fast phase; by default resolves
+to \code{30} sec instead of \code{Inf} (recorded in \code{channel_args}).
 
-Aliases: \code{method = c("exp_linear", "exp_drift", "monoexp_drift", "drift")}.
+The biexponential fit is kept only when the data support both phases. The
+model will fall back to \emph{"exponential_drift"} when the fit fails (e.g.
+phases not separable), the fitted response is monotonic (no estimable
+excursion point \code{texc}), \code{tau2} exceeds twice the fitted time span (a slow
+phase the record cannot tell from a linear drift), or the slow-phase
+amplitude \verb{|B2 - B|} is below twice the fit RMSE.
 
-A parametric approach fitting a two-phase curve using \code{\link[stats:nls]{stats::nls()}} with
-\code{\link[=SSexponential_drift]{SSexponential_drift()}}: a pure \code{\link[=monoexponential]{monoexponential()}} primary response plus
-a secondary linear drift beginning near the primary asymptote.
+The exponential-drift fit is in turn subject to its own fallback to
+\emph{"monoexponential"} (see above). Each fallback is warned about and recorded
+in \code{warnings}. The \code{model} column in \code{coefficients} names the final method
+for each row. A hidden argument \code{model_fallback = FALSE} will override the
+fallback process and retain the more complex model, or return an error.
 
-Model equation:
-
-\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
-
-\code{A}, \code{B}, \code{tau}, \code{TD}, and the derived \code{k}, \code{MRT}, and \code{HRT} are as for
-\emph{"monoexponential"}. \code{slope_B} is the linear drift rate \code{dx/dt}. The drift
-onset is fixed where the primary response reaches \code{drift_fraction} of its
-amplitude, \code{TD - tau * log(1 - drift_fraction)} (\emph{default} \code{0.95};
-\code{TD + 3 * tau}). The excursion point \code{texc} is where the
-drift rate overtakes the decaying primary rate,
-\verb{TD + tau * log(|B - A| / (|slope_B| * tau))}, floored at the drift onset:
-the excursion point of the curve when the phases oppose, or where the
-linear trend takes over a monotonic response. It is reported elapsed
-from \code{start_time} (the same frame as \code{TD} and \code{MRT}) with the fitted
-value \code{texc_fitted}. Set \code{use_TD = TRUE} (\emph{default}) to include the
-time-delay parameter \code{TD}.
-
-The drift is kept only when the data support it. A channel falls back
-to the \emph{"monoexponential"} model (same window and time-delay structure,
-with \code{A}, \code{B}, \code{tau}, and \code{TD} carried over from \code{fix}) when the fit
-fails or the drift amplitude over the record from the drift onset,
-\verb{|slope_B| * (t_end - onset)}, is below twice the fit RMSE, with a warning
-recorded in \code{warnings}. The \code{model} coefficient column names the method
-each row comes from; monoexponential rows report \code{texc}, \code{slope_B},
-\code{drift_fraction}, and \code{texc_fitted} as \code{NA}.
-
-\code{A}, \code{B}, \code{tau}, \code{slope_B}, and \code{TD} may be held constant with \code{fix}, as
+Parameters may be held constant with \code{fix}, e.g. \code{fix = list(A = 0)}, as
 above.
 }
 
@@ -627,12 +596,12 @@ of the amplitude.
 point of the response. \code{slope} is the response rate \code{dx/dt} at the
 inflection.
 
-A \emph{"symmetric"} shape is the default for an unbiased fit when no
-obvious asymmetry is expected. \emph{"gompertz"} (right-inflection) growth is
-appropriate for fast-onset, slow-tail responses. \emph{"gompertz_left"} for
-slow-onset, fast-tail responses. See \code{\link[=logistic]{logistic()}}, \code{\link[=gompertz]{gompertz()}}, and
-\code{\link[=gompertz_left]{gompertz_left()}} for the model families and \code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[=SSgompertz]{SSgompertz()}},
-and \code{\link[=SSgompertz_left]{SSgompertz_left()}} for self-start initialisations.
+A \emph{"symmetric"} shape is the default when no obvious asymmetry is expected.
+\emph{"gompertz"} (right-inflection) growth is appropriate for fast-onset,
+slow-tail responses. \emph{"gompertz_left"} for slow-onset, fast-tail responses.
+See \code{\link[=logistic]{logistic()}}, \code{\link[=gompertz]{gompertz()}}, and \code{\link[=gompertz_left]{gompertz_left()}} for the model families
+and \code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[=SSgompertz]{SSgompertz()}}, and \code{\link[=SSgompertz_left]{SSgompertz_left()}} for self-start
+initialisations.
 
 Parameters may be held constant with \code{fix}, e.g. \code{fix = list(A = 0)}, as
 above.
@@ -640,12 +609,12 @@ above.
 
 \subsection{method = "sigmoidal_drift"}{
 
-Aliases: \code{method = c("sigmoid_drift", "sig_drift", "logistic_drift", "gompertz_drift", "sigmoidal_linear")}.
+Aliases: \code{method = c("sigmoid_drift", "sig_drift", "sig-lin", "logistic_drift", "gompertz_drift")}.
 
-A parametric approach fitting a two-phase curve using \code{\link[stats:nls]{stats::nls()}}
-with \code{\link[=SSsigmoidal_drift]{SSsigmoidal_drift()}}: a \emph{"sigmoidal"} primary response of the
-given \code{shape} plus a secondary linear drift beginning near the ending
-asymptote.
+A parametric approach fitting a self-starting two-phase curve using
+\code{\link[stats:nls]{stats::nls()}} with \code{\link[=SSsigmoidal_drift]{SSsigmoidal_drift()}}. A \emph{fast "sigmoidal"}
+primary response of the given \code{shape} plus a \emph{slow} linear secondary drift
+beginning near the primary ending asymptote.
 
 Model equation:
 
@@ -653,28 +622,23 @@ Model equation:
 
 \code{S(t)} and \code{A}, \code{B}, \code{xmid}, and \code{slope} are as for \emph{"sigmoidal"}.
 \code{slope_B} is the linear drift rate \code{dx/dt} at the asymptote \code{B}. The
-drift is a hinge line anchored at zero at its onset, where the sigmoid
-reaches \code{drift_fraction} (\emph{default} \code{0.95}) of its amplitude, by the
-analytic inverse of each \code{shape} (see \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}); a
-\code{"gompertz"} form places its onset furthest past \code{xmid}. The excursion
-point \code{texc} is where the drift rate overtakes the decaying sigmoid
-rate, \verb{|S'(t)| = |slope_B|}, floored at the drift onset: the turning
-point of the curve when the phases oppose, or where the linear trend
-takes over a monotonic response. It is reported elapsed from
-\code{start_time} (the same frame as \code{xmid}) with the fitted value
-\code{texc_fitted}.
+drift is not a free estimate. \code{drift_fraction} specifies the fraction
+(\verb{(0.5, 1)}) of the primary response amplitude where the drift begins
+(\emph{default} \code{0.95}).
 
-The drift is kept only when the data support it. A channel falls back
-to the \emph{"sigmoidal"} model (same \code{shape} and window, with \code{A}, \code{B},
-\code{xmid}, and \code{slope} carried over from \code{fix}) when the fit fails or the
-drift amplitude over the record from the excursion point,
-\verb{|slope_B| * (t_end - texc)}, is below twice the fit RMSE, with a
-warning recorded in \code{warnings}. The \code{model} coefficient column names the
-method each row comes from; sigmoidal rows report \code{texc}, \code{slope_B},
-\code{drift_fraction}, and \code{texc_fitted} as \code{NA}.
+The excursion point \code{texc} is where the drift rate overtakes the decaying
+primary rate, \verb{|S'(t)| = |slope_B|}, floored at the drift onset, elapsed
+from \code{start_time} (the same frame as \code{xmid}).
 
-\code{A}, \code{B}, \code{xmid}, \code{slope}, and \code{slope_B} may be held constant with
-\code{fix}, as above.
+The drift component is kept only when the data support it. The model will
+fall back to \emph{"sigmoidal"} when the fit fails or if the total drift
+amplitude is below twice the fit RMSE, with a warning recorded in
+\code{warnings}. The \code{model} column in \code{coefficients} names the final method
+for each row. A hidden argument \code{model_fallback = FALSE} will override the
+fallback process and retain the more complex model, or return an error.
+
+Parameters may be held constant with \code{fix}, e.g. \code{fix = list(A = 0)}, as
+above.
 }
 
 \subsection{Recursive analysis}{
@@ -691,7 +655,7 @@ the analysis runs on absolute time. \code{start_time} itself and duration
 coefficients (e.g. \code{tau}) are unchanged.
 
 Coefficient rows from separate trials can be analysed separately with
-\code{group_intervals}, e.g. 24 occlusion slopes from two trials:
+\code{group_intervals}, e.g. 20 occlusion slopes from two trials:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{analyse_kinetics(
     result,
@@ -745,6 +709,6 @@ plot(result)
 }
 \seealso{
 \code{\link[=extract_intervals]{extract_intervals()}}, \code{\link[=response_time]{response_time()}}, \code{\link[=peak_slope]{peak_slope()}},
-\code{\link[=monoexponential]{monoexponential()}}, \code{\link[=biexponential]{biexponential()}}, \code{\link[=logistic]{logistic()}}, \code{\link[=gompertz]{gompertz()}},
-\code{\link[=gompertz_left]{gompertz_left()}}
+\code{\link[=monoexponential]{monoexponential()}}, \code{\link[=exponential_drift]{exponential_drift()}}, \code{\link[=biexponential]{biexponential()}},
+\code{\link[=logistic]{logistic()}}, \code{\link[=gompertz]{gompertz()}}, \code{\link[=gompertz_left]{gompertz_left()}}, \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}
 }

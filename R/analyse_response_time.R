@@ -1,85 +1,103 @@
-#' Compute fractional kinetics response time
+#' Fractional response time
 #'
-#' Identify the time at which a numeric signal reaches a specified fraction
-#' of its total response amplitude relative to a baseline period (e.g.
-#' *half-response time* at 50% fractional amplitude). Vector-level companion
-#' to [analyse_kinetics()] when `method = "response_time"`.
+#' @description
+#' Estimate the time at which a numeric vector reaches a specified fraction
+#' of its total response amplitude relative to a baseline, e.g.
+#' *half-response time* at `response_fraction = 0.5`. Vector-level companion
+#' to [analyse_kinetics()] with `method = "response_time"`.
 #'
-#' @param start_time A numeric value specifying the start of the kinetics
-#'   response in units of `t`. Observations where `t <= start_time` define the
-#'   baseline window. Defaults to `0`.
-#' @param response_fraction A numeric vector of values in the range `[0, 1]`
-#'   specifying the fractional response amplitude(s) to detect. Defaults to
-#'   `0.5` (50% response, i.e. half-response time). Multiple values (e.g.
-#'   `c(0.5, 0.632)`) return one result per response_fraction.
+#' @param start_time A numeric value in units of `t` specifying the response
+#'   onset. Samples where `t <= start_time` define the baseline window.
+#'   *Default* is `0`.
+#' @param response_fraction A numeric vector in the range `[0, 1]` specifying
+#'   the fractional response amplitude(s) to detect. Defaults to `0.5` (50%
+#'   response, i.e. half-response time). Multiple values (e.g.
+#'   `c(0.5, 0.632)`) return one element per fraction.
 #' @param ... Additional arguments.
 #' @inheritParams replace_invalid
 #' @inheritParams find_kinetics_idx
 #' @inheritParams validate_mnirs
 #'
 #' @details
+#' A non-parametric approach (estimated directly from the observed data without
+#' assuming a specific mathematical shape). `response_fraction = 0.5`
+#' approximates the inflection point (`xmid`) of a symmetric sigmoid function.
+#' `response_fraction = 0.632` approximates the time constant (`tau`;
+#' \eqn{\tau}) of a monoexponential function, or `xmid` of a left-Gompertz
+#' function. `response_fraction = 0.368` approximates `xmid` of a
+#' right-Gompertz function. This is a good fallback estimation method if
+#' parametric methods are not successfully fit.
+#'
 #' ## Method
 #'
-#' The target response value is computed as:
+#' The target response value is: `fitted = A + (B - A) * response_fraction`
 #'
-#' `response_fitted = A + (B - A) * response_fraction`
+#' Where `A` is the mean baseline value (`t <= start_time`) and `B` is the
+#' extreme (peak or trough) value after `start_time`. `response_value` is the
+#' first observed sample equal to or greater/lesser than the target `fitted`
+#' value (above for *"positive"*, below for *"negative"* `direction`).
+#' `response_time` is the elapsed time from `start_time` to `response_value`.
 #'
-#' where `A` is the mean baseline (`t <= start_time`) and `B` is the extreme
-#' (peak or trough) value after `start_time`. The response time is the elapsed
-#' time from `start_time` to the first sample where `x` reaches the
-#' `response_fitted` value (above for positive direction, below for negative).
+#' [analyse_kinetics()] first trims `x` to `end_window` past the first extreme,
+#' so `B` there is the first local extreme with no greater/lesser values
+#' within `end_window`. Called directly, `B` is the global extreme of `x`
+#' after `start_time`.
 #'
 #' ## Direction
 #'
-#' When `direction = "auto"`, the net slope across `x` determines the overall
-#' trend, and the corresponding extreme (maximum for positive, minimum for
-#' negative) is used as `B`. If the net slope is zero or `NA`, the direction
-#' of greatest absolute change is used. When `direction = "positive"` or
-#' `"negative"`, the extreme is the maximum or minimum value after
-#' `start_time`, respectively.
+#' `direction` is detected automatically by default as either *"positive"*
+#' (upward) or *"negative"* (downward) response, from the dominant excursion
+#' of `x` above or below its initial baseline (the median of the earliest
+#' samples). When tied, the greater absolute extreme decides. `B` is the
+#' maximum for *"positive"* or the minimum for *"negative"*, and can be
+#' overwritten manually.
 #'
 #' ## Baseline
 #'
-#' When no observations exist where `t <= start_time`, the first sample `x[1]`
-#' is used as the baseline and a warning is issued. `start_time` cannot exceed
-#' the maximum of `t`.
+#' When no samples exist where `t <= start_time`, the first sample `x[1]` is
+#' used as the baseline `A` with a warning. `start_time` must be within the
+#' range of `t`.
 #'
 #' @returns A named list containing:
-#'   \item{`A`}{Mean baseline value (mean of `x` where `t <= start_time`).}
-#'   \item{`B`}{Extreme value (maximum or minimum) after `start_time`.}
-#'   \item{`response_time`}{Elapsed time from `start_time` to the fractional
-#'   response, in units of `t`; one element per `response_fraction`.}
-#'   \item{`response_value`}{The observed signal value at the response index;
+#'   \item{`A`}{The mean baseline value of `x` where `t <= start_time`.}
+#'   \item{`B`}{The extreme (maximum or minimum) value of `x` after
+#'   `start_time`.}
+#'   \item{`response_time`}{The elapsed time from `start_time` to the
+#'   fractional response, in units of `t`; one element per
+#'   `response_fraction`.}
+#'   \item{`response_value`}{The observed value of `x` at the response index;
 #'   one element per `response_fraction`.}
-#'   \item{`fitted`}{The predicted fractional response value
-#'   (`A + (B - A) * response_fraction`); one element per `response_fraction`.}
+#'   \item{`fitted`}{The target fractional response value
+#'   `A + (B - A) * response_fraction`; one element per `response_fraction`.}
 #'   \item{`baseline_idx`}{Integer indices where `t <= start_time`.}
 #'   \item{`response_idx`}{Integer index at each `response_value`.}
-#'   \item{`extreme_idx`}{Integer index at the extreme value (`B`).}
+#'   \item{`extreme_idx`}{Integer index at the extreme value `B`.}
 #'
 #' @seealso [analyse_kinetics()], [peak_slope()], [monoexponential()]
 #'
 #' @examples
+#' ## create an exponential curve with random noise
 #' set.seed(13)
 #' t <- 0:60
-#' x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) + 
+#' x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) +
 #'     rnorm(length(t), 0, 1)
 #'
-#' ## half-response time (0.5) and mean response time (0.632 ~= tau)
+#' ## half-response time (0.5) and time constant approximation (0.632 ~= tau)
 #' RT <- response_time(x, t, start_time = 10, response_fraction = c(0.5, 0.632))
+#' RT$response_time
 #'
 #' plot(t, x, type = "l", col = "grey60", xlab = "t", ylab = "x")
-#' ## baseline mean across baseline_idx
+#' ## mean baseline `A` across the baseline window
 #' segments(
 #'     t[min(RT$baseline_idx)], RT$A,
 #'     t[max(RT$baseline_idx)], RT$A,
 #'     col = "red", lwd = 2
 #' )
-#' ## response_fraction = 0.5 (red) & 0.632 (blue): response_value & extreme
+#' ## response values at 0.5 (red) and 0.632 (blue), and the extreme `B`
 #' points(
-#'     t[RT$response_idx], 
-#'     RT$response_value, 
-#'     col = c("red", "blue"), 
+#'     t[RT$response_idx],
+#'     RT$response_value,
+#'     col = c("red", "blue"),
 #'     pch = 19
 #' )
 #' points(t[RT$extreme_idx], RT$B, col = "red", pch = 19)

@@ -196,8 +196,8 @@ within every group.
 
 \subsection{Grouping intervals}{
 
-\code{group_intervals} controls whether extracted intervals are returned as distinct
-data frames or ensemble-averaged.
+\code{group_intervals} controls whether extracted intervals are returned as
+distinct data frames or ensemble-averaged.
 
 \describe{
 \item{\code{"distinct"}}{The default. Extract each interval and return a

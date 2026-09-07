@@ -12,8 +12,8 @@ SSbiexponential(t, A, B, tau, B2, tau2, TD)
 \item{A}{A numeric parameter for the starting value of the response
 variable (the \code{t = 0} intercept).}
 
-\item{B}{A numeric parameter for the asymptote of the \emph{fast} component;
-the value the fast response alone would approach.}
+\item{B}{A numeric parameter for the asymptote of the \emph{fast} component; the
+value the fast response alone would approach.}
 
 \item{tau}{A numeric parameter for the \emph{fast} time constant (\eqn{\tau_1}),
 in units of the predictor variable \code{t}. Dominates the initial steep
@@ -26,7 +26,7 @@ infinity.}
 \item{tau2}{A numeric parameter for the \emph{slow} time constant (\eqn{\tau_2}),
 in units of the predictor variable \code{t}. Typically \verb{tau2 >> tau}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of the
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 response, in units of the predictor variable \code{t}. If \code{NULL} (\emph{default}),
 a 5-parameter model without time delay is used.}
 }
@@ -37,16 +37,15 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for a \code{selfStart} wrapper around
 \code{\link[=biexponential]{biexponential()}}, for use with \code{\link[stats:nls]{stats::nls()}}. Supports both the
-5-parameter form (A, B, tau, B2, tau2) and the 6-parameter form adding
-a time delay TD; arity is inferred from the formula passed to
-\code{\link[stats:nls]{stats::nls()}}.
+5-parameter (A, B, tau, B2, tau2) and 6-parameter forms adding a time
+delay TD; arity is inferred from the formula passed to \code{\link[stats:nls]{stats::nls()}}.
 }
 \details{
-5-parameter model:
-\code{x ~ SSbiexponential(t, A, B, tau, B2, tau2)}
-
-6-parameter model:
-\code{x ~ SSbiexponential(t, A, B, tau, B2, tau2, TD)}
+\subsection{Model formulas}{
+\itemize{
+\item 5-parameter: \code{x ~ SSbiexponential(t, A, B, tau, B2, tau2)}
+\item 6-parameter: \code{x ~ SSbiexponential(t, A, B, tau, B2, tau2, TD)}
+}
 
 The two phases are weakly identified when \code{tau} and \code{tau2} are close, so
 \code{algorithm = "port"} with the time constants bounded non-negative and
@@ -54,20 +53,26 @@ The two phases are weakly identified when \code{tau} and \code{tau2} are close, 
 \code{\link[=analyse_kinetics]{analyse_kinetics()}} instead fits the phases sequentially, holding the
 fast phase near a monoexponential estimate.
 
-The model function returns the analytic gradient for the free
-parameters as a \code{"gradient"} attribute, so \code{\link[stats:nls]{stats::nls()}} does not
-resort to \code{\link[stats:numericDeriv]{stats::numericDeriv()}} and \code{\link[stats:predict]{stats::predict()}} on a fitted
-model carries the attribute; drop it with \code{as.vector()}.
-
 The 5-parameter form is recommended for small samples or when no obvious
 time delay is expected, as it converges more reliably. \code{\link[stats:nls]{stats::nls()}}
 reads the free parameters from the formula right-hand side, so omitting
 \code{TD} incurs no degrees-of-freedom penalty.
+
+Starting estimates are profiled on a coarse grid of \code{tau}, \code{tau2} (and
+\code{TD}) with the amplitudes solved by least squares at each grid point,
+keeping the residual-minimising start. Grid pairs with
+\code{tau / tau2 > 0.98} are dropped as near-collinear.
+
+The model function returns the analytic gradient for the free parameters
+as a \code{"gradient"} attribute, so \code{\link[stats:nls]{stats::nls()}} does not resort to
+\code{\link[stats:numericDeriv]{stats::numericDeriv()}}. \code{\link[stats:predict]{stats::predict()}} on a fitted model carries the
+attribute; drop it with \code{as.vector()}.
+}
+
 \subsection{Fixing parameters}{
 
-Any parameter may be held constant by writing a value in place of its
-name in the formula, e.g.
-\code{x ~ SSbiexponential(t, A, B, tau = 5, B2, tau2)}
+Any parameter may be held constant by writing a value in place of its name
+in the formula, e.g. \code{x ~ SSbiexponential(t, A, B, tau = 5, B2, tau2)}
 holds the fast time constant at \code{5}. Fixed parameters are excluded from
 estimation and are not returned by \code{\link[stats:coef]{stats::coef()}}.
 }
@@ -80,6 +85,7 @@ x <- biexponential(t, A = 70, B = 40, tau = 5, B2 = 60, tau2 = 40) +
     rnorm(length(t), 0, 0.8)
 data <- data.frame(t, x)
 
+## 5-parameter fit
 model <- nls(
     x ~ SSbiexponential(t, A, B, tau, B2, tau2),
     data = data,
@@ -89,7 +95,7 @@ model <- nls(
 )
 summary(model)
 
-## fix the fast time constant
+## fix the fast time constant `tau` at a known value
 model_fixed <- nls(
     x ~ SSbiexponential(t, A, B, tau = 5, B2, tau2),
     data = data,
@@ -101,6 +107,6 @@ summary(model_fixed)
 
 }
 \seealso{
-\code{\link[=biexponential]{biexponential()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
-\code{\link[=SSmonoexponential]{SSmonoexponential()}}, \code{\link[=SSexponential_drift]{SSexponential_drift()}}
+\code{\link[=biexponential]{biexponential()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[stats:nls]{stats::nls()}},
+\code{\link[stats:selfStart]{stats::selfStart()}}, \code{\link[=SSmonoexponential]{SSmonoexponential()}}, \code{\link[=SSexponential_drift]{SSexponential_drift()}}
 }

@@ -1,42 +1,42 @@
 #' Monoexponential function
 #'
-#' Calculate a 3- or 4-parameter monoexponential curve.
+#' @description
+#' Calculate a 3- or 4-parameter monoexponential curve. Model family fit by
+#' [analyse_kinetics()] with `method = "monoexponential"`, and by
+#' [stats::nls()] via the self-starting wrapper [SSmonoexponential()].
 #'
 #' @param t A numeric vector of the predictor variable (time).
 #' @param A A numeric parameter for the starting baseline of the response
 #'   variable.
 #' @param B A numeric parameter for the ending asymptote of the response
 #'   variable.
-#' @param tau A numeric parameter for the time constant `tau` (\eqn{\tau})
-#'   of the exponential curve, in units of the predictor variable `t`.
-#' @param TD A numeric parameter for the time delay before the onset of
+#' @param tau A numeric parameter for the *time constant* (\eqn{\tau}) of the
+#'   exponential response, in units of the predictor variable `t`.
+#' @param TD A numeric parameter for the *time delay* before the onset of the
 #'   exponential response, in units of the predictor variable `t`. If `NULL`
 #'   (*default*), a 3-parameter model without time delay is used.
 #'
 #' @details
-#' This model family is
-#' fit by [analyse_kinetics()] when `method = "monoexponential"`, and by
-#' [stats::nls()] via the self-starting wrapper [SSmonoexponential()].
-#'
 #' ## Model equations
 #'
-#' 3-parameter model: `A + (B - A) * (1 - exp(-t / tau))`
+#' - 3-parameter: `A + (B - A) * (1 - exp(-t / tau))`
+#' - 4-parameter: `A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau))`
 #'
-#' 4-parameter model: `A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau))`
+#' Clamping the shifted time at zero holds the curve flat at the baseline `A`
+#' until the response onset at `t = TD`.
 #'
-#' Clamping the shifted time at zero holds the curve at the baseline `A` until
-#' the onset of the response at `t = TD`.
+#' ## Derived quantities
 #'
-#' The rate constant `k` is the reciprocal of `tau` (`k = 1 / tau`) in
-#' reciprocal units of `time_channel`; i.e. `sec^-1s`).
-#'
-#' Common derived quantities include the mean response time `MRT = TD + tau`
-#' and the half-response time `HRT = TD + tau * log(2)`.
+#' The *rate constant* `k` is the reciprocal of `tau` (`k = 1 / tau`) in
+#' reciprocal units of `t` (e.g. `sec^-1`). The *mean response time* is the
+#' time sum `MRT = TD + tau`, and the *half-response time* is
+#' `HRT = TD + tau * log(2)`.
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
-#' @seealso [analyse_kinetics()], [SSmonoexponential()], [response_time()],
+#' @seealso [analyse_kinetics()], [SSmonoexponential()],
+#'   [exponential_drift()], [biexponential()], [response_time()],
 #'   [peak_slope()]
 #'
 #' @examples
@@ -47,6 +47,7 @@
 #'     rnorm(length(t), 0, 3)
 #' data <- data.frame(t, x)
 #'
+#' ## 4-parameter fit with the self-starting wrapper
 #' model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
 #' summary(model)
 #'
@@ -223,10 +224,11 @@ monoexp_model <- function(t, A, B, tau, TD = NULL) {
 
 #' Self-starting monoexponential model
 #'
+#' @description
 #' Creates initial coefficient estimates for a `selfStart` wrapper around
 #' [monoexponential()], for use with [stats::nls()]. Supports both the
-#' 3-parameter form (A, B, tau) and the 4-parameter form (A, B, tau, TD);
-#' arity is inferred from the formula passed to [stats::nls()].
+#' 3-parameter (A, B, tau) and 4-parameter (A, B, tau, TD) forms; arity is
+#' inferred from the formula passed to [stats::nls()].
 #'
 #' @usage
 #' SSmonoexponential(t, A, B, tau, TD)
@@ -234,32 +236,37 @@ monoexp_model <- function(t, A, B, tau, TD = NULL) {
 #' @inheritParams monoexponential
 #'
 #' @details
-#' 3-parameter model: `x ~ SSmonoexponential(t, A, B, tau)`
+#' ## Model formulas
 #'
-#' 4-parameter model: `x ~ SSmonoexponential(t, A, B, tau, TD)`
+#' - 3-parameter: `x ~ SSmonoexponential(t, A, B, tau)`
+#' - 4-parameter: `x ~ SSmonoexponential(t, A, B, tau, TD)`
 #'
 #' The 3-parameter form is recommended for small samples or when no obvious
-#'   time delay is expected, as it converges more reliably. [stats::nls()]
-#'   reads the free parameters from the formula right-hand side, so omitting
-#'   `TD` incurs no degrees-of-freedom penalty.
+#' time delay is expected, as it converges more reliably. [stats::nls()]
+#' reads the free parameters from the formula right-hand side, so omitting
+#' `TD` incurs no degrees-of-freedom penalty.
 #'
-#' The model function returns the analytic gradient for the free
-#'   parameters as a `"gradient"` attribute, so [stats::nls()] does not
-#'   resort to [stats::numericDeriv()] and [stats::predict()] on a fitted
-#'   model carries the attribute; drop it with `as.vector()`.
+#' Starting estimates are profiled on a coarse grid of `tau` (and `TD`) with
+#' the asymptotes solved by least squares at each grid point, keeping the
+#' residual-minimising start.
+#'
+#' The model function returns the analytic gradient for the free parameters
+#' as a `"gradient"` attribute, so [stats::nls()] does not resort to
+#' [stats::numericDeriv()]. [stats::predict()] on a fitted model carries the
+#' attribute; drop it with `as.vector()`.
 #'
 #' ## Fixing parameters
 #'
-#' Any parameter may be held constant by writing a value in place of its
-#'   name in the formula, e.g. `x ~ SSmonoexponential(t, A = 0, B, tau)` fixes
-#'   the baseline at `A = 0`. Fixed parameters are excluded from estimation
-#'   and are not returned by [stats::coef()].
+#' Any parameter may be held constant by writing a value in place of its name
+#' in the formula, e.g. `x ~ SSmonoexponential(t, A = 0, B, tau)` fixes the
+#' baseline at `A = 0`. Fixed parameters are excluded from estimation and are
+#' not returned by [stats::coef()].
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
-#' @seealso [monoexponential()], [stats::nls()], [stats::selfStart()],
-#'   [stats::SSasymp()]
+#' @seealso [monoexponential()], [analyse_kinetics()], [stats::nls()],
+#'   [stats::selfStart()], [stats::SSasymp()]
 #'
 #' @examples
 #' ## create an exponential curve with random noise
@@ -277,7 +284,7 @@ monoexp_model <- function(t, A, B, tau, TD = NULL) {
 #' model3 <- nls(x ~ SSmonoexponential(t, A, B, tau), data = data)
 #' summary(model3)
 #'
-#' ## fix the baseline A at a known value
+#' ## fix the baseline `A` at a known value
 #' model_fixed <- nls(x ~ SSmonoexponential(t, A = 10, B, tau, TD), data = data)
 #' summary(model_fixed)
 #'

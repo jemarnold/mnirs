@@ -15,69 +15,67 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{xmid}{A numeric parameter for the time value at the inflection
-(steepest) point of the curve, in units of the predictor variable \code{t}.}
+\item{xmid}{A numeric parameter for the time at the \emph{inflection point} (the
+steepest point) of the curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 
-\item{asym}{A numeric parameter for the asymmetry index of the curve,
-equal to the fraction of the response where the inflection \code{xmid} occurs,
-bounded in \code{c(0, 1)} for \code{(y(xmid) - A) / (B - A)}. \code{asym = 0.5}
-is symmetric and equivalent to the 4-parameter form. If \code{NULL}
-(\emph{default}), a symmetric 4-parameter model is used.}
+\item{asym}{A numeric parameter for the asymmetry index of the curve; the
+fraction of the amplitude \code{(y(xmid) - A) / (B - A)} at which the
+inflection \code{xmid} occurs, in \verb{(0, 1)}. \code{asym = 0.5} is symmetric and
+equivalent to the 4-parameter form. If \code{NULL} (\emph{default}), a symmetric
+4-parameter model is used.}
 }
 \value{
 A numeric vector of predicted values the same length as the
 predictor variable \code{t}.
 }
 \description{
-Calculate a 4- or 5-parameter logistic (sigmoidal) curve.
+Calculate a 4- or 5-parameter logistic (sigmoidal) curve. The 4-parameter
+symmetric form is fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "sigmoidal"}
+and \code{shape = "symmetric"} (\emph{default}), and by \code{\link[stats:nls]{stats::nls()}} via the
+self-starting wrapper \code{\link[=SSlogistic]{SSlogistic()}}.
 }
 \details{
-The 4-parameter symmetric form is fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when
-\code{method = "sigmoidal"} and \code{shape = "symmetric"} (\emph{default}) via the
-self-starting wrapper \code{\link[=SSlogistic]{SSlogistic()}}.
-
 The 5-parameter Richards form is exported for advanced use directly with
 \code{\link[stats:nls]{stats::nls()}} but is not used by \code{\link[=analyse_kinetics]{analyse_kinetics()}} due to convergence
 instability. For asymmetric responses, prefer \code{\link[=gompertz]{gompertz()}} /
 \code{\link[=gompertz_left]{gompertz_left()}}, which are more stable.
 \subsection{Model equations}{
 
-Logistic models are re-parameterised from a Richards generalised logistic
-model to be interpretable.
-
-4-parameter (symmetric) model:
-\code{A + (B - A) / (1 + exp(-4 * slope * (t - xmid) / (B - A)))}
-
-5-parameter (asymmetric) model re-parameterised so \code{asym} is the
-inflection fraction. Internally:
+Both forms are re-parameterised from the Richards generalised logistic
+model so \code{xmid} is the time at inflection and \code{slope} is the response rate
+\code{dx/dt} at the inflection.
 \itemize{
-\item \code{y = A + (B - A) / (1 + exp(-k * (t - xmid)))^(1 / v)}
-\item \code{k = 2 * slope * v / ((B - A) * asym)}
-\item \code{v = -log(2) / log(asym)}
+\item 4-parameter (symmetric):
+\code{A + (B - A) / (1 + exp(-4 * slope * (t - xmid) / (B - A)))}
+\item 5-parameter (asymmetric):
+\code{A + (B - A) / (1 + exp(-k * (t - xmid)))^(1 / v)} with
+\code{v = -log(2) / log(asym)} and \code{k = 2 * slope * v / ((B - A) * asym)}.
 }
 
-Inflection is at \code{t = xmid} with \code{dx/dt = slope} and
-\code{y(xmid) = A + (B - A) * asym} for any \code{asym} in \verb{(0, 1)}.
+The inflection is at \code{t = xmid} with \code{dx/dt = slope} and
+\code{y(xmid) = A + (B - A) * asym} for any \code{asym} in \verb{(0, 1)}:
 \itemize{
-\item \code{asym = 0.5 -> v = 1} the model collapses to the 4-parameter form.
-\item \code{asym -> 0} gives an early-acceleration curve (inflection near \code{A}),
+\item \code{asym = 0.5} (\code{v = 1}) collapses to the 4-parameter form.
+\item \code{asym -> 0} gives an early-acceleration curve (inflection near \code{A}).
 \item \code{asym -> 1} gives a late-acceleration curve (inflection near \code{B}).
-\item \code{asym = 0.368} (\code{1/e}) approximates a right-inflection Gompertz curve.
-\item \code{asym = 0.632} (\code{1 - 1/e}) approximates a left-inflection Gompertz curve.
+\item \code{asym = 0.368} (\code{1/e}) approximates a right-inflection \code{\link[=gompertz]{gompertz()}} curve.
+\item \code{asym = 0.632} (\code{1 - 1/e}) approximates a left-inflection
+\code{\link[=gompertz_left]{gompertz_left()}} curve.
 }
 }
 }
 \examples{
-## create a logistic curve with random noise
+## create an asymmetric logistic curve with random noise
 set.seed(15)
 t <- 1:60
 x <- logistic(t, A = 10, B = 100, xmid = 30, slope = 4, asym = 0.3) +
     rnorm(length(t), 0, 2)
-data <- data.frame(x, t)
+data <- data.frame(t, x)
 
+## 5-parameter fit with the self-starting wrapper
 model <- nls(x ~ SSlogistic(t, A, B, xmid, slope, asym), data = data)
 summary(model)
 
@@ -94,5 +92,6 @@ y <- predict(model, data)
 
 }
 \seealso{
-\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[=monoexponential]{monoexponential()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[=gompertz]{gompertz()}},
+\code{\link[=gompertz_left]{gompertz_left()}}, \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}, \code{\link[=monoexponential]{monoexponential()}}
 }

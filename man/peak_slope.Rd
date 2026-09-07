@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_peak_slope.R
 \name{peak_slope}
 \alias{peak_slope}
-\title{Find peak linear slope}
+\title{Peak linear slope}
 \usage{
 peak_slope(
   x,
@@ -57,70 +57,79 @@ Global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 A named list containing:
 \item{\code{slope}}{The peak slope value in units of \code{x / t}.}
 \item{\code{intercept}}{The y-intercept of the peak local regression line.}
-\item{\code{y}}{The predicted response value at the peak slope window index.}
-\item{\code{t}}{The time value at the peak slope window index.}
-\item{\code{idx}}{The integer index position of the peak slope window.}
+\item{\code{y}}{The predicted value of \code{x} at the peak slope index.}
+\item{\code{t}}{The value of \code{t} at the peak slope index.}
+\item{\code{idx}}{The integer index of the peak slope window.}
 \item{\code{fitted}}{A numeric vector of predicted values spanning the peak
 slope window.}
 \item{\code{window_idx}}{An integer vector of indices spanning the peak slope
 window.}
+\item{\code{model}}{The \link[stats:lm]{lm} object fit to the peak slope
+window.}
 }
 \description{
-Identify the maximum positive or negative local linear slope within a
-numeric vector using rolling least-squares regression, and return a list
-of regression parameters for the peak window. Vector-level companion to
-\code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "peak_slope"}.
+Identify the maximum positive or negative local linear slope of a numeric
+vector using rolling least-squares regression, and return the regression
+parameters of the peak window. Vector-level companion to
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "peak_slope"}.
 }
 \details{
+A semi-parametric approach to estimate the steepest local rate of change
+of a signal. In NIRS signals this can be interpreted as the moment of
+greatest mismatch between oxygen delivery and extraction. Rolling slopes
+are computed by \code{\link[=rolling_slope]{rolling_slope()}}, and the peak window is refit with
+\code{\link[stats:lm]{stats::lm()}} to return the regression parameters.
 \subsection{Rolling window}{
 
-The local rolling window is defined by either \code{width} (number of samples)
-or \code{span} (time duration in units of \code{t}); one of either \code{width} or \code{span}
-must be specified. When \code{align = "centre"} and
-\code{width} is specified, the window spans
+The local window is defined by either \code{width} (number of samples) or
+\code{span} (time span in units of \code{t}); one of either \code{width} or \code{span} must be
+specified.
+\itemize{
+\item \code{width} with \code{align = "centre"} spans
 \verb{[idx - floor((width - 1) / 2), idx + floor(width / 2)]}. Even \code{width}
 values bias alignment to \emph{"left"}, placing the unequal sample forward of
 \code{idx}.
-
-When \code{span} is specified with \code{align = "centre"}, the window spans
-\verb{[t - span / 2, t + span / 2]}.
+\item \code{span} with \code{align = "centre"} spans \verb{[t - span / 2, t + span / 2]}.
+}
 }
 
-\subsection{Direction detection}{
+\subsection{Direction}{
 
-When \code{direction = "auto"}, the net slope across all of \code{x} determines the
-overall trend (positive or negative), and the greatest local slope in that
-direction is returned. If the net slope equals zero or is \code{NA}, the greatest
-absolute local slope is returned.
+\code{direction} is detected automatically by default as either \emph{"positive"}
+(upward) or \emph{"negative"} (downward) response, from the dominant excursion
+of \code{x} above or below its initial baseline (the median of the earliest
+samples). When tied, the greater absolute rolling slope decides. The
+greatest local slope in that direction is returned, and \code{direction} can be
+overwritten manually.
 }
 
 \subsection{Partial windows}{
 
-The default \code{partial = FALSE} requires the complete number of samples
-specified by \code{width} or \code{span}. \code{NA} is returned if fewer samples are
-present in the local window.
-
-Setting \code{partial = TRUE} allows computation with as few as 2 valid samples.
-These windows, such as at edge conditions, will be more sensitive to noise
-and this setting should be used with caution.
+\code{partial = FALSE} (the \emph{default}) requires the complete number of samples
+specified by \code{width} or \code{span}, and returns \code{NA} for any window with fewer
+samples. \code{partial = TRUE} allows computation with as few as 2 valid
+samples. These windows, such as at edge conditions, are more sensitive to
+noise and should be used with caution.
 }
 
 \subsection{Missing values}{
 
-When \code{na.rm = FALSE} (the default), any \code{NA} in a window propagates \code{NA}
-to the returned slope. When \code{na.rm = TRUE}, \code{NA}s are ignored and the slope
-is computed from the remaining valid samples.
+\code{na.rm = FALSE} (the \emph{default}) propagates any \code{NA} in a window to the
+returned slope. \code{na.rm = TRUE} ignores \code{NA}s and computes the slope from
+the remaining valid samples.
 }
 }
 \examples{
 x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+
+## peak positive slope over a 5-sample window
 peak_slope(x, width = 5)
 
-x_dec <- rev(x)
-peak_slope(x_dec, width = 5)
+## peak negative slope of the reversed signal
+peak_slope(rev(x), width = 5)
 
 }
 \seealso{
-\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=response_time]{response_time()}}, \code{\link[=monoexponential]{monoexponential()}},
-\code{\link[=rolling_slope]{rolling_slope()}}
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=rolling_slope]{rolling_slope()}}, \code{\link[=response_time]{response_time()}},
+\code{\link[=monoexponential]{monoexponential()}}
 }

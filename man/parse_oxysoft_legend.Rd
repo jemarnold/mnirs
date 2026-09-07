@@ -13,7 +13,8 @@ parse_oxysoft_legend(raw, header_row)
 }
 \description{
 Legend rows above the numeric header row map column ids to trace names.
-Returns a channel list of named mappings \code{c(new_name = "original_col")},
-or \code{NULL} when the legend is missing or malformed.
+Returns a channel list of named mappings \code{c(new_name = "original_col")}
+plus \code{alias} mapping raw trace names to column ids, or \code{NULL} when the
+legend is missing or malformed.
 }
 \keyword{internal}

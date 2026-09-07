@@ -1388,8 +1388,7 @@ test_that("analyse_biexponential() converges on real dataset", {
     warnings()
     plot(results)
     plot(results, time_labels = TRUE, labels = FALSE) + 
-        ggplot2::coord_cartesian(ylim = c(40, 90)) + 
-        ggview::canvas(width = 280, height = 280*0.5, units = "mm", dpi = 300)
+        ggplot2::coord_cartesian(ylim = c(40, 90))
     # plot(results, components = TRUE, scales = "free")
 
     coefs <- results$coefficients

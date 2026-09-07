@@ -13,8 +13,8 @@ sigdrift_start(x, t, fixed = list(), shape = "symmetric")
 
 \item{fixed}{A named list of user-fixed parameter values.}
 
-\item{shape}{Character; the sigmoidal shape. One of \code{"symmetric"}
-(\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
+\item{shape}{Character; the 4-parameter sigmoidal shape. One of
+\code{"symmetric"} (\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
 \code{"gompertz_left"} (\code{\link[=gompertz_left]{gompertz_left()}}).}
 }
 \value{

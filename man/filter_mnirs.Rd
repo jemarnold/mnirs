@@ -271,7 +271,7 @@ data_filtered
 
 \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ## plot filtered data and add the raw data back to the plot to compare
+        ## plot filtered data on top of raw to compare
         plot(data_filtered, time_labels = TRUE) +
             ggplot2::geom_line(
                 data = data,

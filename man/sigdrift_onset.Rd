@@ -13,19 +13,18 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{xmid}{A numeric parameter for the time value at the inflection
-(steepest) point of the curve, in units of the predictor variable \code{t}.}
+\item{xmid}{A numeric parameter for the time at the \emph{inflection point} (the
+steepest point) of the curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 
-\item{drift_fraction}{A numeric fraction of the amplitude \code{B - A} in
-\verb{(0.5, 1)} at which the linear drift begins: the drift onset is where
-the sigmoid reaches \code{A + drift_fraction * (B - A)} (see
-\code{\link[=sigdrift_onset]{sigdrift_onset()}}).}
+\item{drift_fraction}{A numeric fraction of the primary amplitude \code{B - A}
+in \verb{(0.5, 1)} at which the linear drift begins, where the sigmoid
+reaches \code{A + drift_fraction * (B - A)}.}
 
-\item{shape}{Character; the sigmoidal shape. One of \code{"symmetric"}
-(\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
+\item{shape}{Character; the 4-parameter sigmoidal shape. One of
+\code{"symmetric"} (\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
 \code{"gompertz_left"} (\code{\link[=gompertz_left]{gompertz_left()}}).}
 }
 \value{

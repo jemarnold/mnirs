@@ -15,19 +15,18 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
-of the exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the \emph{time constant} (\eqn{\tau}) of the
+exponential response, in units of the predictor variable \code{t}.}
 
-\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
-of the secondary phase, in response units per unit of the predictor
-variable \code{t}.}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt} of the
+secondary phase, in response units per unit of the predictor variable
+\code{t}.}
 
-\item{drift_fraction}{A numeric fraction of the amplitude \code{B - A} in
-\verb{(0.5, 1)} at which the linear drift begins: the drift onset is where
-the primary response reaches \code{A + drift_fraction * (B - A)}, at
-\code{TD - tau * log(1 - drift_fraction)} (\code{TD = 0} when absent).}
+\item{drift_fraction}{A numeric fraction of the primary amplitude \code{B - A}
+in \verb{(0.5, 1)} at which the linear drift begins, where the primary
+response reaches \code{A + drift_fraction * (B - A)}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 exponential response, in units of the predictor variable \code{t}. If \code{NULL}
 (\emph{default}), a 3-parameter model without time delay is used.}
 }

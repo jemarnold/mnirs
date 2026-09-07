@@ -36,14 +36,6 @@ This article assumes basic familiarity with the *{mnirs}* package. See [*Reading
 
 library(ggplot2) ## for plotting
 library(mnirs)   ## install: pak::pak("jemarnold/mnirs@dev")
-
-```
-
-```{r}
-#| label: file paths
-#| echo: false
-PIONIRS_ftn <- r"(C:\R-Projects\mnirs\tests\testthat\testdata\pionirs_occlusion.ftn)"
-PIONIRS_ftn2 <- r"(C:\R-Projects\mnirs\tests\testthat\testdata\pionirs_occlusion.ftn2)"
 ```
 
 
@@ -58,7 +50,7 @@ When automatically detecting a known NIRS device file format, all columns are re
 
 ## read an example file with no additional parameters
 ## file paths are hidden for this example
-df_sto2 <- read_mnirs(PIONIRS_ftn2)
+df_sto2 <- read_mnirs(example_mnirs("pionirs"))
 
 print(df_sto2, n = 5)
 ```
@@ -97,24 +89,23 @@ plot(df_filt) +
 
 # Specify explicit NIRS channels for analysis
 
-Channels can also be specified and renamed explicitly. Here we read the raw haemoglobin concentration channels from the single-channel `.ftn` file, with the event column containing manually entered labels.
+Channels can also be specified and renamed explicitly. Since we have already read the file, we can instead modify channels using `create_mnirs_data()`. We will specify the raw haemoglobin concentration signals from the first NIRS channel, with the event column containing manually entered labels.
 
 ```{r}
 #| label: read ftn
 
-df_raw <- read_mnirs(
-    file_path     = PIONIRS_ftn,
-    nirs_channels = c(o2hb = "O2Hb", hhb = "HHb", thb = "THb"),
-    time_channel  = c(time = "Time"),
-    event_channel = c(labels = "TagLabel"),
-    verbose = FALSE
-) |> 
+df_raw <- create_mnirs_data(
+    df_filt,
+    nirs_channels = c(o2hb = "O2Hb(CH1)", hhb = "HHb(CH1)", thb = "THb(CH1)"),
+    time_channel = c(time = "Time"),
+    event_channel = c(labels = "TagLabel")
+) |>
     filter_mnirs(method = "butterworth", order = 2, fc = 0.05)
 
-plot(df_raw) + 
+plot(df_raw) +
     geom_vline(
         data = subset(df_raw, !is.na(labels)),
-        aes(xintercept = time), 
+        aes(xintercept = time),
         linetype = "dotted"
     )
 ```

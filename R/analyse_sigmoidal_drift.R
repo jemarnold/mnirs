@@ -1,50 +1,56 @@
 #' Sigmoidal-drift function
 #'
-#' Calculate a two-phase curve: a primary sigmoidal response with a
-#' secondary linear drift beginning near the ending asymptote.
+#' @description
+#' Calculate a two-phase curve: a *fast* sigmoidal primary response of the
+#' given `shape` plus a *slow* linear secondary drift beginning near the
+#' ending asymptote. Model family fit by [analyse_kinetics()] with
+#' `method = "sigmoidal_drift"`, and by [stats::nls()] via the self-starting
+#' wrapper [SSsigmoidal_drift()].
 #'
-#' @param slope_B A numeric parameter for the linear drift rate `dx/dt`
-#'   of the secondary phase at the ending asymptote `B`, in response units
-#'   per unit of the predictor variable `t`.
-#' @param drift_fraction A numeric fraction of the amplitude `B - A` in
-#'   `(0.5, 1)` at which the linear drift begins: the drift onset is where
-#'   the sigmoid reaches `A + drift_fraction * (B - A)` (see
-#'   [sigdrift_onset()]).
-#' @param shape Character; the sigmoidal shape. One of `"symmetric"`
-#'   (*default*; [logistic()]), `"gompertz"` ([gompertz()]), or
+#' @param slope_B A numeric parameter for the linear drift rate `dx/dt` of the
+#'   secondary phase at the ending asymptote `B`, in response units per unit
+#'   of the predictor variable `t`.
+#' @param drift_fraction A numeric fraction of the primary amplitude `B - A`
+#'   in `(0.5, 1)` at which the linear drift begins, where the sigmoid
+#'   reaches `A + drift_fraction * (B - A)`.
+#' @param shape Character; the 4-parameter sigmoidal shape. One of
+#'   `"symmetric"` (*default*; [logistic()]), `"gompertz"` ([gompertz()]), or
 #'   `"gompertz_left"` ([gompertz_left()]).
 #' @inheritParams logistic
 #'
 #' @details
-#' Model:
+#' ## Model equation
+#'
 #' `S(t) + slope_B * pmax(t - onset, 0)`
 #'
-#' where `S(t)` is the 4-parameter sigmoid of the given `shape` with
-#' asymptotes `A` and `B`, inflection `xmid`, and inflection rate `slope`.
-#' The drift is a hinge line anchored at zero at the onset, so it is
-#' exactly zero up to the onset.
+#' `S(t)` is the 4-parameter sigmoid of the given `shape` with asymptotes `A`
+#' and `B`, inflection `xmid`, and inflection rate `slope` (see [logistic()]
+#' and [gompertz()]). The drift is a hinge line anchored at zero at the onset,
+#' so it is exactly zero up to the onset.
 #'
-#' The onset is the analytic inverse of each shape at the `drift_fraction`
-#' fraction `f` of its amplitude, `onset = xmid + u / k`:
+#' The drift onset is not a free estimate: it is the analytic inverse of each
+#' shape at the `drift_fraction` fraction `f` of its amplitude,
+#' `onset = xmid + u / k`:
 #'
-#' - `shape = "symmetric"`: `k = 4 * slope / (B - A)`;
-#'   `u = log(f / (1 - f))`.
-#' - `shape = "gompertz"`: `k = slope * e / (B - A)`;
-#'   `u = -log(-log(f))`.
+#' - `shape = "symmetric"`: `k = 4 * slope / (B - A)`; `u = log(f / (1 - f))`.
+#' - `shape = "gompertz"`: `k = slope * e / (B - A)`; `u = -log(-log(f))`.
 #' - `shape = "gompertz_left"`: `k = slope * e / (B - A)`;
 #'   `u = log(-log(1 - f))`.
 #'
-#' The `"gompertz"` form places its onset furthest past `xmid` (slow
-#' tail) and `"gompertz_left"` nearest (fast tail).
+#' The `"gompertz"` form places its onset furthest past `xmid` (slow tail)
+#' and `"gompertz_left"` nearest (fast tail).
+#'
+#' The excursion point `texc` is where the drift rate overtakes the decaying
+#' primary rate, `|S'(t)| = |slope_B|`, floored at the drift onset.
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
 #' @seealso [analyse_kinetics()], [SSsigmoidal_drift()], [logistic()],
-#'   [gompertz()], [exponential_drift()]
+#'   [gompertz()], [gompertz_left()], [exponential_drift()]
 #'
 #' @examples
-#' ## create a sigmoidal curve with a late linear drift and random noise
+#' ## create a sigmoidal curve with late linear drift and random noise
 #' set.seed(13)
 #' t <- 1:120
 #' x <- sigmoidal_drift(
@@ -272,39 +278,50 @@ sigdrift_start <- function(x, t, fixed = list(), shape = "symmetric") {
 
 #' Self-starting sigmoidal-drift model
 #'
+#' @description
 #' Creates initial coefficient estimates for a `selfStart` wrapper around
 #' [sigmoidal_drift()], for use with [stats::nls()]: a 4-parameter sigmoid
-#' (`A`, `B`, `xmid`, `slope`) with a linear drift `slope_B` at its ending
-#' asymptote from the onset fraction `drift_fraction`.
+#' (A, B, xmid, slope) with a linear drift `slope_B` at its ending asymptote
+#' from the onset fraction `drift_fraction`.
+#'
+#' @usage
+#' SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction, shape)
 #'
 #' @inheritParams sigmoidal_drift
 #'
 #' @details
+#' ## Model formula
+#'
 #' `x ~ SSsigmoidal_drift(t, A, B, xmid, slope, slope_B,
 #' drift_fraction = 0.95, shape = "gompertz")`
 #'
 #' `drift_fraction` should be written as a constant, and `shape` is a string
-#' constant (`"symmetric"` when omitted); neither is estimated. The hinge
-#' at the onset is not differentiable, so `algorithm = "port"` with
+#' constant (`"symmetric"` when omitted); neither is estimated. The hinge at
+#' the drift onset is not differentiable, so `algorithm = "port"` with
 #' `control = nls.control(warnOnly = TRUE)` is recommended.
+#'
+#' Starting estimates seed the sigmoid as for [SSgompertz()], resolve the
+#' drift onset from that seed, and regress the residual past the onset on
+#' time to seed `slope_B` and correct the asymptote `B`.
 #'
 #' ## Fixing parameters
 #'
-#' Any parameter may be held constant by writing a value in place of its
-#'   name in the formula, e.g.
-#'   `x ~ SSsigmoidal_drift(t, A = 0, B, xmid, slope, slope_B,
-#'   drift_fraction = 0.95)` holds the starting asymptote at `0`. Fixed
-#'   parameters are excluded from estimation and are not returned by
-#'   [stats::coef()].
+#' Any parameter may be held constant by writing a value in place of its name
+#' in the formula, e.g.
+#' `x ~ SSsigmoidal_drift(t, A = 0, B, xmid, slope, slope_B,
+#' drift_fraction = 0.95)` fixes the starting asymptote at `A = 0`. Fixed
+#' parameters are excluded from estimation and are not returned by
+#' [stats::coef()].
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
-#' @seealso [sigmoidal_drift()], [stats::nls()], [stats::selfStart()],
-#'   [SSlogistic()], [SSgompertz()], [SSexponential_drift()]
+#' @seealso [sigmoidal_drift()], [analyse_kinetics()], [stats::nls()],
+#'   [stats::selfStart()], [SSlogistic()], [SSgompertz()],
+#'   [SSexponential_drift()]
 #'
 #' @examples
-#' ## create a Gompertz curve with a late linear drift and random noise
+#' ## create a Gompertz curve with late linear drift and random noise
 #' set.seed(13)
 #' t <- 1:120
 #' x <- sigmoidal_drift(
@@ -313,6 +330,7 @@ sigdrift_start <- function(x, t, fixed = list(), shape = "symmetric") {
 #' ) + rnorm(length(t), 0, 2)
 #' data <- data.frame(t, x)
 #'
+#' ## fit with the drift onset held at 95% of the amplitude
 #' model <- nls(
 #'     x ~ SSsigmoidal_drift(
 #'         t, A, B, xmid, slope, slope_B,

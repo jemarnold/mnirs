@@ -110,8 +110,9 @@ these channels automatically:
 \itemize{
 \item \code{nirs_channels} names become clean lower-case column names with
 underscores (e.g. \code{"Rx1 - Tx1 O2Hb"} becomes \code{rx1_tx1_o2hb}). Channels
-should still be explicitly renamed pointing to their number, e.g.
-\code{nirs_channels = c(o2hb = 2, hhb = 3)}.
+can still be renamed by any of column number, cleaned name, or legend
+trace name, e.g. \code{nirs_channels = c(o2hb = 2)},
+\code{c(o2hb = "rx1_tx1_o2hb")}, or \code{c(o2hb = "Rx1 - Tx1 O2Hb")}.
 \item \code{"(Sample number)"} column is renamed \code{sample}, and a \code{time} column
 in seconds is automatically derived from the export sample rate.
 \item \code{"(Event)"} column is renamed \code{event} and set as \code{event_channel}.

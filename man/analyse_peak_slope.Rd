@@ -40,9 +40,9 @@ used.
 }}
 
 \item{start_time}{A numeric value in units of \code{time_channel} specifying the
-time of response onset (effectively time = \code{0} of the response). If \code{NULL}
-(\emph{default}), retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls
-back to \code{0} or the first positive time value (see \emph{Details}).}
+response onset (effectively time = \code{0} of the fit). If \code{NULL} (\emph{default}),
+retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}
+or the first positive time value (see \emph{Details}).}
 
 \item{width}{An integer defining the local window in number of samples
 around \code{idx} in which to perform the operation, according to \code{align}.}
@@ -60,13 +60,13 @@ is \emph{backward looking} from the current sample.}
 \emph{Details}.}
 
 \item{end_window}{A numeric value in units of \code{time_channel} specifying the
-window in which to look for the end of the kinetics fit; returns the
-window with no greater/lesser values within \code{end_window} after the first
-extreme value. \code{end_window = Inf} (\emph{default}) returns the global extreme
-from the full sample range (see \emph{Details}). For \emph{"biexponential"},
-\code{end_window} bounds the fast-phase (stage 1) window only, and \code{Inf}
-resolves to \code{30} time units past the first extreme; the full model is
-fit to the whole response.}
+window in which to look for the end of the kinetics fit; with no greater/
+lesser values within \code{end_window} after the first extrema (min/max).
+\code{end_window = Inf} (\emph{default}) returns the global extreme from the full
+data range (see \emph{Details}).
+
+For \emph{"biexponential"}, \code{end_window} bounds the fast-phase window only, and
+the default is \code{30} sec; the full model is then fit to the full data range.}
 
 \item{partial}{Logical; default is \code{FALSE}, only returns values where a full
 window of valid (non-\code{NA}) samples are available. If \code{TRUE}, ignores \code{NA}

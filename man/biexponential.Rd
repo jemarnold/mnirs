@@ -12,8 +12,8 @@ biexponential(t, A, B, tau, B2, tau2, TD = NULL)
 \item{A}{A numeric parameter for the starting value of the response
 variable (the \code{t = 0} intercept).}
 
-\item{B}{A numeric parameter for the asymptote of the \emph{fast} component;
-the value the fast response alone would approach.}
+\item{B}{A numeric parameter for the asymptote of the \emph{fast} component; the
+value the fast response alone would approach.}
 
 \item{tau}{A numeric parameter for the \emph{fast} time constant (\eqn{\tau_1}),
 in units of the predictor variable \code{t}. Dominates the initial steep
@@ -26,7 +26,7 @@ infinity.}
 \item{tau2}{A numeric parameter for the \emph{slow} time constant (\eqn{\tau_2}),
 in units of the predictor variable \code{t}. Typically \verb{tau2 >> tau}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of the
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 response, in units of the predictor variable \code{t}. If \code{NULL} (\emph{default}),
 a 5-parameter model without time delay is used.}
 }
@@ -35,37 +35,38 @@ A numeric vector of predicted values the same length as the
 predictor variable \code{t}.
 }
 \description{
-Calculate a two-phase curve: a fast monoexponential response toward \code{B}
-and a slow monoexponential response from \code{B} toward a stable plateau at
-\code{B2}, both clocked from the response onset and summed.
+Calculate a two-phase curve: a \emph{fast} monoexponential primary response
+toward \code{B} and a \emph{slow} monoexponential secondary response from \code{B} toward
+a stable plateau at \code{B2}, both clocked from the response onset and summed.
+Model family fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "biexponential"},
+and by \code{\link[stats:nls]{stats::nls()}} via the self-starting wrapper \code{\link[=SSbiexponential]{SSbiexponential()}}.
 }
 \details{
-This model family is fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when
-\code{method = "biexponential"}, and by \code{\link[stats:nls]{stats::nls()}} via the self-starting
-wrapper \code{\link[=SSbiexponential]{SSbiexponential()}}.
 \subsection{Model equations}{
-
-5-parameter model:
-\code{A + (B - A) * (1 - exp(-t / tau)) + (B2 - B) * (1 - exp(-t / tau2))}
-
-6-parameter model (with time delay), where \code{ts = pmax(t - TD, 0)}:
+\itemize{
+\item 5-parameter: \code{A + (B - A) * (1 - exp(-t / tau)) + (B2 - B) * (1 - exp(-t / tau2))}
+\item 6-parameter, where \code{ts = pmax(t - TD, 0)}:
 \code{A + (B - A) * (1 - exp(-ts / tau)) + (B2 - B) * (1 - exp(-ts / tau2))}
+}
 
 \code{A}, \code{B}, and \code{B2} are all values on the response scale. The fast
 component is a \code{\link[=monoexponential]{monoexponential()}} response from \code{A} toward \code{B} with
 amplitude \code{B - A}; the slow component runs concurrently from the same
-onset with amplitude \code{B2 - B}. The curve starts at \code{A}, approaches \code{B2}
-as \code{t} grows, and is smooth throughout.
+onset with amplitude \code{B2 - B}. The curve starts at \code{A}, approaches \code{B2} as
+\code{t} grows, and is smooth throughout. If \code{B = B2}, the curve reduces to a
+\code{\link[=monoexponential]{monoexponential()}} with time constant \code{tau} and asymptote \code{B2}.
+}
+
+\subsection{Excursion point}{
 
 The expected response is a \emph{fast} excursion toward a minimum or maximum
 short of \code{B}, followed by a \emph{slow} recovery back to a stable plateau at
-\code{B2}. The excursion point occurs where the two phase rates cancel:
-\code{texc = TD + log(r) / (1 / tau - 1 / tau2)} with
-\code{ratio = -(B - A) * tau2 / ((B2 - B) * tau)}, which exists only when
-the amplitudes oppose in sign and the fast phase dominates at the onset
+\code{B2}. The excursion point \code{texc} occurs where the two phase rates cancel:
+\code{texc = TD + log(ratio) / (1 / tau - 1 / tau2)} with
+\code{ratio = -(B - A) * tau2 / ((B2 - B) * tau)}, which exists only when the
+amplitudes oppose in sign and the fast phase dominates at the onset
 (\code{ratio > 1}). If \code{B} is between \code{A} and \code{B2}, the response is monotonic
-but still two-phase. If \code{B = B2}, the curve reduces to a
-\code{\link[=monoexponential]{monoexponential()}} with single time constant \code{tau} and asymptote \code{B2}.
+but still two-phase.
 }
 }
 \examples{
@@ -76,6 +77,7 @@ x <- biexponential(t, A = 70, B = 40, tau = 5, B2 = 60, tau2 = 40) +
     rnorm(length(t), 0, 0.8)
 data <- data.frame(t, x)
 
+## 5-parameter fit with the self-starting wrapper
 model <- nls(
     x ~ SSbiexponential(t, A, B, tau, B2, tau2),
     data = data,

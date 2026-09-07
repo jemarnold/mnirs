@@ -15,10 +15,10 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
-of the exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the \emph{time constant} (\eqn{\tau}) of the
+exponential response, in units of the predictor variable \code{t}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 exponential response, in units of the predictor variable \code{t}. If \code{NULL}
 (\emph{default}), a 3-parameter model without time delay is used.}
 }

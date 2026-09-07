@@ -4,8 +4,7 @@
 \alias{SSsigmoidal_drift}
 \title{Self-starting sigmoidal-drift model}
 \usage{
-SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction,
-    shape = "symmetric")
+SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction, shape)
 }
 \arguments{
 \item{t}{A numeric vector of the predictor variable (time).}
@@ -16,23 +15,22 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{xmid}{A numeric parameter for the time value at the inflection
-(steepest) point of the curve, in units of the predictor variable \code{t}.}
+\item{xmid}{A numeric parameter for the time at the \emph{inflection point} (the
+steepest point) of the curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 
-\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
-of the secondary phase at the ending asymptote \code{B}, in response units
-per unit of the predictor variable \code{t}.}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt} of the
+secondary phase at the ending asymptote \code{B}, in response units per unit
+of the predictor variable \code{t}.}
 
-\item{drift_fraction}{A numeric fraction of the amplitude \code{B - A} in
-\verb{(0.5, 1)} at which the linear drift begins: the drift onset is where
-the sigmoid reaches \code{A + drift_fraction * (B - A)} (see
-\code{\link[=sigdrift_onset]{sigdrift_onset()}}).}
+\item{drift_fraction}{A numeric fraction of the primary amplitude \code{B - A}
+in \verb{(0.5, 1)} at which the linear drift begins, where the sigmoid
+reaches \code{A + drift_fraction * (B - A)}.}
 
-\item{shape}{Character; the sigmoidal shape. One of \code{"symmetric"}
-(\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
+\item{shape}{Character; the 4-parameter sigmoidal shape. One of
+\code{"symmetric"} (\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
 \code{"gompertz_left"} (\code{\link[=gompertz_left]{gompertz_left()}}).}
 }
 \value{
@@ -42,27 +40,35 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for a \code{selfStart} wrapper around
 \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}, for use with \code{\link[stats:nls]{stats::nls()}}: a 4-parameter sigmoid
-(\code{A}, \code{B}, \code{xmid}, \code{slope}) with a linear drift \code{slope_B} at its ending
-asymptote from the onset fraction \code{drift_fraction}.
+(A, B, xmid, slope) with a linear drift \code{slope_B} at its ending asymptote
+from the onset fraction \code{drift_fraction}.
 }
 \details{
+\subsection{Model formula}{
+
 \code{x ~ SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction = 0.95, shape = "gompertz")}
 
 \code{drift_fraction} should be written as a constant, and \code{shape} is a string
-constant (\code{"symmetric"} when omitted); neither is estimated. The hinge
-at the onset is not differentiable, so \code{algorithm = "port"} with
+constant (\code{"symmetric"} when omitted); neither is estimated. The hinge at
+the drift onset is not differentiable, so \code{algorithm = "port"} with
 \code{control = nls.control(warnOnly = TRUE)} is recommended.
+
+Starting estimates seed the sigmoid as for \code{\link[=SSgompertz]{SSgompertz()}}, resolve the
+drift onset from that seed, and regress the residual past the onset on
+time to seed \code{slope_B} and correct the asymptote \code{B}.
+}
+
 \subsection{Fixing parameters}{
 
-Any parameter may be held constant by writing a value in place of its
-name in the formula, e.g.
-\code{x ~ SSsigmoidal_drift(t, A = 0, B, xmid, slope, slope_B, drift_fraction = 0.95)} holds the starting asymptote at \code{0}. Fixed
+Any parameter may be held constant by writing a value in place of its name
+in the formula, e.g.
+\code{x ~ SSsigmoidal_drift(t, A = 0, B, xmid, slope, slope_B, drift_fraction = 0.95)} fixes the starting asymptote at \code{A = 0}. Fixed
 parameters are excluded from estimation and are not returned by
 \code{\link[stats:coef]{stats::coef()}}.
 }
 }
 \examples{
-## create a Gompertz curve with a late linear drift and random noise
+## create a Gompertz curve with late linear drift and random noise
 set.seed(13)
 t <- 1:120
 x <- sigmoidal_drift(
@@ -71,6 +77,7 @@ x <- sigmoidal_drift(
 ) + rnorm(length(t), 0, 2)
 data <- data.frame(t, x)
 
+## fit with the drift onset held at 95\% of the amplitude
 model <- nls(
     x ~ SSsigmoidal_drift(
         t, A, B, xmid, slope, slope_B,
@@ -84,6 +91,7 @@ summary(model)
 
 }
 \seealso{
-\code{\link[=sigmoidal_drift]{sigmoidal_drift()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
-\code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[=SSgompertz]{SSgompertz()}}, \code{\link[=SSexponential_drift]{SSexponential_drift()}}
+\code{\link[=sigmoidal_drift]{sigmoidal_drift()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[stats:nls]{stats::nls()}},
+\code{\link[stats:selfStart]{stats::selfStart()}}, \code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[=SSgompertz]{SSgompertz()}},
+\code{\link[=SSexponential_drift]{SSexponential_drift()}}
 }

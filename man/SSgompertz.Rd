@@ -3,7 +3,7 @@
 \name{SSgompertz}
 \alias{SSgompertz}
 \alias{SSgompertz_left}
-\title{Self-starting Gompertz model}
+\title{Self-starting Gompertz models}
 \usage{
 SSgompertz(t, A, B, xmid, slope)
 
@@ -20,11 +20,11 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{xmid}{A numeric parameter for the time value at the inflection
-(steepest) point of the curve, in units of the predictor variable \code{t}.}
+\item{xmid}{A numeric parameter for the time at the \emph{inflection point} (the
+steepest point) of the curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 }
 \value{
 A numeric vector of predicted values the same length as the
@@ -33,16 +33,27 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for \code{selfStart} wrappers around
 \code{\link[=gompertz]{gompertz()}} and \code{\link[=gompertz_left]{gompertz_left()}}, for use with \code{\link[stats:nls]{stats::nls()}}. Both
-wrappers use the same 4-parameter \verb{(A, B, xmid, slope)} interface.
+wrappers use the same 4-parameter (A, B, xmid, slope) interface.
 }
 \details{
-Overwrites \code{\link[stats:SSgompertz]{stats::SSgompertz()}}.
+\subsection{Model formulas}{
+\itemize{
+\item Right-Gompertz: \code{x ~ SSgompertz(t, A, B, xmid, slope)}
+\item Left-Gompertz: \code{x ~ SSgompertz_left(t, A, B, xmid, slope)}
+}
+
+Used by \code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "sigmoidal"} and
+\code{shape = "gompertz"} or \code{"gompertz_left"}. Starting estimates locate the
+inflection from a smoothed first derivative. \code{SSgompertz()} masks
+\code{\link[stats:SSgompertz]{stats::SSgompertz()}}.
+}
+
 \subsection{Fixing parameters}{
 
-Any parameter may be held constant by writing a value in place of its
-name in the formula, e.g. \code{x ~ SSgompertz(t, A = 0, B, xmid, slope)}
-fixes the starting asymptote at \code{A = 0}. Fixed parameters are excluded
-from estimation and are not returned by \code{\link[stats:coef]{stats::coef()}}.
+Any parameter may be held constant by writing a value in place of its name
+in the formula, e.g. \code{x ~ SSgompertz(t, A = 0, B, xmid, slope)} fixes the
+starting asymptote at \code{A = 0}. Fixed parameters are excluded from
+estimation and are not returned by \code{\link[stats:coef]{stats::coef()}}.
 }
 }
 \examples{
@@ -56,7 +67,7 @@ data <- data.frame(t, x)
 model <- nls(x ~ SSgompertz(t, A, B, xmid, slope), data = data)
 summary(model)
 
-## fix the baseline A at a known value
+## fix the starting asymptote `A` at a known value
 model_fixed <- nls(x ~ SSgompertz(t, A = 10, B, xmid, slope), data = data)
 summary(model_fixed)
 
@@ -71,6 +82,7 @@ summary(model_left)
 
 }
 \seealso{
-\code{\link[=gompertz]{gompertz()}}, \code{\link[=gompertz_left]{gompertz_left()}}, \code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[stats:nls]{stats::nls()}},
-\code{\link[stats:selfStart]{stats::selfStart()}}, \code{\link[stats:SSgompertz]{stats::SSgompertz()}}
+\code{\link[=gompertz]{gompertz()}}, \code{\link[=gompertz_left]{gompertz_left()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}},
+\code{\link[=SSlogistic]{SSlogistic()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
+\code{\link[stats:SSgompertz]{stats::SSgompertz()}}
 }

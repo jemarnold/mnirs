@@ -144,8 +144,8 @@
 #'
 #' ## Grouping intervals
 #'
-#' `group_intervals` controls whether extracted intervals are returned as distinct
-#' data frames or ensemble-averaged.
+#' `group_intervals` controls whether extracted intervals are returned as
+#' distinct data frames or ensemble-averaged.
 #'
 #' \describe{
 #'    \item{`"distinct"`}{The default. Extract each interval and return a

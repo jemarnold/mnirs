@@ -52,7 +52,8 @@
 #' cumulative sum of adjusted incremental differences:
 #'
 #' \deqn{\Delta\text{O2Hb}_c = \Delta\text{O2Hb} - \beta \cdot \Delta\text{THb}}
-#' \deqn{\Delta\text{HHb}_c = \Delta\text{HHb} - (1 - \beta) \cdot \Delta\text{THb}}
+#' \deqn{\Delta\text{HHb}_c = \Delta\text{HHb} - 
+#' (1 - \beta) \cdot \Delta\text{THb}}
 #'
 #' After correction, `total[haem]` is zero (blood volume changes are
 #' normalised).

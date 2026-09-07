@@ -15,8 +15,8 @@ biexp_model(t, A, B, tau, B2, tau2, TD = NULL)
 \item{A}{A numeric parameter for the starting value of the response
 variable (the \code{t = 0} intercept).}
 
-\item{B}{A numeric parameter for the asymptote of the \emph{fast} component;
-the value the fast response alone would approach.}
+\item{B}{A numeric parameter for the asymptote of the \emph{fast} component; the
+value the fast response alone would approach.}
 
 \item{tau}{A numeric parameter for the \emph{fast} time constant (\eqn{\tau_1}),
 in units of the predictor variable \code{t}. Dominates the initial steep
@@ -29,7 +29,7 @@ infinity.}
 \item{tau2}{A numeric parameter for the \emph{slow} time constant (\eqn{\tau_2}),
 in units of the predictor variable \code{t}. Typically \verb{tau2 >> tau}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of the
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 response, in units of the predictor variable \code{t}. If \code{NULL} (\emph{default}),
 a 5-parameter model without time delay is used.}
 }

@@ -15,10 +15,10 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
-of the exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the \emph{time constant} (\eqn{\tau}) of the
+exponential response, in units of the predictor variable \code{t}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 exponential response, in units of the predictor variable \code{t}. If \code{NULL}
 (\emph{default}), a 3-parameter model without time delay is used.}
 }
@@ -27,26 +27,27 @@ A numeric vector of predicted values the same length as the
 predictor variable \code{t}.
 }
 \description{
-Calculate a 3- or 4-parameter monoexponential curve.
+Calculate a 3- or 4-parameter monoexponential curve. Model family fit by
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "monoexponential"}, and by
+\code{\link[stats:nls]{stats::nls()}} via the self-starting wrapper \code{\link[=SSmonoexponential]{SSmonoexponential()}}.
 }
 \details{
-This model family is
-fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "monoexponential"}, and by
-\code{\link[stats:nls]{stats::nls()}} via the self-starting wrapper \code{\link[=SSmonoexponential]{SSmonoexponential()}}.
 \subsection{Model equations}{
+\itemize{
+\item 3-parameter: \code{A + (B - A) * (1 - exp(-t / tau))}
+\item 4-parameter: \code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau))}
+}
 
-3-parameter model: \code{A + (B - A) * (1 - exp(-t / tau))}
+Clamping the shifted time at zero holds the curve flat at the baseline \code{A}
+until the response onset at \code{t = TD}.
+}
 
-4-parameter model: \code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau))}
+\subsection{Derived quantities}{
 
-Clamping the shifted time at zero holds the curve at the baseline \code{A} until
-the onset of the response at \code{t = TD}.
-
-The rate constant \code{k} is the reciprocal of \code{tau} (\code{k = 1 / tau}) in
-reciprocal units of \code{time_channel}; i.e. \verb{sec^-1s}).
-
-Common derived quantities include the mean response time \code{MRT = TD + tau}
-and the half-response time \code{HRT = TD + tau * log(2)}.
+The \emph{rate constant} \code{k} is the reciprocal of \code{tau} (\code{k = 1 / tau}) in
+reciprocal units of \code{t} (e.g. \code{sec^-1}). The \emph{mean response time} is the
+time sum \code{MRT = TD + tau}, and the \emph{half-response time} is
+\code{HRT = TD + tau * log(2)}.
 }
 }
 \examples{
@@ -57,6 +58,7 @@ x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
     rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 
+## 4-parameter fit with the self-starting wrapper
 model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
 summary(model)
 
@@ -73,6 +75,7 @@ y <- predict(model, data)
 
 }
 \seealso{
-\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SSmonoexponential]{SSmonoexponential()}}, \code{\link[=response_time]{response_time()}},
+\code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SSmonoexponential]{SSmonoexponential()}},
+\code{\link[=exponential_drift]{exponential_drift()}}, \code{\link[=biexponential]{biexponential()}}, \code{\link[=response_time]{response_time()}},
 \code{\link[=peak_slope]{peak_slope()}}
 }

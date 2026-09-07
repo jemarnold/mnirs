@@ -1,14 +1,17 @@
 #' Biexponential function
 #'
-#' Calculate a two-phase curve: a fast monoexponential response toward `B`
-#' and a slow monoexponential response from `B` toward a stable plateau at
-#' `B2`, both clocked from the response onset and summed.
+#' @description
+#' Calculate a two-phase curve: a *fast* monoexponential primary response
+#' toward `B` and a *slow* monoexponential secondary response from `B` toward
+#' a stable plateau at `B2`, both clocked from the response onset and summed.
+#' Model family fit by [analyse_kinetics()] with `method = "biexponential"`,
+#' and by [stats::nls()] via the self-starting wrapper [SSbiexponential()].
 #'
 #' @param t A numeric vector of the predictor variable (time).
 #' @param A A numeric parameter for the starting value of the response
 #'   variable (the `t = 0` intercept).
-#' @param B A numeric parameter for the asymptote of the *fast* component;
-#'   the value the fast response alone would approach.
+#' @param B A numeric parameter for the asymptote of the *fast* component; the
+#'   value the fast response alone would approach.
 #' @param tau A numeric parameter for the *fast* time constant (\eqn{\tau_1}),
 #'   in units of the predictor variable `t`. Dominates the initial steep
 #'   response.
@@ -17,39 +20,36 @@
 #'   infinity.
 #' @param tau2 A numeric parameter for the *slow* time constant (\eqn{\tau_2}),
 #'   in units of the predictor variable `t`. Typically `tau2 >> tau`.
-#' @param TD A numeric parameter for the time delay before the onset of the
+#' @param TD A numeric parameter for the *time delay* before the onset of the
 #'   response, in units of the predictor variable `t`. If `NULL` (*default*),
 #'   a 5-parameter model without time delay is used.
 #'
 #' @details
-#' This model family is fit by [analyse_kinetics()] when
-#' `method = "biexponential"`, and by [stats::nls()] via the self-starting
-#' wrapper [SSbiexponential()].
-#'
 #' ## Model equations
 #'
-#' 5-parameter model:
-#'   `A + (B - A) * (1 - exp(-t / tau)) + (B2 - B) * (1 - exp(-t / tau2))`
-#'
-#' 6-parameter model (with time delay), where `ts = pmax(t - TD, 0)`:
+#' - 5-parameter: `A + (B - A) * (1 - exp(-t / tau)) +
+#'   (B2 - B) * (1 - exp(-t / tau2))`
+#' - 6-parameter, where `ts = pmax(t - TD, 0)`:
 #'   `A + (B - A) * (1 - exp(-ts / tau)) +
 #'   (B2 - B) * (1 - exp(-ts / tau2))`
 #'
 #' `A`, `B`, and `B2` are all values on the response scale. The fast
 #' component is a [monoexponential()] response from `A` toward `B` with
 #' amplitude `B - A`; the slow component runs concurrently from the same
-#' onset with amplitude `B2 - B`. The curve starts at `A`, approaches `B2`
-#' as `t` grows, and is smooth throughout.
+#' onset with amplitude `B2 - B`. The curve starts at `A`, approaches `B2` as
+#' `t` grows, and is smooth throughout. If `B = B2`, the curve reduces to a
+#' [monoexponential()] with time constant `tau` and asymptote `B2`.
+#'
+#' ## Excursion point
 #'
 #' The expected response is a *fast* excursion toward a minimum or maximum
 #' short of `B`, followed by a *slow* recovery back to a stable plateau at
-#' `B2`. The excursion point occurs where the two phase rates cancel:
-#' `texc = TD + log(r) / (1 / tau - 1 / tau2)` with
-#' `ratio = -(B - A) * tau2 / ((B2 - B) * tau)`, which exists only when
-#' the amplitudes oppose in sign and the fast phase dominates at the onset
+#' `B2`. The excursion point `texc` occurs where the two phase rates cancel:
+#' `texc = TD + log(ratio) / (1 / tau - 1 / tau2)` with
+#' `ratio = -(B - A) * tau2 / ((B2 - B) * tau)`, which exists only when the
+#' amplitudes oppose in sign and the fast phase dominates at the onset
 #' (`ratio > 1`). If `B` is between `A` and `B2`, the response is monotonic
-#' but still two-phase. If `B = B2`, the curve reduces to a
-#' [monoexponential()] with single time constant `tau` and asymptote `B2`.
+#' but still two-phase.
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
@@ -65,6 +65,7 @@
 #'     rnorm(length(t), 0, 0.8)
 #' data <- data.frame(t, x)
 #'
+#' ## 5-parameter fit with the self-starting wrapper
 #' model <- nls(
 #'     x ~ SSbiexponential(t, A, B, tau, B2, tau2),
 #'     data = data,
@@ -288,11 +289,11 @@ biexp_model <- function(t, A, B, tau, B2, tau2, TD = NULL) {
 
 #' Self-starting biexponential model
 #'
+#' @description
 #' Creates initial coefficient estimates for a `selfStart` wrapper around
 #' [biexponential()], for use with [stats::nls()]. Supports both the
-#' 5-parameter form (A, B, tau, B2, tau2) and the 6-parameter form adding
-#' a time delay TD; arity is inferred from the formula passed to
-#' [stats::nls()].
+#' 5-parameter (A, B, tau, B2, tau2) and 6-parameter forms adding a time
+#' delay TD; arity is inferred from the formula passed to [stats::nls()].
 #'
 #' @usage
 #' SSbiexponential(t, A, B, tau, B2, tau2, TD)
@@ -300,11 +301,10 @@ biexp_model <- function(t, A, B, tau, B2, tau2, TD = NULL) {
 #' @inheritParams biexponential
 #'
 #' @details
-#' 5-parameter model:
-#' `x ~ SSbiexponential(t, A, B, tau, B2, tau2)`
+#' ## Model formulas
 #'
-#' 6-parameter model:
-#' `x ~ SSbiexponential(t, A, B, tau, B2, tau2, TD)`
+#' - 5-parameter: `x ~ SSbiexponential(t, A, B, tau, B2, tau2)`
+#' - 6-parameter: `x ~ SSbiexponential(t, A, B, tau, B2, tau2, TD)`
 #'
 #' The two phases are weakly identified when `tau` and `tau2` are close, so
 #' `algorithm = "port"` with the time constants bounded non-negative and
@@ -312,29 +312,33 @@ biexp_model <- function(t, A, B, tau, B2, tau2, TD = NULL) {
 #' [analyse_kinetics()] instead fits the phases sequentially, holding the
 #' fast phase near a monoexponential estimate.
 #'
-#' The model function returns the analytic gradient for the free
-#' parameters as a `"gradient"` attribute, so [stats::nls()] does not
-#' resort to [stats::numericDeriv()] and [stats::predict()] on a fitted
-#' model carries the attribute; drop it with `as.vector()`.
-#'
 #' The 5-parameter form is recommended for small samples or when no obvious
-#'   time delay is expected, as it converges more reliably. [stats::nls()]
-#'   reads the free parameters from the formula right-hand side, so omitting
-#'   `TD` incurs no degrees-of-freedom penalty.
+#' time delay is expected, as it converges more reliably. [stats::nls()]
+#' reads the free parameters from the formula right-hand side, so omitting
+#' `TD` incurs no degrees-of-freedom penalty.
+#'
+#' Starting estimates are profiled on a coarse grid of `tau`, `tau2` (and
+#' `TD`) with the amplitudes solved by least squares at each grid point,
+#' keeping the residual-minimising start. Grid pairs with
+#' `tau / tau2 > 0.98` are dropped as near-collinear.
+#'
+#' The model function returns the analytic gradient for the free parameters
+#' as a `"gradient"` attribute, so [stats::nls()] does not resort to
+#' [stats::numericDeriv()]. [stats::predict()] on a fitted model carries the
+#' attribute; drop it with `as.vector()`.
 #'
 #' ## Fixing parameters
 #'
-#' Any parameter may be held constant by writing a value in place of its
-#'   name in the formula, e.g.
-#'   `x ~ SSbiexponential(t, A, B, tau = 5, B2, tau2)`
-#'   holds the fast time constant at `5`. Fixed parameters are excluded from
-#'   estimation and are not returned by [stats::coef()].
+#' Any parameter may be held constant by writing a value in place of its name
+#' in the formula, e.g. `x ~ SSbiexponential(t, A, B, tau = 5, B2, tau2)`
+#' holds the fast time constant at `5`. Fixed parameters are excluded from
+#' estimation and are not returned by [stats::coef()].
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
-#' @seealso [biexponential()], [stats::nls()], [stats::selfStart()],
-#'   [SSmonoexponential()], [SSexponential_drift()]
+#' @seealso [biexponential()], [analyse_kinetics()], [stats::nls()],
+#'   [stats::selfStart()], [SSmonoexponential()], [SSexponential_drift()]
 #'
 #' @examples
 #' ## create a biexponential excursion-recovery curve with random noise
@@ -344,6 +348,7 @@ biexp_model <- function(t, A, B, tau, B2, tau2, TD = NULL) {
 #'     rnorm(length(t), 0, 0.8)
 #' data <- data.frame(t, x)
 #'
+#' ## 5-parameter fit
 #' model <- nls(
 #'     x ~ SSbiexponential(t, A, B, tau, B2, tau2),
 #'     data = data,
@@ -353,7 +358,7 @@ biexp_model <- function(t, A, B, tau, B2, tau2, TD = NULL) {
 #' )
 #' summary(model)
 #'
-#' ## fix the fast time constant
+#' ## fix the fast time constant `tau` at a known value
 #' model_fixed <- nls(
 #'     x ~ SSbiexponential(t, A, B, tau = 5, B2, tau2),
 #'     data = data,

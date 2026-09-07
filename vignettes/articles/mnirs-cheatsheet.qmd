@@ -52,14 +52,14 @@ execute:
         [
           #text(size: 20pt, weight: "bold", fill: white)[mnirs]
           #h(0.6em)
-          #text(size: 10pt, fill: white.transparentize(30%))[v0.7.0]
+          #text(size: 10pt, fill: white.transparentize(30%))[v0.8.0]
+          #h(0.8em)
+          #text(size: 9pt, weight: "bold", fill: white)[
+            Muscle Near-Infrared Spectroscopy Processing and Analysis
+          ]
           #h(1fr)
           #link("https://jemarnold-mnirs-app.share.connect.posit.cloud/")[
             #text(size: 14pt, weight: "bold", fill: white, underline[online app])
-          ]
-          #linebreak()
-          #text(size: 9pt, weight: "bold", fill: white)[
-            Muscle Near-Infrared Spectroscopy Processing and Analysis
           ]
           #linebreak()
           #v(0.2em)
@@ -99,7 +99,7 @@ execute:
       #set align(left)
       #text(size: 10pt, weight: "bold")[Workflow]
       #v(0.1em)
-      #set text(font: "Monaspace Neon", size: 10pt, weight: "extralight")
+      #set text(font: "Monaspace Neon", size: 9.5pt, weight: "extralight")
       #tree-line("", "├──", chip("read_mnirs()"))
       #tree-line("│   ", "├──", chip("create_mnirs_data()"))
       #tree-line("│   ", "└──", chip("example_mnirs()"))
@@ -129,9 +129,11 @@ execute:
       #tree-line("│   ", "├──", chip("response_time()"))
       #tree-line("│   ", "├──", chip("peak_slope()"))
       #tree-line("│   ", "├──", chip("monoexponential()"))
-      #tree-line("│   ", "├──", chip("biexponential()"))
       #tree-line("│   ", "├──", chip("exponential_drift()"))
+      #tree-line("│   ", "├──", chip("biexponential()"))
       #tree-line("│   ", "└──", chip("logistic()"))
+      #tree-line("│   ", "└──", chip("gompertz()"))
+      #tree-line("│   ", "└──", chip("sigmoidal_drift()"))
       #tree-line("", "└──", chip("plot.mnirs()"))
     ]
 ))
@@ -223,11 +225,13 @@ execute:
 
 `monoexponential()` — Monoexponential curve fitting
 
-`biexponential()` — Two-phase overlapping exponentials
-
 `exponential_drift()` — Two-phase exponential-linear
 
+`biexponential()` — Two-phase overlapping exponentials
+
 `logistic()`, `gompertz()` — Sigmoidal functions
+
+`sigmoidal_drift()` — Two-phase sigmoidal-linear
 
 ---
 

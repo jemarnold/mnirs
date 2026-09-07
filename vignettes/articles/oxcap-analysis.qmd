@@ -300,7 +300,7 @@ Next, we calculate the slope value for each occlusion interval.
 
 * `method`
 
-    Six analysis methods are currently available. This OxCap analysis uses *"peak_slope"* and *"monoexponential"*, then *"exponential_drift"* as an exploratory extension below.
+    Multiple analysis methods are currently available. This OxCap analysis uses *"peak_slope"* and *"monoexponential"*, then *"exponential_drift"* as an exploratory extension below.
 
 
 

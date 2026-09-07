@@ -15,19 +15,18 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
-of the exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the \emph{time constant} (\eqn{\tau}) of the
+exponential response, in units of the predictor variable \code{t}.}
 
-\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
-of the secondary phase, in response units per unit of the predictor
-variable \code{t}.}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt} of the
+secondary phase, in response units per unit of the predictor variable
+\code{t}.}
 
-\item{drift_fraction}{A numeric fraction of the amplitude \code{B - A} in
-\verb{(0.5, 1)} at which the linear drift begins: the drift onset is where
-the primary response reaches \code{A + drift_fraction * (B - A)}, at
-\code{TD - tau * log(1 - drift_fraction)} (\code{TD = 0} when absent).}
+\item{drift_fraction}{A numeric fraction of the primary amplitude \code{B - A}
+in \verb{(0.5, 1)} at which the linear drift begins, where the primary
+response reaches \code{A + drift_fraction * (B - A)}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 exponential response, in units of the predictor variable \code{t}. If \code{NULL}
 (\emph{default}), a 3-parameter model without time delay is used.}
 }
@@ -36,20 +35,28 @@ A numeric vector of predicted values the same length as the
 predictor variable \code{t}.
 }
 \description{
-Calculate a two-phase curve: a primary monoexponential response with a
-secondary linear drift beginning near the asymptote.
+Calculate a two-phase curve: a \emph{fast} \code{\link[=monoexponential]{monoexponential()}} primary response
+plus a \emph{slow} linear secondary drift beginning near the primary asymptote.
+Model family fit by \code{\link[=analyse_kinetics]{analyse_kinetics()}} with
+\code{method = "exponential_drift"}, and by \code{\link[stats:nls]{stats::nls()}} via the self-starting
+wrapper \code{\link[=SSexponential_drift]{SSexponential_drift()}}.
 }
 \details{
-5-parameter model:
-\code{A + (B - A) * (1 - exp(-t / tau)) + slope_B * pmax(t + tau * log(1 - drift_fraction), 0)}
+\subsection{Model equations}{
+\itemize{
+\item 5-parameter: \code{A + (B - A) * (1 - exp(-t / tau)) + slope_B * pmax(t + tau * log(1 - drift_fraction), 0)}
+\item 6-parameter: \code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
+}
 
-6-parameter model:
-\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
+\code{A}, \code{B}, \code{tau}, and \code{TD} are as for \code{\link[=monoexponential]{monoexponential()}}. The drift onset
+is not a free estimate: the secondary drift is exactly zero before
+\code{TD - tau * log(1 - drift_fraction)} (\code{TD = 0} when absent), and
+\code{drift_fraction = 0.95} places the onset at \code{TD + 3 * tau}.
 
-The primary phase is a \code{\link[=monoexponential]{monoexponential()}} response toward the asymptote
-\code{B}. The secondary linear drift is exactly zero before the onset
-\code{TD - tau * log(1 - drift_fraction)} (see \code{\link[=expdrift_onset]{expdrift_onset()}}); the default
-\code{drift_fraction = 0.95} places it at \code{TD + 3 * tau}.
+The excursion point \code{texc} is where the drift rate overtakes the decaying
+primary rate, \verb{TD + tau * log(|B - A| / (|slope_B| * tau))}, floored at the
+drift onset.
+}
 }
 \examples{
 ## create an exponential curve with late linear drift and random noise
@@ -87,5 +94,5 @@ y <- predict(model, data)
 }
 \seealso{
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=SSexponential_drift]{SSexponential_drift()}},
-\code{\link[=monoexponential]{monoexponential()}}, \code{\link[=biexponential]{biexponential()}}
+\code{\link[=monoexponential]{monoexponential()}}, \code{\link[=biexponential]{biexponential()}}, \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}
 }

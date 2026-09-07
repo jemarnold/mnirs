@@ -35,7 +35,9 @@ mappings, each a named \code{c(new = "original")} vector or \code{NULL}. List
 order sets output column order.
 }
 \description{
-User-specified channels take priority. Otherwise \code{nirs} channels are read
+User-specified channels take priority; for Artinis, user originals given
+as legend names (cleaned or raw trace) resolve to their column ids.
+Otherwise \code{nirs} channels are read
 from the Oxysoft legend (Artinis) or header cells starting with \code{SmO2};
 \code{time} falls back to the device default, and is detected later by
 \code{detect_time_channel()} when still \code{NULL}; \code{event} falls back to the

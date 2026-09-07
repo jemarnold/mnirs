@@ -54,22 +54,22 @@ per-channel as a list of lists keyed by channel name, e.g.
 \code{use_TD = TRUE}; a fixed \code{TD} disables the 5-parameter fallback.}
 
 \item{start_time}{A numeric value in units of \code{time_channel} specifying the
-time of response onset (effectively time = \code{0} of the response). If \code{NULL}
-(\emph{default}), retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls
-back to \code{0} or the first positive time value (see \emph{Details}).}
+response onset (effectively time = \code{0} of the fit). If \code{NULL} (\emph{default}),
+retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}
+or the first positive time value (see \emph{Details}).}
 
 \item{direction}{A character string specifying the response direction
 \code{"positive"}, or \code{"negative"}, or detect with \code{"auto"} (\emph{default}). See
 \emph{Details}.}
 
 \item{end_window}{A numeric value in units of \code{time_channel} specifying the
-window in which to look for the end of the kinetics fit; returns the
-window with no greater/lesser values within \code{end_window} after the first
-extreme value. \code{end_window = Inf} (\emph{default}) returns the global extreme
-from the full sample range (see \emph{Details}). For \emph{"biexponential"},
-\code{end_window} bounds the fast-phase (stage 1) window only, and \code{Inf}
-resolves to \code{30} time units past the first extreme; the full model is
-fit to the whole response.}
+window in which to look for the end of the kinetics fit; with no greater/
+lesser values within \code{end_window} after the first extrema (min/max).
+\code{end_window = Inf} (\emph{default}) returns the global extreme from the full
+data range (see \emph{Details}).
+
+For \emph{"biexponential"}, \code{end_window} bounds the fast-phase window only, and
+the default is \code{30} sec; the full model is then fit to the full data range.}
 
 \item{verbose}{Logical. \code{TRUE} (\emph{default}) will display, and \code{FALSE} will
 silence warnings and information messages helpful for troubleshooting.
@@ -77,14 +77,10 @@ Global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments passed to the underlying method function.
 See \emph{Details}. For the \code{\link[stats:nls]{stats::nls()}} methods (\strong{monoexponential,
-biexponential, exponential_drift, sigmoidal, sigmoidal_drift}),
-\code{control} is an
-\emph{optional} \code{list()} or \code{\link[stats:nls.control]{stats::nls.control()}} of convergence settings,
-e.g. \code{control = list(maxiter = 200)}. Values override the internal
-defaults (\code{maxiter = 500}, \code{warnOnly = TRUE} for bounded \code{"port"} fits).
-Applied globally to every channel and interval. \code{warnOnly = FALSE} turns
-a non-converged bounded fit into a fit failure (\code{NA} coefficients with a
-warning).}
+exponential_drift, biexponential, sigmoidal, sigmoidal_drift}),
+\code{control = list()} can be passed to \code{\link[stats:nls.control]{stats::nls.control()}}, e.g.
+\code{control = list(maxiter = 200)}, applied globally to all channels and
+intervals.}
 
 \item{tau_flex}{Numeric; multiplicative half-width of the stage-2
 \code{tau} bounds about the stage-1 value,

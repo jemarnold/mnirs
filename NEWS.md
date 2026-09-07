@@ -1,18 +1,47 @@
 # mnirs 0.7.2
 
-* `read_mnirs()` now reads *PIONIRS* `.ftn` and `.ftn2` file exports, with automatic channel detection for `StO2`, `Time`, and `TagLabel`.
-* `read_mnirs()` is faster and allocates less memory. Per-device auto-detected columns (e.g. *Artinis "labels"*, *PIONIRS "Iteration"* and *"Tag"*) are now returned more consistently when `keep_all = TRUE` (and when `nirs_channels = NULL` returns the full data table for known NIRS device file formats).
+## `read_mnirs()`
 
-* `read_mnirs()` now reads channel names automatically from *Artinis Oxysoft* exports.
+* Reading all files, in particular `.csv`, is faster and allocates less memory.
 
-    * *"(Sample number)"* becomes *"sample"* with a derived *"time"* column as previously.
+* Files can now be read from **PIONIRS NIRSBOX**, an advanced time-domain *TD-NIRS* device.
+
+    * PIONIRS explors file types `.ftn` and `.ftn2` for single- and dual-channel TD-NIRS, respectively.
     
-    * *"(Event)"* becomes *"event"* and is set as `event_channel`, and the trailing un-numbered event label column becomes *"labels"* (can be explicitly renamed by either: `event_channel = c(labels = "col_6")` or `c(labels = "labels")`).
-
-    * All other channels in the legend are renamed and returned as `nirs_channels`, with clean, lower case names (e.g. *"Rx1 - Tx1 O2Hb"* renamed as *"rx1_tx1_o2hb"*).
+    * `read_mnirs()` will automatically detect channels `StO2`, `Time`, and `TagLabel`.
     
-    * Explicit channel arguments override the automatic detection, as previous.
+    * Example file `pionirs_occlusion.ftn2` can be called with `example_mnirs()` (Thanks to Marianna, Dr. Porcelli, and PIONIRS for the demo files).
 
+``` r
+example_mnirs("pionirs")
+#> [1] "<R library>/mnirs/inst/extdata/pionirs_occlusion.ftn2"
+```
+
+* **Artinis Oxysoft** file exports are now automatically read more consistently, using the file metadata and *Legend* to rename channels:
+
+    * *"(Sample number)"* (column `1`) is renamed *"sample"* with a derived *"time"* column which is set to `time_channel`.
+    
+    * *"(Event)"* (the last numbered column with event markers) is renamed *"event"* and is set as `event_channel`. The trailing un-numbered column with event labels is renamed *"labels"*, and can be explicitly renamed: `event_channel = c(labels = "labels")`.
+
+    * All other channels in the *Legend* are renamed and returned as `nirs_channels` by default with clean, lower case names (e.g. *"Rx1 - Tx1 O2Hb"* is renamed as *"rx1_tx1_o2hb"*).
+    
+    * Channels can be renamed from either their literal *Legend* names; e.g. `nirs_channels = c(o2hb = 2)`, `c(o2hb = "rx1_tx1_o2hb")`, or `c(o2hb = "Rx1 - Tx1 O2Hb")`.
+
+* `create_mnirs_data()` can now rename `nirs_channels`, `time_channel`, and `event_channel` and add the renamed column names to metadata.
+
+``` r
+df <- create_mnirs_data(
+    PIONIRS_ftn2,
+    nirs_channels = c(o2hb = "O2Hb(CH1)", hhb = "HHb(CH1)", thb = "THb(CH1)"),
+    time_channel = c(time = "Time"),
+    event_channel = c(labels = "TagLabel")
+)
+
+attr(df, "nirs_channels")
+# [1] "o2hb" "hhb"  "thb" 
+```
+
+## Core processing functions
 
 * `extract_intervals()` now accepts a list of multiple `start` and/or `end` values with mixed `by_time()`, `by_label()`, `by_lap()`, or `by_sample()`. Intervals are matched by user-specified order.
 
@@ -27,7 +56,7 @@ extract_intervals(
 
 * `extract_intervals()` Also now properly retains `event_channel` column in ensemble-averaged intervals (`group_intervals = "ensemble"` or custom groups).
 
-* `plot_mnirs`: small adjustments to plot spacing & point sizes.
+* `plot_mnirs()`: small adjustments to plot spacing & point sizes.
 
 * `palette_mnirs()` now returns unnamed colours, which was disrupting use with `ggplot2::scale_colour_manual()`.
 
@@ -38,7 +67,6 @@ custom_colours <- c(
     smo2_left_rf = palette_mnirs("purple"),
     smo2_right_rf = palette_mnirs("dark blue")
 )
-#> custom_colours
 # smo2_left_vl smo2_right_vl  smo2_left_rf smo2_right_rf 
 #  "#ff80ff"   "#0080ff"   "#9f79ee" "#00468Bff" 
 
@@ -54,7 +82,7 @@ plot(result) +
 
 ```
 
-* `print.mnirs()` & `print.mnirs_kinetics()` now returns their objects invisibly, so can be called incrementally within a function pipeline (which I just learned was possible!).
+* `print.mnirs()` now returns its object invisibly, so can be called incrementally within a function pipeline (which I just learned was possible!).
 
 ``` r
 read_mnirs(...) |> 

@@ -22,7 +22,7 @@
 #'      Additional arguments: `use_TD`, `drift_fraction`, `fix`, `control`.
 #'      See [exponential_drift()].}
 #'      \item{`"biexponential"`}{Two-phase kinetics: overlapping fast primary
-#'      + slow secondary exponential curves fit via [stats::nls()]. Additional
+#'      and slow secondary exponential curves fit via [stats::nls()]. Additional
 #'      arguments: `use_TD`, `fix`, `control`. See [biexponential()].}
 #'      \item{`"sigmoidal"`}{Logistic or Gompertz-family curve fit via
 #'      [stats::nls()]. Additional arguments: `shape`, `fix`, `control`.
@@ -101,7 +101,7 @@
 #'   Specify per-channel as a list of lists keyed by channel name, e.g.
 #'   `fix = list(smo2 = list(A = 0))`. See *Details*.
 #' @param drift_fraction **exponential_drift, sigmoidal_drift**: A numeric
-#'   fraction of the primary amplitude in `[0.5, 1]` at which the linear
+#'   fraction of the primary amplitude in `(0.5, 1)` at which the linear
 #'   secondary drift begins, where the primary response reaches
 #'   `A + drift_fraction * (B - A)`. *Default* is `0.95`. Specify per-channel
 #'   as a list keyed by channel name, e.g. `drift_fraction = list(smo2 = 0.9)`.
@@ -121,7 +121,7 @@
 #'   data frame is split by grouping levels and each group is processed as a
 #'   separate interval.
 #' - A special case for *recursive analysis*: The results from
-#'   `mnirs_analysis()` can be fed into a second call to analyse the
+#'   `analyse_kinetics()` can be fed into a second call to analyse the
 #'   `results$coefficients` table, split into data frames by `nirs_channel`
 #'   with one row per interval (see *Recursive analysis*).
 #'
@@ -168,7 +168,7 @@
 #' (upward) or *"negative"* (downward) response, and can be overwritten
 #' manually. `end_window` is a time span in units of `time_channel` defining
 #' the end of the kinetics fitting window by locating the first extrema
-#' (peak/trough, depending on `direction` with no greater/lesser values
+#' (peak/trough, depending on `direction`) with no greater/lesser values
 #' within the subsequent `end_window` time span. The curve fitting window
 #' extends to the end of `end_window` beyond the detected extrema.
 #'
@@ -207,7 +207,7 @@
 #'   unless supplied explicitly (optionally per-interval, keyed by group name).
 #' - `zero_time = TRUE` rebases each group's `time_channel` to its first
 #'   sample, so `start_time` then defaults to `0`.
-#' - Per-interval arguments key by the group names (see below)..
+#' - Per-interval arguments key by the group names (see below).
 #'
 #' 
 #' ## Per-channel and per-interval arguments
@@ -366,7 +366,7 @@
 #' `A`, `B`, `tau`, `TD`, and the derived `k`, `MRT`, and `HRT` are as for
 #' *"monoexponential"*. `slope_B` is the linear drift rate `dx/dt`. The drift
 #' onset is not a free estimate. `drift_fraction` specifies the fraction
-#' (`[0.5, 1]`) of the primary response amplitude where the drift begins;
+#' (`(0.5, 1)`) of the primary response amplitude where the drift begins;
 #' `TD - tau * log(1 - drift_fraction)` (*default* `0.95`; `TD + 3 * tau`).
 #' 
 #' The excursion point `texc` is where the drift rate overtakes the decaying
@@ -377,7 +377,7 @@
 #' fall back to *"monoexponential"* when the fit fails or if the total drift
 #' amplitude is below twice the fit RMSE, with a warning recorded in 
 #' `warnings`. The `model` column in `coefficients` names the final method
-#' for each row. A hidden argument `model_fallback = TRUE` will override the
+#' for each row. A hidden argument `model_fallback = FALSE` will override the
 #' fallback process and retain the more complex model, or return an error.
 #'
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
@@ -434,7 +434,7 @@
 #' The exponential-drift fit is in turn subject to its own fallback to
 #' *"monoexponential"* (see above). Each fallback is warned about and recorded
 #' in `warnings`. The `model` column in `coefficients` names the final method
-#' for each row. A hidden argument `model_fallback = TRUE` will override the
+#' for each row. A hidden argument `model_fallback = FALSE` will override the
 #' fallback process and retain the more complex model, or return an error.
 #'
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
@@ -494,7 +494,7 @@
 #' `S(t)` and `A`, `B`, `xmid`, and `slope` are as for *"sigmoidal"*.
 #' `slope_B` is the linear drift rate `dx/dt` at the asymptote `B`. The
 #' drift is not a free estimate. `drift_fraction` specifies the fraction
-#' (`[0.5, 1]`) of the primary response amplitude where the drift begins
+#' (`(0.5, 1)`) of the primary response amplitude where the drift begins
 #' (*default* `0.95`).
 #' 
 #' The excursion point `texc` is where the drift rate overtakes the decaying 
@@ -505,7 +505,7 @@
 #' fall back to *"sigmoidal"* when the fit fails or if the total drift
 #' amplitude is below twice the fit RMSE, with a warning recorded in 
 #' `warnings`. The `model` column in `coefficients` names the final method
-#' for each row. A hidden argument `model_fallback = TRUE` will override the
+#' for each row. A hidden argument `model_fallback = FALSE` will override the
 #' fallback process and retain the more complex model, or return an error.
 #'
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
@@ -549,7 +549,7 @@
 #'       object. For `"response_time"`; `NULL`. Models are fitted on *time*
 #'       *elapsed* from `start_time`, so [predict][stats::predict] expects a
 #'       `time_channel` column in `newdata` with adjusted units. The offset for
-#'       each interval can be retrieved from `coefficients$start_times`.}
+#'       each interval can be retrieved from `coefficients$start_time`.}
 #'   \item{`coefficients`}{A data frame of coefficients with one row per
 #'       `nirs_channel` per interval, containing `interval`, `nirs_channels`,
 #'       the resolved `start_time` (the fit onset from which time coefficients
@@ -951,7 +951,6 @@ analyse_kinetics.sigmoidal_drift <- function(
 
 
 #' @rdname analyse_kinetics
-#' @usage analyze_kinetics(...)
 #' @export
 analyze_kinetics <- function(
     data,

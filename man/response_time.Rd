@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyse_response_time.R
 \name{response_time}
 \alias{response_time}
-\title{Compute fractional kinetics response time}
+\title{Fractional response time}
 \usage{
 response_time(
   x,
@@ -20,14 +20,14 @@ response_time(
 \item{t}{An \emph{optional} numeric vector of the predictor variable (e.g. time).
 Default is \code{seq_along(x)}.}
 
-\item{start_time}{A numeric value specifying the start of the kinetics
-response in units of \code{t}. Observations where \code{t <= start_time} define the
-baseline window. Defaults to \code{0}.}
+\item{start_time}{A numeric value in units of \code{t} specifying the response
+onset. Samples where \code{t <= start_time} define the baseline window.
+\emph{Default} is \code{0}.}
 
-\item{response_fraction}{A numeric vector of values in the range \verb{[0, 1]} specifying
+\item{response_fraction}{A numeric vector in the range \verb{[0, 1]} specifying
 the fractional response amplitude(s) to detect. Defaults to \code{0.5} (50\%
 response, i.e. half-response time). Multiple values (e.g.
-\code{c(0.5, 0.632)}) return one result per response_fraction.}
+\code{c(0.5, 0.632)}) return one element per fraction.}
 
 \item{direction}{A character string specifying the response direction
 \code{"positive"}, or \code{"negative"}, or detect with \code{"auto"} (\emph{default}). See
@@ -41,71 +41,93 @@ Global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 }
 \value{
 A named list containing:
-\item{\code{A}}{Mean baseline value (mean of \code{x} where \code{t <= start_time}).}
-\item{\code{B}}{Extreme value (maximum or minimum) after \code{start_time}.}
-\item{\code{response_time}}{Elapsed time from \code{start_time} to the fractional
-response, in units of \code{t}; one element per \code{response_fraction}.}
-\item{\code{response_value}}{The observed signal value at the response index;
+\item{\code{A}}{The mean baseline value of \code{x} where \code{t <= start_time}.}
+\item{\code{B}}{The extreme (maximum or minimum) value of \code{x} after
+\code{start_time}.}
+\item{\code{response_time}}{The elapsed time from \code{start_time} to the
+fractional response, in units of \code{t}; one element per
+\code{response_fraction}.}
+\item{\code{response_value}}{The observed value of \code{x} at the response index;
 one element per \code{response_fraction}.}
-\item{\code{fitted}}{The predicted fractional response value
-(\code{A + (B - A) * response_fraction}); one element per \code{response_fraction}.}
+\item{\code{fitted}}{The target fractional response value
+\code{A + (B - A) * response_fraction}; one element per \code{response_fraction}.}
 \item{\code{baseline_idx}}{Integer indices where \code{t <= start_time}.}
 \item{\code{response_idx}}{Integer index at each \code{response_value}.}
-\item{\code{extreme_idx}}{Integer index at the extreme value (\code{B}).}
+\item{\code{extreme_idx}}{Integer index at the extreme value \code{B}.}
 }
 \description{
-Identify the time at which a numeric signal reaches a specified fraction
-of its total response amplitude relative to a baseline period (e.g.
-\emph{half-response time} at 50\% fractional amplitude). Vector-level companion
-to \code{\link[=analyse_kinetics]{analyse_kinetics()}} when \code{method = "response_time"}.
+Estimate the time at which a numeric vector reaches a specified fraction
+of its total response amplitude relative to a baseline, e.g.
+\emph{half-response time} at \code{response_fraction = 0.5}. Vector-level companion
+to \code{\link[=analyse_kinetics]{analyse_kinetics()}} with \code{method = "response_time"}.
 }
 \details{
+A non-parametric approach (estimated directly from the observed data without
+assuming a specific mathematical shape). \code{response_fraction = 0.5}
+approximates the inflection point (\code{xmid}) of a symmetric sigmoid function.
+\code{response_fraction = 0.632} approximates the time constant (\code{tau};
+\eqn{\tau}) of a monoexponential function, or \code{xmid} of a left-Gompertz
+function. \code{response_fraction = 0.368} approximates \code{xmid} of a
+right-Gompertz function. This is a good fallback estimation method if
+parametric methods are not successfully fit.
 \subsection{Method}{
 
-The target response value is computed as:
+The target response value is: \code{fitted = A + (B - A) * response_fraction}
 
-\code{response_fitted = A + (B - A) * response_fraction}
+Where \code{A} is the mean baseline value (\code{t <= start_time}) and \code{B} is the
+extreme (peak or trough) value after \code{start_time}. \code{response_value} is the
+first observed sample equal to or greater/lesser than the target \code{fitted}
+value (above for \emph{"positive"}, below for \emph{"negative"} \code{direction}).
+\code{response_time} is the elapsed time from \code{start_time} to \code{response_value}.
 
-where \code{A} is the mean baseline (\code{t <= start_time}) and \code{B} is the extreme
-(peak or trough) value after \code{start_time}. The response time is the elapsed
-time from \code{start_time} to the first sample where \code{x} reaches the
-\code{response_fitted} value (above for positive direction, below for negative).
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} first trims \code{x} to \code{end_window} past the first extreme,
+so \code{B} there is the first local extreme with no greater/lesser values
+within \code{end_window}. Called directly, \code{B} is the global extreme of \code{x}
+after \code{start_time}.
 }
 
 \subsection{Direction}{
 
-When \code{direction = "auto"}, the net slope across \code{x} determines the overall
-trend, and the corresponding extreme (maximum for positive, minimum for
-negative) is used as \code{B}. If the net slope is zero or \code{NA}, the direction
-of greatest absolute change is used. When \code{direction = "positive"} or
-\code{"negative"}, the extreme is the maximum or minimum value after
-\code{start_time}, respectively.
+\code{direction} is detected automatically by default as either \emph{"positive"}
+(upward) or \emph{"negative"} (downward) response, from the dominant excursion
+of \code{x} above or below its initial baseline (the median of the earliest
+samples). When tied, the greater absolute extreme decides. \code{B} is the
+maximum for \emph{"positive"} or the minimum for \emph{"negative"}, and can be
+overwritten manually.
 }
 
 \subsection{Baseline}{
 
-When no observations exist where \code{t <= start_time}, the first sample \code{x[1]}
-is used as the baseline and a warning is issued. \code{start_time} cannot exceed
-the maximum of \code{t}.
+When no samples exist where \code{t <= start_time}, the first sample \code{x[1]} is
+used as the baseline \code{A} with a warning. \code{start_time} must be within the
+range of \code{t}.
 }
 }
 \examples{
+## create an exponential curve with random noise
 set.seed(13)
 t <- 0:60
-x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) + rnorm(length(t), 0, 1)
+x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) +
+    rnorm(length(t), 0, 1)
 
-## half-response time (0.5) and mean response time (0.632 ~= tau)
+## half-response time (0.5) and time constant approximation (0.632 ~= tau)
 RT <- response_time(x, t, start_time = 10, response_fraction = c(0.5, 0.632))
+RT$response_time
 
 plot(t, x, type = "l", col = "grey60", xlab = "t", ylab = "x")
-## baseline mean across baseline_idx
+## mean baseline `A` across the baseline window
 segments(
     t[min(RT$baseline_idx)], RT$A,
     t[max(RT$baseline_idx)], RT$A,
     col = "red", lwd = 2
 )
-## response_fraction = 0.5 (red) and 0.632 (blue): response_value, and extreme
-points(t[RT$response_idx], RT$response_value, col = c("red", "blue"), pch = 19)
+## response values at 0.5 (red) and 0.632 (blue), and the extreme `B`
+points(
+    t[RT$response_idx],
+    RT$response_value,
+    col = c("red", "blue"),
+    pch = 19
+)
 points(t[RT$extreme_idx], RT$B, col = "red", pch = 19)
 
 }

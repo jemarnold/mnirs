@@ -177,7 +177,8 @@ plot.mnirs <- function(
 #' @param x An *"mnirs_kinetics"* object from [analyse_kinetics()].
 #' @param fitted Logical. Default is `TRUE`; overlays a dashed fitted curve for
 #'   parametric methods (`"peak_slope"`, `"monoexponential"`,
-#'   `"biexponential"`, `"sigmoidal"`) in a darker shade of the channel
+#'   `"exponential_drift"`, `"biexponential"`, `"sigmoidal"`,
+#'   `"sigmoidal_drift"`) in a darker shade of the channel
 #'   colour. `"response_time"` has no fitted curve.
 #' @param markers Logical. Default is `TRUE`; draws a dotted vertical line at
 #'   the response onset (`start_time`) and key coefficient points in a darker
@@ -294,7 +295,11 @@ plot.mnirs_kinetics <- function(
             d <- plot_data[is.finite(plot_data[[fcol]]), , drop = FALSE]
             ## curved fits: re-predict on a dense time grid so fitted lines
             ## plot smoothly when an interval has < 100 fit-window samples
-            sp <- split(d, if (faceted) d$interval else rep_len(1L, nrow(d)), drop = TRUE)
+            sp <- split(
+                d,
+                if (faceted) d$interval else rep_len(1L, nrow(d)),
+                drop = TRUE
+            )
             if (curved && any(vapply(sp, nrow, 0L) < 100L)) {
                 mods <- if (faceted) x$model[names(sp)] else x$model[1L]
                 d <- do.call(rbind, Map(\(.d, .m) {
@@ -321,7 +326,9 @@ plot.mnirs_kinetics <- function(
             ggplot2::geom_line(
                 ggplot2::aes(
                     y = .data[[fcol]],
-                    colour = ggplot2::stage(.ch, after_scale = darken(colour))
+                    colour = ggplot2::stage(
+                        .ch, after_scale = darken(.data$colour)
+                    )
                 ),
                 data = d,
                 linetype = "dashed",
@@ -339,7 +346,7 @@ plot.mnirs_kinetics <- function(
     ## exponential_drift linear drift from the drift onset.
     ## for sigmoidal_drift, comp1 is the primary sigmoid and comp2 the
     ## linear drift from the drift onset
-    comp_methods <- c("biexponential", "exponential_drift", "sigmoidal_drift")
+    comp_methods <- c("exponential_drift", "biexponential", "sigmoidal_drift")
     if (isTRUE(list(...)[["components"]]) && x$method %in% comp_methods) {
         p <- p +
             lapply(fit_ch, \(.ch) {
@@ -353,7 +360,11 @@ plot.mnirs_kinetics <- function(
             ## channel names can never collide with coefficient names
             cf <- x$coefficients[x$coefficients$nirs_channels == .ch, ]
             co <- cf[
-                if (faceted) match(d$interval, cf$interval) else rep(1L, nrow(d)),
+                if (faceted) {
+                    match(d$interval, cf$interval)
+                } else {
+                    rep(1L, nrow(d))
+                },
             ]
             t_rel <- d[[time_channel]] - co$start_time
             ## TD NA marks a fit with no time delay; those fits only keep
@@ -400,16 +411,21 @@ plot.mnirs_kinetics <- function(
                 )
             }
 
-            comp_line <- \(.col) ggplot2::geom_line(
-                ggplot2::aes(
-                    y = .data[[.col]],
-                    colour = ggplot2::stage(.ch, after_scale = darken(colour))
-                ),
-                data = cd[is.finite(cd[[.col]]), , drop = FALSE],
-                linetype = "dotted",
-                linewidth = 0.5,
-                show.legend = FALSE
-            )
+            comp_line <- \(.col) {
+                ggplot2::geom_line(
+                    ggplot2::aes(
+                        y = .data[[.col]],
+                        colour = ggplot2::stage(
+                            .ch,
+                            after_scale = darken(.data$colour)
+                        )
+                    ),
+                    data = cd[is.finite(cd[[.col]]), , drop = FALSE],
+                    linetype = "dotted",
+                    linewidth = 0.5,
+                    show.legend = FALSE
+                )
+            }
             lapply(grep("^comp", names(cd), value = TRUE), comp_line)
         })
     }
@@ -446,7 +462,10 @@ plot.mnirs_kinetics <- function(
                 key_point(
                     ggplot2::aes(
                         y = .data[[fcol]],
-                        colour = ggplot2::stage(.ch, after_scale = darken(colour))
+                        colour = ggplot2::stage(
+                            .ch,
+                            after_scale = darken(.data$colour)
+                        )
                     ),
                     plot_data[post, , drop = FALSE]
                 )
@@ -466,7 +485,7 @@ plot.mnirs_kinetics <- function(
                         y = .data$A,
                         colour = ggplot2::stage(
                             .data$nirs_channels,
-                            after_scale = darken(colour)
+                            after_scale = darken(.data$colour)
                         )
                     ),
                     base_pts,
@@ -484,7 +503,7 @@ plot.mnirs_kinetics <- function(
                         y = .data$yval,
                         colour = ggplot2::stage(
                             .data$nirs_channels,
-                            after_scale = darken(colour)
+                            after_scale = darken(.data$colour)
                         )
                     ),
                     ann[
@@ -598,8 +617,8 @@ kinetics_annotations <- function(x) {
             ## model lacks reads NA and its line is dropped. `MRT` is redundant
             ## with `tau` without `TD`, and with a marked `texc`
             monoexponential = ,
-            biexponential = ,
-            exponential_drift = {
+            exponential_drift = ,
+            biexponential = {
                 g <- \(.nm) coefs[[.nm]] %||% NA_real_
                 offset <- intersect(c("MRT", "texc"), names(coefs))
                 list(
@@ -836,7 +855,8 @@ as_plot_data <- function(x, env = rlang::caller_env()) {
 #' @param ... Additional arguments to add to `[ggplot2::theme()]`.
 #'
 #' @details
-#' - `axis.title = element_text(face = "bold")` by *default* Modify to *"plain"*.
+#' - `axis.title = element_text(face = "bold")` by *default* Modify to
+#'   *"plain"*.
 #'
 #' - `panel.grid.major` & `panel.grid.major` set to blank. Modify to
 #'   `= element_line()` for visible grid lines.
@@ -970,7 +990,7 @@ palette_mnirs <- function(...) {
         if (n <= length(colours)) {
             return(unname(colours[seq_len(n)]))
         }
-        ## interpolate if more colours needed, but this probably won't look good!
+        ## interpolate if more colours needed, but probably won't look good!
         return(grDevices::colorRampPalette(colours)(n))
     }
 

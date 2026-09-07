@@ -13,11 +13,11 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 
-\item{shape}{Character; the sigmoidal shape. One of \code{"symmetric"}
-(\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
+\item{shape}{Character; the 4-parameter sigmoidal shape. One of
+\code{"symmetric"} (\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
 \code{"gompertz_left"} (\code{\link[=gompertz_left]{gompertz_left()}}).}
 }
 \value{

@@ -15,10 +15,10 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
-of the exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the \emph{time constant} (\eqn{\tau}) of the
+exponential response, in units of the predictor variable \code{t}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 exponential response, in units of the predictor variable \code{t}. If \code{NULL}
 (\emph{default}), a 3-parameter model without time delay is used.}
 }
@@ -29,29 +29,37 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for a \code{selfStart} wrapper around
 \code{\link[=monoexponential]{monoexponential()}}, for use with \code{\link[stats:nls]{stats::nls()}}. Supports both the
-3-parameter form (A, B, tau) and the 4-parameter form (A, B, tau, TD);
-arity is inferred from the formula passed to \code{\link[stats:nls]{stats::nls()}}.
+3-parameter (A, B, tau) and 4-parameter (A, B, tau, TD) forms; arity is
+inferred from the formula passed to \code{\link[stats:nls]{stats::nls()}}.
 }
 \details{
-3-parameter model: \code{x ~ SSmonoexponential(t, A, B, tau)}
-
-4-parameter model: \code{x ~ SSmonoexponential(t, A, B, tau, TD)}
+\subsection{Model formulas}{
+\itemize{
+\item 3-parameter: \code{x ~ SSmonoexponential(t, A, B, tau)}
+\item 4-parameter: \code{x ~ SSmonoexponential(t, A, B, tau, TD)}
+}
 
 The 3-parameter form is recommended for small samples or when no obvious
 time delay is expected, as it converges more reliably. \code{\link[stats:nls]{stats::nls()}}
 reads the free parameters from the formula right-hand side, so omitting
 \code{TD} incurs no degrees-of-freedom penalty.
 
-The model function returns the analytic gradient for the free
-parameters as a \code{"gradient"} attribute, so \code{\link[stats:nls]{stats::nls()}} does not
-resort to \code{\link[stats:numericDeriv]{stats::numericDeriv()}} and \code{\link[stats:predict]{stats::predict()}} on a fitted
-model carries the attribute; drop it with \code{as.vector()}.
+Starting estimates are profiled on a coarse grid of \code{tau} (and \code{TD}) with
+the asymptotes solved by least squares at each grid point, keeping the
+residual-minimising start.
+
+The model function returns the analytic gradient for the free parameters
+as a \code{"gradient"} attribute, so \code{\link[stats:nls]{stats::nls()}} does not resort to
+\code{\link[stats:numericDeriv]{stats::numericDeriv()}}. \code{\link[stats:predict]{stats::predict()}} on a fitted model carries the
+attribute; drop it with \code{as.vector()}.
+}
+
 \subsection{Fixing parameters}{
 
-Any parameter may be held constant by writing a value in place of its
-name in the formula, e.g. \code{x ~ SSmonoexponential(t, A = 0, B, tau)} fixes
-the baseline at \code{A = 0}. Fixed parameters are excluded from estimation
-and are not returned by \code{\link[stats:coef]{stats::coef()}}.
+Any parameter may be held constant by writing a value in place of its name
+in the formula, e.g. \code{x ~ SSmonoexponential(t, A = 0, B, tau)} fixes the
+baseline at \code{A = 0}. Fixed parameters are excluded from estimation and are
+not returned by \code{\link[stats:coef]{stats::coef()}}.
 }
 }
 \examples{
@@ -70,7 +78,7 @@ summary(model4)
 model3 <- nls(x ~ SSmonoexponential(t, A, B, tau), data = data)
 summary(model3)
 
-## fix the baseline A at a known value
+## fix the baseline `A` at a known value
 model_fixed <- nls(x ~ SSmonoexponential(t, A = 10, B, tau, TD), data = data)
 summary(model_fixed)
 
@@ -89,6 +97,6 @@ y3 <- predict(model3, data)
 
 }
 \seealso{
-\code{\link[=monoexponential]{monoexponential()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
-\code{\link[stats:SSasymp]{stats::SSasymp()}}
+\code{\link[=monoexponential]{monoexponential()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[stats:nls]{stats::nls()}},
+\code{\link[stats:selfStart]{stats::selfStart()}}, \code{\link[stats:SSasymp]{stats::SSasymp()}}
 }

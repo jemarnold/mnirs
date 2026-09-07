@@ -63,7 +63,9 @@ NULL
 #'   Channel mapping for [read_mnirs()]:
 #'   - `nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")`
 #'   - `time_channel = c("hh:mm:ss")`
-#'   - `interval_times = list(start = c(124, 486, 848, 1210), end = c(364, 726, 1088, 1450))`
+#'   - `interval_times = list(
+#'         start = c(124, 486, 848, 1210), 
+#'         end = c(364, 726, 1088, 1450))`
 #'
 #' @source Moxy Monitor (Fortiori Design LLC), exported via Moxy Portal App.
 #'   (https://www.moxymonitor.com/)
@@ -106,11 +108,19 @@ NULL
 #'   }
 #'
 #'   Channel mapping for [read_mnirs()]:
-#'   - `nirs_channels = c("SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHb unfiltered")`
+#'   - `nirs_channels = c(
+#'         "SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHb unfiltered"
+#'     )`
 #'   - `time_channel = c("Timestamp (seconds passed)")`
 #'   - `event_channel = c("Lap/Event")`
-#'   - `interval_times = list(start = c(2150.09, 2872.28), end = c(2452.26, 3167.98))`
-#'   - `interval_times = list(start = c(65.94, 788.13), end = c(368.11, 1083.83))` from zero_time
+#'   - `interval_times = list(
+#'         start = c(2150.09, 2872.28), 
+#'         end = c(2452.26, 3167.98)
+#'     )`
+#'   - `interval_times = list(        ## from zero_time
+#'         start = c(65.94, 788.13), 
+#'         end = c(368.11, 1083.83)
+#'     )`
 #'
 #' @source Train.Red (Train.Red B.V.), exported via Train.Red app
 #'   (https://train.red/)
@@ -148,7 +158,10 @@ NULL
 #'   - `nirs_channels = c(O2Hb = 2, HHb = 3)`
 #'   - `time_channel = c(sample = 1)`
 #'   - `event_channel = c(event = 4)`
-#'   - `interval_times = list(start = c(158, 999, 1750), end = c(493, 1333, 1961))` two intervals and post-exercise occlusion
+#'   - `interval_times = list(        ## two intervals, post-exercise occlusion
+#'         start = c(158, 999, 1750), 
+#'         end = c(493, 1333, 1961)
+#'     )`
 #'
 #' @source Artinis Medical Systems. Oxymon MKIII, exported via Oxysoft desktop
 #'   software (https://artinis.com/)
@@ -188,7 +201,7 @@ NULL
 #'   [read_mnirs()]:
 #'   - `nirs_channels = c(THb = 2, HHb = 3, O2Hb = 4)`
 #'   - `time_channel = c(sample = 1)`
-#'   - `event_channel = c(event = 5, label = "col_6")`
+#'   - `event_channel = c(event = 5, label = "labels")`
 #'
 #' @source Artinis Medical Systems. Portamon, exported via Oxysoft desktop
 #'   software (https://artinis.com/)

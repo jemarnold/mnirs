@@ -15,19 +15,18 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
-of the exponential curve, in units of the predictor variable \code{t}.}
+\item{tau}{A numeric parameter for the \emph{time constant} (\eqn{\tau}) of the
+exponential response, in units of the predictor variable \code{t}.}
 
-\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
-of the secondary phase, in response units per unit of the predictor
-variable \code{t}.}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt} of the
+secondary phase, in response units per unit of the predictor variable
+\code{t}.}
 
-\item{drift_fraction}{A numeric fraction of the amplitude \code{B - A} in
-\verb{(0.5, 1)} at which the linear drift begins: the drift onset is where
-the primary response reaches \code{A + drift_fraction * (B - A)}, at
-\code{TD - tau * log(1 - drift_fraction)} (\code{TD = 0} when absent).}
+\item{drift_fraction}{A numeric fraction of the primary amplitude \code{B - A}
+in \verb{(0.5, 1)} at which the linear drift begins, where the primary
+response reaches \code{A + drift_fraction * (B - A)}.}
 
-\item{TD}{A numeric parameter for the time delay before the onset of
+\item{TD}{A numeric parameter for the \emph{time delay} before the onset of the
 exponential response, in units of the predictor variable \code{t}. If \code{NULL}
 (\emph{default}), a 3-parameter model without time delay is used.}
 }
@@ -38,33 +37,39 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for a \code{selfStart} wrapper around
 \code{\link[=exponential_drift]{exponential_drift()}}, for use with \code{\link[stats:nls]{stats::nls()}}. Supports both the
-5-parameter form (A, B, tau, slope_B, drift_fraction) and the
-6-parameter form adding a time delay TD; arity is inferred from the
-formula passed to \code{\link[stats:nls]{stats::nls()}}.
+5-parameter (A, B, tau, slope_B, drift_fraction) and 6-parameter forms
+adding a time delay TD; arity is inferred from the formula passed to
+\code{\link[stats:nls]{stats::nls()}}.
 }
 \details{
-5-parameter model:
+\subsection{Model formulas}{
+\itemize{
+\item 5-parameter:
 \code{x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction)}
-
-6-parameter model:
+\item 6-parameter:
 \code{x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction, TD)}
+}
 
 The hinge at the drift onset \code{TD - tau * log(1 - drift_fraction)} is not
-differentiable, so
-\code{algorithm = "port"} with \code{tau} (and \code{TD}) bounded non-negative and
-\code{control = nls.control(warnOnly = TRUE)} is recommended.
+differentiable, so \code{algorithm = "port"} with \code{tau} (and \code{TD}) bounded
+non-negative and \code{control = nls.control(warnOnly = TRUE)} is recommended.
 
-The model function returns the analytic gradient (one-sided at the
-hinge) for the free parameters as a \code{"gradient"} attribute, so
-\code{\link[stats:nls]{stats::nls()}} does not resort to \code{\link[stats:numericDeriv]{stats::numericDeriv()}} and
-\code{\link[stats:predict]{stats::predict()}} on a fitted model carries the attribute; drop it
-with \code{as.vector()}.
+Starting estimates are profiled on a coarse grid of \code{tau} (and \code{TD}) with
+\code{A}, \code{B}, and \code{slope_B} solved by least squares at each grid point,
+keeping the residual-minimising start.
+
+The model function returns the analytic gradient (one-sided at the hinge)
+for the free parameters as a \code{"gradient"} attribute, so \code{\link[stats:nls]{stats::nls()}}
+does not resort to \code{\link[stats:numericDeriv]{stats::numericDeriv()}}. \code{\link[stats:predict]{stats::predict()}} on a fitted
+model carries the attribute; drop it with \code{as.vector()}.
+}
+
 \subsection{Fixing parameters}{
 
-Any parameter may be held constant by writing a value in place of its
-name in the formula, e.g.
+Any parameter may be held constant by writing a value in place of its name
+in the formula, e.g.
 \code{x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction = 0.95)}
-holds the drift onset at 95\% of the amplitude (\code{3 * tau}). Fixed
+holds the drift onset at 95\% of the amplitude (\code{TD + 3 * tau}). Fixed
 parameters are excluded from estimation and are not returned by
 \code{\link[stats:coef]{stats::coef()}}.
 }
@@ -93,6 +98,6 @@ summary(model)
 
 }
 \seealso{
-\code{\link[=exponential_drift]{exponential_drift()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
-\code{\link[=SSmonoexponential]{SSmonoexponential()}}
+\code{\link[=exponential_drift]{exponential_drift()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[stats:nls]{stats::nls()}},
+\code{\link[stats:selfStart]{stats::selfStart()}}, \code{\link[=SSmonoexponential]{SSmonoexponential()}}, \code{\link[=SSbiexponential]{SSbiexponential()}}
 }

@@ -1,36 +1,42 @@
 #' Exponential-drift function
 #'
-#' Calculate a two-phase curve: a primary monoexponential response with a
-#' secondary linear drift beginning near the asymptote.
+#' @description
+#' Calculate a two-phase curve: a *fast* [monoexponential()] primary response
+#' plus a *slow* linear secondary drift beginning near the primary asymptote.
+#' Model family fit by [analyse_kinetics()] with
+#' `method = "exponential_drift"`, and by [stats::nls()] via the self-starting
+#' wrapper [SSexponential_drift()].
 #'
-#' @param slope_B A numeric parameter for the linear drift rate `dx/dt`
-#'   of the secondary phase, in response units per unit of the predictor
-#'   variable `t`.
-#' @param drift_fraction A numeric fraction of the amplitude `B - A` in
-#'   `(0.5, 1)` at which the linear drift begins: the drift onset is where
-#'   the primary response reaches `A + drift_fraction * (B - A)`, at
-#'   `TD - tau * log(1 - drift_fraction)` (`TD = 0` when absent).
+#' @param slope_B A numeric parameter for the linear drift rate `dx/dt` of the
+#'   secondary phase, in response units per unit of the predictor variable
+#'   `t`.
+#' @param drift_fraction A numeric fraction of the primary amplitude `B - A`
+#'   in `(0.5, 1)` at which the linear drift begins, where the primary
+#'   response reaches `A + drift_fraction * (B - A)`.
 #' @inheritParams monoexponential
 #'
 #' @details
-#' 5-parameter model:
-#' `A + (B - A) * (1 - exp(-t / tau)) +
-#' slope_B * pmax(t + tau * log(1 - drift_fraction), 0)`
+#' ## Model equations
 #'
-#' 6-parameter model:
-#' `A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) +
-#' slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)`
+#' - 5-parameter: `A + (B - A) * (1 - exp(-t / tau)) +
+#'   slope_B * pmax(t + tau * log(1 - drift_fraction), 0)`
+#' - 6-parameter: `A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) +
+#'   slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)`
 #'
-#' The primary phase is a [monoexponential()] response toward the asymptote
-#' `B`. The secondary linear drift is exactly zero before the onset
-#' `TD - tau * log(1 - drift_fraction)` (see [expdrift_onset()]); the default
-#' `drift_fraction = 0.95` places it at `TD + 3 * tau`.
+#' `A`, `B`, `tau`, and `TD` are as for [monoexponential()]. The drift onset
+#' is not a free estimate: the secondary drift is exactly zero before
+#' `TD - tau * log(1 - drift_fraction)` (`TD = 0` when absent), and
+#' `drift_fraction = 0.95` places the onset at `TD + 3 * tau`.
+#'
+#' The excursion point `texc` is where the drift rate overtakes the decaying
+#' primary rate, `TD + tau * log(|B - A| / (|slope_B| * tau))`, floored at the
+#' drift onset.
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
 #' @seealso [analyse_kinetics()], [SSexponential_drift()],
-#'   [monoexponential()], [biexponential()]
+#'   [monoexponential()], [biexponential()], [sigmoidal_drift()]
 #'
 #' @examples
 #' ## create an exponential curve with late linear drift and random noise
@@ -250,11 +256,12 @@ expdrift_model <- function(t, A, B, tau, slope_B, drift_fraction, TD = NULL) {
 
 #' Self-starting exponential-drift model
 #'
+#' @description
 #' Creates initial coefficient estimates for a `selfStart` wrapper around
 #' [exponential_drift()], for use with [stats::nls()]. Supports both the
-#' 5-parameter form (A, B, tau, slope_B, drift_fraction) and the
-#' 6-parameter form adding a time delay TD; arity is inferred from the
-#' formula passed to [stats::nls()].
+#' 5-parameter (A, B, tau, slope_B, drift_fraction) and 6-parameter forms
+#' adding a time delay TD; arity is inferred from the formula passed to
+#' [stats::nls()].
 #'
 #' @usage
 #' SSexponential_drift(t, A, B, tau, slope_B, drift_fraction, TD)
@@ -262,37 +269,40 @@ expdrift_model <- function(t, A, B, tau, slope_B, drift_fraction, TD = NULL) {
 #' @inheritParams exponential_drift
 #'
 #' @details
-#' 5-parameter model:
-#' `x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction)`
+#' ## Model formulas
 #'
-#' 6-parameter model:
-#' `x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction, TD)`
+#' - 5-parameter:
+#'   `x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction)`
+#' - 6-parameter:
+#'   `x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction, TD)`
 #'
 #' The hinge at the drift onset `TD - tau * log(1 - drift_fraction)` is not
-#' differentiable, so
-#' `algorithm = "port"` with `tau` (and `TD`) bounded non-negative and
-#' `control = nls.control(warnOnly = TRUE)` is recommended.
+#' differentiable, so `algorithm = "port"` with `tau` (and `TD`) bounded
+#' non-negative and `control = nls.control(warnOnly = TRUE)` is recommended.
 #'
-#' The model function returns the analytic gradient (one-sided at the
-#' hinge) for the free parameters as a `"gradient"` attribute, so
-#' [stats::nls()] does not resort to [stats::numericDeriv()] and
-#' [stats::predict()] on a fitted model carries the attribute; drop it
-#' with `as.vector()`.
+#' Starting estimates are profiled on a coarse grid of `tau` (and `TD`) with
+#' `A`, `B`, and `slope_B` solved by least squares at each grid point,
+#' keeping the residual-minimising start.
+#'
+#' The model function returns the analytic gradient (one-sided at the hinge)
+#' for the free parameters as a `"gradient"` attribute, so [stats::nls()]
+#' does not resort to [stats::numericDeriv()]. [stats::predict()] on a fitted
+#' model carries the attribute; drop it with `as.vector()`.
 #'
 #' ## Fixing parameters
 #'
-#' Any parameter may be held constant by writing a value in place of its
-#'   name in the formula, e.g.
-#'   `x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction = 0.95)`
-#'   holds the drift onset at 95% of the amplitude (`3 * tau`). Fixed
-#'   parameters are excluded from estimation and are not returned by
-#'   [stats::coef()].
+#' Any parameter may be held constant by writing a value in place of its name
+#' in the formula, e.g.
+#' `x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction = 0.95)`
+#' holds the drift onset at 95% of the amplitude (`TD + 3 * tau`). Fixed
+#' parameters are excluded from estimation and are not returned by
+#' [stats::coef()].
 #'
 #' @returns A numeric vector of predicted values the same length as the
 #'   predictor variable `t`.
 #'
-#' @seealso [exponential_drift()], [stats::nls()], [stats::selfStart()],
-#'   [SSmonoexponential()]
+#' @seealso [exponential_drift()], [analyse_kinetics()], [stats::nls()],
+#'   [stats::selfStart()], [SSmonoexponential()], [SSbiexponential()]
 #'
 #' @examples
 #' ## create an exponential curve with late linear drift and random noise

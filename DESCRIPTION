@@ -24,7 +24,8 @@ Imports:
     rlang,
     stats,
     tibble,
-    tidyselect
+    tidyselect,
+    utils
 Suggests: 
     dplyr,
     ggplot2,

@@ -15,17 +15,17 @@ variable.}
 \item{B}{A numeric parameter for the ending asymptote of the response
 variable.}
 
-\item{xmid}{A numeric parameter for the time value at the inflection
-(steepest) point of the curve, in units of the predictor variable \code{t}.}
+\item{xmid}{A numeric parameter for the time at the \emph{inflection point} (the
+steepest point) of the curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
-variable at the inflection \code{xmid}.}
+\item{slope}{A numeric parameter for the response rate \code{dx/dt} at the
+inflection \code{xmid}.}
 
-\item{asym}{A numeric parameter for the asymmetry index of the curve,
-equal to the fraction of the response where the inflection \code{xmid} occurs,
-bounded in \code{c(0, 1)} for \code{(y(xmid) - A) / (B - A)}. \code{asym = 0.5}
-is symmetric and equivalent to the 4-parameter form. If \code{NULL}
-(\emph{default}), a symmetric 4-parameter model is used.}
+\item{asym}{A numeric parameter for the asymmetry index of the curve; the
+fraction of the amplitude \code{(y(xmid) - A) / (B - A)} at which the
+inflection \code{xmid} occurs, in \verb{(0, 1)}. \code{asym = 0.5} is symmetric and
+equivalent to the 4-parameter form. If \code{NULL} (\emph{default}), a symmetric
+4-parameter model is used.}
 }
 \value{
 A numeric vector of predicted values the same length as the
@@ -34,33 +34,36 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for a \code{selfStart} wrapper around
 \code{\link[=logistic]{logistic()}}, for use with \code{\link[stats:nls]{stats::nls()}}. Supports both the 4-parameter
-symmetric form (A, B, xmid, slope) and the 5-parameter asymmetric form
-(A, B, xmid, slope, asym); arity is inferred from the formula passed to
+symmetric (A, B, xmid, slope) and 5-parameter asymmetric (A, B, xmid,
+slope, asym) forms; arity is inferred from the formula passed to
 \code{\link[stats:nls]{stats::nls()}}.
 }
 \details{
-4-parameter model: \code{x ~ SSlogistic(t, A, B, xmid, slope)}
+\subsection{Model formulas}{
+\itemize{
+\item 4-parameter: \code{x ~ SSlogistic(t, A, B, xmid, slope)}
+\item 5-parameter: \code{x ~ SSlogistic(t, A, B, xmid, slope, asym)}
+}
 
-5-parameter model: \code{x ~ SSlogistic(t, A, B, xmid, slope, asym)}
-
-The 4-parameter form is used by \code{\link[=analyse_kinetics]{analyse_kinetics()}} when
+The 4-parameter form is used by \code{\link[=analyse_kinetics]{analyse_kinetics()}} with
 \code{method = "sigmoidal"} and \code{shape = "symmetric"}. The 5-parameter
-asymmetric form is retained for advanced/experimental use only.
-\code{\link[stats:nls]{stats::nls()}} reads the free parameters from the formula right-hand
-side, so omitting \code{asym} incurs no degrees-of-freedom penalty.
-
-\code{analyse_kinetics()} instead dispatches to \code{\link[=SSgompertz]{SSgompertz()}} /
+asymmetric form is retained for advanced/experimental use only;
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} instead dispatches to \code{\link[=SSgompertz]{SSgompertz()}} /
 \code{\link[=SSgompertz_left]{SSgompertz_left()}} for asymmetric shapes, which are more stable.
+\code{\link[stats:nls]{stats::nls()}} reads the free parameters from the formula right-hand side,
+so omitting \code{asym} incurs no degrees-of-freedom penalty.
+}
+
 \subsection{Fixing parameters}{
 
-Any parameter may be held constant by writing a value in place of its
-name in the formula, e.g. \code{x ~ SSlogistic(t, A = 0, B, xmid, slope)}
-fixes the starting asymptote at \code{A = 0}. Fixed parameters are excluded
-from estimation and are not returned by \code{\link[stats:coef]{stats::coef()}}.
+Any parameter may be held constant by writing a value in place of its name
+in the formula, e.g. \code{x ~ SSlogistic(t, A = 0, B, xmid, slope)} fixes the
+starting asymptote at \code{A = 0}. Fixed parameters are excluded from
+estimation and are not returned by \code{\link[stats:coef]{stats::coef()}}.
 }
 }
 \examples{
-## create a logistic curve with random noise
+## create an asymmetric logistic curve with random noise
 set.seed(15)
 t <- 1:60
 x <- logistic(t, A = 10, B = 100, xmid = 30, slope = 4, asym = 0.3) +
@@ -75,7 +78,7 @@ summary(model4)
 model5 <- nls(x ~ SSlogistic(t, A, B, xmid, slope, asym), data = data)
 summary(model5)
 
-## fix the baseline A at a known value
+## fix the starting asymptote `A` at a known value
 model_fixed <- nls(x ~ SSlogistic(t, A = 10, B, xmid, slope), data = data)
 summary(model_fixed)
 
@@ -94,6 +97,6 @@ y5 <- predict(model5, data)
 
 }
 \seealso{
-\code{\link[=logistic]{logistic()}}, \code{\link[stats:nls]{stats::nls()}}, \code{\link[stats:selfStart]{stats::selfStart()}},
-\code{\link[stats:SSfpl]{stats::SSfpl()}}
+\code{\link[=logistic]{logistic()}}, \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[stats:nls]{stats::nls()}},
+\code{\link[stats:selfStart]{stats::selfStart()}}, \code{\link[stats:SSfpl]{stats::SSfpl()}}, \code{\link[=SSgompertz]{SSgompertz()}}
 }

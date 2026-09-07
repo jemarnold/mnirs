@@ -36,27 +36,27 @@ used.
 }}
 
 \item{start_time}{A numeric value in units of \code{time_channel} specifying the
-time of response onset (effectively time = \code{0} of the response). If \code{NULL}
-(\emph{default}), retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls
-back to \code{0} or the first positive time value (see \emph{Details}).}
+response onset (effectively time = \code{0} of the fit). If \code{NULL} (\emph{default}),
+retrieves \code{interval_times} from \emph{"mnirs"} metadata, or falls back to \code{0}
+or the first positive time value (see \emph{Details}).}
 
-\item{response_fraction}{\strong{response_time}: A numeric vector of values in the range
+\item{response_fraction}{\strong{response_time}: A numeric vector in the range
 \verb{[0, 1]} specifying the fractional response amplitude(s) to detect.
 Defaults to \code{0.5} (50\% response, i.e. half-response time). Multiple
-values (e.g. \code{c(0.5, 0.632)}) return one coefficient row per response_fraction.}
+values (e.g. \code{c(0.5, 0.632)}) return one coefficient row per fraction.}
 
 \item{direction}{A character string specifying the response direction
 \code{"positive"}, or \code{"negative"}, or detect with \code{"auto"} (\emph{default}). See
 \emph{Details}.}
 
 \item{end_window}{A numeric value in units of \code{time_channel} specifying the
-window in which to look for the end of the kinetics fit; returns the
-window with no greater/lesser values within \code{end_window} after the first
-extreme value. \code{end_window = Inf} (\emph{default}) returns the global extreme
-from the full sample range (see \emph{Details}). For \emph{"biexponential"},
-\code{end_window} bounds the fast-phase (stage 1) window only, and \code{Inf}
-resolves to \code{30} time units past the first extreme; the full model is
-fit to the whole response.}
+window in which to look for the end of the kinetics fit; with no greater/
+lesser values within \code{end_window} after the first extrema (min/max).
+\code{end_window = Inf} (\emph{default}) returns the global extreme from the full
+data range (see \emph{Details}).
+
+For \emph{"biexponential"}, \code{end_window} bounds the fast-phase window only, and
+the default is \code{30} sec; the full model is then fit to the full data range.}
 
 \item{verbose}{Logical. \code{TRUE} (\emph{default}) will display, and \code{FALSE} will
 silence warnings and information messages helpful for troubleshooting.
@@ -64,24 +64,20 @@ Global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 
 \item{...}{Additional arguments passed to the underlying method function.
 See \emph{Details}. For the \code{\link[stats:nls]{stats::nls()}} methods (\strong{monoexponential,
-biexponential, exponential_drift, sigmoidal, sigmoidal_drift}),
-\code{control} is an
-\emph{optional} \code{list()} or \code{\link[stats:nls.control]{stats::nls.control()}} of convergence settings,
-e.g. \code{control = list(maxiter = 200)}. Values override the internal
-defaults (\code{maxiter = 500}, \code{warnOnly = TRUE} for bounded \code{"port"} fits).
-Applied globally to every channel and interval. \code{warnOnly = FALSE} turns
-a non-converged bounded fit into a fit failure (\code{NA} coefficients with a
-warning).}
+exponential_drift, biexponential, sigmoidal, sigmoidal_drift}),
+\code{control = list()} can be passed to \code{\link[stats:nls.control]{stats::nls.control()}}, e.g.
+\code{control = list(maxiter = 200)}, applied globally to all channels and
+intervals.}
 
 \item{env}{The calling environment or a defused call, used to report
 errors and warnings as coming from the user-facing function rather
 than the validator.}
 }
 \value{
-A \code{data.frame} with one row per \code{nirs_channel} per \code{response_fraction}
-and columns \code{nirs_channels}, \code{response_fraction}, \code{A}, \code{B}, \code{response_time},
-\code{response_value}, \code{fitted}, \code{idx}. Per-channel metadata are attached
-as attributes:
+A \code{data.frame} with one row per \code{nirs_channel} per
+\code{response_fraction} and columns \code{nirs_channels}, \code{response_fraction},
+\code{A}, \code{B}, \code{response_time}, \code{response_value}, \code{fitted}, \code{idx}. Per-channel
+metadata are attached as attributes:
 \itemize{
 \item \code{"model"}: \code{NULL} (no parametric model is fitted).
 \item \code{"fitted_data"}: a named list of per-channel data frames with

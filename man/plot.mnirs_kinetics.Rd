@@ -11,7 +11,8 @@
 
 \item{fitted}{Logical. Default is \code{TRUE}; overlays a dashed fitted curve for
 parametric methods (\code{"peak_slope"}, \code{"monoexponential"},
-\code{"biexponential"}, \code{"sigmoidal"}) in a darker shade of the channel
+\code{"exponential_drift"}, \code{"biexponential"}, \code{"sigmoidal"},
+\code{"sigmoidal_drift"}) in a darker shade of the channel
 colour. \code{"response_time"} has no fitted curve.}
 
 \item{markers}{Logical. Default is \code{TRUE}; draws a dotted vertical line at
