@@ -14,9 +14,6 @@ method_aliases <- c(
     exponential = "monoexponential",
     mrt = "monoexponential",
     tau = "monoexponential",
-    biexponential = "biexponential",
-    biexp = "biexponential",
-    double_exponential = "biexponential",
     exponential_drift = "exponential_drift",
     exponential_linear = "exponential_drift",
     exp_drift = "exponential_drift",
@@ -24,6 +21,9 @@ method_aliases <- c(
     exp_lin = "exponential_drift",
     monoexp_drift = "exponential_drift",
     monoexp_linear = "exponential_drift",
+    biexponential = "biexponential",
+    biexp = "biexponential",
+    double_exponential = "biexponential",
     logistic = "sigmoidal",
     sig = "sigmoidal",
     gompertz = "sigmoidal",
@@ -52,10 +52,10 @@ kinetics_dispatch <- list(
     response_time = c("response_fraction"),
     peak_slope = c("width", "span", "align", "partial", "na.rm"),
     monoexponential = c("use_TD", "fix", "control"),
+    exponential_drift = c("use_TD", "drift_fraction", "fix", "control"),
     biexponential = c(
         "use_TD", "fix", "tau_flex", "TD_flex", "A_flex", "control"
     ),
-    exponential_drift = c("use_TD", "drift_fraction", "fix", "control"),
     sigmoidal = c("shape", "fix", "control"),
     sigmoidal_drift = c("shape", "drift_fraction", "fix", "control")
 )
@@ -75,8 +75,8 @@ kinetics_workers <- c(
     response_time = "analyse_response_time",
     peak_slope = "analyse_peak_slope",
     monoexponential = "analyse_monoexponential",
-    biexponential = "analyse_biexponential",
     exponential_drift = "analyse_exponential_drift",
+    biexponential = "analyse_biexponential",
     sigmoidal = "analyse_logistic",
     sigmoidal_drift = "analyse_sigmoidal_drift"
 )
@@ -118,6 +118,28 @@ fallback_gate <- 2
 ## `args` overrides reduced worker arguments. `to_label` names the reduced
 ## model in the warning in place of its `SS<to>()` self-start fn
 kinetics_fallbacks <- list(
+    exponential_drift = list(
+        to = "monoexponential",
+        fix_keep = c("A", "B", "tau", "TD"),
+        args = list(),
+        trigger = \(cf, rmse, span, t_end) {
+            ## drift amplitude over the record from the drift onset
+            # fmt: skip
+            onset <- expdrift_onset(
+                cf$tau, cf$drift_fraction, if (is.finite(cf$TD)) cf$TD
+            )
+            first_reason(
+                "Fit failed." = is.na(cf$A),
+                !!paste0(
+                    "Drift amplitude is below ",
+                    cli::col_blue(fallback_gate),
+                    " RMSE."
+                ) := !is.finite(cf[["slope_B"]]) ||
+                    abs(cf[["slope_B"]]) * (t_end - onset) <
+                        fallback_gate * rmse
+            )
+        }
+    ),
     biexponential = list(
         to = "exponential_drift",
         fix_keep = c("A", "B", "tau", "TD"),
@@ -139,28 +161,6 @@ kinetics_fallbacks <- list(
                     cli::col_blue(fallback_gate),
                     " RMSE."
                 ) := abs(cf$B2 - cf$B) < fallback_gate * rmse
-            )
-        }
-    ),
-    exponential_drift = list(
-        to = "monoexponential",
-        fix_keep = c("A", "B", "tau", "TD"),
-        args = list(),
-        trigger = \(cf, rmse, span, t_end) {
-            ## drift amplitude over the record from the drift onset
-            # fmt: skip
-            onset <- expdrift_onset(
-                cf$tau, cf$drift_fraction, if (is.finite(cf$TD)) cf$TD
-            )
-            first_reason(
-                "Fit failed." = is.na(cf$A),
-                !!paste0(
-                    "Drift amplitude is below ",
-                    cli::col_blue(fallback_gate),
-                    " RMSE."
-                ) := !is.finite(cf[["slope_B"]]) ||
-                    abs(cf[["slope_B"]]) * (t_end - onset) <
-                        fallback_gate * rmse
             )
         }
     ),
@@ -848,7 +848,11 @@ analyse_kinetics_intervals <- function(
         )
         intervals <- mapply(\(.nm, .src) {
             sfx <- paste0("_", .src)
-            if (endsWith(.nm, sfx)) substr(.nm, 1L, nchar(.nm) - nchar(sfx)) else .nm
+            if (endsWith(.nm, sfx)) {
+                substr(.nm, 1L, nchar(.nm) - nchar(sfx))
+            } else {
+                .nm
+            }
         }, names(data_list), src, USE.NAMES = FALSE)
         relabelled <- Map(\(.res, .df, .src, .int) {
             raw <- names(attr(.res, "fitted_data"))
@@ -1303,8 +1307,9 @@ analyse_kinetics_channels <- function(
                         ## expand the single-row data frame
                         paste(deparse(.x), collapse = "")
                     } else if (length(.x) > 1L) {
-                        ## collapse vector args (e.g. multiple `response_fraction`
-                        ## values) to fit the single-row data frame
+                        ## collapse vector args (e.g. multiple
+                        ## `response_fraction` values) to fit the single-row
+                        ## data frame
                         paste(.x, collapse = ", ")
                     } else {
                         .x
@@ -1367,12 +1372,14 @@ analyse_kinetics_channels <- function(
                     c(
                         "!" = paste(
                             "Negative `time_channel` coefficients imply the",
-                            "response occurred before `start_time`. This may",
-                            "indicate a poorly fitted or misparameterised model."
+                            "response occurred before `start_time`.",
+                            "This may indicate a poorly fitted or",
+                            "misparameterised model."
                         ),
                         "i" = paste(
                             "Check `time_channel` and `start_time` values, or",
-                            "consider using a different `analyse_kinetics()` method."
+                            "consider using a different `analyse_kinetics()`",
+                            "method."
                         )
                     ),
                     call = warn_call(env)
@@ -1446,7 +1453,9 @@ validate_kinetics_args <- function(
                 cli_abort(c(
                     "x" = "{.arg control} must be a {.cls list} of \\
                     {.fn stats::nls.control} arguments.",
-                    if (length(bad) > 0L) c("i" = "Unrecognised: {.field {bad}}.")
+                    if (length(bad) > 0L) c(
+                        "i" = "Unrecognised: {.field {bad}}."
+                    )
                 ), call = env)
             }
         }
@@ -2152,7 +2161,7 @@ enforce_direction <- function(
         rlang::warn(
             c(
                 "x" = sprintf(
-                    "`%s()` fit for %s in %s could not satisfy `direction = %s`.",
+                    "`%s()` fit for %s in %s cannot satisfy `direction = %s`.",
                     fn,
                     cli::col_green(.nirs),
                     cli::col_green(interval_name),

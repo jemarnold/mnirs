@@ -55,7 +55,9 @@
 #'
 #' ## the drift onset fraction is held constant in the formula
 #' model <- nls(
-#'     x ~ SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction = 0.95),
+#'     x ~ SSsigmoidal_drift(
+#'         t, A, B, xmid, slope, slope_B, drift_fraction = 0.95
+#'     ),
 #'     data = data,
 #'     algorithm = "port",
 #'     control = nls.control(warnOnly = TRUE)
@@ -149,7 +151,7 @@ sigdrift_onset <- function(A, B, xmid, slope, drift_fraction, shape) {
 #' @inheritParams sigmoidal_drift
 #'
 #' @details
-#' With `r = |slope_B / slope|` and `u = k * (t - xmid)` (see
+#' With `ratio = |slope_B / slope|` and `u = k * (t - xmid)` (see
 #' [sigdrift_rate()]), the sigmoid rate relative to its peak is
 #' `4 * L * (1 - L)` with `L = 1 / (1 + exp(-u))` for `"symmetric"`, solved
 #' as `u = 2 * atanh(sqrt(1 - r))`; `exp(1 - u - exp(-u))` for
@@ -163,20 +165,20 @@ sigdrift_onset <- function(A, B, xmid, slope, drift_fraction, shape) {
 #' @keywords internal
 sigdrift_texc <- function(A, B, xmid, slope, slope_B, drift_fraction, shape) {
     onset <- sigdrift_onset(A, B, xmid, slope, drift_fraction, shape)
-    r <- abs(slope_B / slope)
-    if (!is.finite(r) || r >= 1) {
+    ratio <- abs(slope_B / slope)
+    if (!is.finite(ratio) || ratio >= 1) {
         return(onset)
     }
     u <- switch(
         shape,
-        symmetric = 2 * atanh(sqrt(1 - r)),
+        symmetric = 2 * atanh(sqrt(1 - ratio)),
         gompertz = stats::uniroot(
-            \(u) u + exp(-u) - 1 + log(r),
-            c(0, 1 - log(r))
+            \(u) u + exp(-u) - 1 + log(ratio),
+            c(0, 1 - log(ratio))
         )$root,
         gompertz_left = stats::uniroot(
-            \(u) exp(u) - u - 1 + log(r),
-            c(0, log(2 * (1 - log(r))))
+            \(u) exp(u) - u - 1 + log(ratio),
+            c(0, log(2 * (1 - log(ratio))))
         )$root
     )
     return(max(onset, xmid + u / sigdrift_rate(A, B, slope, shape)))
@@ -274,10 +276,6 @@ sigdrift_start <- function(x, t, fixed = list(), shape = "symmetric") {
 #' [sigmoidal_drift()], for use with [stats::nls()]: a 4-parameter sigmoid
 #' (`A`, `B`, `xmid`, `slope`) with a linear drift `slope_B` at its ending
 #' asymptote from the onset fraction `drift_fraction`.
-#'
-#' @usage
-#' SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction,
-#'     shape = "symmetric")
 #'
 #' @inheritParams sigmoidal_drift
 #'

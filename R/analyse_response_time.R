@@ -8,9 +8,9 @@
 #' @param start_time A numeric value specifying the start of the kinetics
 #'   response in units of `t`. Observations where `t <= start_time` define the
 #'   baseline window. Defaults to `0`.
-#' @param response_fraction A numeric vector of values in the range `[0, 1]` specifying
-#'   the fractional response amplitude(s) to detect. Defaults to `0.5` (50%
-#'   response, i.e. half-response time). Multiple values (e.g.
+#' @param response_fraction A numeric vector of values in the range `[0, 1]`
+#'   specifying the fractional response amplitude(s) to detect. Defaults to
+#'   `0.5` (50% response, i.e. half-response time). Multiple values (e.g.
 #'   `c(0.5, 0.632)`) return one result per response_fraction.
 #' @param ... Additional arguments.
 #' @inheritParams replace_invalid
@@ -62,7 +62,8 @@
 #' @examples
 #' set.seed(13)
 #' t <- 0:60
-#' x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) + rnorm(length(t), 0, 1)
+#' x <- monoexponential(t, A = 20, B = 60, tau = 8, TD = 10) + 
+#'     rnorm(length(t), 0, 1)
 #'
 #' ## half-response time (0.5) and mean response time (0.632 ~= tau)
 #' RT <- response_time(x, t, start_time = 10, response_fraction = c(0.5, 0.632))
@@ -74,8 +75,13 @@
 #'     t[max(RT$baseline_idx)], RT$A,
 #'     col = "red", lwd = 2
 #' )
-#' ## response_fraction = 0.5 (red) and 0.632 (blue): response_value, and extreme
-#' points(t[RT$response_idx], RT$response_value, col = c("red", "blue"), pch = 19)
+#' ## response_fraction = 0.5 (red) & 0.632 (blue): response_value & extreme
+#' points(
+#'     t[RT$response_idx], 
+#'     RT$response_value, 
+#'     col = c("red", "blue"), 
+#'     pch = 19
+#' )
 #' points(t[RT$extreme_idx], RT$B, col = "red", pch = 19)
 #'
 #' @export
@@ -188,10 +194,10 @@ response_time <- function(
 #' @inheritParams analyse_kinetics
 #' @inheritParams response_time
 #'
-#' @returns A `data.frame` with one row per `nirs_channel` per `response_fraction`
-#'   and columns `nirs_channels`, `response_fraction`, `A`, `B`, `response_time`,
-#'   `response_value`, `fitted`, `idx`. Per-channel metadata are attached
-#'   as attributes:
+#' @returns A `data.frame` with one row per `nirs_channel` per
+#'   `response_fraction` and columns `nirs_channels`, `response_fraction`,
+#'   `A`, `B`, `response_time`, `response_value`, `fitted`, `idx`. Per-channel
+#'   metadata are attached as attributes:
 #'   - `"model"`: `NULL` (no parametric model is fitted).
 #'   - `"fitted_data"`: a named list of per-channel data frames with
 #'     columns `window_idx` and `fitted`, containing the baseline,
