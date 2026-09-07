@@ -10,7 +10,6 @@ sigmoidal_drift(
   B,
   xmid,
   slope,
-  slope_A,
   slope_B,
   drift_fraction,
   shape = c("symmetric", "gompertz", "gompertz_left")
@@ -31,15 +30,14 @@ variable.}
 \item{slope}{A numeric parameter for the slope \code{dx/dt} of the response
 variable at the inflection \code{xmid}.}
 
-\item{slope_A, slope_B}{Numeric parameters for the linear drift rates
-\code{dx/dt} at the starting asymptote \code{A} and the ending asymptote \code{B}, in
-response units per unit of the predictor variable \code{t}.}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
+of the secondary phase at the ending asymptote \code{B}, in response units
+per unit of the predictor variable \code{t}.}
 
 \item{drift_fraction}{A numeric fraction of the amplitude \code{B - A} in
-\verb{(0.5, 1)} bounding the drift regions: the leading drift applies only
-before the sigmoid reaches \code{A + (1 - drift_fraction) * (B - A)} (at
-\code{texc_A}), the trailing drift only after it reaches
-\code{A + drift_fraction * (B - A)} (at \code{texc_B}).}
+\verb{(0.5, 1)} at which the linear drift begins: the drift onset is where
+the sigmoid reaches \code{A + drift_fraction * (B - A)} (see
+\code{\link[=sigdrift_onset]{sigdrift_onset()}}).}
 
 \item{shape}{Character; the sigmoidal shape. One of \code{"symmetric"}
 (\emph{default}; \code{\link[=logistic]{logistic()}}), \code{"gompertz"} (\code{\link[=gompertz]{gompertz()}}), or
@@ -50,51 +48,45 @@ A numeric vector of predicted values the same length as the
 predictor variable \code{t}.
 }
 \description{
-Calculate a three-phase curve: a primary sigmoidal response with
-independent linear drifts at the leading and trailing asymptotes.
+Calculate a two-phase curve: a primary sigmoidal response with a
+secondary linear drift beginning near the ending asymptote.
 }
 \details{
 Model:
-\code{S(t) + slope_A * pmin(t - texc_A, 0) + slope_B * pmax(t - texc_B, 0)}
+\code{S(t) + slope_B * pmax(t - onset, 0)}
 
 where \code{S(t)} is the 4-parameter sigmoid of the given \code{shape} with
 asymptotes \code{A} and \code{B}, inflection \code{xmid}, and inflection rate \code{slope}.
-Each drift is a hinge line anchored at zero at its cutoff, so the
-leading drift is exactly zero from \code{texc_A} on and the trailing drift
-exactly zero up to \code{texc_B}. The cutoffs never overlap
-(\verb{texc_A < xmid < texc_B}), so the two drifts are independent.
+The drift is a hinge line anchored at zero at the onset, so it is
+exactly zero up to the onset.
 
-The cutoffs are where the sigmoid reaches the \code{1 - drift_fraction} and
-\code{drift_fraction} fractions of its amplitude (\code{p = 1 - drift_fraction}):
+The onset is the analytic inverse of each shape at the \code{drift_fraction}
+fraction \code{f} of its amplitude, \code{onset = xmid + u / k}:
 \itemize{
 \item \code{shape = "symmetric"}: \code{k = 4 * slope / (B - A)};
-\code{texc_A = xmid - log((1 - p) / p) / k},
-\code{texc_B = xmid + log((1 - p) / p) / k}.
+\code{u = log(f / (1 - f))}.
 \item \code{shape = "gompertz"}: \code{k = slope * e / (B - A)};
-\code{texc_A = xmid - log(-log(p)) / k},
-\code{texc_B = xmid - log(-log(1 - p)) / k}.
+\code{u = -log(-log(f))}.
 \item \code{shape = "gompertz_left"}: \code{k = slope * e / (B - A)};
-\code{texc_A = xmid + log(-log(1 - p)) / k},
-\code{texc_B = xmid + log(-log(p)) / k}.
+\code{u = log(-log(1 - f))}.
 }
 
-The Gompertz forms give a longer cutoff distance on their slow side.
+The \code{"gompertz"} form places its onset furthest past \code{xmid} (slow
+tail) and \code{"gompertz_left"} nearest (fast tail).
 }
 \examples{
-## create a sigmoidal curve with drifting asymptotes and random noise
+## create a sigmoidal curve with a late linear drift and random noise
 set.seed(13)
 t <- 1:120
 x <- sigmoidal_drift(
     t, A = 10, B = 100, xmid = 40, slope = 4,
-    slope_A = 0.3, slope_B = -0.4, drift_fraction = 0.95
+    slope_B = -0.4, drift_fraction = 0.95
 ) + rnorm(length(t), 0, 2)
 data <- data.frame(t, x)
 
-## the cutoff fraction is held constant in the formula
+## the drift onset fraction is held constant in the formula
 model <- nls(
-    x ~ SSsigmoidal_drift(
-        t, A, B, xmid, slope, slope_A, slope_B, drift_fraction = 0.95
-    ),
+    x ~ SSsigmoidal_drift(t, A, B, xmid, slope, slope_B, drift_fraction = 0.95),
     data = data,
     algorithm = "port",
     control = nls.control(warnOnly = TRUE)

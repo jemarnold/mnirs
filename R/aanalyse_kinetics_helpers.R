@@ -90,7 +90,7 @@ kinetics_coef_cols <- list(
         "A", "B", "TD", "tau", "k", "MRT", "HRT", "MRT_fitted", "HRT_fitted"
     ),
     exponential_drift = c(
-        "A", "B", "TD", "tau", "k", "MRT", "HRT", "texc", "slope",
+        "A", "B", "TD", "tau", "k", "MRT", "HRT", "texc", "slope_B",
         "drift_fraction", "MRT_fitted", "HRT_fitted", "texc_fitted"
     ),
     biexponential = c(
@@ -158,8 +158,9 @@ kinetics_fallbacks <- list(
                     "Drift amplitude is below ",
                     cli::col_blue(fallback_gate),
                     " RMSE."
-                ) := !is.finite(cf$slope) ||
-                    abs(cf$slope) * (t_end - onset) < fallback_gate * rmse
+                ) := !is.finite(cf[["slope_B"]]) ||
+                    abs(cf[["slope_B"]]) * (t_end - onset) <
+                        fallback_gate * rmse
             )
         }
     ),

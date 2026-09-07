@@ -1028,7 +1028,7 @@ create_linear_tail_data <- function(seed = 5, t = 0:119) {
     set.seed(seed)
     # fmt: skip
     x <- exponential_drift(
-        t, A = 70, B = 40, tau = 5, slope = 0.1, drift_fraction = 0.95
+        t, A = 70, B = 40, tau = 5, slope_B = 0.1, drift_fraction = 0.95
     ) +
         rnorm(length(t), 0, 0.3)
     create_mnirs_data(
@@ -1104,7 +1104,7 @@ test_that("analyse_kinetics() falls back to a monoexponential response", {
     expect_true(all.equal(cf$tau, 8, tolerance = 1, scale = 1))
     expect_true(all(is.na(cf[c(biexp_only, "texc")])))
     ## drift-only columns are dropped when no row kept the drift model
-    expect_false(any(c("slope", "drift_fraction") %in% names(cf)))
+    expect_false(any(c("slope_B", "drift_fraction") %in% names(cf)))
     expect_true(inherits(result$model[[1L]]$smo2, "nls"))
     ## both fallbacks are recorded
     expect_equal(sum(grepl("fell back to", result$warnings$message)), 2L)
@@ -1177,9 +1177,9 @@ test_that("a slow phase beyond the record falls back to exponential_drift", {
     cf <- result$coefficients
 
     expect_equal(cf$model, "exponential_drift")
-    expect_true(all.equal(cf$slope, 0.1, tolerance = 0.05, scale = 1))
+    expect_true(all.equal(cf$slope_B, 0.1, tolerance = 0.05, scale = 1))
     expect_true(is.finite(cf$texc))
-    expect_named(coef(result$model[[1L]]$smo2), c("A", "B", "tau", "slope"))
+    expect_named(coef(result$model[[1L]]$smo2), c("A", "B", "tau", "slope_B"))
     expect_true(all(is.na(cf[biexp_only])))
     msgs <- result$warnings$message
     expect_true(any(grepl("fell back to", msgs)))
@@ -1339,7 +1339,8 @@ test_that("kinetics_chain_cols() unions the chain with `_fitted` columns last", 
         kinetics_chain_cols("biexponential"),
         c(
             "A", "B", "TD", "tau", "MRT", "texc", "B2", "tau2", "k", "HRT",
-            "slope", "drift_fraction", "MRT_fitted", "texc_fitted", "HRT_fitted"
+            "slope_B", "drift_fraction", "MRT_fitted", "texc_fitted",
+            "HRT_fitted"
         )
     )
     expect_equal(
@@ -1367,17 +1368,28 @@ test_that("bind_union() pads differing columns and keeps a fixed order", {
 test_that("analyse_biexponential() converges on real dataset", {
     skip("Manual fit convergence check")
 
-    intervals <- readRDS(test_path("testdata/5-1_intervals_short.rds"))
+    intervals <- readRDS("tests/testthat/testdata/5-1_intervals_short.rds")
     deoxy <- intervals[grepl("^deoxy", names(intervals))]
+    reoxy <- intervals[grepl("^reoxy", names(intervals))]
+
+    deoxy_channels <- c("smo2_left_vl", "smo2_right_vl")
+    reoxy_channels <- c("SmO2 Live")
+
+    deoxy_short <- lapply(deoxy[1:3], \(.df) {
+        .df[1:240, ]
+    })
 
     results <- analyse_kinetics(
-        deoxy,
+        reoxy,
         # nirs_channels = c(smo2_left_vl, smo2_right_vl),
-        method = "biexponential",
-        end_window = 30
+        method = "biexp",
+        # end_window = 30
     )
-    tibble(results$warnings)
-    # plot(results)
+    warnings()
+    plot(results)
+    plot(results, time_labels = TRUE, labels = FALSE) + 
+        ggplot2::coord_cartesian(ylim = c(40, 90)) + 
+        ggview::canvas(width = 280, height = 280*0.5, units = "mm", dpi = 300)
     # plot(results, components = TRUE, scales = "free")
 
     coefs <- results$coefficients

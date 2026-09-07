@@ -427,15 +427,15 @@
 #' Model equation:
 #'
 #' `A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) +
-#' slope * pmax(t - TD + tau * log(1 - drift_fraction), 0)`
+#' slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)`
 #'
 #' `A`, `B`, `tau`, `TD`, and the derived `k`, `MRT`, and `HRT` are as for
-#' *"monoexponential"*. `slope` is the linear drift rate `dx/dt`. The drift
+#' *"monoexponential"*. `slope_B` is the linear drift rate `dx/dt`. The drift
 #' onset is fixed where the primary response reaches `drift_fraction` of its
 #' amplitude, `TD - tau * log(1 - drift_fraction)` (*default* `0.95`;
 #' `TD + 3 * tau`). The excursion point `texc` is where the
 #' drift rate overtakes the decaying primary rate,
-#' `TD + tau * log(|B - A| / (|slope| * tau))`, floored at the drift onset:
+#' `TD + tau * log(|B - A| / (|slope_B| * tau))`, floored at the drift onset:
 #' the excursion point of the curve when the phases oppose, or where the
 #' linear trend takes over a monotonic response. It is reported elapsed
 #' from `start_time` (the same frame as `TD` and `MRT`) with the fitted
@@ -446,12 +446,12 @@
 #' to the *"monoexponential"* model (same window and time-delay structure,
 #' with `A`, `B`, `tau`, and `TD` carried over from `fix`) when the fit
 #' fails or the drift amplitude over the record from the drift onset,
-#' `|slope| * (t_end - onset)`, is below twice the fit RMSE, with a warning
+#' `|slope_B| * (t_end - onset)`, is below twice the fit RMSE, with a warning
 #' recorded in `warnings`. The `model` coefficient column names the method
-#' each row comes from; monoexponential rows report `texc`, `slope`,
+#' each row comes from; monoexponential rows report `texc`, `slope_B`,
 #' `drift_fraction`, and `texc_fitted` as `NA`.
 #'
-#' `A`, `B`, `tau`, `slope`, and `TD` may be held constant with `fix`, as
+#' `A`, `B`, `tau`, `slope_B`, and `TD` may be held constant with `fix`, as
 #' above.
 #'
 #' ## method = "sigmoidal"

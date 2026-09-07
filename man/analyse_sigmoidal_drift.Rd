@@ -43,17 +43,15 @@ used.
 (early-inflection; calls \code{\link[=SSgompertz]{SSgompertz()}}), or \code{"gompertz_left"}
 (late-inflection; calls \code{\link[=SSgompertz_left]{SSgompertz_left()}}).}
 
-\item{drift_fraction}{A numeric fraction of the amplitude in \verb{(0.5, 1)}
-bounding the drift regions (\emph{default} \code{0.95}): the leading drift
-applies below \code{A + (1 - drift_fraction) * (B - A)} and the trailing drift
-above \code{A + drift_fraction * (B - A)}. Always held constant. Applied to
-every channel, or per-channel as a list keyed by channel name, e.g.
-\code{drift_fraction = list(smo2 = 0.9)}.}
+\item{drift_fraction}{A numeric fraction of the amplitude in \verb{(0.5, 1)} at
+which the drift onset is held (\emph{default} \code{0.95}). Always held constant.
+Applied to every channel, or per-channel as a list keyed by channel
+name, e.g. \code{drift_fraction = list(smo2 = 0.9)}.}
 
 \item{fix}{An \emph{optional} named list of model parameters (\code{A}, \code{B},
-\code{xmid}, \code{slope}, \code{slope_A}, \code{slope_B}) to hold constant during fitting,
-e.g. \code{fix = list(A = 0)}. Applied to every channel, or per-channel as
-a list of lists keyed by channel name, e.g.
+\code{xmid}, \code{slope}, \code{slope_B}) to hold constant during fitting, e.g.
+\code{fix = list(A = 0)}. Applied to every channel, or per-channel as a
+list of lists keyed by channel name, e.g.
 \code{fix = list(smo2 = list(A = 0))}.}
 
 \item{control}{An \emph{optional} \code{list()} or \code{\link[stats:nls.control]{stats::nls.control()}} merged
@@ -99,9 +97,10 @@ than the validator.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
-\code{nirs_channels}, \code{A}, \code{B}, \code{xmid}, \code{slope}, \code{slope_A}, \code{slope_B},
-\code{drift_fraction}, \code{texc_A}, \code{texc_B}, \code{xmid_fitted}. \code{texc_A} and \code{texc_B}
-are the drift cutoff times (see \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}).
+\code{nirs_channels}, \code{A}, \code{B}, \code{xmid}, \code{slope}, \code{texc}, \code{slope_B},
+\code{drift_fraction}, \code{xmid_fitted}, \code{texc_fitted}. \code{texc} is the
+excursion point where the drift rate overtakes the decaying sigmoid
+rate, never before the drift onset (see \code{\link[=sigdrift_texc]{sigdrift_texc()}}).
 Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"model"}: an \link[stats:nls]{nls} model object, or \code{NULL} for channels
@@ -116,9 +115,9 @@ recording the resolved arguments used.
 }
 \description{
 Internal channel-level dispatch for
-\code{analyse_kinetics(method = "sigmoidal_drift")}. Fits a sigmoidal curve
-with linear drifts at both asymptotes to each \code{nirs_channel} within a
-single \emph{"mnirs"} data frame. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
+\code{analyse_kinetics(method = "sigmoidal_drift")}. Fits a two-phase
+sigmoidal + linear-drift curve to each \code{nirs_channel} within a single
+\emph{"mnirs"} data frame. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
 documentation.
 }
 \seealso{

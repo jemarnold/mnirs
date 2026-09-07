@@ -394,7 +394,7 @@ plot.mnirs_kinetics <- function(
                     ifelse(
                         model == "exponential_drift" & t_rel >= onset,
                         monoexponential(onset, g("A"), g("B"), g("tau"), TD) +
-                            g("slope") * (t_rel - onset),
+                            g("slope_B") * (t_rel - onset),
                         NA_real_
                     )
                 )
@@ -615,7 +615,7 @@ kinetics_annotations <- function(x) {
                         ),
                         line("texc = %s s", g("texc")),
                         line("tau2 = %s s", g("tau2")),
-                        line("slope = %s /s", g("slope"), decimals = Inf)
+                        line("slope_B = %s /s", g("slope_B"), decimals = Inf)
                     )
                 )
             },

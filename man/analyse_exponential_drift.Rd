@@ -49,7 +49,7 @@ Always held constant. Applied to every channel, or per-channel as a
 list keyed by channel name, e.g. \code{drift_fraction = list(smo2 = 0.9)}.}
 
 \item{fix}{An \emph{optional} named list of model parameters (\code{A}, \code{B}, \code{tau},
-\code{slope}, \code{TD}) to hold constant during fitting, e.g. \code{fix = list(A = 0)}.
+\code{slope_B}, \code{TD}) to hold constant during fitting, e.g. \code{fix = list(A = 0)}.
 Applied to every channel, or per-channel as a list of lists keyed by
 channel name, e.g. \code{fix = list(smo2 = list(A = 0))}. \code{TD} is fixable
 for channels where \code{use_TD = TRUE}; a fixed \code{TD} disables the
@@ -99,7 +99,8 @@ than the validator.}
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
 \code{nirs_channels}, \code{A}, \code{B}, \code{TD}, \code{tau}, \code{k}, \code{MRT}, \code{HRT}, \code{texc},
-\code{slope}, \code{drift_fraction}, \code{MRT_fitted}, \code{HRT_fitted}, \code{texc_fitted}. \code{texc}
+\code{slope_B}, \code{drift_fraction}, \code{MRT_fitted}, \code{HRT_fitted},
+\code{texc_fitted}. \code{texc}
 is the excursion point where the drift rate overtakes the decaying
 primary rate, never before the drift onset (see \code{\link[=expdrift_onset]{expdrift_onset()}}).
 Per-channel metadata are attached as attributes:

@@ -93,7 +93,7 @@ linear drift, fit via \code{\link[stats:nls]{stats::nls()}}. Additional argument
 \code{\link[stats:nls]{stats::nls()}}. Additional arguments: \code{shape}, \code{fix}, \code{control}.
 See \code{\link[=logistic]{logistic()}}.}
 \item{\code{"sigmoidal_drift"}}{Logistic or Gompertz-family curve with
-linear drifts at both asymptotes, fit via \code{\link[stats:nls]{stats::nls()}}. Additional
+a secondary linear drift, fit via \code{\link[stats:nls]{stats::nls()}}. Additional
 arguments: \code{shape}, \code{drift_fraction}, \code{fix}, \code{control}. See
 \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}.}
 }}
@@ -188,14 +188,12 @@ or \code{"gompertz_left"} (late-inflection; calls \code{\link[=SSgompertz_left]{
 \strong{sigmoidal_drift} the shape is passed to \code{\link[=SSsigmoidal_drift]{SSsigmoidal_drift()}}.}
 
 \item{drift_fraction}{\strong{exponential_drift, sigmoidal_drift}: A numeric
-fraction of the primary amplitude in \verb{(0.5, 1)} bounding the drift
-regions. For \strong{exponential_drift} the linear drift begins where the
-primary response reaches \code{A + drift_fraction * (B - A)}, at
-\code{TD - tau * log(1 - drift_fraction)}. For \strong{sigmoidal_drift} the leading
-drift applies only below \code{A + (1 - drift_fraction) * (B - A)} (before
-\code{texc_A}) and the trailing drift only above \code{A + drift_fraction * (B - A)}
-(after \code{texc_B}). The default \code{0.95} is always held constant. Specify
-per-channel as a list keyed by channel name, e.g.
+fraction of the primary amplitude in \verb{(0.5, 1)} at which the linear
+drift begins, where the primary response reaches
+\code{A + drift_fraction * (B - A)}: at \code{TD - tau * log(1 - drift_fraction)}
+for \strong{exponential_drift}, or the analytic inverse of the sigmoid
+\code{shape} for \strong{sigmoidal_drift}. The default \code{0.95} is always held
+constant. Specify per-channel as a list keyed by channel name, e.g.
 \code{drift_fraction = list(smo2 = 0.9)}. See \emph{Details}.}
 
 \item{fix}{\strong{monoexponential, biexponential, exponential_drift,
@@ -576,15 +574,15 @@ a secondary linear drift beginning near the primary asymptote.
 
 Model equation:
 
-\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
+\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
 
 \code{A}, \code{B}, \code{tau}, \code{TD}, and the derived \code{k}, \code{MRT}, and \code{HRT} are as for
-\emph{"monoexponential"}. \code{slope} is the linear drift rate \code{dx/dt}. The drift
+\emph{"monoexponential"}. \code{slope_B} is the linear drift rate \code{dx/dt}. The drift
 onset is fixed where the primary response reaches \code{drift_fraction} of its
 amplitude, \code{TD - tau * log(1 - drift_fraction)} (\emph{default} \code{0.95};
 \code{TD + 3 * tau}). The excursion point \code{texc} is where the
 drift rate overtakes the decaying primary rate,
-\verb{TD + tau * log(|B - A| / (|slope| * tau))}, floored at the drift onset:
+\verb{TD + tau * log(|B - A| / (|slope_B| * tau))}, floored at the drift onset:
 the excursion point of the curve when the phases oppose, or where the
 linear trend takes over a monotonic response. It is reported elapsed
 from \code{start_time} (the same frame as \code{TD} and \code{MRT}) with the fitted
@@ -595,12 +593,12 @@ The drift is kept only when the data support it. A channel falls back
 to the \emph{"monoexponential"} model (same window and time-delay structure,
 with \code{A}, \code{B}, \code{tau}, and \code{TD} carried over from \code{fix}) when the fit
 fails or the drift amplitude over the record from the drift onset,
-\verb{|slope| * (t_end - onset)}, is below twice the fit RMSE, with a warning
+\verb{|slope_B| * (t_end - onset)}, is below twice the fit RMSE, with a warning
 recorded in \code{warnings}. The \code{model} coefficient column names the method
-each row comes from; monoexponential rows report \code{texc}, \code{slope},
+each row comes from; monoexponential rows report \code{texc}, \code{slope_B},
 \code{drift_fraction}, and \code{texc_fitted} as \code{NA}.
 
-\code{A}, \code{B}, \code{tau}, \code{slope}, and \code{TD} may be held constant with \code{fix}, as
+\code{A}, \code{B}, \code{tau}, \code{slope_B}, and \code{TD} may be held constant with \code{fix}, as
 above.
 }
 
@@ -644,39 +642,39 @@ above.
 
 Aliases: \code{method = c("sigmoid_drift", "sig_drift", "logistic_drift", "gompertz_drift", "sigmoidal_linear")}.
 
-A parametric approach fitting a three-phase curve using \code{\link[stats:nls]{stats::nls()}}
+A parametric approach fitting a two-phase curve using \code{\link[stats:nls]{stats::nls()}}
 with \code{\link[=SSsigmoidal_drift]{SSsigmoidal_drift()}}: a \emph{"sigmoidal"} primary response of the
-given \code{shape} plus independent linear drifts at the leading and trailing
-asymptotes.
+given \code{shape} plus a secondary linear drift beginning near the ending
+asymptote.
 
 Model equation:
 
-\code{S(t) + slope_A * pmin(t - texc_A, 0) + slope_B * pmax(t - texc_B, 0)}
+\code{S(t) + slope_B * pmax(t - onset, 0)}
 
 \code{S(t)} and \code{A}, \code{B}, \code{xmid}, and \code{slope} are as for \emph{"sigmoidal"}.
-\code{slope_A} and \code{slope_B} are the linear drift rates \code{dx/dt} at the
-asymptotes \code{A} and \code{B}. Each drift is a hinge line anchored at zero at
-its cutoff: the leading drift applies only before \code{texc_A}, where the
-sigmoid reaches \code{1 - drift_fraction} (\emph{default} \code{0.95}; 5\%) of its
-amplitude, and the trailing drift only after \code{texc_B}, where it reaches
-\code{drift_fraction} (95\%). The cutoffs are the analytic inverse of each
-\code{shape} (see \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}), so a Gompertz form places its cutoff
-further out on its slow side. The drift regions never overlap, so the
-two drifts are fitted independently. \code{texc_A} and \code{texc_B} are reported
-elapsed from \code{start_time} (the same frame as \code{xmid}).
+\code{slope_B} is the linear drift rate \code{dx/dt} at the asymptote \code{B}. The
+drift is a hinge line anchored at zero at its onset, where the sigmoid
+reaches \code{drift_fraction} (\emph{default} \code{0.95}) of its amplitude, by the
+analytic inverse of each \code{shape} (see \code{\link[=sigmoidal_drift]{sigmoidal_drift()}}); a
+\code{"gompertz"} form places its onset furthest past \code{xmid}. The excursion
+point \code{texc} is where the drift rate overtakes the decaying sigmoid
+rate, \verb{|S'(t)| = |slope_B|}, floored at the drift onset: the turning
+point of the curve when the phases oppose, or where the linear trend
+takes over a monotonic response. It is reported elapsed from
+\code{start_time} (the same frame as \code{xmid}) with the fitted value
+\code{texc_fitted}.
 
-The drifts are kept only when the data support them. A channel falls
-back to the \emph{"sigmoidal"} model (same \code{shape} and window, with \code{A}, \code{B},
-\code{xmid}, and \code{slope} carried over from \code{fix}) when the fit fails or both
-drift amplitudes over their support, \verb{|slope_A| * (texc_A - t_start)} and
-\verb{|slope_B| * (t_end - texc_B)}, are below twice the fit RMSE, with a
-warning recorded in \code{warnings}. One supported drift keeps the full
-model. The \code{model} coefficient column names the method each row comes
-from; sigmoidal rows report \code{slope_A}, \code{slope_B}, \code{drift_fraction}, \code{texc_A},
-and \code{texc_B} as \code{NA}.
+The drift is kept only when the data support it. A channel falls back
+to the \emph{"sigmoidal"} model (same \code{shape} and window, with \code{A}, \code{B},
+\code{xmid}, and \code{slope} carried over from \code{fix}) when the fit fails or the
+drift amplitude over the record from the excursion point,
+\verb{|slope_B| * (t_end - texc)}, is below twice the fit RMSE, with a
+warning recorded in \code{warnings}. The \code{model} coefficient column names the
+method each row comes from; sigmoidal rows report \code{texc}, \code{slope_B},
+\code{drift_fraction}, and \code{texc_fitted} as \code{NA}.
 
-\code{A}, \code{B}, \code{xmid}, \code{slope}, \code{slope_A}, and \code{slope_B} may be held constant
-with \code{fix}, as above.
+\code{A}, \code{B}, \code{xmid}, \code{slope}, and \code{slope_B} may be held constant with
+\code{fix}, as above.
 }
 
 \subsection{Recursive analysis}{

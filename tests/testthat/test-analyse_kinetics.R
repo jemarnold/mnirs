@@ -2350,7 +2350,7 @@ create_expdrift_data <- function(
     A = 70,
     B = 40,
     tau = 8,
-    slope = 0.2,
+    slope_B = 0.2,
     drift_fraction = 0.98,
     TD = 5,
     n = 120,
@@ -2361,7 +2361,7 @@ create_expdrift_data <- function(
 ) {
     set.seed(seed)
     t <- seq(0, (n - 1) / sample_rate, length.out = n)
-    x <- exponential_drift(t, A, B, tau, slope, drift_fraction, TD) +
+    x <- exponential_drift(t, A, B, tau, slope_B, drift_fraction, TD) +
         rnorm(n, 0, noise_sd)
 
     df <- setNames(
@@ -2372,7 +2372,7 @@ create_expdrift_data <- function(
         for (ch in channels[-1]) {
             # fmt: skip
             df[[ch]] <- exponential_drift(
-                t, A + 5, B + 5, tau, slope, drift_fraction, TD
+                t, A + 5, B + 5, tau, slope_B, drift_fraction, TD
             ) +
                 rnorm(n, 0, noise_sd)
         }
@@ -2388,7 +2388,7 @@ create_expdrift_data <- function(
 
 
 test_that("analyse_kinetics.exponential_drift dispatches to the method", {
-    data <- create_expdrift_data(slope = 0.1)
+    data <- create_expdrift_data(slope_B = 0.1)
 
     result <- analyse_kinetics(
         data,
@@ -2400,12 +2400,12 @@ test_that("analyse_kinetics.exponential_drift dispatches to the method", {
     expect_s3_class(result, "mnirs_kinetics")
     expect_equal(result$method, "exponential_drift")
     expect_true(all(
-        c("tau", "MRT", "slope", "drift_fraction", "texc", "texc_fitted") %in%
+        c("tau", "MRT", "slope_B", "drift_fraction", "texc", "texc_fitted") %in%
             names(result$coefficients)
     ))
     expect_named(
         coef(result$model[[1L]]$smo2),
-        c("A", "B", "tau", "slope", "TD")
+        c("A", "B", "tau", "slope_B", "TD")
     )
 })
 
@@ -2459,7 +2459,7 @@ test_that("analyse_kinetics.exponential_drift passes use_TD and fix", {
     expect_equal(result$coefficients$A, 70)
     expect_true(is.na(result$coefficients$TD))
     expect_named(
-        coef(result$model[[1L]]$smo2), c("B", "tau", "slope")
+        coef(result$model[[1L]]$smo2), c("B", "tau", "slope_B")
     )
 })
 

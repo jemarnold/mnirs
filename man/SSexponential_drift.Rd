@@ -4,7 +4,7 @@
 \alias{SSexponential_drift}
 \title{Self-starting exponential-drift model}
 \usage{
-SSexponential_drift(t, A, B, tau, slope, drift_fraction, TD)
+SSexponential_drift(t, A, B, tau, slope_B, drift_fraction, TD)
 }
 \arguments{
 \item{t}{A numeric vector of the predictor variable (time).}
@@ -18,7 +18,7 @@ variable.}
 \item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
 of the exponential curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the linear drift rate \code{dx/dt}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
 of the secondary phase, in response units per unit of the predictor
 variable \code{t}.}
 
@@ -38,16 +38,16 @@ predictor variable \code{t}.
 \description{
 Creates initial coefficient estimates for a \code{selfStart} wrapper around
 \code{\link[=exponential_drift]{exponential_drift()}}, for use with \code{\link[stats:nls]{stats::nls()}}. Supports both the
-5-parameter form (A, B, tau, slope, drift_fraction) and the
+5-parameter form (A, B, tau, slope_B, drift_fraction) and the
 6-parameter form adding a time delay TD; arity is inferred from the
 formula passed to \code{\link[stats:nls]{stats::nls()}}.
 }
 \details{
 5-parameter model:
-\code{x ~ SSexponential_drift(t, A, B, tau, slope, drift_fraction)}
+\code{x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction)}
 
 6-parameter model:
-\code{x ~ SSexponential_drift(t, A, B, tau, slope, drift_fraction, TD)}
+\code{x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction, TD)}
 
 The hinge at the drift onset \code{TD - tau * log(1 - drift_fraction)} is not
 differentiable, so
@@ -63,7 +63,7 @@ with \code{as.vector()}.
 
 Any parameter may be held constant by writing a value in place of its
 name in the formula, e.g.
-\code{x ~ SSexponential_drift(t, A, B, tau, slope, drift_fraction = 0.95)}
+\code{x ~ SSexponential_drift(t, A, B, tau, slope_B, drift_fraction = 0.95)}
 holds the drift onset at 95\% of the amplitude (\code{3 * tau}). Fixed
 parameters are excluded from estimation and are not returned by
 \code{\link[stats:coef]{stats::coef()}}.
@@ -74,13 +74,16 @@ parameters are excluded from estimation and are not returned by
 set.seed(13)
 t <- 1:180
 x <- exponential_drift(
-    t, A = 10, B = 100, tau = 12, slope = -0.5, drift_fraction = 0.98, TD = 15
+    t, A = 10, B = 100, tau = 12,
+    slope_B = -0.5, drift_fraction = 0.98, TD = 15
 ) + rnorm(length(t), 0, 2)
 data <- data.frame(t, x)
 
 ## 6-parameter fit with the drift onset held at 98\% of the amplitude
 model <- nls(
-    x ~ SSexponential_drift(t, A, B, tau, slope, drift_fraction = 0.98, TD),
+    x ~ SSexponential_drift(
+        t, A, B, tau, slope_B, drift_fraction = 0.98, TD
+    ),
     data = data,
     algorithm = "port",
     lower = c(-Inf, -Inf, 0, -Inf, 0),

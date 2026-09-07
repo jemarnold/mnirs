@@ -631,29 +631,32 @@ test_that("components draws the exponential_drift drift line from the drift onse
     d1 <- comps[[1L]]$data
     expect_equal(nrow(d1), sum(is.finite(x$data[[1]]$smo2_fitted)))
 
-    # drift term restricted to t >= the drift onset, linear at the fitted slope
+    ## drift term restricted to t >= the drift onset, linear at the fitted
+    ## drift rate
     d2 <- comps[[2L]]$data
     expect_lt(nrow(d2), nrow(d1))
     t_rel <- d2$time - x$interval_times$start_times[[1L]]
     cf <- x$coefficients
     onset <- expdrift_onset(cf$tau, cf$drift_fraction, if (is.finite(cf$TD)) cf$TD)
     expect_true(all(t_rel >= onset))
-    expect_equal(diff(d2$comp2), rep(x$coefficients$slope, nrow(d2) - 1L))
+    expect_equal(diff(d2$comp2), rep(x$coefficients$slope_B, nrow(d2) - 1L))
 })
 
 test_that("components tolerates channels named after coefficients", {
-    ## a channel named `slope` collides with an exponential_drift
+    ## a channel named `slope_B` collides with an exponential_drift
     ## coefficient; overlay frame must not join coefficient columns
-    single <- kin_expdrift(channels = "slope")
+    single <- kin_expdrift(channels = "slope_B")
     p1 <- plot(single, components = TRUE, markers = FALSE, labels = FALSE)
     expect_length(comp_layers(p1), 2L)
     expect_no_error(ggplot2::ggplot_build(p1))
 
-    ## drift line reflects the fitted slope, not the data channel
+    ## drift line reflects the fitted drift rate, not the data channel
     d2 <- comp_layers(p1)[[2L]]$data
-    expect_equal(diff(d2$comp2), rep(single$coefficients$slope, nrow(d2) - 1L))
+    expect_equal(
+        diff(d2$comp2), rep(single$coefficients$slope_B, nrow(d2) - 1L)
+    )
 
-    faceted <- kin_expdrift(channels = "slope", faceted = TRUE)
+    faceted <- kin_expdrift(channels = "slope_B", faceted = TRUE)
     p2 <- plot(faceted, components = TRUE, markers = FALSE, labels = FALSE)
     expect_length(comp_layers(p2), 2L)
     expect_no_error(ggplot2::ggplot_build(p2))

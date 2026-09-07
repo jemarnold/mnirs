@@ -21,7 +21,7 @@ A named numeric vector of starting estimates in model order.
 Vector-level initialiser behind \code{\link[=expdrift_init]{expdrift_init()}}, called directly by
 the kinetics worker on the fit window. Profiles \code{tau} (and \code{TD}) on a
 coarse grid and keeps the RSS-minimising start (cf.
-\code{\link[=monoexp_start]{monoexp_start()}}). The model is linear in \code{A}, \code{B}, and \code{slope} once
+\code{\link[=monoexp_start]{monoexp_start()}}). The model is linear in \code{A}, \code{B}, and \code{slope_B} once
 \code{tau} and \code{TD} are held, so those are solved by least squares at every
 grid point at once via \code{\link[=solve_grid3]{solve_grid3()}}. User-fixed \code{tau}, \code{TD}, and
 \code{drift_fraction} narrow the grids; the linear parameters are always solved

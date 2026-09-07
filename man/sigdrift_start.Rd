@@ -23,12 +23,12 @@ A named numeric vector of starting estimates in model order.
 \description{
 Vector-level initialiser behind \code{\link[=sigdrift_init]{sigdrift_init()}}, called directly by
 the kinetics worker on the fit window. The sigmoid is seeded as for
-\code{\link[=SSgompertz]{SSgompertz()}} (\code{\link[=init_asymptotes]{init_asymptotes()}}, \code{\link[=init_inflection]{init_inflection()}}), the cutoffs
-resolved from that seed, and each tail's residual from the seeded model
-regressed on time from its cutoff: the intercept corrects the asymptote
-and the slope the drift. A second pass re-seeds the sigmoid on the
-drift-corrected response, correcting an inflection biased by the drift.
-A tail with fewer than two points seeds a zero drift. User-fixed values
-are held.
+\code{\link[=SSgompertz]{SSgompertz()}} (\code{\link[=init_asymptotes]{init_asymptotes()}}, \code{\link[=init_inflection]{init_inflection()}}), the drift
+onset resolved from that seed, and the residual from the seeded sigmoid
+past the onset regressed on time from the onset: the intercept corrects
+the asymptote \code{B} and the slope is the drift. A second pass re-seeds the
+sigmoid on the drift-corrected response, correcting an inflection
+biased by the drift. Fewer than two points past the onset seed a zero
+drift. User-fixed values are held.
 }
 \keyword{internal}

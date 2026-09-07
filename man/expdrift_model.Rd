@@ -4,7 +4,7 @@
 \alias{expdrift_model}
 \title{Exponential-drift model with gradient}
 \usage{
-expdrift_model(t, A, B, tau, slope, drift_fraction, TD = NULL)
+expdrift_model(t, A, B, tau, slope_B, drift_fraction, TD = NULL)
 }
 \arguments{
 \item{t}{A numeric vector of the predictor variable (time).}
@@ -18,7 +18,7 @@ variable.}
 \item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
 of the exponential curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the linear drift rate \code{dx/dt}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
 of the secondary phase, in response units per unit of the predictor
 variable \code{t}.}
 

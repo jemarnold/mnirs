@@ -4,7 +4,7 @@
 \alias{exponential_drift}
 \title{Exponential-drift function}
 \usage{
-exponential_drift(t, A, B, tau, slope, drift_fraction, TD = NULL)
+exponential_drift(t, A, B, tau, slope_B, drift_fraction, TD = NULL)
 }
 \arguments{
 \item{t}{A numeric vector of the predictor variable (time).}
@@ -18,7 +18,7 @@ variable.}
 \item{tau}{A numeric parameter for the time constant \code{tau} (\eqn{\tau})
 of the exponential curve, in units of the predictor variable \code{t}.}
 
-\item{slope}{A numeric parameter for the linear drift rate \code{dx/dt}
+\item{slope_B}{A numeric parameter for the linear drift rate \code{dx/dt}
 of the secondary phase, in response units per unit of the predictor
 variable \code{t}.}
 
@@ -41,10 +41,10 @@ secondary linear drift beginning near the asymptote.
 }
 \details{
 5-parameter model:
-\code{A + (B - A) * (1 - exp(-t / tau)) + slope * pmax(t + tau * log(1 - drift_fraction), 0)}
+\code{A + (B - A) * (1 - exp(-t / tau)) + slope_B * pmax(t + tau * log(1 - drift_fraction), 0)}
 
 6-parameter model:
-\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
+\code{A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau)) + slope_B * pmax(t - TD + tau * log(1 - drift_fraction), 0)}
 
 The primary phase is a \code{\link[=monoexponential]{monoexponential()}} response toward the asymptote
 \code{B}. The secondary linear drift is exactly zero before the onset
@@ -56,13 +56,16 @@ The primary phase is a \code{\link[=monoexponential]{monoexponential()}} respons
 set.seed(13)
 t <- 1:180
 x <- exponential_drift(
-    t, A = 10, B = 100, tau = 12, slope = -0.5, drift_fraction = 0.95, TD = 15
+    t, A = 10, B = 100, tau = 12,
+    slope_B = -0.5, drift_fraction = 0.95, TD = 15
 ) + rnorm(length(t), 0, 2)
 data <- data.frame(t, x)
 
 ## the drift onset fraction is held constant in the formula
 model <- nls(
-    x ~ SSexponential_drift(t, A, B, tau, slope, drift_fraction = 0.95, TD),
+    x ~ SSexponential_drift(
+        t, A, B, tau, slope_B, drift_fraction = 0.95, TD
+    ),
     data = data,
     algorithm = "port",
     lower = c(-Inf, -Inf, 0, -Inf, 0),
