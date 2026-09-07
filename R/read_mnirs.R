@@ -79,8 +79,9 @@
 #'
 #' - `nirs_channels` names become clean lower-case column names with
 #'   underscores (e.g. `"Rx1 - Tx1 O2Hb"` becomes `rx1_tx1_o2hb`). Channels
-#'   should still be explicitly renamed pointing to their number, e.g.
-#'   `nirs_channels = c(o2hb = 2, hhb = 3)`.
+#'   can still be renamed by any of column number, cleaned name, or legend
+#'   trace name, e.g. `nirs_channels = c(o2hb = 2)`,
+#'   `c(o2hb = "rx1_tx1_o2hb")`, or `c(o2hb = "Rx1 - Tx1 O2Hb")`.
 #' - `"(Sample number)"` column is renamed `sample`, and a `time` column
 #'   in seconds is automatically derived from the export sample rate.
 #' - `"(Event)"` column is renamed `event` and set as `event_channel`.
@@ -298,9 +299,14 @@ mnirs_metadata <- c(
 #'   - interval_times
 #'   - interval_span
 #'
+#'   `nirs_channels`, `time_channel`, and `event_channel` accept named
+#'   character vectors in the same form as `read_mnirs()`;
+#'   `c(renamed = "original_name")`. Existing column names can be renamed,
+#'   and the new names specified as `*_channel` in metadata.
+#'
 #' @details
-#' Typically will only be called internally, but can be used to inject
-#'   *{mnirs}* metadata into any data frame.
+#' Intended primarily for internal use, but can be used to inject *{mnirs}*
+#'   metadata into any data frame.
 #'
 #' @returns
 #' A [tibble][tibble::tibble-package] of class `"mnirs"`. Metadata are stored
@@ -325,6 +331,13 @@ mnirs_metadata <- c(
 #'
 #' attributes(nirs_data)
 #'
+#' ## rename channels and update metadata
+#' create_mnirs_data(
+#'     nirs_data,
+#'     nirs_channels = c(smo2 = "B", thb = "C"),
+#'     time_channel = c(time = "A")
+#' )
+#'
 #' @export
 create_mnirs_data <- function(data, ...) {
     validate_mnirs_data(data, 1L)
@@ -348,7 +361,31 @@ create_mnirs_data <- function(data, ...) {
         args
     }
 
-    #! check missing `utils` dependency
+    ## rename columns from `c(new = "original")` channel mappings;
+    ## metadata store the new names, channel names win any clash
+    roles <- intersect(
+        c("nirs_channels", "time_channel", "event_channel"),
+        names(incoming_metadata)
+    )
+    map <- name_channels(
+        unlist(unname(incoming_metadata[roles])) %||% character()
+    )
+    idx <- match(map, names(data))
+    if (anyNA(idx[names(map) != map])) {
+        cli_abort(c(
+            "x" = "Channel names not detected.",
+            "i" = "Column names are case sensitive and must match exactly."
+        ))
+    }
+    found <- !is.na(idx)
+    names(data) <- rename_duplicates(c(names(map)[found], names(data)))[
+        sum(found) + seq_along(data)
+    ]
+    names(data)[idx[found]] <- names(map)[found]
+    incoming_metadata[roles] <- lapply(incoming_metadata[roles], \(.x) {
+        unname(names(name_channels(.x)))
+    })
+
     metadata <- utils::modifyList(attributes(data), incoming_metadata)
 
     ## preserve grouping: `new_tibble()` resets class, so re-add `grouped_df`

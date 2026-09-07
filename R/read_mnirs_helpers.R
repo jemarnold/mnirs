@@ -176,8 +176,9 @@ detect_mnirs_device <- function(data, chunk = 200L) {
 #' Parse channel names from the Oxysoft "Legend" metadata block
 #'
 #' Legend rows above the numeric header row map column ids to trace names.
-#' Returns a channel list of named mappings `c(new_name = "original_col")`,
-#' or `NULL` when the legend is missing or malformed.
+#' Returns a channel list of named mappings `c(new_name = "original_col")`
+#' plus `alias` mapping raw trace names to column ids, or `NULL` when the
+#' legend is missing or malformed.
 #' @param raw A raw character data frame from `read_file()`.
 #' @param header_row Integer row index of the numeric data table header.
 #' @keywords internal
@@ -239,7 +240,8 @@ parse_oxysoft_legend <- function(raw, header_row) {
             paste0("col_", label_idx, recycle0 = TRUE),
             "labels"
         ),
-        nirs = named_map(cols[!paren], clean_channel_names(traces[!paren]))
+        nirs = named_map(cols[!paren], clean_channel_names(traces[!paren])),
+        alias = named_map(cols, traces)
     ))
 }
 
@@ -255,7 +257,9 @@ oxysoft_sample_rate <- function(header) {
 
 #' Resolve channels from user input, device defaults, or the Oxysoft legend
 #'
-#' User-specified channels take priority. Otherwise `nirs` channels are read
+#' User-specified channels take priority; for Artinis, user originals given
+#' as legend names (cleaned or raw trace) resolve to their column ids.
+#' Otherwise `nirs` channels are read
 #' from the Oxysoft legend (Artinis) or header cells starting with `SmO2`;
 #' `time` falls back to the device default, and is detected later by
 #' `detect_time_channel()` when still `NULL`; `event` falls back to the
@@ -283,13 +287,14 @@ resolve_channels <- function(
     auto <- if (identical(nirs_device, "Artinis")) {
         legend <- parse_oxysoft_legend(raw, device$header_row) %||%
             list(time = c(sample = "1"))
-        ## user `event_channel = "labels"` aliases the unnumbered label column
-        if (
-            identical(unname(user$event), "labels") &&
-                length(legend$labels) == 1L
-        ) {
-            user$event[] <- legend$labels
-        }
+        ## user originals given as legend names (cleaned or raw trace,
+        ## `sample`, `event`, `labels`) resolve to their column ids
+        lookup <- unlist(unname(legend))
+        user <- lapply(user, \(.x) {
+            id <- lookup[.x]
+            .x[!is.na(id)] <- id[!is.na(id)]
+            .x
+        })
         legend
     } else {
         ## header cells starting with "SmO2" or "StO2", ignoring case; drop

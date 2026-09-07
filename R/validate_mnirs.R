@@ -225,8 +225,17 @@ parse_channel_name <- function(
 
     ## evaluate: tidyselect first, then fallback to direct evaluation
     ## handles c(), tidyselect helpers, symbols, and external objects
+    ## renamed selections return `c(new = "original")`
     tryCatch(
-        unname(names(tidyselect::eval_select(channel, data))),
+        {
+            pos <- tidyselect::eval_select(channel, data)
+            orig <- names(data)[pos]
+            if (identical(names(pos), orig)) {
+                orig
+            } else {
+                setNames(orig, names(pos))
+            }
+        },
         error = \(e) {
             result <- rlang::eval_tidy(channel, env = env)
             if (is.list(result) || is.character(result)) result else NULL

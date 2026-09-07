@@ -128,7 +128,7 @@ test_that("read_file() reads vo2master files correctly", {
 })
 
 test_that("read_file() reads pionirs .ftn2 and .ftn files correctly", {
-    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
+    ftn2_path <- example_mnirs("pionirs")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     result <- read_file(ftn2_path)
@@ -255,7 +255,7 @@ test_that("detect_mnirs_device works on internal example files", {
 })
 
 test_that("detect_mnirs_device works on pionirs files", {
-    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
+    ftn2_path <- example_mnirs("pionirs")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     expect_equal(
@@ -503,6 +503,20 @@ test_that("resolve_channels() parses Artinis legend block", {
     )
     expect_equal(result$event, c(event = "col_5"))
     expect_null(result$labels)
+
+    ## legend names (cleaned or raw trace) resolve to column ids
+    result <- resolve_channels(
+        raw, device, test_user(nirs = c(o2hb = "vl_o2hb")), verbose = FALSE
+    )
+    expect_equal(result$nirs, c(o2hb = "2"))
+
+    result <- resolve_channels(
+        raw, device,
+        test_user(time = c(t = "sample"), nirs = c(o2hb = "VL O2Hb")),
+        verbose = FALSE
+    )
+    expect_equal(result$time, c(t = "1"))
+    expect_equal(result$nirs, c(o2hb = "2"))
 })
 
 test_that("resolve_channels() Artinis falls back without legend", {
@@ -559,7 +573,7 @@ test_that("resolve_channels() detects known channels for PerfPro", {
 })
 
 test_that("resolve_channels() detects known channels for PIONIRS", {
-    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
+    ftn2_path <- example_mnirs("pionirs")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     raw <- read_file(ftn2_path)
@@ -671,8 +685,15 @@ test_that("parse_oxysoft_legend() parses full legend with labels column", {
 
     result <- parse_oxysoft_legend(data, header_row = 9L)
 
-    expect_named(result, c("time", "extra", "event", "labels", "nirs"))
+    expect_named(
+        result, c("time", "extra", "event", "labels", "nirs", "alias")
+    )
     expect_equal(result$time, c(sample = "1"))
+    expect_equal(
+        result$alias,
+        c("(Sample number)" = "1", "Rx1 - Tx1 tHb" = "2",
+          "Rx1 - Tx1 O2Hb" = "3", "(TSI)" = "4", "(Event)" = "5")
+    )
     expect_equal(
         result$nirs,
         c(rx1_tx1_thb = "2", rx1_tx1_o2hb = "3")
@@ -1073,7 +1094,7 @@ test_that("read_mnirs() selects, orders, and renames columns", {
 })
 
 test_that("read_mnirs() reads pionirs .ftn2 file with auto-detection", {
-    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
+    ftn2_path <- example_mnirs("pionirs")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     df <- read_mnirs(ftn2_path, verbose = TRUE)
@@ -2462,6 +2483,14 @@ test_that("read_mnirs Oxysoft edge case channel names", {
         expect_warning("Duplicate")
 
     expect_true(all(c("HHb", "HHb_1") %in% names(df)))
+
+    ## legend names resolve to their column ids
+    df <- read_mnirs(
+        file_path = file_path,
+        nirs_channels = c(o2hb = "vl_o2hb", hhb = "VL HHb")
+    )
+    expect_equal(attr(df, "nirs_channels"), c("o2hb", "hhb"))
+    expect_true(all(c("o2hb", "hhb") %in% names(df)))
 })
 
 ## VO2master app ========================================================
@@ -2616,6 +2645,52 @@ test_that("create_mnirs_data accepts NSE for *_channels", {
     df_list <- create_mnirs_data(df, meta)
     expect_equal(attr(df_list, "nirs_channels"), c("B", "C"))
     expect_equal(attr(df_list, "sample_rate"), 2)
+})
+
+test_that("create_mnirs_data renames channels", {
+    df <- tibble(A = 1:2, B = 3:4, C = 5:6, lap = c("a", "b"))
+
+    ## c() expression renames columns and stores new names, order kept
+    df_ren <- create_mnirs_data(
+        df,
+        nirs_channels = c(b = "B", c = "C"),
+        time_channel = c(time = "A"),
+        event_channel = c(event = "lap")
+    )
+    expect_equal(names(df_ren), c("time", "b", "c", "event"))
+    expect_equal(attr(df_ren, "nirs_channels"), c("b", "c"))
+    expect_equal(attr(df_ren, "time_channel"), "time")
+    expect_equal(attr(df_ren, "event_channel"), "event")
+
+    ## external named vector and list form
+    chans <- c(b = "B", c = "C")
+    df_ext <- create_mnirs_data(df, nirs_channels = chans)
+    expect_equal(names(df_ext), c("A", "b", "c", "lap"))
+    expect_equal(attr(df_ext, "nirs_channels"), c("b", "c"))
+
+    df_list <- create_mnirs_data(df, list(time_channel = c(time = "A")))
+    expect_equal(names(df_list), c("time", "B", "C", "lap"))
+    expect_equal(attr(df_list, "time_channel"), "time")
+
+    ## partial renaming keeps unnamed originals
+    df_part <- create_mnirs_data(df, nirs_channels = c(b = "B", "C"))
+    expect_equal(attr(df_part, "nirs_channels"), c("b", "C"))
+
+    ## channel name wins clash with existing column
+    df_clash <- create_mnirs_data(df, time_channel = c(B = "A"))
+    expect_equal(names(df_clash), c("B", "B_1", "C", "lap"))
+    expect_equal(attr(df_clash, "time_channel"), "B")
+
+    ## missing original errors
+    expect_error(
+        create_mnirs_data(df, nirs_channels = c(b = "typo")),
+        "Channel names not detected"
+    )
+
+    ## unnamed input unchanged
+    df_plain <- create_mnirs_data(df, nirs_channels = c("B", "C"))
+    expect_equal(names(df_plain), names(df))
+    expect_equal(attr(df_plain, "nirs_channels"), c("B", "C"))
 })
 
 test_that("create_mnirs_data preserves grouping", {
