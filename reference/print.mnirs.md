@@ -18,7 +18,9 @@ print(x, ...)
 - ...:
 
   Additional arguments passed to
-  [`print()`](https://rdrr.io/r/base/print.html).
+  [`print()`](https://rdrr.io/r/base/print.html) methods of `x` or each
+  list element, e.g. `n` rows for
+  [tibbles](https://tibble.tidyverse.org/reference/tibble-package.html).
 
 ## Value
 
@@ -43,36 +45,36 @@ x <- read_mnirs(
     )
 
 print(x)
-#> $interval_1
-#> # A tibble: 1,801 × 2
-#>     time  smo2
-#>    <dbl> <dbl>
-#>  1 2392   56.5
-#>  2 2392.  56.5
-#>  3 2392.  56.5
-#>  4 2392.  56.6
-#>  5 2392.  56.6
-#>  6 2392.  56.6
-#>  7 2393.  56.6
-#>  8 2393.  56.6
-#>  9 2393.  56.6
-#> 10 2393.  56.6
+#> $interval_1 
+#> # A tibble: 1,801 × 3
+#>     time `Lap/Event`  smo2
+#>    <dbl>       <int> <dbl>
+#>  1 2392            2  56.5
+#>  2 2392.           2  56.5
+#>  3 2392.           2  56.5
+#>  4 2392.           2  56.6
+#>  5 2392.           2  56.6
+#>  6 2392.           2  56.6
+#>  7 2393.           2  56.6
+#>  8 2393.           2  56.6
+#>  9 2393.           2  56.6
+#> 10 2393.           2  56.6
 #> # ℹ 1,791 more rows
 #> 
-#> $interval_2
-#> # A tibble: 1,801 × 2
-#>     time  smo2
-#>    <dbl> <dbl>
-#>  1 3108   56.7
-#>  2 3108.  56.7
-#>  3 3108.  56.7
-#>  4 3108.  56.7
-#>  5 3108.  56.8
-#>  6 3108.  56.8
-#>  7 3109.  56.8
-#>  8 3109.  56.8
-#>  9 3109.  56.8
-#> 10 3109.  56.8
+#> $interval_2 
+#> # A tibble: 1,801 × 3
+#>     time `Lap/Event`  smo2
+#>    <dbl>       <int> <dbl>
+#>  1 3108            4  56.7
+#>  2 3108.           4  56.7
+#>  3 3108.           4  56.7
+#>  4 3108.           4  56.7
+#>  5 3108.           4  56.8
+#>  6 3108.           4  56.8
+#>  7 3109.           4  56.8
+#>  8 3109.           4  56.8
+#>  9 3109.           4  56.8
+#> 10 3109.           4  56.8
 #> # ℹ 1,791 more rows
 #> 
 ```

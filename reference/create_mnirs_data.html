@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,7 +68,10 @@ Can be either seperate named arguments or a list of named values.</p><ul><li><p>
 <li><p>start_timestamp</p></li>
 <li><p>interval_times</p></li>
 <li><p>interval_span</p></li>
-</ul></dd>
+</ul><p><code>nirs_channels</code>, <code>time_channel</code>, and <code>event_channel</code> accept named
+character vectors in the same form as <code><a href="read_mnirs.html">read_mnirs()</a></code>;
+<code>c(renamed = "original_name")</code>. Existing column names can be renamed,
+and the new names specified as <code>*_channel</code> in metadata.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -78,8 +81,8 @@ as attributes and can be accessed with <code>attributes(data)</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Typically will only be called internally, but can be used to inject
-<em>mnirs</em> metadata into any data frame.</p>
+    <p>Intended primarily for internal use, but can be used to inject <em>mnirs</em>
+metadata into any data frame.</p>
     </div>
 
     <div class="section level2">
@@ -128,6 +131,19 @@ as attributes and can be accessed with <code>attributes(data)</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $class</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## rename channels and update metadata</span></span></span>
+<span class="r-in"><span><span class="fu">create_mnirs_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">nirs_data</span>,</span></span>
+<span class="r-in"><span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>smo2 <span class="op">=</span> <span class="st">"B"</span>, thb <span class="op">=</span> <span class="st">"C"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    time_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>time <span class="op">=</span> <span class="st">"A"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    time  smo2   thb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>     1    10    11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     2    20    22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>     3    30    33</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

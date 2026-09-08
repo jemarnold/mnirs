@@ -11,7 +11,7 @@ index.'><meta name="twitter:card" content="summary"><meta name="twitter:creator"
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,20 +141,23 @@ occurs.</p></li>
 <dd><p>Specifies where intervals begin. Either raw values – numeric
 for time values, character for event labels, explicit integer (e.g. <code>2L</code>)
 for lap numbers – or created with <code><a href="by_time.html">by_time()</a></code>, <code><a href="by_time.html">by_label()</a></code>, <code><a href="by_time.html">by_lap()</a></code>,
-or <code><a href="by_time.html">by_sample()</a></code>.</p></dd>
+or <code><a href="by_time.html">by_sample()</a></code>. Multiple specifications can be combined with
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> (e.g. <code>list(by_time(30), by_label("go"))</code>); see <em>Details</em>.</p></dd>
 
 
 <dt id="arg-end">end<a class="anchor" aria-label="anchor" href="#arg-end"></a></dt>
 <dd><p>Specifies where intervals end. Either raw values – numeric for
 time values, character for event labels, explicit integer (e.g. <code>2L</code>)
 for lap numbers – or created with <code><a href="by_time.html">by_time()</a></code>, <code><a href="by_time.html">by_label()</a></code>, <code><a href="by_time.html">by_lap()</a></code>,
-or <code><a href="by_time.html">by_sample()</a></code>.</p></dd>
+or <code><a href="by_time.html">by_sample()</a></code>. Multiple specifications can be combined with
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> (e.g. <code>list(by_time(30), by_label("go"))</code>); see <em>Details</em>.</p></dd>
 
 
 <dt id="arg-span">span<a class="anchor" aria-label="anchor" href="#arg-span"></a></dt>
-<dd><p>A one- or two-element numeric vector <code>c(before, after)</code> in units
-of <code>time_channel</code>, or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of such vectors. (<em>default</em>
-<code>span = c(-60, 60)</code>. Applied additively to interval boundaries:</p><ul><li><p>When both <code>start</code> and <code>end</code> are specified: <code>span[1]</code> shifts start times,
+<dd><p>A one- or two-element numeric vector expanding the time bounds
+around <code>c(start, end)</code>, in units of <code>time_channel</code>; or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of such
+vectors. (<em>default</em> <code>span = c(-60, 60)</code>. Applied additively to interval
+boundaries:</p><ul><li><p>When both <code>start</code> and <code>end</code> are specified: <code>span[1]</code> shifts start times,
 <code>span[2]</code> shifts end times.</p></li>
 <li><p>When only <code>start</code> or only <code>end</code> is specified: both <code>span[1]</code> and
 <code>span[2]</code> apply as a window around the event).</p></li>
@@ -172,9 +175,9 @@ data frame.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
-warnings and information messages helpful for troubleshooting. Ad
-global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
+<dd><p>Logical. <code>TRUE</code> (<em>default</em>) will display, and <code>FALSE</code> will
+silence warnings and information messages helpful for troubleshooting.
+Global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
 <dt id="arg-event-groups">event_groups<a class="anchor" aria-label="anchor" href="#arg-event-groups"></a></dt>
@@ -221,6 +224,11 @@ first sample of each lap for <code>start</code>, and the last lap sample for <co
 <li><p>Use <code><a href="by_time.html">by_sample()</a></code> explicitly for sample indices.</p></li>
 </ul><p><code>start</code> and <code>end</code> can use different specification types (e.g., start by
 label, end by time). When lengths differ, the shorter is recycled.</p>
+<p>Multiple specification types can be combined for a single boundary with
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> (e.g. <code>start = list(by_time(30), by_label("go"))</code>).
+Resolved boundary times are concatenated in the order supplied. Combined
+specifications must use the <code>by_</code> helpers directly: raw values are ignored
+with a warning.</p>
 </div>
 
 <div class="section">
@@ -261,8 +269,8 @@ within every group.</p>
 <h3 id="grouping-intervals">Grouping intervals<a class="anchor" aria-label="anchor" href="#grouping-intervals"></a></h3>
 
 
-<p><code>group_intervals</code> controls whether extracted intervals are returned as distinct
-data frames or ensemble-averaged.</p>
+<p><code>group_intervals</code> controls whether extracted intervals are returned as
+distinct data frames or ensemble-averaged.</p>
 <dl><dt><code>"distinct"</code></dt>
 <dd><p>The default. Extract each interval and return a
 list of independent data frames.</p></dd>
@@ -317,19 +325,19 @@ Extra items are ignored.</p>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">interval_list</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,101 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time smo2_left smo2_right</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> -<span style="color: #BB0000;">20</span>        56.3       59.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> -<span style="color: #BB0000;">19.9</span>      56.1       59.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> -<span style="color: #BB0000;">19.8</span>      56.1       59.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> -<span style="color: #BB0000;">19.7</span>      56.2       58.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> -<span style="color: #BB0000;">19.6</span>      56.4       58.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> -<span style="color: #BB0000;">19.5</span>      56.5       58.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> -<span style="color: #BB0000;">19.4</span>      56.9       58.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> -<span style="color: #BB0000;">19.3</span>      57.0       58.7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> -<span style="color: #BB0000;">19.2</span>      56.9       59.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> -<span style="color: #BB0000;">19.1</span>      56.7       58.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,101 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     time `Lap/Event` smo2_left smo2_right</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> -<span style="color: #BB0000;">20</span>             2      56.3       59.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> -<span style="color: #BB0000;">19.9</span>           2      56.1       59.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> -<span style="color: #BB0000;">19.8</span>           2      56.1       59.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> -<span style="color: #BB0000;">19.7</span>           2      56.2       58.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> -<span style="color: #BB0000;">19.6</span>           2      56.4       58.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> -<span style="color: #BB0000;">19.5</span>           2      56.5       58.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> -<span style="color: #BB0000;">19.4</span>           2      56.9       58.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> -<span style="color: #BB0000;">19.3</span>           2      57.0       58.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> -<span style="color: #BB0000;">19.2</span>           2      56.9       59.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> -<span style="color: #BB0000;">19.1</span>           2      56.7       58.8</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1,091 more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>

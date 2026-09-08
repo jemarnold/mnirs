@@ -36,6 +36,12 @@ create_mnirs_data(data, ...)
 
   - interval_span
 
+  `nirs_channels`, `time_channel`, and `event_channel` accept named
+  character vectors in the same form as
+  [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md);
+  `c(renamed = "original_name")`. Existing column names can be renamed,
+  and the new names specified as `*_channel` in metadata.
+
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble-package.html)
@@ -44,8 +50,8 @@ accessed with `attributes(data)`.
 
 ## Details
 
-Typically will only be called internally, but can be used to inject
-*mnirs* metadata into any data frame.
+Intended primarily for internal use, but can be used to inject *mnirs*
+metadata into any data frame.
 
 ## Examples
 
@@ -94,4 +100,17 @@ attributes(nirs_data)
 #> $class
 #> [1] "mnirs"      "tbl_df"     "tbl"        "data.frame"
 #> 
+
+## rename channels and update metadata
+create_mnirs_data(
+    nirs_data,
+    nirs_channels = c(smo2 = "B", thb = "C"),
+    time_channel = c(time = "A")
+)
+#> # A tibble: 3 × 3
+#>    time  smo2   thb
+#>   <int> <dbl> <dbl>
+#> 1     1    10    11
+#> 2     2    20    22
+#> 3     3    30    33
 ```

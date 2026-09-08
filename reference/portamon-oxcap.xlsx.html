@@ -13,7 +13,7 @@ each with 17 occlusions."><meta name="twitter:card" content="summary"><meta name
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,9 +76,11 @@ each with 17 occlusions.</p>
 <dd><p>Unmarked event label (character).</p></dd>
 
 
-</dl><p>Channel mapping for <code><a href="read_mnirs.html">read_mnirs()</a></code>:</p><ul><li><p><code>nirs_channels = c(THb = 2, HHb = 3, O2Hb = 4)</code></p></li>
+</dl><p>Channels are detected automatically from the file legend (the unmarked
+label column is named <code>"labels"</code>), or can be specified explicitly for
+<code><a href="read_mnirs.html">read_mnirs()</a></code>:</p><ul><li><p><code>nirs_channels = c(THb = 2, HHb = 3, O2Hb = 4)</code></p></li>
 <li><p><code>time_channel = c(sample = 1)</code></p></li>
-<li><p><code>event_channel = c(event = 5, label = "col_6")</code></p></li>
+<li><p><code>event_channel = c(event = 5, label = "labels")</code></p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>

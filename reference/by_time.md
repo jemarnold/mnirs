@@ -71,6 +71,12 @@ values can be passed directly:
 
 - Use `by_sample()` explicitly for sample indices.
 
+Multiple specification types can be combined for a single boundary with
+[`list()`](https://rdrr.io/r/base/list.html) (e.g.
+`list(by_time(30), by_label("go"))`). Resolved boundary times are
+concatenated in the order supplied. Combined specifications must use the
+`by_` helpers directly: raw values are ignored with a warning.
+
 ## Examples
 
 ``` r
@@ -89,7 +95,7 @@ data <- read_mnirs(
 
 ## start and end by time
 extract_intervals(data, start = by_time(66), end = by_time(357))
-#> $interval_1
+#> $interval_1 
 #> # A tibble: 4,150 × 4
 #>     time   lap smo2_left smo2_right
 #>    <dbl> <int>     <dbl>      <dbl>
@@ -108,48 +114,52 @@ extract_intervals(data, start = by_time(66), end = by_time(357))
 
 ## start by lap
 extract_intervals(data, start = by_lap(2, 4), span = 0)
-#> $interval_1
+#> $interval_1 
 #> # A tibble: 1 × 4
 #>    time   lap smo2_left smo2_right
 #>   <dbl> <int>     <dbl>      <dbl>
 #> 1  65.9     2      68.4       71.6
 #> 
-#> $interval_2
+#> $interval_2 
 #> # A tibble: 1 × 4
 #>    time   lap smo2_left smo2_right
 #>   <dbl> <int>     <dbl>      <dbl>
 #> 1  788.     4      69.4       70.2
 #> 
 
-## introduce event_channel with "start" string
-data$event <- NA_character_
-data$event[1000] <- "start"
-data <- create_mnirs_data(data, event_channel = "event")
-
-## start by label, end by time
-extract_intervals(data, start = by_label("start"), end = by_time(1500))
-#> Warning: !  Interval 1 is partially outside data bounds.
-#> ℹ Returning available data only.
-#> $interval_1
-#> # A tibble: 11,601 × 5
-#>     time   lap smo2_left smo2_right event
-#>    <dbl> <int>     <dbl>      <dbl> <chr>
-#>  1  39.0     1      67.8       69.3 NA   
-#>  2  39.0     1      67.8       69.1 NA   
-#>  3  39.2     1      68.0       70.1 NA   
-#>  4  39.2     1      68.0       69.8 NA   
-#>  5  39.3     1      68.2       69.4 NA   
-#>  6  39.4     1      68.2       69.7 NA   
-#>  7  39.5     1      68.0       69.2 NA   
-#>  8  39.6     1      68.5       69.2 NA   
-#>  9  39.7     1      68.5       70.0 NA   
-#> 10  39.9     1      68.5       69.8 NA   
-#> # ℹ 11,591 more rows
+## combine multiple specification types
+extract_intervals(
+    data,
+    start = list(by_lap(2), by_time(400)),
+    end = by_sample(1500)
+)
+#> Warning: ! Unequal lengths for `start` (2) and `end` (1).
+#> ℹ Returning 1 paired interval.
+#> $interval_1 
+#> # A tibble: 2,045 × 4
+#>     time   lap smo2_left smo2_right
+#>    <dbl> <int>     <dbl>      <dbl>
+#>  1  6.04     1      67.6       70.7
+#>  2  6.04     1      67.6       71.8
+#>  3  6.24     1      67.6       71.4
+#>  4  6.24     1      67.6       71.7
+#>  5  6.30     1      67.6       71.6
+#>  6  6.39     1      65.7       70.9
+#>  7  6.48     1      67.4       72.0
+#>  8  6.63     1      67.0       72.2
+#>  9  6.69     1      67.6       70.8
+#> 10  7.61     1      68.4       71.5
+#> # ℹ 2,035 more rows
 #> 
+
+## simulate event_channel with character label match
+data$event <- NA_character_
+data$event[c(1000, 1001)] <- c("start", "lap.1")
+data <- create_mnirs_data(data, event_channel = "event")
 
 ## case-insensitive label match
 extract_intervals(data, start = by_label("START", ignore_case = TRUE))
-#> $interval_1
+#> $interval_1 
 #> # A tibble: 1,211 × 5
 #>     time   lap smo2_left smo2_right event
 #>    <dbl> <int>     <dbl>      <dbl> <chr>
@@ -167,11 +177,9 @@ extract_intervals(data, start = by_label("START", ignore_case = TRUE))
 #> 
 
 ## literal-string label match (regex metacharacters treated as text)
-data$event[1000] <- "lap.1"
-data <- create_mnirs_data(data, event_channel = "event")
 extract_intervals(data, start = by_label("lap.1", fixed = TRUE))
-#> $interval_1
-#> # A tibble: 1,211 × 5
+#> $interval_1 
+#> # A tibble: 1,212 × 5
 #>     time   lap smo2_left smo2_right event
 #>    <dbl> <int>     <dbl>      <dbl> <chr>
 #>  1  39.0     1      67.8       69.3 NA   
@@ -184,41 +192,6 @@ extract_intervals(data, start = by_label("lap.1", fixed = TRUE))
 #>  8  39.6     1      68.5       69.2 NA   
 #>  9  39.7     1      68.5       70.0 NA   
 #> 10  39.9     1      68.5       69.8 NA   
-#> # ℹ 1,201 more rows
-#> 
-
-## multiple intervals by sample index
-extract_intervals(data, start = by_sample(1000, 1500))
-#> $interval_1
-#> # A tibble: 1,211 × 5
-#>     time   lap smo2_left smo2_right event
-#>    <dbl> <int>     <dbl>      <dbl> <chr>
-#>  1  39.0     1      67.8       69.3 NA   
-#>  2  39.0     1      67.8       69.1 NA   
-#>  3  39.2     1      68.0       70.1 NA   
-#>  4  39.2     1      68.0       69.8 NA   
-#>  5  39.3     1      68.2       69.4 NA   
-#>  6  39.4     1      68.2       69.7 NA   
-#>  7  39.5     1      68.0       69.2 NA   
-#>  8  39.6     1      68.5       69.2 NA   
-#>  9  39.7     1      68.5       70.0 NA   
-#> 10  39.9     1      68.5       69.8 NA   
-#> # ℹ 1,201 more rows
-#> 
-#> $interval_2
-#> # A tibble: 1,211 × 5
-#>     time   lap smo2_left smo2_right event
-#>    <dbl> <int>     <dbl>      <dbl> <chr>
-#>  1  88.5     2      58.7       65.2 NA   
-#>  2  88.7     2      59.7       65.0 NA   
-#>  3  88.7     2      59.7       65.6 NA   
-#>  4  88.9     2      58.6       66.4 NA   
-#>  5  88.9     2      58.6       66.4 NA   
-#>  6  89.1     2      58.9       65.3 NA   
-#>  7  89.1     2      58.9       64.8 NA   
-#>  8  89.2     2      58.9       65.7 NA   
-#>  9  89.3     2      58.9       65.0 NA   
-#> 10  89.4     2      58.8       65.1 NA   
-#> # ℹ 1,201 more rows
+#> # ℹ 1,202 more rows
 #> 
 ```

@@ -21,7 +21,7 @@ Note the method-specific arguments below."><meta name="twitter:card" content="su
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,9 +137,9 @@ samples within the local window. May return errors or warnings. (see
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
-warnings and information messages helpful for troubleshooting. Ad
-global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
+<dd><p>Logical. <code>TRUE</code> (<em>default</em>) will display, and <code>FALSE</code> will
+silence warnings and information messages helpful for troubleshooting.
+Global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -308,7 +308,7 @@ a separate interval, returned as a named list.</p></li>
 
 <p>Arguments apply globally to all <code>nirs_channels</code> by default. Relevant
 arguments can instead be supplied uniquely per-channel as a named <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>,
-with names matching <code>nirs_channels</code>, e.g.:</p>
+with names matching <code>nirs_channels</code>, e.g.</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data</span>,</span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hhb</span>, <span class="va">smo2</span><span class="op">)</span>,</span>
@@ -386,7 +386,7 @@ ignored.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span>    <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>        <span class="co">## plot filtered data and add the raw data back to the plot to compare</span></span></span>
+<span class="r-in"><span>        <span class="co">## plot filtered data on top of raw to compare</span></span></span>
 <span class="r-in"><span>        <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">data_filtered</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span></span>
 <span class="r-in"><span>            <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>                data <span class="op">=</span> <span class="va">data</span>,</span></span>

@@ -33,5 +33,5 @@ scales::show_col(palette_mnirs())
 
 scales::show_col(palette_mnirs(2))
 
-scales::show_col(palette_mnirs("red", "orange"))
+scales::show_col(palette_mnirs("red", "blue", "green"))
 ```

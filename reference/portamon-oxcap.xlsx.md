@@ -32,14 +32,15 @@ oxidative capacity testing, each with 17 occlusions.
 
   Unmarked event label (character).
 
-Channel mapping for
+Channels are detected automatically from the file legend (the unmarked
+label column is named `"labels"`), or can be specified explicitly for
 [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md):
 
 - `nirs_channels = c(THb = 2, HHb = 3, O2Hb = 4)`
 
 - `time_channel = c(sample = 1)`
 
-- `event_channel = c(event = 5, label = "col_6")`
+- `event_channel = c(event = 5, label = "labels")`
 
 ## Source
 

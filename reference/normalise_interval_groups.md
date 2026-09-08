@@ -19,8 +19,8 @@ normalise_interval_groups(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
-  and information messages helpful for troubleshooting. Ad global
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
   default can be set via `options(mnirs.verbose = FALSE)`.
 
 - env:

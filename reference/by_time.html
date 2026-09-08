@@ -9,7 +9,7 @@ extract_intervals()."><meta name="twitter:card" content="summary"><meta name="tw
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,7 +106,12 @@ values can be passed directly:</p><ul><li><p>Numeric -&gt; <code>by_time()</code
 <li><p>Character -&gt; <code>by_label()</code>,</p></li>
 <li><p>Explicit integer (e.g. <code>2L</code>) -&gt; <code>by_lap()</code>.</p></li>
 <li><p>Use <code>by_sample()</code> explicitly for sample indices.</p></li>
-</ul></div>
+</ul><p>Multiple specification types can be combined for a single boundary with
+<code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> (e.g. <code>list(by_time(30), by_label("go"))</code>). Resolved
+boundary times are concatenated in the order supplied. Combined
+specifications must use the <code>by_</code> helpers directly: raw values are
+ignored with a warning.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -125,7 +130,7 @@ values can be passed directly:</p><ul><li><p>Numeric -&gt; <code>by_time()</code
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## start and end by time</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span><span class="va">data</span>, start <span class="op">=</span> <span class="fu">by_time</span><span class="op">(</span><span class="fl">66</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu">by_time</span><span class="op">(</span><span class="fl">357</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4,150 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -144,48 +149,52 @@ values can be passed directly:</p><ul><li><p>Numeric -&gt; <code>by_time()</code
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## start by lap</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span><span class="va">data</span>, start <span class="op">=</span> <span class="fu">by_lap</span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">)</span>, span <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    time   lap smo2_left smo2_right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  65.9     2      68.4       71.6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    time   lap smo2_left smo2_right</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>  788.     4      69.4       70.2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## introduce event_channel with "start" string</span></span></span>
-<span class="r-in"><span><span class="va">data</span><span class="op">$</span><span class="va">event</span> <span class="op">&lt;-</span> <span class="cn">NA_character_</span></span></span>
-<span class="r-in"><span><span class="va">data</span><span class="op">$</span><span class="va">event</span><span class="op">[</span><span class="fl">1000</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"start"</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mnirs_data.html">create_mnirs_data</a></span><span class="op">(</span><span class="va">data</span>, event_channel <span class="op">=</span> <span class="st">"event"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## start by label, end by time</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span><span class="va">data</span>, start <span class="op">=</span> <span class="fu">by_label</span><span class="op">(</span><span class="st">"start"</span><span class="op">)</span>, end <span class="op">=</span> <span class="fu">by_time</span><span class="op">(</span><span class="fl">1500</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span>  Interval <span style="color: #00BB00;">1</span> is partially outside data bounds.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Returning available data only.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 11,601 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right event</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  39.0     1      67.8       69.3 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  39.0     1      67.8       69.1 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  39.2     1      68.0       70.1 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  39.2     1      68.0       69.8 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>  39.3     1      68.2       69.4 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  39.4     1      68.2       69.7 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  39.5     1      68.0       69.2 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  39.6     1      68.5       69.2 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  39.7     1      68.5       70.0 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  39.9     1      68.5       69.8 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 11,591 more rows</span></span>
+<span class="r-in"><span><span class="co">## combine multiple specification types</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">data</span>,</span></span>
+<span class="r-in"><span>    start <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu">by_lap</span><span class="op">(</span><span class="fl">2</span><span class="op">)</span>, <span class="fu">by_time</span><span class="op">(</span><span class="fl">400</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    end <span class="op">=</span> <span class="fu">by_sample</span><span class="op">(</span><span class="fl">1500</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> Unequal lengths for `start` (<span style="color: #0000BB;">2</span>) and `end` (<span style="color: #0000BB;">1</span>).</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Returning <span style="color: #0000BB;">1</span> paired interval.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,045 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  6.04     1      67.6       70.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  6.04     1      67.6       71.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  6.24     1      67.6       71.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  6.24     1      67.6       71.7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>  6.30     1      67.6       71.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  6.39     1      65.7       70.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  6.48     1      67.4       72.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  6.63     1      67.0       72.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  6.69     1      67.6       70.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  7.61     1      68.4       71.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,035 more rows</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## simulate event_channel with character label match</span></span></span>
+<span class="r-in"><span><span class="va">data</span><span class="op">$</span><span class="va">event</span> <span class="op">&lt;-</span> <span class="cn">NA_character_</span></span></span>
+<span class="r-in"><span><span class="va">data</span><span class="op">$</span><span class="va">event</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">1001</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"start"</span>, <span class="st">"lap.1"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mnirs_data.html">create_mnirs_data</a></span><span class="op">(</span><span class="va">data</span>, event_channel <span class="op">=</span> <span class="st">"event"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## case-insensitive label match</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span><span class="va">data</span>, start <span class="op">=</span> <span class="fu">by_label</span><span class="op">(</span><span class="st">"START"</span>, ignore_case <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,211 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right event</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
@@ -203,11 +212,9 @@ values can be passed directly:</p><ul><li><p>Numeric -&gt; <code>by_time()</code
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## literal-string label match (regex metacharacters treated as text)</span></span></span>
-<span class="r-in"><span><span class="va">data</span><span class="op">$</span><span class="va">event</span><span class="op">[</span><span class="fl">1000</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="st">"lap.1"</span></span></span>
-<span class="r-in"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="create_mnirs_data.html">create_mnirs_data</a></span><span class="op">(</span><span class="va">data</span>, event_channel <span class="op">=</span> <span class="st">"event"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span><span class="va">data</span>, start <span class="op">=</span> <span class="fu">by_label</span><span class="op">(</span><span class="st">"lap.1"</span>, fixed <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,211 × 5</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,212 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right event</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  39.0     1      67.8       69.3 <span style="color: #BB0000;">NA</span>   </span>
@@ -220,42 +227,7 @@ values can be passed directly:</p><ul><li><p>Numeric -&gt; <code>by_time()</code
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  39.6     1      68.5       69.2 <span style="color: #BB0000;">NA</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  39.7     1      68.5       70.0 <span style="color: #BB0000;">NA</span>   </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  39.9     1      68.5       69.8 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1,201 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">## multiple intervals by sample index</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="extract_intervals.html">extract_intervals</a></span><span class="op">(</span><span class="va">data</span>, start <span class="op">=</span> <span class="fu">by_sample</span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">1500</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,211 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right event</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  39.0     1      67.8       69.3 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  39.0     1      67.8       69.1 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  39.2     1      68.0       70.1 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  39.2     1      68.0       69.8 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>  39.3     1      68.2       69.4 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  39.4     1      68.2       69.7 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  39.5     1      68.0       69.2 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  39.6     1      68.5       69.2 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  39.7     1      68.5       70.0 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  39.9     1      68.5       69.8 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1,201 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $interval_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,211 × 5</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     time   lap smo2_left smo2_right event</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>  88.5     2      58.7       65.2 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>  88.7     2      59.7       65.0 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>  88.7     2      59.7       65.6 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>  88.9     2      58.6       66.4 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>  88.9     2      58.6       66.4 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>  89.1     2      58.9       65.3 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>  89.1     2      58.9       64.8 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>  89.2     2      58.9       65.7 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  89.3     2      58.9       65.0 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  89.4     2      58.8       65.1 <span style="color: #BB0000;">NA</span>   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1,201 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1,202 more rows</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

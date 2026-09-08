@@ -141,8 +141,8 @@ validate_x_t(x, t, allow_na = FALSE, env = rlang::caller_env())
 
 - verbose:
 
-  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
-  and information messages helpful for troubleshooting. Ad global
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
   default can be set via `options(mnirs.verbose = FALSE)`.
 
 ## Value

@@ -89,8 +89,8 @@ filter_mnirs(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
-  and information messages helpful for troubleshooting. Ad global
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
   default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
@@ -256,7 +256,7 @@ each local window are either propagated to the returned vector when
 Arguments apply globally to all `nirs_channels` by default. Relevant
 arguments can instead be supplied uniquely per-channel as a named
 [`list()`](https://rdrr.io/r/base/list.html), with names matching
-`nirs_channels`, e.g.:
+`nirs_channels`, e.g.
 
     replace_mnirs(
         data,
@@ -341,7 +341,7 @@ data_filtered
 
 # \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {
-        ## plot filtered data and add the raw data back to the plot to compare
+        ## plot filtered data on top of raw to compare
         plot(data_filtered, time_labels = TRUE) +
             ggplot2::geom_line(
                 data = data,

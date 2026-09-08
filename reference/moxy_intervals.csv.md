@@ -43,7 +43,7 @@ Channel mapping for
 
 - `time_channel = c("hh:mm:ss")`
 
-- `interval_times = list(start = c(124, 486, 848, 1210), end = c(364, 726, 1088, 1450))`
+- `interval_times = list( start = c(124, 486, 848, 1210), end = c(364, 726, 1088, 1450))`
 
 ## Source
 

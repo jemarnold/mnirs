@@ -114,6 +114,9 @@ extract_intervals(
   [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
   or
   [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md).
+  Multiple specifications can be combined with
+  [`list()`](https://rdrr.io/r/base/list.html) (e.g.
+  `list(by_time(30), by_label("go"))`); see *Details*.
 
 - end:
 
@@ -125,13 +128,17 @@ extract_intervals(
   [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md),
   or
   [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md).
+  Multiple specifications can be combined with
+  [`list()`](https://rdrr.io/r/base/list.html) (e.g.
+  `list(by_time(30), by_label("go"))`); see *Details*.
 
 - span:
 
-  A one- or two-element numeric vector `c(before, after)` in units of
-  `time_channel`, or a [`list()`](https://rdrr.io/r/base/list.html) of
-  such vectors. (*default* `span = c(-60, 60)`. Applied additively to
-  interval boundaries:
+  A one- or two-element numeric vector expanding the time bounds around
+  `c(start, end)`, in units of `time_channel`; or a
+  [`list()`](https://rdrr.io/r/base/list.html) of such vectors.
+  (*default* `span = c(-60, 60)`. Applied additively to interval
+  boundaries:
 
   - When both `start` and `end` are specified: `span[1]` shifts start
     times, `span[2]` shifts end times.
@@ -153,8 +160,8 @@ extract_intervals(
 
 - verbose:
 
-  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
-  and information messages helpful for troubleshooting. Ad global
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
   default can be set via `options(mnirs.verbose = FALSE)`.
 
 - event_groups:
@@ -215,6 +222,12 @@ Raw values supplied to `start`/`end` are auto-coerced:
 
 `start` and `end` can use different specification types (e.g., start by
 label, end by time). When lengths differ, the shorter is recycled.
+
+Multiple specification types can be combined for a single boundary with
+[`list()`](https://rdrr.io/r/base/list.html) (e.g.
+`start = list(by_time(30), by_label("go"))`). Resolved boundary times
+are concatenated in the order supplied. Combined specifications must use
+the `by_` helpers directly: raw values are ignored with a warning.
 
 ### Time span window
 
@@ -310,19 +323,19 @@ interval_list <- extract_intervals(
 )
 
 interval_list[[1L]]
-#> # A tibble: 1,101 × 3
-#>     time smo2_left smo2_right
-#>    <dbl>     <dbl>      <dbl>
-#>  1 -20        56.3       59.2
-#>  2 -19.9      56.1       59.2
-#>  3 -19.8      56.1       59.2
-#>  4 -19.7      56.2       58.9
-#>  5 -19.6      56.4       58.9
-#>  6 -19.5      56.5       58.9
-#>  7 -19.4      56.9       58.7
-#>  8 -19.3      57.0       58.7
-#>  9 -19.2      56.9       59.0
-#> 10 -19.1      56.7       58.8
+#> # A tibble: 1,101 × 4
+#>     time `Lap/Event` smo2_left smo2_right
+#>    <dbl>       <int>     <dbl>      <dbl>
+#>  1 -20             2      56.3       59.2
+#>  2 -19.9           2      56.1       59.2
+#>  3 -19.8           2      56.1       59.2
+#>  4 -19.7           2      56.2       58.9
+#>  5 -19.6           2      56.4       58.9
+#>  6 -19.5           2      56.5       58.9
+#>  7 -19.4           2      56.9       58.7
+#>  8 -19.3           2      57.0       58.7
+#>  9 -19.2           2      56.9       59.0
+#> 10 -19.1           2      56.7       58.8
 #> # ℹ 1,091 more rows
 
 # \donttest{

@@ -1,13 +1,18 @@
 # Generate numeric sequence from range of a vector
 
-Creates a numeric sequence spanning the range of input data with
-specified step size and direction. Optionally rounds the range endpoints
-before generating the sequence.
+Creates a numeric sequence spanning the range of input vector with
+either a specified step size or a desired output length.
 
 ## Usage
 
 ``` r
-seq_range(x, by = 1, direction = c("up", "down"), digits = NA)
+seq_range(
+  x,
+  by = 1,
+  length.out = NULL,
+  direction = c("up", "down"),
+  env = rlang::caller_env()
+)
 ```
 
 ## Arguments
@@ -18,36 +23,33 @@ seq_range(x, by = 1, direction = c("up", "down"), digits = NA)
 
 - by:
 
-  A numeric step size for the sequence. *Default* is `1`.
+  A numeric step size for the output sequence. *Default* is `1`. Sign
+  determines order of returned vector (negative `by` returns a
+  descending sequence). `direction` takes precedence over `by` sign.
+
+- length.out:
+
+  A positive integer giving the desired length of the sequence.
+  *Default* is `NULL`. If supplied, takes precedence over `by`.
 
 - direction:
 
-  A character string specifying sequence direction. Either *"up"* (the
-  *default*) for ascending or *"down"* for descending sequence.
+  Order of returned vector. Either `"up"` for ascending or `"down"` for
+  descending. If supplied, takes precedence over the `by` sign.
 
-- digits:
+- env:
 
-  An integer specifying number of decimal places to round range
-  endpoints, or `NA` (the *default*) for no rounding.
+  The calling environment or a defused call, used to report errors and
+  warnings as coming from the user-facing function rather than the
+  validator.
 
 ## Value
 
-A numeric vector spanning the range of the input data.
+A numeric vector spanning the range of the input `x`.
 
 ## Details
 
-The output vector will likely be a different length than the input
-vector.
-
-The function:
-
-- Calculates the range of `x` (ignoring NA values).
-
-- Optionally rounds the range endpoints if `digits` is specified.
-
-- Generates a sequence with the specified step size.
-
-- Reverses the sequence if `direction = "down"`.
+The output vector will likely be a different length than the input `x`.
 
 ## See also
 

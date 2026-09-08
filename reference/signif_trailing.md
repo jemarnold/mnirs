@@ -20,7 +20,7 @@ signif_whole(x, digits = 5L)
 signif_pvalue(
   x,
   digits = 3L,
-  format = c("digits", "signif"),
+  format = c("digits", "threshold"),
   display = c("value", "symbol"),
   symbol = "*",
   symbol_repeat = FALSE,
@@ -42,9 +42,10 @@ signif_pvalue(
 
 - format:
 
-  Indicates how to treat `digits`. Either the desired number of decimal
-  places (`format = "digits"`, the *default*) or significant figures
-  after the decimal place (`format = "signif"`).
+  Indicates how to treat `digits`. Either the desired significance
+  criteria over which to display the absolute p value
+  (`format = "digits"`, the *default*), or the smallest significance
+  criteria to print as less than (`format = "signif"`).
 
 - trim:
 
@@ -101,11 +102,17 @@ of [`signif()`](https://rdrr.io/r/base/Round.html) and
 
 `signif_pvalue()`
 
-- When `display = "value"` and e.g. `digits = 3`, `x` will be either
-  rounded to 3 decimal places with `signif_trailing()`, or appear as
-  e.g. *"\< 0.001"*.
+- When `format = "digits"` and e.g. `digits = 3`, `x` is rounded to 3
+  decimal places, or shown as *"p \< 0.001"* below a 3-decimal place
+  significance threshold.
 
-- `digits = 1` will display *"less than `alpha`"*, e.g. *"\< 0.05"*.
+- `digits = 1` with `format = "digits"` displays *"p \< `alpha`"*, e.g.
+  *"p \< 0.05"*.
+
+- When `format = "signif"`, `digits` sets the lowest threshold (e.g.
+  `digits = 3` gives thresholds `alpha`, `0.01`, `0.001`). Values below
+  `alpha` show the nearest threshold above them, e.g. `p = 0.04` gives
+  *"p \< 0.05"*; `p = 0.009` gives *"p \< 0.01"*.
 
 - When `display = "symbol"`, if `symbol_repeat = TRUE`: Uses repeated
   symbols based on thresholds

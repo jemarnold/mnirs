@@ -1,17 +1,11 @@
-# Detect time_channel from header row
+# Detect time_channel from column names or time-formatted values
 
-Detect time_channel from header row
+Detect time_channel from column names or time-formatted values
 
 ## Usage
 
 ``` r
-detect_time_channel(
-  data,
-  time_channel = NULL,
-  nirs_device = NULL,
-  verbose = TRUE,
-  env = rlang::caller_env()
-)
+detect_time_channel(data, verbose = TRUE, env = rlang::caller_env())
 ```
 
 ## Arguments
@@ -21,18 +15,10 @@ detect_time_channel(
   A data frame of class *"mnirs"* containing time series data and
   metadata.
 
-- time_channel:
-
-  A character string naming the time or sample column. Must match a
-  column name in `data` exactly.
-
-  - If `NULL` (default), the `time_channel` metadata attribute of `data`
-    is used.
-
 - verbose:
 
-  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
-  and information messages helpful for troubleshooting. Ad global
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
   default can be set via `options(mnirs.verbose = FALSE)`.
 
 - env:

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,13 +77,13 @@
     <section class="section level2"><h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Modern wearable muscle near-infrared spectroscopy (mNIRS) devices make it easier than ever to monitor local muscle oxygenation during dynamic activities.</p>
-<p>The real challenge comes with deciding how to clean, filter, process, and eventually interpret those data.</p>
+<p>The real challenge comes with deciding how to process, analyse, and eventually interpret those data.</p>
 <p>The <a href="https://jemarnold.github.io/mnirs/">mnirs</a> package aims to provide standardised, reproducible methods for reading, processing, and analysing mNIRS data. The goal is to help practitioners detect meaningful signal from noise, and improve our confidence in interpreting and applying information to the clients we work with.</p>
 <p>In this vignette we will demonstrate how to:</p>
 <ul>
-<li><p>📂 Read files exported from wearable NIRS devices, and import NIRS channels into a standard data frame format with metadata, ready for further processing.</p></li>
-<li><p>📊 Plot and visualise data frames of class <em><code>"mnirs"</code></em>.</p></li>
-<li><p>🔍 Retrieve metadata stored with data frames of class <em><code>"mnirs"</code></em> to avoid repetitively specifying which channels to process.</p></li>
+<li><p>📂 Read files exported from wearable mNIRS devices, and import NIRS channels into a standard data frame format with metadata, ready for further processing.</p></li>
+<li><p>📊 Plot and visualise data frames of class <em>“mnirs”</em>.</p></li>
+<li><p>🔍 Retrieve metadata stored with data frames of class <em>“mnirs”</em> to avoid repetitively specifying which channels to process.</p></li>
 <li><p>⏱️ Resample data to a higher or lower sample rate, to correct irregular sampling periods, or to match the frequency of other data sources for synchronisation.</p></li>
 <li><p>🧹 Detect and replace local outliers, invalid values, and interpolate across missing data.</p></li>
 <li><p>📈️ Apply digital filtering to optimise signal-to-noise ratio for the responses observed in our data.</p></li>
@@ -91,12 +91,12 @@
 <li><p>🔀 Demonstrate a complete data wrangling process using pipe-friendly functions.</p></li>
 <li><p>🧮 Detect and extract intervals for further analysis.</p></li>
 </ul>
-<p><em><code>mnirs</code></em> is designed to process NIRS data, but it can be used to read, clean, and process other time series data which require many of the same processing steps. Enjoy!</p>
+<p><em>{mnirs}</em> is designed to process NIRS data, but it can be used to read, clean, and process other time series data which require many of the same processing steps. Enjoy!</p>
 </section><section class="section level2"><h2 id="read-data-from-file">📂 Read data from file<a class="anchor" aria-label="anchor" href="#read-data-from-file"></a>
 </h2>
 <p>We will read an example data file with two NIRS channels from an incremental ramp cycling assessment recorded with <em>Moxy</em> muscle oxygen monitor.</p>
-<p>First, install and load the <em><code>mnirs</code></em> package and other required libraries.</p>
-<p><em><code>mnirs</code></em> can be installed with <code>install.packages("mnirs")</code>.</p>
+<p>First, install and load the <em>{mnirs}</em> package and other required libraries.</p>
+<p><em>{mnirs}</em> can be installed with <code>install.packages("mnirs")</code>.</p>
 <div class="cell" data-layout-align="centre">
 <div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># pak::pak("jemarnold/mnirs") ## install development version</span></span>
@@ -118,7 +118,7 @@
 <div>
 <blockquote>
 <p><strong>Example data files</strong></p>
-<p>A few example data files are included in the <em><code>mnirs</code></em> package. File paths can be accessed with <code><a href="../reference/example_mnirs.html">example_mnirs()</a></code>.</p>
+<p>A few example data files are included in the <em>{mnirs}</em> package. File paths can be accessed with <code><a href="../reference/example_mnirs.html">example_mnirs()</a></code>.</p>
 </blockquote>
 </div>
 <ul>
@@ -133,7 +133,8 @@
 <li>
 <p><code>event_channel</code></p>
 <p>Optionally, a channel can be specified which indicates character <em>event</em> labels or integer <em>lap</em> values in the data table.<br><br>
-These channel names are used to detect the data table within the file, and must match exactly with text strings in the file on the same row. We can rename these channels when reading data by specifying a named character vector:</p>
+Files exported from <em>Artinis Oxysoft</em> can automatically detect <code>nirs_channels</code> from the <em>Legend</em> metadata. Names are cleaned and lowercased (e.g. <em>“rx1_tx1_o2hb”</em>). The <em>“Sample”</em> column is detected and a <em>“time”</em> column is derived as <code>time_channel</code>. <code>event_channel</code> is also automatically detected, with a secondary <em>“labels”</em> column included if present.<br><br>
+Explicitly user-supplied channel names are used to detect the data table within the file, and must match exactly with text strings in the file on the same row. We can rename these channels when reading data by specifying a named character vector:</p>
 </li>
 </ul>
 <div class="cell" data-layout-align="centre">
@@ -152,7 +153,7 @@ Automatic detection usually works well unless there is irregular sampling, or th
 <li>
 <p><code>add_timestamp</code></p>
 <p><code>FALSE</code> by default; if <code>time_channel</code> is in date-time (POSIXct) format (e.g., <em>hh:mm:ss</em>), by default it will be converted to numeric time in seconds.<br><br>
-If <code>add_timestamp = TRUE</code>, the date-time start time value in <code>time_channel</code> or in the file metadata will be extracted and a <code>"timestamp"</code> column will be added to the returned data frame. This can be useful for synchronising devices based on system time.</p>
+If <code>add_timestamp = TRUE</code>, the date-time start time value in <code>time_channel</code> or in the file metadata will be extracted and a <em>“timestamp”</em> column will be added to the returned data frame. This can be useful for synchronising devices based on system time.</p>
 </li>
 <li>
 <p><code>zero_time</code></p>
@@ -161,25 +162,48 @@ If <code>add_timestamp = TRUE</code>, the date-time start time value in <code>ti
 <li>
 <p><code>keep_all</code></p>
 <p><code>FALSE</code> by default; only the channels explicitly specified will be returned in a data frame. <code>keep_all = TRUE</code> will return all columns detected from the data table in the file.<br><br>
-Blank/empty columns will be omitted. Duplicate column names will be repaired by appending a suffix <code>"_n"</code>, and empty column names will be renamed as <code>col_n</code>; where <code>n</code> is equal to the column number in the data file. Renamed columns should be checked to confirm correct naming if duplicates are present.</p>
+Blank/empty columns will be omitted. Duplicate column names will be repaired by appending a suffix *“_n”<em>, and empty column names will be renamed as </em>”col_n”*; where <code>n</code> is equal to the column number in the data file. Renamed columns should be checked to confirm correct naming if duplicates are present.</p>
 </li>
 <li>
 <p><code>verbose</code></p>
-<p><code>TRUE</code> by default; this and most <em><code>mnirs</code></em> functions will return warnings and informational messages which are useful for troubleshooting and data validation. This option can be used to silence those messages. <em><code>mnirs</code></em> messages can be silenced globally for a session by setting <code>options(mnirs.verbose = FALSE)</code>.</p>
+<p><code>TRUE</code> by default; this and most <em>{mnirs}</em> functions will return warnings and informational messages which are useful for troubleshooting and data validation. This option can be used to silence those messages. <em>{mnirs}</em> messages can be silenced globally for a session by setting <code>options(mnirs.verbose = FALSE)</code>.</p>
 </li>
 </ul>
 <div class="cell" data-layout-align="centre">
 <div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## {mnirs} includes sample files from a few NIRS devices</span></span>
+<code class="sourceCode R"><span><span class="co">## {mnirs} includes sample files from a few mNIRS devices</span></span>
 <span><span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     </span></span>
-<span><span class="co">#&gt; [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    </span></span>
-<span><span class="co">#&gt; [5] "train.red_intervals.csv"</span></span>
+<span><span class="co">#&gt; [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn2" </span></span>
+<span><span class="co">#&gt; [5] "portamon-oxcap.xlsx"     "train.red_intervals.csv"</span></span>
 <span></span>
 <span><span class="co">## partial matching will error if matches multiple</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/try.html" class="external-link">try</a></span><span class="op">(</span><span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error in example_mnirs("moxy") : ✖ Multiple files match "moxy":</span></span>
 <span><span class="co">#&gt; ℹ Matching files: "moxy_intervals.csv" and "moxy_ramp.xlsx"</span></span>
+<span></span>
+<span><span class="co">## automatically detect known file formats to explore the data</span></span>
+<span><span class="fu"><a href="../reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
+<span>    file_path <span class="op">=</span> <span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"artinis"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; ! "Artinis" file format detected. `nirs_channels` set to vl_o2hb and vl_hhb.</span></span>
+<span><span class="co">#&gt; ℹ Override by specifying `nirs_channels` explicitly.</span></span>
+<span><span class="co">#&gt; ! Oxysoft `sample_rate` = 10 Hz.</span></span>
+<span><span class="co">#&gt; ℹ `time_channel` = time added to the data frame, in &lt;seconds&gt;.</span></span>
+<span><span class="co">#&gt; # A tibble: 20,920 × 5</span></span>
+<span><span class="co">#&gt;     time sample event vl_o2hb vl_hhb</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;  &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1   0        0 &lt;NA&gt;  -0.0289   10.7</span></span>
+<span><span class="co">#&gt;  2   0.1      1 &lt;NA&gt;  -0.0524   10.7</span></span>
+<span><span class="co">#&gt;  3   0.2      2 &lt;NA&gt;  -0.0916   10.7</span></span>
+<span><span class="co">#&gt;  4   0.3      3 &lt;NA&gt;  -0.138    10.7</span></span>
+<span><span class="co">#&gt;  5   0.4      4 &lt;NA&gt;  -0.205    10.8</span></span>
+<span><span class="co">#&gt;  6   0.5      5 &lt;NA&gt;  -0.241    10.9</span></span>
+<span><span class="co">#&gt;  7   0.6      6 &lt;NA&gt;  -0.257    10.9</span></span>
+<span><span class="co">#&gt;  8   0.7      7 &lt;NA&gt;  -0.316    10.9</span></span>
+<span><span class="co">#&gt;  9   0.8      8 &lt;NA&gt;  -0.387    10.9</span></span>
+<span><span class="co">#&gt; 10   0.9      9 &lt;NA&gt;  -0.404    10.9</span></span>
+<span><span class="co">#&gt; # ℹ 20,910 more rows</span></span>
 <span></span>
 <span><span class="va">data_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
 <span>    file_path <span class="op">=</span> <span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"moxy_ramp"</span><span class="op">)</span>, <span class="co">## call an example data file</span></span>
@@ -201,7 +225,7 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <span><span class="co">#&gt; ℹ time = 211.59 and 1183.6.</span></span>
 <span><span class="co">#&gt; ℹ Re-sample with `mnirs::resample_mnirs()`.</span></span>
 <span></span>
-<span><span class="co">## Note the above info message that sample_rate was estimated correctly at 2 Hz ☝</span></span>
+<span><span class="co">## Note the above info message that sample_rate was estimated correctly at 2 Hz 👆</span></span>
 <span><span class="co">## ignore the warnings about irregular sampling for now, we will resample later</span></span>
 <span></span>
 <span><span class="va">data_raw</span></span>
@@ -220,22 +244,22 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <span><span class="co">#&gt; 10 4.96         57         67</span></span>
 <span><span class="co">#&gt; # ℹ 2,192 more rows</span></span></code></pre></div>
 </div>
-</section></section><section class="section level2"><h2 id="plot-mnirs-data">📊 Plot <em><code>mnirs</code></em> data<a class="anchor" aria-label="anchor" href="#plot-mnirs-data"></a>
+</section></section><section class="section level2"><h2 id="plot-mnirs-data">📊 Plot <em>{mnirs}</em> data<a class="anchor" aria-label="anchor" href="#plot-mnirs-data"></a>
 </h2>
-<p><em><code>mnirs</code></em> data can be easily viewed by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (explicitly documented as <code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>). This generic plot function uses <em><code>ggplot2</code></em> and will work on data frames (or lists of data frames) processed by <em><code>mnirs</code></em> functions, where the metadata contains <code>class = *"mnirs"*</code>.</p>
+<p><em>{mnirs}</em> data can be easily viewed by calling <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> (explicitly documented as <code><a href="../reference/plot.mnirs.html">plot.mnirs()</a></code>). This generic plot function uses <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a> and will work on data frames (or lists of data frames) processed by <em>{mnirs}</em> functions, where the metadata contains <code>class = "mnirs"</code>.</p>
 <div>
 <blockquote>
-<p><strong>Processing lists of <em><code>mnirs</code></em> data frames</strong></p>
-<p>As of <code>mnirs v0.7.0</code>, most processing functions will accept either a single data frame, a list of data frames, or a grouped data frame (requiring <a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a>), and returns a single or list of data frames, respectively. This allows separate processing of NIRS interval data, e.g. filtering and shifting NIRS channels within discrete intervals, rather than on the global data frame.</p>
+<p><strong>Processing lists of <em>{mnirs}</em> data frames</strong></p>
+<p>As of <em>{mnirs}</em> <code>v0.7.0</code>, most processing functions will accept either a single data frame, a list of data frames, or a grouped data frame (requiring <a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a>), and returns a single or list of data frames, respectively. This allows separate processing of NIRS interval data, e.g. filtering and shifting NIRS channels within discrete intervals, rather than on the global data frame.</p>
 </blockquote>
 </div>
 <section class="level2"><h3 id="plot-mnirs">
-<code>plot.mnirs</code><a class="anchor" aria-label="anchor" href="#plot-mnirs"></a>
+<code>plot.mnirs()</code><a class="anchor" aria-label="anchor" href="#plot-mnirs"></a>
 </h3>
 <ul>
 <li>
 <p><code>data</code></p>
-<p>This function takes in a data frame or list of data frames of class <em><code>mnirs</code></em> and returns a formatted <em><code>ggplot2</code></em> plot. Lists of <em><code>mnirs</code></em> data frames are returned as plot facets.</p>
+<p>This function takes in a data frame or list of data frames of class <em>“mnirs”</em> and returns a formatted <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a> plot. Lists of <em>{mnirs}</em> data frames are returned as plot facets.</p>
 </li>
 <li>
 <p><code>points</code></p>
@@ -266,11 +290,11 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 </div>
 </div>
 </div>
-<p><em><code>mnirs</code></em> includes a custom <em><code>ggplot2</code></em> theme and colour palette available with <code><a href="../reference/theme_mnirs.html">theme_mnirs()</a></code> and <code><a href="../reference/palette_mnirs.html">palette_mnirs()</a></code>. See those documentation references for more details.</p>
-</section></section><section class="section level2"><h2 id="metadata-stored-in-mnirs-data-frames">🔍 Metadata stored in <em><code>mnirs</code></em> data frames<a class="anchor" aria-label="anchor" href="#metadata-stored-in-mnirs-data-frames"></a>
+<p><em>{mnirs}</em> includes a custom <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a> theme and colour palette available with <code><a href="../reference/theme_mnirs.html">theme_mnirs()</a></code> and <code><a href="../reference/palette_mnirs.html">palette_mnirs()</a></code>. See those documentation references for more details.</p>
+</section></section><section class="section level2"><h2 id="metadata-stored-in-mnirs-data-frames">🔍 Metadata stored in <em>{mnirs}</em> data frames<a class="anchor" aria-label="anchor" href="#metadata-stored-in-mnirs-data-frames"></a>
 </h2>
-<p>Data frames generated or read by <em><code>mnirs</code></em> functions will return <code>class = *"mnirs"*</code> and contain metadata, which can be retrieved with <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes()</a></code>.</p>
-<p>Instead of re-defining values like our channel names or sample rate, certain <em><code>mnirs</code></em> functions can automatically retrieve them from metadata. They can always be overwritten manually in subsequent functions, or by using a helper function <code><a href="../reference/create_mnirs_data.html">create_mnirs_data()</a></code>.</p>
+<p>Data frames generated or read by <em>{mnirs}</em> functions will return <code>class = "mnirs"</code> and contain metadata, which can be retrieved with <code><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes()</a></code>.</p>
+<p>Instead of re-defining values like our channel names or sample rate, certain <em>{mnirs}</em> functions can automatically retrieve them from metadata. They can always be overwritten manually in subsequent functions, or by using a helper function <code><a href="../reference/create_mnirs_data.html">create_mnirs_data()</a></code>.</p>
 <p>See <code><a href="../reference/create_mnirs_data.html">create_mnirs_data()</a></code> for more details about metadata.</p>
 <div class="cell" data-layout-align="centre">
 <div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
@@ -294,16 +318,16 @@ Blank/empty columns will be omitted. Duplicate column names will be repaired by 
 <ul>
 <li>
 <p><code>data</code></p>
-<p>This function takes in a data frame or list of data frames, applies processing to all channels specified explicitly or implicitly from <em><code>mnirs</code></em> metadata, then returns the processed data frame (or list). <em><code>mnirs</code></em> metadata will be passed to and from this function.<br><br><em><code>mnirs</code></em> functions are also pipe-friendly for Base R 4.1+ (<code>|&gt;</code>) or <a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a> (<code>%&gt;%</code>) pipes to chain operations together (see below).</p>
+<p>This function takes in a data frame or list of data frames, applies processing to all channels specified explicitly or implicitly from <em>{mnirs}</em> metadata, then returns the processed data frame (or list). <em>{mnirs}</em> metadata will be passed to and from this function.<br><br><em>{mnirs}</em> functions are also pipe-friendly for Base R 4.1+ (<code>|&gt;</code>) or <a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a> (<code>%&gt;%</code>) pipes to chain operations together (see below).</p>
 </li>
 <li>
 <p><code>time_channel</code></p>
-<p>The column name of time series values in <code>data</code>. If the data contain <em><code>mnirs</code></em> metadata, this channel will be detected automatically, or it can be specified explicitly.<br><br>
+<p>The column name of time series values in <code>data</code>. If the data contain <em>{mnirs}</em> metadata, this channel will be detected automatically, or it can be specified explicitly.<br><br>
 This function processes all columns in <code>data</code>, so <code>nirs_channels</code> does not need to be specified.</p>
 </li>
 <li>
 <p><code>sample_rate</code></p>
-<p>The sample rate (in Hz) of <code>data</code>. If the data contain <em><code>mnirs</code></em> metadata, this channel will be detected automatically, or it can be specified explicitly.</p>
+<p>The sample rate (in Hz) of <code>data</code>. If the data contain <em>{mnirs}</em> metadata, this channel will be detected automatically, or it can be specified explicitly.</p>
 </li>
 <li>
 <p><code>resample_rate</code></p>
@@ -311,7 +335,7 @@ This function processes all columns in <code>data</code>, so <code>nirs_channels
 </li>
 <li>
 <p><code>method</code></p>
-<p>Any new samples created by resampling (i.e. samples fill in between gaps, or up-sampled indices) can be filled in or left blank as <code>NA</code>. The default <code>method</code> is to leave new samples blank, and interpolation must be explicitly specified as either <em>“locf”</em> to repeat the last observation carried forward, or <em>“linear”</em> interpolation.</p>
+<p>Any new samples created by resampling (i.e. samples fill in between gaps, or up-sampled indices) can be filled in or left blank as <code>NA</code>. The default <code>method = "none"</code> leaves new samples blank, and interpolation must be explicitly specified as either <em>“locf”</em> to repeat the last observation carried forward, or <em>“linear”</em> interpolation.</p>
 </li>
 </ul>
 <div class="cell" data-layout-align="centre">
@@ -352,7 +376,7 @@ This function processes all columns in <code>data</code>, so <code>nirs_channels
 </section></section><section class="section level2"><h2 id="replace-local-outliers-invalid-values-and-missing-values">🧹 Replace local outliers, invalid values, and missing values<a class="anchor" aria-label="anchor" href="#replace-local-outliers-invalid-values-and-missing-values"></a>
 </h2>
 <p>We can see some data issues in the plot above, so let’s clean those with a single wrangling function <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>, to prepare our data for digital filtering and smoothing.</p>
-<p><em><code>mnirs</code></em> tries to include basic functions which work on vector data, and convenience wrappers which combine functionality and can be used on multiple channels in a data frame at once.</p>
+<p><em>{mnirs}</em> tries to include basic functions which work on vector data, and convenience wrappers which combine functionality and can be used on multiple channels in a data frame at once.</p>
 <p>Let’s explain the functionality of this data-wide function, and for more details about the vector-specific functions see <code><a href="../reference/replace_mnirs.html">replace_mnirs()</a></code>.</p>
 <section class="level2"><h3 id="replace_mnirs">
 <code>replace_mnirs()</code><a class="anchor" aria-label="anchor" href="#replace_mnirs"></a>
@@ -360,11 +384,11 @@ This function processes all columns in <code>data</code>, so <code>nirs_channels
 <ul>
 <li>
 <p><code>nirs_channels</code></p>
-<p>Specify which column names in <code>data</code> to process, i.e. the response variables. If the data contain <em><code>mnirs</code></em> metadata, these channels will be detected automatically. Channels not explicitly specified will be passed through unprocessed to the returned data frame.</p>
+<p>Specify which column names in <code>data</code> to process, i.e. the response variables. If the data contain <em>{mnirs}</em> metadata, these channels will be detected automatically. Channels not explicitly specified will be passed through unprocessed to the returned data frame.</p>
 </li>
 <li>
 <p><code>time_channel</code> &amp; <code>sample_rate</code></p>
-<p>If the data contain <em><code>mnirs</code></em> metadata, these will be detected automatically, or they can be specified explicitly.</p>
+<p>If the data contain <em>{mnirs}</em> metadata, these will be detected automatically, or they can be specified explicitly.</p>
 </li>
 <li>
 <p><code>invalid_values</code>, <code>invalid_above</code>, or <code>invalid_below</code></p>
@@ -380,7 +404,7 @@ This function processes all columns in <code>data</code>, so <code>nirs_channels
 </li>
 <li>
 <p><code>method</code></p>
-<p>Missing data (<code>NA</code>), invalid values, and local outliers specified above can be replaced via interpolation or fill methods; either <code>"linear"</code> interpolation (the default), fill with local <code>"median"</code>, or <code>"locf"</code> (<em>“last observation carried forward”</em>).<br><br><code>NA</code>s can be passed through to the returned data frame with <code>method = "none"</code>. However, subsequent processing &amp; analysis steps may return errors when <code>NA</code>s are present. Therefore, it is good practice to deal with missing data early during data processing.</p>
+<p>Missing data (<code>NA</code>), invalid values, and local outliers specified above can be replaced via interpolation or fill methods; either <em>“linear”</em> interpolation (the default), fill with local <em>“median”</em>, or <em>“locf”</em> (<em>“last observation carried forward”</em>).<br><br><code>NA</code>s can be passed through to the returned data frame with <code>method = "none"</code>. However, subsequent processing &amp; analysis steps may return errors when <code>NA</code>s are present. Therefore, it is good practice to deal with missing data early during data processing.</p>
 </li>
 <li>
 <p><code>verbose</code></p>
@@ -407,12 +431,12 @@ This function processes all columns in <code>data</code>, so <code>nirs_channels
 </div>
 </div>
 <p>That cleaned up all the obvious data issues.</p>
-</section></section><section class="section level2"><h2 id="digital-filtering">📈 Digital filtering<a class="anchor" aria-label="anchor" href="#digital-filtering"></a>
+</section></section><section class="section level2"><h2 id="digital-filtering">📈️ Digital filtering<a class="anchor" aria-label="anchor" href="#digital-filtering"></a>
 </h2>
 <p>To improve the signal-to-noise ratio in our dataset without losing information, we should apply digital filtering to smooth the data.</p>
 <section class="level2"><h3 id="choosing-a-digital-filter">Choosing a digital filter<a class="anchor" aria-label="anchor" href="#choosing-a-digital-filter"></a>
 </h3>
-<p>There are a few digital filtering methods available in <em><code>mnirs</code></em>. Which option is best for <em>you</em> will depend in large part on the sample rate of your data and the frequency of the response signal or phenomenon you are interested in observing.</p>
+<p>There are a few digital filtering methods available in <em>{mnirs}</em>. Which option is best for <em>you</em> will depend in large part on the sample rate of your data and the frequency of the response signal or phenomenon you are interested in observing.</p>
 <p>Choosing filter parameters is an important processing step to improve signal-to-noise ratio and enhance our subsequent interpretations. Over-filtering the data can introduce data artefacts which can negatively influence signal analysis and interpretations, just as much as trying to analyse overly-noisy raw data.</p>
 <p>It is perfectly valid to choose a digital filter by iteratively testing filter parameters until the signal or response of interest appears to be visually optimised with minimal data artefacts, to your satisfaction.</p>
 <p>We will discuss the process of choosing a digital filter in more depth in another article coming soon.</p>
@@ -514,7 +538,7 @@ This function processes all columns in <code>data</code>, so <code>nirs_channels
 <ul>
 <li>
 <p><code>group_channels</code></p>
-<p>Controls how <code>nirs_channels</code> are grouped, to preserve absolute or relative scaling. Either a character keyword or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of channel-name vectors:<br><br><code>"ensemble"</code> (the default) shifts all channels together to a common value, preserving the relative scaling between channels.<br><br><code>"distinct"</code> shifts each channel independently, losing the relative scaling between channels.<br><br>
+<p>Controls how <code>nirs_channels</code> are grouped, to preserve absolute or relative scaling. Either a character keyword or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of channel-name vectors:<br><br><em>“ensemble”</em> (the default) shifts all channels together to a common value, preserving the relative scaling between channels.<br><br><em>“distinct”</em> shifts each channel independently, losing the relative scaling between channels.<br><br>
 A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of channel-name vectors (e.g. <code>list(c(A, B), c(C))</code>) shifts channels <code>A</code> &amp; <code>B</code> together and <code>C</code> separately, preserving relative scaling within, but not between groups.</p>
 </li>
 <li>
@@ -528,14 +552,14 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 </li>
 <li>
 <p><code>position</code></p>
-<p>Specifies the reference point used to shift the data; either <code>"min"</code>, <code>"max"</code>, or <code>"first"</code> sample(s).</p>
+<p>Specifies the reference point used to shift the data; either <em>“min”</em>, <em>“max”</em>, or <em>“first”</em> sample(s).</p>
 </li>
 </ul>
 <p>For this data set, we want to shift each NIRS channel so that the mean of the 2-minute baseline is equal to zero, which would then give us a change in deoxygenation from baseline during the incremental cycling protocol.</p>
 <div>
 <blockquote>
 <p><strong><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a>-style channel name specification</strong></p>
-<p>This is a good time to note that here and in most <em><code>mnirs</code></em> functions, data channels can be specified using <a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a>-style naming. Data frame column names can be specified either with quotes as a character string (<code>"smo2"</code>), or as a direct symbol (<code>smo2</code>).</p>
+<p>This is a good time to note that here and in most <em>{mnirs}</em> functions, data channels can be specified using <a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a>-style naming. Data frame column names can be specified either with quotes as a character string (<code>"smo2"</code>), or as a direct symbol (<code>smo2</code>).</p>
 <p><a href="https://tidyselect.r-lib.org" class="external-link">tidyselect</a> support functions such as <code>starts_with()</code>, <code>matches()</code> can also be used.</p>
 </blockquote>
 </div>
@@ -543,7 +567,7 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 <div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_shifted</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/shift_mnirs.html">shift_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_filtered</span>,</span>
-<span>    group_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>, <span class="co">## 👈 channels shifted separately</span></span>
+<span>    group_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>, <span class="co">## channels shifted separately</span></span>
 <span>    to <span class="op">=</span> <span class="fl">0</span>,            <span class="co">## NIRS values will be shifted to zero</span></span>
 <span>    span <span class="op">=</span> <span class="fl">120</span>,        <span class="co">## shift the *first* 120 sec of data to zero</span></span>
 <span>    position <span class="op">=</span> <span class="st">"first"</span></span>
@@ -558,10 +582,10 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 </div>
 </div>
 </div>
-<p>Before shifting, the minimum (end of exercise) values for <em>smo2_left</em> and <em>smo2_right</em> were similar, but the starting baseline values were different.</p>
-<p>When we shift both baseline values to zero, however, we can see that the <em>smo2_left</em> signal has a smaller deoxygenation amplitude compared to the <em>smo2_right</em> signal, and a (slightly) greater hyperaemic reoxygenation peak.</p>
+<p>Before shifting, the minimum (end of exercise) values for <em>“smo2_left”</em> and <em>“smo2_right”</em> were similar, but the starting baseline values were different.</p>
+<p>When we shift both baseline values to zero, however, we can see that the <em>“smo2_left”</em> signal has a smaller deoxygenation amplitude compared to the <em>“smo2_right”</em> signal, and a (slightly) greater hyperaemic reoxygenation peak.</p>
 <p>We have to consider how our assumptions and processing decisions will influence our interpretations; by shifting both starting values, we are normalising for, and implicitly assuming that the baseline represents the same starting condition for the tissues in both legs.</p>
-<p>This may or may not be an appropriate assumption for your research question; for example, this may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as <code>"∇SmO2"</code>), but not if we were interested in asymmetries that could influence SmO<sub>2</sub> at rest.</p>
+<p>This may or may not be an appropriate assumption for your research question; for example, this may be appropriate when we are more interested in the relative change (delta) in each leg during an intervention or exposure (often referred to as <em>“∇SmO2”</em>), but not if we were interested in asymmetries that could influence SmO<sub>2</sub> at rest.</p>
 </section><section class="level2"><h3 id="rescale_mnirs">
 <code>rescale_mnirs()</code><a class="anchor" aria-label="anchor" href="#rescale_mnirs"></a>
 </h3>
@@ -569,7 +593,7 @@ e.g. <code>width = 1</code> will shift from the single minimum sample, whereas 
 <ul>
 <li>
 <p><code>group_channels</code></p>
-<p>Controls how <code>nirs_channels</code> are grouped, to preserve absolute or relative scaling. Either a character keyword or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of channel-name vectors:<br><br><code>"ensemble"</code> (the default) rescales all channels together to a common range, preserving the relative scaling between channels.<br><br><code>"distinct"</code> rescales each channel independently, losing the relative scaling between channels.<br><br>
+<p>Controls how <code>nirs_channels</code> are grouped, to preserve absolute or relative scaling. Either a character keyword or a <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of channel-name vectors:<br><br><em>“ensemble”</em> (the default) rescales all channels together to a common range, preserving the relative scaling between channels.<br><br><em>“distinct”</em> rescales each channel independently, losing the relative scaling between channels.<br><br>
 A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code> of channel-name vectors (e.g. <code>list(c(A, B), c(C))</code>) rescales channels <code>A</code> &amp; <code>B</code> together and <code>C</code> separately, preserving relative scaling within, but not between groups.</p>
 </li>
 <li>
@@ -581,7 +605,7 @@ A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()<
 <div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data_rescaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rescale_mnirs.html">rescale_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data_filtered</span>,</span>
-<span>    group_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>, <span class="co">## 👈 channels rescaled separately</span></span>
+<span>    group_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">smo2_left</span>, <span class="va">smo2_right</span><span class="op">)</span>, <span class="co">## channels rescaled separately</span></span>
 <span>    range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span> <span class="co">## rescale to a 0-100% functional exercise range</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -595,12 +619,12 @@ A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()<
 </div>
 </div>
 <p>Here, our assumption is that during a maximal exercise task, the minimum and maximum values represent the functional capacity of each tissue volume being observed. So we rescale the functional dynamic range in each leg.</p>
-<p>By normalising this way, we might lose meaningful differences captured by the different amplitudes between <em>smo2_left</em> and <em>smo2_right</em>, but we might be more interested in the trend or time course of each response.</p>
-<p>Our interpretation may be that <em>smo2_right</em> appears to start at a slightly higher percent of its functional range, deoxygenates faster toward a minimum, and reaches a quasi-plateau near maximal exercise. While <em>smo2_left</em> deoxygenates slightly slower and continues to deoxygenate until maximal task tolerance.</p>
+<p>By normalising this way, we might lose meaningful differences captured by the different amplitudes between <em>“smo2_left”</em> and <em>“smo2_right”</em>, but we might be more interested in the trend or time course of each response.</p>
+<p>Our interpretation may be that <em>“smo2_right”</em> appears to start at a slightly higher percent of its functional range, deoxygenates faster toward a minimum, and reaches a quasi-plateau near maximal exercise. While <em>“smo2_left”</em> deoxygenates slightly slower and continues to deoxygenate until maximal task tolerance.</p>
 <p>Additionally, the left leg reoxygenates slightly faster than the right during recovery. This might, for example, indicate exercise capacity differences between the limbs (although these differences are marginal and only discussed as representative for influence on interpretations).</p>
 </section></section><section class="section level2"><h2 id="pipe-friendly-functions">🔀 Pipe-friendly functions<a class="anchor" aria-label="anchor" href="#pipe-friendly-functions"></a>
 </h2>
-<p>Most <em><code>mnirs</code></em> functions can be piped together using Base R 4.1+ (<code>|&gt;</code>) or <a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a> (<code>%&gt;%</code>). The entire processing workflow can easily be performed in a sequential pipe.</p>
+<p>Most <em>{mnirs}</em> functions can be piped together using Base R 4.1+ (<code>|&gt;</code>) or <a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a> (<code>%&gt;%</code>). The entire processing workflow can easily be performed in a sequential pipe.</p>
 <p>To demonstrate this, we’ll read a different example file recorded with <em>Train.Red FYER</em> muscle oxygen sensor and pipe it through each processing stage straight to a plot.</p>
 <p>This is also a good time to demonstrate how to use the global <code>mnirs.verbose</code> option to silence all warning &amp; information messages, for example when dealing with a familiar dataset. We recommend leaving <code>verbose = TRUE</code> by default whenever reading and exploring a new file.</p>
 <div class="cell" data-layout-align="centre">
@@ -647,11 +671,11 @@ A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()<
 </div>
 </div>
 </div>
-<p>We have two exercise intervals in this data set. Let’s demonstrate some of the common analysis methods currently available with <em><code>mnirs</code></em>.</p>
+<p>We have two exercise intervals in this data set. Let’s demonstrate some of the common analysis methods currently available with <em>{mnirs}</em>.</p>
 </section><section class="section level2"><h2 id="interval-extraction">🧮 Interval extraction<a class="anchor" aria-label="anchor" href="#interval-extraction"></a>
 </h2>
 <p>After the NIRS signal has been cleaned and filtered, it should be ready for further processing and analysis.</p>
-<p><em><code>mnirs</code></em> is under development to include functionality for processing discrete intervals and events, e.g. reoxygenation kinetics, slope calculations for post-occlusion microvascular responsiveness, and critical oxygenation breakpoints.</p>
+<p><em>{mnirs}</em> is under development to include functionality for processing discrete intervals and events, e.g. reoxygenation kinetics, slope calculations for post-occlusion microvascular responsiveness, and critical oxygenation breakpoints.</p>
 <section class="level2"><h3 id="extract_intervals">
 <code>extract_intervals()</code><a class="anchor" aria-label="anchor" href="#extract_intervals"></a>
 </h3>
@@ -660,12 +684,11 @@ A <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()<
 <ul>
 <li>
 <p><code>data</code></p>
-<p>This function takes in a single data frame, detects and extracts specified intervals, and returns a list of processed data frames. <em><code>mnirs</code></em> metadata will be passed to and from this function.</p>
+<p>This function takes in a single data frame, detects and extracts specified intervals, and returns a list of processed data frames. <em>{mnirs}</em> metadata will be passed to and from this function.</p>
 </li>
 <li>
 <p><code>nirs_channels</code></p>
-<p>If returning a list of <em>“distinct”</em> intervals (see <code>group_intervals</code> below), <code>nirs_channels</code> does not have to be specified, as no channels are processed.<br><br>
-Only when <em>“ensemble”</em>-averaging, <code>nirs_channels</code> should be specified by providing a list of column names (e.g. <code>list(c(A, B), c(A))</code>), where each list item specifies the channels to be ensemble-averaged within the respective group (ensemble-groups are specified by <code>group_intervals</code> below), in the order in which they are returned. The default <em><code>mnirs</code></em> metadata will ensemble-average all <code>nirs_channels</code>.</p>
+<p>If returning a list of <em>“distinct”</em> intervals (see <code>group_intervals</code> below), <code>nirs_channels</code> does not have to be specified, as no channels are processed. If <code>group_intervals = "ensemble"</code> or a custom grouped list, then <code>nirs_channels</code> should be specified or taken from metadata (also see <code>group_channels</code> below).</p>
 </li>
 <li>
 <p><code>start</code> &amp; <code>end</code></p>
@@ -673,12 +696,16 @@ Only when <em>“ensemble”</em>-averaging, <code>nirs_channels</code> should b
 </li>
 <li>
 <p><code>group_intervals</code></p>
-<p>Events can be extracted and returned as a list of <code>"distinct"</code> intervals, or <code>"ensemble"</code>-averaged into a single data frame. Custom grouping structure for ensemble-averaging can be specified by event number, in order of appearance within the original data.<br><br>
+<p>Events can be extracted and returned as a list of <em>“distinct”</em> intervals, or <em>“ensemble”</em>-averaged into a single data frame. Custom grouping structure for ensemble-averaging can be specified by event number, in order of appearance within the original data.<br><br>
 e.g. <code>group_intervals = list(c(1, 2), c(3, 4))</code> would return a list of two intervals, each ensemble-averaged from the respective events, in sequential order from the original data.</p>
 </li>
 <li>
+<p><code>group_channels</code></p>
+<p>When <code>group_intervals = "ensemble"</code> or a custom grouping list, then <code>group_channels</code> can be used to specify which <code>nirs_channels</code> should be included in the ensemble average. e.g. <code>list(c(A, B), c(A))</code> would ensemble-average <em>“A”</em> and <em>“B”</em> for the first interval group, but only <em>“A”</em> for the second group. By default, all <code>nirs_channels</code> are included in ensemble-averaging.</p>
+</li>
+<li>
 <p><code>span</code></p>
-<p>When only <code>start</code> (or <code>end</code>) is provided, <code>span</code> specifies a time window in units of <code>time_channel</code> as <code>c(before, after)</code>, where positive values indicate time after the event and negative values indicate time before. When both <code>start</code> and <code>end</code> are provided, <code>span</code> shifts boundaries additively: <code>span[1]</code> adjusts starts, <code>span[2]</code> adjusts ends.<br><br>
+<p>A two-element vector of <code>time_channel</code> values specifying a time window <code>c(start, end)</code> in units of <code>time_channel</code>, where positive values indicate time after the event bound and negative values indicate time before. <code>span[1]</code> shifts the start bound, <code>span[2]</code> shifts the end bound, respectively.<br><br>
 A list of unique <code>span</code> vectors can be specified for each interval, otherwise a single <code>span</code> vector will be recycled to all intervals.</p>
 </li>
 <li>
@@ -731,7 +758,7 @@ When ensemble-averaging across intervals, time will always be re-calculated from
 <p>Ensemble-averaging can help mitigate data dropouts and other quality issues from measurement error or biological variability. For example, ensemble-averaging is common for evaluating systemic VO<sub>2</sub> kinetics, where responses can be highly variable trial to trial.</p>
 </section></section><section class="section level2"><h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>This vignette walks through the core functionality of <em><code>mnirs</code></em> to read, clean, and pre-process data in preparation for analysis.</p>
+<p>This vignette walks through the core functionality of <em>{mnirs}</em> to read, clean, and pre-process data in preparation for analysis.</p>
 <p>Future development and articles will cover standardised analysis methods, including deoxygenation &amp; reoxygenation kinetics and critical oxygenation breakpoint analysis.</p>
 </section><script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {

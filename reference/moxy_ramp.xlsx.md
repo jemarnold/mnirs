@@ -40,7 +40,7 @@ Channel mapping for
 
 - `event_channel = c("Lap")`
 
-- `interval_times = list(start = c(204, 878))` (start and end of
+- `interval_times = list(start = c(204, 868))` (start and end of
   exercise)
 
 ## Source

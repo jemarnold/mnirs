@@ -1,6 +1,6 @@
-# recycle a single-element span to c(before, after) positive -\> c(0, x), negative -\> c(x, 0)
+# recycle a single-element span to c(start, end) positive -\> c(0, x), negative -\> c(x, 0)
 
-recycle a single-element span to c(before, after) positive -\> c(0, x),
+recycle a single-element span to c(start, end) positive -\> c(0, x),
 negative -\> c(x, 0)
 
 ## Usage

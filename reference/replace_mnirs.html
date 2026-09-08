@@ -23,7 +23,7 @@ replaces via interpolation.'><meta name="twitter:card" content="summary"><meta n
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -201,9 +201,9 @@ values within a centred window defined by <code>width</code> or <code>span</code
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
-warnings and information messages helpful for troubleshooting. Ad
-global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
+<dd><p>Logical. <code>TRUE</code> (<em>default</em>) will display, and <code>FALSE</code> will
+silence warnings and information messages helpful for troubleshooting.
+Global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
@@ -334,7 +334,7 @@ valid sample on either side is used (equivalent to
 
 <p>Arguments apply globally to all <code>nirs_channels</code> by default. Relevant
 arguments can instead be supplied uniquely per-channel as a named <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>,
-with names matching <code>nirs_channels</code>, e.g.:</p>
+with names matching <code>nirs_channels</code>, e.g.</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="../reference/replace_mnirs.html">replace_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data</span>,</span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">hhb</span>, <span class="va">smo2</span><span class="op">)</span>,</span>

@@ -118,3 +118,5 @@ Example data files included in the package
   : 2 Hz PerfPro export of Moxy data
 - [`portamon-oxcap.xlsx`](https://jemarnold.github.io/mnirs/reference/portamon-oxcap.xlsx.md)
   : 10 Hz Artinis Oxysoft export recorded with Portamon
+- [`pionirs_occlusion.ftn2`](https://jemarnold.github.io/mnirs/reference/pionirs_occlusion.ftn2.md)
+  : 1 Hz PIONIRS NIRSBOX-DUAL export

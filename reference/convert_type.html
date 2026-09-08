@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,14 +46,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_type</span><span class="op">(</span></span>
-<span>  <span class="va">data</span>,</span>
-<span>  nirs_channels <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">time_channel</span>,</span>
-<span>  event_channel <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  env <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">convert_type</span><span class="op">(</span><span class="va">data</span>, <span class="va">channels</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, env <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">caller_env</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -65,31 +58,14 @@
 metadata.</p></dd>
 
 
-<dt id="arg-nirs-channels">nirs_channels<a class="anchor" aria-label="anchor" href="#arg-nirs-channels"></a></dt>
-<dd><p>A character vector giving the names of mNIRS columns to
-operate on. Must match column names in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>nirs_channels</code> metadata attribute of <code>data</code> is
-used.</p></li>
-</ul></dd>
-
-
-<dt id="arg-time-channel">time_channel<a class="anchor" aria-label="anchor" href="#arg-time-channel"></a></dt>
-<dd><p>A character string naming the time or sample column.
-Must match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>time_channel</code> metadata attribute of <code>data</code> is
-used.</p></li>
-</ul></dd>
-
-
-<dt id="arg-event-channel">event_channel<a class="anchor" aria-label="anchor" href="#arg-event-channel"></a></dt>
-<dd><p>A character string naming the event/lap column. Must
-match a column name in <code>data</code> exactly.</p><ul><li><p>If <code>NULL</code> (default), the <code>event_channel</code> metadata attribute of <code>data</code> is
-used.</p></li>
-</ul></dd>
+<dt id="arg-channels">channels<a class="anchor" aria-label="anchor" href="#arg-channels"></a></dt>
+<dd><p>A list of <code>time</code>, <code>event</code>, and <code>nirs</code> column names.</p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
-warnings and information messages helpful for troubleshooting. Ad
-global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
+<dd><p>Logical. <code>TRUE</code> (<em>default</em>) will display, and <code>FALSE</code> will
+silence warnings and information messages helpful for troubleshooting.
+Global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>

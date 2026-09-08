@@ -6,14 +6,7 @@ detected
 ## Usage
 
 ``` r
-convert_type(
-  data,
-  nirs_channels = NULL,
-  time_channel,
-  event_channel = NULL,
-  verbose = TRUE,
-  env = rlang::caller_env()
-)
+convert_type(data, channels, verbose = TRUE, env = rlang::caller_env())
 ```
 
 ## Arguments
@@ -23,34 +16,14 @@ convert_type(
   A data frame of class *"mnirs"* containing time series data and
   metadata.
 
-- nirs_channels:
+- channels:
 
-  A character vector giving the names of mNIRS columns to operate on.
-  Must match column names in `data` exactly.
-
-  - If `NULL` (default), the `nirs_channels` metadata attribute of
-    `data` is used.
-
-- time_channel:
-
-  A character string naming the time or sample column. Must match a
-  column name in `data` exactly.
-
-  - If `NULL` (default), the `time_channel` metadata attribute of `data`
-    is used.
-
-- event_channel:
-
-  A character string naming the event/lap column. Must match a column
-  name in `data` exactly.
-
-  - If `NULL` (default), the `event_channel` metadata attribute of
-    `data` is used.
+  A list of `time`, `event`, and `nirs` column names.
 
 - verbose:
 
-  Logical. Default is `TRUE`. Display or silence (if `FALSE`) warnings
-  and information messages helpful for troubleshooting. Ad global
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
   default can be set via `options(mnirs.verbose = FALSE)`.
 
 - env:

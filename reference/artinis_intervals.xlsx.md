@@ -28,17 +28,17 @@ ischaemic occlusion, placed on the vastus lateralis muscle site.
 
   Unmarked event label (character).
 
-Channel mapping for
+Channels are detected automatically from the file legend, or can be
+specified explicitly for
 [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md):
 
 - `nirs_channels = c(O2Hb = 2, HHb = 3)`
 
 - `time_channel = c(sample = 1)`
 
-- `event_channel = c(event = 4, label = "col_5")`
+- `event_channel = c(event = 4)`
 
-- `interval_times = list(start = c(158, 999, 1750) end = c(493, 1333, 1961))`
-  two intervals and post-exercise occlusion
+- `interval_times = list( ## two intervals, post-exercise occlusion start = c(158, 999, 1750), end = c(493, 1333, 1961) )`
 
 ## Source
 

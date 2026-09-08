@@ -9,7 +9,7 @@ amplitude/dynamic range, e.g. rescale the range of NIRS data to c(0, 100)."><met
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,9 +102,9 @@ range of output values to which <code>nirs_channels</code> will be rescaled.</p>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
-<dd><p>Logical. Default is <code>TRUE</code>. Display or silence (if <code>FALSE</code>)
-warnings and information messages helpful for troubleshooting. Ad
-global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
+<dd><p>Logical. <code>TRUE</code> (<em>default</em>) will display, and <code>FALSE</code> will
+silence warnings and information messages helpful for troubleshooting.
+Global default can be set via <code>options(mnirs.verbose = FALSE)</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -153,7 +153,7 @@ a separate interval, returned as a named list.</p></li>
 <p>Arguments apply globally to all <code>nirs_channels</code> by default. Relevant
 arguments can instead be supplied uniquely per-channel as a named <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>,
 with names matching either <code>nirs_channels</code> or list names in
-<code>group_channels</code>, e.g.:</p>
+<code>group_channels</code>, e.g.</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="fu"><a href="../reference/shift_mnirs.html">shift_mnirs</a></span><span class="op">(</span></span>
 <span>    <span class="va">data</span>,</span>
 <span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">A</span>, <span class="va">B</span>, <span class="va">C</span><span class="op">)</span>,</span>
