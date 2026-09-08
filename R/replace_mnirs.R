@@ -67,7 +67,7 @@
 #'
 #' Arguments apply globally to all `nirs_channels` by default. Relevant
 #' arguments can instead be supplied uniquely per-channel as a named `list()`,
-#' with names matching `nirs_channels`, e.g.:
+#' with names matching `nirs_channels`, e.g.
 #'
 #' ```r
 #' replace_mnirs(
@@ -163,7 +163,7 @@ replace_mnirs <- function(
     method = c("linear", "median", "locf", "none"),
     verbose = TRUE
 ) {
-    ## list or grouped input → normalise to named list, recurse per interval
+    ## list or grouped input -> normalise to named list, recurse per interval
     if (inherits(data, "grouped_df") || !is.data.frame(data)) {
         return(map_mnirs_intervals(data, match.call(), parent.frame()))
     }

@@ -16,11 +16,13 @@
 \item{Column 6}{Unmarked event label (character).}
 }
 
-Channel mapping for \code{\link[=read_mnirs]{read_mnirs()}}:
+Channels are detected automatically from the file legend (the unmarked
+label column is named \code{"labels"}), or can be specified explicitly for
+\code{\link[=read_mnirs]{read_mnirs()}}:
 \itemize{
 \item \code{nirs_channels = c(THb = 2, HHb = 3, O2Hb = 4)}
 \item \code{time_channel = c(sample = 1)}
-\item \code{event_channel = c(event = 5, label = "col_6")}
+\item \code{event_channel = c(event = 5, label = "labels")}
 }
 }
 \source{

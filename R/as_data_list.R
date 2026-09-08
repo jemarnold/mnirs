@@ -33,12 +33,12 @@ as_data_list <- function(data, env = rlang::caller_env()) {
         return(data_list)
     }
 
-    ## single data frame → length-1 list
+    ## single data frame -> length-1 list
     if (is.data.frame(data)) {
         return(setNames(list(data), "interval_1"))
     }
 
-    ## list of data frames — validate
+    ## list of data frames -- validate
     if (!is.list(data) || !all(vapply(data, is.data.frame, logical(1)))) {
         cli_abort(
             "{.arg data} must be a list of data frames, or a single grouped \\
@@ -102,7 +102,7 @@ map_mnirs_intervals <- function(
         eval(call, envir = eval_env)
     })
     ## class list for `plot.mnirs()` / `print.mnirs()` dispatch
-    class(result) <- c("mnirs", class(result))
+    class(result) <- unique(c("mnirs", class(result)))
 
     return(result)
 }

@@ -83,6 +83,8 @@ abort_validation <- function(
     env = rlang::caller_env()
 ) {
     type <- if (integer) "integer" else "numeric"
+    ## label the argument expression only on failure
+    name <- rlang::as_label(name)
 
     cli_abort(c(
         "x" = paste0(
@@ -109,14 +111,14 @@ validate_numeric <- function(
         return(invisible(NULL))
     }
 
-    name <- rlang::as_label(substitute(x))
+    name <- substitute(x)
 
     ## cheap early type check
     if (!is.numeric(x)) {
         abort_validation(name, integer, msg1, msg2, env)
     }
 
-    ## valid elements length — skip NA scan when allow_na = TRUE
+    ## valid elements length -- skip NA scan when allow_na = TRUE
     if (!allow_na) {
         valid <- !is.na(x)
         n_valid <- sum(valid)
@@ -223,8 +225,17 @@ parse_channel_name <- function(
 
     ## evaluate: tidyselect first, then fallback to direct evaluation
     ## handles c(), tidyselect helpers, symbols, and external objects
+    ## renamed selections return `c(new = "original")`
     tryCatch(
-        unname(names(tidyselect::eval_select(channel, data))),
+        {
+            pos <- tidyselect::eval_select(channel, data)
+            orig <- names(data)[pos]
+            if (identical(names(pos), orig)) {
+                orig
+            } else {
+                setNames(orig, names(pos))
+            }
+        },
         error = \(e) {
             result <- rlang::eval_tidy(channel, env = env)
             if (is.list(result) || is.character(result)) result else NULL
@@ -387,7 +398,7 @@ validate_event_channel <- function(
         ), call = env)
     }
 
-    ## check for empty column — character columns also check for empty strings
+    ## check for empty column -- character columns also check for empty strings
     valid_values <- if (is.character(col)) {
         !is.na(col) & nzchar(col)
     } else {
@@ -544,9 +555,11 @@ validate_start_time <- function(
     verbose = TRUE,
     env = rlang::caller_env()
 ) {
-    ## fall back to metadata, first non-negative value, or zero
+    ## fall back to interval onset, first non-negative value, or zero
+    ## unlist takes first ensemble t0-corrected time (probably t = 0)
+    it <- unlist(attr(data, "interval_times"))
     start_time <- start_time %||%
-        attr(data, "interval_times") %||%
+        (if (is.numeric(it) && length(it) > 0L) it[[1L]]) %||%
         c(t_vec[t_vec >= 0], 0)[1L]
     validate_numeric(start_time, 1L, env = env)
     t1 <- t_vec[1L]
@@ -595,53 +608,4 @@ warn_call <- function(env = rlang::caller_env()) {
         env <- rlang::frame_call(env)
     }
     return(env[1])
-}
-
-
-#' Detect if numeric values fall within range of a vector
-#'
-#' Vectorised check for `x %in% vec`, inclusive or exclusive of left and right
-#' boundary values, specified independently.
-#'
-#' @param x A numeric vector.
-#' @param vec A numeric vector from which `left` and `right` boundary values
-#'   for `x` will be taken.
-#' @param inclusive A character vector to specify which of `left` and/or
-#'   `right` boundary values should be included in the range, or both (the
-#'   default), or excluded if `FALSE`.
-#'
-#' @details
-#' `inclusive = FALSE` can be used to test for positive non-zero values:
-#'   `within(x, c(0, Inf), inclusive = FALSE)`.
-#'
-#' @returns A logical vector the same length as `x`.
-#'
-#' @seealso [dplyr::between()]
-#'
-#' @keywords internal
-within <- function(x, vec, inclusive = c("left", "right")) {
-    if (!is.numeric(x)) {
-        abort_validation(substitute(x))
-    }
-    if (!is.numeric(vec)) {
-        abort_validation(substitute(vec))
-    }
-    inclusive <- match.arg(
-        as.character(inclusive), ## force FALSE to character
-        choices = c("left", "right", "FALSE"),
-        several.ok = TRUE
-    )
-
-    ## extract bounds from vec
-    left <- min(vec, na.rm = TRUE)
-    right <- max(vec, na.rm = TRUE)
-
-    if ("FALSE" %in% inclusive) {
-        return(x > left & x < right)
-    }
-
-    left_op <- if ("left" %in% inclusive) `>=` else `>`
-    right_op <- if ("right" %in% inclusive) `<=` else `<`
-
-    return(left_op(x, left) & right_op(x, right))
 }

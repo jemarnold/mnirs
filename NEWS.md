@@ -1,3 +1,105 @@
+# mnirs 0.7.2
+
+## `read_mnirs()`
+
+* Reading all files, in particular `.csv`, is faster and allocates less memory.
+
+* Files can now be read from **PIONIRS NIRSBOX**, an advanced time-domain *TD-NIRS* device.
+
+    * PIONIRS explors file types `.ftn` and `.ftn2` for single- and dual-channel TD-NIRS, respectively.
+    
+    * `read_mnirs()` will automatically detect channels `StO2`, `Time`, and `TagLabel`.
+    
+    * Example file `pionirs_occlusion.ftn2` can be called with `example_mnirs()` (Thanks to Marianna, Dr. Porcelli, and PIONIRS for the demo files).
+
+``` r
+example_mnirs("pionirs")
+#> [1] "<R library>/mnirs/inst/extdata/pionirs_occlusion.ftn2"
+```
+
+* **Artinis Oxysoft** file exports are now automatically read more consistently, using the file metadata and *Legend* to rename channels:
+
+    * *"(Sample number)"* (column `1`) is renamed *"sample"* with a derived *"time"* column which is set to `time_channel`.
+    
+    * *"(Event)"* (the last numbered column with event markers) is renamed *"event"* and is set as `event_channel`. The trailing un-numbered column with event labels is renamed *"labels"*, and can be explicitly renamed: `event_channel = c(labels = "labels")`.
+
+    * All other channels in the *Legend* are renamed and returned as `nirs_channels` by default with clean, lower case names (e.g. *"Rx1 - Tx1 O2Hb"* is renamed as *"rx1_tx1_o2hb"*).
+    
+    * Channels can be renamed from either their literal *Legend* names; e.g. `nirs_channels = c(o2hb = 2)`, `c(o2hb = "rx1_tx1_o2hb")`, or `c(o2hb = "Rx1 - Tx1 O2Hb")`.
+
+* `create_mnirs_data()` can now rename `nirs_channels`, `time_channel`, and `event_channel` and add the renamed column names to metadata.
+
+``` r
+df <- create_mnirs_data(
+    PIONIRS_ftn2,
+    nirs_channels = c(o2hb = "O2Hb(CH1)", hhb = "HHb(CH1)", thb = "THb(CH1)"),
+    time_channel = c(time = "Time"),
+    event_channel = c(labels = "TagLabel")
+)
+
+attr(df, "nirs_channels")
+# [1] "o2hb" "hhb"  "thb" 
+```
+
+## Core processing functions
+
+* `extract_intervals()` now accepts a list of multiple `start` and/or `end` values with mixed `by_time()`, `by_label()`, `by_lap()`, or `by_sample()`. Intervals are matched by user-specified order.
+
+``` r
+## combine multiple specification types for one boundary
+extract_intervals(
+    data, 
+    start = list(by_lap(2), by_time(400)),
+    end = list(by_lap(3), by_label("10-min marker"))
+)
+```
+
+* `extract_intervals()` Also now properly retains `event_channel` column in ensemble-averaged intervals (`group_intervals = "ensemble"` or custom groups).
+
+* `plot_mnirs()`: small adjustments to plot spacing & point sizes.
+
+* `palette_mnirs()` now returns unnamed colours, which was disrupting use with `ggplot2::scale_colour_manual()`.
+
+``` r
+custom_colours <- c(
+    smo2_left_vl = palette_mnirs("pink"),
+    smo2_right_vl = palette_mnirs("light blue"),
+    smo2_left_rf = palette_mnirs("purple"),
+    smo2_right_rf = palette_mnirs("dark blue")
+)
+# smo2_left_vl smo2_right_vl  smo2_left_rf smo2_right_rf 
+#  "#ff80ff"   "#0080ff"   "#9f79ee" "#00468Bff" 
+
+plot(result) +
+    scale_colour_manual(
+        values = c(
+            smo2_left_vl = palette_mnirs("pink"),
+            smo2_right_vl = palette_mnirs("light blue"),
+            smo2_left_rf = palette_mnirs("purple"),
+            smo2_right_rf = palette_mnirs("dark blue")
+        )
+    )
+
+```
+
+* `print.mnirs()` now returns its object invisibly, so can be called incrementally within a function pipeline (which I just learned was possible!).
+
+``` r
+read_mnirs(...) |> 
+    print() |>  ## intermediate view data frame
+    extract_intervals(...) |> 
+    print() |>  ## view returned list of data frames
+    plot()      ## and plot those results
+```
+
+## Package accessories
+
+* *"README"* and *"Reading and Cleaning Data with mnirs"* vignette edited with updated functionality and consistent formatting.
+
+* Included example *"moxy_intervals.csv"* modified *"Lap"* column coincides with intervals start & end, for testing with `extract_intervals()`.
+
+
+
 # mnirs 0.7.1
 
 * `shift_mnirs()` now properly excludes partial windows at data edges, where fewer samples can bias calculation of *"min"* or *"max"* shift values on noise.

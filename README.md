@@ -26,7 +26,7 @@ practice.
 install.packages("mnirs")
 ```
 
-You can install the development version of *`mnirs`* from
+You can install the development version of *{mnirs}* from
 [GitHub](https://github.com/jemarnold/mnirs) with:
 
 ``` r
@@ -36,14 +36,14 @@ pak::pak("jemarnold/mnirs")
 
 ## Citation
 
-<https://cran.r-universe.dev/mnirs/citation>
+[](https://cran.r-universe.dev/mnirs/citation)
 
 `<package manuscript coming soon>`
 
-## Online App
+## Online app
 
 A very basic implementation of this package is hosted at
-<https://jemarnold-mnirs-app.share.connect.posit.cloud/> and can
+[](https://jemarnold-mnirs-app.share.connect.posit.cloud/) and can
 currently be used for reading and processing mNIRS data.
 
 [![mnirs processing shiny
@@ -53,13 +53,13 @@ app](https://raw.githubusercontent.com/jemarnold/mnirs/main/man/figures/README-m
 
 A more detailed vignette for common usage can be found on the package
 website: [Reading and Cleaning Data with
-{mnirs}](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
+mnirs](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html)
 
-*`mnirs`* is designed for mNIRS data, but it can be used to read, clean,
+*{mnirs}* is designed for mNIRS data, but it can be used to read, clean,
 and process other time series datasets which require many of the same
 processing steps. Enjoy!
 
-### `read_mnirs()` Read data from file
+### `read_mnirs()`: Read data from file
 
 ``` r
 library(ggplot2) ## for plotting
@@ -68,8 +68,8 @@ library(mnirs)
 ## {mnirs} includes sample files from a few mNIRS devices
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
-#> [3] "moxy_ramp.xlsx"          "portamon-oxcap.xlsx"    
-#> [5] "train.red_intervals.csv"
+#> [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn2" 
+#> [5] "portamon-oxcap.xlsx"     "train.red_intervals.csv"
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
@@ -122,7 +122,7 @@ plot(
 
 <img src="man/figures/README-read_mnirs-1.png" alt="" width="100%" />
 
-### Metadata stored in `mnirs` data frames
+### Metadata stored in *“mnirs”* data frames
 
 ``` r
 ## view metadata
@@ -282,7 +282,7 @@ plot(nirs_data, time_labels = TRUE)
 
 <img src="man/figures/README-pipeline-1.png" alt="" width="100%" />
 
-### `extract_intervals()`: detect events and extract intervals
+### `extract_intervals()`: Detect events and extract intervals
 
 ``` r
 ## return each interval independently with `group_intervals = "distinct"`
@@ -316,7 +316,7 @@ plot(ensemble, time_labels = TRUE) +
 
 <img src="man/figures/README-extract_intervals_ensemble-1.png" alt="" width="100%" />
 
-## Future *`mnirs`* development
+## Future *{mnirs}* development
 
 - Process oxygenation kinetics
 
@@ -349,6 +349,8 @@ the following devices and apps:
   .xlsx)
 - [Moxy](https://www.moxymonitor.com/) direct export (.csv)
 - [PerfPro](https://perfprostudio.com/) PC software (.xlsx)
+- [PIONIRS](https://www.pionirs.com/wp/) software export (.ftn and
+  .ftn2)
 - [Train.Red](https://train.red/) app (.csv)
 - [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
 

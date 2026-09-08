@@ -170,7 +170,7 @@
 #'
 #' \donttest{
 #'     if (requireNamespace("ggplot2", quietly = TRUE)) {
-#'         ## plot filtered data and add the raw data back to the plot to compare
+#'         ## plot filtered data on top of raw to compare
 #'         plot(data_filtered, time_labels = TRUE) +
 #'             ggplot2::geom_line(
 #'                 data = data,
@@ -200,7 +200,7 @@ filter_mnirs <- function(
     span = NULL,
     partial = FALSE
 ) {
-    ## list or grouped input → normalise to named list, recurse per interval
+    ## list or grouped input -> normalise to named list, recurse per interval
     if (inherits(data, "grouped_df") || !is.data.frame(data)) {
         return(map_mnirs_intervals(data, match.call(), parent.frame()))
     }
@@ -607,10 +607,10 @@ filter_ma <- filter_moving_average
 #'     scale_colour_mnirs(name = NULL) +
 #'     ggplot2::geom_line(ggplot2::aes(y = noisy_sin)) +
 #'     ggplot2::geom_line(
-#'         ggplot2::aes(y = without_edge_detection, colour = "without_edge_detection")
+#'         ggplot2::aes(y = without_edge_detection, colour = "without")
 #'     ) +
 #'     ggplot2::geom_line(
-#'         ggplot2::aes(y = with_edge_detection, colour = "with_edge_detection")
+#'         ggplot2::aes(y = with_edge_detection, colour = "with")
 #'     )
 #'
 #' @export

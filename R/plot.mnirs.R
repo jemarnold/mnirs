@@ -102,9 +102,7 @@ plot.mnirs <- function(
 
     ## sort facets by appearance
     if ("interval" %in% names(x) && !is.factor(x[["interval"]])) {
-        x[["interval"]] <- factor(x[["interval"]],
-            levels = unique(x[["interval"]])
-        )
+        x[["interval"]] <- factor(x[["interval"]], unique(x[["interval"]]))
     }
 
     ## build base plot with axis configuration
@@ -115,11 +113,11 @@ plot.mnirs <- function(
         ggplot2::scale_x_continuous(
             breaks = x_breaks,
             labels = x_labels,
-            expand = ggplot2::expansion(mult = 0.01)
+            expand = ggplot2::expansion(mult = 0.02)
         ) +
         ggplot2::scale_y_continuous(
             breaks = y_breaks,
-            expand = ggplot2::expansion(mult = 0.01)
+            expand = ggplot2::expansion(mult = 0.02)
         ) +
         scale_colour_mnirs(
             name = NULL,
@@ -129,21 +127,21 @@ plot.mnirs <- function(
         )
 
     ## add one geom per channel, restricted to the panels declaring it
-    layers <- lapply(nirs_channels, function(ch) {
+    layers <- lapply(nirs_channels, function(channel) {
         keep <- if (is.null(channel_map)) {
             TRUE
         } else {
-            x[["interval"]] %in% channel_map[[ch]]
+            x[["interval"]] %in% channel_map[[channel]]
         }
         if (na.omit) {
-            keep <- keep & is.finite(x[[ch]])
+            keep <- keep & is.finite(x[[channel]])
         }
         ch_data <- x[keep, , drop = FALSE]
-        ch_aes <- ggplot2::aes(y = .data[[ch]], colour = ch)
+        ch_aes <- ggplot2::aes(y = .data[[channel]], colour = channel)
         c(
             list(ggplot2::geom_line(ch_aes, data = ch_data)),
             if (points) {
-                list(ggplot2::geom_point(ch_aes, data = ch_data, size = 3))
+                list(ggplot2::geom_point(ch_aes, data = ch_data, size = 2))
             }
         )
     })
@@ -175,7 +173,7 @@ plot.mnirs <- function(
 #' @returns For a single-element list, that element unchanged. Otherwise a
 #'   row-bound `data.frame` with an `interval` factor column, carrying
 #'   attributes `nirs_channels` (the union across elements), `time_channel`,
-#'   and `channel_map` — a named list mapping each channel to the interval
+#'   and `channel_map` -- a named list mapping each channel to the interval
 #'   names whose source element declares it, so [plot.mnirs()] draws each
 #'   channel only in its own panels.
 #'
@@ -237,10 +235,13 @@ as_plot_data <- function(x, env = rlang::caller_env()) {
     })
     names(channel_map) <- nirs_channels
 
-    ## pad each element with NA for any missing nirs_channels
+    ## pad each element with NA for any column it lacks, so elements with
+    ## asymmetrical channels (and their derived `_fitted` columns) row-bind
+    all_cols <- unique(unlist(lapply(x, names), use.names = FALSE))
+    all_cols <- union(all_cols, nirs_channels)
     x <- lapply(x, \(.df) {
-        .df[setdiff(nirs_channels, names(.df))] <- NA_real_
-        .df
+        .df[setdiff(all_cols, names(.df))] <- NA_real_
+        .df[all_cols]
     })
 
     ## add interval column to each element, then row-bind
@@ -274,7 +275,8 @@ as_plot_data <- function(x, env = rlang::caller_env()) {
 #' @param ... Additional arguments to add to `[ggplot2::theme()]`.
 #'
 #' @details
-#' - `axis.title = element_text(face = "bold")` by *default* Modify to *"plain"*.
+#' - `axis.title = element_text(face = "bold")` by *default* Modify to
+#'   *"plain"*.
 #'
 #' - `panel.grid.major` & `panel.grid.major` set to blank. Modify to
 #'   `= element_line()` for visible grid lines.
@@ -375,7 +377,7 @@ theme_mnirs <- function(
 #' @examplesIf rlang::is_installed("scales")
 #' scales::show_col(palette_mnirs())
 #' scales::show_col(palette_mnirs(2))
-#' scales::show_col(palette_mnirs("red", "orange"))
+#' scales::show_col(palette_mnirs("red", "blue", "green"))
 #'
 #' @export
 palette_mnirs <- function(...) {
@@ -408,7 +410,7 @@ palette_mnirs <- function(...) {
         if (n <= length(colours)) {
             return(unname(colours[seq_len(n)]))
         }
-        ## interpolate if more colours needed, but this probably won't look good!
+        ## interpolate if more colours needed, but probably won't look good!
         return(grDevices::colorRampPalette(colours)(n))
     }
 
@@ -431,7 +433,7 @@ palette_mnirs <- function(...) {
             "i" = "Valid names: {.val {names(colours)}}."
         ))
     }
-    return(colours[idx])
+    return(unname(colours[idx]))
 }
 
 

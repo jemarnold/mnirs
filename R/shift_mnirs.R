@@ -56,8 +56,8 @@
 #' `nirs_channels` and `time_channel` can be retrieved automatically from
 #'   `data` of class *"mnirs"* which has been processed with `{mnirs}`,
 #'   if not defined explicitly.
-#' 
-#' When `position` is *"min"* or *"max"*, only full windows of `width` or 
+#'
+#' When `position` is *"min"* or *"max"*, only full windows of `width` or
 #'   `span` are considered, to avoid bias from noise at edge conditions with
 #'   partial samples.
 #'
@@ -66,7 +66,7 @@
 #' Arguments apply globally to all `nirs_channels` by default. Relevant
 #' arguments can instead be supplied uniquely per-channel as a named `list()`,
 #' with names matching either `nirs_channels` or list names in
-#' `group_channels`, e.g.:
+#' `group_channels`, e.g.
 #'
 #' ```r
 #' shift_mnirs(
@@ -135,7 +135,7 @@ shift_mnirs <- function(
     position = c("min", "max", "first"),
     verbose = TRUE
 ) {
-    ## list or grouped input → normalise to named list, recurse per interval
+    ## list or grouped input -> normalise to named list, recurse per interval
     if (inherits(data, "grouped_df") || !is.data.frame(data)) {
         return(map_mnirs_intervals(data, match.call(), parent.frame()))
     }
@@ -244,7 +244,7 @@ shift_mnirs <- function(
                     verbose = FALSE,
                     env = env
                 )
-                ## locate extremum window via fast rolling means, then
+                ## locate extreme window via fast rolling means, then
                 ## recompute reference exactly to avoid floating-point drift
                 ## from cumsum differencing
                 .i <- which_fun(smoothed)
