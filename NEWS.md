@@ -92,8 +92,11 @@ read_mnirs(...) |>
     plot()      ## and plot those results
 ```
 
+## Package accessories
+
 * *"README"* and *"Reading and Cleaning Data with mnirs"* vignette edited with updated functionality and consistent formatting.
 
+* Included example *"moxy_intervals.csv"* modified *"Lap"* column coincides with intervals start & end, for testing with `extract_intervals()`.
 
 
 # mnirs 0.7.1

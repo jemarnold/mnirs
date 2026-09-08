@@ -632,7 +632,7 @@ We may have marked event labels or have incremental lap numbers in the specified
 e.g. `group_intervals = list(c(1, 2), c(3, 4))` would return a list of two intervals, each ensemble-averaged from the respective events, in sequential order from the original data.
 
 * `group_channels`
-#! CORRECT THIS
+
     When `group_intervals = "ensemble"` or a custom grouping list, then `group_channels` can be used to specify which `nirs_channels` should be included in the ensemble average. e.g. `list(c(A, B), c(A))` would ensemble-average *"A"* and *"B"* for the first interval group, but only *"A"* for the second group. By default, all `nirs_channels` are included in ensemble-averaging.
 
 * `span`
