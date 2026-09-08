@@ -769,6 +769,17 @@ analyse_kinetics_intervals <- function(
     ## normalise input to named list of data frames
     data_list <- as_data_list(data, env = env)
 
+    ## fitting needs >= 2 samples per interval, e.g. a single extracted
+    ## interval piped back as kinetics coefs yields one row per channel
+    short <- vapply(data_list, nrow, integer(1)) < 2L
+    if (any(short)) {
+        cli_abort(c(
+            "x" = "{.arg data} must contain at least 2 samples per interval.",
+            "i" = "{qty(sum(short))}Interval{?s} \\
+            {.field {names(data_list)[short]}} {?has/have} fewer than 2 samples."
+        ), call = env)
+    }
+
     ## recursive coef input: time-point coefs are elapsed from each interval's
     ## onset, so shift the chosen `time_channel` to absolute time
     recursive <- inherits(data, "mnirs_kinetics")

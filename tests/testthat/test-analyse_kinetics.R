@@ -1762,6 +1762,43 @@ test_that("analyse_kinetics offsets time-point coefs by start_time recursively",
 })
 
 
+test_that("analyse_kinetics errors on intervals with < 2 samples", {
+    ## single-row data frame
+    df <- create_mnirs_data(
+        data.frame(t = 1, x = 5),
+        nirs_channels = "x",
+        time_channel = "t"
+    )
+    expect_error(
+        analyse_kinetics(df, method = "peak_slope", width = 2, verbose = FALSE),
+        "at least 2 samples"
+    )
+
+    ## recursive coefs from a single interval yield one row per channel
+    coefs <- data.frame(
+        interval = c("a", "b"),
+        nirs_channels = "ch1",
+        start_time = c(0, 100),
+        TD = c(5, 6),
+        tau = c(10, 12)
+    )
+    recurse <- function(coefs) {
+        analyse_kinetics(
+            structure(list(coefficients = coefs), class = "mnirs_kinetics"),
+            nirs_channels = "tau",
+            time_channel = "TD",
+            method = "peak_slope",
+            width = 2,
+            verbose = FALSE
+        )
+    }
+    expect_error(recurse(coefs[1L, ]), "at least 2 samples")
+
+    ## two samples proceed to fitting
+    expect_no_error(recurse(coefs))
+})
+
+
 test_that("analyse_kinetics errors on invalid method", {
     data <- create_kinetics_data()
 
