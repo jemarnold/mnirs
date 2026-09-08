@@ -299,9 +299,3 @@ Currently, it has been tested successfully with mNIRS data exported from the fol
 * [PIONIRS](https://www.pionirs.com/wp/) software export (.ftn and .ftn2)
 * [Train.Red](https://train.red/) app (.csv)
 * [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
-
-
-
----
-
-*Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed and validated by the package author.*

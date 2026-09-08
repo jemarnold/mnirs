@@ -357,8 +357,3 @@ the following devices and apps:
   .ftn2)
 - [Train.Red](https://train.red/) app (.csv)
 - [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
-
-------------------------------------------------------------------------
-
-*Generative chatbots are used to assist with code optimisation. All code
-is thoroughly reviewed and validated by the package author.*
