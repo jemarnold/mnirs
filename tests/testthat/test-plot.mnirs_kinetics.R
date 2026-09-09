@@ -354,39 +354,71 @@ test_that("kinetics_annotations biexponential marks MRT and the fitted excursion
 })
 
 test_that("kinetics_annotations places label in the vacated corner", {
-    ## rising signal (B > A) -> bottom corner (-Inf)
+    ## right half of the signal sits high -> bottom corner (-Inf)
     rise <- kin_monoexp(A = 50, B = 80)
     expect_true(all(ann_labels(kinetics_annotations(rise))$yval == -Inf))
 
-    ## falling signal (A > B) -> top corner (Inf)
+    ## right half of the signal sits low -> top corner (Inf)
     fall <- kin_monoexp(A = 80, B = 50)
     expect_true(all(ann_labels(kinetics_annotations(fall))$yval == Inf))
 })
 
-test_that("kinetics_annotations biexponential corner follows the plateau", {
-    ## net trend is the plateau B2 against the baseline A
-
-    ## fall-recover: plateau below baseline -> falls -> top corner (Inf)
+test_that("kinetics_annotations corner follows the observed signal, not the fit", {
+    ## fall-recover: right half recovers to below the y-midpoint -> top (Inf)
     fall <- kin_biexp(B = 45, B2 = 55)
-    expect_true(all(fall$coefficients$B2 < fall$coefficients$A))
     expect_true(all(ann_labels(kinetics_annotations(fall))$yval == Inf))
 
-    ## rise-overshoot: plateau above baseline -> rises -> bottom corner (-Inf)
+    ## rise-overshoot: right half settles above the y-midpoint -> bottom (-Inf)
     rise <- kin_biexp(B = 95, B2 = 85)
-    expect_true(all(rise$coefficients$B2 > rise$coefficients$A))
     expect_true(all(ann_labels(kinetics_annotations(rise))$yval == -Inf))
+
+    ## peak_slope on a fall-recover signal: the fitted slope is negative but
+    ## the right half sits high, so the labels take the bottom corner
+    x <- analyse_kinetics(
+        make_biexp(A = 80, B = 50, B2 = 78),
+        nirs_channels = "smo2",
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+    expect_true(all(x$coefficients$slope < 0))
+    expect_true(all(ann_labels(kinetics_annotations(x))$yval == -Inf))
 })
 
-test_that("kinetics_annotations peak_slope corner follows the slope sign", {
-    ## no asymptote to trend on, so direction comes from the fitted slope
-    x <- kin_peak_slope()
-    labels <- ann_labels(kinetics_annotations(x))
-    expect_true(all(labels$yval == ifelse(x$coefficients$slope > 0, -Inf, Inf)))
+test_that("kinetics_annotations without data falls back to the top corner", {
+    coefs <- data.frame(
+        interval = "a",
+        nirs_channels = "smo2",
+        start_time = 0,
+        slope = 0.5,
+        peak_slope_time = 10,
+        fitted = 1
+    )
+    ann <- kinetics_annotations(list(method = "peak_slope", coefficients = coefs))
+    expect_true(all(ann_labels(ann)$yval == Inf))
+})
+
+test_that("kinetics_annotations y-midpoint spans facets unless free_y", {
+    ## B falls 95 -> 85: below its own midpoint (90) but above the shared
+    ## axis midpoint (~72), so the corner flips with the facet scale
+    x <- analyse_kinetics(
+        list(A = make_monoexp(50, 80), B = make_monoexp(95, 85)),
+        nirs_channels = "smo2",
+        method = "monoexponential",
+        use_TD = FALSE,
+        verbose = FALSE
+    )
+    shared <- ann_labels(kinetics_annotations(x))
+    expect_true(all(shared$yval == -Inf))
+
+    free <- ann_labels(kinetics_annotations(x, free_y = TRUE))
+    expect_equal(free$yval, ifelse(free$interval == "A", -Inf, Inf))
 })
 
 test_that("kinetics_annotations mixed-direction channels share one corner", {
     ## opposite-direction channels still get a single corner per panel, with
-    ## labels staggered rather than split; a tie falls back to the top corner
+    ## labels staggered rather than split; mirrored channels leave the
+    ## right-half median at the y-midpoint, so noise alone picks the corner
     set.seed(13)
     t <- 0:59
     df <- data.frame(
@@ -409,8 +441,11 @@ test_that("kinetics_annotations mixed-direction channels share one corner", {
         verbose = FALSE
     )
     labels <- ann_labels(kinetics_annotations(x))
-    expect_true(all(labels$yval == Inf))
-    expect_equal(labels$vjust, c(1.8, 3.4))
+    expect_length(unique(labels$yval), 1L)
+    expect_equal(
+        labels$vjust,
+        if (labels$yval[[1L]] > 0) c(1.8, 3.4) else c(-2.4, -0.8)
+    )
 })
 
 test_that("kinetics_annotations stacks label lines inward from the corner", {

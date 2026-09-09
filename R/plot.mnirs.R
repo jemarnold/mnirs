@@ -184,7 +184,8 @@ plot.mnirs <- function(
 #'   the response onset (`start_time`) and key coefficient points in a darker
 #'   shade of the channel colour.
 #' @param labels Logical. Default is `TRUE`; annotates each panel with the key
-#'   coefficient value(s) for the fitted method.
+#'   coefficient value(s) for the fitted method, in the right-hand corner
+#'   the observed signal leaves clear.
 #' @param ... Additional arguments.
 #'
 #' @details
@@ -431,8 +432,12 @@ plot.mnirs_kinetics <- function(
     }
 
     ## per-interval-per-channel markers and labels ============
-    ## methods with no annotation spec plot the fitted curve alone
-    ann <- kinetics_annotations(x)
+    ## methods with no annotation spec plot the fitted curve alone. the
+    ## label corner reads the y-axis midpoint, per panel only when y is free
+    ann <- kinetics_annotations(
+        x,
+        free_y = isTRUE(list(...)[["scales"]] %in% c("free", "free_y"))
+    )
 
     if (is.null(ann)) {
         return(p)
@@ -548,10 +553,15 @@ plot.mnirs_kinetics <- function(
 #' x-coordinates the resolved onset plus the method's time coefficient.
 #' Label rows are one per label line, anchored (`xval = Inf`,
 #' `yval = -Inf` or `Inf`) at the corner of the panel's right edge vacated by
-#' the fitted data, judged from the coefficient direction. `vjust` stacks
-#' the lines inward from the corner in channel order within each interval.
+#' the observed signal: the bottom corner when the median of all channels
+#' over the right half of the interval sits above the y-axis midpoint,
+#' otherwise the top. `vjust` stacks the lines inward from the corner in
+#' channel order within each interval.
 #'
 #' @param x An *"mnirs_kinetics"* object from [analyse_kinetics()].
+#' @param free_y Logical. Default is `FALSE`; the y-axis midpoint spans all
+#'   intervals, matching a shared facet axis. If `TRUE` (facet `scales =
+#'   "free_y"` or `"free"`) each interval uses its own midpoint.
 #'
 #' @returns A `data.frame` with columns `interval`, `nirs_channels`,
 #'   `xval`, `yval`, `label`, and `vjust`. Marker rows have an empty `label`
@@ -562,7 +572,7 @@ plot.mnirs_kinetics <- function(
 #'   [plot.mnirs_kinetics()] draws the fitted curve alone.
 #'
 #' @keywords internal
-kinetics_annotations <- function(x) {
+kinetics_annotations <- function(x, free_y = FALSE) {
     coefs <- x$coefficients
 
     ## one label line per coefficient, `NA` when missing (e.g. `TD` for
@@ -703,29 +713,31 @@ kinetics_annotations <- function(x) {
     ann <- rbind(ann[!is_lab, ], ann[is_lab, ][order(ann$row[is_lab]), ])
     is_lab <- nzchar(ann$label)
 
-    ## signed response direction: fitted slope sign (peak_slope, sigmoidal),
-    ## otherwise plateau minus baseline; the plateau is `B2` or `B`,
-    ## whichever the row's model reports
-    dir <- if (is.null(coefs[["A"]])) {
-        coefs[["slope"]]
-    } else {
-        plateau <- Reduce(
-            \(.x, .y) ifelse(is.na(.x), .y, .x),
-            coefs[intersect(c("B2", "B"), names(coefs))]
-        )
-        plateau - coefs[["A"]]
-    }
-
     ## one corner per panel: labels anchor to the right edge, so use the half
-    ## the fitted responses vacate. sign-sum majority across channels decides;
-    ## ties and all-NA fits fall back to the top corner
-    # fmt: skip
-    rises <- stats::ave(
-        sign(dir),
-        coefs$interval,
-        FUN = \(s) sum(s, na.rm = TRUE)
-    ) > 0
-    ann$yval[is_lab] <- ifelse(rises[ann$row[is_lab]], -Inf, Inf)
+    ## the observed signal vacates. the right-half median across all channels
+    ## against the y-axis midpoint decides; ties and objects without `data`
+    ## fall back to the top corner. the axis is shared across panels unless
+    ## `free_y`, so the midpoint spans all intervals
+    high_right <- logical(0)
+    if (length(x$data)) {
+        ## per interval: right-half median across channels, then y-range
+        stat <- vapply(x$data, \(.d) {
+            t <- .d[[attr(.d, "time_channel")]]
+            y <- as.matrix(.d[attr(.d, "nirs_channels")])
+            c(
+                stats::median(y[t > mean(range(t)), ], na.rm = TRUE),
+                range(y, na.rm = TRUE)
+            )
+        }, numeric(3))
+        mid <- if (free_y) {
+            colMeans(stat[-1, , drop = FALSE])
+        } else {
+            mean(range(stat[-1, ]))
+        }
+        high_right <- stat[1, ] > mid
+    }
+    lab_int <- as.character(ann$interval[is_lab])
+    ann$yval[is_lab] <- ifelse(high_right[lab_int] %in% TRUE, -Inf, Inf)
 
     ## stack lines inward from the corner, half a line-gap from the border,
     ## keeping top-to-bottom order in both corners. `vjust` is in single-line
