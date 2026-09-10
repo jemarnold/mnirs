@@ -128,7 +128,7 @@ test_that("read_file() reads vo2master files correctly", {
 })
 
 test_that("read_file() reads pionirs .ftn2 and .ftn files correctly", {
-    ftn2_path <- example_mnirs("pionirs")
+    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     result <- read_file(ftn2_path)
@@ -138,7 +138,7 @@ test_that("read_file() reads pionirs .ftn2 and .ftn files correctly", {
     expect_equal(result[1, 1], "Iteration")
     expect_all_true(unlist(lapply(result, is.character)))
 
-    file_path <- test_path("testdata/pionirs-occlusion.ftn")
+    file_path <- example_mnirs("pionirs")
     skip_if_not(file.exists(file_path), "testdata not available")
 
     result <- read_file(file_path)
@@ -255,7 +255,7 @@ test_that("detect_mnirs_device works on internal example files", {
 })
 
 test_that("detect_mnirs_device works on pionirs files", {
-    ftn2_path <- example_mnirs("pionirs")
+    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     expect_equal(
@@ -264,7 +264,7 @@ test_that("detect_mnirs_device works on pionirs files", {
         list(nirs_device = "PIONIRS", header_row = 1L)
     )
 
-    file_path <- test_path("testdata/pionirs-occlusion.ftn")
+    file_path <- example_mnirs("pionirs")
     skip_if_not(file.exists(file_path), "testdata not available")
 
     expect_equal(
@@ -573,7 +573,7 @@ test_that("resolve_channels() detects known channels for PerfPro", {
 })
 
 test_that("resolve_channels() detects known channels for PIONIRS", {
-    ftn2_path <- example_mnirs("pionirs")
+    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     raw <- read_file(ftn2_path)
@@ -1094,7 +1094,7 @@ test_that("read_mnirs() selects, orders, and renames columns", {
 })
 
 test_that("read_mnirs() reads pionirs .ftn2 file with auto-detection", {
-    ftn2_path <- example_mnirs("pionirs")
+    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     df <- read_mnirs(ftn2_path, verbose = TRUE)

@@ -112,7 +112,7 @@ analyse_kinetics(
 
 * *"Analysing muscle oxidative capacity with mnirs"* walks through a full arterial occlusion OxCap analysis: correcting for blood volume, extracting occlusion intervals, finding peak deoxy[haem] slopes, and fitting a monoexponential through the slope estimates to estimate the mV̇O~2~ recovery rate constant *k*.
 
-* *"Reading and analysing PIONIRS data with mnirs"* demonstrates reading new TD-NIRS `.ftn2` files, and compares different fit methods to occlusion reoxygenation kinetics.
+* *"Reading and analysing PIONIRS data with mnirs"* demonstrates reading new TD-NIRS `.ftn` & `.ftn2` files, and compares different fit methods to occlusion reoxygenation kinetics.
 
 
 
@@ -128,11 +128,11 @@ analyse_kinetics(
     
     * `read_mnirs()` will automatically detect channels `StO2`, `Time`, and `TagLabel`.
     
-    * Example file `pionirs_occlusion.ftn2` can be called with `example_mnirs()` (Thanks to Marianna, Dr. Porcelli, and PIONIRS for the demo files).
+    * Example file `pionirs_occlusion.ftn` can be called with `example_mnirs()` (Thanks to Marianna, Dr. Porcelli, and PIONIRS for the demo files).
 
 ``` r
 example_mnirs("pionirs")
-#> [1] "<R library>/mnirs/inst/extdata/pionirs_occlusion.ftn2"
+#> [1] "<R library>/mnirs/inst/extdata/pionirs_occlusion.ftn"
 ```
 
 * **Artinis Oxysoft** file exports are now automatically read more consistently, using the file metadata and *Legend* to rename channels:

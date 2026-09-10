@@ -76,12 +76,7 @@ df_filt <- filter_mnirs(
 plot(df_filt) +
     geom_line(
         data  = df_sto2,
-        aes(y = `StO2(CH1)`, colour = "StO2(CH1)"),
-        alpha = 0.3
-    ) +
-    geom_line(
-        data  = df_sto2,
-        aes(y = `StO2(CH2)`, colour = "StO2(CH2)"),
+        aes(y = `StO2`, colour = "StO2"),
         alpha = 0.3
     )
 ```
@@ -89,14 +84,14 @@ plot(df_filt) +
 
 # Specify explicit NIRS channels for analysis
 
-Channels can also be specified and renamed explicitly. Since we have already read the file, we can instead modify channels using `create_mnirs_data()`. We will specify the raw haemoglobin concentration signals from the first NIRS channel, with the event column containing manually entered labels.
+Channels can also be specified and renamed explicitly. Since we have already read the file, we can instead modify channels using `create_mnirs_data()`. We will specify the raw haemoglobin concentration signals, with the event column containing manually entered labels.
 
 ```{r}
 #| label: read ftn
 
 df_raw <- create_mnirs_data(
     df_filt,
-    nirs_channels = c(o2hb = "O2Hb(CH1)", hhb = "HHb(CH1)", thb = "THb(CH1)"),
+    nirs_channels = c(o2hb = "O2Hb", hhb = "HHb", thb = "THb"),
     time_channel = c(time = "Time"),
     event_channel = c(labels = "TagLabel")
 ) |>

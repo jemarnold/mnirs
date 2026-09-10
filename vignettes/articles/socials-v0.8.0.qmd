@@ -223,7 +223,7 @@ e.g. PIONIRS reoxygenation after occlusion: monoexponential vs two-phase exponen
 ## PIONIRS occlusion: blood volume corrected deoxy[haem] reoxygenation
 df_reoxy <- read_mnirs(example_mnirs("pionirs")) |>
     create_mnirs_data(
-        nirs_channels = c(o2hb = "O2Hb(CH1)", hhb = "HHb(CH1)", thb = "THb(CH1)"),
+        nirs_channels = c(o2hb = "O2Hb", hhb = "HHb", thb = "THb"),
         time_channel = c(time = "Time"),
         event_channel = c(labels = "TagLabel")
     ) |>

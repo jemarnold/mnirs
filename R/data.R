@@ -64,7 +64,7 @@ NULL
 #'   - `nirs_channels = c("SmO2 Live", "SmO2 Averaged", "THb")`
 #'   - `time_channel = c("hh:mm:ss")`
 #'   - `interval_times = list(
-#'         start = c(124, 486, 848, 1210), 
+#'         start = c(124, 486, 848, 1210),
 #'         end = c(364, 726, 1088, 1450))`
 #'
 #' @source Moxy Monitor (Fortiori Design LLC), exported via Moxy Portal App.
@@ -114,11 +114,11 @@ NULL
 #'   - `time_channel = c("Timestamp (seconds passed)")`
 #'   - `event_channel = c("Lap/Event")`
 #'   - `interval_times = list(
-#'         start = c(2150.09, 2872.28), 
+#'         start = c(2150.09, 2872.28),
 #'         end = c(2452.26, 3167.98)
 #'     )`
 #'   - `interval_times = list(        ## from zero_time
-#'         start = c(65.94, 788.13), 
+#'         start = c(65.94, 788.13),
 #'         end = c(368.11, 1083.83)
 #'     )`
 #'
@@ -159,7 +159,7 @@ NULL
 #'   - `time_channel = c(sample = 1)`
 #'   - `event_channel = c(event = 4)`
 #'   - `interval_times = list(        ## two intervals, post-exercise occlusion
-#'         start = c(158, 999, 1750), 
+#'         start = c(158, 999, 1750),
 #'         end = c(493, 1333, 1961)
 #'     )`
 #'
@@ -214,18 +214,17 @@ NULL
 NULL
 
 
-#' @name pionirs_occlusion.ftn2
+#' @name pionirs_occlusion.ftn
 #'
-#' @title 1 Hz PIONIRS NIRSBOX-DUAL export
+#' @title 1 Hz PIONIRS NIRSBOX export
 #'
-#' @description Exported from PIONIRS software at 1 Hz, two channels.
+#' @description Exported from PIONIRS software at 1 Hz, one channel.
 #'   Containing baseline, arterial occlusion, and recovery phases marked
-#'   by event tags, from the thenar eminence (CH1) and medial forearm (CH2).
+#'   by event tags, from the thenar eminence (CH1).
 #'
 #' @docType data
 #'
-#' @format tab-separated .ftn2 file with 26 columns and 700 rows. Each signal
-#'   is duplicated for channel 1 `(CH1)` and channel 2 `(CH2)`:
+#' @format tab-separated .ftn file with 15 columns and 700 rows:
 #'   \describe{
 #'     \item{Iteration}{Sample index.}
 #'     \item{Time}{Elapsed time (seconds).}
@@ -248,7 +247,7 @@ NULL
 #'
 #'   Channels are detected automatically, or can be specified explicitly for
 #'   [read_mnirs()]:
-#'   - `nirs_channels = c("StO2(CH1)", "StO2(CH2)")`
+#'   - `nirs_channels = c("StO2", "O2Hb", "HHb", "THb")`
 #'   - `time_channel = c("Time")`
 #'   - `event_channel = c("TagLabel")`
 #'   - `interval_times = list(start = 91, end = 391)`
