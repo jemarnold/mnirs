@@ -64,12 +64,17 @@ processing steps. Enjoy!
 ``` r
 library(ggplot2) ## for plotting
 library(mnirs)
+#> 
+#> Attaching package: 'mnirs'
+#> The following object is masked from 'package:stats':
+#> 
+#>     SSgompertz
 
 ## {mnirs} includes sample files from a few mNIRS devices
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
-#> [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn2" 
-#> [5] "portamon-oxcap.xlsx"     "train.red_intervals.csv"
+#> [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn"  
+#> [5] "portamon_oxcap.xlsx"     "train.red_intervals.csv"
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly
@@ -316,25 +321,24 @@ plot(ensemble, time_labels = TRUE) +
 
 <img src="man/figures/README-extract_intervals_ensemble-1.png" alt="" width="100%" />
 
+## Analysis functions
+
+See [Oxidative Capacity Analysis with
+mnirs](https://jemarnold.github.io/mnirs/articles/oxcap-analysis.html)
+for a walkthrough of the recently added `analyse_kinetics()`
+functionality.
+
 ## Future *{mnirs}* development
 
-- Process oxygenation kinetics
+- ✅ Process oxygenation kinetics
 
-  - Monoexponential & sigmoidal non-linear curve fitting
-
-  - Non-parametric response time & slope analysis
+- ✅ Oxidative capacity assessment
 
 - Critical oxygenation breakpoint analysis
 
   - Manual selection and automation-assisted breakpoint detection
     (combine expert evaluation with robust probabilistic breakpoint
     detection)
-
-- Oxidative capacity assessment
-
-  - Repeated occlusion ensemble-averaging and model fitting
-
-  - Blood volume correction
 
 ## mNIRS device compatibility
 
@@ -353,8 +357,3 @@ the following devices and apps:
   .ftn2)
 - [Train.Red](https://train.red/) app (.csv)
 - [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
-
-------------------------------------------------------------------------
-
-*Generative chatbots are used to assist with code optimisation. All code
-is thoroughly reviewed and validated by the package author.*

@@ -131,44 +131,45 @@ detect_mnirs_device <- function(data, chunk = 200L) {
         do.call(paste, c(data[.rows, , drop = FALSE], list(sep = " ")))
     }
 
-    ## header rows sit near the top: scan in chunks and stop at the first
-    ## match rather than pattern-matching every data row
-    n <- nrow(data)
-    for (from in seq.int(1L, max(n, 1L), by = chunk)) {
-        strings <- row_strings(seq.int(from, min(from + chunk - 1L, n)))
-
-        ## first row index where all of a device's patterns match; NA if none
-        first_rows <- vapply(device_patterns, \(.d) {
+    ## first row index per device where all patterns match; NA if none
+    first_rows <- \(.rows) {
+        strings <- row_strings(.rows)
+        vapply(device_patterns, \(.d) {
             hits <- Reduce(`&`, lapply(
                 .d$pattern, grepl, x = strings, fixed = .d$fixed
             ))
-            which(hits)[1L]
+            .rows[which(hits)[1L]]
         }, integer(1L))
-
-        if (all(is.na(first_rows))) {
-            next
-        }
-
-        ## earliest matching row; ties resolved by device order via which.min
-        matched_row <- min(first_rows, na.rm = TRUE) + from - 1L
-        device_name <- names(first_rows)[which.min(first_rows)]
-
-        ## require "oxysoft" match at or above the row for Artinis pattern
-        if (
-            identical(device_name, "Artinis") &&
-                !any(grepl(
-                    "oxysoft",
-                    row_strings(seq_len(matched_row)),
-                    ignore.case = TRUE
-                ))
-        ) {
-            break
-        }
-
-        return(list(nirs_device = device_name, header_row = matched_row))
     }
 
-    return(list(nirs_device = NULL, header_row = 1L))
+    ## header rows sit near the top: scan the head block first, then the
+    ## remainder only when nothing matched
+    n <- nrow(data)
+    rows <- first_rows(seq_len(min(chunk, n)))
+    if (all(is.na(rows)) && n > chunk) {
+        rows <- first_rows(seq.int(chunk + 1L, n))
+    }
+    if (all(is.na(rows))) {
+        return(list(nirs_device = NULL, header_row = 1L))
+    }
+
+    ## earliest matching row; ties resolved by device order via which.min
+    matched_row <- min(rows, na.rm = TRUE)
+    device_name <- names(rows)[which.min(rows)]
+
+    ## require "oxysoft" match at or above the row for Artinis pattern
+    if (
+        identical(device_name, "Artinis") &&
+            !any(grepl(
+                "oxysoft",
+                row_strings(seq_len(matched_row)),
+                ignore.case = TRUE
+            ))
+    ) {
+        return(list(nirs_device = NULL, header_row = 1L))
+    }
+
+    return(list(nirs_device = device_name, header_row = matched_row))
 }
 
 

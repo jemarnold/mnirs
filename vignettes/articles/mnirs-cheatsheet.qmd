@@ -18,9 +18,9 @@ execute:
 ---
 
 ```{=typst}
-#set text(font: "Merriweather Sans", size: 8pt)
+#set text(font: "Merriweather Sans", size: 7pt)
 #set par(leading: 0.5em)
-#show heading.where(level: 2): set text(size: 10pt, weight: "bold")
+#show heading.where(level: 2): set text(size: 9pt, weight: "bold")
 #show raw.where(block: false): it => box(
   fill: rgb("#e6f2ff"),
   stroke: rgb("#cccccc"),
@@ -52,14 +52,14 @@ execute:
         [
           #text(size: 20pt, weight: "bold", fill: white)[mnirs]
           #h(0.6em)
-          #text(size: 10pt, fill: white.transparentize(30%))[v0.7.0]
-          #h(1fr)
-          #link("https://jemarnold-mnirs-app.share.connect.posit.cloud/")[
-            #text(size: 10pt, weight: "bold", fill: white, underline[online Shiny app])
-          ]
-          #linebreak()
+          #text(size: 10pt, fill: white.transparentize(30%))[v0.8.0]
+          #h(0.8em)
           #text(size: 9pt, weight: "bold", fill: white)[
             Muscle Near-Infrared Spectroscopy Processing and Analysis
+          ]
+          #h(1fr)
+          #link("https://jemarnold-mnirs-app.share.connect.posit.cloud/")[
+            #text(size: 14pt, weight: "bold", fill: white, underline[online app])
           ]
           #linebreak()
           #v(0.2em)
@@ -97,9 +97,9 @@ execute:
   inset: (x: 10pt, y: 8pt),
   [
       #set align(left)
-      #text(size: 12pt, weight: "bold")[Workflow]
+      #text(size: 10pt, weight: "bold")[Workflow]
       #v(0.1em)
-      #set text(font: "Monaspace Neon", size: 12pt, weight: "extralight")
+      #set text(font: "Monaspace Neon", size: 9.5pt, weight: "extralight")
       #tree-line("", "├──", chip("read_mnirs()"))
       #tree-line("│   ", "├──", chip("create_mnirs_data()"))
       #tree-line("│   ", "└──", chip("example_mnirs()"))
@@ -113,6 +113,7 @@ execute:
       #tree-line("│   ", "└──", chip("filter_butterworth()"))
       #tree-line("", "├──", chip("shift_mnirs()"))
       #tree-line("", "├──", chip("rescale_mnirs()"))
+      #tree-line("", "├──", chip("correct_blood_volume()"))
       #tree-line("│   ", "├──", chip("theme_mnirs()"))
       #tree-line("│   ", "├──", chip("palette_mnirs()"))
       #tree-line("│   ", "├──", chip("scale_colour_mnirs()"))
@@ -124,6 +125,15 @@ execute:
       #tree-line("│   ", "├──", chip("by_label()"))
       #tree-line("│   ", "├──", chip("by_lap()"))
       #tree-line("│   ", "└──", chip("by_sample()"))
+      #tree-line("", "├──", chip("analyse_kinetics()"))
+      #tree-line("│   ", "├──", chip("response_time()"))
+      #tree-line("│   ", "├──", chip("peak_slope()"))
+      #tree-line("│   ", "├──", chip("monoexponential()"))
+      #tree-line("│   ", "├──", chip("exponential_drift()"))
+      #tree-line("│   ", "├──", chip("biexponential()"))
+      #tree-line("│   ", "└──", chip("logistic()"))
+      #tree-line("│   ", "└──", chip("gompertz()"))
+      #tree-line("│   ", "└──", chip("sigmoidal_drift()"))
       #tree-line("", "└──", chip("plot.mnirs()"))
     ]
 ))
@@ -139,9 +149,9 @@ execute:
 
 #### Package-level functions
 
-`example_mnirs()` — Paths to an included example file
+`example_mnirs()` — Paths to included demo files
 
-`create_mnirs_data()` — Add *"mnirs"* class metadata to data
+`create_mnirs_data()` — Add class *"mnirs"* metadata to data frame
 
 ---
 
@@ -159,7 +169,7 @@ execute:
 
 `replace_outliers()` — Replace local outliers
 
-`replace_invalid()` — Replace specified invalid values
+`replace_invalid()` — Replace specific invalid values
 
 `replace_missing()` — Interpolate over *NA* values
 
@@ -181,13 +191,11 @@ execute:
 
 `shift_mnirs()` — Shift channels to a reference value
 
-`rescale_mnirs()` — Rescale channels data range
+`rescale_mnirs()` — Rescale channels amplitude / range
 
+`correct_blood_volume()` — Normalise total[haem] changes
 
-
-```{=typst}
-#colbreak()
-```
+---
 
 ## Extract
 
@@ -195,16 +203,41 @@ execute:
 
 #### Interval boundary helpers
 
-`by_time()` / `by_label()` / `by_lap()` / `by_sample()` 
+`by_time()`, `by_label()`, `by_lap()`, `by_sample()` 
 
-— Boundaries by time value, event label, lap number, or row index
+— Boundaries by time value, event string, lap integer, or row index
+
+
+
+```{=typst}
+#colbreak()
+```
+
+## Analyse
+
+`analyse_kinetics()` — Analyse response kinetics
+
+#### Vector-level functions
+
+`response_time()` — Compute fractional response time
+
+`peak_slope()` — Find peak linear slope
+
+`monoexponential()` — Monoexponential curve fitting
+
+`exponential_drift()` — Two-phase exponential-linear
+
+`biexponential()` — Two-phase overlapping exponentials
+
+`logistic()`, `gompertz()` — Sigmoidal functions
+
+`sigmoidal_drift()` — Two-phase sigmoidal-linear
 
 ---
 
-
 ## Plot
 
-`plot()` — Plot a data frame of class *"mnirs"*
+`plot()` — Plot a data frame of class *"mnirs"* or *"mnirs_kinetics"*
 
 `theme_mnirs()` — ggplot2 theme for mnirs plots
 
@@ -219,9 +252,9 @@ execute:
 ```{=typst}
 // fill remaining column height; image scales to fit without page overflow
 #block(height: 1fr, 
-  align(center + horizon, move(dx: 20pt,
+  align(center + horizon, move(dx: -20pt,
     box(stroke: 0.5pt + rgb("#cccccc"), radius: 4pt, clip: true,
-      image("README-filter_mnirs-1.png", height: 60%, fit: "contain")
+      image("README-filter_mnirs-1.png", height: 90%, fit: "contain")
     )
   ))
 )

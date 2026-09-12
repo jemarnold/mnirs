@@ -15,6 +15,7 @@ A logical scalar.
 \description{
 An argument is a map when it is a \code{list()} with at least one named
 element and at most one unnamed element (the fallback for unlisted
-keys). Shared by \code{\link[=resolve_channel_args]{resolve_channel_args()}}.
+keys). Shared by \code{\link[=resolve_channel_args]{resolve_channel_args()}} and
+\code{\link[=resolve_interval_args]{resolve_interval_args()}}.
 }
 \keyword{internal}

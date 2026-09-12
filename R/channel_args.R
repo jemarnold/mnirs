@@ -125,7 +125,8 @@ resolve_channel_args <- function(
 #'
 #' An argument is a map when it is a `list()` with at least one named
 #' element and at most one unnamed element (the fallback for unlisted
-#' keys). Shared by [resolve_channel_args()].
+#' keys). Shared by [resolve_channel_args()] and
+#' [resolve_interval_args()].
 #'
 #' @param x An argument value.
 #'
@@ -143,7 +144,7 @@ is_arg_map <- function(x) {
 
 #' Warn about unmatched keys in an argument map
 #'
-#' Shared by [resolve_channel_args()]:
+#' Shared by [resolve_channel_args()] and [resolve_interval_args()]:
 #' unrecognised keys are warned about and ignored; omitted keys (only
 #' reported by callers when the map has no unnamed fallback) fall back
 #' to the argument's default.

@@ -272,25 +272,20 @@ plot(ensemble, time_labels = TRUE) +
     geom_vline(xintercept = 0, linetype = "dotted")
 ```
 
+## Analysis functions
+
+See [Oxidative Capacity Analysis with mnirs](https://jemarnold.github.io/mnirs/articles/oxcap-analysis.html) for a walkthrough of the recently added `analyse_kinetics()` functionality.
 
 ## Future *{mnirs}* development
 
-* Process oxygenation kinetics
+* ✅ Process oxygenation kinetics
 
-    * Monoexponential & sigmoidal non-linear curve fitting
-    
-    * Non-parametric response time & slope analysis
+* ✅ Oxidative capacity assessment
 
 * Critical oxygenation breakpoint analysis
 
     * Manual selection and automation-assisted breakpoint detection (combine expert evaluation with robust probabilistic breakpoint detection)
 
-* Oxidative capacity assessment
-
-    * Repeated occlusion ensemble-averaging and model fitting
-
-    * Blood volume correction
-    
 
 ## mNIRS device compatibility
 
@@ -304,9 +299,3 @@ Currently, it has been tested successfully with mNIRS data exported from the fol
 * [PIONIRS](https://www.pionirs.com/wp/) software export (.ftn and .ftn2)
 * [Train.Red](https://train.red/) app (.csv)
 * [VO2 Master Manager](https://vo2master.com/features/) app (.xlsx)
-
-
-
----
-
-*Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed and validated by the package author.*

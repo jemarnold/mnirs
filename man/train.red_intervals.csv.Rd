@@ -28,8 +28,8 @@ Channel mapping for \code{\link[=read_mnirs]{read_mnirs()}}:
 \item \code{nirs_channels = c( "SmO2", "SmO2 unfiltered", "O2HB unfiltered", "HHb unfiltered" )}
 \item \code{time_channel = c("Timestamp (seconds passed)")}
 \item \code{event_channel = c("Lap/Event")}
-\item \code{interval_times = list( start = c(2150.09, 2872.28),  end = c(2452.26, 3167.98) )}
-\item \verb{interval_times = list(        ## from zero_time start = c(65.94, 788.13),  end = c(368.11, 1083.83) )}
+\item \code{interval_times = list( start = c(2150.09, 2872.28), end = c(2452.26, 3167.98) )}
+\item \verb{interval_times = list(        ## from zero_time start = c(65.94, 788.13), end = c(368.11, 1083.83) )}
 }
 }
 \source{

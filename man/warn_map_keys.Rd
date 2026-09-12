@@ -32,7 +32,7 @@ than the validator.}
 \code{invisible(NULL)}, invoked for its warning side effects.
 }
 \description{
-Shared by \code{\link[=resolve_channel_args]{resolve_channel_args()}}:
+Shared by \code{\link[=resolve_channel_args]{resolve_channel_args()}} and \code{\link[=resolve_interval_args]{resolve_interval_args()}}:
 unrecognised keys are warned about and ignored; omitted keys (only
 reported by callers when the map has no unnamed fallback) fall back
 to the argument's default.

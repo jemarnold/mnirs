@@ -50,12 +50,24 @@ reference:
   - starts_with("filter")
   - shift_mnirs
   - rescale_mnirs
+  - correct_blood_volume
 - title: Detect intervals
   desc: |
     Detect and extract intervals for further analysis
   contents:
   - extract_intervals
   - starts_with("by_")
+- title: Analyse kinetics
+  desc: |
+    Estimate response dynamics and kinetic parameters
+  contents:
+  - analyse_kinetics
+  - matches("response_time")
+  - matches("slope")
+  - matches("exp")
+  - matches("sigmoidal")
+  - matches("logistic")
+  - matches("gompertz")
 - title: Print & plot
   desc: |
     Tools for printing functions and pretty plotting with `{ggplot2}`
