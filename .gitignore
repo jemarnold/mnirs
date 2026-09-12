@@ -9,7 +9,6 @@ inst/doc
 docs
 /doc/
 /Meta/
-**/_extensions
 *mnirs-hex*.png
 *mnirs-hex-v*.svg
 **/*.quarto_ipynb
