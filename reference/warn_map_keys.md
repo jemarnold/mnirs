@@ -1,7 +1,9 @@
 # Warn about unmatched keys in an argument map
 
 Shared by
-[`resolve_channel_args()`](https://jemarnold.github.io/mnirs/reference/resolve_channel_args.md):
+[`resolve_channel_args()`](https://jemarnold.github.io/mnirs/reference/resolve_channel_args.md)
+and
+[`resolve_interval_args()`](https://jemarnold.github.io/mnirs/reference/resolve_interval_args.md):
 unrecognised keys are warned about and ignored; omitted keys (only
 reported by callers when the map has no unnamed fallback) fall back to
 the argument's default.

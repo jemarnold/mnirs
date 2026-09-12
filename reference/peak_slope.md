@@ -1,7 +1,10 @@
-# Find peak linear slope
+# Peak linear slope
 
-Identifies the maximum positive or negative local linear slope within a
-numeric vector and returns regression parameters
+Identify the maximum positive or negative local linear slope of a
+numeric vector using rolling least-squares regression, and return the
+regression parameters of the peak window. Vector-level companion to
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+with `method = "peak_slope"`.
 
 ## Usage
 
@@ -14,6 +17,7 @@ peak_slope(
   align = c("centre", "left", "right"),
   direction = c("auto", "positive", "negative"),
   partial = FALSE,
+  na.rm = FALSE,
   verbose = TRUE,
   ...
 )
@@ -27,8 +31,8 @@ peak_slope(
 
 - t:
 
-  An *optional* numeric vector of the predictor variable (time or sample
-  number). Default is `seq_along(x)`.
+  An *optional* numeric vector of the predictor variable (e.g. time).
+  Default is `seq_along(x)`.
 
 - width:
 
@@ -37,7 +41,7 @@ peak_slope(
 
 - span:
 
-  A numeric value defining the local window timespan around `idx` in
+  A numeric value defining the local window time span around `idx` in
   which to perform the operation, according to `align`. In units of
   `time_channel` or `t`.
 
@@ -49,22 +53,27 @@ peak_slope(
 
 - direction:
 
-  A character string to detect either the peak `"positive"` or
-  `"negative"` slope, or `"auto"` detect (the *default*) based on the
-  overal trend of the signal (see *Details*).
+  A character string specifying the response direction `"positive"`, or
+  `"negative"`, or detect with `"auto"` (*default*). See *Details*.
 
 - partial:
 
-  A logical specifying whether to perform the operation over a subset of
-  available data within the local rolling window (`TRUE`), or requiring
-  a complete window of valid samples (`FALSE`, by *default*). See
-  *Details*.
+  Logical; default is `FALSE`, only returns values where a full window
+  of valid (non-`NA`) samples are available. If `TRUE`, ignores `NA` and
+  processes available valid samples (see *Details*).
+
+- na.rm:
+
+  Logical; default is `FALSE`, propagates any `NA`s to the returned
+  vector. If `TRUE`, ignores `NA`s and processes available valid samples
+  within the local window. May return errors or warnings. (see
+  *Details*).
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
 
@@ -76,70 +85,97 @@ A named list containing:
 
 - `slope`:
 
-  The peak slope value in units of `x/t`.
+  The peak slope value in units of `x / t`.
 
 - `intercept`:
 
-  The y-intercept of the peak local regression equation.
+  The y-intercept of the peak local regression line.
 
 - `y`:
 
-  The response value predicted from `x` at `t`.
+  The predicted value of `x` at the peak slope index.
 
 - `t`:
 
-  The time value at the index of the peak slope window.
+  The value of `t` at the peak slope index.
 
 - `idx`:
 
-  The index position of the peak slope.
+  The integer index of the peak slope window.
 
 - `fitted`:
 
-  A numeric vector of predicted values from `x` over `t[window_idx]`
-  from the peak slope and intercept.
+  A numeric vector of predicted values spanning the peak slope window.
 
 - `window_idx`:
 
-  An integer vector of indices for the peak slope window.
+  An integer vector of indices spanning the peak slope window.
+
+- `model`:
+
+  The [lm](https://rdrr.io/r/stats/lm.html) object fit to the peak slope
+  window.
 
 ## Details
 
-Uses rolling slope calculations via the least squares formula on
-complete case data. The local rolling window can be specified by either
-`width` as the number of samples, or `span` as the timespan in units of
-`t`.
+A semi-parametric approach to estimate the steepest local rate of change
+of a signal. In NIRS signals this can be interpreted as the moment of
+greatest mismatch between oxygen delivery and extraction. Rolling slopes
+are computed by
+[`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
+and the peak window is refit with
+[`stats::lm()`](https://rdrr.io/r/stats/lm.html) to return the
+regression parameters.
 
-`align` defaults to *"centre"* the local window around `idx` between
-`[idx - floor((width-1)/2),` `idx + floor(width/2)]` when `width` is
-specified. Even `width` values will bias `align` to *"left"*, with the
-unequal sample forward of `idx`. When `span` is specified with
-`align = "centre"`, the local window is between
-`[t - span/2, t + span/2]`.
+### Rolling window
 
-When `direction = "auto"`, the net slope across all of `x` is calculated
-to determine the trend direction (positive or negative), then the
-greatest local slope in that direction is returned. If the net slope
-equals zero, will return the greatest absolute local slope. When
-`direction = "positive"` or `"negative"`, returns the greatest
-respective directional slope. If no positive/negative slopes exist,
-returns `NA` with a warning.
+The local window is defined by either `width` (number of samples) or
+`span` (time span in units of `t`); one of either `width` or `span` must
+be specified.
 
-The default `partial = FALSE` requires complete case data with the same
-number of valid samples as specified by `width` or `span` (number of
-samples is estimated for `span` from the sample rate of `t`). If fewer
-than the requires valid samples are present in the local vector, `NA` is
-returned.
+- `width` with `align = "centre"` spans
+  `[idx - floor((width - 1) / 2), idx + floor(width / 2)]`. Even `width`
+  values bias alignment to *"left"*, placing the unequal sample forward
+  of `idx`.
 
-`partial = TRUE` allows calculation over partial windows with at least
-`2` valid samples, such as at edge conditions or over missing data
-`NA`s. However, these slope values will be sensitive to noisy data, so
-use with caution.
+- `span` with `align = "centre"` spans `[t - span / 2, t + span / 2]`.
+
+### Direction
+
+`direction` is detected automatically by default as either *"positive"*
+(upward) or *"negative"* (downward) response, from the dominant
+excursion of `x` above or below its initial baseline (the median of the
+earliest samples). When tied, the greater absolute rolling slope
+decides. The greatest local slope in that direction is returned, and
+`direction` can be overwritten manually.
+
+### Partial windows
+
+`partial = FALSE` (the *default*) requires the complete number of
+samples specified by `width` or `span`, and returns `NA` for any window
+with fewer samples. `partial = TRUE` allows computation with as few as 2
+valid samples. These windows, such as at edge conditions, are more
+sensitive to noise and should be used with caution.
+
+### Missing values
+
+`na.rm = FALSE` (the *default*) propagates any `NA` in a window to the
+returned slope. `na.rm = TRUE` ignores `NA`s and computes the slope from
+the remaining valid samples.
+
+## See also
+
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md),
+[`rolling_slope()`](https://jemarnold.github.io/mnirs/reference/rolling_slope.md),
+[`response_time()`](https://jemarnold.github.io/mnirs/reference/response_time.md),
+[`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
 
 ## Examples
 
 ``` r
 x <- c(1, 3, 2, 5, 8, 7, 9, 12, 11, 15, 14, 17, 18)
+
+## peak positive slope over a 5-sample window
 peak_slope(x, width = 5)
 #> $slope
 #> [1] 1.8
@@ -162,9 +198,20 @@ peak_slope(x, width = 5)
 #> $window_idx
 #> [1]  6  7  8  9 10
 #> 
+#> $model
+#> 
+#> Call:
+#> stats::lm(formula = fit_formula, data = data.frame(x = x[window_idx], 
+#>     t = t[window_idx]))
+#> 
+#> Coefficients:
+#> (Intercept)            t  
+#>        -3.6          1.8  
+#> 
+#> 
 
-x_dec <- rev(x)
-peak_slope(x_dec, width = 5)
+## peak negative slope of the reversed signal
+peak_slope(rev(x), width = 5)
 #> $slope
 #> [1] -1.8
 #> 
@@ -185,5 +232,16 @@ peak_slope(x_dec, width = 5)
 #> 
 #> $window_idx
 #> [1] 4 5 6 7 8
+#> 
+#> $model
+#> 
+#> Call:
+#> stats::lm(formula = fit_formula, data = data.frame(x = x[window_idx], 
+#>     t = t[window_idx]))
+#> 
+#> Coefficients:
+#> (Intercept)            t  
+#>        21.6         -1.8  
+#> 
 #> 
 ```

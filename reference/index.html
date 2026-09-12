@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,6 +18,8 @@
       <ul class="navbar-nav me-auto"><li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with mnirs</a></li>
+    <li><a class="dropdown-item" href="../articles/PIONIRS-demo.html">Reading and analysing PIONIRS data with mnirs</a></li>
     <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with mnirs</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -126,6 +128,13 @@
 
         </dt>
         <dd>Rescale data range</dd>
+
+        <dt>
+
+          <code><a href="correct_blood_volume.html">correct_blood_volume()</a></code>
+
+        </dt>
+        <dd>Correct for blood volume changes</dd>
       </dl></div><div class="section level2">
       <h2 id="detect-intervals">Detect intervals<a class="anchor" aria-label="anchor" href="#detect-intervals"></a></h2>
 
@@ -150,6 +159,120 @@
         </dt>
         <dd>Specify interval boundaries by time, label, lap, or sample</dd>
       </dl></div><div class="section level2">
+      <h2 id="analyse-kinetics">Analyse kinetics<a class="anchor" aria-label="anchor" href="#analyse-kinetics"></a></h2>
+
+      <div class="section-desc"><p>Estimate response dynamics and kinetic parameters</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="analyse_kinetics.html">analyse_kinetics()</a></code> <code><a href="analyse_kinetics.html">analyze_kinetics()</a></code>
+
+        </dt>
+        <dd>Analyse kinetics across mNIRS channels and intervals</dd>
+
+        <dt>
+
+          <code><a href="response_time.html">response_time()</a></code>
+
+        </dt>
+        <dd>Fractional response time</dd>
+
+        <dt>
+
+          <code><a href="peak_slope.html">peak_slope()</a></code>
+
+        </dt>
+        <dd>Peak linear slope</dd>
+
+        <dt>
+
+          <code><a href="SSbiexponential.html">SSbiexponential()</a></code>
+
+        </dt>
+        <dd>Self-starting biexponential model</dd>
+
+        <dt>
+
+          <code><a href="SSexponential_drift.html">SSexponential_drift()</a></code>
+
+        </dt>
+        <dd>Self-starting exponential-drift model</dd>
+
+        <dt>
+
+          <code><a href="SSmonoexponential.html">SSmonoexponential()</a></code>
+
+        </dt>
+        <dd>Self-starting monoexponential model</dd>
+
+        <dt>
+
+          <code><a href="biexponential.html">biexponential()</a></code>
+
+        </dt>
+        <dd>Biexponential function</dd>
+
+        <dt>
+
+          <code><a href="exponential_drift.html">exponential_drift()</a></code>
+
+        </dt>
+        <dd>Exponential-drift function</dd>
+
+        <dt>
+
+          <code><a href="monoexponential.html">monoexponential()</a></code>
+
+        </dt>
+        <dd>Monoexponential function</dd>
+
+        <dt>
+
+          <code><a href="SSsigmoidal_drift.html">SSsigmoidal_drift()</a></code>
+
+        </dt>
+        <dd>Self-starting sigmoidal-drift model</dd>
+
+        <dt>
+
+          <code><a href="sigmoidal_drift.html">sigmoidal_drift()</a></code>
+
+        </dt>
+        <dd>Sigmoidal-drift function</dd>
+
+        <dt>
+
+          <code><a href="SSlogistic.html">SSlogistic()</a></code>
+
+        </dt>
+        <dd>Self-starting logistic model</dd>
+
+        <dt>
+
+          <code><a href="logistic.html">logistic()</a></code>
+
+        </dt>
+        <dd>Generalised logistic function</dd>
+
+        <dt>
+
+          <code><a href="SSgompertz.html">SSgompertz()</a></code> <code><a href="SSgompertz.html">SSgompertz_left()</a></code>
+
+        </dt>
+        <dd>Self-starting Gompertz models</dd>
+
+        <dt>
+
+          <code><a href="gompertz.html">gompertz()</a></code> <code><a href="gompertz.html">gompertz_left()</a></code>
+
+        </dt>
+        <dd>Gompertz growth functions</dd>
+      </dl></div><div class="section level2">
       <h2 id="print-plot">Print &amp; plot<a class="anchor" aria-label="anchor" href="#print-plot"></a></h2>
 
       <div class="section-desc"><p>Tools for printing functions and pretty plotting with <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></p></div>
@@ -168,10 +291,24 @@
 
         <dt>
 
+          <code><a href="print.mnirs_kinetics.html">print(<i>&lt;mnirs_kinetics&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Methods for mnirs_kinetics objects</dd>
+
+        <dt>
+
           <code><a href="plot.mnirs.html">plot(<i>&lt;mnirs&gt;</i>)</a></code>
 
         </dt>
         <dd>Plot <em>mnirs</em> objects</dd>
+
+        <dt>
+
+          <code><a href="plot.mnirs_kinetics.html">plot(<i>&lt;mnirs_kinetics&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot <em>mnirs</em> kinetics results</dd>
 
         <dt>
 
@@ -247,17 +384,17 @@
 
         <dt>
 
-          <code><a href="portamon-oxcap.xlsx.html">portamon-oxcap.xlsx</a></code>
+          <code><a href="portamon_oxcap.xlsx.html">portamon_oxcap.xlsx</a></code>
 
         </dt>
         <dd>10 Hz Artinis Oxysoft export recorded with Portamon</dd>
 
         <dt>
 
-          <code><a href="pionirs_occlusion.ftn2.html">pionirs_occlusion.ftn2</a></code>
+          <code><a href="pionirs_occlusion.ftn.html">pionirs_occlusion.ftn</a></code>
 
         </dt>
-        <dd>1 Hz PIONIRS NIRSBOX-DUAL export</dd>
+        <dd>1 Hz PIONIRS NIRSBOX export</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

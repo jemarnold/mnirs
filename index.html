@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
+    <li><a class="dropdown-item" href="articles/oxcap-analysis.html">Analysing muscle oxidative capacity with mnirs</a></li>
+    <li><a class="dropdown-item" href="articles/PIONIRS-demo.html">Reading and analysing PIONIRS data with mnirs</a></li>
     <li><a class="dropdown-item" href="articles/reading-mnirs-data.html">Reading and Cleaning Data with mnirs</a></li>
   </ul>
 </li>
@@ -99,12 +101,17 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co">## for plotting</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jemarnold.github.io/mnirs/">mnirs</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'mnirs'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     SSgompertz</span></span>
 <span></span>
 <span><span class="co">## {mnirs} includes sample files from a few mNIRS devices</span></span>
 <span><span class="fu"><a href="reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     </span></span>
-<span><span class="co">#&gt; [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn2" </span></span>
-<span><span class="co">#&gt; [5] "portamon-oxcap.xlsx"     "train.red_intervals.csv"</span></span>
+<span><span class="co">#&gt; [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn"  </span></span>
+<span><span class="co">#&gt; [5] "portamon_oxcap.xlsx"     "train.red_intervals.csv"</span></span>
 <span></span>
 <span><span class="co">## rename channels in the format `renamed = "original_name"`</span></span>
 <span><span class="co">## where "original_name1" should match the file column name exactly</span></span>
@@ -345,27 +352,20 @@
 </div>
 </div>
 <div class="section level2">
+<h2 id="analysis-functions">Analysis functions<a class="anchor" aria-label="anchor" href="#analysis-functions"></a>
+</h2>
+<p>See <a href="https://jemarnold.github.io/mnirs/articles/oxcap-analysis.html">Oxidative Capacity Analysis with mnirs</a> for a walkthrough of the recently added <code><a href="reference/analyse_kinetics.html">analyse_kinetics()</a></code> functionality.</p>
+</div>
+<div class="section level2">
 <h2 id="future-mnirs-development">Future <em>{mnirs}</em> development<a class="anchor" aria-label="anchor" href="#future-mnirs-development"></a>
 </h2>
 <ul>
-<li>
-<p>Process oxygenation kinetics</p>
-<ul>
-<li><p>Monoexponential &amp; sigmoidal non-linear curve fitting</p></li>
-<li><p>Non-parametric response time &amp; slope analysis</p></li>
-</ul>
-</li>
+<li><p>✅ Process oxygenation kinetics</p></li>
+<li><p>✅ Oxidative capacity assessment</p></li>
 <li>
 <p>Critical oxygenation breakpoint analysis</p>
 <ul>
 <li>Manual selection and automation-assisted breakpoint detection (combine expert evaluation with robust probabilistic breakpoint detection)</li>
-</ul>
-</li>
-<li>
-<p>Oxidative capacity assessment</p>
-<ul>
-<li><p>Repeated occlusion ensemble-averaging and model fitting</p></li>
-<li><p>Blood volume correction</p></li>
 </ul>
 </li>
 </ul>
@@ -389,8 +389,6 @@
 <li>
 <a href="https://vo2master.com/features/" class="external-link">VO2 Master Manager</a> app (.xlsx)</li>
 </ul>
-<hr>
-<p><em>Generative chatbots are used to assist with code optimisation. All code is thoroughly reviewed and validated by the package author.</em></p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

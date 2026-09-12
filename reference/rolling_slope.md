@@ -1,9 +1,10 @@
 # Calculate rolling linear slope
 
-`rolling_slope()`: Computes rolling linear regression slopes within a
+`rolling_slope()`: Compute rolling linear regression slopes within a
 local window along a numeric vector.
 
-`slope()`: Calculates the linear regression slope of a numeric vector.
+`slope()`: Calculate the linear regression slope of a numeric vector via
+the least-squares formula.
 
 ## Usage
 
@@ -15,11 +16,13 @@ rolling_slope(
   span = NULL,
   align = c("centre", "left", "right"),
   partial = FALSE,
+  na.rm = FALSE,
   verbose = TRUE,
-  ...
+  ...,
+  env = rlang::caller_env()
 )
 
-slope(x, t = seq_along(x), ...)
+slope(x, t = seq_along(x), na.rm = FALSE, ..., env = rlang::caller_env())
 ```
 
 ## Arguments
@@ -30,8 +33,8 @@ slope(x, t = seq_along(x), ...)
 
 - t:
 
-  An *optional* numeric vector of the predictor variable (time or sample
-  number). Default is `seq_along(x)`.
+  An *optional* numeric vector of the predictor variable (e.g. time).
+  Default is `seq_along(x)`.
 
 - width:
 
@@ -40,7 +43,7 @@ slope(x, t = seq_along(x), ...)
 
 - span:
 
-  A numeric value defining the local window timespan around `idx` in
+  A numeric value defining the local window time span around `idx` in
   which to perform the operation, according to `align`. In units of
   `time_channel` or `t`.
 
@@ -52,57 +55,72 @@ slope(x, t = seq_along(x), ...)
 
 - partial:
 
-  A logical specifying whether to perform the operation over a subset of
-  available data within the local rolling window (`TRUE`), or requiring
-  a complete window of valid samples (`FALSE`, by *default*). See
-  *Details*.
+  Logical; default is `FALSE`, only returns values where a full window
+  of valid (non-`NA`) samples are available. If `TRUE`, ignores `NA` and
+  processes available valid samples (see *Details*).
+
+- na.rm:
+
+  Logical; default is `FALSE`, propagates any `NA`s to the returned
+  vector. If `TRUE`, ignores `NA`s and processes available valid samples
+  within the local window. May return errors or warnings. (see
+  *Details*).
 
 - verbose:
 
-  Logical. Default is `TRUE`. Will display or silence (if `FALSE`)
-  warnings and information messages helpful for troubleshooting. A
-  global default can be set via `options(mnirs.verbose = FALSE)`.
+  Logical. `TRUE` (*default*) will display, and `FALSE` will silence
+  warnings and information messages helpful for troubleshooting. Global
+  default can be set via `options(mnirs.verbose = FALSE)`.
 
 - ...:
 
   Additional arguments.
 
+- env:
+
+  The calling environment or a defused call, used to report errors and
+  warnings as coming from the user-facing function rather than the
+  validator.
+
 ## Value
 
 `rolling_slope()` returns a numeric vector of rolling local slopes in
-units of `x/t` the same length as `x`.
+units of `x / t`, the same length as `x`.
 
-`slope()` returns a numeric slope in units of `x/t`.
+`slope()` returns a numeric slope value in units of `x / t`, or
+`NA_real_` when insufficient valid observations are present.
 
 ## Details
 
-See details in
-[`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md).
+See
+[`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+for details on window specification (`width`, `span`, `align`), partial
+windows, and direction detection.
 
-Additional args (`...`) accepts:
+Additional arguments (`...`) accepted:
 
 - `bypass_checks`:
 
-  Logical; Speeds operation by bypassing validation checks. These checks
-  should be performed upstream.
+  Logical; if `TRUE`, skips input validation. Intended for internal use
+  when checks have already been performed upstream.
 
 - `min_obs`:
 
-  Integer; The minimum number of observations required to calculate
-  `slope()`. Defined by either `width` or `span`, or equal to `2` when
-  `partial = TRUE`
+  Integer; minimum number of valid observations required per window to
+  return a slope. Derived from `width` or `span`, or `2L` when
+  `partial = TRUE`.
 
 - `intercept`:
 
-  Logical; When `TRUE`, `slope()` will also return a numeric intercept
-  value retrievable with `attr(slope, "intercept")`.
+  Logical; if `TRUE`, `slope()` also attaches the y-intercept as
+  `attr(slope_val, "intercept")`.
 
 - `window_idx`:
 
-  Logical; When `TRUE`, `rolling_slope()` will also return a list of
-  numeric window indices retrievable with
-  `attr(rolling_slope, "window_idx")`.
+  Logical; if `TRUE`, the window bounds from
+  [`compute_window_bounds()`](https://jemarnold.github.io/mnirs/reference/compute_helpers.md)
+  are attached as `attr(slopes, "bounds")`.
 
 ## See also
 
-[`zoo::rollapply()`](https://rdrr.io/pkg/zoo/man/rollapply.html)
+[`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)

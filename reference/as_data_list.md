@@ -1,6 +1,9 @@
 # Coerce `data` input to a named list of data frames
 
-Coerce `data` input to a named list of data frames
+Accepts a single or grouped data frame, a list of data frames, or an
+*"mnirs_kinetics"* object, whose `coefficients` are split by
+`nirs_channels` into one data frame per channel (a row per interval) for
+recursive analysis of coefficients.
 
 ## Usage
 

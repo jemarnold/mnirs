@@ -5,14 +5,18 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Analysing muscle oxidative capacity with {mnirs} • mnirs</title>
+<title>Analysing muscle oxidative capacity with mnirs • mnirs</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><script src="oxcap-analysis_files/libs/quarto-html/popper.min.js"></script><script src="oxcap-analysis_files/libs/quarto-html/tippy.umd.min.js"></script><link href="oxcap-analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="oxcap-analysis_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Analysing muscle oxidative capacity with {mnirs}">
+<link href="oxcap-analysis_files/libs/quarto-contrib/fontawesome6-6.7.2/all.min.css" rel="stylesheet">
+<link href="oxcap-analysis_files/libs/quarto-contrib/fontawesome6-6.7.2/latex-fontsize.css" rel="stylesheet">
+<link href="oxcap-analysis_files/libs/quarto-contrib/academicons-1.9.4/all.css" rel="stylesheet">
+<link href="oxcap-analysis_files/libs/quarto-contrib/academicons-1.9.4/size.css" rel="stylesheet">
+<!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Analysing muscle oxidative capacity with mnirs">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:creator" content="@jem_arnold">
 <meta name="twitter:site" content="@jem_arnold">
@@ -25,7 +29,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mnirs</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,8 +42,9 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/mnirs-cheatsheet.pdf">mnirs-cheatsheet (PDF)</a></li>
-    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with {mnirs}</a></li>
-    <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with {mnirs}</a></li>
+    <li><a class="dropdown-item" href="../articles/oxcap-analysis.html">Analysing muscle oxidative capacity with mnirs</a></li>
+    <li><a class="dropdown-item" href="../articles/PIONIRS-demo.html">Reading and analysing PIONIRS data with mnirs</a></li>
+    <li><a class="dropdown-item" href="../articles/reading-mnirs-data.html">Reading and Cleaning Data with mnirs</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
@@ -49,9 +54,9 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jemarnold/mnirs" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://bsky.app/profile/jemarnold.bsky.social" aria-label="Bluesky"><span class="fa fa-brands fa-bluesky"></span></a></li>
 <li class="nav-item"><a class="external-link nav-link" href="https://twitter.com/jem_arnold" aria-label="Twitter"><span class="fa fa-twitter"></span></a></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/jemarnold/mnirs" aria-label="GitHub"><span class="fa fa-github"></span></a></li>
       </ul>
 </div>
 
@@ -61,10 +66,10 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Analysing muscle oxidative capacity with {mnirs}</h1>
+      <h1>Analysing muscle oxidative capacity with mnirs</h1>
 
-      <p class="author">Jem Arnold</p>
-      <p class="date">2026-03-18</p>
+      <p class="author">Jem I Arnold <a href="https://github.com/jemarnold/mnirs" target='"_blank"' class="external-link"><i class="fa-brands fa-github" aria-label="github"></i></a> <a href="https://www.linkedin.com/in/jem--arnold/" target='"_blank"' class="external-link"><i class="fa-brands fa-linkedin" aria-label="linkedin"></i></a> <a href="https://researchgate.net/profile/Jem-Arnold" target='"_blank"' class="external-link"><i class="ai  ai-researchgate" aria-label="researchgate"></i></a> <a href="https://orcid.org/0000-0003-3908-9447" target='"_blank"' class="external-link"><i class="ai  ai-orcid" aria-label="orcid"></i></a></p>
+      <p class="date">2026-09-12</p>
 
       <small class="dont-index">Source: <a href="https://github.com/jemarnold/mnirs/blob/main/vignettes/articles/oxcap-analysis.qmd" class="external-link"><code>vignettes/articles/oxcap-analysis.qmd</code></a></small>
       <div class="d-none name"><code></code></div>
@@ -77,469 +82,612 @@
 
     <section class="section level2"><h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>I am continuing to develop the <a href="https://github.com/jemarnold/mnirs" class="external-link"><code>{mnirs}</code></a> package for processing and analysing muscle near-infrared spectroscopy in R.</p>
-<p>In this article, I will demonstrate how the recently added functionality can be combined to perform muscle oxidative capacity (OxCap) analysis from a repeated ischaemic occlusion protocol, while ensuring reproducibility and adhering to current gold-standard processing methods.</p>
-<div>
-<blockquote>
-<p><strong>Tip</strong></p>
-<p>This article assumes basic familiarity with the {mnirs} package. For an overview and demonstration of data processing with {mnirs}, please see the package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html"><em>Reading and Cleaning Data with {mnirs}</em></a>.</p>
-</blockquote>
-</div>
-<section class="level3"><h4 id="muscle-oxidative-capacity-testing">Muscle oxidative capacity testing<a class="anchor" aria-label="anchor" href="#muscle-oxidative-capacity-testing"></a>
-</h4>
-<p>One of the most compelling applications emerging in mNIRS research is the ability to non-invasively evaluate <strong>muscle oxidative capacity</strong> after a dynamic exercise task.</p>
-<p>Oxidative capacity is the maximal rate at which a muscle utilises oxygen (O<sub>2</sub>) to meet the energetic demand of exercise, and is related to mitochondrial respiratory function <span class="citation" data-cites="Beever2020">[<a href="#ref-Beever2020" role="doc-biblioref">1</a>]</span>.</p>
-<p>Traditionally, OxCap assessment requires highly complex and invasive in-vitro methods such as high-resolution respirometry of biopsy tissue samples, or expensive in-vivo <sup>31</sup>P magnetic resonance spectroscopy.</p>
-<p>With mNIRS, muscle OxCap can be assessed non-invasively during more dynamic exercise tasks, and with lower cost and burden than traditional methods previously available.</p>
-</section><section class="level3"><h4 id="protocol-overview">Protocol overview<a class="anchor" aria-label="anchor" href="#protocol-overview"></a>
-</h4>
-<p>The participant is asked to perform a brief exercise task or muscle contraction stimulus to elevate the O<sub>2</sub> demand in the target tissue, with mNIRS sensors over the peripheral muscle of interest and an occlusion cuff ready (deflated) around the proximal limb.</p>
-<p>Immediately after the stimulus, the occlusion cuff is rapidly inflated to a supra-systolic blood pressure (e.g., 300 mmHg) to transiently stop blood flow into the distal target muscle site.</p>
-<p>The occlusion is held for a brief period such as 5-seconds, then deflated to allow recovery to proceed. A sequence of these brief, repeated occlusions are performed at a pre-specified tempo (e.g. 5-sec occlusion, 10-sec recovery) for up to twenty repetitions (~5-minutes) until the muscle has recovered back to baseline.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="figures/McCully-2024.jpg"></p>
-<figcaption>Figure 2 from McCully et al, 2024 <span class="citation" data-cites="McCully2024">[<a href="#ref-McCully2024" role="doc-biblioref">2</a>]</span>. (A) The experimental setup for the progressive exercise test. The NIRS device was placed on the vastus lateralis using straps. The blood pressure cuff was placed proximally to the NIRS device. The leg is shown lifting the weight. For NIRS measurements, the leg was placed on top of the padding in the horizontal position to allow the muscle to relax during the measurements.</figcaption></figure>
-</div>
-<p>During each occlusion where oxygen delivery is constrained and assumed to be zero, the rate of deoxygenation — the slope of the rise in deoxyhaeme (HHb/time; μM/sec), or decline in oxygen saturation or oxyhaeme — is interpreted to represent the rate of local muscle oxygen uptake (mV̇O<sub>2</sub>).</p>
-<p>Immediately after the exercise task when metabolic demand is high, mV̇O<sub>2</sub> will be elevated. It will decline at an exponential rate as recovery proceeds back to baseline. The rate constant (<em>k</em>, min<sup>-1</sup>) of this monoexponential curve quantifies the muscle OxCap value <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="figures/Adami-2018.jpg"></p>
-<figcaption>Figure 1 from Adami et al, 2018 <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>. Muscle oxygen consumption (mVO2) recovery rate constant (k) by near-infrared spectroscopy. A and B: example of the oxidative capacity test by NIRS. A: changes in the tissue saturation index (TSI) during dynamic exercise (EX, gray area) and subsequent intermittent arterial occlusions at rest. B: mVO2 recovery kinetics derived from the rate of change of TSI during intermittent arterial occlusions measured from A. mVO2 recovery data are fit to an exponential (dashed line) to estimate the recovery k. C: summaries of current reports of the mVO2 recovery rate constant (k), which is proportional to oxidative capacity, in upper and lower limbs of adults in health and disease.</figcaption></figure>
-</div>
-<p>This technique has been well studied in recent years, validated against <sup>31</sup>P-MRS <span class="citation" data-cites="Ryan2013">[<a href="#ref-Ryan2013" role="doc-biblioref">4</a>]</span> and mitochondrial content protein markers <span class="citation" data-cites="Tripp2023">[<a href="#ref-Tripp2023" role="doc-biblioref">5</a>]</span>. The rate constant <em>k</em> has been shown to be proportionally higher (faster recovery) in endurance-trained muscle, and lower (slower) in pathalogical and diseased muscle <span class="citation" data-cites="Adami2018">[<a href="#ref-Adami2018" role="doc-biblioref">3</a>]</span>.</p>
-</section><section class="level3"><h4 id="a-call-for-standardised-processing-methods">A call for standardised processing methods<a class="anchor" aria-label="anchor" href="#a-call-for-standardised-processing-methods"></a>
-</h4>
-<p>Technical procedures and analysis methods for OxCap assessment have converged toward standardisation in recent years, with methods showing good reliability and reproducibility.</p>
-<p>Recently there has been a call to implement standard analysis scripts with robust slope detection and non-linear modelling, to minimise operator-related variability between research centres, and thereby improving interpretation of outcomes across populations and interventions <span class="citation" data-cites="Costalat2025 Rasica2024">[<a href="#ref-Costalat2025" role="doc-biblioref">6</a>,<a href="#ref-Rasica2024" role="doc-biblioref">7</a>]</span>.</p>
-<p>I wanted to see how well (or poorly) my current {mnirs} functionality could process and analyse repeated occlusion muscle OxCap data.</p>
-<p>In the future, this process will be wrapped into convenience functions to make the process easier for the end user. But I believe this process is already considerably simpler and more robust than non-reproducible methods relying on manual data cleaning, occlusion interval selection, and curve fitting.</p>
-</section></section><section class="section level2"><h2 id="oxidative-capacity-analysis-in-mnirs">Oxidative capacity analysis in {mnirs}<a class="anchor" aria-label="anchor" href="#oxidative-capacity-analysis-in-mnirs"></a>
-</h2>
-<p>This article serves as a vignette for three analysis functions recently added to the {mnirs} package, and how they can be used together to perform robust OxCap analysis.</p>
-<ul>
-<li><p><code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>: is used to detect specific events or times in an <em>“mnirs”</em> data frame, and extract an interval around each one, returning a list of data frames.<br><br>
-This is useful when a certain event is labelled in <code>event_channel</code>, or a list of time values is provided manually for when events occur, such as the start of an exercise interval or occlusion. The returned list of data frames is ready for further analysis. See <code><a href="../reference/extract_intervals.html">?extract_intervals</a></code> for more details.</p></li>
-<li><p><code><a href="../reference/peak_slope.html">peak_slope()</a></code>: is used to find the peak positive or negative linear regression slope from a numeric vector and return the slope value, intercept, and associated parameters.<br><br>
-The segment of an mNIRS signal with the steepest slope is often interpreted to represent the point of greatest mismatch between O<sub>2</sub> supply and O<sub>2</sub> demand, such as for muscle OxCap testing. See <code><a href="../reference/peak_slope.html">?peak_slope</a></code> for more details.</p></li>
-<li><p><code><a href="../reference/monoexponential.html">monoexponential()</a></code>: specifies the equation for an exponential function. Two self-starting functions are available for non-linear curve fitting; <code><a href="../reference/SS_monoexp.html">SS_monoexp4()</a></code> fits a 4-parameter monoexponential model, while <code><a href="../reference/SS_monoexp.html">SS_monoexp3()</a></code> fits a reduced 3-parameter model without a time delay parameter, where monoexponential response is expected to be instantaneous.<br><br>
-Calling these functions in non-linear curve fitting functions (e.g. <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">nls()</a></code>) will return model coefficients for the three or four parameters. See <code><a href="../reference/monoexponential.html">?monoexponential</a></code> and <code><a href="../reference/SS_monoexp.html">?SS_monoexp</a></code> for more details.</p></li>
-</ul>
-<section class="level3"><h4 id="analysis-plan">Analysis plan<a class="anchor" aria-label="anchor" href="#analysis-plan"></a>
-</h4>
-<p>For OxCap analysis, we will perform roughly 8 steps:</p>
-<ol type="1">
-<li>Import an example NIRS file with the repeated occlusions procedure.</li>
-<li>Pre-process/clean data, as needed (minimal in this example).</li>
-<li>Iteratively correct NIRS values for changes in blood volume, a required step to ensure valid analysis.</li>
-<li>Specify occlusion events in the data and extract a 5-sec intervals for all occlusions.</li>
-<li>Find the peak 3-sec linear regression NIRS slope within each occlusion event.</li>
-<li>Model a monoexponential curve fit across NIRS slope observations within both repeated occlusion trials.</li>
-<li>Extract the rate constant (<em>k</em>) for each trial exponential curve.</li>
-<li>Plot the modelled data.</li>
-</ol>
-<p>My aim is to perform this analysis using only the {mnirs} package and {tidyverse} functions, keeping the script as clean as possible, with as few janky manual adjustments as necessary.</p>
-</section><section class="level3"><h4 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
-</h4>
-<p>First, load our packages and initial setup options. We will silence {mnirs} info messages and set our ggplot2 theme.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span> <span class="co">## tidyverse packages for convenient data wrangling</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jemarnold.github.io/mnirs/">mnirs</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">## globally silence info/warning messages</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/get_theme.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="../reference/theme_mnirs.html">theme_mnirs</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span><span class="op">)</span> <span class="co">## set ggplot2 theme</span></span></code></pre></div>
-</div>
+<p>The <a href="https://github.com/jemarnold/mnirs" target="_blank" class="external-link"><code>{mnirs}</code></a> package is under active development with processing and analysis methods for muscle near-infrared spectroscopy in R.</p>
+<p>This article demonstrates recently added functionality in <em>{mnirs}</em> can be combined to perform muscle oxidative capacity (OxCap) analysis from a repeated ischaemic occlusion protocol, ensuring reproducibility and adhering to current gold-standard processing methods.</p>
 <div>
 <blockquote>
 <p><strong>Note</strong></p>
-<p>I received this example file from <a href="https://scholar.google.com/citations?user=A9JwQbYAAAAJ&amp;hl=en" class="external-link">Dr. Thomas Tripp</a>, Postdoctoral fellow in <a href="https://scholar.google.com/citations?hl=en&amp;user=tJepNIQAAAAJ" class="external-link">Dr. Martin MacInnis</a>’ lab at the University of Calgary. They have kindly allowed me to include this file with the {mnirs} package for users to examine themselves.</p>
-<p>It can be accessed by calling <code>example_mnirs("portamon-oxcap")</code>.</p>
+<p>This article assumes basic familiarity with the <em>{mnirs}</em> package. For an overview and demonstration of data processing with <em>{mnirs}</em>, please see the original package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html" target="_blank"><em>Reading and Cleaning Data with mnirs</em></a>.</p>
 </blockquote>
 </div>
-<p>This article will assume basic familiarity with the {mnirs} package. For further details and demonstration of data processing, please see the package vignette <a href="https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html"><em>Reading and Cleaning Data with {mnirs}</em></a>.</p>
-</section></section><section class="section level2"><h2 id="read-mnirs-data-file">Read {mnirs} data file<a class="anchor" aria-label="anchor" href="#read-mnirs-data-file"></a>
+<div>
+<blockquote>
+<p><strong>Tip</strong></p>
+<p>Skip to the <a href="#oxidative-capacity-analysis-with-mnirs">analysis code</a> below if you are already familiar with the method.</p>
+</blockquote>
+</div>
+<section class="level2"><h3 id="muscle-oxidative-capacity-testing">Muscle oxidative capacity testing<a class="anchor" aria-label="anchor" href="#muscle-oxidative-capacity-testing"></a>
+</h3>
+<p>One of the most compelling applications emerging in mNIRS research is the non-invasive evaluation of gross <strong>muscle oxidative capacity</strong> after a dynamic exercise task.</p>
+<p>Oxidative capacity is the maximal rate at which a muscle utilises oxygen (O<sub>2</sub>) to meet the energetic demand of exercise, and is related to mitochondrial respiratory function <span class="citation" data-cites="Beever2020">(<a href="#ref-Beever2020" role="doc-biblioref">Beever et al., 2020</a>)</span>.</p>
+<p>Traditional mitochondrial oxidative capacity assessment requires invasive in-vitro methods such as high-resolution respirometry of biopsy tissue, or expensive in-vivo <sup>31</sup>P magnetic resonance spectroscopy. mNIRS is comparatively far more accessible, and allows non-invasive assessment during dynamic exercise tasks, at lower cost and with lower participant burden.</p>
+</section><section class="level2"><h3 id="protocol-overview">Protocol overview<a class="anchor" aria-label="anchor" href="#protocol-overview"></a>
+</h3>
+<p>The participant performs a brief exercise task or muscle stimulation to elevate O<sub>2</sub> extraction (mV̇O<sub>2</sub>) demand in the target tissue, with mNIRS sensors over the muscle of interest and an occlusion cuff around the proximal limb.</p>
+<p>Immediately after the stimulus, the cuff is rapidly inflated to a supra-systolic pressure (e.g. 300 mmHg), transiently stopping blood flow into the distal target muscle. The occlusion is held briefly (e.g. 5 s) then rapidly deflated to allow recovery. A sequence of these brief, repeated occlusions are performed at a pre-specified tempo (e.g. 5-sec occlusion, 10-sec recovery) for up to twenty repetitions (~5 min), until the muscle recovers to baseline.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure><p><img src="figures/McCully-2024.jpg"></p>
+<figcaption>Figure 2 from <span class="citation" data-cites="McCully2024">McCully et al. (<a href="#ref-McCully2024" role="doc-biblioref">2024</a>)</span>. (A) The experimental setup for the progressive exercise test. The NIRS device was placed on the vastus lateralis using straps. The blood pressure cuff was placed proximal to the NIRS device. The leg is shown lifting the weight. For NIRS measurements, the leg was placed on top of the padding in the horizontal position to allow the muscle to relax during the measurements.</figcaption></figure>
+</div>
+<p>During each occlusion, oxygen delivery is restricted and assumed to be zero. The rate of deoxygenation — the slope of the rise in deoxy[haem] (HHb/time; μM/sec), or decline in oxygen saturation (SmO<sub>2</sub>) or oxy[haem] — is therefore interpreted as the rate of local muscle oxygen uptake (mV̇O<sub>2</sub>).</p>
+<p>mV̇O<sub>2</sub> is elevated immediately after the exercise task, then recovers exponentially toward baseline. The rate constant (<em>k</em>, min<sup>-1</sup>) of this monoexponential curve quantifies the muscle OxCap value <span class="citation" data-cites="Adami2018">(<a href="#ref-Adami2018" role="doc-biblioref">Adami &amp; Rossiter, 2018</a>)</span>.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure><p><img src="figures/Adami-2018.jpg"></p>
+<figcaption>Figure 1 from <span class="citation" data-cites="Adami2018">Adami &amp; Rossiter (<a href="#ref-Adami2018" role="doc-biblioref">2018</a>)</span>. Muscle oxygen consumption (mVO2) recovery rate constant (k) by near-infrared spectroscopy. A and B: example of the oxidative capacity test by NIRS. A: changes in the tissue saturation index (TSI) during dynamic exercise (EX, gray area) and subsequent intermittent arterial occlusions at rest. B: mVO2 recovery kinetics derived from the rate of change of TSI during intermittent arterial occlusions measured from A. mVO2 recovery data are fit to an exponential (dashed line) to estimate the recovery k. C: summaries of current reports of the mVO2 recovery rate constant (k), which is proportional to oxidative capacity, in upper and lower limbs of adults in health and disease.</figcaption></figure>
+</div>
+<p>This technique is well validated against <sup>31</sup>P-MRS <span class="citation" data-cites="Ryan2013">(<a href="#ref-Ryan2013" role="doc-biblioref">Ryan et al., 2013</a>)</span> and mitochondrial content protein markers <span class="citation" data-cites="Tripp2023">(<a href="#ref-Tripp2023" role="doc-biblioref">Tripp et al., 2023</a>)</span>. The rate constant <em>k</em> is proportionally higher (faster recovery) in endurance-trained muscle, and lower (slower) in untrained, older, or diseased muscle <span class="citation" data-cites="Adami2018">(<a href="#ref-Adami2018" role="doc-biblioref">Adami &amp; Rossiter, 2018</a>)</span>.</p>
+</section><section class="level2"><h3 id="a-call-for-standardised-processing-methods">A call for standardised processing methods<a class="anchor" aria-label="anchor" href="#a-call-for-standardised-processing-methods"></a>
+</h3>
+<p>Technical and analysis methods for OxCap assessment have converged toward standardisation in recent years, with good demonstrated reliability and reproducibility. There has been a recent call to implement standard analysis scripts with robust slope detection and non-linear modelling, to minimise operator-related variability between research centres, and improve interpretation of outcomes across populations and interventions <span class="citation" data-cites="Costalat2025 Rasica2024">(<a href="#ref-Costalat2025" role="doc-biblioref">Costalat et al., 2025</a>; <a href="#ref-Rasica2024" role="doc-biblioref">Rasica et al., 2024</a>)</span>.</p>
+<p>This article uses recently developed <em>{mnirs}</em> functionality to process and analyse repeated occlusion muscle OxCap data. In the future, this could be wrapped into a single convenience function, but the current process is already considerably simpler and more robust than methods relying on manual data cleaning, manual interval selection, and iterative (e.g. Excel macro) curve fitting.</p>
+</section><section class="level2"><h3 id="analysis-plan">Analysis plan<a class="anchor" aria-label="anchor" href="#analysis-plan"></a>
+</h3>
+<p>For OxCap analysis, we will perform roughly 8 steps:</p>
+<ol type="1">
+<li>Import an example mNIRS file with the repeated occlusions procedure.</li>
+<li>Process/clean data, as needed (minimal in this example).</li>
+<li>Iteratively correct NIRS values for changes in blood volume, a required step to ensure valid analysis.</li>
+<li>Specify occlusion events in the data and extract a 5-sec interval for each occlusion.</li>
+<li>Find the peak 3-sec linear regression NIRS slope within each occlusion interval.</li>
+<li>Fit a monoexponential curve across NIRS slope observations for both repeated occlusion trials.</li>
+<li>Extract the rate constant (<em>k</em>) for each trial exponential curve.</li>
+<li>Plot the modelled data.</li>
+</ol></section></section><section class="section level2"><h2 id="oxidative-capacity-analysis-with-mnirs">Oxidative capacity analysis with <em>{mnirs}</em>
+<a class="anchor" aria-label="anchor" href="#oxidative-capacity-analysis-with-mnirs"></a>
 </h2>
-<p>The included example file has three NIRS channels and a column with sample number, which will automatically be converted to a time value when the <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> function recognises the <em>Artinis Oxysoft</em> export format and sample rate (10 Hz). The file does not need to be cleaned for outliers or digitally filtered, so minimal pre-processing is required.</p>
-<p>One thing to note: <em>Artinis Oxysoft</em> exports an event label column without a named header by default. This is the column we will use to identify our occlusion events by the label <em>“Occlusion”</em>, so we need to include it. Currently in {mnirs} an unnamed column like this will be named <code>"col_"</code> with a numeric suffix for the column number in the data file. In our example file, this events column will therefore be <code>"col_6"</code>. It’s not the most elegant solution, but it works for now!</p>
-<p>We can separate the two trials in the data set by finding the longer gap between consecutive occlusion labels and manually defining intervals before that as trial 1, and after that as trial 2.</p>
-<div class="cell" data-layout-align="center">
+<p>This article serves as a vignette for some of the kinetics analysis functions recently added to <em>{mnirs}</em>, and how they combine to perform robust OxCap analysis.</p>
+<ul>
+<li><p><code><a href="../reference/correct_blood_volume.html">correct_blood_volume()</a></code> normalises values for oxy[haem], deoxy[haem], and total[haem] channels (if present), using an iterative method developed from <span class="citation" data-cites="Beever2020">Beever et al. (<a href="#ref-Beever2020" role="doc-biblioref">2020</a>)</span> that properly accommodates negative values. See <code><a href="../reference/correct_blood_volume.html">?correct_blood_volume</a></code> for details.</p></li>
+<li><p><code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> detects specific events or times in an <em>“mnirs”</em> data frame, extracts an interval around each one, and returns a list of data frames. The returned list of data frames is ready for further analysis. See <code><a href="../reference/extract_intervals.html">?extract_intervals</a></code> for details.</p></li>
+<li>
+<p><code><a href="../reference/analyse_kinetics.html">analyse_kinetics()</a></code> evaluates mNIRS response kinetics from a single <em>“mnirs”</em> data frame or a list of data frames, with a selection of parametric and non-parametric methods. It returns a formatted table of model results, with internal model components retrieved with <code>results$...</code>. See <code><a href="../reference/analyse_kinetics.html">?analyse_kinetics</a></code> for details.<br><br>
+We will use this function twice for OxCap analysis:</p>
+<ul>
+<li><p><code>analyse_kinetics(method = "peak_slope")</code> finds the peak linear regression slopes on deoxy[haem] from the extracted occlusion intervals. The steepest (positive or negative) slope is often interpreted as the point of greatest mismatch between O<sub>2</sub> supply and extraction. See <code><a href="../reference/peak_slope.html">?peak_slope</a></code> for details on the vector-level function called by <code><a href="../reference/analyse_kinetics.html">analyse_kinetics()</a></code>.</p></li>
+<li><p><code>analyse_kinetics(method = "monoexponential")</code> then fits an exponential curve through the resulting slope values over time, to find the rate constant <em>k</em>. A self-starting function <code><a href="../reference/SSmonoexponential.html">SSmonoexponential()</a></code> is fit with <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">stats::nls()</a></code>, called as either a <strong>4-parameter</strong> model with a time-delay parameter (<em>TD</em>), or a reduced <strong>3-parameter</strong> model without <em>TD</em> where response onset is expected to be immediate. See <code><a href="../reference/monoexponential.html">?monoexponential</a></code> and <code><a href="../reference/SSmonoexponential.html">?SSmonoexponential</a></code> for details.</p></li>
+</ul>
+</li>
+</ul>
+<section class="level2"><h3 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
+</h3>
+<p>First, load our packages and initial setup options.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span>   <span class="co">## for convenient data wrangling</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span> <span class="co">## for plotting</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://jemarnold.github.io/mnirs/">mnirs</a></span><span class="op">)</span>   <span class="co">## install: pak::pak("jemarnold/mnirs@dev")</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span>mnirs.verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">## silence mnirs messages</span></span></code></pre></div>
+</div>
+<div>
+<blockquote>
+<p><strong>Acknowledgement</strong></p>
+<p>I received this example file from <a href="https://scholar.google.com/citations?user=A9JwQbYAAAAJ&amp;hl=en" target="_blank" class="external-link">Dr. Thomas Tripp</a>, currently a postdoctoral fellow in <a href="https://scholar.google.com/citations?hl=en&amp;user=tJepNIQAAAAJ" target="_blank" class="external-link">Dr. Martin MacInnis</a>’ lab at the University of Calgary. They have kindly allowed me to include this file with the <em>{mnirs}</em> package for users to examine themselves.</p>
+<p>It can be accessed by calling <code>example_mnirs("portamon_oxcap")</code>.</p>
+</blockquote>
+</div>
+</section></section><section class="section level2"><h2 id="read-mnirs-data-file">Read <em>{mnirs}</em> data file<a class="anchor" aria-label="anchor" href="#read-mnirs-data-file"></a>
+</h2>
+<p>The included example file has three NIRS channels and a sample-number column, automatically converted to a time value by <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code>. The file needs no other pre-processing steps.</p>
+<p>Note: by default, <em>Artinis Oxysoft</em> exports an event label column without a named header. <code><a href="../reference/read_mnirs.html">read_mnirs()</a></code> renames this to <em>“labels”</em>. This is the column we will use to identify occlusion events by the label <em>“Occlusion”</em>.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
-<span>    file_path <span class="op">=</span> <span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"portamon-oxcap.xlsx"</span><span class="op">)</span>,</span>
-<span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>thb <span class="op">=</span> <span class="fl">2</span>, hhb <span class="op">=</span> <span class="fl">3</span>, o2hb <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>, <span class="co">## identify and rename NIRS channels</span></span>
-<span>    event_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>event <span class="op">=</span> <span class="st">"col_6"</span><span class="op">)</span> <span class="co">## specify the unnamed events column</span></span>
+<code class="sourceCode R"><span><span class="co">## identify and rename channels, including the event label column</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
+<span>    file_path     <span class="op">=</span> <span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"portamon_oxcap.xlsx"</span><span class="op">)</span>,</span>
+<span>    nirs_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>thb <span class="op">=</span> <span class="fl">2</span>, hhb <span class="op">=</span> <span class="fl">3</span>, o2hb <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    event_channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>event <span class="op">=</span> <span class="st">"labels"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">## view the structure of our data frame</span></span>
-<span><span class="va">df</span></span>
-<span><span class="co">#&gt; # A tibble: 7,944 × 6</span></span>
-<span><span class="co">#&gt;    sample  time event   thb   hhb  o2hb</span></span>
-<span><span class="co">#&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1      0   0   &lt;NA&gt;   146.  63.0  82.9</span></span>
-<span><span class="co">#&gt;  2      1   0.1 &lt;NA&gt;   146.  63.0  82.8</span></span>
-<span><span class="co">#&gt;  3      2   0.2 &lt;NA&gt;   146.  63.0  82.8</span></span>
-<span><span class="co">#&gt;  4      3   0.3 &lt;NA&gt;   146.  63.0  82.9</span></span>
-<span><span class="co">#&gt;  5      4   0.4 &lt;NA&gt;   146.  63.0  82.7</span></span>
-<span><span class="co">#&gt;  6      5   0.5 &lt;NA&gt;   146.  62.9  82.6</span></span>
-<span><span class="co">#&gt;  7      6   0.6 &lt;NA&gt;   146.  62.9  82.7</span></span>
-<span><span class="co">#&gt;  8      7   0.7 &lt;NA&gt;   146.  62.9  82.8</span></span>
-<span><span class="co">#&gt;  9      8   0.8 &lt;NA&gt;   146.  62.9  82.7</span></span>
-<span><span class="co">#&gt; 10      9   0.9 &lt;NA&gt;   146.  62.9  82.7</span></span>
-<span><span class="co">#&gt; # ℹ 7,934 more rows</span></span>
+<span><span class="va">df</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="co">#&gt; # A tibble: 7,944 × 6</span></span>
+<span><span class="co">#&gt;     time sample event   thb   hhb  o2hb</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1   0        0 &lt;NA&gt;   146.  63.0  82.9</span></span>
+<span><span class="co">#&gt;  2   0.1      1 &lt;NA&gt;   146.  63.0  82.8</span></span>
+<span><span class="co">#&gt;  3   0.2      2 &lt;NA&gt;   146.  63.0  82.8</span></span>
+<span><span class="co">#&gt;  4   0.3      3 &lt;NA&gt;   146.  63.0  82.9</span></span>
+<span><span class="co">#&gt;  5   0.4      4 &lt;NA&gt;   146.  63.0  82.7</span></span>
+<span><span class="co">#&gt;  6   0.5      5 &lt;NA&gt;   146.  62.9  82.6</span></span>
+<span><span class="co">#&gt;  7   0.6      6 &lt;NA&gt;   146.  62.9  82.7</span></span>
+<span><span class="co">#&gt;  8   0.7      7 &lt;NA&gt;   146.  62.9  82.8</span></span>
+<span><span class="co">#&gt;  9   0.8      8 &lt;NA&gt;   146.  62.9  82.7</span></span>
+<span><span class="co">#&gt; 10   0.9      9 &lt;NA&gt;   146.  62.9  82.7</span></span>
+<span><span class="co">#&gt; # ℹ 7,934 more rows</span></span></code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## plot the two trial start events</span></span>
+<span><span class="va">trial_times</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">time</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Trial Start"</span>, <span class="va">df</span><span class="op">$</span><span class="va">event</span><span class="op">)</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co">## "Occlusion" is our pre-specified event string in our events column</span></span>
-<span><span class="co">## find each occlusion event, find where there is a longer gap</span></span>
-<span><span class="co">## the number of occlusions before this should be in the first trial</span></span>
-<span><span class="va">df_occlusions</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Occlusion"</span>, <span class="va">df</span><span class="op">$</span><span class="va">event</span><span class="op">)</span>, <span class="op">]</span></span>
-<span><span class="va">n_occlusions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="va">df_occlusions</span><span class="op">$</span><span class="va">time</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">60</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">trial_times</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="oxcap-analysis_files/figure-html/read%20file%20and%20pre-process-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+<div>
+<figure><p><img src="oxcap-analysis_files/figure-html/plot%20trials-1.png" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>The two exercise bouts and repeated occlusion trials can clearly be identified from plotting the raw data. A few resting occlusions were also performed at the start of the file, but we will ignore those and just model the two repeated occlusion trials.</p>
+<p>The two repeated occlusion trials are clearly identifiable from the raw data plot. A few resting occlusions were also performed at the start of the file, which we will ignore for now.</p>
 </section><section class="section level2"><h2 id="correct-for-blood-volume">Correct for blood volume<a class="anchor" aria-label="anchor" href="#correct-for-blood-volume"></a>
 </h2>
-<p>A necessary processing step before analysing the OxCap trials is to apply a correction to the NIRS channels for changes in blood volume during the repeated occlusions. This step has been shown to improve validity when taking slopes of the oxy- or deoxyhaeme channels <span class="citation" data-cites="Ryan2012">[<a href="#ref-Ryan2012" role="doc-biblioref">8</a>]</span>.</p>
-<p>The preferred method is to iteratively correct for instantaneous changes in oxygenation between samples, according to Beever et al, 2020 <span class="citation" data-cites="Beever2020">[<a href="#ref-Beever2020" role="doc-biblioref">1</a>]</span>.</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        <span class="co">## blood volume correction factor `beta`</span></span>
-<span>        beta <span class="op">=</span> <span class="va">o2hb</span> <span class="op">/</span> <span class="op">(</span><span class="va">o2hb</span> <span class="op">+</span> <span class="va">hhb</span><span class="op">)</span>,</span>
-<span>        <span class="co">## iteratively correct NIRS values from one sample to the next</span></span>
-<span>        o2hb <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/accumulate.html" class="external-link">accumulate</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>, \<span class="op">(</span><span class="va">prev</span>, <span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
-<span>            <span class="va">prev</span> <span class="op">+</span> <span class="op">(</span><span class="va">o2hb</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">o2hb</span><span class="op">[</span><span class="va">i</span> <span class="op">-</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="va">beta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="op">(</span><span class="va">thb</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">thb</span><span class="op">[</span><span class="va">i</span> <span class="op">-</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span>            <span class="op">}</span>, .init <span class="op">=</span> <span class="fl">0</span></span>
-<span>        <span class="op">)</span>,</span>
-<span>        hhb <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/accumulate.html" class="external-link">accumulate</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/context.html" class="external-link">n</a></span><span class="op">(</span><span class="op">)</span>, \<span class="op">(</span><span class="va">prev</span>, <span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
-<span>            <span class="va">prev</span> <span class="op">+</span> <span class="op">(</span><span class="va">hhb</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">hhb</span><span class="op">[</span><span class="va">i</span> <span class="op">-</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span> <span class="op">-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">beta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">thb</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">-</span> <span class="va">thb</span><span class="op">[</span><span class="va">i</span> <span class="op">-</span> <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span>            <span class="op">}</span>, .init <span class="op">=</span> <span class="fl">0</span></span>
-<span>        <span class="op">)</span>,</span>
-<span>        <span class="co">## thb corrected for changes in blood volume becomes equal to zero</span></span>
-<span>        thb <span class="op">=</span> <span class="va">o2hb</span> <span class="op">+</span> <span class="va">hhb</span>,</span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span><span class="co">## plot corrected data with occlusion event indicators</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">df_occlusions</span><span class="op">$</span><span class="va">time</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></code></pre></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="oxcap-analysis_files/figure-html/blood%20volume%20correction-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>This results in a symmetrical distribution of oxy- and deoxyhaeme, with the sum total (total-haeme; THb) equal to zero at all samples.</p>
-<p>We can also plot occlusion event indicators (vertical dotted lines) to confirm timing and detect any missed/extra events.</p>
-</section><section class="section level2"><h2 id="extract-occlusion-intervals">Extract occlusion intervals<a class="anchor" aria-label="anchor" href="#extract-occlusion-intervals"></a>
-</h2>
-<p>The next step is to identify these occlusion events and extract the interval around each, into a list of data frames which we can continue to analyse iteratively.</p>
-<section class="level3"><h4 id="extract_intervals">
-<code>extract_intervals()</code><a class="anchor" aria-label="anchor" href="#extract_intervals"></a>
-</h4>
+<p>Before analysing the OxCap trials, the NIRS channels must be corrected for changes in blood volume during the repeated occlusions. This ensures validity when evaluating NIRS slopes <span class="citation" data-cites="Ryan2012">(<a href="#ref-Ryan2012" role="doc-biblioref">Ryan et al., 2012</a>)</span>.</p>
+<p>The preferred method proposed by <span class="citation" data-cites="Beever2020">Beever et al. (<a href="#ref-Beever2020" role="doc-biblioref">2020</a>)</span> iteratively corrects for instantaneous changes in oxygenation between samples. <code><a href="../reference/correct_blood_volume.html">correct_blood_volume()</a></code> implements this method, further developed to accommodate negative NIRS values, which can be reported by some mNIRS devices.</p>
+<section class="level2"><h3 id="correct_blood_volume">
+<code>correct_blood_volume()</code><a class="anchor" aria-label="anchor" href="#correct_blood_volume"></a>
+</h3>
 <ul>
 <li>
 <p><code>data</code></p>
-<p>This function takes in a data frame, applies processing to all channels specified, then returns a list of processed data frames. <em>“mnirs”</em> metadata will be passed to and from this function.<br><br>
-For this analysis, we will re-join the returned list of data frames into a combined data frame with a grouping variable labelled “interval”.</p>
+<p>This function takes a data frame (or a list of data frames), corrects the specified NIRS channels for changes in blood volume (<em>Δtotal[haem]</em>), and returns the data frame with the corrected <code>nirs_channels</code>.<br><br>
+These channels cannot be read automatically from <em>“mnirs”</em> metadata, to avoid ambiguity. The corrected channels are passed on in metadata as <code>nirs_channels</code> for further analysis.</p>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">df</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/correct_blood_volume.html">correct_blood_volume</a></span><span class="op">(</span></span>
+<span>        oxy_channel   <span class="op">=</span> <span class="va">o2hb</span>,</span>
+<span>        deoxy_channel <span class="op">=</span> <span class="va">hhb</span>,</span>
+<span>        total_channel <span class="op">=</span> <span class="va">thb</span></span>
+<span>    <span class="op">)</span></span>
+<span></span>
+<span><span class="co">## plot corrected data with occlusion event indicators</span></span>
+<span><span class="va">occl_times</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">time</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"Occlusion"</span>, <span class="va">df</span><span class="op">$</span><span class="va">event</span><span class="op">)</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df</span>, label_time <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">occl_times</span>, linetype <span class="op">=</span> <span class="st">"dotted"</span>, alpha <span class="op">=</span> <span class="fl">0.4</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure><p><img src="oxcap-analysis_files/figure-html/blood%20volume%20correction-1.png" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This correction results in a symmetrical distribution of oxy- and deoxy[haem], with the sum total (total[haem]; THb) definitionally equal to zero at all samples.</p>
+<p>Occlusions from the labels in <code>event_channel</code> are also plotted (vertical dotted lines) to visually confirm timing and detect any erroneous events.</p>
+</section></section><section class="section level2"><h2 id="extract-occlusion-intervals">Extract occlusion intervals<a class="anchor" aria-label="anchor" href="#extract-occlusion-intervals"></a>
+</h2>
+<p>The next step is to detect and extract each interval around these occlusion event labels into a data frame for iterative kinetics analysis. We will also need to split the analysis into the two discrete trials.</p>
+<section class="level2"><h3 id="extract_intervals">
+<code>extract_intervals()</code><a class="anchor" aria-label="anchor" href="#extract_intervals"></a>
+</h3>
+<ul>
+<li>
+<p><code>data</code></p>
+<p>This function takes a data frame or list of data frames, and returns a list of data frames, named per detected interval. <em>“mnirs”</em> metadata is passed to and from this function.</p>
 </li>
 <li>
 <p><code>nirs_channels</code>, <code>time_channel</code>, <code>event_channel</code>, &amp; <code>sample_rate</code></p>
-<p>Specify which column names in <code>data</code> will be processed. <code>nirs_channels</code> are the response variables; <code>time_channel</code> is the time series variable; <code>event_channel</code> specifies where to look for event labels; and <code>sample_rate</code> specifies the recording rate used when ensemble-averaging across intervals with unequal time samples. If any arguments are not specified, they will be retrieved from <em>“mnirs”</em> metadata. Channels in the data but not explicitly specified will be passed through unprocessed to the returned data frames.<br><br>
-We will analyse OxCap from the deoxyhaeme (HHb) NIRS signal, which is often recommended <span class="citation" data-cites="Costalat2025">[<a href="#ref-Costalat2025" role="doc-biblioref">6</a>]</span>.</p>
+<p>Specify which column names in <code>data</code> will be processed. <code>nirs_channels</code> are the response variables; <code>time_channel</code> is the predictor variable; <code>event_channel</code> specifies where to look for events as either character labels or integer laps; and <code>sample_rate</code> carries the exported samples-per-second rate used when ensemble-averaging across intervals. Arguments left unspecified are retrieved from <em>“mnirs”</em> metadata by default.<br><br>
+We will analyse OxCap from the deoxy[haem] (<em>“HHb”</em>) NIRS signal, as recommended <span class="citation" data-cites="Costalat2025">(<a href="#ref-Costalat2025" role="doc-biblioref">Costalat et al., 2025</a>)</span>.</p>
 </li>
 <li>
 <p><code>start</code> &amp; <code>end</code></p>
-<p>Interval boundaries are specified using helper functions: <code><a href="../reference/by_time.html">by_time()</a></code> for <code>time_channel</code> values; <code><a href="../reference/by_time.html">by_label()</a></code> for <code>event_channel</code> labels; or <code><a href="../reference/by_time.html">by_sample()</a></code> for sample indices (row numbers). Provide both <code>start</code> and <code>end</code> to define precise intervals, or provide <code>start</code> alone with <code>span</code> to extract windows around events.<br><br>
-Once again, in this example data file, the occlusions are all identified by the event label <em>“Occlusion”</em>. This makes it very simple to detect this string in the <code>event</code> column as the <code>start</code> value to extract each interval.<br><br>
-Detecting intervals by event labels must match a full string exactly or use a regular expression (regex) string such as <em>“(?i)occlusions?”</em> or <em>“start|end”</em>.</p>
+<p>Interval boundaries are specified using helper functions: <code><a href="../reference/by_time.html">by_time()</a></code> for <code>time_channel</code> values; <code><a href="../reference/by_time.html">by_label()</a></code> for <code>event_channel</code> labels; <code><a href="../reference/by_time.html">by_lap()</a></code> for lap indices in <code>event_channel</code>; or <code><a href="../reference/by_time.html">by_sample()</a></code> for sample indices (row numbers). Provide both <code>start</code> and <code>end</code> to define precise intervals, or <code>start</code> alone with <code>span</code> to extract a window around events (see below).<br><br>
+Since the occlusions are all identified by the event label <em>“Occlusion”</em>, we can look for this string as the <code>start</code> value to extract each interval.<br><br>
+Event labels are matched as regular expressions (regex) by default, so a partial string will match. Use <code>fixed = TRUE</code> for literal matching, or <code>ignore_case = TRUE</code> to match case-insensitively.</p>
+</li>
+<li>
+<p><code>group_intervals</code></p>
+<p>Multiple events can be extracted for analysis as <em>“distinct”</em> intervals, or <em>“ensemble”</em>-averaged together. Different groupings can be ensemble-averaged by providing a list of intervals by number, e.g. <code>list(c(1, 2), c(3, 4))</code>.<br><br>
+For manual grouping, interval numbers must be known ahead of time and always refer to order of occurrence in the data frame (sorted by <code>time_channel</code>). For this example, we analyse each interval separately using the default <code>group_intervals = "distinct"</code>.</p>
 </li>
 <li>
 <p><code>span</code></p>
-<p>When only <code>start</code> (or <code>end</code>) is provided, <code>span</code> specifies a time window in units of <code>time_channel</code> as <code>c(before, after)</code>, where positive values indicate time after the event and negative values indicate time before. When both <code>start</code> and <code>end</code> are provided, <code>span</code> shifts boundaries additively: <code>span[1]</code> adjusts starts, <code>span[2]</code> adjusts ends.<br><br>
-All occlusion bouts were held for 5-seconds in this protocol. If the occlusion duration changed across the protocol, we might have to specify a list of time spans, rather than a single <code>span</code> as in this case.<br><br>
-From visual investigation of the plots, we were able to see that in the first ~0.5 sec after the occlusion label, the deoxyhaeme signal was disrupted by the inflation of the cuff, which might produce invalid slope values. So we will specify a time span of <code>c(1, 5)</code>, i.e. from 1 to 5 seconds after each <em>“Occlusion”</em> event label. If we wanted to include an interval before the event label, we could specify a negative numeric value, e.g. <code>c(-2.5, 2.5)</code> to include a 5-sec span centred on the label itself.</p>
-</li>
-<li>
-<p><code>event_groups</code></p>
-<p>Multiple events can be extracted for analysis as <code>"distinct"</code> intervals, or <code>"ensemble"</code>-averaged together. Different groupings of intervals can be ensemble-averaged by providing a list of numeric vectors specifying event intervals by number to ensemble-average or return as distinct; e.g. <code>list(c(1, 2), c(3, 4))</code>.<br><br>
-The interval numbers need to be known ahead of time and always refer to their order of occurrence in the data frame (i.e., sorted by <code>time_channel</code>). Any event intervals detected but not supplied by number will be included as distinct data frames.</p>
+<p>A two-element vector of <code>time_channel</code> values specifying a time window <code>c(start, end)</code> in units of <code>time_channel</code>, where positive values indicate time after the event bound and negative values indicate time before. <code>span[1]</code> shifts the start bound, <code>span[2]</code> shifts the end bound, respectively.<br><br>
+Since all occlusion bouts were held for 5 s, we use a 5-sec time span. If occlusion duration changed through the protocol, we could specify a list of time spans (<code>span = list()</code>); here a single vector is recycled.<br><br>
+Visual inspection (not shown) revealed that the deoxy[haem] signal was disrupted by cuff inflation during the first 0.5-1.0 sec of each occlusion interval, which might influence slope values. We therefore exclude the first second with <code>span = c(1, 5)</code>, i.e. extract from 1-sec to 5-sec after each <em>“Occlusion”</em> label.</p>
 </li>
 <li>
 <p><code>zero_time</code></p>
-<p>The time values for each event interval can be recalculated to start from zero at the event indicator. Time values for ensemble-averaged intervals will always be re-calculated from zero, since the original time information is lost when ensembling.<br><br>
-For repeated occlusion testing, the original time information for each occlusion interval is critical to subsequently model the exponential recovery function, so we keep this as <code>FALSE</code>.</p>
+<p>Time values for each event interval can be recalculated to start from zero at the event indicator. Ensemble-averaged intervals are always rebased to zero, since original time values are obsolete when ensembling.<br><br>
+For repeated occlusion testing, the original time information per interval is needed to subsequently model the exponential recovery function, so we keep <code>zero_time = FALSE</code>.</p>
 </li>
 </ul>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## identify and extract intervals by event label "Occlusion"</span></span>
-<span><span class="co">## re-join the returned list of data frames </span></span>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## extract all occlusion events from the data at once</span></span>
+<span><span class="co">## we can specify the two-trial structure later</span></span>
+<span><span class="co">## extract intervals in a 1-5 sec span after each event</span></span>
 <span><span class="va">df_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
-<span>    <span class="va">df</span>,</span>
-<span>    start <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_label</a></span><span class="op">(</span><span class="st">"Occlusion"</span><span class="op">)</span>, <span class="co">## event label used in file</span></span>
-<span>    event_groups <span class="op">=</span> <span class="st">"distinct"</span>, <span class="co">## return each occlusion event separately</span></span>
-<span>    span <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="co">## interval c(start, end) around each event time value</span></span>
-<span>    zero_time <span class="op">=</span> <span class="cn">FALSE</span> <span class="co">## preserve original time values at each event</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">## join back into a single grouped data frame</span></span>
-<span><span class="co">## only necessary for easier plotting</span></span>
-<span><span class="va">df_grouped</span> <span class="op">&lt;-</span> <span class="va">df_list</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span>names_to <span class="op">=</span> <span class="st">"interval"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co">## convert the "interval" column to a categorical factor</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>interval <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">interval</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">interval</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co">## add "mnirs" metadata back to the combined data frame, for plotting</span></span>
-<span>    <span class="fu"><a href="../reference/create_mnirs_data.html">create_mnirs_data</a></span><span class="op">(</span></span>
-<span>        <span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">df_list</span><span class="op">[[</span><span class="fl">1L</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"nirs_channels"</span>, <span class="st">"time_channel"</span><span class="op">)</span><span class="op">]</span></span>
+<span>        <span class="va">df</span>,</span>
+<span>        group_intervals <span class="op">=</span> <span class="st">"distinct"</span>,</span>
+<span>        start           <span class="op">=</span> <span class="fu"><a href="../reference/by_time.html">by_label</a></span><span class="op">(</span><span class="st">"Occlusion"</span><span class="op">)</span>,</span>
+<span>        span            <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>, <span class="co">## span in reference to `start` times</span></span>
+<span>        zero_time       <span class="op">=</span> <span class="cn">FALSE</span>    <span class="co">## preserve original time values</span></span>
 <span>    <span class="op">)</span></span>
 <span></span>
-<span><span class="co">## visualise facet plot with all occlusion intervals for error checking</span></span>
-<span><span class="co">## the steepest facets will be the first occlusions from the two trials</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df_grouped</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
-<span>        strip.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>        strip.background <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>        strip.placement <span class="op">=</span> <span class="st">"outside"</span>,</span>
-<span>        axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_wrap.html" class="external-link">facet_wrap</a></span><span class="op">(</span><span class="op">~</span><span class="va">interval</span>, scales <span class="op">=</span> <span class="st">"free_x"</span>, nrow <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">## visualise all occlusion intervals for error checking</span></span>
+<span><span class="co">## expecting 2 x 16 = 32 total</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">df_list</span>, ncol <span class="op">=</span> <span class="fl">8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.ticks.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="oxcap-analysis_files/figure-html/extract%20intervals-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+<div>
+<figure><p><img src="oxcap-analysis_files/figure-html/extract%20intervals-1.png" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>We can plot the sequence of extracted occlusion intervals to visually inspect the data. As expected, the first interval during each repeated occlusion trial appears the steepest, with the slope rapidly becoming less steep during each subsequent occlusion as mV̇O<sub>2</sub> recovers.</p>
-<p>From here, we want to calculate the slope values for each of these occlusion intervals.</p>
+<p>As expected, on visual inspection the first intervals in each repeated occlusion trial (<em>interval_1</em> and <em>interval_17</em>) are the steepest, becoming progressively less steep at each subsequent occlusion as mV̇O<sub>2</sub> recovers.</p>
+<p>Next, we calculate the slope value for each occlusion interval.</p>
 </section></section><section class="section level2"><h2 id="calculate-occlusion-slopes">Calculate occlusion slopes<a class="anchor" aria-label="anchor" href="#calculate-occlusion-slopes"></a>
 </h2>
-<section class="level3"><h4 id="peak_slope">
-<code>peak_slope()</code><a class="anchor" aria-label="anchor" href="#peak_slope"></a>
-</h4>
+<section class="level2"><h3 id="analyse_kinetics">
+<code>analyse_kinetics()</code><a class="anchor" aria-label="anchor" href="#analyse_kinetics"></a>
+</h3>
 <ul>
 <li>
-<p><code>x</code>, <code>t</code></p>
-<p>This function takes in a vector of numeric data (<code>x</code>) and optional time values (<code>t</code>), processes the response variable <code>x</code> to find the peak local linear regression slope over the predictor variable <code>t</code> (defaults to sample number if not provided), and returns a list of parameters from that linear regression model.</p>
+<p><code>data</code></p>
+<p>This function takes a data frame or list of data frames, analyses all channels separately, and returns a single formatted table of results. Model components such as coefficients, fitted data frames, intake metadata, and diagnostics can be retrieved from results metadata with <code>results$...</code>.</p>
 </li>
 <li>
+<p><code>nirs_channels</code> &amp; <code>time_channel</code></p>
+<p>If the data contain <em>“mnirs”</em> metadata, these are detected automatically; otherwise they can be specified explicitly.</p>
+</li>
+<li>
+<p><code>start_time</code>, <code>direction</code>, &amp; <code>end_window</code></p>
+<p>These arguments apply to every method. <code>start_time</code> marks the response onset. When intervals come from <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code>, it is retrieved automatically from <em>“mnirs”</em> metadata. Otherwise it defaults to the first non-negative time value (i.e. <code>0</code>).<br><br><code>direction</code> detects whether the response rises (<em>“positive”</em>) or falls (<em>“negative”</em>), and defaults to <em>“auto”</em>. For parametric fits it also constrains the expected response direction, in case of ambiguous kinetics. For deoxy[haem], we specify <code>direction = "positive"</code>, since deoxygenation increases during occlusions.<br><br><code>end_window</code> defines the end of the fitting window by looking forward for a reasonable end time, taking the first peak or trough (for rising or falling response, respectively) with no more extreme value within that span. The default <code>end_window = Inf</code> uses the global extreme across the whole interval, appropriate for these short occlusion windows.</p>
+</li>
+<li>
+<p><code>method</code></p>
+<p>Multiple analysis methods are currently available. This OxCap analysis uses <em>“peak_slope”</em> and <em>“monoexponential”</em>, then <em>“exponential_drift”</em> as an exploratory extension below.</p>
+</li>
+</ul>
+<section class="level3"><h4 id="analyse-peak-slope-kinetics">Analyse peak slope kinetics<a class="anchor" aria-label="anchor" href="#analyse-peak-slope-kinetics"></a>
+</h4>
+<ul>
+<li><code>method = "peak_slope"</code></li>
+</ul>
+<p>The <strong>peak slope</strong> method is a <em>semi-parametric</em> approach: it fits a linear regression model across a rolling local window, returning the single steepest slope along with the time at which it occurs. For OxCap analysis, the steepest local rate of deoxygenation is interpreted as the point of greatest mismatch between O<sub>2</sub> delivery and extraction — a proxy for mV̇O<sub>2</sub> during each occlusion.</p>
+<ul>
+<li>
 <p><code>width</code>, <code>span</code></p>
-<p>Linear regression is performed within a rolling local window specified by one of either <code>width</code> or <code>span</code>. <code>width</code> defines a number of samples, whereas <code>span</code> defines a range of time in units of <code>time_channel</code>.<br><br>
-For this occlusion protocol, the peak 3-sec slope will be extracted from each 5-sec occlusion interval.</p>
+<p>The local window is specified by either <code>width</code> (a number of samples) or <code>span</code> (a range of time in units of <code>time_channel</code>). Here we want the peak slope from a 3-sec span within each occlusion interval.</p>
 </li>
 <li>
 <p><code>align</code></p>
-<p>The local rolling linear regression window can be <code>"centre"</code>-aligned around the target sample (<code>idx</code>), or it can be <code>"left"</code>-aligned with <code>idx</code> at the start of the window (forward-looking), or <code>"right"</code>-aligned with <code>idx</code> at the end of the window (backward-looking).</p>
-</li>
-<li>
-<p><code>direction</code></p>
-<p>By default, the peak positive (upward) or negative (downward) slope will be returned depending on the overall trend direction of the response variable <code>x</code>. This can be overridden by specifying either <code>"positive"</code> or <code>"negative"</code>.<br><br>
-For processing deoxyhaeme, we will specify that the peak slope during occlusion should be positive, because deoxygenation increases.</p>
+<p>The window can be <em>“centre”</em>-aligned around the target sample (<code>idx</code>), <em>“left”</em>-aligned with <code>idx</code> at the start (forward-looking), or <em>“right”</em>-aligned with <code>idx</code> at the end (backward-looking). We keep the default <code>align = "centre"</code>.</p>
 </li>
 <li>
 <p><code>partial</code></p>
-<p>By default, a local window will only return a linear regression model if all samples within the window are valid. If <code>partial</code> is set to <code>TRUE</code>, then local windows will return a slope model as long as there are two or more valid samples.<br><br>
-A window with fewer samples will tend to return steeper slope values, which may or may not be relevant to our interpretations. e.g., as an edge-case (literally at the edges of the data) in a noisy data set there may be two samples with an extreme local slope between them. We usually would want to ignore this outlier slope value.</p>
+<p>By default, a local window only returns a linear regression model if all samples within it are valid. If <code>partial = TRUE</code>, windows return a slope model as long as two or more samples are available.<br><br>
+Windows with fewer samples tend to return steeper slopes, which may not be relevant to our interpretation — e.g. at the edges of a noisy dataset, two samples alone can produce an extreme local slope that we would usually want to ignore.</p>
 </li>
 </ul>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## iteratively find peak local slopes within each occlusion interval</span></span>
-<span><span class="co">## return summary values for each factor level of "interval" grouping column</span></span>
-<span><span class="va">slopes_df</span> <span class="op">&lt;-</span> <span class="va">df_grouped</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe</a></span><span class="op">(</span></span>
-<span>        .by <span class="op">=</span> <span class="va">interval</span>,</span>
-<span>        <span class="op">{</span></span>
-<span>            <span class="va">slope_params</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/peak_slope.html">peak_slope</a></span><span class="op">(</span></span>
-<span>                x <span class="op">=</span> <span class="va">hhb</span>, <span class="co">## response variable: deoxyhaeme</span></span>
-<span>                t <span class="op">=</span> <span class="va">time</span>, <span class="co">## predictor variable: time in seconds</span></span>
-<span>                span <span class="op">=</span> <span class="fl">3</span>, <span class="co">## steepest 3 sec slope</span></span>
-<span>                align <span class="op">=</span> <span class="st">"left"</span>, <span class="co">## forward-looking from index sample</span></span>
-<span>                direction <span class="op">=</span> <span class="st">"positive"</span>, <span class="co">## upward slope for hhb</span></span>
-<span>                partial <span class="op">=</span> <span class="cn">FALSE</span> <span class="co">## allow only complete 3-sec segments, no NAs</span></span>
-<span>            <span class="op">)</span></span>
-<span>            <span class="co">## return time value (start time of 3-sec period) and slope value (μM/sec)</span></span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>                time <span class="op">=</span> <span class="va">slope_params</span><span class="op">$</span><span class="va">t</span>,</span>
-<span>                slope <span class="op">=</span> <span class="va">slope_params</span><span class="op">$</span><span class="va">slope</span></span>
-<span>            <span class="op">)</span></span>
-<span>        <span class="op">}</span></span>
-<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        <span class="co">## manual factor by occlusions in each trial</span></span>
-<span>        trial <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/if_else.html" class="external-link">if_else</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_occlusions</span><span class="op">)</span>, <span class="fl">1L</span>, <span class="fl">2L</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        <span class="co">## recalculate time as starting from zero for each trial</span></span>
-<span>        .by <span class="op">=</span> <span class="va">trial</span>,</span>
-<span>        time <span class="op">=</span> <span class="va">time</span> <span class="op">-</span> <span class="va">time</span><span class="op">[</span><span class="fl">1L</span><span class="op">]</span>,</span>
-<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">trial</span>, <span class="va">time</span>, <span class="va">slope</span><span class="op">)</span></span>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## find peak 3-sec hhb slopes within each occlusion interval</span></span>
+<span><span class="va">slope_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyse_kinetics.html">analyse_kinetics</a></span><span class="op">(</span></span>
+<span>    <span class="va">df_list</span>,</span>
+<span>    nirs_channels <span class="op">=</span> <span class="va">hhb</span>,</span>
+<span>    time_channel  <span class="op">=</span> <span class="va">time</span>,</span>
+<span>    method        <span class="op">=</span> <span class="st">"peak_slope"</span>,</span>
+<span>    span          <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    direction     <span class="op">=</span> <span class="st">"positive"</span>,</span>
+<span>    partial       <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## create plot template</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">slopes_df</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">slope</span>, colour <span class="op">=</span> <span class="va">trial</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/coord_cartesian.html" class="external-link">coord_cartesian</a></span><span class="op">(</span>ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_x_continuous</a></span><span class="op">(</span></span>
-<span>        name <span class="op">=</span> <span class="st">"Time (mm:ss)"</span>,</span>
-<span>        breaks <span class="op">=</span> <span class="fu"><a href="../reference/breaks_timespan.html">breaks_timespan</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>        labels <span class="op">=</span> <span class="va">format_hmmss</span></span>
-<span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.03</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="../reference/scale_colour_mnirs.html">scale_colour_mnirs</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>        y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="va">HHb</span> <span class="op">~</span> <span class="va">Slope</span> <span class="op">~</span> <span class="st">'(μM'</span> <span class="op">%.%</span> <span class="va">sec</span><span class="op">^</span><span class="st">'-1'</span> <span class="op">*</span> <span class="st">')'</span><span class="op">)</span><span class="op">)</span></span>
-<span>    <span class="op">)</span></span>
-<span></span>
-<span><span class="co">## plot observed slope values for each trial</span></span>
-<span><span class="va">p</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, size <span class="op">=</span> <span class="fl">3</span>, shape <span class="op">=</span> <span class="fl">21</span>, stroke <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">## view the formatted results</span></span>
+<span><span class="va">slope_results</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; Peak Linear Response Rate</span></span>
+<span><span class="co">#&gt;     Model Coefficients:</span></span>
+<span><span class="co">#&gt;             interval nirs_channels start_time  slope intercept peak_slope_time</span></span>
+<span><span class="co">#&gt;      1:   interval_1           hhb      213.7  1.044    -1.505             1.2</span></span>
+<span><span class="co">#&gt;      2:   interval_2           hhb      228.5 0.6122   -0.1580             1.2</span></span>
+<span><span class="co">#&gt;      3:   interval_3           hhb      243.4 0.3869   -0.7273             2.8</span></span>
+<span><span class="co">#&gt;      4:   interval_4           hhb      258.4 0.3275    -1.877             2.8</span></span>
+<span><span class="co">#&gt;      5:   interval_5           hhb      273.6 0.1902    -1.094             2.8</span></span>
+<span><span class="co">#&gt;     --- 22 rows omitted</span></span>
+<span><span class="co">#&gt;     28:  interval_28           hhb      722.0 0.2043    -2.208             2.1</span></span>
+<span><span class="co">#&gt;     29:  interval_29           hhb      736.7 0.1902    -2.110             2.8</span></span>
+<span><span class="co">#&gt;     30:  interval_30           hhb      751.5 0.1968    -4.253             2.8</span></span>
+<span><span class="co">#&gt;     31:  interval_31           hhb      766.7 0.2230    -4.138             1.8</span></span>
+<span><span class="co">#&gt;     32:  interval_32           hhb      781.3 0.1925    -3.602             2.7</span></span></code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">slope_results</span>, ncol <span class="op">=</span> <span class="fl">8</span>, label_size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>, axis.ticks.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="oxcap-analysis_files/figure-html/find%20peak%20slopes-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+<div>
+<figure><p><img src="oxcap-analysis_files/figure-html/find%20peak%20slopes-1.png" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Plotting the returned slope values gives us a very nice indication of the exponential recovery response for mV̇O<sub>2</sub> after each brief exercise task.</p>
-</section></section><section class="section level2"><h2 id="model-mvo2-recovery">Model mV̇O<sub>2</sub> recovery<a class="anchor" aria-label="anchor" href="#model-mvo2-recovery"></a>
+<div>
+<blockquote>
+<p><strong>Tip</strong></p>
+<p>Individual kinetics results can be quickly visualised with the built-in <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> function with coefficient labels (see <code><a href="../reference/plot.mnirs_kinetics.html">?plot.mnirs_kinetics</a></code>).</p>
+</blockquote>
+</div>
+<p>Next, we can recursively analyse the resulting slope coefficients with another <code><a href="../reference/analyse_kinetics.html">analyse_kinetics()</a></code> call using a <em>“monoexponential”</em> model to estimate mV̇O<sub>2</sub> recovery.</p>
+</section></section></section><section class="section level2"><h2 id="model-mvo2-recovery">Model mV̇O<sub>2</sub> recovery<a class="anchor" aria-label="anchor" href="#model-mvo2-recovery"></a>
 </h2>
-<section class="level3"><h4 id="monoexponential">
-<code>monoexponential()</code><a class="anchor" aria-label="anchor" href="#monoexponential"></a>
+<section class="level2"><h3 id="analyse_kinetics-1">
+<code>analyse_kinetics()</code><a class="anchor" aria-label="anchor" href="#analyse_kinetics-1"></a>
+</h3>
+<section class="level3"><h4 id="analyse-monoexponential-kinetics">Analyse monoexponential kinetics<a class="anchor" aria-label="anchor" href="#analyse-monoexponential-kinetics"></a>
 </h4>
 <ul>
-<li>
-<p><code>t</code></p>
-<p>This function is the equation for either a 3- or 4-parameter monoexponential function. It takes in a predictor variable for time (<code>t</code>) and generates the response variable (<code>y</code>) for an exponential curve with characteristics determined by four coefficients.</p>
-</li>
-<li>
-<p><code>A</code>, <code>B</code></p>
-<p>The starting (baseline) value and the ending (asymptote) value, respectively for the monoexponential curve. Will define either an exponential association curve in the positive direction when <code>B</code> &gt; <code>A</code>, or exponential decay in the negative direction when <code>A</code> &gt; <code>B</code>.</p>
-</li>
-<li>
-<p><code>tau</code></p>
-<p>The time constant (τ) describes the speed of the exponential transition from <code>A</code> to <code>B</code>, and is approximated by the time elapsed when the response has completed 63.2% of the total amplitude. i.e., has reached the value <code>A + 0.632 × (B − A)</code>.<br><br>
-The rate constant (<em>k</em>) is the inverse of the time constant (<code>k = 1 / tau</code>) and is also commonly used in NIRS research, including for OxCap assessment. In this example we will report <em>k</em> in units of min<sup>-1</sup>.</p>
-</li>
-<li>
-<p><code>TD</code></p>
-<p>TD is the optional fourth parameter which defines a time lag before the start of monoexponential behaviour. This can capture behaviour which does not respond instantaneously to an intervention with a delay or a transient acceleration phase before exponential behaviour.<br><br>
-Often during repeated occlusions after exercise, the first occlusions may not conform to monoexponential behaviour, if the oxygen saturation is too low and limiting to mV̇O<sub>2</sub>. In these cases, a time delay parameter may be required to accurately capture the true monoexponential response. This example protocol was designed to avoid this potential delay and so a time delay parameter was not required.</p>
-</li>
-</ul></section><section class="level3"><h4 id="ss_monoexp3-ss_monoexp4">
-<code>SS_monoexp3()</code>, <code>SS_monoexp4()</code>
-<a class="anchor" aria-label="anchor" href="#ss_monoexp3-ss_monoexp4"></a>
-</h4>
-<ul>
-<li>These self-starting non-linear curve functions allow for optimising monoexponential fit coefficients on existing data, with either a 3- or 4-parameter model using <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">nls()</a></code> or another non-linear optimiser function. They return a model with three or four coefficients and associated fit parameters.</li>
+<li><code>method = "monoexponential"</code></li>
 </ul>
-<p>Having split our data set of times and slopes by trial, we can use <code><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">tidyr::nest()</a></code> <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">purrr::map()</a></code> functions to iteratively fit a 3-parameter monoexponential model for slope over time, for each trial, and return the primary outcome coefficient; the rate constant (<em>k</em>), calculated as the inverse of the time constant (<em>tau</em>).</p>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## use 3-param monoexponential model for each trial</span></span>
-<span><span class="co">## fit models by trial within the data frame with {tidyr} and {purrr}</span></span>
-<span><span class="co">## return fitted data and time constant tau coefficient</span></span>
-<span><span class="va">pred_df</span> <span class="op">&lt;-</span> <span class="va">slopes_df</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co">## nest the data to model each trial</span></span>
-<span>    <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">nest</a></span><span class="op">(</span>.by <span class="op">=</span> <span class="va">trial</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>        <span class="co">## apply self-starting monoexp model to each trial</span></span>
-<span>        model <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">data</span>, \<span class="op">(</span><span class="va">.df</span><span class="op">)</span> <span class="op">{</span></span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/stats/nls.html" class="external-link">nls</a></span><span class="op">(</span><span class="va">slope</span> <span class="op">~</span> <span class="fu"><a href="../reference/SS_monoexp.html">SS_monoexp3</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">A</span>, <span class="va">B</span>, <span class="va">tau</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">.df</span><span class="op">)</span></span>
-<span>        <span class="op">}</span><span class="op">)</span>,</span>
-<span>        <span class="co">## return tau coefficient for each trial model</span></span>
-<span>        tau <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_dbl</a></span><span class="op">(</span><span class="va">model</span>, \<span class="op">(</span><span class="va">.m</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">.m</span><span class="op">)</span><span class="op">[[</span><span class="st">"tau"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>,</span>
-<span>        <span class="co">## return the predicted exponential curve values for plotting</span></span>
-<span>        data <span class="op">=</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map2.html" class="external-link">map2</a></span><span class="op">(</span><span class="va">data</span>, <span class="va">model</span>, \<span class="op">(</span><span class="va">.df</span>, <span class="va">.m</span><span class="op">)</span> <span class="op">{</span></span>
-<span>            <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">.df</span>, predicted_slope <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">.m</span><span class="op">)</span><span class="op">)</span></span>
-<span>        <span class="op">}</span><span class="op">)</span></span>
-<span>    <span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">trial</span>, <span class="va">tau</span>, <span class="va">data</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>    <span class="co">## unnest back into the top level data frame for extraction and plotting</span></span>
-<span>    <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
+<p>The <strong>monoexponential</strong> method is a <em>parametric</em> approach: it fits a self-starting exponential curve to time series data with <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">stats::nls()</a></code>, using <code><a href="../reference/SSmonoexponential.html">SSmonoexponential()</a></code> to initialise starting values. This models how mV̇O<sub>2</sub> recovers back to baseline after the exercise stimulus, and its rate constant <em>k</em> is the OxCap outcome.</p>
+<p>It fits either a <strong>4-parameter</strong> model <code>A + (B − A)(1 − exp(−(t − TD) / tau))</code> with a time delay <em>TD</em>, or a reduced <strong>3-parameter</strong> model without <em>TD</em> when the response is expected to start immediately.</p>
+<ul>
+<li>
+<p><code>use_TD</code> (<em>TD</em> coefficient)</p>
+<p>An argument used with the exponential methods: it explicitly specifies a <strong>4-parameter</strong> model with a time delay between the stimulus (e.g. at <code>t = 0</code>) and the start of a systematic exponential response. The model falls back to a <strong>3-parameter</strong> fit if the 4-parameter fit fails to converge.<br><br>
+During repeated occlusions after exercise, the first occlusions may not conform to an exponential response, i.e. if oxygen saturation is too low and limiting to mV̇O<sub>2</sub>. A time delay parameter can capture the true monoexponential response in these cases. This protocol was designed to avoid that delay, so <em>TD</em> is not required here.</p>
+</li>
+<li>
+<p><em>A</em>, <em>B</em> coefficients</p>
+<p>The starting (baseline) and ending (asymptote) values of the monoexponential curve, defining either exponential association (positive direction, <em>B</em> &gt; <em>A</em>) or decay (negative direction, <em>A</em> &gt; <em>B</em>).</p>
+</li>
+<li>
+<p><em>tau</em>, <em>k</em> coefficients</p>
+<p>The time constant (<em>tau</em>; τ) describes the time (speed) of the exponential response from <em>A</em> to <em>B</em>, approximated by the time elapsed at 63.2% of the total response amplitude — i.e. when predicted <code>y</code> equals <code>A + 0.632 × (B − A)</code>.<br><br>
+The rate constant (<em>k</em>) is the inverse of the time constant (<code>k = 1 / tau</code>) and is also commonly used in NIRS research. <em>k</em> is returned as the inverse of <code>time_channel</code> units (seconds) by default; here we convert <em>k</em> to min<sup>-1</sup>.</p>
+</li>
+<li>
+<p><code>group_intervals</code> &amp; <code>zero_time</code></p>
+<p>Note these arguments differ slightly in intent from their <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> counterparts above. Here, <code>group_intervals</code> takes a list of <strong>sample (row) numbers</strong>, processing each as separate intervals and returning named groups as interval names. The default <em>“ensemble”</em> fits all samples of each data frame together, as in the above <code>method = "peak_slope"</code> example.<br><br>
+Our <code>slope_results</code> has one sample per occlusion, so <code>list(trial1 = 1:16, trial2 = 17:32)</code> separates the two trials. As with <code><a href="../reference/extract_intervals.html">extract_intervals()</a></code> above, <code>zero_time</code> is used to rebase each trial to start from <code>0</code>.</p>
+</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## use 3-param monoexponential model without TD</span></span>
+<span><span class="co">## fit samples in sequence grouped by trial</span></span>
+<span><span class="co">## channels must be specified explicitly</span></span>
+<span><span class="va">monoexp_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyse_kinetics.html">analyse_kinetics</a></span><span class="op">(</span></span>
+<span>    <span class="va">slope_results</span>,</span>
+<span>    nirs_channels   <span class="op">=</span> <span class="va">slope</span>,  <span class="co">## supply predictor &amp; response channels</span></span>
+<span>    time_channel    <span class="op">=</span> <span class="va">peak_slope_time</span>,</span>
+<span>    method          <span class="op">=</span> <span class="st">"monoexponential"</span>,</span>
+<span>    use_TD          <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    group_intervals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trial1 <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">16</span>, trial2 <span class="op">=</span> <span class="fl">17</span><span class="op">:</span><span class="fl">32</span><span class="op">)</span>,</span>
+<span>    zero_time       <span class="op">=</span> <span class="cn">TRUE</span>    <span class="co">## rebase each trial start_time to zero</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## extract tau and k coef labels per trial, for plotting</span></span>
-<span><span class="va">coef_df</span> <span class="op">&lt;-</span> <span class="va">pred_df</span> <span class="op">|&gt;</span></span>
+<span><span class="co">## view the formatted results</span></span>
+<span><span class="va">monoexp_results</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; Monoexponential One-Phase Kinetics</span></span>
+<span><span class="co">#&gt;     Model Coefficients:</span></span>
+<span><span class="co">#&gt;   interval nirs_channels     A      B TD   tau       k   MRT</span></span>
+<span><span class="co">#&gt; 1   trial1     hhb_slope 1.051 0.2104 NA 19.33 0.05174 19.33</span></span>
+<span><span class="co">#&gt; 2   trial2     hhb_slope 1.034 0.1666 NA 15.39 0.06496 15.39</span></span></code></pre>
+</div>
+</div>
+<p>Resulting coefficients <code>A</code> represents the peak observed mV̇O<sub>2</sub> value at <code>time = 0</code>, and <code>B</code> represents the asymptote resting mV̇O<sub>2</sub> value. <code>tau</code> and <code>k</code> are the time and rate constants explained above. Since there is no <code>TD</code>, <code>MRT</code> (mean response time; the sum of <code>tau</code> + <code>TD</code>) is redundant with <code>tau</code>. <code>HRT</code> (half-response time) is also reported.</p>
+<p>The default plot of <em>“mnirs_kinetics”</em> data only reports <code>tau</code> (and <code>TD</code> &amp; <code>MRT</code> if relevant). We want to know both <code>tau</code> and <code>k</code> in min<sup>-1</sup>, so we will replace the default with a custom label for our results plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## extract tau and k coef labels per trial, for plotting</span></span>
+<span><span class="va">coef_labels</span> <span class="op">&lt;-</span> <span class="va">monoexp_results</span><span class="op">$</span><span class="va">coefficients</span> <span class="op">|&gt;</span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span></span>
-<span>        .by <span class="op">=</span> <span class="va">trial</span>,</span>
-<span>        label <span class="op">=</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_glue.html" class="external-link">str_glue</a></span><span class="op">(</span></span>
-<span>            <span class="st">"Trial {trial[1]}</span></span>
-<span><span class="st">            tau = {mnirs:::signif_trailing(tau[1], 1)} sec</span></span>
-<span><span class="st">            k = {mnirs:::signif_trailing(60 / tau[1], 1)} min⁻¹"</span></span>
+<span>        .by <span class="op">=</span> <span class="va">interval</span>,</span>
+<span>        label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span></span>
+<span>            <span class="st">"Trial %s\ntau = %s sec\nk = %s min⁻¹"</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"trial"</span>, <span class="st">""</span>, <span class="va">interval</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">tau</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>            <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">k</span> <span class="op">*</span> <span class="fl">60</span>, <span class="fl">1</span><span class="op">)</span> <span class="co">## convert to min^-1</span></span>
 <span>        <span class="op">)</span></span>
 <span>    <span class="op">)</span></span></code></pre></div>
 </div>
-<div class="cell" data-layout-align="center">
-<div class="sourceCode cell-code" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">## add predicted values to the plot of observed data</span></span>
-<span><span class="va">p</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span></span>
-<span>        data <span class="op">=</span> <span class="va">pred_df</span>,</span>
-<span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>y <span class="op">=</span> <span class="va">predicted_slope</span>, group <span class="op">=</span> <span class="va">trial</span><span class="op">)</span>,</span>
-<span>        colour <span class="op">=</span> <span class="st">"black"</span>, linewidth <span class="op">=</span> <span class="fl">1</span></span>
-<span>    <span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span></span>
-<span>        data <span class="op">=</span> <span class="va">coef_df</span>,</span>
-<span>        <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">label</span>, colour <span class="op">=</span> <span class="va">trial</span>, group <span class="op">=</span> <span class="va">trial</span><span class="op">)</span>,</span>
-<span>        x <span class="op">=</span> <span class="cn">Inf</span>, y <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>        size <span class="op">=</span> <span class="fl">5</span>, hjust <span class="op">=</span> <span class="fl">1.1</span>, vjust <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.5</span>, <span class="fl">3</span><span class="op">)</span></span>
+<p>We can plot our results with some built-in customisation arguments, and additional components built from <a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## add custom info to the plot</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">monoexp_results</span>, time_labels <span class="op">=</span> <span class="cn">TRUE</span>, points <span class="op">=</span> <span class="cn">TRUE</span>, labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>        x <span class="op">=</span> <span class="st">"Occlusion Times (mm:ss)"</span>,</span>
+<span>        y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="va">HHb</span> <span class="op">~</span> <span class="va">Slope</span> <span class="op">~</span> <span class="st">'('</span> <span class="op">*</span> <span class="va">μM</span> <span class="op">%.%</span> <span class="va">sec</span><span class="op">^</span><span class="st">'-1'</span> <span class="op">*</span> <span class="st">')'</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    <span class="op">)</span> <span class="op">+</span> </span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"white"</span>, size <span class="op">=</span> <span class="fl">3</span>, shape <span class="op">=</span> <span class="fl">21</span>, stroke <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_text.html" class="external-link">geom_text</a></span><span class="op">(</span></span>
+<span>        data <span class="op">=</span> <span class="va">coef_labels</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>label <span class="op">=</span> <span class="va">label</span><span class="op">)</span>,</span>
+<span>        x <span class="op">=</span> <span class="cn">Inf</span>, y <span class="op">=</span> <span class="cn">Inf</span>, size <span class="op">=</span> <span class="fl">5</span>, hjust <span class="op">=</span> <span class="fl">1.1</span>, vjust <span class="op">=</span> <span class="fl">1.3</span></span>
+<span>    <span class="op">)</span></span></code></pre></div>
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure><p><img src="oxcap-analysis_files/figure-html/plot%20modelled%20data-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+<div>
+<figure><p><img src="oxcap-analysis_files/figure-html/plot%20modelled%20data-1.png" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
-</section></section><section class="section level2"><h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+<p>As a final validation step, we can examine the fitting diagnostics for the two trials.</p>
+</section></section></section><section class="section level2"><h2 id="examine-fit-diagnostics">Examine fit diagnostics<a class="anchor" aria-label="anchor" href="#examine-fit-diagnostics"></a>
 </h2>
-<p>This article demonstrates how muscle oxidative capacity analysis can be performed using {mnirs} and some relatively simple, reproducible data wrangling steps.</p>
-<p>In future development, I would like to wrap some of these processing steps into dedicated functions with recommended default parameters, to make the analysis process more streamlined.</p>
-<p>However, there are also a few limitations to this current process: modelling monoexponential behaviour with relatively few data samples (there are 17 occlusions per trial in this example) can result in unstable fit parameters or inability to converge non-linear fitting at all.</p>
-<p>A more robust fitting process may be required for real-world data where mV̇O<sub>2</sub> recovery does not perfectly conform to monoexponential behaviour. Or, manual processing steps may be inevitably required during analysis to accommodate for these computational limitations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## call diagnostics and format sigfigs</span></span>
+<span><span class="va">monoexp_results</span><span class="op">$</span><span class="va">diagnostics</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="co">#&gt;   interval nirs_channels n_obs n_params    r2 adj_r2   rmse cv_rmse  snr   aic</span></span>
+<span><span class="co">#&gt; 1   trial1     hhb_slope    16        3 0.967  0.962 0.0397   0.130 14.9 -49.8</span></span>
+<span><span class="co">#&gt; 2   trial2     hhb_slope    16        3 0.975  0.971 0.0343   0.137 16.1 -54.5</span></span>
+<span><span class="co">#&gt;    aicc   bic</span></span>
+<span><span class="co">#&gt; 1 -46.2 -46.7</span></span>
+<span><span class="co">#&gt; 2 -50.8 -51.4</span></span></code></pre>
+</div>
+</div>
+<p>The diagnostics are already strong, suggesting valid monoexponential fit. However, we might wonder whether the upward drift in slope values rather than a flat asymptote is physiologically meaningful.</p>
+<p>For that, we could use an exploratory third <code><a href="../reference/analyse_kinetics.html">analyse_kinetics()</a></code> method:</p>
+<section class="level2"><h3 id="analyse_kinetics-2">
+<code>analyse_kinetics()</code><a class="anchor" aria-label="anchor" href="#analyse_kinetics-2"></a>
+</h3>
+<section class="level3"><h4 id="analyse-exponential-drift-kinetics">Analyse exponential-drift kinetics<a class="anchor" aria-label="anchor" href="#analyse-exponential-drift-kinetics"></a>
+</h4>
+<ul>
+<li><code>method = "exponential_drift"</code></li>
+</ul>
+<p>The <strong>exponential-drift</strong> method is a <em>parametric</em> two-phase approach: it fits a monoexponential primary response with a secondary linear drift beginning near the primary asymptote, with <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">stats::nls()</a></code> and <code><a href="../reference/SSexponential_drift.html">SSexponential_drift()</a></code>. <em>A</em>, <em>B</em>, <em>tau</em>, and the derived <em>k</em>, <em>MRT</em>, and <em>HRT</em> are interpreted the same as for <em>“monoexponential”</em> above. The additional <em>slope</em> coefficient is the linear drift rate (in response units per unit <code>time_channel</code>).</p>
+<p>It fits a <strong>5-parameter</strong> model <code>A + (B − A)(1 − exp(−t / tau)) + slope × max(t + tau × log(1 − drift_fraction), 0)</code>, or a <strong>6-parameter</strong> model adding a time delay <em>TD</em>.</p>
+<p>A slow drift in mV̇O<sub>2</sub> after the primary recovery is physiologically plausible, e.g. from post-occlusion reactive hyperaemia or a slow-component shift in resting metabolic demand. Separating it from the primary response means the exponential phase is no longer forced to absorb the drift into its asymptote. See <code><a href="../reference/exponential_drift.html">?exponential_drift</a></code> and <code><a href="../reference/SSexponential_drift.html">?SSexponential_drift</a></code> for details.</p>
+<ul>
+<li>
+<p><code>drift_fraction</code> (determines where the drift begins)</p>
+<p>The drift onset occurs where the primary response reaches the specified fraction of its amplitude, <code>TD − tau × log(1 − drift_fraction)</code>. Before the onset, the drift term is considered to be zero. The reported excursion point <em>texc</em> is where the secondary drift rate overtakes the decaying primary rate (the turning point of the curve when the two phases oppose).<br><br>
+The default <code>drift_fraction = 0.95</code> places drift onset at 95% of the primary amplitude (3 × <em>tau</em> after <em>TD</em>), i.e. where the primary response is effectively complete. It can be manually adjusted, but smaller fractions allow the drift response to encroach on and absorb more of the primary response, biasing the more physiologically relevant <em>tau</em> estimate. We will leave it at the default.</p>
+</li>
+</ul>
+<div>
+<blockquote>
+<p><strong>Caution</strong></p>
+<p>Please note! <strong>Exponential-drift</strong> kinetics is currently experimental based on empirical observation, and remains to be more rigorously validated.</p>
+</blockquote>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">exp_drift_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/analyse_kinetics.html">analyse_kinetics</a></span><span class="op">(</span></span>
+<span>    <span class="va">slope_results</span>,</span>
+<span>    nirs_channels   <span class="op">=</span> <span class="va">slope</span>,</span>
+<span>    time_channel    <span class="op">=</span> <span class="va">peak_slope_time</span>,</span>
+<span>    method          <span class="op">=</span> <span class="st">"exponential_drift"</span>,</span>
+<span>    use_TD          <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>    drift_fraction  <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>    group_intervals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>trial1 <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">16</span>, trial2 <span class="op">=</span> <span class="fl">17</span><span class="op">:</span><span class="fl">32</span><span class="op">)</span>,</span>
+<span>    zero_time       <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## view the formatted results</span></span>
+<span><span class="va">exp_drift_results</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="co">#&gt;</span></span>
+<span><span class="co">#&gt; Exponential-Linear Drift Two-Phase Kinetics</span></span>
+<span><span class="co">#&gt;     Model Coefficients:</span></span>
+<span><span class="co">#&gt;   interval nirs_channels             model     A       B TD   tau       k   MRT</span></span>
+<span><span class="co">#&gt; 1   trial1     hhb_slope exponential_drift 1.038  0.1383 NA 24.57 0.04069 24.57</span></span>
+<span><span class="co">#&gt; 2   trial2     hhb_slope exponential_drift 1.028 0.09962 NA 19.02 0.05257 19.02</span></span>
+<span><span class="co">#&gt;    texc   slope_B</span></span>
+<span><span class="co">#&gt; 1 91.71 0.0008767</span></span>
+<span><span class="co">#&gt; 2 79.65 0.0007414</span></span></code></pre>
+</div>
+</div>
+<p>We will plot the new results using default labels, and displaying the two-phase components with a hidden (undocumented) option.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span></span>
+<span>    <span class="va">exp_drift_results</span>,</span>
+<span>    time_labels <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    points      <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>    label_size  <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>    components  <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>        x <span class="op">=</span> <span class="st">"Occlusion Times (mm:ss)"</span>,</span>
+<span>        y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="fu">bold</span><span class="op">(</span><span class="va">HHb</span> <span class="op">~</span> <span class="va">Slope</span> <span class="op">~</span> <span class="st">'('</span> <span class="op">*</span> <span class="va">μM</span> <span class="op">%.%</span> <span class="va">sec</span><span class="op">^</span><span class="st">'-1'</span> <span class="op">*</span> <span class="st">')'</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    <span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output-display">
+<div>
+<figure><p><img src="oxcap-analysis_files/figure-html/plot%20exp-linear%20data-1.png" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Time constant (<code>tau</code>) values are each ~5-sec greater with the two-phase exponential-drift kinetics, implying the fast primary monoexponential response can be described as proceeding more gradually toward a lower asymptote than initially observed, hidden behind a moderate slower hyperaemic drift.</p>
+<p>We can evaluate the fit diagnostics for this advanced kinetics fit, however we should be cautious directly comparing the diagnostic values without first considering <code>n_obs</code> and <code>n_params</code>; which reports the number of samples (observations) and coefficients (parameters) used by each model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">## bind both fit diagnostics into a single comparison table</span></span>
+<span><span class="co">## compare by trial</span></span>
+<span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
+<span>    monoexponential   <span class="op">=</span> <span class="va">monoexp_results</span><span class="op">$</span><span class="va">diagnostics</span>,</span>
+<span>    exponential_drift <span class="op">=</span> <span class="va">exp_drift_results</span><span class="op">$</span><span class="va">diagnostics</span>,</span>
+<span>    .id <span class="op">=</span> <span class="st">"model"</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">interval</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html" class="external-link">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html" class="external-link">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">signif</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code><span><span class="co">#&gt;               model interval nirs_channels n_obs n_params    r2 adj_r2   rmse</span></span>
+<span><span class="co">#&gt; 1   monoexponential   trial1     hhb_slope    16        3 0.967  0.962 0.0397</span></span>
+<span><span class="co">#&gt; 2 exponential_drift   trial1     hhb_slope    16        4 0.988  0.985 0.0240</span></span>
+<span><span class="co">#&gt; 3   monoexponential   trial2     hhb_slope    16        3 0.975  0.971 0.0343</span></span>
+<span><span class="co">#&gt; 4 exponential_drift   trial2     hhb_slope    16        4 0.995  0.994 0.0147</span></span>
+<span><span class="co">#&gt;   cv_rmse  snr   aic  aicc   bic</span></span>
+<span><span class="co">#&gt; 1  0.1300 14.9 -49.8 -46.2 -46.7</span></span>
+<span><span class="co">#&gt; 2  0.0783 19.2 -63.9 -57.9 -60.1</span></span>
+<span><span class="co">#&gt; 3  0.1370 16.1 -54.5 -50.8 -51.4</span></span>
+<span><span class="co">#&gt; 4  0.0587 23.4 -79.6 -73.6 -75.7</span></span></code></pre>
+</div>
+</div>
+<p>We can see that fit diagnostics are better in an absolute sense for the exponential-drift model. Because the two models are fit to identical data but differ in <code>n_params</code>, the unpenalised diagnostics (<code>r2</code>, <code>rmse</code>, <code>snr</code>) will always favour the more flexible model. For this comparison, they are not evidence of <em>“better fit”</em> on their own.</p>
+<p>The information criteria (<code>aic</code>, <code>aicc</code>, <code>bic</code>) are unitless estimators of prediction error, and penalise extra parameters. Lower values are <em>“better”</em> (read elsewhere about the <em>Akaike</em> and <em>Bayesian Information Criterion</em>). Therefore, because all three are lower (more negative) for the exponential-drift model in both trials, this supports the advanced model as a statically <em>“better fit”</em>, explaining relatively more of the signal vs noise.</p>
+<p>However, this suggests nothing about the <em>physiological rationale</em> for the added linear drift component, which takes precedence over any purely statistical <em>“goodness-of-fit”</em> test. That is a speculative question for another time!</p>
+</section></section></section><section class="section level2"><h2 id="a-concise-processing-pipeline">A concise processing pipeline<a class="anchor" aria-label="anchor" href="#a-concise-processing-pipeline"></a>
+</h2>
+<p>This article demonstrates how muscle oxidative capacity analysis can be performed using <em>{mnirs}</em> with relatively simple, reproducible data wrangling steps.</p>
+<p><em>{mnirs}</em> is built with a strong focus on plotting incremental processing &amp; analysis steps along the way. In my opinion, this is an important visual validation step to perform whenever performing multi-step processing &amp; analysis. When working with a familiar dataset, the processing &amp; analysis pipeline can be considerably simplified compared to above:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/read_mnirs.html">read_mnirs</a></span><span class="op">(</span></span>
+<span>    file_path       <span class="op">=</span> <span class="fu"><a href="../reference/example_mnirs.html">example_mnirs</a></span><span class="op">(</span><span class="st">"portamon_oxcap.xlsx"</span><span class="op">)</span>,</span>
+<span>    nirs_channels   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>thb <span class="op">=</span> <span class="fl">2</span>, hhb <span class="op">=</span> <span class="fl">3</span>, o2hb <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    event_channel   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>event <span class="op">=</span> <span class="st">"labels"</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="../reference/correct_blood_volume.html">correct_blood_volume</a></span><span class="op">(</span></span>
+<span>        oxy_channel     <span class="op">=</span> <span class="va">o2hb</span>,</span>
+<span>        deoxy_channel   <span class="op">=</span> <span class="va">hhb</span>,</span>
+<span>        total_channel   <span class="op">=</span> <span class="va">thb</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="../reference/extract_intervals.html">extract_intervals</a></span><span class="op">(</span></span>
+<span>        start           <span class="op">=</span> <span class="st">"Occlusion"</span>,</span>
+<span>        span            <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="../reference/analyse_kinetics.html">analyse_kinetics</a></span><span class="op">(</span></span>
+<span>        nirs_channels   <span class="op">=</span> <span class="va">hhb</span>,</span>
+<span>        method          <span class="op">=</span> <span class="st">"peak_slope"</span>,</span>
+<span>        span            <span class="op">=</span> <span class="fl">3</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="../reference/analyse_kinetics.html">analyse_kinetics</a></span><span class="op">(</span></span>
+<span>        nirs_channels   <span class="op">=</span> <span class="va">slope</span>,</span>
+<span>        time_channel    <span class="op">=</span> <span class="va">peak_slope_time</span>,</span>
+<span>        method          <span class="op">=</span> <span class="st">"monoexponential"</span>,</span>
+<span>        use_TD          <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>        group_intervals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">16</span>, <span class="fl">17</span><span class="op">:</span><span class="fl">32</span><span class="op">)</span>,</span>
+<span>        zero_time       <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>    <span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<p>Future development could wrap these steps into a dedicated convenience function with recommended default parameters, streamlining the analysis process. However, there are always trade-offs between automation and customisation: fitting nonlinear models to sparse, noisy biological data can produce unstable fit parameters or fail to converge. Manual processing steps may still be needed to accommodate these limitations.</p>
 </section><section class="section level2"><h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
-<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
-<div id="ref-Beever2020" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[1] </div>
-<div class="csl-right-inline">Beever AT, Tripp TR, Zhang J, et al. NIRS-derived skeletal muscle oxidative capacity is correlated with aerobic fitness and independent of sex. J Appl Physiol (1985) 2020;129:558–68. <a href="https://doi.org/10.1152/japplphysiol.00017.2020" class="external-link">https://doi.org/10.1152/japplphysiol.00017.2020</a>.</div>
-</div>
-<div id="ref-McCully2024" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[2] </div>
-<div class="csl-right-inline">McCully KK, Stoddard SN, Reynolds MA, et al. Skeletal muscle oxidative metabolism during exercise measured with near infrared spectroscopy. NDT 2024;2:417–29. <a href="https://doi.org/10.3390/ndt2040025" class="external-link">https://doi.org/10.3390/ndt2040025</a>.</div>
-</div>
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
 <div id="ref-Adami2018" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[3] </div>
-<div class="csl-right-inline">Adami A, Rossiter HB. Principles, insights, and potential pitfalls of the noninvasive determination of muscle oxidative capacity by near-infrared spectroscopy. J Appl Physiol (1985) 2018;124:245–8. <a href="https://doi.org/10.1152/japplphysiol.00445.2017" class="external-link">https://doi.org/10.1152/japplphysiol.00445.2017</a>.</div>
+Adami, A., &amp; Rossiter, H. B. (2018). Principles, insights, and potential pitfalls of the noninvasive determination of muscle oxidative capacity by near-infrared spectroscopy [Journal Article]. <em>J Appl Physiol (1985)</em>, <em>124</em>(1), 245–248. <a href="https://doi.org/10.1152/japplphysiol.00445.2017" class="external-link">https://doi.org/10.1152/japplphysiol.00445.2017</a>
 </div>
-<div id="ref-Ryan2013" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div>
-<div class="csl-right-inline">Ryan TE, Southern WM, Reynolds MA, et al. A cross-validation of near-infrared spectroscopy measurements of skeletal muscle oxidative capacity with phosphorus magnetic resonance spectroscopy. J Appl Physiol (1985) 2013;115:1757–66. <a href="https://doi.org/10.1152/japplphysiol.00835.2013" class="external-link">https://doi.org/10.1152/japplphysiol.00835.2013</a>.</div>
-</div>
-<div id="ref-Tripp2023" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[5] </div>
-<div class="csl-right-inline">Tripp TR, McDougall RM, Frankish BP, et al. Contraction intensity affects NIRS-derived skeletal muscle oxidative capacity but not its relationships to mitochondrial protein content or aerobic fitness. Journal of Applied Physiology 2023. <a href="https://doi.org/10.1152/japplphysiol.00342.2023" class="external-link">https://doi.org/10.1152/japplphysiol.00342.2023</a>.</div>
+<div id="ref-Beever2020" class="csl-entry" role="listitem">
+Beever, A. T., Tripp, T. R., Zhang, J., &amp; MacInnis, M. J. (2020). NIRS-derived skeletal muscle oxidative capacity is correlated with aerobic fitness and independent of sex [Journal Article]. <em>J Appl Physiol (1985)</em>, <em>129</em>(3), 558–568. <a href="https://doi.org/10.1152/japplphysiol.00017.2020" class="external-link">https://doi.org/10.1152/japplphysiol.00017.2020</a>
 </div>
 <div id="ref-Costalat2025" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div>
-<div class="csl-right-inline">Costalat G, Sautillet B, Millet GP, et al. Steepest near-infrared spectroscopy-derived deoxygenation slopes during arterial occlusions provide more reliable assessments of muscle mitochondrial capacity. Exp Physiol 2025. <a href="https://doi.org/10.1113/EP093040" class="external-link">https://doi.org/10.1113/EP093040</a>.</div>
+Costalat, G., Sautillet, B., Millet, G. P., Unal, C., Abaidia, A. E., Hassar, A., &amp; Cozette, M. (2025). Steepest near-infrared spectroscopy-derived deoxygenation slopes during arterial occlusions provide more reliable assessments of muscle mitochondrial capacity [Journal Article]. <em>Exp Physiol</em>. <a href="https://doi.org/10.1113/EP093040" class="external-link">https://doi.org/10.1113/EP093040</a>
+</div>
+<div id="ref-McCully2024" class="csl-entry" role="listitem">
+McCully, K. K., Stoddard, S. N., Reynolds, M. A., &amp; Ryan, T. E. (2024). Skeletal muscle oxidative metabolism during exercise measured with near infrared spectroscopy [Journal Article]. <em>NDT</em>, <em>2</em>(4), 417–429. <a href="https://doi.org/10.3390/ndt2040025" class="external-link">https://doi.org/10.3390/ndt2040025</a>
 </div>
 <div id="ref-Rasica2024" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[7] </div>
-<div class="csl-right-inline">Rasica L, Inglis EC, Mazzolari R, et al. Methodological considerations on near-infrared spectroscopy derived muscle oxidative capacity. European Journal of Applied Physiology 2024. <a href="https://doi.org/10.1007/s00421-024-05421-6" class="external-link">https://doi.org/10.1007/s00421-024-05421-6</a>.</div>
+Rasica, L., Inglis, E. C., Mazzolari, R., Iannetta, D., &amp; Murias, J. M. (2024). Methodological considerations on near-infrared spectroscopy derived muscle oxidative capacity [Journal Article]. <em>European Journal of Applied Physiology</em>. <a href="https://doi.org/10.1007/s00421-024-05421-6" class="external-link">https://doi.org/10.1007/s00421-024-05421-6</a>
 </div>
 <div id="ref-Ryan2012" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[8] </div>
-<div class="csl-right-inline">Ryan TE, Erickson ML, Brizendine JT, et al. Noninvasive evaluation of skeletal muscle mitochondrial capacity with near-infrared spectroscopy: Correcting for blood volume changes. J Appl Physiol (1985) 2012;113:175–83. <a href="https://doi.org/10.1152/japplphysiol.00319.2012" class="external-link">https://doi.org/10.1152/japplphysiol.00319.2012</a>.</div>
+Ryan, T. E., Erickson, M. L., Brizendine, J. T., Young, H. J., &amp; McCully, K. K. (2012). Noninvasive evaluation of skeletal muscle mitochondrial capacity with near-infrared spectroscopy: Correcting for blood volume changes [Journal Article]. <em>J Appl Physiol (1985)</em>, <em>113</em>(2), 175–183. <a href="https://doi.org/10.1152/japplphysiol.00319.2012" class="external-link">https://doi.org/10.1152/japplphysiol.00319.2012</a>
+</div>
+<div id="ref-Ryan2013" class="csl-entry" role="listitem">
+Ryan, T. E., Southern, W. M., Reynolds, M. A., &amp; McCully, K. K. (2013). A cross-validation of near-infrared spectroscopy measurements of skeletal muscle oxidative capacity with phosphorus magnetic resonance spectroscopy [Journal Article]. <em>J Appl Physiol (1985)</em>, <em>115</em>(12), 1757–1766. <a href="https://doi.org/10.1152/japplphysiol.00835.2013" class="external-link">https://doi.org/10.1152/japplphysiol.00835.2013</a>
+</div>
+<div id="ref-Tripp2023" class="csl-entry" role="listitem">
+Tripp, T. R., McDougall, R. M., Frankish, B. P., Wiley, J. P., Lun, V., &amp; MacInnis, M. J. (2023). Contraction intensity affects NIRS-derived skeletal muscle oxidative capacity but not its relationships to mitochondrial protein content or aerobic fitness [Journal Article]. <em>Journal of Applied Physiology</em>. <a href="https://doi.org/10.1152/japplphysiol.00342.2023" class="external-link">https://doi.org/10.1152/japplphysiol.00342.2023</a>
 </div>
 </div>
 </section><script id="quarto-html-after-body" type="application/javascript">
@@ -635,7 +783,7 @@ Often during repeated occlusions after exercise, the first occlusions may not co
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

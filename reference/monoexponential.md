@@ -1,6 +1,11 @@
-# Monoexponential function with 4 parameters
+# Monoexponential function
 
-Calculate a four-parameter monoexponential curve.
+Calculate a 3- or 4-parameter monoexponential curve. Model family fit by
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+with `method = "monoexponential"`, and by
+[`stats::nls()`](https://rdrr.io/r/stats/nls.html) via the self-starting
+wrapper
+[`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md).
 
 ## Usage
 
@@ -12,28 +17,27 @@ monoexponential(t, A, B, tau, TD = NULL)
 
 - t:
 
-  A numeric vector of the predictor variable; time or sample number.
+  A numeric vector of the predictor variable (time).
 
 - A:
 
-  A numeric parameter for the starting (baseline) value of the response
+  A numeric parameter for the starting baseline of the response
   variable.
 
 - B:
 
-  A numeric parameter for the ending (asymptote) value of the response
-  variable.
+  A numeric parameter for the ending asymptote of the response variable.
 
 - tau:
 
-  A numeric parameter for the time constant `tau` (\\\tau\\) of the
-  exponential curve, in units of the predictor variable `t`.
+  A numeric parameter for the *time constant* (\\\tau\\) of the
+  exponential response, in units of the predictor variable `t`.
 
 - TD:
 
-  A numeric parameter for the time delay before the onset of exponential
-  response, in units of the predictor variable `t`. If `NULL`
-  (*default*), a 3-parameter model without time delay is used.
+  A numeric parameter for the *time delay* before the onset of the
+  exponential response, in units of the predictor variable `t`. If
+  `NULL` (*default*), a 3-parameter model without time delay is used.
 
 ## Value
 
@@ -42,54 +46,63 @@ variable `t`.
 
 ## Details
 
-3-parameter model equation: `A + (B - A) * (1 - exp(-t / tau))`
+### Model equations
 
-4-parameter model equation:
-`ifelse(t <= TD, A, A + (B - A) * (1 - exp(-(t - TD) / tau)))`
+- 3-parameter: `A + (B - A) * (1 - exp(-t / tau))`
 
-`tau` is the time constant and equal to the reciprocal of `k`, the rate
-constant (`k = 1/tau`).
+- 4-parameter: `A + (B - A) * (1 - exp(-pmax(t - TD, 0) / tau))`
+
+Clamping the shifted time at zero holds the curve flat at the baseline
+`A` until the response onset at `t = TD`.
+
+### Derived quantities
+
+The *rate constant* `k` is the reciprocal of `tau` (`k = 1 / tau`) in
+reciprocal units of `t` (e.g. `sec^-1`). The *mean response time* is the
+time sum `MRT = TD + tau`, and the *half-response time* is
+`HRT = TD + tau * log(2)`.
 
 ## See also
 
-[`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md),
-[`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md),
+[`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md),
+[`exponential_drift()`](https://jemarnold.github.io/mnirs/reference/exponential_drift.md),
+[`biexponential()`](https://jemarnold.github.io/mnirs/reference/biexponential.md),
+[`response_time()`](https://jemarnold.github.io/mnirs/reference/response_time.md),
+[`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
 
 ## Examples
 
 ``` r
+## create an exponential curve with random noise
 set.seed(13)
 t <- 1:60
-
-## create an exponential curve with random noise
 x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
     rnorm(length(t), 0, 3)
 data <- data.frame(t, x)
 
-model <- nls(x ~ SS_monoexp4(t, A, B, tau, TD), data = data)
-
-model
-#> Nonlinear regression model
-#>   model: x ~ SS_monoexp4(t, A, B, tau, TD)
-#>    data: data
-#>       A       B     tau      TD 
-#>  10.461 100.233   8.313  14.884 
-#>  residual sum-of-squares: 455.5
+## 4-parameter fit with the self-starting wrapper
+model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
+summary(model)
 #> 
-#> Number of iterations to convergence: 5 
-#> Achieved convergence tolerance: 7.619e-07
+#> Formula: x ~ SSmonoexponential(t, A, B, tau, TD)
+#> 
+#> Parameters:
+#>     Estimate Std. Error t value Pr(>|t|)    
+#> A    10.4611     0.7622   13.72   <2e-16 ***
+#> B   100.2334     0.7527  133.17   <2e-16 ***
+#> tau   8.3128     0.3562   23.34   <2e-16 ***
+#> TD   14.8835     0.1898   78.43   <2e-16 ***
+#> ---
+#> Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#> 
+#> Residual standard error: 2.852 on 56 degrees of freedom
+#> 
+#> Number of iterations to convergence: 4 
+#> Achieved convergence tolerance: 1.182e-06
+#> 
 
 y <- predict(model, data)
-
-y
-#>  [1] 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110
-#>  [9] 10.46110 10.46110 10.46110 10.46110 10.46110 10.46110 11.71031 21.74373
-#> [17] 30.63994 38.52783 45.52169 51.72285 57.22115 62.09627 66.41882 70.25145
-#> [25] 73.64968 76.66275 79.33431 81.70306 83.80334 85.66557 87.31673 88.78074
-#> [33] 90.07881 91.22976 92.25026 93.15510 93.95737 94.66872 95.29944 95.85867
-#> [41] 96.35452 96.79416 97.18398 97.52961 97.83607 98.10780 98.34872 98.56234
-#> [49] 98.75175 98.91969 99.06859 99.20062 99.31768 99.42148 99.51351 99.59511
-#> [57] 99.66746 99.73161 99.78849 99.83892
 
 # \donttest{
     if (requireNamespace("ggplot2", quietly = TRUE)) {

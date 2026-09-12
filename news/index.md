@@ -1,5 +1,205 @@
 # Changelog
 
+## mnirs 0.8.0
+
+The initial release of
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+and family of kinetics modelling functions!
+
+### `analyse_kinetics()`
+
+- [`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+  fits oxygenation response kinetics with parametric and non-parametric
+  methods. It accepts a single *“mnirs”* data frame, a list of data
+  frames, or a grouped data frame, analyses `nirs_channels` in each
+  interval, and returns a formatted table of results.
+
+- See
+  [`?analyse_kinetics`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+  for the canonical (i.e. human-verified) documentation of all methods,
+  arguments, and returned objects.
+
+``` r
+
+analyse_kinetics(
+    data,
+    nirs_channels = c(smo2_left, smo2_right),
+    method = "monoexponential",
+    use_TD = TRUE,      ## use time delay parameter
+    direction = "auto"  ## auto-detect response direction
+) |> 
+    print() |>  ## the formatted table prints the coefficients
+    plot()      ## plot observations & fitted data
+```
+
+- `method` argument selects the kinetics model. Each has its own
+  additional arguments:
+
+  - `"response_time"` — non-parametric fractional (e.g. 50%) response
+    time.
+
+  - `"peak_slope"` — peak rolling linear least-squares regression slope.
+
+  - `"monoexponential"` — 3- or 4-parameter exponential curve fit via
+    [`stats::nls()`](https://rdrr.io/r/stats/nls.html).
+
+  - `"exponential_drift"` — two-phase fast monoexponential primary
+    response plus slow linear secondary drift.
+
+  - `"biexponential"` — two-phase fast primary and slow secondary
+    exponential phases.
+
+  - `"sigmoidal"` — 4-parameter symmetric generalised logistic or
+    Gompertz-family curve.
+
+  - `"sigmoidal_drift"` — two-phase fast sigmoidal primary response plus
+    slow linear secondary drift.
+
+- Most arguments can be supplied globally or per-channel and
+  per-interval. However, `method` itself currently only accepts a single
+  global model for all channels.
+
+- Results are returned as a structured list of class *“mnirs_kinetics”*,
+  containing:
+
+  - `method`: the selected kinetics model.
+  - `model`: the `lm` or `nls` objects.
+  - `coefficients`: resultant model parameters.
+  - `data`: the input data augmented with `*_fitted` columns per
+    `nirs_channel`.
+  - `interval_times`: `start_times` and `end_times` of the analysed
+    intervals.
+  - `diagnostics`: fit quality and model validation parameters used to
+    evaluate and compare model fits.
+  - `channel_args`: selected per-channel and per-interval args.
+  - `warnings`: any warning and error messages generated during fitting.
+  - `call`: the matched call.
+
+- [`print.mnirs_kinetics()`](https://jemarnold.github.io/mnirs/reference/print.mnirs_kinetics.md)
+  returns a formatted coefficients table, and
+  [`plot.mnirs_kinetics()`](https://jemarnold.github.io/mnirs/reference/plot.mnirs_kinetics.md)
+  displays the observed data overlaid with fitted curves for each
+  channel and interval.
+
+### Vector-level and model functions
+
+The individual fitting methods called by
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+can be called directly outside of the *“mnirs”* data structure:
+
+- [`response_time()`](https://jemarnold.github.io/mnirs/reference/response_time.md)
+  and
+  [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+  estimate kinetics directly from a numeric vector `x` over `t`, and
+  return a named list of coefficients (with the `lm` model object for
+  [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)).
+
+``` r
+
+peak_slope(x, t, width = 5, direction = "auto")
+
+response_time(x, t, response_fraction = c(0.5, 0.632))
+```
+
+- [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md),
+  [`exponential_drift()`](https://jemarnold.github.io/mnirs/reference/exponential_drift.md),
+  [`biexponential()`](https://jemarnold.github.io/mnirs/reference/biexponential.md),
+  [`logistic()`](https://jemarnold.github.io/mnirs/reference/logistic.md),
+  [`gompertz()`](https://jemarnold.github.io/mnirs/reference/gompertz.md),
+  [`gompertz_left()`](https://jemarnold.github.io/mnirs/reference/gompertz.md),
+  and
+  [`sigmoidal_drift()`](https://jemarnold.github.io/mnirs/reference/sigmoidal_drift.md)
+  contain the parametric equations for each model response curves. They
+  can be used to construct a pure curve from explicit parameters, to
+  simulate data, or plotting a fitted model.
+
+``` r
+
+t <- 1:100
+monoexponential(t, A = 10, B = 100, tau = 8, TD = 15)
+
+sigmoidsl(t, A = 10, B = 100, xmid = 30, slope = 4)
+```
+
+- [`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md),
+  [`SSexponential_drift()`](https://jemarnold.github.io/mnirs/reference/SSexponential_drift.md),
+  [`SSbiexponential()`](https://jemarnold.github.io/mnirs/reference/SSbiexponential.md),
+  [`SSlogistic()`](https://jemarnold.github.io/mnirs/reference/SSlogistic.md),
+  [`SSgompertz()`](https://jemarnold.github.io/mnirs/reference/SSgompertz.md),
+  [`SSgompertz_left()`](https://jemarnold.github.io/mnirs/reference/SSgompertz.md),
+  and
+  [`SSsigmoidal_drift()`](https://jemarnold.github.io/mnirs/reference/SSsigmoidal_drift.md)
+  are the matching self-starting (`selfStart`) wrappers, which generate
+  their own initial parameter estimates and can be fit directly with
+  [`stats::nls()`](https://rdrr.io/r/stats/nls.html).
+
+``` r
+
+nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
+
+nls(x ~ SSlogistic(t, A, B, xmid, slope), data = data)
+```
+
+### mV̇O₂ recovery kinetics and muscle Oxidative Capacity assessment
+
+An emerging method using in mNIRS research, a series of repeated brief
+occlusions can be used to estimate the recovery rate of muscle oxygen
+uptake from NIRS channels, as a proxy for muscle oxidative capacity.
+This method can be performed in *{mnirs}* using recursive calls to
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md):
+
+- A sequence of data frames containing occlusion intervals
+  (i.e. extracted with
+  [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md))
+  can be passed to `analyse_kinetics(method = "peak_slope")` with
+  appropriate arguments.
+
+- The result can be passed directly to another call of
+  [`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md),
+  with resulting coefficients supplied explicitly as `time_channel` and
+  `nirs_channels`. `method` will usually be selected as
+  `"monoexponential"` to determine the rate constant (`k`) of mV̇O₂
+  recovery (also see *Articles* below).
+
+``` r
+
+## fit an exponential through the peak slopes of successive occlusions
+analyse_kinetics(
+    occlusion_intervals,
+    nirs_channels = hhb,
+    method = "peak_slope",
+    span = 3,
+) |> 
+    print() |>  ## print intermediate results and pass along
+    analyse_kinetics(
+        nirs_channels = slope,
+        time_channel = peak_slope_time,
+        method = "monoexponential",
+        group_intervals = list(trial1 = 1:10, trial2 = 11:20)
+    )
+```
+
+### Correcting for blood volume changes
+
+- [`correct_blood_volume()`](https://jemarnold.github.io/mnirs/reference/correct_blood_volume.md)
+  is used to normalise NIRS components signals — i.e. *oxy\[haem\] and
+  deoxy\[haem\]* — for changes in *total\[haem\]*, which is a proxy for
+  local blood volume/perfusion. This can be done before further
+  analysis, to isolate metabolic O₂ from mechanical haemodynamics. See
+  [`?correct_blood_volume`](https://jemarnold.github.io/mnirs/reference/correct_blood_volume.md).
+
+### Articles
+
+- *“Analysing muscle oxidative capacity with mnirs”* walks through a
+  full arterial occlusion OxCap analysis: correcting for blood volume,
+  extracting occlusion intervals, finding peak deoxy\[haem\] slopes, and
+  fitting a monoexponential through the slope estimates to estimate the
+  mV̇O₂ recovery rate constant *k*.
+
+- *“Reading and analysing PIONIRS data with mnirs”* demonstrates reading
+  new TD-NIRS `.ftn` & `.ftn2` files, and compares different fit methods
+  to occlusion reoxygenation kinetics.
+
 ## mnirs 0.7.2
 
 ### `read_mnirs()`

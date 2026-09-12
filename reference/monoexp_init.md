@@ -25,12 +25,13 @@ monoexp_init(mCall, data, LHS, ...)
 
 - ...:
 
-  Additional arguments.
+  Additional arguments, including `fixed`, a named list of user-fixed
+  parameter values from
+  [`init_fixed()`](https://jemarnold.github.io/mnirs/reference/init_fixed.md)
+  used to seed the remaining free estimates.
 
 ## Value
 
 `monoexp_init()`: Initial starting estimates for parameters in the model
 called by
-[`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-and
-[`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md).
+[`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md).

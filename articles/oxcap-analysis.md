@@ -1,84 +1,86 @@
-# Analysing muscle oxidative capacity with {mnirs}
+# Analysing muscle oxidative capacity with mnirs
 
 ## Introduction
 
-I am continuing to develop the
-[`{mnirs}`](https://github.com/jemarnold/mnirs) package for processing
-and analysing muscle near-infrared spectroscopy in R.
+The [`{mnirs}`](https://github.com/jemarnold/mnirs) package is under
+active development with processing and analysis methods for muscle
+near-infrared spectroscopy in R.
 
-In this article, I will demonstrate how the recently added functionality
-can be combined to perform muscle oxidative capacity (OxCap) analysis
-from a repeated ischaemic occlusion protocol, while ensuring
-reproducibility and adhering to current gold-standard processing
-methods.
+This article demonstrates recently added functionality in *{mnirs}* can
+be combined to perform muscle oxidative capacity (OxCap) analysis from a
+repeated ischaemic occlusion protocol, ensuring reproducibility and
+adhering to current gold-standard processing methods.
+
+> **Note**
+>
+> This article assumes basic familiarity with the *{mnirs}* package. For
+> an overview and demonstration of data processing with *{mnirs}*,
+> please see the original package vignette [*Reading and Cleaning Data
+> with
+> mnirs*](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html).
 
 > **Tip**
 >
-> This article assumes basic familiarity with the {mnirs} package. For
-> an overview and demonstration of data processing with {mnirs}, please
-> see the package vignette [*Reading and Cleaning Data with
-> {mnirs}*](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html).
+> Skip to the [analysis code](#oxidative-capacity-analysis-with-mnirs)
+> below if you are already familiar with the method.
 
-#### Muscle oxidative capacity testing
+### Muscle oxidative capacity testing
 
 One of the most compelling applications emerging in mNIRS research is
-the ability to non-invasively evaluate **muscle oxidative capacity**
-after a dynamic exercise task.
+the non-invasive evaluation of gross **muscle oxidative capacity** after
+a dynamic exercise task.
 
 Oxidative capacity is the maximal rate at which a muscle utilises oxygen
 (O₂) to meet the energetic demand of exercise, and is related to
-mitochondrial respiratory function \[[1](#ref-Beever2020)\].
+mitochondrial respiratory function ([Beever et al.,
+2020](#ref-Beever2020)).
 
-Traditionally, OxCap assessment requires highly complex and invasive
-in-vitro methods such as high-resolution respirometry of biopsy tissue
-samples, or expensive in-vivo ³¹P magnetic resonance spectroscopy.
+Traditional mitochondrial oxidative capacity assessment requires
+invasive in-vitro methods such as high-resolution respirometry of biopsy
+tissue, or expensive in-vivo ³¹P magnetic resonance spectroscopy. mNIRS
+is comparatively far more accessible, and allows non-invasive assessment
+during dynamic exercise tasks, at lower cost and with lower participant
+burden.
 
-With mNIRS, muscle OxCap can be assessed non-invasively during more
-dynamic exercise tasks, and with lower cost and burden than traditional
-methods previously available.
+### Protocol overview
 
-#### Protocol overview
+The participant performs a brief exercise task or muscle stimulation to
+elevate O₂ extraction (mV̇O₂) demand in the target tissue, with mNIRS
+sensors over the muscle of interest and an occlusion cuff around the
+proximal limb.
 
-The participant is asked to perform a brief exercise task or muscle
-contraction stimulus to elevate the O₂ demand in the target tissue, with
-mNIRS sensors over the peripheral muscle of interest and an occlusion
-cuff ready (deflated) around the proximal limb.
-
-Immediately after the stimulus, the occlusion cuff is rapidly inflated
-to a supra-systolic blood pressure (e.g., 300 mmHg) to transiently stop
-blood flow into the distal target muscle site.
-
-The occlusion is held for a brief period such as 5-seconds, then
-deflated to allow recovery to proceed. A sequence of these brief,
+Immediately after the stimulus, the cuff is rapidly inflated to a
+supra-systolic pressure (e.g. 300 mmHg), transiently stopping blood flow
+into the distal target muscle. The occlusion is held briefly (e.g. 5 s)
+then rapidly deflated to allow recovery. A sequence of these brief,
 repeated occlusions are performed at a pre-specified tempo (e.g. 5-sec
-occlusion, 10-sec recovery) for up to twenty repetitions (~5-minutes)
-until the muscle has recovered back to baseline.
+occlusion, 10-sec recovery) for up to twenty repetitions (~5 min), until
+the muscle recovers to baseline.
 
 ![](figures/McCully-2024.jpg)
 
-Figure 2 from McCully et al, 2024 \[[2](#ref-McCully2024)\]. (A) The
+Figure 2 from McCully et al. ([2024](#ref-McCully2024)). (A) The
 experimental setup for the progressive exercise test. The NIRS device
 was placed on the vastus lateralis using straps. The blood pressure cuff
-was placed proximally to the NIRS device. The leg is shown lifting the
+was placed proximal to the NIRS device. The leg is shown lifting the
 weight. For NIRS measurements, the leg was placed on top of the padding
 in the horizontal position to allow the muscle to relax during the
 measurements.
 
-During each occlusion where oxygen delivery is constrained and assumed
-to be zero, the rate of deoxygenation — the slope of the rise in
-deoxyhaeme (HHb/time; μM/sec), or decline in oxygen saturation or
-oxyhaeme — is interpreted to represent the rate of local muscle oxygen
-uptake (mV̇O₂).
+During each occlusion, oxygen delivery is restricted and assumed to be
+zero. The rate of deoxygenation — the slope of the rise in deoxy\[haem\]
+(HHb/time; μM/sec), or decline in oxygen saturation (SmO₂) or
+oxy\[haem\] — is therefore interpreted as the rate of local muscle
+oxygen uptake (mV̇O₂).
 
-Immediately after the exercise task when metabolic demand is high, mV̇O₂
-will be elevated. It will decline at an exponential rate as recovery
-proceeds back to baseline. The rate constant (*k*, min⁻¹) of this
-monoexponential curve quantifies the muscle OxCap value
-\[[3](#ref-Adami2018)\].
+mV̇O₂ is elevated immediately after the exercise task, then recovers
+exponentially toward baseline. The rate constant (*k*, min⁻¹) of this
+monoexponential curve quantifies the muscle OxCap value ([Adami &
+Rossiter, 2018](#ref-Adami2018)).
 
 ![](figures/Adami-2018.jpg)
 
-Figure 1 from Adami et al, 2018 \[[3](#ref-Adami2018)\]. Muscle oxygen
+Figure 1 from Adami & Rossiter ([2018](#ref-Adami2018)). Muscle oxygen
 consumption (mVO2) recovery rate constant (k) by near-infrared
 spectroscopy. A and B: example of the oxidative capacity test by NIRS.
 A: changes in the tissue saturation index (TSI) during dynamic exercise
@@ -90,267 +92,262 @@ summaries of current reports of the mVO2 recovery rate constant (k),
 which is proportional to oxidative capacity, in upper and lower limbs of
 adults in health and disease.
 
-This technique has been well studied in recent years, validated against
-³¹P-MRS \[[4](#ref-Ryan2013)\] and mitochondrial content protein markers
-\[[5](#ref-Tripp2023)\]. The rate constant *k* has been shown to be
-proportionally higher (faster recovery) in endurance-trained muscle, and
-lower (slower) in pathalogical and diseased muscle
-\[[3](#ref-Adami2018)\].
+This technique is well validated against ³¹P-MRS ([Ryan et al.,
+2013](#ref-Ryan2013)) and mitochondrial content protein markers ([Tripp
+et al., 2023](#ref-Tripp2023)). The rate constant *k* is proportionally
+higher (faster recovery) in endurance-trained muscle, and lower (slower)
+in untrained, older, or diseased muscle ([Adami & Rossiter,
+2018](#ref-Adami2018)).
 
-#### A call for standardised processing methods
+### A call for standardised processing methods
 
-Technical procedures and analysis methods for OxCap assessment have
-converged toward standardisation in recent years, with methods showing
-good reliability and reproducibility.
+Technical and analysis methods for OxCap assessment have converged
+toward standardisation in recent years, with good demonstrated
+reliability and reproducibility. There has been a recent call to
+implement standard analysis scripts with robust slope detection and
+non-linear modelling, to minimise operator-related variability between
+research centres, and improve interpretation of outcomes across
+populations and interventions ([Costalat et al.,
+2025](#ref-Costalat2025); [Rasica et al., 2024](#ref-Rasica2024)).
 
-Recently there has been a call to implement standard analysis scripts
-with robust slope detection and non-linear modelling, to minimise
-operator-related variability between research centres, and thereby
-improving interpretation of outcomes across populations and
-interventions \[[6](#ref-Costalat2025),[7](#ref-Rasica2024)\].
+This article uses recently developed *{mnirs}* functionality to process
+and analyse repeated occlusion muscle OxCap data. In the future, this
+could be wrapped into a single convenience function, but the current
+process is already considerably simpler and more robust than methods
+relying on manual data cleaning, manual interval selection, and
+iterative (e.g. Excel macro) curve fitting.
 
-I wanted to see how well (or poorly) my current {mnirs} functionality
-could process and analyse repeated occlusion muscle OxCap data.
-
-In the future, this process will be wrapped into convenience functions
-to make the process easier for the end user. But I believe this process
-is already considerably simpler and more robust than non-reproducible
-methods relying on manual data cleaning, occlusion interval selection,
-and curve fitting.
-
-## Oxidative capacity analysis in {mnirs}
-
-This article serves as a vignette for three analysis functions recently
-added to the {mnirs} package, and how they can be used together to
-perform robust OxCap analysis.
-
-- [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md):
-  is used to detect specific events or times in an *“mnirs”* data frame,
-  and extract an interval around each one, returning a list of data
-  frames.  
-    
-  This is useful when a certain event is labelled in `event_channel`, or
-  a list of time values is provided manually for when events occur, such
-  as the start of an exercise interval or occlusion. The returned list
-  of data frames is ready for further analysis. See
-  [`?extract_intervals`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
-  for more details.
-
-- [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md):
-  is used to find the peak positive or negative linear regression slope
-  from a numeric vector and return the slope value, intercept, and
-  associated parameters.  
-    
-  The segment of an mNIRS signal with the steepest slope is often
-  interpreted to represent the point of greatest mismatch between O₂
-  supply and O₂ demand, such as for muscle OxCap testing. See
-  [`?peak_slope`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
-  for more details.
-
-- [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md):
-  specifies the equation for an exponential function. Two self-starting
-  functions are available for non-linear curve fitting;
-  [`SS_monoexp4()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  fits a 4-parameter monoexponential model, while
-  [`SS_monoexp3()`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  fits a reduced 3-parameter model without a time delay parameter, where
-  monoexponential response is expected to be instantaneous.  
-    
-  Calling these functions in non-linear curve fitting functions
-  (e.g. [`nls()`](https://rdrr.io/r/stats/nls.html)) will return model
-  coefficients for the three or four parameters. See
-  [`?monoexponential`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
-  and
-  [`?SS_monoexp`](https://jemarnold.github.io/mnirs/reference/SS_monoexp.md)
-  for more details.
-
-#### Analysis plan
+### Analysis plan
 
 For OxCap analysis, we will perform roughly 8 steps:
 
-1.  Import an example NIRS file with the repeated occlusions procedure.
-2.  Pre-process/clean data, as needed (minimal in this example).
+1.  Import an example mNIRS file with the repeated occlusions procedure.
+2.  Process/clean data, as needed (minimal in this example).
 3.  Iteratively correct NIRS values for changes in blood volume, a
     required step to ensure valid analysis.
-4.  Specify occlusion events in the data and extract a 5-sec intervals
-    for all occlusions.
+4.  Specify occlusion events in the data and extract a 5-sec interval
+    for each occlusion.
 5.  Find the peak 3-sec linear regression NIRS slope within each
-    occlusion event.
-6.  Model a monoexponential curve fit across NIRS slope observations
-    within both repeated occlusion trials.
+    occlusion interval.
+6.  Fit a monoexponential curve across NIRS slope observations for both
+    repeated occlusion trials.
 7.  Extract the rate constant (*k*) for each trial exponential curve.
 8.  Plot the modelled data.
 
-My aim is to perform this analysis using only the {mnirs} package and
-{tidyverse} functions, keeping the script as clean as possible, with as
-few janky manual adjustments as necessary.
+## Oxidative capacity analysis with *{mnirs}*
 
-#### Setup
+This article serves as a vignette for some of the kinetics analysis
+functions recently added to *{mnirs}*, and how they combine to perform
+robust OxCap analysis.
 
-First, load our packages and initial setup options. We will silence
-{mnirs} info messages and set our ggplot2 theme.
+- [`correct_blood_volume()`](https://jemarnold.github.io/mnirs/reference/correct_blood_volume.md)
+  normalises values for oxy\[haem\], deoxy\[haem\], and total\[haem\]
+  channels (if present), using an iterative method developed from Beever
+  et al. ([2020](#ref-Beever2020)) that properly accommodates negative
+  values. See
+  [`?correct_blood_volume`](https://jemarnold.github.io/mnirs/reference/correct_blood_volume.md)
+  for details.
+
+- [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  detects specific events or times in an *“mnirs”* data frame, extracts
+  an interval around each one, and returns a list of data frames. The
+  returned list of data frames is ready for further analysis. See
+  [`?extract_intervals`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  for details.
+
+- [`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+  evaluates mNIRS response kinetics from a single *“mnirs”* data frame
+  or a list of data frames, with a selection of parametric and
+  non-parametric methods. It returns a formatted table of model results,
+  with internal model components retrieved with `results$...`. See
+  [`?analyse_kinetics`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+  for details.  
+    
+  We will use this function twice for OxCap analysis:
+
+  - `analyse_kinetics(method = "peak_slope")` finds the peak linear
+    regression slopes on deoxy\[haem\] from the extracted occlusion
+    intervals. The steepest (positive or negative) slope is often
+    interpreted as the point of greatest mismatch between O₂ supply and
+    extraction. See
+    [`?peak_slope`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+    for details on the vector-level function called by
+    [`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md).
+
+  - `analyse_kinetics(method = "monoexponential")` then fits an
+    exponential curve through the resulting slope values over time, to
+    find the rate constant *k*. A self-starting function
+    [`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md)
+    is fit with [`stats::nls()`](https://rdrr.io/r/stats/nls.html),
+    called as either a **4-parameter** model with a time-delay parameter
+    (*TD*), or a reduced **3-parameter** model without *TD* where
+    response onset is expected to be immediate. See
+    [`?monoexponential`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
+    and
+    [`?SSmonoexponential`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md)
+    for details.
+
+### Setup
+
+First, load our packages and initial setup options.
 
 ``` r
-library(tidyverse) ## tidyverse packages for convenient data wrangling
-library(mnirs)
 
-options(mnirs.verbose = FALSE) ## globally silence info/warning messages
-theme_set(theme_mnirs(legend.position = "none")) ## set ggplot2 theme
+library(dplyr)   ## for convenient data wrangling
+library(ggplot2) ## for plotting
+library(mnirs)   ## install: pak::pak("jemarnold/mnirs@dev")
+
+options(mnirs.verbose = FALSE) ## silence mnirs messages
 ```
 
-> **Note**
+> **Acknowledgement**
 >
 > I received this example file from [Dr. Thomas
 > Tripp](https://scholar.google.com/citations?user=A9JwQbYAAAAJ&hl=en),
-> Postdoctoral fellow in [Dr. Martin
+> currently a postdoctoral fellow in [Dr. Martin
 > MacInnis](https://scholar.google.com/citations?hl=en&user=tJepNIQAAAAJ)’
 > lab at the University of Calgary. They have kindly allowed me to
-> include this file with the {mnirs} package for users to examine
+> include this file with the *{mnirs}* package for users to examine
 > themselves.
 >
-> It can be accessed by calling `example_mnirs("portamon-oxcap")`.
+> It can be accessed by calling `example_mnirs("portamon_oxcap")`.
 
-This article will assume basic familiarity with the {mnirs} package. For
-further details and demonstration of data processing, please see the
-package vignette [*Reading and Cleaning Data with
-{mnirs}*](https://jemarnold.github.io/mnirs/articles/reading-mnirs-data.html).
+## Read *{mnirs}* data file
 
-## Read {mnirs} data file
+The included example file has three NIRS channels and a sample-number
+column, automatically converted to a time value by
+[`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md).
+The file needs no other pre-processing steps.
 
-The included example file has three NIRS channels and a column with
-sample number, which will automatically be converted to a time value
-when the
+Note: by default, *Artinis Oxysoft* exports an event label column
+without a named header.
 [`read_mnirs()`](https://jemarnold.github.io/mnirs/reference/read_mnirs.md)
-function recognises the *Artinis Oxysoft* export format and sample rate
-(10 Hz). The file does not need to be cleaned for outliers or digitally
-filtered, so minimal pre-processing is required.
-
-One thing to note: *Artinis Oxysoft* exports an event label column
-without a named header by default. This is the column we will use to
-identify our occlusion events by the label *“Occlusion”*, so we need to
-include it. Currently in {mnirs} an unnamed column like this will be
-named `"col_"` with a numeric suffix for the column number in the data
-file. In our example file, this events column will therefore be
-`"col_6"`. It’s not the most elegant solution, but it works for now!
-
-We can separate the two trials in the data set by finding the longer gap
-between consecutive occlusion labels and manually defining intervals
-before that as trial 1, and after that as trial 2.
+renames this to *“labels”*. This is the column we will use to identify
+occlusion events by the label *“Occlusion”*.
 
 ``` r
+
+## identify and rename channels, including the event label column
 df <- read_mnirs(
-    file_path = example_mnirs("portamon-oxcap.xlsx"),
-    nirs_channels = c(thb = 2, hhb = 3, o2hb = 4), ## identify and rename NIRS channels
-    event_channel = c(event = "col_6") ## specify the unnamed events column
+    file_path     = example_mnirs("portamon_oxcap.xlsx"),
+    nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
+    event_channel = c(event = "labels")
 )
 
 ## view the structure of our data frame
 df
-#> # A tibble: 7,944 × 6
-#>    sample  time event   thb   hhb  o2hb
-#>     <dbl> <dbl> <chr> <dbl> <dbl> <dbl>
-#>  1      0   0   <NA>   146.  63.0  82.9
-#>  2      1   0.1 <NA>   146.  63.0  82.8
-#>  3      2   0.2 <NA>   146.  63.0  82.8
-#>  4      3   0.3 <NA>   146.  63.0  82.9
-#>  5      4   0.4 <NA>   146.  63.0  82.7
-#>  6      5   0.5 <NA>   146.  62.9  82.6
-#>  7      6   0.6 <NA>   146.  62.9  82.7
-#>  8      7   0.7 <NA>   146.  62.9  82.8
-#>  9      8   0.8 <NA>   146.  62.9  82.7
-#> 10      9   0.9 <NA>   146.  62.9  82.7
-#> # ℹ 7,934 more rows
-
-## "Occlusion" is our pre-specified event string in our events column
-## find each occlusion event, find where there is a longer gap
-## the number of occlusions before this should be in the first trial
-df_occlusions <- df[grepl("Occlusion", df$event), ]
-n_occlusions <- which(diff(df_occlusions$time) > 60)
-
-plot(df)
 ```
 
-![](oxcap-analysis_files/figure-html/read%20file%20and%20pre-process-1.png)
+    #> # A tibble: 7,944 × 6
+    #>     time sample event   thb   hhb  o2hb
+    #>    <dbl>  <dbl> <chr> <dbl> <dbl> <dbl>
+    #>  1   0        0 <NA>   146.  63.0  82.9
+    #>  2   0.1      1 <NA>   146.  63.0  82.8
+    #>  3   0.2      2 <NA>   146.  63.0  82.8
+    #>  4   0.3      3 <NA>   146.  63.0  82.9
+    #>  5   0.4      4 <NA>   146.  63.0  82.7
+    #>  6   0.5      5 <NA>   146.  62.9  82.6
+    #>  7   0.6      6 <NA>   146.  62.9  82.7
+    #>  8   0.7      7 <NA>   146.  62.9  82.8
+    #>  9   0.8      8 <NA>   146.  62.9  82.7
+    #> 10   0.9      9 <NA>   146.  62.9  82.7
+    #> # ℹ 7,934 more rows
 
-The two exercise bouts and repeated occlusion trials can clearly be
-identified from plotting the raw data. A few resting occlusions were
-also performed at the start of the file, but we will ignore those and
-just model the two repeated occlusion trials.
+``` r
+
+## plot the two trial start events
+trial_times <- df$time[grepl("Trial Start", df$event)]
+
+plot(df, label_time = TRUE) +
+    geom_vline(xintercept = trial_times, linetype = "dashed")
+```
+
+![](oxcap-analysis_files/figure-html/plot%20trials-1.png)
+
+The two repeated occlusion trials are clearly identifiable from the raw
+data plot. A few resting occlusions were also performed at the start of
+the file, which we will ignore for now.
 
 ## Correct for blood volume
 
-A necessary processing step before analysing the OxCap trials is to
-apply a correction to the NIRS channels for changes in blood volume
-during the repeated occlusions. This step has been shown to improve
-validity when taking slopes of the oxy- or deoxyhaeme channels
-\[[8](#ref-Ryan2012)\].
+Before analysing the OxCap trials, the NIRS channels must be corrected
+for changes in blood volume during the repeated occlusions. This ensures
+validity when evaluating NIRS slopes ([Ryan et al.,
+2012](#ref-Ryan2012)).
 
-The preferred method is to iteratively correct for instantaneous changes
-in oxygenation between samples, according to Beever et al, 2020
-\[[1](#ref-Beever2020)\].
+The preferred method proposed by Beever et al. ([2020](#ref-Beever2020))
+iteratively corrects for instantaneous changes in oxygenation between
+samples.
+[`correct_blood_volume()`](https://jemarnold.github.io/mnirs/reference/correct_blood_volume.md)
+implements this method, further developed to accommodate negative NIRS
+values, which can be reported by some mNIRS devices.
+
+### `correct_blood_volume()`
+
+- `data`
+
+  This function takes a data frame (or a list of data frames), corrects
+  the specified NIRS channels for changes in blood volume
+  (*Δtotal\[haem\]*), and returns the data frame with the corrected
+  `nirs_channels`.  
+    
+  These channels cannot be read automatically from *“mnirs”* metadata,
+  to avoid ambiguity. The corrected channels are passed on in metadata
+  as `nirs_channels` for further analysis.
 
 ``` r
+
 df <- df |>
-    mutate(
-        ## blood volume correction factor `beta`
-        beta = o2hb / (o2hb + hhb),
-        ## iteratively correct NIRS values from one sample to the next
-        o2hb = purrr::accumulate(2:n(), \(prev, i) {
-            prev + (o2hb[i] - o2hb[i - 1]) - beta[i] * (thb[i] - thb[i - 1])
-            }, .init = 0
-        ),
-        hhb = purrr::accumulate(2:n(), \(prev, i) {
-            prev + (hhb[i] - hhb[i - 1]) - (1 - beta[i]) * (thb[i] - thb[i - 1])
-            }, .init = 0
-        ),
-        ## thb corrected for changes in blood volume becomes equal to zero
-        thb = o2hb + hhb,
+    correct_blood_volume(
+        oxy_channel   = o2hb,
+        deoxy_channel = hhb,
+        total_channel = thb
     )
 
 ## plot corrected data with occlusion event indicators
-plot(df) +
-    geom_vline(xintercept = df_occlusions$time, linetype = "dotted", alpha = 0.4)
+occl_times <- df$time[grepl("Occlusion", df$event)]
+
+plot(df, label_time = TRUE) +
+    geom_vline(xintercept = occl_times, linetype = "dotted", alpha = 0.4)
 ```
 
 ![](oxcap-analysis_files/figure-html/blood%20volume%20correction-1.png)
 
-This results in a symmetrical distribution of oxy- and deoxyhaeme, with
-the sum total (total-haeme; THb) equal to zero at all samples.
+This correction results in a symmetrical distribution of oxy- and
+deoxy\[haem\], with the sum total (total\[haem\]; THb) definitionally
+equal to zero at all samples.
 
-We can also plot occlusion event indicators (vertical dotted lines) to
-confirm timing and detect any missed/extra events.
+Occlusions from the labels in `event_channel` are also plotted (vertical
+dotted lines) to visually confirm timing and detect any erroneous
+events.
 
 ## Extract occlusion intervals
 
-The next step is to identify these occlusion events and extract the
-interval around each, into a list of data frames which we can continue
-to analyse iteratively.
+The next step is to detect and extract each interval around these
+occlusion event labels into a data frame for iterative kinetics
+analysis. We will also need to split the analysis into the two discrete
+trials.
 
-#### `extract_intervals()`
+### `extract_intervals()`
 
 - `data`
 
-  This function takes in a data frame, applies processing to all
-  channels specified, then returns a list of processed data frames.
-  *“mnirs”* metadata will be passed to and from this function.  
-    
-  For this analysis, we will re-join the returned list of data frames
-  into a combined data frame with a grouping variable labelled
-  “interval”.
+  This function takes a data frame or list of data frames, and returns a
+  list of data frames, named per detected interval. *“mnirs”* metadata
+  is passed to and from this function.
 
 - `nirs_channels`, `time_channel`, `event_channel`, & `sample_rate`
 
   Specify which column names in `data` will be processed.
-  `nirs_channels` are the response variables; `time_channel` is the time
-  series variable; `event_channel` specifies where to look for event
-  labels; and `sample_rate` specifies the recording rate used when
-  ensemble-averaging across intervals with unequal time samples. If any
-  arguments are not specified, they will be retrieved from *“mnirs”*
-  metadata. Channels in the data but not explicitly specified will be
-  passed through unprocessed to the returned data frames.  
+  `nirs_channels` are the response variables; `time_channel` is the
+  predictor variable; `event_channel` specifies where to look for events
+  as either character labels or integer laps; and `sample_rate` carries
+  the exported samples-per-second rate used when ensemble-averaging
+  across intervals. Arguments left unspecified are retrieved from
+  *“mnirs”* metadata by default.  
     
-  We will analyse OxCap from the deoxyhaeme (HHb) NIRS signal, which is
-  often recommended \[[6](#ref-Costalat2025)\].
+  We will analyse OxCap from the deoxy\[haem\] (*“HHb”*) NIRS signal, as
+  recommended ([Costalat et al., 2025](#ref-Costalat2025)).
 
 - `start` & `end`
 
@@ -358,415 +355,646 @@ to analyse iteratively.
   [`by_time()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
   for `time_channel` values;
   [`by_label()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
-  for `event_channel` labels; or
+  for `event_channel` labels;
+  [`by_lap()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
+  for lap indices in `event_channel`; or
   [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
   for sample indices (row numbers). Provide both `start` and `end` to
-  define precise intervals, or provide `start` alone with `span` to
-  extract windows around events.  
+  define precise intervals, or `start` alone with `span` to extract a
+  window around events (see below).  
     
-  Once again, in this example data file, the occlusions are all
-  identified by the event label *“Occlusion”*. This makes it very simple
-  to detect this string in the `event` column as the `start` value to
+  Since the occlusions are all identified by the event label
+  *“Occlusion”*, we can look for this string as the `start` value to
   extract each interval.  
     
-  Detecting intervals by event labels must match a full string exactly
-  or use a regular expression (regex) string such as *“(?i)occlusions?”*
-  or *“start\|end”*.
+  Event labels are matched as regular expressions (regex) by default, so
+  a partial string will match. Use `fixed = TRUE` for literal matching,
+  or `ignore_case = TRUE` to match case-insensitively.
+
+- `group_intervals`
+
+  Multiple events can be extracted for analysis as *“distinct”*
+  intervals, or *“ensemble”*-averaged together. Different groupings can
+  be ensemble-averaged by providing a list of intervals by number,
+  e.g. `list(c(1, 2), c(3, 4))`.  
+    
+  For manual grouping, interval numbers must be known ahead of time and
+  always refer to order of occurrence in the data frame (sorted by
+  `time_channel`). For this example, we analyse each interval separately
+  using the default `group_intervals = "distinct"`.
 
 - `span`
 
-  When only `start` (or `end`) is provided, `span` specifies a time
-  window in units of `time_channel` as `c(before, after)`, where
-  positive values indicate time after the event and negative values
-  indicate time before. When both `start` and `end` are provided, `span`
-  shifts boundaries additively: `span[1]` adjusts starts, `span[2]`
-  adjusts ends.  
+  A two-element vector of `time_channel` values specifying a time window
+  `c(start, end)` in units of `time_channel`, where positive values
+  indicate time after the event bound and negative values indicate time
+  before. `span[1]` shifts the start bound, `span[2]` shifts the end
+  bound, respectively.  
     
-  All occlusion bouts were held for 5-seconds in this protocol. If the
-  occlusion duration changed across the protocol, we might have to
-  specify a list of time spans, rather than a single `span` as in this
-  case.  
+  Since all occlusion bouts were held for 5 s, we use a 5-sec time span.
+  If occlusion duration changed through the protocol, we could specify a
+  list of time spans (`span = list()`); here a single vector is
+  recycled.  
     
-  From visual investigation of the plots, we were able to see that in
-  the first ~0.5 sec after the occlusion label, the deoxyhaeme signal
-  was disrupted by the inflation of the cuff, which might produce
-  invalid slope values. So we will specify a time span of `c(1, 5)`,
-  i.e. from 1 to 5 seconds after each *“Occlusion”* event label. If we
-  wanted to include an interval before the event label, we could specify
-  a negative numeric value, e.g. `c(-2.5, 2.5)` to include a 5-sec span
-  centred on the label itself.
-
-- `event_groups`
-
-  Multiple events can be extracted for analysis as `"distinct"`
-  intervals, or `"ensemble"`-averaged together. Different groupings of
-  intervals can be ensemble-averaged by providing a list of numeric
-  vectors specifying event intervals by number to ensemble-average or
-  return as distinct; e.g. `list(c(1, 2), c(3, 4))`.  
-    
-  The interval numbers need to be known ahead of time and always refer
-  to their order of occurrence in the data frame (i.e., sorted by
-  `time_channel`). Any event intervals detected but not supplied by
-  number will be included as distinct data frames.
+  Visual inspection (not shown) revealed that the deoxy\[haem\] signal
+  was disrupted by cuff inflation during the first 0.5-1.0 sec of each
+  occlusion interval, which might influence slope values. We therefore
+  exclude the first second with `span = c(1, 5)`, i.e. extract from
+  1-sec to 5-sec after each *“Occlusion”* label.
 
 - `zero_time`
 
-  The time values for each event interval can be recalculated to start
-  from zero at the event indicator. Time values for ensemble-averaged
-  intervals will always be re-calculated from zero, since the original
-  time information is lost when ensembling.  
+  Time values for each event interval can be recalculated to start from
+  zero at the event indicator. Ensemble-averaged intervals are always
+  rebased to zero, since original time values are obsolete when
+  ensembling.  
     
-  For repeated occlusion testing, the original time information for each
-  occlusion interval is critical to subsequently model the exponential
-  recovery function, so we keep this as `FALSE`.
+  For repeated occlusion testing, the original time information per
+  interval is needed to subsequently model the exponential recovery
+  function, so we keep `zero_time = FALSE`.
 
 ``` r
-## identify and extract intervals by event label "Occlusion"
-## re-join the returned list of data frames 
-df_list <- extract_intervals(
-    df,
-    start = by_label("Occlusion"), ## event label used in file
-    event_groups = "distinct", ## return each occlusion event separately
-    span = c(1, 5), ## interval c(start, end) around each event time value
-    zero_time = FALSE ## preserve original time values at each event
-)
 
-## join back into a single grouped data frame
-## only necessary for easier plotting
-df_grouped <- df_list |>
-    purrr::list_rbind(names_to = "interval") |>
-    ## convert the "interval" column to a categorical factor
-    mutate(interval = factor(interval, levels = unique(interval))) |>
-    ## add "mnirs" metadata back to the combined data frame, for plotting
-    create_mnirs_data(
-        attributes(df_list[[1L]])[c("nirs_channels", "time_channel")]
+## extract all occlusion events from the data at once
+## we can specify the two-trial structure later
+## extract intervals in a 1-5 sec span after each event
+df_list <- extract_intervals(
+        df,
+        group_intervals = "distinct",
+        start           = by_label("Occlusion"),
+        span            = c(1, 5), ## span in reference to `start` times
+        zero_time       = FALSE    ## preserve original time values
     )
 
-## visualise facet plot with all occlusion intervals for error checking
-## the steepest facets will be the first occlusions from the two trials
-plot(df_grouped) +
-    theme(
-        strip.text = element_blank(),
-        strip.background = element_blank(),
-        strip.placement = "outside",
-        axis.text.x = element_blank(),
-    ) +
-    facet_wrap(~interval, scales = "free_x", nrow = 4)
+## visualise all occlusion intervals for error checking
+## expecting 2 x 16 = 32 total
+plot(df_list, ncol = 8) +
+    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 ```
 
 ![](oxcap-analysis_files/figure-html/extract%20intervals-1.png)
 
-We can plot the sequence of extracted occlusion intervals to visually
-inspect the data. As expected, the first interval during each repeated
-occlusion trial appears the steepest, with the slope rapidly becoming
-less steep during each subsequent occlusion as mV̇O₂ recovers.
+As expected, on visual inspection the first intervals in each repeated
+occlusion trial (*interval_1* and *interval_17*) are the steepest,
+becoming progressively less steep at each subsequent occlusion as mV̇O₂
+recovers.
 
-From here, we want to calculate the slope values for each of these
-occlusion intervals.
+Next, we calculate the slope value for each occlusion interval.
 
 ## Calculate occlusion slopes
 
-#### `peak_slope()`
+### `analyse_kinetics()`
 
-- `x`, `t`
+- `data`
 
-  This function takes in a vector of numeric data (`x`) and optional
-  time values (`t`), processes the response variable `x` to find the
-  peak local linear regression slope over the predictor variable `t`
-  (defaults to sample number if not provided), and returns a list of
-  parameters from that linear regression model.
+  This function takes a data frame or list of data frames, analyses all
+  channels separately, and returns a single formatted table of results.
+  Model components such as coefficients, fitted data frames, intake
+  metadata, and diagnostics can be retrieved from results metadata with
+  `results$...`.
+
+- `nirs_channels` & `time_channel`
+
+  If the data contain *“mnirs”* metadata, these are detected
+  automatically; otherwise they can be specified explicitly.
+
+- `start_time`, `direction`, & `end_window`
+
+  These arguments apply to every method. `start_time` marks the response
+  onset. When intervals come from
+  [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md),
+  it is retrieved automatically from *“mnirs”* metadata. Otherwise it
+  defaults to the first non-negative time value (i.e. `0`).  
+    
+  `direction` detects whether the response rises (*“positive”*) or falls
+  (*“negative”*), and defaults to *“auto”*. For parametric fits it also
+  constrains the expected response direction, in case of ambiguous
+  kinetics. For deoxy\[haem\], we specify `direction = "positive"`,
+  since deoxygenation increases during occlusions.  
+    
+  `end_window` defines the end of the fitting window by looking forward
+  for a reasonable end time, taking the first peak or trough (for rising
+  or falling response, respectively) with no more extreme value within
+  that span. The default `end_window = Inf` uses the global extreme
+  across the whole interval, appropriate for these short occlusion
+  windows.
+
+- `method`
+
+  Multiple analysis methods are currently available. This OxCap analysis
+  uses *“peak_slope”* and *“monoexponential”*, then
+  *“exponential_drift”* as an exploratory extension below.
+
+#### Analyse peak slope kinetics
+
+- `method = "peak_slope"`
+
+The **peak slope** method is a *semi-parametric* approach: it fits a
+linear regression model across a rolling local window, returning the
+single steepest slope along with the time at which it occurs. For OxCap
+analysis, the steepest local rate of deoxygenation is interpreted as the
+point of greatest mismatch between O₂ delivery and extraction — a proxy
+for mV̇O₂ during each occlusion.
 
 - `width`, `span`
 
-  Linear regression is performed within a rolling local window specified
-  by one of either `width` or `span`. `width` defines a number of
-  samples, whereas `span` defines a range of time in units of
-  `time_channel`.  
-    
-  For this occlusion protocol, the peak 3-sec slope will be extracted
-  from each 5-sec occlusion interval.
+  The local window is specified by either `width` (a number of samples)
+  or `span` (a range of time in units of `time_channel`). Here we want
+  the peak slope from a 3-sec span within each occlusion interval.
 
 - `align`
 
-  The local rolling linear regression window can be `"centre"`-aligned
-  around the target sample (`idx`), or it can be `"left"`-aligned with
-  `idx` at the start of the window (forward-looking), or
-  `"right"`-aligned with `idx` at the end of the window
-  (backward-looking).
-
-- `direction`
-
-  By default, the peak positive (upward) or negative (downward) slope
-  will be returned depending on the overall trend direction of the
-  response variable `x`. This can be overridden by specifying either
-  `"positive"` or `"negative"`.  
-    
-  For processing deoxyhaeme, we will specify that the peak slope during
-  occlusion should be positive, because deoxygenation increases.
+  The window can be *“centre”*-aligned around the target sample (`idx`),
+  *“left”*-aligned with `idx` at the start (forward-looking), or
+  *“right”*-aligned with `idx` at the end (backward-looking). We keep
+  the default `align = "centre"`.
 
 - `partial`
 
-  By default, a local window will only return a linear regression model
-  if all samples within the window are valid. If `partial` is set to
-  `TRUE`, then local windows will return a slope model as long as there
-  are two or more valid samples.  
+  By default, a local window only returns a linear regression model if
+  all samples within it are valid. If `partial = TRUE`, windows return a
+  slope model as long as two or more samples are available.  
     
-  A window with fewer samples will tend to return steeper slope values,
-  which may or may not be relevant to our interpretations. e.g., as an
-  edge-case (literally at the edges of the data) in a noisy data set
-  there may be two samples with an extreme local slope between them. We
-  usually would want to ignore this outlier slope value.
+  Windows with fewer samples tend to return steeper slopes, which may
+  not be relevant to our interpretation — e.g. at the edges of a noisy
+  dataset, two samples alone can produce an extreme local slope that we
+  would usually want to ignore.
 
 ``` r
-## iteratively find peak local slopes within each occlusion interval
-## return summary values for each factor level of "interval" grouping column
-slopes_df <- df_grouped |>
-    reframe(
-        .by = interval,
-        {
-            slope_params <- peak_slope(
-                x = hhb, ## response variable: deoxyhaeme
-                t = time, ## predictor variable: time in seconds
-                span = 3, ## steepest 3 sec slope
-                align = "left", ## forward-looking from index sample
-                direction = "positive", ## upward slope for hhb
-                partial = FALSE ## allow only complete 3-sec segments, no NAs
-            )
-            ## return time value (start time of 3-sec period) and slope value (μM/sec)
-            data.frame(
-                time = slope_params$t,
-                slope = slope_params$slope
-            )
-        }
-    ) |>
-    mutate(
-        ## manual factor by occlusions in each trial
-        trial = factor(if_else(row_number() %in% seq_len(n_occlusions), 1L, 2L))
-    ) |>
-    mutate(
-        ## recalculate time as starting from zero for each trial
-        .by = trial,
-        time = time - time[1L],
-    ) |>
-    select(trial, time, slope)
 
-## create plot template
-p <- ggplot(slopes_df, aes(time, slope, colour = trial)) +
-    coord_cartesian(ylim = c(0, NA)) +
-    scale_x_continuous(
-        name = "Time (mm:ss)",
-        breaks = breaks_timespan(),
-        labels = format_hmmss
-    ) +
-    scale_y_continuous(expand = expansion(c(0, 0.03))) +
-    scale_colour_mnirs() +
-    labs(
-        y = expression(bold(HHb ~ Slope ~ '(μM' %.% sec^'-1' * ')'))
-    )
+## find peak 3-sec hhb slopes within each occlusion interval
+slope_results <- analyse_kinetics(
+    df_list,
+    nirs_channels = hhb,
+    time_channel  = time,
+    method        = "peak_slope",
+    span          = 3,
+    direction     = "positive",
+    partial       = FALSE,
+)
 
-## plot observed slope values for each trial
-p +
-    geom_line() +
-    geom_point(fill = "white", size = 3, shape = 21, stroke = 1)
+## view the formatted results
+slope_results
+```
+
+    #>
+    #> Peak Linear Response Rate
+    #>     Model Coefficients:
+    #>             interval nirs_channels start_time  slope intercept peak_slope_time
+    #>      1:   interval_1           hhb      213.7  1.044    -1.505             1.2
+    #>      2:   interval_2           hhb      228.5 0.6122   -0.1580             1.2
+    #>      3:   interval_3           hhb      243.4 0.3869   -0.7273             2.8
+    #>      4:   interval_4           hhb      258.4 0.3275    -1.877             2.8
+    #>      5:   interval_5           hhb      273.6 0.1902    -1.094             2.8
+    #>     --- 22 rows omitted
+    #>     28:  interval_28           hhb      722.0 0.2043    -2.208             2.1
+    #>     29:  interval_29           hhb      736.7 0.1902    -2.110             2.8
+    #>     30:  interval_30           hhb      751.5 0.1968    -4.253             2.8
+    #>     31:  interval_31           hhb      766.7 0.2230    -4.138             1.8
+    #>     32:  interval_32           hhb      781.3 0.1925    -3.602             2.7
+
+``` r
+
+plot(slope_results, ncol = 8, label_size = 3) +
+    theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 ```
 
 ![](oxcap-analysis_files/figure-html/find%20peak%20slopes-1.png)
 
-Plotting the returned slope values gives us a very nice indication of
-the exponential recovery response for mV̇O₂ after each brief exercise
-task.
+> **Tip**
+>
+> Individual kinetics results can be quickly visualised with the
+> built-in [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+> function with coefficient labels (see
+> [`?plot.mnirs_kinetics`](https://jemarnold.github.io/mnirs/reference/plot.mnirs_kinetics.md)).
+
+Next, we can recursively analyse the resulting slope coefficients with
+another
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+call using a *“monoexponential”* model to estimate mV̇O₂ recovery.
 
 ## Model mV̇O₂ recovery
 
-#### `monoexponential()`
+### `analyse_kinetics()`
 
-- `t`
+#### Analyse monoexponential kinetics
 
-  This function is the equation for either a 3- or 4-parameter
-  monoexponential function. It takes in a predictor variable for time
-  (`t`) and generates the response variable (`y`) for an exponential
-  curve with characteristics determined by four coefficients.
+- `method = "monoexponential"`
 
-- `A`, `B`
+The **monoexponential** method is a *parametric* approach: it fits a
+self-starting exponential curve to time series data with
+[`stats::nls()`](https://rdrr.io/r/stats/nls.html), using
+[`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md)
+to initialise starting values. This models how mV̇O₂ recovers back to
+baseline after the exercise stimulus, and its rate constant *k* is the
+OxCap outcome.
 
-  The starting (baseline) value and the ending (asymptote) value,
-  respectively for the monoexponential curve. Will define either an
-  exponential association curve in the positive direction when `B` \>
-  `A`, or exponential decay in the negative direction when `A` \> `B`.
+It fits either a **4-parameter** model
+`A + (B − A)(1 − exp(−(t − TD) / tau))` with a time delay *TD*, or a
+reduced **3-parameter** model without *TD* when the response is expected
+to start immediately.
 
-- `tau`
+- `use_TD` (*TD* coefficient)
 
-  The time constant (τ) describes the speed of the exponential
-  transition from `A` to `B`, and is approximated by the time elapsed
-  when the response has completed 63.2% of the total amplitude. i.e.,
-  has reached the value `A + 0.632 × (B − A)`.  
+  An argument used with the exponential methods: it explicitly specifies
+  a **4-parameter** model with a time delay between the stimulus
+  (e.g. at `t = 0`) and the start of a systematic exponential response.
+  The model falls back to a **3-parameter** fit if the 4-parameter fit
+  fails to converge.  
+    
+  During repeated occlusions after exercise, the first occlusions may
+  not conform to an exponential response, i.e. if oxygen saturation is
+  too low and limiting to mV̇O₂. A time delay parameter can capture the
+  true monoexponential response in these cases. This protocol was
+  designed to avoid that delay, so *TD* is not required here.
+
+- *A*, *B* coefficients
+
+  The starting (baseline) and ending (asymptote) values of the
+  monoexponential curve, defining either exponential association
+  (positive direction, *B* \> *A*) or decay (negative direction, *A* \>
+  *B*).
+
+- *tau*, *k* coefficients
+
+  The time constant (*tau*; τ) describes the time (speed) of the
+  exponential response from *A* to *B*, approximated by the time elapsed
+  at 63.2% of the total response amplitude — i.e. when predicted `y`
+  equals `A + 0.632 × (B − A)`.  
     
   The rate constant (*k*) is the inverse of the time constant
-  (`k = 1 / tau`) and is also commonly used in NIRS research, including
-  for OxCap assessment. In this example we will report *k* in units of
-  min⁻¹.
+  (`k = 1 / tau`) and is also commonly used in NIRS research. *k* is
+  returned as the inverse of `time_channel` units (seconds) by default;
+  here we convert *k* to min⁻¹.
 
-- `TD`
+- `group_intervals` & `zero_time`
 
-  TD is the optional fourth parameter which defines a time lag before
-  the start of monoexponential behaviour. This can capture behaviour
-  which does not respond instantaneously to an intervention with a delay
-  or a transient acceleration phase before exponential behaviour.  
+  Note these arguments differ slightly in intent from their
+  [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  counterparts above. Here, `group_intervals` takes a list of **sample
+  (row) numbers**, processing each as separate intervals and returning
+  named groups as interval names. The default *“ensemble”* fits all
+  samples of each data frame together, as in the above
+  `method = "peak_slope"` example.  
     
-  Often during repeated occlusions after exercise, the first occlusions
-  may not conform to monoexponential behaviour, if the oxygen saturation
-  is too low and limiting to mV̇O₂. In these cases, a time delay
-  parameter may be required to accurately capture the true
-  monoexponential response. This example protocol was designed to avoid
-  this potential delay and so a time delay parameter was not required.
-
-#### `SS_monoexp3()`, `SS_monoexp4()`
-
-- These self-starting non-linear curve functions allow for optimising
-  monoexponential fit coefficients on existing data, with either a 3- or
-  4-parameter model using [`nls()`](https://rdrr.io/r/stats/nls.html) or
-  another non-linear optimiser function. They return a model with three
-  or four coefficients and associated fit parameters.
-
-Having split our data set of times and slopes by trial, we can use
-[`tidyr::nest()`](https://tidyr.tidyverse.org/reference/nest.html)
-[`purrr::map()`](https://purrr.tidyverse.org/reference/map.html)
-functions to iteratively fit a 3-parameter monoexponential model for
-slope over time, for each trial, and return the primary outcome
-coefficient; the rate constant (*k*), calculated as the inverse of the
-time constant (*tau*).
+  Our `slope_results` has one sample per occlusion, so
+  `list(trial1 = 1:16, trial2 = 17:32)` separates the two trials. As
+  with
+  [`extract_intervals()`](https://jemarnold.github.io/mnirs/reference/extract_intervals.md)
+  above, `zero_time` is used to rebase each trial to start from `0`.
 
 ``` r
-## use 3-param monoexponential model for each trial
-## fit models by trial within the data frame with {tidyr} and {purrr}
-## return fitted data and time constant tau coefficient
-pred_df <- slopes_df |>
-    ## nest the data to model each trial
-    tidyr::nest(.by = trial) |>
-    mutate(
-        ## apply self-starting monoexp model to each trial
-        model = purrr::map(data, \(.df) {
-            nls(slope ~ SS_monoexp3(time, A, B, tau), data = .df)
-        }),
-        ## return tau coefficient for each trial model
-        tau = purrr::map_dbl(model, \(.m) coef(.m)[["tau"]]),
-        ## return the predicted exponential curve values for plotting
-        data = purrr::map2(data, model, \(.df, .m) {
-            mutate(.df, predicted_slope = predict(.m))
-        })
-    ) |>
-    select(trial, tau, data) |>
-    ## unnest back into the top level data frame for extraction and plotting
-    tidyr::unnest(data)
+
+## use 3-param monoexponential model without TD
+## fit samples in sequence grouped by trial
+## channels must be specified explicitly
+monoexp_results <- analyse_kinetics(
+    slope_results,
+    nirs_channels   = slope,  ## supply predictor & response channels
+    time_channel    = peak_slope_time,
+    method          = "monoexponential",
+    use_TD          = FALSE,
+    group_intervals = list(trial1 = 1:16, trial2 = 17:32),
+    zero_time       = TRUE    ## rebase each trial start_time to zero
+)
+
+## view the formatted results
+monoexp_results
+```
+
+    #>
+    #> Monoexponential One-Phase Kinetics
+    #>     Model Coefficients:
+    #>   interval nirs_channels     A      B TD   tau       k   MRT
+    #> 1   trial1     hhb_slope 1.051 0.2104 NA 19.33 0.05174 19.33
+    #> 2   trial2     hhb_slope 1.034 0.1666 NA 15.39 0.06496 15.39
+
+Resulting coefficients `A` represents the peak observed mV̇O₂ value at
+`time = 0`, and `B` represents the asymptote resting mV̇O₂ value. `tau`
+and `k` are the time and rate constants explained above. Since there is
+no `TD`, `MRT` (mean response time; the sum of `tau` + `TD`) is
+redundant with `tau`. `HRT` (half-response time) is also reported.
+
+The default plot of *“mnirs_kinetics”* data only reports `tau` (and `TD`
+& `MRT` if relevant). We want to know both `tau` and `k` in min⁻¹, so we
+will replace the default with a custom label for our results plot.
+
+``` r
 
 ## extract tau and k coef labels per trial, for plotting
-coef_df <- pred_df |>
+coef_labels <- monoexp_results$coefficients |>
     summarise(
-        .by = trial,
-        label = stringr::str_glue(
-            "Trial {trial[1]}
-            tau = {mnirs:::signif_trailing(tau[1], 1)} sec
-            k = {mnirs:::signif_trailing(60 / tau[1], 1)} min⁻¹"
+        .by = interval,
+        label = sprintf(
+            "Trial %s\ntau = %s sec\nk = %s min⁻¹",
+            gsub("trial", "", interval),
+            round(tau, 1),
+            round(k * 60, 1) ## convert to min^-1
         )
     )
 ```
 
+We can plot our results with some built-in customisation arguments, and
+additional components built from
+[ggplot2](https://ggplot2.tidyverse.org).
+
 ``` r
-## add predicted values to the plot of observed data
-p +
-    geom_line(
-        data = pred_df,
-        aes(y = predicted_slope, group = trial),
-        colour = "black", linewidth = 1
-    ) +
-    geom_text(
-        data = coef_df,
-        aes(label = label, colour = trial, group = trial),
-        x = Inf, y = Inf,
-        size = 5, hjust = 1.1, vjust = c(1.5, 3)
+
+## add custom info to the plot
+plot(monoexp_results, time_labels = TRUE, points = TRUE, labels = FALSE) +
+    labs(
+        x = "Occlusion Times (mm:ss)",
+        y = expression(bold(HHb ~ Slope ~ '(' * μM %.% sec^'-1' * ')')),
     ) + 
-    geom_line() +
-    geom_point(fill = "white", size = 3, shape = 21, stroke = 1)
+    theme(legend.position = "none") + 
+    geom_text(
+        data = coef_labels, aes(label = label),
+        x = Inf, y = Inf, size = 5, hjust = 1.1, vjust = 1.3
+    )
 ```
 
 ![](oxcap-analysis_files/figure-html/plot%20modelled%20data-1.png)
 
-## Conclusion
+As a final validation step, we can examine the fitting diagnostics for
+the two trials.
+
+## Examine fit diagnostics
+
+``` r
+
+## call diagnostics and format sigfigs
+monoexp_results$diagnostics |>
+    mutate(across(where(is.numeric), \(x) signif(x, 3)))
+```
+
+    #>   interval nirs_channels n_obs n_params    r2 adj_r2   rmse cv_rmse  snr   aic
+    #> 1   trial1     hhb_slope    16        3 0.967  0.962 0.0397   0.130 14.9 -49.8
+    #> 2   trial2     hhb_slope    16        3 0.975  0.971 0.0343   0.137 16.1 -54.5
+    #>    aicc   bic
+    #> 1 -46.2 -46.7
+    #> 2 -50.8 -51.4
+
+The diagnostics are already strong, suggesting valid monoexponential
+fit. However, we might wonder whether the upward drift in slope values
+rather than a flat asymptote is physiologically meaningful.
+
+For that, we could use an exploratory third
+[`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+method:
+
+### `analyse_kinetics()`
+
+#### Analyse exponential-drift kinetics
+
+- `method = "exponential_drift"`
+
+The **exponential-drift** method is a *parametric* two-phase approach:
+it fits a monoexponential primary response with a secondary linear drift
+beginning near the primary asymptote, with
+[`stats::nls()`](https://rdrr.io/r/stats/nls.html) and
+[`SSexponential_drift()`](https://jemarnold.github.io/mnirs/reference/SSexponential_drift.md).
+*A*, *B*, *tau*, and the derived *k*, *MRT*, and *HRT* are interpreted
+the same as for *“monoexponential”* above. The additional *slope*
+coefficient is the linear drift rate (in response units per unit
+`time_channel`).
+
+It fits a **5-parameter** model
+`A + (B − A)(1 − exp(−t / tau)) + slope × max(t + tau × log(1 − drift_fraction), 0)`,
+or a **6-parameter** model adding a time delay *TD*.
+
+A slow drift in mV̇O₂ after the primary recovery is physiologically
+plausible, e.g. from post-occlusion reactive hyperaemia or a
+slow-component shift in resting metabolic demand. Separating it from the
+primary response means the exponential phase is no longer forced to
+absorb the drift into its asymptote. See
+[`?exponential_drift`](https://jemarnold.github.io/mnirs/reference/exponential_drift.md)
+and
+[`?SSexponential_drift`](https://jemarnold.github.io/mnirs/reference/SSexponential_drift.md)
+for details.
+
+- `drift_fraction` (determines where the drift begins)
+
+  The drift onset occurs where the primary response reaches the
+  specified fraction of its amplitude,
+  `TD − tau × log(1 − drift_fraction)`. Before the onset, the drift term
+  is considered to be zero. The reported excursion point *texc* is where
+  the secondary drift rate overtakes the decaying primary rate (the
+  turning point of the curve when the two phases oppose).  
+    
+  The default `drift_fraction = 0.95` places drift onset at 95% of the
+  primary amplitude (3 × *tau* after *TD*), i.e. where the primary
+  response is effectively complete. It can be manually adjusted, but
+  smaller fractions allow the drift response to encroach on and absorb
+  more of the primary response, biasing the more physiologically
+  relevant *tau* estimate. We will leave it at the default.
+
+> **Caution**
+>
+> Please note! **Exponential-drift** kinetics is currently experimental
+> based on empirical observation, and remains to be more rigorously
+> validated.
+
+``` r
+
+exp_drift_results <- analyse_kinetics(
+    slope_results,
+    nirs_channels   = slope,
+    time_channel    = peak_slope_time,
+    method          = "exponential_drift",
+    use_TD          = FALSE,
+    drift_fraction  = 0.95,
+    group_intervals = list(trial1 = 1:16, trial2 = 17:32),
+    zero_time       = TRUE
+)
+
+## view the formatted results
+exp_drift_results
+```
+
+    #>
+    #> Exponential-Linear Drift Two-Phase Kinetics
+    #>     Model Coefficients:
+    #>   interval nirs_channels             model     A       B TD   tau       k   MRT
+    #> 1   trial1     hhb_slope exponential_drift 1.038  0.1383 NA 24.57 0.04069 24.57
+    #> 2   trial2     hhb_slope exponential_drift 1.028 0.09962 NA 19.02 0.05257 19.02
+    #>    texc   slope_B
+    #> 1 91.71 0.0008767
+    #> 2 79.65 0.0007414
+
+We will plot the new results using default labels, and displaying the
+two-phase components with a hidden (undocumented) option.
+
+``` r
+
+plot(
+    exp_drift_results,
+    time_labels = TRUE,
+    points      = TRUE,
+    label_size  = 5,
+    components  = TRUE
+) +
+    labs(
+        x = "Occlusion Times (mm:ss)",
+        y = expression(bold(HHb ~ Slope ~ '(' * μM %.% sec^'-1' * ')')),
+    ) +
+    theme(legend.position = "none")
+```
+
+![](oxcap-analysis_files/figure-html/plot%20exp-linear%20data-1.png)
+
+Time constant (`tau`) values are each ~5-sec greater with the two-phase
+exponential-drift kinetics, implying the fast primary monoexponential
+response can be described as proceeding more gradually toward a lower
+asymptote than initially observed, hidden behind a moderate slower
+hyperaemic drift.
+
+We can evaluate the fit diagnostics for this advanced kinetics fit,
+however we should be cautious directly comparing the diagnostic values
+without first considering `n_obs` and `n_params`; which reports the
+number of samples (observations) and coefficients (parameters) used by
+each model.
+
+``` r
+
+## bind both fit diagnostics into a single comparison table
+## compare by trial
+bind_rows(
+    monoexponential   = monoexp_results$diagnostics,
+    exponential_drift = exp_drift_results$diagnostics,
+    .id = "model"
+) |>
+    arrange(interval) |>
+    mutate(across(where(is.numeric), \(x) signif(x, 3)))
+```
+
+    #>               model interval nirs_channels n_obs n_params    r2 adj_r2   rmse
+    #> 1   monoexponential   trial1     hhb_slope    16        3 0.967  0.962 0.0397
+    #> 2 exponential_drift   trial1     hhb_slope    16        4 0.988  0.985 0.0240
+    #> 3   monoexponential   trial2     hhb_slope    16        3 0.975  0.971 0.0343
+    #> 4 exponential_drift   trial2     hhb_slope    16        4 0.995  0.994 0.0147
+    #>   cv_rmse  snr   aic  aicc   bic
+    #> 1  0.1300 14.9 -49.8 -46.2 -46.7
+    #> 2  0.0783 19.2 -63.9 -57.9 -60.1
+    #> 3  0.1370 16.1 -54.5 -50.8 -51.4
+    #> 4  0.0587 23.4 -79.6 -73.6 -75.7
+
+We can see that fit diagnostics are better in an absolute sense for the
+exponential-drift model. Because the two models are fit to identical
+data but differ in `n_params`, the unpenalised diagnostics (`r2`,
+`rmse`, `snr`) will always favour the more flexible model. For this
+comparison, they are not evidence of *“better fit”* on their own.
+
+The information criteria (`aic`, `aicc`, `bic`) are unitless estimators
+of prediction error, and penalise extra parameters. Lower values are
+*“better”* (read elsewhere about the *Akaike* and *Bayesian Information
+Criterion*). Therefore, because all three are lower (more negative) for
+the exponential-drift model in both trials, this supports the advanced
+model as a statically *“better fit”*, explaining relatively more of the
+signal vs noise.
+
+However, this suggests nothing about the *physiological rationale* for
+the added linear drift component, which takes precedence over any purely
+statistical *“goodness-of-fit”* test. That is a speculative question for
+another time!
+
+## A concise processing pipeline
 
 This article demonstrates how muscle oxidative capacity analysis can be
-performed using {mnirs} and some relatively simple, reproducible data
+performed using *{mnirs}* with relatively simple, reproducible data
 wrangling steps.
 
-In future development, I would like to wrap some of these processing
-steps into dedicated functions with recommended default parameters, to
-make the analysis process more streamlined.
+*{mnirs}* is built with a strong focus on plotting incremental
+processing & analysis steps along the way. In my opinion, this is an
+important visual validation step to perform whenever performing
+multi-step processing & analysis. When working with a familiar dataset,
+the processing & analysis pipeline can be considerably simplified
+compared to above:
 
-However, there are also a few limitations to this current process:
-modelling monoexponential behaviour with relatively few data samples
-(there are 17 occlusions per trial in this example) can result in
-unstable fit parameters or inability to converge non-linear fitting at
-all.
+``` r
 
-A more robust fitting process may be required for real-world data where
-mV̇O₂ recovery does not perfectly conform to monoexponential behaviour.
-Or, manual processing steps may be inevitably required during analysis
-to accommodate for these computational limitations.
+read_mnirs(
+    file_path       = example_mnirs("portamon_oxcap.xlsx"),
+    nirs_channels   = c(thb = 2, hhb = 3, o2hb = 4),
+    event_channel   = c(event = "labels")
+) |>
+    correct_blood_volume(
+        oxy_channel     = o2hb,
+        deoxy_channel   = hhb,
+        total_channel   = thb
+    ) |> 
+    extract_intervals(
+        start           = "Occlusion",
+        span            = c(1, 5)
+    ) |> 
+    analyse_kinetics(
+        nirs_channels   = hhb,
+        method          = "peak_slope",
+        span            = 3
+    ) |> 
+    analyse_kinetics(
+        nirs_channels   = slope,
+        time_channel    = peak_slope_time,
+        method          = "monoexponential",
+        use_TD          = FALSE,
+        group_intervals = list(1:16, 17:32),
+        zero_time       = TRUE
+    ) |> 
+    print() |> 
+    plot()
+```
+
+Future development could wrap these steps into a dedicated convenience
+function with recommended default parameters, streamlining the analysis
+process. However, there are always trade-offs between automation and
+customisation: fitting nonlinear models to sparse, noisy biological data
+can produce unstable fit parameters or fail to converge. Manual
+processing steps may still be needed to accommodate these limitations.
 
 ## References
 
-\[1\]
+Adami, A., & Rossiter, H. B. (2018). Principles, insights, and potential
+pitfalls of the noninvasive determination of muscle oxidative capacity
+by near-infrared spectroscopy \[Journal Article\]. *J Appl Physiol
+(1985)*, *124*(1), 245–248.
+<https://doi.org/10.1152/japplphysiol.00445.2017>
 
-Beever AT, Tripp TR, Zhang J, et al. NIRS-derived skeletal muscle
-oxidative capacity is correlated with aerobic fitness and independent of
-sex. J Appl Physiol (1985) 2020;129:558–68.
-<https://doi.org/10.1152/japplphysiol.00017.2020>.
+Beever, A. T., Tripp, T. R., Zhang, J., & MacInnis, M. J. (2020).
+NIRS-derived skeletal muscle oxidative capacity is correlated with
+aerobic fitness and independent of sex \[Journal Article\]. *J Appl
+Physiol (1985)*, *129*(3), 558–568.
+<https://doi.org/10.1152/japplphysiol.00017.2020>
 
-\[2\]
-
-McCully KK, Stoddard SN, Reynolds MA, et al. Skeletal muscle oxidative
-metabolism during exercise measured with near infrared spectroscopy. NDT
-2024;2:417–29. <https://doi.org/10.3390/ndt2040025>.
-
-\[3\]
-
-Adami A, Rossiter HB. Principles, insights, and potential pitfalls of
-the noninvasive determination of muscle oxidative capacity by
-near-infrared spectroscopy. J Appl Physiol (1985) 2018;124:245–8.
-<https://doi.org/10.1152/japplphysiol.00445.2017>.
-
-\[4\]
-
-Ryan TE, Southern WM, Reynolds MA, et al. A cross-validation of
-near-infrared spectroscopy measurements of skeletal muscle oxidative
-capacity with phosphorus magnetic resonance spectroscopy. J Appl Physiol
-(1985) 2013;115:1757–66.
-<https://doi.org/10.1152/japplphysiol.00835.2013>.
-
-\[5\]
-
-Tripp TR, McDougall RM, Frankish BP, et al. Contraction intensity
-affects NIRS-derived skeletal muscle oxidative capacity but not its
-relationships to mitochondrial protein content or aerobic fitness.
-Journal of Applied Physiology 2023.
-<https://doi.org/10.1152/japplphysiol.00342.2023>.
-
-\[6\]
-
-Costalat G, Sautillet B, Millet GP, et al. Steepest near-infrared
+Costalat, G., Sautillet, B., Millet, G. P., Unal, C., Abaidia, A. E.,
+Hassar, A., & Cozette, M. (2025). Steepest near-infrared
 spectroscopy-derived deoxygenation slopes during arterial occlusions
-provide more reliable assessments of muscle mitochondrial capacity. Exp
-Physiol 2025. <https://doi.org/10.1113/EP093040>.
+provide more reliable assessments of muscle mitochondrial capacity
+\[Journal Article\]. *Exp Physiol*. <https://doi.org/10.1113/EP093040>
 
-\[7\]
+McCully, K. K., Stoddard, S. N., Reynolds, M. A., & Ryan, T. E. (2024).
+Skeletal muscle oxidative metabolism during exercise measured with near
+infrared spectroscopy \[Journal Article\]. *NDT*, *2*(4), 417–429.
+<https://doi.org/10.3390/ndt2040025>
 
-Rasica L, Inglis EC, Mazzolari R, et al. Methodological considerations
-on near-infrared spectroscopy derived muscle oxidative capacity.
-European Journal of Applied Physiology 2024.
-<https://doi.org/10.1007/s00421-024-05421-6>.
+Rasica, L., Inglis, E. C., Mazzolari, R., Iannetta, D., & Murias, J. M.
+(2024). Methodological considerations on near-infrared spectroscopy
+derived muscle oxidative capacity \[Journal Article\]. *European Journal
+of Applied Physiology*. <https://doi.org/10.1007/s00421-024-05421-6>
 
-\[8\]
+Ryan, T. E., Erickson, M. L., Brizendine, J. T., Young, H. J., &
+McCully, K. K. (2012). Noninvasive evaluation of skeletal muscle
+mitochondrial capacity with near-infrared spectroscopy: Correcting for
+blood volume changes \[Journal Article\]. *J Appl Physiol (1985)*,
+*113*(2), 175–183. <https://doi.org/10.1152/japplphysiol.00319.2012>
 
-Ryan TE, Erickson ML, Brizendine JT, et al. Noninvasive evaluation of
-skeletal muscle mitochondrial capacity with near-infrared spectroscopy:
-Correcting for blood volume changes. J Appl Physiol (1985)
-2012;113:175–83. <https://doi.org/10.1152/japplphysiol.00319.2012>.
+Ryan, T. E., Southern, W. M., Reynolds, M. A., & McCully, K. K. (2013).
+A cross-validation of near-infrared spectroscopy measurements of
+skeletal muscle oxidative capacity with phosphorus magnetic resonance
+spectroscopy \[Journal Article\]. *J Appl Physiol (1985)*, *115*(12),
+1757–1766. <https://doi.org/10.1152/japplphysiol.00835.2013>
+
+Tripp, T. R., McDougall, R. M., Frankish, B. P., Wiley, J. P., Lun, V.,
+& MacInnis, M. J. (2023). Contraction intensity affects NIRS-derived
+skeletal muscle oxidative capacity but not its relationships to
+mitochondrial protein content or aerobic fitness \[Journal Article\].
+*Journal of Applied Physiology*.
+<https://doi.org/10.1152/japplphysiol.00342.2023>

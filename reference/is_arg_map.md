@@ -4,7 +4,9 @@ An argument is a map when it is a
 [`list()`](https://rdrr.io/r/base/list.html) with at least one named
 element and at most one unnamed element (the fallback for unlisted
 keys). Shared by
-[`resolve_channel_args()`](https://jemarnold.github.io/mnirs/reference/resolve_channel_args.md).
+[`resolve_channel_args()`](https://jemarnold.github.io/mnirs/reference/resolve_channel_args.md)
+and
+[`resolve_interval_args()`](https://jemarnold.github.io/mnirs/reference/resolve_interval_args.md).
 
 ## Usage
 

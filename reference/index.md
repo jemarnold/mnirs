@@ -53,6 +53,9 @@ Clean, filter, and transform data.
 - [`rescale_mnirs()`](https://jemarnold.github.io/mnirs/reference/rescale_mnirs.md)
   : Rescale data range
 
+- [`correct_blood_volume()`](https://jemarnold.github.io/mnirs/reference/correct_blood_volume.md)
+  : Correct for blood volume changes
+
 ## Detect intervals
 
 Detect and extract intervals for further analysis
@@ -68,6 +71,44 @@ Detect and extract intervals for further analysis
   [`by_sample()`](https://jemarnold.github.io/mnirs/reference/by_time.md)
   : Specify interval boundaries by time, label, lap, or sample
 
+## Analyse kinetics
+
+Estimate response dynamics and kinetic parameters
+
+- [`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+  [`analyze_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
+  : Analyse kinetics across mNIRS channels and intervals
+- [`response_time()`](https://jemarnold.github.io/mnirs/reference/response_time.md)
+  : Fractional response time
+- [`peak_slope()`](https://jemarnold.github.io/mnirs/reference/peak_slope.md)
+  : Peak linear slope
+- [`SSbiexponential()`](https://jemarnold.github.io/mnirs/reference/SSbiexponential.md)
+  : Self-starting biexponential model
+- [`SSexponential_drift()`](https://jemarnold.github.io/mnirs/reference/SSexponential_drift.md)
+  : Self-starting exponential-drift model
+- [`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md)
+  : Self-starting monoexponential model
+- [`biexponential()`](https://jemarnold.github.io/mnirs/reference/biexponential.md)
+  : Biexponential function
+- [`exponential_drift()`](https://jemarnold.github.io/mnirs/reference/exponential_drift.md)
+  : Exponential-drift function
+- [`monoexponential()`](https://jemarnold.github.io/mnirs/reference/monoexponential.md)
+  : Monoexponential function
+- [`SSsigmoidal_drift()`](https://jemarnold.github.io/mnirs/reference/SSsigmoidal_drift.md)
+  : Self-starting sigmoidal-drift model
+- [`sigmoidal_drift()`](https://jemarnold.github.io/mnirs/reference/sigmoidal_drift.md)
+  : Sigmoidal-drift function
+- [`SSlogistic()`](https://jemarnold.github.io/mnirs/reference/SSlogistic.md)
+  : Self-starting logistic model
+- [`logistic()`](https://jemarnold.github.io/mnirs/reference/logistic.md)
+  : Generalised logistic function
+- [`SSgompertz()`](https://jemarnold.github.io/mnirs/reference/SSgompertz.md)
+  [`SSgompertz_left()`](https://jemarnold.github.io/mnirs/reference/SSgompertz.md)
+  : Self-starting Gompertz models
+- [`gompertz()`](https://jemarnold.github.io/mnirs/reference/gompertz.md)
+  [`gompertz_left()`](https://jemarnold.github.io/mnirs/reference/gompertz.md)
+  : Gompertz growth functions
+
 ## Print & plot
 
 Tools for printing functions and pretty plotting with
@@ -76,10 +117,18 @@ Tools for printing functions and pretty plotting with
 - [`print(`*`<mnirs>`*`)`](https://jemarnold.github.io/mnirs/reference/print.mnirs.md)
   : Methods for mnirs objects
 
+- [`print(`*`<mnirs_kinetics>`*`)`](https://jemarnold.github.io/mnirs/reference/print.mnirs_kinetics.md)
+  : Methods for mnirs_kinetics objects
+
 - [`plot(`*`<mnirs>`*`)`](https://jemarnold.github.io/mnirs/reference/plot.mnirs.md)
   :
 
   Plot *mnirs* objects
+
+- [`plot(`*`<mnirs_kinetics>`*`)`](https://jemarnold.github.io/mnirs/reference/plot.mnirs_kinetics.md)
+  :
+
+  Plot *mnirs* kinetics results
 
 - [`theme_mnirs()`](https://jemarnold.github.io/mnirs/reference/theme_mnirs.md)
   :
@@ -116,7 +165,7 @@ Example data files included in the package
   : 10 Hz Artinis Oxysoft export recorded with Oxymon MKIII
 - [`moxy_ramp.xlsx`](https://jemarnold.github.io/mnirs/reference/moxy_ramp.xlsx.md)
   : 2 Hz PerfPro export of Moxy data
-- [`portamon-oxcap.xlsx`](https://jemarnold.github.io/mnirs/reference/portamon-oxcap.xlsx.md)
+- [`portamon_oxcap.xlsx`](https://jemarnold.github.io/mnirs/reference/portamon_oxcap.xlsx.md)
   : 10 Hz Artinis Oxysoft export recorded with Portamon
-- [`pionirs_occlusion.ftn2`](https://jemarnold.github.io/mnirs/reference/pionirs_occlusion.ftn2.md)
-  : 1 Hz PIONIRS NIRSBOX-DUAL export
+- [`pionirs_occlusion.ftn`](https://jemarnold.github.io/mnirs/reference/pionirs_occlusion.ftn.md)
+  : 1 Hz PIONIRS NIRSBOX export
