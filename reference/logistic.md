@@ -131,7 +131,7 @@ summary(model)
 #> Residual standard error: 1.827 on 55 degrees of freedom
 #> 
 #> Number of iterations to convergence: 5 
-#> Achieved convergence tolerance: 1.468e-06
+#> Achieved convergence tolerance: 1.54e-06
 #> 
 
 y <- predict(model, data)

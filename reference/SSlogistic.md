@@ -141,7 +141,7 @@ summary(model5)
 #> Residual standard error: 1.827 on 55 degrees of freedom
 #> 
 #> Number of iterations to convergence: 5 
-#> Achieved convergence tolerance: 1.468e-06
+#> Achieved convergence tolerance: 1.54e-06
 #> 
 
 ## fix the starting asymptote `A` at a known value
