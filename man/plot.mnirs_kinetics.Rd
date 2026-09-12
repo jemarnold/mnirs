@@ -20,7 +20,8 @@ the response onset (\code{start_time}) and key coefficient points in a darker
 shade of the channel colour.}
 
 \item{labels}{Logical. Default is \code{TRUE}; annotates each panel with the key
-coefficient value(s) for the fitted method.}
+coefficient value(s) for the fitted method, in the right-hand corner
+the observed signal leaves clear.}
 
 \item{...}{Additional arguments.}
 }

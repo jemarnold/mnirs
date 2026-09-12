@@ -143,6 +143,39 @@ test_that("SSsigmoidal_drift() excludes fixed parameters from estimation", {
     )
 })
 
+test_that("SSsigmoidal_drift() gradient matches numericDeriv for every shape", {
+    ## sample points off the hinge, where the one-sided derivative is exact
+    t <- seq(0, 120, by = 0.5) + 0.01
+    lapply(shapes, \(.s) {
+        env <- list2env(list(
+            t = t, A = 10, B = 100, xmid = 40, slope = 4,
+            slope_B = -0.4, drift_fraction = 0.95
+        ))
+        chk <- function(expr, pars) {
+            an <- attr(eval(expr, env), "gradient")
+            nd <- attr(numericDeriv(expr, pars, env), "gradient")
+            expect_identical(colnames(an), pars)
+            expect_equal(unname(an), unname(nd), tolerance = 1e-5)
+        }
+        chk(
+            substitute(SSsigmoidal_drift(
+                t, A, B, xmid, slope, slope_B,
+                drift_fraction = 0.95, shape = .s
+            ), list(.s = .s)),
+            c("A", "B", "xmid", "slope", "slope_B")
+        )
+        chk(
+            substitute(SSsigmoidal_drift(
+                t, A, B, xmid, slope, slope_B, drift_fraction, shape = .s
+            ), list(.s = .s)),
+            c("A", "B", "xmid", "slope", "slope_B", "drift_fraction")
+        )
+    })
+    expect_null(
+        attr(sigmoidal_drift(t, 10, 100, 40, 4, -0.4, 0.95), "gradient")
+    )
+})
+
 
 ## sigdrift_start() =================================================
 
@@ -223,10 +256,12 @@ test_that("analyse_sigmoidal_drift() returns correct structure and recovers para
     )
 
     expect_s3_class(result, "data.frame")
+    ## the chain's union schema, `model` naming the fit per row
     expect_named(result, c(
-        "interval", "nirs_channels", "A", "B", "xmid", "slope", "texc",
-        "slope_B", "drift_fraction", "xmid_fitted", "texc_fitted"
+        "interval", "nirs_channels", "model",
+        kinetics_chain_cols("sigmoidal_drift")
     ))
+    expect_equal(result$model, "sigmoidal_drift")
     expect_equal(nrow(result), 1L)
 
     ## attributes
@@ -584,10 +619,10 @@ test_that("analyse_sigmoidal_drift() converges on real dataset", {
 
     ## end-to-end path: window detection and held drift onset.
     ## start_time = 0 anchors the fit at the interval onset
-    results <- lapply(intervals, \(df) {
-        analyse_exponential_drift(
+    results <- lapply(deoxy, \(df) {
+        analyse_sigmoidal_drift(
             df,
-            nirs_channels = nirs_channels,
+            nirs_channels = deoxy_channels,
             start_time = 0,
             use_TD = TRUE,
             verbose = FALSE
@@ -595,16 +630,12 @@ test_that("analyse_sigmoidal_drift() converges on real dataset", {
     })
 
     coefs <- do.call(rbind, results)
-    success <- tapply(!is.na(coefs$tau), coefs$nirs_channels, mean)
+    ok <- !is.na(coefs$xmid)
+    success <- tapply(ok, coefs$nirs_channels, mean)
     success
     expect_true(all(success >= 1.0))
 
-    TD_success <- tapply(!is.na(coefs$TD), coefs$nirs_channels, mean)
-    TD_success
-    expect_true(all(TD_success >= 0.8))
-
     ## converged fits keep the drift onset inside the record
-    ok <- !is.na(coefs$tau)
     expect_true(all(coefs$texc[ok] >= 0))
 
     r2 <- unlist(lapply(results, \(x) attr(x, "diagnostics")$r2))

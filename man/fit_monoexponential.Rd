@@ -2,46 +2,31 @@
 % Please edit documentation in R/analyse_monoexponential.R
 \name{fit_monoexponential}
 \alias{fit_monoexponential}
-\title{Fit a monoexponential model to one channel window}
+\title{Fit a monoexponential model to one channel}
 \usage{
-fit_monoexponential(
-  .nirs,
-  x_fit,
-  t_fit,
-  .a,
-  valid,
-  time_channel,
-  interval_name,
-  env = rlang::caller_env()
-)
+fit_monoexponential(x, t, valid, .a, ctx)
 }
 \arguments{
-\item{.nirs}{Character; the channel name.}
-
-\item{x_fit, t_fit}{Numeric vectors of the channel fit window.}
-
-\item{.a}{The channel's resolved argument list.}
+\item{x, t}{Numeric vectors of the channel response and time elapsed
+from \code{start_time}.}
 
 \item{valid}{The \code{\link[=find_kinetics_idx]{find_kinetics_idx()}} result for the channel.}
 
-\item{time_channel}{Character; resolved time column name.}
+\item{.a}{The resolved argument list of the channel.}
 
-\item{interval_name}{Character; the interval name recorded in the \code{interval}
-column of the returned coefficients, \code{diagnostics}, and \code{channel_args}.}
-
-\item{env}{The calling environment or a defused call, used to report
-errors and warnings as coming from the user-facing function rather
-than the validator.}
+\item{ctx}{The channel context list of \code{\link[=analyse_kinetics_channels]{analyse_kinetics_channels()}}.}
 }
 \value{
 The \code{coefs}/\code{model}/\code{fitted_data}/\code{diag} list of
 \code{\link[=build_fit_results]{build_fit_results()}}, or \code{\link[=build_na_results]{build_na_results()}} when the fit fails.
 }
 \description{
-Channel-level fit behind \code{\link[=analyse_monoexponential]{analyse_monoexponential()}}, also the fast-phase
-(stage 1) fit of \code{\link[=analyse_biexponential]{analyse_biexponential()}}. Self-starting
-\code{\link[=SSmonoexponential]{SSmonoexponential()}} via \code{\link[stats:nls]{stats::nls()}}; a failed 4-parameter fit falls
-back to the 3-parameter model (\code{\link[=fit_td_fallback]{fit_td_fallback()}}), and the requested
-\code{direction} is enforced on \code{B - A} (\code{\link[=enforce_direction]{enforce_direction()}}).
+Channel fitter of \code{\link[=analyse_monoexponential]{analyse_monoexponential()}} (see
+\code{\link[=analyse_kinetics_channels]{analyse_kinetics_channels()}}), also the fast-phase (stage 1) fit of
+\code{\link[=fit_biexponential]{fit_biexponential()}} and the fallback of \code{\link[=fit_exponential_drift]{fit_exponential_drift()}}.
+Self-starting \code{\link[=SSmonoexponential]{SSmonoexponential()}} via \code{\link[stats:nls]{stats::nls()}}; a failed
+4-parameter fit falls back to the 3-parameter model
+(\code{\link[=fit_td_fallback]{fit_td_fallback()}}), and the requested \code{direction} is enforced on
+\code{B - A} (\code{\link[=enforce_direction]{enforce_direction()}}).
 }
 \keyword{internal}

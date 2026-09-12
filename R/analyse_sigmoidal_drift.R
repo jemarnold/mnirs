@@ -276,6 +276,72 @@ sigdrift_start <- function(x, t, fixed = list(), shape = "symmetric") {
 }
 
 
+#' Sigmoidal-drift model with gradient
+#'
+#' Model function of [SSsigmoidal_drift()]: [sigmoidal_drift()] plus the
+#' partial derivatives for the parameters written as bare symbols in the
+#' call (see [free_params()]), so [stats::nls()] skips
+#' [stats::numericDeriv()]. The sigmoid partials come from
+#' [sigmoid_core()]; the drift onset `xmid + u_f / k` moves with every
+#' sigmoid parameter through the rate `k`, and the hinge derivatives are
+#' one-sided at the onset.
+#'
+#' @inheritParams sigmoidal_drift
+#'
+#' @returns A numeric vector of predicted values with a `"gradient"`
+#'   attribute when any parameter is free.
+#'
+#' @keywords internal
+sigdrift_model <- function(
+    t,
+    A,
+    B,
+    xmid,
+    slope,
+    slope_B,
+    drift_fraction,
+    shape = "symmetric"
+) {
+    g <- sigmoid_core(t, A, B, xmid, slope, shape)
+    f <- drift_fraction
+    ## the shape inverse at the fraction, in units of u (see sigdrift_onset)
+    u_f <- switch(
+        shape,
+        symmetric = log(f / (1 - f)),
+        gompertz = -log(-log(f)),
+        gompertz_left = log(-log1p(-f))
+    )
+    onset <- xmid + u_f / g$k
+    h <- pmax(t - onset, 0)
+    val <- g$val + slope_B * h
+    free <- free_params(
+        match.call(),
+        c("A", "B", "xmid", "slope", "slope_B", "drift_fraction")
+    )
+    if (length(free) > 0L) {
+        ## d/dp = dS/dp - slope_B * [t > onset] * d(onset)/dp
+        on <- slope_B * (t > onset)
+        kD <- g$k * (B - A)
+        du_f <- switch(
+            shape,
+            symmetric = 1 / (f * (1 - f)),
+            gompertz = -1 / (f * log(f)),
+            gompertz_left = -1 / ((1 - f) * log1p(-f))
+        )
+        grad <- cbind(
+            A = g$A + on * u_f / kD,
+            B = g$B - on * u_f / kD,
+            xmid = g$xmid - on,
+            slope = g$slope + on * u_f / (g$k * slope),
+            slope_B = h,
+            drift_fraction = -on * du_f / g$k
+        )
+        attr(val, "gradient") <- grad[, free, drop = FALSE]
+    }
+    return(val)
+}
+
+
 #' Self-starting sigmoidal-drift model
 #'
 #' @description
@@ -344,7 +410,7 @@ sigdrift_start <- function(x, t, fixed = list(), shape = "symmetric") {
 #'
 #' @export
 SSsigmoidal_drift <- selfStart(
-    model = sigmoidal_drift,
+    model = sigdrift_model,
     initial = init_fixed(
         sigdrift_init,
         c("A", "B", "xmid", "slope", "slope_B", "drift_fraction")
@@ -358,7 +424,9 @@ SSsigmoidal_drift <- selfStart(
 #' Internal channel-level dispatch for
 #' `analyse_kinetics(method = "sigmoidal_drift")`. Fits a two-phase
 #' sigmoidal + linear-drift curve to each `nirs_channel` within a single
-#' *"mnirs"* data frame. See [analyse_kinetics()] for user-facing
+#' *"mnirs"* data frame via [fit_sigmoidal_drift()], falling back to
+#' [fit_sigmoidal()] where the drift is unsupported (see
+#' `kinetics_fallbacks`). See [analyse_kinetics()] for user-facing
 #' documentation.
 #'
 #' @param drift_fraction A numeric fraction of the amplitude in `(0.5, 1)` at
@@ -376,10 +444,10 @@ SSsigmoidal_drift <- selfStart(
 #' @inheritParams analyse_monoexponential
 #'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
-#'   `nirs_channels`, `A`, `B`, `xmid`, `slope`, `texc`, `slope_B`,
-#'   `drift_fraction`, `xmid_fitted`, `texc_fitted`. `texc` is the
-#'   excursion point where the drift rate overtakes the decaying sigmoid
-#'   rate, never before the drift onset (see [sigdrift_texc()]).
+#'   `nirs_channels`, `model`, `A`, `B`, `xmid`, `slope`, `texc`,
+#'   `slope_B`, `drift_fraction`, `xmid_fitted`, `texc_fitted`. `texc` is
+#'   the excursion point where the drift rate overtakes the decaying
+#'   sigmoid rate, never before the drift onset (see [sigdrift_texc()]).
 #'   Per-channel metadata are attached as attributes:
 #'   - `"model"`: an [nls][stats::nls] model object, or `NULL` for channels
 #'     where fitting failed.
@@ -389,6 +457,7 @@ SSsigmoidal_drift <- selfStart(
 #'     containing model fit diagnostics.
 #'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
 #'     recording the resolved arguments used.
+#'   - `"warnings"`: a `data.frame` of conditions captured during fitting.
 #'
 #' @seealso [analyse_kinetics()], [sigmoidal_drift()],
 #'   [SSsigmoidal_drift()]
@@ -433,130 +502,152 @@ analyse_sigmoidal_drift <- function(
         verbose = verbose,
         env = env
     )
-    per_channel <- resolve_drift_frac(setup$per_channel, env)
 
-    time_channel <- setup$time_channel
+    ## an unsupported drift falls back to the sigmoidal (see
+    ## `kinetics_fallbacks`); the undocumented `model_fallback = FALSE`
+    ## keeps the raw fit
+    return(analyse_kinetics_channels(
+        data,
+        setup$nirs_channels,
+        setup$time_channel,
+        resolve_drift_frac(setup$per_channel, env),
+        fit_sigmoidal_drift,
+        verbose,
+        interval_name,
+        extra_args = args,
+        method = "sigmoidal_drift",
+        fallback = !isFALSE(args$model_fallback),
+        env = env
+    ))
+}
+
+
+#' Fit a sigmoidal-drift model to one channel
+#'
+#' Channel fitter of [analyse_sigmoidal_drift()] (see
+#' [analyse_kinetics_channels()]). Self-starting [SSsigmoidal_drift()] of
+#' the channel `shape` via [stats::nls()] with `algorithm = "port"`,
+#' seeded by [sigdrift_start()], with the requested `direction` enforced
+#' on `B - A` and the sign of `slope` ([enforce_direction()]).
+#'
+#' @inheritParams fit_monoexponential
+#'
+#' @returns The `coefs`/`model`/`fitted_data`/`diag` list of
+#'   [build_fit_results()], or [build_na_results()] when the fit fails.
+#'
+#' @keywords internal
+fit_sigmoidal_drift <- function(x, t, valid, .a, ctx) {
+    x_fit <- x[valid$idx]
+    t_fit <- t[valid$idx]
     ## NA scaffold (method columns only) for convergence failure
     na_cols <- kinetics_coef_cols$sigmoidal_drift
     params <- c("A", "B", "xmid", "slope", "slope_B", "drift_fraction")
     fn <- quote(SSsigmoidal_drift)
 
-    ## method-specific fit: self-starting sigmoidal-drift via nls
-    sigdrift_fit <- function(.nirs, x_fit, t_fit, .a, valid) {
-        ## the drift onset fraction is always held constant; the shape
-        ## rides in the formula as a string constant beside the fixed
-        ## parameters
-        .a$fix <- c(.a$fix, list(drift_fraction = .a$drift_fraction))
-        fix_all <- c(.a$fix, list(shape = .a$shape))
-        free <- setdiff(params, names(.a$fix))
-        ## columns carry the channel names so the model predicts on them
-        nm <- fit_names(.nirs, time_channel, params)
-        fit_data <- setNames(data.frame(x_fit, t_fit), nm)
-        on_error <- \(e) warn_fit_failed(fn, e, .nirs, interval_name, env = env)
+    ## the drift onset fraction is always held constant; the shape rides
+    ## in the formula as a string constant beside the fixed parameters
+    .a$fix <- c(.a$fix, list(drift_fraction = .a$drift_fraction))
+    fix_all <- c(.a$fix, list(shape = .a$shape))
+    free <- setdiff(params, names(.a$fix))
+    ## columns carry the channel names so the model predicts on them
+    nm <- fit_names(ctx$nirs, ctx$time_channel, params)
+    fit_data <- list2DF(setNames(list(x_fit, t_fit), nm))
+    on_error <- \(e) {
+        warn_fit_failed(fn, e, ctx$nirs, ctx$interval_name, env = ctx$env)
+    }
 
-        ## the hinge is non-smooth, so port often stops short of its
-        ## certificate on usable coefficients, which are kept with a warning
-        model <- if (nrow(fit_data) <= length(free)) {
-            on_error(simpleError(sprintf(
-                "%d observation%s for %d free parameters.",
-                nrow(fit_data),
-                if (nrow(fit_data) == 1L) "" else "s",
-                length(free)
-            )))
-        } else {
-            formula <- build_ss_formula(
-                fn,
-                c(params, "shape"),
-                fix_all,
-                nm[[1L]],
-                nm[[2L]]
-            )
-            tryCatch(
-                {
-                    start <- sigdrift_start(x_fit, t_fit, .a$fix, .a$shape)
-                    embed_fit_call(suppressWarnings(nls(
-                        formula,
-                        fit_data,
-                        start = start[free],
-                        algorithm = "port",
-                        control = fit_control(
-                            .a$control,
-                            maxiter = 500L,
-                            warnOnly = TRUE
-                        )
-                    )))
-                },
-                error = on_error
-            )
-        }
-        model <- accept_port_fit(model, on_error)
-        if (is.null(model)) {
-            return(build_na_results(na_cols))
-        }
-
-        coefs <- full_coefs(model, params, .a$fix)
-
-        ## enforce direction: bounded refit on D = B - A and slope sign.
-        ## data-scaled slope floor: slope pinned here is a degenerate
-        ## flat fit, not a genuine response
-        want <- if (.a$direction == "positive") 1 else -1
-        slope_eps <- diff(range(x_fit)) / diff(range(t_fit)) * 1e-6
-        slope_free <- !"slope" %in% names(.a$fix)
-        enforced <- enforce_direction(
-            model,
-            coefs,
-            fit_data,
-            direction = .a$direction,
-            amp_fn = quote(sigmoidal_drift),
-            lower = if (slope_free) {
-                c(slope = if (want > 0) slope_eps else -Inf)
-            },
-            upper = if (slope_free) {
-                c(slope = if (want > 0) Inf else -slope_eps)
-            },
-            fix = fix_all,
-            control = .a$control,
-            .nirs = .nirs,
-            interval_name = interval_name,
-            env = env
+    ## the hinge is non-smooth, so port often stops short of its
+    ## certificate on usable coefficients, which are kept with a warning
+    model <- if (nrow(fit_data) <= length(free)) {
+        on_error(simpleError(sprintf(
+            "%d observation%s for %d free parameters.",
+            nrow(fit_data),
+            if (nrow(fit_data) == 1L) "" else "s",
+            length(free)
+        )))
+    } else {
+        formula <- build_ss_formula(
+            fn,
+            c(params, "shape"),
+            fix_all,
+            nm[[1L]],
+            nm[[2L]]
         )
-        if (is.null(enforced)) {
-            return(build_na_results(na_cols))
-        }
-        model <- enforced$model
-        coefs <- enforced$coefs
+        tryCatch(
+            {
+                start <- sigdrift_start(x_fit, t_fit, .a$fix, .a$shape)
+                embed_fit_call(suppressWarnings(nls(
+                    formula,
+                    fit_data,
+                    start = start[free],
+                    algorithm = "port",
+                    control = fit_control(
+                        .a$control,
+                        maxiter = 500L,
+                        warnOnly = TRUE
+                    )
+                )))
+            },
+            error = on_error
+        )
+    }
+    model <- accept_port_fit(model, on_error)
+    if (is.null(model)) {
+        return(build_na_results(na_cols))
+    }
 
-        ## xmid and texc are elapsed from start_time, matching the fit
-        ## time base; the coefficients are in model-argument order
-        cf <- c(as.list(coefs), shape = .a$shape)
-        texc_val <- do.call(sigdrift_texc, cf)
-        ## predict response at xmid and texc using the full fitted model
-        fitted <- do.call(sigmoidal_drift, c(list(c(cf$xmid, texc_val)), cf))
+    coefs <- full_coefs(model, params, .a$fix)
 
-        build_fit_results(
-            data.frame(
-                t(coefs),
+    ## enforce direction: bounded refit on D = B - A and slope sign.
+    ## data-scaled slope floor: slope pinned here is a degenerate
+    ## flat fit, not a genuine response
+    want <- if (.a$direction == "positive") 1 else -1
+    slope_eps <- diff(range(x_fit)) / diff(range(t_fit)) * 1e-6
+    slope_free <- !"slope" %in% names(.a$fix)
+    enforced <- enforce_direction(
+        model,
+        coefs,
+        fit_data,
+        direction = .a$direction,
+        amp_fn = fn,
+        lower = if (slope_free) {
+            c(slope = if (want > 0) slope_eps else -Inf)
+        },
+        upper = if (slope_free) {
+            c(slope = if (want > 0) Inf else -slope_eps)
+        },
+        fix = fix_all,
+        control = .a$control,
+        .nirs = ctx$nirs,
+        interval_name = ctx$interval_name,
+        env = ctx$env
+    )
+    if (is.null(enforced)) {
+        return(build_na_results(na_cols))
+    }
+    model <- enforced$model
+    coefs <- enforced$coefs
+
+    ## xmid and texc are elapsed from start_time, matching the fit
+    ## time base; the coefficients are in model-argument order
+    cf <- c(as.list(coefs), shape = .a$shape)
+    texc_val <- do.call(sigdrift_texc, cf)
+    ## predict response at xmid and texc using the full fitted model
+    fitted <- do.call(sigmoidal_drift, c(list(c(cf$xmid, texc_val)), cf))
+
+    return(build_fit_results(
+        list2DF(c(
+            as.list(coefs),
+            list(
                 texc = texc_val,
                 xmid_fitted = fitted[[1L]],
                 texc_fitted = fitted[[2L]]
-            )[na_cols],
-            model,
-            x_fit,
-            t_fit,
-            valid,
-            env = env
-        )
-    }
-
-    return(analyse_kinetics_channels(
-        data,
-        setup$nirs_channels,
-        setup$time_channel,
-        per_channel,
-        sigdrift_fit,
-        verbose,
-        interval_name,
-        extra_args = args,
-        env = env
+            )
+        ))[na_cols],
+        model,
+        x_fit,
+        t_fit,
+        valid,
+        env = ctx$env
     ))
 }

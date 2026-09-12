@@ -313,8 +313,9 @@ SSmonoexponential <- selfStart(
 #'
 #' Internal channel-level dispatch for
 #' `analyse_kinetics(method = "monoexponential")`. Fits a monoexponential
-#' curve to each `nirs_channel` within a single *"mnirs"* data frame. See
-#' [analyse_kinetics()] for user-facing documentation.
+#' curve to each `nirs_channel` within a single *"mnirs"* data frame via
+#' [fit_monoexponential()]. See [analyse_kinetics()] for user-facing
+#' documentation.
 #'
 #' @param use_TD Logical; default is `TRUE` to attempt to fit a
 #'   4-parameter [SSmonoexponential()] model (A, B, tau, TD) with a time delay.
@@ -384,54 +385,45 @@ analyse_monoexponential <- function(
         verbose = verbose,
         env = env
     )
-    time_channel <- setup$time_channel
 
     return(analyse_kinetics_channels(
         data,
         setup$nirs_channels,
         setup$time_channel,
         setup$per_channel,
-        \(.nirs, x_fit, t_fit, .a, valid) {
-            # fmt: skip
-            fit_monoexponential(
-                .nirs, x_fit, t_fit, .a, valid, time_channel, interval_name, env
-            )
-        },
+        fit_monoexponential,
         verbose,
         interval_name,
         extra_args = args,
+        method = "monoexponential",
         env = env
     ))
 }
 
 
-#' Fit a monoexponential model to one channel window
+#' Fit a monoexponential model to one channel
 #'
-#' Channel-level fit behind [analyse_monoexponential()], also the fast-phase
-#' (stage 1) fit of [analyse_biexponential()]. Self-starting
-#' [SSmonoexponential()] via [stats::nls()]; a failed 4-parameter fit falls
-#' back to the 3-parameter model ([fit_td_fallback()]), and the requested
-#' `direction` is enforced on `B - A` ([enforce_direction()]).
+#' Channel fitter of [analyse_monoexponential()] (see
+#' [analyse_kinetics_channels()]), also the fast-phase (stage 1) fit of
+#' [fit_biexponential()] and the fallback of [fit_exponential_drift()].
+#' Self-starting [SSmonoexponential()] via [stats::nls()]; a failed
+#' 4-parameter fit falls back to the 3-parameter model
+#' ([fit_td_fallback()]), and the requested `direction` is enforced on
+#' `B - A` ([enforce_direction()]).
 #'
-#' @inheritParams analyse_kinetics_channels
-#' @inheritParams fit_td_fallback
-#' @param .a The channel's resolved argument list.
+#' @param x,t Numeric vectors of the channel response and time elapsed
+#'   from `start_time`.
 #' @param valid The [find_kinetics_idx()] result for the channel.
+#' @param .a The resolved argument list of the channel.
+#' @param ctx The channel context list of [analyse_kinetics_channels()].
 #'
 #' @returns The `coefs`/`model`/`fitted_data`/`diag` list of
 #'   [build_fit_results()], or [build_na_results()] when the fit fails.
 #'
 #' @keywords internal
-fit_monoexponential <- function(
-    .nirs,
-    x_fit,
-    t_fit,
-    .a,
-    valid,
-    time_channel,
-    interval_name,
-    env = rlang::caller_env()
-) {
+fit_monoexponential <- function(x, t, valid, .a, ctx) {
+    x_fit <- x[valid$idx]
+    t_fit <- t[valid$idx]
     ## NA scaffold (method columns only) for convergence failure
     na_cols <- kinetics_coef_cols$monoexponential
     fit <- fit_td_fallback(
@@ -465,10 +457,7 @@ fit_monoexponential <- function(
             )
         },
         fn = quote(SSmonoexponential),
-        .nirs = .nirs,
-        time_channel = time_channel,
-        interval_name = interval_name,
-        env = env
+        ctx = ctx
     )
     if (is.null(fit$model)) {
         return(build_na_results(na_cols))
@@ -490,9 +479,9 @@ fit_monoexponential <- function(
         },
         fix = .a$fix,
         control = .a$control,
-        .nirs = .nirs,
-        interval_name = interval_name,
-        env = env
+        .nirs = ctx$nirs,
+        interval_name = ctx$interval_name,
+        env = ctx$env
     )
     if (is.null(enforced)) {
         return(build_na_results(na_cols))
@@ -504,8 +493,7 @@ fit_monoexponential <- function(
     MRT_val <- sum(TD_arg, coefs[["tau"]])
     HRT_val <- sum(TD_arg, coefs[["tau"]] * log(2))
 
-    ## predict response at tau, MRT, and HRT using the fitted model;
-    ## tau shifted by TD_arg so all time points share the reported frame
+    ## predict response at MRT and HRT using the fitted model
     fitted_params <- monoexponential(
         t = c(MRT_val, HRT_val),
         A = coefs[["A"]],
@@ -515,7 +503,7 @@ fit_monoexponential <- function(
     )
 
     return(build_fit_results(
-        data.frame(
+        list2DF(list(
             A = coefs[["A"]],
             B = coefs[["B"]],
             TD = TD_arg %||% NA_real_,
@@ -525,12 +513,12 @@ fit_monoexponential <- function(
             HRT = HRT_val,
             MRT_fitted = fitted_params[[1L]],
             HRT_fitted = fitted_params[[2L]]
-        ),
+        )),
         enforced$model,
         x_fit,
         t_fit,
         valid,
         fit$keep,
-        env
+        ctx$env
     ))
 }

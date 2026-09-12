@@ -106,8 +106,9 @@ recording the resolved arguments used.
 \description{
 Internal channel-level dispatch for
 \code{analyse_kinetics(method = "monoexponential")}. Fits a monoexponential
-curve to each \code{nirs_channel} within a single \emph{"mnirs"} data frame. See
-\code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing documentation.
+curve to each \code{nirs_channel} within a single \emph{"mnirs"} data frame via
+\code{\link[=fit_monoexponential]{fit_monoexponential()}}. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
+documentation.
 }
 \seealso{
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=monoexponential]{monoexponential()}}, \code{\link[=SSmonoexponential]{SSmonoexponential()}}

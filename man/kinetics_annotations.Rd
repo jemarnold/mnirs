@@ -4,10 +4,13 @@
 \alias{kinetics_annotations}
 \title{Build per-panel kinetics marker and label annotations}
 \usage{
-kinetics_annotations(x)
+kinetics_annotations(x, free_y = FALSE)
 }
 \arguments{
 \item{x}{An \emph{"mnirs_kinetics"} object from \code{\link[=analyse_kinetics]{analyse_kinetics()}}.}
+
+\item{free_y}{Logical. Default is \code{FALSE}; the y-axis midpoint spans all
+intervals, matching a shared facet axis. If \code{TRUE} (facet \code{scales = "free_y"} or \code{"free"}) each interval uses its own midpoint.}
 }
 \value{
 A \code{data.frame} with columns \code{interval}, \code{nirs_channels},
@@ -25,7 +28,9 @@ Marker rows are one per \code{nirs_channel} per key point per interval, with
 x-coordinates the resolved onset plus the method's time coefficient.
 Label rows are one per label line, anchored (\code{xval = Inf},
 \code{yval = -Inf} or \code{Inf}) at the corner of the panel's right edge vacated by
-the fitted data, judged from the coefficient direction. \code{vjust} stacks
-the lines inward from the corner in channel order within each interval.
+the observed signal: the bottom corner when the median of all channels
+over the right half of the interval sits above the y-axis midpoint,
+otherwise the top. \code{vjust} stacks the lines inward from the corner in
+channel order within each interval.
 }
 \keyword{internal}

@@ -41,14 +41,14 @@
 #'   lesser values within `end_window` after the first extrema (min/max).
 #'   `end_window = Inf` (*default*) returns the global extreme from the full
 #'   data range (see *Details*).
-#' 
+#'
 #' For *"biexponential"*, `end_window` bounds the fast-phase window only, and
 #'   the default is `30` sec; the full model is then fit to the full data range.
 #' @param group_intervals Either `"ensemble"` (*default*) to analyse all
 #'   samples of each data frame together, or a `list()` of integer vectors
 #'   of sample (row) numbers, each analysed as a separate interval, e.g.
 #'   `list(trial1 = 1:10, trial2 = 11:20)`.
-#' 
+#'
 #' List names become interval names (`interval_<n>` when unnamed)
 #'   (see *Details*).
 #' @param zero_time Logical. Default is `FALSE`. If `TRUE`, re-bases
@@ -58,9 +58,9 @@
 #'   See *Details*. For the [stats::nls()] methods (**monoexponential,
 #'   exponential_drift, biexponential, sigmoidal, sigmoidal_drift**),
 #'   `control = list()` can be passed to [stats::nls.control()], e.g.
-#'   `control = list(maxiter = 200)`, applied globally to all channels and 
+#'   `control = list(maxiter = 200)`, applied globally to all channels and
 #'   intervals.
-#' 
+#'
 #' @param response_fraction **response_time**: A numeric vector in the range
 #'   `[0, 1]` specifying the fractional response amplitude(s) to detect.
 #'   Defaults to `0.5` (50% response, i.e. half-response time). Multiple
@@ -89,14 +89,14 @@
 #'   `use_TD = FALSE` or the fit fails (with a warning), attempts to fall back
 #'   to a reduced parameter model without `TD`.
 #' @param shape **sigmoidal, sigmoidal_drift**: Character; the 4-parameter
-#'   sigmoidal shape to fit. One of `"symmetric"` (*default*; inflection 
+#'   sigmoidal shape to fit. One of `"symmetric"` (*default*; inflection
 #'   occurs at 50% amplitude), `"gompertz"` (early-inflection; 36.8% `1/e`),
 #'   or `"gompertz_left"` (late-inflection; 63.2% `1 - 1/e`).
 #' @param fix **monoexponential, exponential_drift, biexponential,**
 #'   **sigmoidal, sigmoidal_drift**: An *optional* named list of model
 #'   parameters (coefficients) to hold constant during fitting, e.g.
 #'   `fix = list(A = 0)` fixes the starting amplitude at `0`.
-#' 
+#'
 #' Fixed parameters are excluded from estimation and returned as constant.
 #'   Specify per-channel as a list of lists keyed by channel name, e.g.
 #'   `fix = list(smo2 = list(A = 0))`. See *Details*.
@@ -106,7 +106,7 @@
 #'   `A + drift_fraction * (B - A)`. *Default* is `0.95`. Specify per-channel
 #'   as a list keyed by channel name, e.g. `drift_fraction = list(smo2 = 0.9)`.
 #'   See *Details*.
-#' 
+#'
 #' @inheritParams validate_mnirs
 #' @inheritParams find_kinetics_idx
 #'
@@ -128,7 +128,7 @@
 #' Specified `nirs_channels` (or channels retrieved from *"mnirs"* metadata)
 #' will be analysed and results returned as a formatted table.
 #'
-#' 
+#'
 #' ## Response **start_time** and the baseline window
 #'
 #' `start_time` should be specified as the time point separating the
@@ -136,13 +136,13 @@
 #' systematic response fit window (`time_channel > start_time`). This often
 #' corresponds to a stimulus or start/end of an intervention (e.g. start/end
 #' of an exercise interval).
-#' 
-#' For intervals extracted with [extract_intervals()], `start_time` can be 
+#'
+#' For intervals extracted with [extract_intervals()], `start_time` can be
 #' retrieved from *"mnirs"* metadata. Otherwise `start_time` defaults to `0`
 #' or the first positive `time_channel` value.
 #'
 #' All methods are fitted on *time elapsed* from `start_time`, so returned
-#' time & duration coefficients are relative to response onset 
+#' time & duration coefficients are relative to response onset
 #' (e.g. `start_time = 0`).
 #'
 #' - For *"response_time"*, the baseline window before `start_time` defines the
@@ -158,10 +158,10 @@
 #' The time-delay models (*"exponential"*-family with `use_TD = TRUE`) are flat
 #' at `A` before `TD`, so the pre-onset baseline is included in the fit and
 #' anchors `A`. Their reduced forms (`use_TD = FALSE`, or a `TD` fit that
-#' failed and fell back) have no such flat region and are fitted only where 
+#' failed and fell back) have no such flat region and are fitted only where
 #' `time_channel >= start_time`.
 #'
-#' 
+#'
 #' ## Response **direction** and the fit **end_window**
 #'
 #' `direction` is detected automatically by default as either *"positive"*
@@ -175,10 +175,10 @@
 #' For *"exponential"*- and *"sigmoidal"*-family methods, `direction` also
 #' constrains the sign of the fitted amplitude `B - A`, and the sigmoidal
 #' `slope`. For the *"biexponential"* method, `direction` constrains the sign
-#' of the fast-phase amplitude `B - A`. A fit that cannot satisfy the requested 
+#' of the fast-phase amplitude `B - A`. A fit that cannot satisfy the requested
 #' direction returns `NA` coefficients with a warning.
 #'
-#' 
+#'
 #' ## Grouping samples with group_intervals
 #'
 #' `group_intervals = "ensemble"` (the *default*) analyses every sample of
@@ -197,7 +197,7 @@
 #' - List names become interval names; unnamed groups are `interval_<n>`.
 #' - Interval names are suffixed `<group>_<df>` (e.g. `trial1_A`).
 #' - For *"mnirs_kinetics"* results analysed recursively, the source
-#'   `nirs_channel` is prefixed to the analysed coefficient names (e.g. 
+#'   `nirs_channel` is prefixed to the analysed coefficient names (e.g.
 #'   `smo2_slope`)
 #' - Samples in no group are excluded from analysis (with a message).
 #'   Samples in more than one group are allowed (with a warning).
@@ -209,7 +209,7 @@
 #'   sample, so `start_time` then defaults to `0`.
 #' - Per-interval arguments key by the group names (see below).
 #'
-#' 
+#'
 #' ## Per-channel and per-interval arguments
 #'
 #' Arguments apply globally to all `nirs_channels` by default. Arguments can
@@ -217,7 +217,7 @@
 #' matching `nirs_channels`. For multi-interval input (a list of data frames or
 #' a grouped data frame), a named `list()` can also be keyed by interval name
 #' (the list names, group keys, or `interval_<n>`) to supply values
-#' per-interval, and each per-interval value may itself be a per-channel 
+#' per-interval, and each per-interval value may itself be a per-channel
 #' `list()`, e.g.
 #'
 #' ```r
@@ -273,8 +273,8 @@
 #' intervals with entirely different kinetics models must be done with
 #' independent `analyse_kinetics()` calls, or other iterative solutions
 #' (e.g. `lapply()` or `purrr::map()`).
-#' 
-#' 
+#'
+#'
 #' ## method = "response_time"
 #'
 #' Aliases:
@@ -283,14 +283,14 @@
 #' A non-parametric approach (estimated directly from the observed data without
 #' assuming a specific mathematical shape) to estimate the response time at
 #' which a signal reaches a specified fraction of its total response amplitude
-#' relative to the baseline. e.g. *half-response time* 
+#' relative to the baseline. e.g. *half-response time*
 #' (`response_fraction = 0.5`) is the time from response onset to attain 50%
 #' of the total amplitude change and approximates the inflection point
-#' (`xmid` of a symmetrical sigmoid function). 
-#' 
+#' (`xmid` of a symmetrical sigmoid function).
+#'
 #' `response_fraction = 0.632` approximates the time constant (`tau`;
-#' \eqn{\tau}) parameter from a monoexponential function, or the inflection 
-#' point (`xmid`) of an asymmetrical left-Gompertz function. 
+#' \eqn{\tau}) parameter from a monoexponential function, or the inflection
+#' point (`xmid`) of an asymmetrical left-Gompertz function.
 #' `response_fraction = 0.368` approximates `xmid` of a right-Gompertz function.
 #' This is a good fallback estimation method if parametric methods are not
 #' successfully fit.
@@ -305,23 +305,23 @@
 #' `start_time` to `response_value`. See [response_time()] for the full
 #' algorithm and coefficients.
 #'
-#' 
+#'
 #' ## method = "peak_slope"
 #'
 #' Aliases: `method = c("peak slope", "slope", "lm")`.
 #'
 #' A semi-parametric approach to estimate the maximum positive or negative
 #' local linear slope of a signal using rolling least-squares regression. The
-#' steepest local rate of change in NIRS signals can be interpreted as the 
+#' steepest local rate of change in NIRS signals can be interpreted as the
 #' moment of greatest mismatch between oxygen delivery and extraction.
-#' `peak_slope_time` is the time from response onset `start_time` to this 
+#' `peak_slope_time` is the time from response onset `start_time` to this
 #' moment of greatest mismatch.
 #'
 #' The local window is defined by either `width` (number of samples) or `span`
 #' (in units of `time_channel`). See [peak_slope()] for window mechanics,
 #' partial-window behaviour, and the returned vector-level list.
 #'
-#' 
+#'
 #' ## method = "monoexponential"
 #'
 #' Aliases: `method = c("monoexp", "exponential", "exp", "tau", "MRT")`.
@@ -348,12 +348,12 @@
 #' `use_TD = TRUE` and disables the 3-parameter fallback. It is recommended to
 #' specify `use_TD = FALSE` rather than fix `TD = 0`.
 #'
-#' 
+#'
 #' ## method = "exponential_drift"
 #'
 #' Aliases: `method = c("exp_drift", "exp_linear", "monoexp_drift")`.
 #'
-#' A parametric approach fitting a self-starting two-phase curve using 
+#' A parametric approach fitting a self-starting two-phase curve using
 #' [stats::nls()] with [SSexponential_drift()]. A *fast* [monoexponential()]
 #' primary response plus a *slow* linear secondary drift beginning near the
 #' primary asymptote.
@@ -368,14 +368,14 @@
 #' onset is not a free estimate. `drift_fraction` specifies the fraction
 #' (`(0.5, 1)`) of the primary response amplitude where the drift begins;
 #' `TD - tau * log(1 - drift_fraction)` (*default* `0.95`; `TD + 3 * tau`).
-#' 
+#'
 #' The excursion point `texc` is where the drift rate overtakes the decaying
-#' primary rate, `TD + tau * log(|B - A| / (|slope_B| * tau))`, floored at the 
+#' primary rate, `TD + tau * log(|B - A| / (|slope_B| * tau))`, floored at the
 #' drift onset, elapsed from `start_time` (the same frame as `TD` and `MRT`).
-#' 
+#'
 #' The drift component is kept only when the data support it. The model will
 #' fall back to *"monoexponential"* when the fit fails or if the total drift
-#' amplitude is below twice the fit RMSE, with a warning recorded in 
+#' amplitude is below twice the fit RMSE, with a warning recorded in
 #' `warnings`. The `model` column in `coefficients` names the final method
 #' for each row. A hidden argument `model_fallback = FALSE` will override the
 #' fallback process and retain the more complex model, or return an error.
@@ -383,7 +383,7 @@
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
 #' above.
 #'
-#' 
+#'
 #' ## method = "biexponential"
 #'
 #' Aliases: `method = c("biexp", "double exponential")`.
@@ -405,19 +405,19 @@
 #' `A` is the starting value. `B` & `tau` are the asymptote and time
 #' constant of the fast response. `B2` & `tau2` are the asymptote and time
 #' constant of the slower response plateau (typically `tau2 >> tau`).
-#' 
+#'
 #' Set `use_TD = TRUE` (*default*) to specify the time-delay parameter `TD`.
 #' The fast-phase mean response time `MRT = TD + tau` is reported as for
 #' *"monoexponential"*. See [biexponential()] for the model family and
 #' [SSbiexponential()] for self-start initialisation.
 #'
 #' The two phases are fit sequentially.
-#' - Stage 1 fits the fast phase as a *"monoexponential"* on the supplied 
+#' - Stage 1 fits the fast phase as a *"monoexponential"* on the supplied
 #'   `end_window` window, giving `A`, `tau`, and `TD` (if selected).
-#' - Stage 2 fits the full model to the whole response with `A`, `tau`, and 
+#' - Stage 2 fits the full model to the whole response with `A`, `tau`, and
 #'   `TD` held within a tight range of their stage-1 values, and `B`, `B2`,
 #'   `tau2` free.
-#' 
+#'
 #' Secondary `tau2` is floored above the primary `tau`, so the phases stay
 #' separated. `tau2` is arbitrarily capped at ten times the fit window
 #' timespan, functionally implying the true asymptote is linear not exponential.
@@ -425,12 +425,12 @@
 #' to `30` sec instead of `Inf` (recorded in `channel_args`).
 #'
 #' The biexponential fit is kept only when the data support both phases. The
-#' model will fall back to *"exponential_drift"* when the fit fails (e.g. 
+#' model will fall back to *"exponential_drift"* when the fit fails (e.g.
 #' phases not separable), the fitted response is monotonic (no estimable
 #' excursion point `texc`), `tau2` exceeds twice the fitted time span (a slow
 #' phase the record cannot tell from a linear drift), or the slow-phase
-#' amplitude `|B2 - B|` is below twice the fit RMSE. 
-#' 
+#' amplitude `|B2 - B|` is below twice the fit RMSE.
+#'
 #' The exponential-drift fit is in turn subject to its own fallback to
 #' *"monoexponential"* (see above). Each fallback is warned about and recorded
 #' in `warnings`. The `model` column in `coefficients` names the final method
@@ -440,7 +440,7 @@
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
 #' above.
 #'
-#' 
+#'
 #' ## method = "sigmoidal"
 #'
 #' Aliases: `method = c("logistic", "gompertz", "xmid")`.
@@ -465,8 +465,8 @@
 #' point of the response. `slope` is the response rate `dx/dt` at the
 #' inflection.
 #'
-#' A *"symmetric"* shape is the default when no obvious asymmetry is expected. 
-#' *"gompertz"* (right-inflection) growth is appropriate for fast-onset, 
+#' A *"symmetric"* shape is the default when no obvious asymmetry is expected.
+#' *"gompertz"* (right-inflection) growth is appropriate for fast-onset,
 #' slow-tail responses. *"gompertz_left"* for slow-onset, fast-tail responses.
 #' See [logistic()], [gompertz()], and [gompertz_left()] for the model families
 #' and [SSlogistic()], [SSgompertz()], and [SSgompertz_left()] for self-start
@@ -475,14 +475,14 @@
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
 #' above.
 #'
-#' 
+#'
 #' ## method = "sigmoidal_drift"
 #'
 #' Aliases: `method = c("sigmoid_drift", "sig_drift", "sig-lin",
 #' "logistic_drift", "gompertz_drift")`.
 #'
-#' 
-#' A parametric approach fitting a self-starting two-phase curve using 
+#'
+#' A parametric approach fitting a self-starting two-phase curve using
 #' [stats::nls()] with [SSsigmoidal_drift()]. A *fast "sigmoidal"*
 #' primary response of the given `shape` plus a *slow* linear secondary drift
 #' beginning near the primary ending asymptote.
@@ -496,14 +496,14 @@
 #' drift is not a free estimate. `drift_fraction` specifies the fraction
 #' (`(0.5, 1)`) of the primary response amplitude where the drift begins
 #' (*default* `0.95`).
-#' 
-#' The excursion point `texc` is where the drift rate overtakes the decaying 
+#'
+#' The excursion point `texc` is where the drift rate overtakes the decaying
 #' primary rate, `|S'(t)| = |slope_B|`, floored at the drift onset, elapsed
 #' from `start_time` (the same frame as `xmid`).
-#' 
+#'
 #' The drift component is kept only when the data support it. The model will
 #' fall back to *"sigmoidal"* when the fit fails or if the total drift
-#' amplitude is below twice the fit RMSE, with a warning recorded in 
+#' amplitude is below twice the fit RMSE, with a warning recorded in
 #' `warnings`. The `model` column in `coefficients` names the final method
 #' for each row. A hidden argument `model_fallback = FALSE` will override the
 #' fallback process and retain the more complex model, or return an error.
@@ -511,7 +511,7 @@
 #' Parameters may be held constant with `fix`, e.g. `fix = list(A = 0)`, as
 #' above.
 #'
-#' 
+#'
 #' ## Recursive analysis
 #'
 #' An *"mnirs_kinetics"* result may be passed back as `data` to analyse how
@@ -568,7 +568,7 @@
 #'       `bic`) with one row per `nirs_channel` per interval. `n_params`
 #'       counts the free parameters estimated by the solver, excluding any
 #'       held by `fix`, so a reduced-parameter fallback fit is distinguishable
-#'       from a full one. `n_obs` and `n_params` need to be considered 
+#'       from a full one. `n_obs` and `n_params` need to be considered
 #'       carefully when comparing fit diagnostics between models.}
 #'   \item{`channel_args`}{A data frame of the resolved arguments used for
 #'       each `nirs_channel` with one row per `nirs_channel` per interval.}

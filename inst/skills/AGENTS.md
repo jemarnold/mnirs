@@ -509,7 +509,7 @@ format_hmmss(x)         # numeric seconds → "mm:ss" or "h:mm:ss"
 | `R/extract_intervals.R` | `extract_intervals()` |
 | `R/extract_interval_helpers.R` | `by_time/label/lap/sample()`; boundary resolution |
 | `R/analyse_kinetics.R` | `analyse_kinetics()`/`analyze_kinetics()` + S3 dispatch |
-| `R/aanalyse_kinetics_helpers.R` | *(leading `aa` intentional — load order)* `method_aliases`, channel/interval orchestration, `detect_direction()`, `enforce_direction()`, `compute_diagnostics()`, `kinetics_warnings_df()` |
+| `R/aanalyse_kinetics_helpers.R` | *(leading `aa` intentional — load order)* `method_aliases`, channel/interval orchestration (`analyse_kinetics_intervals()` → per-interval `analyse_<method>()` worker → `analyse_kinetics_channels()` → per-channel `fit_<method>()` fitter; fallback chain `kinetics_fallbacks` resolved per channel), `detect_direction()`, `enforce_direction()`, `compute_diagnostics()`, `kinetics_warnings_df()` |
 | `R/analyse_response_time.R` | `response_time()` |
 | `R/analyse_peak_slope.R` | `peak_slope()`, `rolling_slope()` |
 | `R/analyse_monoexponential.R` | `monoexponential()`, `SSmonoexponential()` |

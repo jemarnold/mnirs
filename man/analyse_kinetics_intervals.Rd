@@ -45,7 +45,7 @@ Global default can be set via \code{options(mnirs.verbose = FALSE)}.}
 \item{env}{The call recorded for condition reporting.}
 
 \item{fallback}{Logical; resolve the method's fallback chain in
-\code{kinetics_fallbacks} per channel (see \code{\link[=run_kinetics_worker]{run_kinetics_worker()}}).}
+\code{kinetics_fallbacks} per channel (see \code{\link[=analyse_kinetics_channels]{analyse_kinetics_channels()}}).}
 }
 \value{
 An \emph{"mnirs_kinetics"} object from
@@ -54,8 +54,8 @@ An \emph{"mnirs_kinetics"} object from
 \description{
 Shared skeleton for \verb{analyse_kinetics.*} methods: normalises \code{data}
 to a named list of interval data frames, splits sample groups via
-\code{\link[=split_kinetics_groups]{split_kinetics_groups()}}, calls the method worker once per interval
-via \code{\link[=run_kinetics_worker]{run_kinetics_worker()}}, and collates results via
+\code{\link[=split_kinetics_groups]{split_kinetics_groups()}}, calls the method worker in
+\code{kinetics_workers} once per interval, and collates results via
 \code{\link[=build_kinetics_results]{build_kinetics_results()}}.
 }
 \keyword{internal}

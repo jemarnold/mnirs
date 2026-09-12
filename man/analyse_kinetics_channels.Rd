@@ -13,6 +13,8 @@ analyse_kinetics_channels(
   verbose = TRUE,
   interval_name = NA_character_,
   extra_args = list(),
+  method = NULL,
+  fallback = TRUE,
   env = rlang::caller_env()
 )
 }
@@ -27,13 +29,16 @@ analyse_kinetics_channels(
 validated argument lists from \code{\link[=resolve_channel_args]{resolve_channel_args()}} and
 \code{\link[=validate_kinetics_args]{validate_kinetics_args()}}.}
 
-\item{fit_fn}{A function \verb{(.nirs, x_fit, t_fit, .a, valid)}
-returning a list with \code{coefs} (1-row data frame of method coefficients,
-\emph{without} \code{interval}/\code{nirs_channels}), \code{model}, \code{fitted_data}
-(\code{window_idx}/\code{fitted}), and \code{diag} (1-row data frame from
-\code{\link[=compute_diagnostics]{compute_diagnostics()}}). \code{t_fit} is always time elapsed from
-\code{start_time}, so time coefficients need no further offset, and
-\code{window_idx} must index the original data frame rows.}
+\item{fit_fn}{A channel fitter \verb{(x, t, valid, .a, ctx)} taking the
+channel's full response \code{x} and time \code{t} elapsed from \code{start_time},
+the \code{\link[=find_kinetics_idx]{find_kinetics_idx()}} window \code{valid}, the channel's resolved
+argument list \code{.a}, and a \code{ctx} list of \code{nirs}, \code{time_channel},
+\code{interval_name}, and \code{env}. Returns a list with \code{coefs} (1-row data
+frame of method coefficients, \emph{without} \code{interval}/\code{nirs_channels}),
+\code{model}, \code{fitted_data} (\code{window_idx}/\code{fitted}, indexing the original
+data frame rows), and \code{diag} (1-row data frame from
+\code{\link[=compute_diagnostics]{compute_diagnostics()}}); see \code{\link[=build_fit_results]{build_fit_results()}}. Fallback fitters
+are resolved from \code{kinetics_fitters}.}
 
 \item{verbose}{Logical. \code{TRUE} (\emph{default}) will display, and \code{FALSE} will
 silence warnings and information messages helpful for troubleshooting.
@@ -45,24 +50,41 @@ column of the returned coefficients, \code{diagnostics}, and \code{channel_args}
 \item{extra_args}{Named list of additional arguments recorded in the
 \code{channel_args} result attribute.}
 
+\item{method}{Character; the canonical method name keying
+\code{kinetics_fallbacks}, or \code{NULL} for methods without a chain.}
+
+\item{fallback}{Logical; resolve the fallback chain. \code{FALSE} keeps the
+raw fit of \code{method}.}
+
 \item{env}{The calling environment or a defused call, used to report
 errors and warnings as coming from the user-facing function rather
 than the validator.}
 }
 \value{
 A \code{data.frame} of coefficients (columns \code{interval},
-\code{nirs_channels}, and method parameters), one row per channel, with
-attributes \code{"time_channel"} (the resolved time column name), \code{"model"}
-and \code{"fitted_data"} (named lists by channel), \code{"diagnostics"} and
-\code{"channel_args"} (data frames, one row per channel), and \code{"warnings"}
-(data frame of conditions captured during fitting, regardless of
-\code{verbose}; zero rows when none fire).
+\code{nirs_channels}, \code{model} for chained methods, and method parameters),
+one row per channel, with attributes \code{"time_channel"} (the resolved
+time column name), \code{"model"} and \code{"fitted_data"} (named lists by
+channel), \code{"diagnostics"} and \code{"channel_args"} (data frames, one row
+per channel), and \code{"warnings"} (data frame of conditions captured
+during fitting, regardless of \code{verbose}; zero rows when none fire).
 }
 \description{
-Shared per-channel skeleton for all \code{analyse_kinetics()} methods. Resolves
-the fitting window for each channel via \code{\link[=find_kinetics_idx]{find_kinetics_idx()}}, delegates
-the method-specific fit to \code{fit_fn}, and assembles the standard attributed
-result. Method workers supply a validated \code{per_channel} argument list and a
-\code{fit_fn}; everything else is common.
+Shared per-channel skeleton for all \code{analyse_kinetics()} methods. For
+each channel, resolves the fitting window via \code{\link[=find_kinetics_idx]{find_kinetics_idx()}},
+delegates the method-specific fit to \code{fit_fn}, and, for methods listed
+in \code{kinetics_fallbacks}, tests the fit with the method's \code{trigger}. A
+channel with a reason is refit by the reduced method (recursively down
+the chain) with the arguments it takes, the spec's overrides, and the
+user-fixed parameters it shares; the fallback is warned about and so
+recorded in the \code{warnings} attribute. A row where every fit in the
+chain failed reports the last method tried with \code{NA} coefficients.
+}
+\details{
+Methods with a fallback report the fitting method per row in a \code{model}
+coefficient column and the union of the chain's coefficient columns
+(\code{NA} where a model has no such parameter), so intervals bind
+regardless of which triggers fire. \code{\link[=build_kinetics_results]{build_kinetics_results()}} then
+drops the columns of fallback models no row resolved to.
 }
 \keyword{internal}

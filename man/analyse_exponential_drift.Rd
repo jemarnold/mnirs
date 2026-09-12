@@ -94,12 +94,11 @@ than the validator.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
-\code{nirs_channels}, \code{A}, \code{B}, \code{TD}, \code{tau}, \code{k}, \code{MRT}, \code{HRT}, \code{texc},
-\code{slope_B}, \code{drift_fraction}, \code{MRT_fitted}, \code{HRT_fitted},
-\code{texc_fitted}. \code{texc}
-is the excursion point where the drift rate overtakes the decaying
-primary rate, never before the drift onset (see \code{\link[=expdrift_onset]{expdrift_onset()}}).
-Per-channel metadata are attached as attributes:
+\code{nirs_channels}, \code{model}, \code{A}, \code{B}, \code{TD}, \code{tau}, \code{k}, \code{MRT}, \code{HRT},
+\code{texc}, \code{slope_B}, \code{drift_fraction}, \code{MRT_fitted}, \code{HRT_fitted},
+\code{texc_fitted}. \code{texc} is the excursion point where the drift rate
+overtakes the decaying primary rate, never before the drift onset (see
+\code{\link[=expdrift_onset]{expdrift_onset()}}). Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"model"}: an \link[stats:nls]{nls} model object, or \code{NULL} for channels
 where fitting failed.
@@ -109,13 +108,16 @@ columns \code{window_idx} and \code{fitted}.
 containing model fit diagnostics.
 \item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
 recording the resolved arguments used.
+\item \code{"warnings"}: a \code{data.frame} of conditions captured during fitting.
 }
 }
 \description{
 Internal channel-level dispatch for
 \code{analyse_kinetics(method = "exponential_drift")}. Fits a two-phase
 monoexponential + linear-drift curve to each \code{nirs_channel} within a
-single \emph{"mnirs"} data frame. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
+single \emph{"mnirs"} data frame via \code{\link[=fit_exponential_drift]{fit_exponential_drift()}}, falling
+back to \code{\link[=fit_monoexponential]{fit_monoexponential()}} where the drift is unsupported (see
+\code{kinetics_fallbacks}). See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
 documentation.
 }
 \seealso{

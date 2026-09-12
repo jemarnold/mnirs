@@ -650,6 +650,30 @@ test_that("SSgompertz()/SSgompertz_left() converge on real dataset", {
     expect_true(mean(!is.na(hhb_left$A)) >= 0.9)
 })
 
+test_that("SSlogistic()/SSgompertz() gradients match numericDeriv", {
+    t <- seq(0, 120, by = 0.5)
+    env <- list2env(list(t = t, A = 10, B = 100, xmid = 40, slope = 4))
+    pars <- c("A", "B", "xmid", "slope")
+    chk <- function(expr) {
+        an <- attr(eval(expr, env), "gradient")
+        nd <- attr(numericDeriv(expr, pars, env), "gradient")
+        expect_identical(colnames(an), pars)
+        expect_equal(unname(an), unname(nd), tolerance = 1e-5)
+    }
+    chk(quote(SSlogistic(t, A, B, xmid, slope)))
+    chk(quote(SSgompertz(t, A, B, xmid, slope)))
+    chk(quote(SSgompertz_left(t, A, B, xmid, slope)))
+
+    ## a fixed parameter contributes no gradient column
+    an <- attr(eval(quote(SSgompertz(t, A = 10, B, xmid, slope)), env), "gradient")
+    expect_identical(colnames(an), c("B", "xmid", "slope"))
+
+    ## the 5-parameter form and the plain model fns carry no gradient
+    expect_null(attr(eval(quote(SSlogistic(t, A, B, xmid, slope, asym = 0.3)), env), "gradient"))
+    expect_null(attr(logistic(t, 10, 100, 40, 4), "gradient"))
+    expect_null(attr(gompertz(t, 10, 100, 40, 4), "gradient"))
+})
+
 
 ## init_inflection() fallbacks =======================================
 

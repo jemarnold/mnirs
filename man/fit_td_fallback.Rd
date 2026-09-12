@@ -4,19 +4,7 @@
 \alias{fit_td_fallback}
 \title{Fit a self-start model with time-delay fallback}
 \usage{
-fit_td_fallback(
-  x_fit,
-  t_fit,
-  params,
-  .a,
-  fitter,
-  fn,
-  .nirs,
-  time_channel,
-  interval_name,
-  env,
-  retry = .a$use_TD && !"TD" \%in\% names(.a$fix)
-)
+fit_td_fallback(x_fit, t_fit, params, .a, fitter, fn, ctx)
 }
 \arguments{
 \item{x_fit, t_fit}{Numeric vectors of the channel fit window.}
@@ -29,25 +17,12 @@ including \code{TD} when the channel fits the TD model.}
 \item{fitter}{A function \verb{(.data, .params, on_error)} fitting \code{.params}
 to a data frame with the response and time columns named per
 \code{\link[=fit_names]{fit_names()}} and returning an \link[stats:nls]{nls} model or \code{NULL}.
-\code{on_error(e)} reports
-the condition \code{e} and returns \code{NULL}, so it doubles as a \code{\link[=tryCatch]{tryCatch()}}
-error handler.}
+\code{on_error(e)} reports the condition \code{e} and returns \code{NULL}, so it
+doubles as a \code{\link[=tryCatch]{tryCatch()}} error handler.}
 
-\item{fn}{Symbol or character; the model fn named in the message.}
+\item{fn}{Symbol; the self-start fn named in the warning.}
 
-\item{.nirs}{Character; the channel name.}
-
-\item{time_channel}{Character; resolved time column name.}
-
-\item{interval_name}{Character; the interval label.}
-
-\item{env}{The calling environment or a defused call, used to report
-errors and warnings as coming from the user-facing function rather
-than the validator.}
-
-\item{retry}{Logical; attempt the reduced model when the TD fit fails.
-A condition of class \code{"mnirs_fit_final"} (see \code{\link[=fit_final_error]{fit_final_error()}})
-reports a failure the reduced model cannot resolve and skips the retry.}
+\item{ctx}{The channel context list of \code{\link[=analyse_kinetics_channels]{analyse_kinetics_channels()}}.}
 }
 \value{
 A list with \code{model} (or \code{NULL}), the \code{params} actually fit,

@@ -93,10 +93,10 @@ than the validator.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
-\code{nirs_channels}, \code{A}, \code{B}, \code{xmid}, \code{slope}, \code{texc}, \code{slope_B},
-\code{drift_fraction}, \code{xmid_fitted}, \code{texc_fitted}. \code{texc} is the
-excursion point where the drift rate overtakes the decaying sigmoid
-rate, never before the drift onset (see \code{\link[=sigdrift_texc]{sigdrift_texc()}}).
+\code{nirs_channels}, \code{model}, \code{A}, \code{B}, \code{xmid}, \code{slope}, \code{texc},
+\code{slope_B}, \code{drift_fraction}, \code{xmid_fitted}, \code{texc_fitted}. \code{texc} is
+the excursion point where the drift rate overtakes the decaying
+sigmoid rate, never before the drift onset (see \code{\link[=sigdrift_texc]{sigdrift_texc()}}).
 Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"model"}: an \link[stats:nls]{nls} model object, or \code{NULL} for channels
@@ -107,13 +107,16 @@ columns \code{window_idx} and \code{fitted}.
 containing model fit diagnostics.
 \item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
 recording the resolved arguments used.
+\item \code{"warnings"}: a \code{data.frame} of conditions captured during fitting.
 }
 }
 \description{
 Internal channel-level dispatch for
 \code{analyse_kinetics(method = "sigmoidal_drift")}. Fits a two-phase
 sigmoidal + linear-drift curve to each \code{nirs_channel} within a single
-\emph{"mnirs"} data frame. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
+\emph{"mnirs"} data frame via \code{\link[=fit_sigmoidal_drift]{fit_sigmoidal_drift()}}, falling back to
+\code{\link[=fit_sigmoidal]{fit_sigmoidal()}} where the drift is unsupported (see
+\code{kinetics_fallbacks}). See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing
 documentation.
 }
 \seealso{

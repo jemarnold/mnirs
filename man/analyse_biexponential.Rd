@@ -104,9 +104,9 @@ than the validator.}
 }
 \value{
 A \code{data.frame} with one row per \code{nirs_channel} and columns
-\code{nirs_channels}, \code{A}, \code{B}, \code{TD}, \code{tau}, \code{MRT}, \code{texc}, \code{B2}, \code{tau2},
-\code{MRT_fitted}, \code{texc_fitted}. Per-channel metadata are attached as
-attributes:
+\code{nirs_channels}, \code{model}, \code{A}, \code{B}, \code{TD}, \code{tau}, \code{MRT}, \code{texc}, \code{B2},
+\code{tau2}, \code{MRT_fitted}, \code{texc_fitted}, plus the columns of the fallback
+models. Per-channel metadata are attached as attributes:
 \itemize{
 \item \code{"model"}: an \link[stats:nls]{nls} model object, or \code{NULL} for channels
 where fitting failed.
@@ -116,18 +116,16 @@ columns \code{window_idx} and \code{fitted}.
 containing model fit diagnostics.
 \item \code{"channel_args"}: a \code{data.frame} with one row per \code{nirs_channel}
 recording the resolved arguments used.
+\item \code{"warnings"}: a \code{data.frame} of conditions captured during fitting.
 }
 }
 \description{
 Internal channel-level dispatch for
 \code{analyse_kinetics(method = "biexponential")}. Fits a biexponential
 excursion-recovery curve to each \code{nirs_channel} within a single \emph{"mnirs"}
-data frame in two stages: the fast phase as a monoexponential on the
-\code{end_window} window (\code{\link[=fit_monoexponential]{fit_monoexponential()}}; \code{Inf} resolves to 30
-time units past the first extreme), then the full
-\code{\link[=SSbiexponential]{SSbiexponential()}} model on the whole response with \code{A}, \code{tau}, and
-\code{TD} box-bounded about their stage-1 values and \code{B}, \code{B2}, \code{tau2}
-free. See \code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing documentation.
+data frame via \code{\link[=fit_biexponential]{fit_biexponential()}}, falling back down the chain in
+\code{kinetics_fallbacks} where the phases are unsupported. See
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} for user-facing documentation.
 }
 \seealso{
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}, \code{\link[=biexponential]{biexponential()}}, \code{\link[=SSbiexponential]{SSbiexponential()}}

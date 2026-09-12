@@ -179,11 +179,12 @@ test_that("analyse_exponential_drift() returns correct structure and recovers pa
     )
 
     expect_s3_class(result, "data.frame")
+    ## the chain's union schema, `model` naming the fit per row
     expect_named(result, c(
-        "interval", "nirs_channels", "A", "B", "TD", "tau", "k", "MRT", "HRT",
-        "texc", "slope_B", "drift_fraction", "MRT_fitted", "HRT_fitted",
-        "texc_fitted"
+        "interval", "nirs_channels", "model",
+        kinetics_chain_cols("exponential_drift")
     ))
+    expect_equal(result$model, "exponential_drift")
     expect_equal(nrow(result), 1L)
 
     ## attributes
@@ -343,12 +344,14 @@ test_that("analyse_exponential_drift() validates drift_fraction", {
 })
 
 test_that("analyse_exponential_drift() fix holds parameters constant", {
-    ## no drift: the curve at texc is the primary response alone
+    ## no drift: the curve at texc is the primary response alone (the raw
+    ## fit; a zero drift otherwise falls back to the monoexponential)
     result <- analyse_exponential_drift(
         create_expdrift_data(slope_B = 0),
         nirs_channels = "smo2",
         fix = list(slope_B = 0),
-        verbose = FALSE
+        verbose = FALSE,
+        model_fallback = FALSE
     )
     expect_equal(result$slope_B, 0)
     expect_named(coef(attr(result, "model")$smo2), c("A", "B", "tau", "TD"))
@@ -529,10 +532,10 @@ test_that("analyse_exponential_drift() converges on real dataset", {
 
     ## end-to-end path: window detection and held drift onset.
     ## start_time = 0 anchors the fit at the interval onset
-    results <- lapply(intervals, \(df) {
+    results <- lapply(deoxy, \(df) {
         analyse_exponential_drift(
             df,
-            nirs_channels = nirs_channels,
+            nirs_channels = deoxy_channels,
             start_time = 0,
             use_TD = TRUE,
             verbose = FALSE
@@ -540,7 +543,8 @@ test_that("analyse_exponential_drift() converges on real dataset", {
     })
 
     coefs <- do.call(rbind, results)
-    success <- tapply(!is.na(coefs$tau), coefs$nirs_channels, mean)
+    ok <- !is.na(coefs$tau)
+    success <- tapply(ok, coefs$nirs_channels, mean)
     success
     expect_true(all(success >= 1.0))
 
@@ -549,7 +553,7 @@ test_that("analyse_exponential_drift() converges on real dataset", {
     expect_true(all(TD_success >= 0.8))
 
     ## converged fits keep the drift onset inside the record
-    ok <- !is.na(coefs$tau)
+    
     expect_true(all(coefs$texc[ok] >= 0))
 
     r2 <- unlist(lapply(results, \(x) attr(x, "diagnostics")$r2))

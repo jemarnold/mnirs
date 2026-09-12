@@ -384,12 +384,9 @@ SSbiexponential <- selfStart(
 #' Internal channel-level dispatch for
 #' `analyse_kinetics(method = "biexponential")`. Fits a biexponential
 #' excursion-recovery curve to each `nirs_channel` within a single *"mnirs"*
-#' data frame in two stages: the fast phase as a monoexponential on the
-#' `end_window` window ([fit_monoexponential()]; `Inf` resolves to 30
-#' time units past the first extreme), then the full
-#' [SSbiexponential()] model on the whole response with `A`, `tau`, and
-#' `TD` box-bounded about their stage-1 values and `B`, `B2`, `tau2`
-#' free. See [analyse_kinetics()] for user-facing documentation.
+#' data frame via [fit_biexponential()], falling back down the chain in
+#' `kinetics_fallbacks` where the phases are unsupported. See
+#' [analyse_kinetics()] for user-facing documentation.
 #'
 #' @param use_TD Logical; `TRUE` attempts to fit the fast phase with a
 #'   time delay, giving a 6-parameter [SSbiexponential()] model (A, B,
@@ -416,9 +413,9 @@ SSbiexponential <- selfStart(
 #' @inheritParams analyse_monoexponential
 #'
 #' @returns A `data.frame` with one row per `nirs_channel` and columns
-#'   `nirs_channels`, `A`, `B`, `TD`, `tau`, `MRT`, `texc`, `B2`, `tau2`,
-#'   `MRT_fitted`, `texc_fitted`. Per-channel metadata are attached as
-#'   attributes:
+#'   `nirs_channels`, `model`, `A`, `B`, `TD`, `tau`, `MRT`, `texc`, `B2`,
+#'   `tau2`, `MRT_fitted`, `texc_fitted`, plus the columns of the fallback
+#'   models. Per-channel metadata are attached as attributes:
 #'   - `"model"`: an [nls][stats::nls] model object, or `NULL` for channels
 #'     where fitting failed.
 #'   - `"fitted_data"`: a named list of per-channel data frames with
@@ -427,6 +424,7 @@ SSbiexponential <- selfStart(
 #'     containing model fit diagnostics.
 #'   - `"channel_args"`: a `data.frame` with one row per `nirs_channel`
 #'     recording the resolved arguments used.
+#'   - `"warnings"`: a `data.frame` of conditions captured during fitting.
 #'
 #' @seealso [analyse_kinetics()], [biexponential()], [SSbiexponential()]
 #'
@@ -473,7 +471,6 @@ analyse_biexponential <- function(
         env = env
     )
 
-    time_channel <- setup$time_channel
     ## `end_window` bounds the stage-1 fast phase only, so the global
     ## default `Inf` (the whole response) is replaced by 30 time units past
     ## the first extreme
@@ -483,191 +480,206 @@ analyse_biexponential <- function(
         }
         .a
     })
-    ## NA scaffold (method columns only) for convergence failure
-    na_cols <- kinetics_coef_cols$biexponential
 
-    ## method-specific fit in two stages. stage 1: the fast phase as a
-    ## monoexponential on the `end_window` window (`x_fit`, `t_fit`).
-    ## stage 2: the biexponential on the full response, with A, tau, and
-    ## TD box-bounded around their stage-1 values by the `*_flex`
-    ## half-widths; B, B2, and tau2 free. a failed stage returns NA, and
-    ## the fallback chain resolves the row upstream
-    biexp_fit <- function(.nirs, x_fit, t_fit, .a, valid) {
-        fix <- .a$fix %||% list()
-
-        ## stage 1: fixed parameters shared with the fast phase carry over
-        a1 <- .a
-        a1$fix <- keep_fix(fix, c("A", "B", "tau", "TD"))
-        # fmt: skip
-        fast <- fit_monoexponential(
-            .nirs, x_fit, t_fit, a1, valid, time_channel, interval_name, env
-        )
-        if (is.null(fast$model)) {
-            return(build_na_results(na_cols))
-        }
-        cf1 <- fast$coefs
-        has_TD <- is.finite(cf1$TD)
-        params <- c("A", "B", "tau", "B2", "tau2", if (has_TD) "TD")
-        free <- setdiff(params, names(fix))
-
-        ## stage 2 window: the full response; the TD model is flat at A
-        ## before TD so the pre-onset baseline is kept, as in
-        ## `fit_td_fallback()`
-        t_rel <- data[[time_channel]] - .a$start_time
-        idx <- which(is.finite(data[[.nirs]]) & is.finite(t_rel))
-        x_full <- data[[.nirs]][idx]
-        t_full <- t_rel[idx]
-        keep <- has_TD | t_full >= 0
-        fit_data <- setNames(
-            data.frame(x_full[keep], t_full[keep]),
-            fit_names(.nirs, time_channel, params)
-        )
-        span <- diff(range(fit_data[[2L]]))
-        on_error <- \(e) {
-            warn_fit_failed(
-                quote(SSbiexponential),
-                e,
-                .nirs,
-                interval_name,
-                length(params),
-                env = env
-            )
-            NULL
-        }
-        if (nrow(fit_data) <= length(free)) {
-            on_error(simpleError(sprintf(
-                "%d observations for %d free parameters.",
-                nrow(fit_data),
-                length(free)
-            )))
-            return(build_na_results(na_cols))
-        }
-
-        ## fast phase from stage 1 (user-fixed values already merged in)
-        prior <- c(
-            list(A = cf1$A, tau = cf1$tau),
-            if (has_TD) list(TD = cf1$TD)
-        )
-        A_flex <- .a$A_flex %||% (2 * stats::sd(stats::residuals(fast$model)))
-        tau_flex <- .a$tau_flex
-        lower <- c(
-            A = prior$A - A_flex,
-            B = -Inf,
-            tau = prior$tau / (1 + tau_flex),
-            B2 = -Inf,
-            ## the slow phase separates above the fast-phase ceiling
-            tau2 = prior$tau * (1 + tau_flex) / tau_ratio,
-            TD = if (has_TD) max(0, prior$TD - .a$TD_flex)
-        )
-        upper <- c(
-            A = prior$A + A_flex,
-            B = Inf,
-            tau = prior$tau * (1 + tau_flex),
-            B2 = Inf,
-            ## a slow tail far beyond the record identifies only its rate
-            tau2 = 10 * span,
-            TD = if (has_TD) prior$TD + .a$TD_flex
-        )
-        ## B, B2, tau2 seeded by the start grid with the fast phase held
-        model <- tryCatch(
-            {
-                start <- biexp_start(
-                    fit_data[[1L]],
-                    fit_data[[2L]],
-                    utils::modifyList(fix, prior[names(prior) != "A"]),
-                    has_TD
-                )
-                start[names(prior)] <- unlist(prior)
-                embed_fit_call(suppressWarnings(nls(
-                    build_ss_formula(
-                        quote(SSbiexponential),
-                        params,
-                        fix,
-                        names(fit_data)[[1L]],
-                        names(fit_data)[[2L]]
-                    ),
-                    fit_data,
-                    start = pmin(
-                        pmax(start[free], lower[free]),
-                        upper[free]
-                    ),
-                    algorithm = "port",
-                    lower = lower[free],
-                    upper = upper[free],
-                    control = fit_control(
-                        .a$control,
-                        maxiter = 500L,
-                        warnOnly = TRUE
-                    )
-                )))
-            },
-            error = on_error
-        )
-        model <- accept_port_fit(model, on_error)
-        if (is.null(model)) {
-            return(build_na_results(na_cols))
-        }
-        coefs <- full_coefs(model, params, fix)
-
-        ## TD is already elapsed from start_time, matching the fit time base
-        TD_arg <- if (has_TD) coefs[["TD"]] else NULL
-        ## fast-phase mean response time, as for the monoexponential
-        MRT_val <- sum(TD_arg, coefs[["tau"]])
-
-        ## excursion time (texc) is the fitted excursion point, reported
-        ## elapsed from start_time, mirroring MRT = TD + tau; NA when the
-        ## fitted response is monotonic
-        texc_val <- biexp_texc(
-            A = coefs[["A"]],
-            B = coefs[["B"]],
-            tau = coefs[["tau"]],
-            B2 = coefs[["B2"]],
-            tau2 = coefs[["tau2"]],
-            TD = TD_arg
-        )
-        ## predict response at MRT and texc using the full fitted model; an
-        ## NA texc (monotonic fit) propagates to NA
-        fitted_params <- biexponential(
-            t = c(MRT_val, texc_val),
-            A = coefs[["A"]],
-            B = coefs[["B"]],
-            tau = coefs[["tau"]],
-            B2 = coefs[["B2"]],
-            tau2 = coefs[["tau2"]],
-            TD = TD_arg
-        )
-
-        build_fit_results(
-            data.frame(
-                A = coefs[["A"]],
-                B = coefs[["B"]],
-                TD = TD_arg %||% NA_real_,
-                tau = coefs[["tau"]],
-                MRT = MRT_val,
-                texc = texc_val,
-                B2 = coefs[["B2"]],
-                tau2 = coefs[["tau2"]],
-                MRT_fitted = fitted_params[[1L]],
-                texc_fitted = fitted_params[[2L]]
-            ),
-            model,
-            x_full,
-            t_full,
-            utils::modifyList(valid, list(idx = idx)),
-            keep,
-            env
-        )
-    }
-
+    ## unsupported fits fall back down the chain in `kinetics_fallbacks`;
+    ## the undocumented `model_fallback = FALSE` keeps the raw fit for
+    ## troubleshooting. `tau_flex`, `TD_flex`, `A_flex` are the stage-2
+    ## half-widths about the stage-1 fast phase, undocumented
     return(analyse_kinetics_channels(
         data,
         setup$nirs_channels,
         setup$time_channel,
         per_channel,
-        biexp_fit,
+        fit_biexponential,
         verbose,
         interval_name,
         extra_args = args,
+        method = "biexponential",
+        fallback = !isFALSE(args$model_fallback),
         env = env
+    ))
+}
+
+
+#' Fit a biexponential model to one channel
+#'
+#' Channel fitter of [analyse_biexponential()] (see
+#' [analyse_kinetics_channels()]), in two stages. Stage 1 fits the fast
+#' phase as a monoexponential on the `end_window` window
+#' ([fit_monoexponential()]). Stage 2 fits the full [SSbiexponential()]
+#' model on the whole response via [stats::nls()] with
+#' `algorithm = "port"`, `A`, `tau`, and `TD` box-bounded about their
+#' stage-1 values by the `*_flex` half-widths and `B`, `B2`, `tau2` free,
+#' seeded by [biexp_start()] with the fast phase held. A failed stage
+#' returns `NA`, and the fallback chain resolves the row upstream.
+#'
+#' @inheritParams fit_monoexponential
+#'
+#' @returns The `coefs`/`model`/`fitted_data`/`diag` list of
+#'   [build_fit_results()], or [build_na_results()] when a stage fails.
+#'
+#' @keywords internal
+fit_biexponential <- function(x, t, valid, .a, ctx) {
+    ## NA scaffold (method columns only) for convergence failure
+    na_cols <- kinetics_coef_cols$biexponential
+    fix <- .a$fix %||% list()
+
+    ## stage 1: fixed parameters shared with the fast phase carry over
+    a1 <- .a
+    a1$fix <- fix[intersect(names(fix), c("A", "B", "tau", "TD"))]
+    fast <- fit_monoexponential(x, t, valid, a1, ctx)
+    if (is.null(fast$model)) {
+        return(build_na_results(na_cols))
+    }
+    cf1 <- fast$coefs
+    has_TD <- is.finite(cf1$TD)
+    params <- c("A", "B", "tau", "B2", "tau2", if (has_TD) "TD")
+    free <- setdiff(params, names(fix))
+
+    ## stage 2 window: the full response; the TD model is flat at A
+    ## before TD so the pre-onset baseline is kept, as in
+    ## `fit_td_fallback()`
+    idx <- which(is.finite(x) & is.finite(t))
+    x_full <- x[idx]
+    t_full <- t[idx]
+    keep <- has_TD | t_full >= 0
+    fit_data <- list2DF(setNames(
+        list(x_full[keep], t_full[keep]),
+        fit_names(ctx$nirs, ctx$time_channel, params)
+    ))
+    span <- diff(range(fit_data[[2L]]))
+    on_error <- \(e) {
+        warn_fit_failed(
+            quote(SSbiexponential),
+            e,
+            ctx$nirs,
+            ctx$interval_name,
+            length(params),
+            env = ctx$env
+        )
+        NULL
+    }
+    if (nrow(fit_data) <= length(free)) {
+        on_error(simpleError(sprintf(
+            "%d observations for %d free parameters.",
+            nrow(fit_data),
+            length(free)
+        )))
+        return(build_na_results(na_cols))
+    }
+
+    ## fast phase from stage 1 (user-fixed values already merged in)
+    prior <- c(
+        list(A = cf1$A, tau = cf1$tau),
+        if (has_TD) list(TD = cf1$TD)
+    )
+    A_flex <- .a$A_flex %||% (2 * stats::sd(stats::residuals(fast$model)))
+    tau_flex <- .a$tau_flex
+    lower <- c(
+        A = prior$A - A_flex,
+        B = -Inf,
+        tau = prior$tau / (1 + tau_flex),
+        B2 = -Inf,
+        ## the slow phase separates above the fast-phase ceiling
+        tau2 = prior$tau * (1 + tau_flex) / tau_ratio,
+        TD = if (has_TD) max(0, prior$TD - .a$TD_flex)
+    )
+    upper <- c(
+        A = prior$A + A_flex,
+        B = Inf,
+        tau = prior$tau * (1 + tau_flex),
+        B2 = Inf,
+        ## a slow tail far beyond the record identifies only its rate
+        tau2 = 10 * span,
+        TD = if (has_TD) prior$TD + .a$TD_flex
+    )
+    ## B, B2, tau2 seeded by the start grid with the fast phase held
+    model <- tryCatch(
+        {
+            start <- biexp_start(
+                fit_data[[1L]],
+                fit_data[[2L]],
+                utils::modifyList(fix, prior[names(prior) != "A"]),
+                has_TD
+            )
+            start[names(prior)] <- unlist(prior)
+            embed_fit_call(suppressWarnings(nls(
+                build_ss_formula(
+                    quote(SSbiexponential),
+                    params,
+                    fix,
+                    names(fit_data)[[1L]],
+                    names(fit_data)[[2L]]
+                ),
+                fit_data,
+                start = pmin(
+                    pmax(start[free], lower[free]),
+                    upper[free]
+                ),
+                algorithm = "port",
+                lower = lower[free],
+                upper = upper[free],
+                control = fit_control(
+                    .a$control,
+                    maxiter = 500L,
+                    warnOnly = TRUE
+                )
+            )))
+        },
+        error = on_error
+    )
+    model <- accept_port_fit(model, on_error)
+    if (is.null(model)) {
+        return(build_na_results(na_cols))
+    }
+    coefs <- full_coefs(model, params, fix)
+
+    ## TD is already elapsed from start_time, matching the fit time base
+    TD_arg <- if (has_TD) coefs[["TD"]] else NULL
+    ## fast-phase mean response time, as for the monoexponential
+    MRT_val <- sum(TD_arg, coefs[["tau"]])
+
+    ## excursion time (texc) is the fitted excursion point, reported
+    ## elapsed from start_time, mirroring MRT = TD + tau; NA when the
+    ## fitted response is monotonic
+    texc_val <- biexp_texc(
+        A = coefs[["A"]],
+        B = coefs[["B"]],
+        tau = coefs[["tau"]],
+        B2 = coefs[["B2"]],
+        tau2 = coefs[["tau2"]],
+        TD = TD_arg
+    )
+    ## predict response at MRT and texc using the full fitted model; an
+    ## NA texc (monotonic fit) propagates to NA
+    fitted_params <- biexponential(
+        t = c(MRT_val, texc_val),
+        A = coefs[["A"]],
+        B = coefs[["B"]],
+        tau = coefs[["tau"]],
+        B2 = coefs[["B2"]],
+        tau2 = coefs[["tau2"]],
+        TD = TD_arg
+    )
+
+    return(build_fit_results(
+        list2DF(list(
+            A = coefs[["A"]],
+            B = coefs[["B"]],
+            TD = TD_arg %||% NA_real_,
+            tau = coefs[["tau"]],
+            MRT = MRT_val,
+            texc = texc_val,
+            B2 = coefs[["B2"]],
+            tau2 = coefs[["tau2"]],
+            MRT_fitted = fitted_params[[1L]],
+            texc_fitted = fitted_params[[2L]]
+        )),
+        model,
+        x_full,
+        t_full,
+        utils::modifyList(valid, list(idx = idx)),
+        keep,
+        ctx$env
     ))
 }

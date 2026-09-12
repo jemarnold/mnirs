@@ -473,7 +473,9 @@ make_per_channel <- function(channels, ...) {
 
 ## helper: trivial fit_fn returning one coefficient per channel
 slope_fit <- function(coef_value = 1.0, time_coef = NULL) {
-    function(.nirs, x_fit, t_fit, .a, valid) {
+    function(x, t, valid, .a, ctx) {
+        x_fit <- x[valid$idx]
+        t_fit <- t[valid$idx]
         coefs <- data.frame(slope = coef_value)
         if (!is.null(time_coef)) {
             coefs$peak_slope_time <- time_coef
@@ -482,7 +484,7 @@ slope_fit <- function(coef_value = 1.0, time_coef = NULL) {
             coefs = coefs,
             model = structure(list(), class = "lm"),
             fitted_data = data.frame(
-                window_idx = seq_along(x_fit),
+                window_idx = valid$idx,
                 fitted = x_fit
             ),
             diag = compute_diagnostics(x_fit, t_fit, x_fit, n_params = 2L)
@@ -638,14 +640,14 @@ test_that("analyse_kinetics_channels captures fit conditions per channel", {
 
     ## fit errors are pre-caught in fit fns and re-signalled as classed
     ## warnings via warn_fit_failed(); emulate that path for ch2 only
-    warn_fit <- function(.nirs, x_fit, t_fit, .a, valid) {
-        if (.nirs == "ch2") {
+    warn_fit <- function(x, t, valid, .a, ctx) {
+        if (ctx$nirs == "ch2") {
             warn_fit_failed(
                 quote(SSmonoexponential), simpleError("no convergence"),
-                .nirs, "baseline"
+                ctx$nirs, "baseline"
             )
         }
-        slope_fit()(.nirs, x_fit, t_fit, .a, valid)
+        slope_fit()(x, t, valid, .a, ctx)
     }
 
     ## verbose = FALSE: console silent, conditions still captured
@@ -2904,25 +2906,27 @@ test_that("accept_port_fit() drops a non-converged fit failing acceptance", {
     )
 })
 
-test_that("fit_final_error() skips the reduced-model retry", {
-    attempts <- 0L
+test_that("fit_td_fallback() retries the reduced model from the onset", {
+    attempts <- list()
     fit <- suppressWarnings(fit_td_fallback(
         x_fit = 1:10,
         t_fit = -4:5,
         params = c("A", "B", "tau", "TD"),
         .a = list(use_TD = TRUE, fix = list()),
         fitter = \(.data, .params, on_error) {
-            attempts <<- attempts + 1L
-            on_error(fit_final_error("inseparable phases"))
+            attempts[[length(attempts) + 1L]] <<- .data
+            on_error(simpleError("no convergence"))
         },
         fn = quote(SSmonoexponential),
-        .nirs = "smo2",
-        time_channel = "time",
-        interval_name = "test",
-        env = environment()
+        ctx = list(nirs = "smo2", time_channel = "time", interval_name = "test", env = environment())
     ))
     expect_null(fit$model)
-    expect_identical(attempts, 1L)
+    ## the TD attempt sees the pre-onset baseline, the reduced one does not
+    expect_length(attempts, 2L)
+    expect_named(attempts[[1L]], c("smo2", "time"))
+    expect_equal(nrow(attempts[[1L]]), 10L)
+    expect_equal(attempts[[2L]]$time, 0:5)
+    expect_equal(fit$params, c("A", "B", "tau"))
 })
 
 test_that("enforce_direction() uses the self-start gradient on the D refit", {
@@ -2976,150 +2980,6 @@ test_that("enforce_direction() uses the self-start gradient on the D refit", {
     expect_equal(result_B$coefs[["A"]], 50, tolerance = 1e-3)
     ## refit models carry the fit data in the call
     expect_s3_class(eval(result_B$model$call$data, baseenv()), "data.frame")
-})
-
-
-## fix_coefs() =========================================================
-test_that("fix_coefs() fixes single parameter correctly", {
-    set.seed(303)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    data <- data.frame(t, x)
-
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-    model_fixed <- fix_coefs(model, TD = 15)
-
-    expect_s3_class(model_fixed, "nls")
-    expect_false("TD" %in% names(coef(model_fixed)))
-    expect_true(all(c("A", "B", "tau") %in% names(coef(model_fixed))))
-    ## 15 should be in the model formula
-    expect_true(any(grepl("15", model_fixed$call$formula)))
-    ## updated model carries the fit data in the call
-    expect_s3_class(eval(model_fixed$call$data, baseenv()), "data.frame")
-})
-
-test_that("fix_coefs() fixes multiple parameters", {
-    set.seed(400)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    data <- data.frame(t, x)
-
-    # ggplot2::ggplot(data, ggplot2::aes(t, x)) +
-    #     theme_mnirs() +
-    #     ggplot2::geom_point()
-
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-    model_fixed <- fix_coefs(
-        model,
-        A = 10,
-        TD = 15,
-    )
-
-    expect_false("A" %in% names(coef(model_fixed)))
-    expect_false("TD" %in% names(coef(model_fixed)))
-    expect_length(coef(model_fixed), 2)
-    ## 10 & 15 should be in the model formula
-    expect_true(any(grepl("15", model_fixed$call$formula)))
-    expect_true(any(grepl("10", model_fixed$call$formula)))
-})
-
-test_that("fix_coefs() errors when all parameters fixed", {
-    set.seed(505)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    data <- data.frame(t, x)
-
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-
-    expect_error(
-        fix_coefs(model, A = 10, B = 100, TD = 15, tau = 8),
-        "Cannot update the model if all parameters are fixed"
-    )
-})
-
-test_that("fix_coefs() warns for invalid parameter names", {
-    set.seed(606)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    data <- data.frame(t, x)
-
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-
-    expect_warning(
-        fix_coefs(model, INVALID = 99, verbose = TRUE),
-        "Unknown model coefficient"
-    )
-
-    expect_silent(
-        fix_coefs(model, INVALID = 99, verbose = FALSE)
-    )
-})
-
-test_that("fix_coefs() accepts explicit data argument", {
-    set.seed(1010)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    data <- data.frame(t, x)
-
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-
-    expect_no_error(
-        model_fixed <- fix_coefs(model, TD = 15, data = data)
-    )
-    expect_s3_class(model_fixed, "nls")
-})
-
-test_that("fix_coefs() predictions differ from original model", {
-    set.seed(1111)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    data <- data.frame(t, x)
-
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-    model_fixed <- fix_coefs(model, TD = 20, data = data, verbose = FALSE)
-
-    pred_orig <- predict(model, data)
-    pred_fixed <- predict(model_fixed, data)
-
-    # Should differ if fixed value differs from estimated
-    expect_false(identical(pred_orig, pred_fixed))
-})
-
-test_that("fix_coefs() aborts when model data cannot be retrieved", {
-    set.seed(707)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-
-    ## model built without a `data` argument -> `model$call$data` is NULL,
-    ## so eval() returns NULL and the data frame cannot be recovered
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD))
-
-    expect_error(
-        fix_coefs(model, TD = 15),
-        "Cannot retrieve original model data frame"
-    )
-})
-
-test_that("fix_coefs() falls back to parent frames for model data", {
-    set.seed(808)
-    t <- 1:60
-    x <- monoexponential(t, A = 10, B = 100, tau = 8, TD = 15) +
-        rnorm(length(t), 0, 3)
-    dtmp <- data.frame(t, x)
-    model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = dtmp)
-
-    ## strip `dtmp` from the formula environment so the primary eval() errors
-    ## and the parent-frame fallback path is exercised
-    rm("dtmp", envir = environment(stats::formula(model)))
-
-    expect_error(fix_coefs(model, TD = 15), "not found")
 })
 
 

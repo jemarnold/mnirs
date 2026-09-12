@@ -282,10 +282,12 @@ test_that("analyse_biexponential() returns correct structure", {
     )
 
     expect_s3_class(result, "data.frame")
+    ## the chain's union schema, `model` naming the fit per row
     expect_named(result, c(
-        "interval", "nirs_channels", "A", "B", "TD", "tau",
-        "MRT", "texc", "B2", "tau2", "MRT_fitted", "texc_fitted"
+        "interval", "nirs_channels", "model",
+        kinetics_chain_cols("biexponential")
     ))
+    expect_equal(result$model, "biexponential")
     expect_equal(nrow(result), 1L)
 
     ## attributes
@@ -384,11 +386,13 @@ test_that("analyse_biexponential() reports NA texc for a monotonic fit", {
         nirs_channels = "smo2", time_channel = "time", sample_rate = 1
     )
 
+    ## the raw fit: a monotonic response otherwise falls back
     result <- analyse_biexponential(
         data,
         nirs_channels = "smo2",
         use_TD = FALSE,
-        verbose = FALSE
+        verbose = FALSE,
+        model_fallback = FALSE
     )
 
     expect_true(is.na(result$texc))
@@ -441,7 +445,8 @@ test_that("analyse_biexponential() returns NA for failed fit", {
         result <- analyse_biexponential(
             custom_name,
             nirs_channels = "smo2",
-            use_TD = FALSE
+            use_TD = FALSE,
+            model_fallback = FALSE
         ),
         "fit failed for.*smo2.*custom_name"
     )
@@ -588,7 +593,8 @@ test_that("analyse_biexponential() falls back to the 5-parameter fit", {
         result <- analyse_biexponential(
             data,
             nirs_channels = "smo2",
-            use_TD = TRUE
+            use_TD = TRUE,
+            model_fallback = FALSE
         )
     )
 
@@ -844,7 +850,8 @@ test_that("analyse_biexponential() caps a runaway tau2 at 10x the span", {
     )
 
     result <- suppressWarnings(analyse_biexponential(
-        data, nirs_channels = "smo2", use_TD = FALSE, verbose = FALSE
+        data, nirs_channels = "smo2", use_TD = FALSE, verbose = FALSE,
+        model_fallback = FALSE
     ))
 
     ## pinned at the port upper bound rather than left to diverge
@@ -1321,17 +1328,6 @@ test_that("a row where every fit fails reports the last method", {
     expect_true(is.na(cf$A))
     expect_null(result$model[[1L]]$smo2)
     expect_equal(sum(grepl("fell back to", result$warnings$message)), 2L)
-})
-
-test_that("keep_fix() filters through nested maps", {
-    keep <- kinetics_fallbacks$biexponential$fix_keep
-
-    expect_equal(keep_fix(list(A = 1, B = 2, tau2 = 3), keep), list(A = 1, B = 2))
-    expect_equal(keep_fix(list(tau2 = 3), keep), setNames(list(), character()))
-    expect_equal(
-        keep_fix(list(smo2 = list(B = 2), hhb = list(tau2 = 4)), keep),
-        list(smo2 = list(B = 2), hhb = setNames(list(), character()))
-    )
 })
 
 test_that("kinetics_chain_cols() unions the chain with `_fitted` columns last", {
