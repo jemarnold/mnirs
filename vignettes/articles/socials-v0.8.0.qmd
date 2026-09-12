@@ -403,4 +403,4 @@ Package site & articles with much more detail: https://jemarnold.github.io/mnirs
 
 OxCap analysis, examples from the new PIONIRS mNIRS device, microvascular responsiveness assessment, and more coming
 
-You're bound to break things, let me know when you do!
+PS, you're bound to break things, let me know when you do!

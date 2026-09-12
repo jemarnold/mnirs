@@ -62,20 +62,24 @@ The individual fitting methods called by `analyse_kinetics()` can be called dire
 ``` r
 peak_slope(x, t, width = 5, direction = "auto")
 
-response_time(x, t, start_time = 10, response_fraction = c(0.5, 0.632))
+response_time(x, t, response_fraction = c(0.5, 0.632))
 ```
 
 * `monoexponential()`, `exponential_drift()`, `biexponential()`, `logistic()`, `gompertz()`, `gompertz_left()`, and `sigmoidal_drift()` contain the parametric equations for each model response curves. They can be used to construct a pure curve from explicit parameters, to simulate data, or plotting a fitted model.
 
 ``` r
+t <- 1:100
 monoexponential(t, A = 10, B = 100, tau = 8, TD = 15)
+
+sigmoidsl(t, A = 10, B = 100, xmid = 30, slope = 4)
 ```
 
 * `SSmonoexponential()`, `SSexponential_drift()`, `SSbiexponential()`, `SSlogistic()`, `SSgompertz()`, `SSgompertz_left()`, and `SSsigmoidal_drift()` are the matching self-starting (`selfStart`) wrappers, which generate their own initial parameter estimates and can be fit directly with `stats::nls()`.
 
 ``` r
-model <- nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
-summary(model)
+nls(x ~ SSmonoexponential(t, A, B, tau, TD), data = data)
+
+nls(x ~ SSlogistic(t, A, B, xmid, slope), data = data)
 ```
 
 ## mV̇O~2~ recovery kinetics and muscle Oxidative Capacity assessment
@@ -106,7 +110,7 @@ analyse_kinetics(
 
 ## Correcting for blood volume changes
 
-* `correct_blood_volume()` is used to normalise NIRS components signals — i.e. *oxy[haem], deoxy[haem], and total[haem]* — for changes in *total[haem]*, which is a proxy for local blood volume/perfusion. This can be done before further analysis, to isolate metabolic O~2~ from mechanical haemodynamics. See `?correct_blood_volume`.
+* `correct_blood_volume()` is used to normalise NIRS components signals — i.e. *oxy[haem] and deoxy[haem]* — for changes in *total[haem]*, which is a proxy for local blood volume/perfusion. This can be done before further analysis, to isolate metabolic O~2~ from mechanical haemodynamics. See `?correct_blood_volume`.
 
 ## Articles
 

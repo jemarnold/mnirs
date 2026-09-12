@@ -128,9 +128,8 @@ test_that("read_file() reads vo2master files correctly", {
 })
 
 test_that("read_file() reads pionirs .ftn2 and .ftn files correctly", {
-    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
+    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
-
     result <- read_file(ftn2_path)
 
     expect_s3_class(result, "data.frame")
@@ -138,10 +137,7 @@ test_that("read_file() reads pionirs .ftn2 and .ftn files correctly", {
     expect_equal(result[1, 1], "Iteration")
     expect_all_true(unlist(lapply(result, is.character)))
 
-    file_path <- example_mnirs("pionirs")
-    skip_if_not(file.exists(file_path), "testdata not available")
-
-    result <- read_file(file_path)
+    result <- read_file(example_mnirs("pionirs"))
 
     expect_equal(dim(result), c(701L, 15L))
     expect_equal(result[1, 15], "TagLabel")
