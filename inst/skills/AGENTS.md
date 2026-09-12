@@ -99,7 +99,7 @@ read_mnirs(
 ```r
 example_mnirs(file = NULL)  # NULL = list all; partial matching
 ## "artinis_intervals", "moxy_intervals", "moxy_ramp",
-## "portamon-oxcap", "train.red_intervals"
+## "portamon_oxcap", "train.red_intervals"
 
 create_mnirs_data(data, ...)  # low-level constructor; wraps df as "mnirs"
 ## ... = named metadata (nirs_channels, time_channel, sample_rate, ...)

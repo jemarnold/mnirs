@@ -2351,7 +2351,7 @@ test_that("read_mnirs oxysoft works", {
 })
 
 test_that("read_mnirs Oxysoft Portamon works", {
-    file_path <- example_mnirs("portamon-oxcap")
+    file_path <- example_mnirs("portamon_oxcap")
 
     expect_equal(
         read_file(file_path) |>
@@ -2363,7 +2363,7 @@ test_that("read_mnirs Oxysoft Portamon works", {
     )
 
     df <- read_mnirs(
-        file_path = example_mnirs("portamon-oxcap.xlsx"),
+        file_path = example_mnirs("portamon_oxcap.xlsx"),
         nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
         time_channel = NULL,
         event_channel = c(event = "col_6"),
@@ -2420,7 +2420,7 @@ test_that("read_mnirs Oxysoft Portamon works", {
 
 test_that("read_mnirs Oxysoft event_channel = 'labels' aliases label column", {
     df <- read_mnirs(
-        example_mnirs("portamon-oxcap"),
+        example_mnirs("portamon_oxcap"),
         nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
         event_channel = c(event = "labels"),
         verbose = FALSE

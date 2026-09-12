@@ -7,16 +7,18 @@ format:
     html:
         embed-resources: true
         toc: true
+        fig-width: 5
+        fig-align: center
+        fig-dpi: 300
 csl: ../apa.csl
+execute:
+    warning: false
 knitr:
     opts_chunk:
         collapse: true
-        comment: '#>'
-        dpi: 300
-        out.width: "100%"
-        fig.width: 5
+        comment: "#>"
         fig.asp: 0.667
-        fig.align: "center"
+        out.width: "100%"
 ---
 
 # Introduction
@@ -32,7 +34,6 @@ This article assumes basic familiarity with the *{mnirs}* package. See [*Reading
 
 ```{r}
 #| label: setup
-#| warning: false
 
 library(ggplot2) ## for plotting
 library(mnirs)   ## install: pak::pak("jemarnold/mnirs@dev")
@@ -46,7 +47,7 @@ library(mnirs)   ## install: pak::pak("jemarnold/mnirs@dev")
 When automatically detecting a known NIRS device file format, all columns are returned to allow exploration of the file.
 
 ```{r}
-#| label: read ftn2
+#| label: read-ftn2
 
 ## read an example file with no additional parameters
 ## file paths are hidden for this example
@@ -63,7 +64,7 @@ print(df_sto2, n = 5)
 Here, a Butterworth low-pass 2nd-order filter with cutoff frequency 0.05 Hz seems to smooth the data sufficiently.
 
 ```{r}
-#| label: filter sto2
+#| label: filter-sto2
 
 df_filt <- filter_mnirs(
     df_sto2,
@@ -87,7 +88,7 @@ plot(df_filt) +
 Channels can also be specified and renamed explicitly. Since we have already read the file, we can instead modify channels using `create_mnirs_data()`. We will specify the raw haemoglobin concentration signals, with the event column containing manually entered labels.
 
 ```{r}
-#| label: read ftn
+#| label: read-ftn
 
 df_raw <- create_mnirs_data(
     df_filt,
@@ -111,7 +112,7 @@ plot(df_raw) +
 `correct_blood_volume()` normalises oxy-, deoxy-, and total[haem] for changes in blood volume during the occlusion. Channels must be specified explicitly to avoid naming ambiguity.
 
 ```{r}
-#| label: blood volume correction
+#| label: blood-volume-correction
 
 df_corr <- correct_blood_volume(
     df_raw,
@@ -135,7 +136,7 @@ Reoxygenation kinetics or *microvascular responsiveness* is typically estimated 
 We will isolate the *"deoxy[haem]"* channel to analyse, since *"hhb"* and *"o2hb"* are now mirror images of each other.
 
 ```{r}
-#| label: extract intervals
+#| label: extract-intervals
 
 df_list <- extract_intervals(
     df_corr,
@@ -199,7 +200,7 @@ With experimental kinetics analysis methods (still under development and not yet
 `method = "exponential_drift"` (or `"exponential_linear"`) fits a linear slope term after the primary monoexponential response, to separate the fast reoxygenation phase from the slow hyperaemic drift.
 
 ```{r}
-#| label: exponential drift
+#| label: exponential-drift
 
 result_drift <- analyse_kinetics(
     df_list[2],
@@ -245,7 +246,7 @@ Two-phase **Exponential-drift** and **Biexponential** kinetics are currently exp
 :::
 
 ```{r}
-#| label: compare diagnostics
+#| label: compare-diagnostics
 
 rbind(
     monoexponential   = result_monoexp$diagnostics,
@@ -260,3 +261,4 @@ In this example, `r2`, `rmse`, and `snr` (signal-to-noise ratio) suggest that th
 # Acknowledgements
 
 Thanks to *Marianna Neri*, [*Dr. Simone Porcelli*](https://medicinamolecolare.dip.unipv.it/en/research/research-teams-and-topics/human-physiology/human-integrative-physology-exercise-simone){target="_blank"}, and the developers at [*PIONIRS*](https://www.pionirs.com/wp/){target="_blank"} for providing access to these example files to allow me to integrate this excellent device into *{mnirs}*.
+

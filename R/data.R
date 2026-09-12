@@ -174,7 +174,7 @@ NULL
 NULL
 
 
-#' @name portamon-oxcap.xlsx
+#' @name portamon_oxcap.xlsx
 #'
 #' @title 10 Hz Artinis Oxysoft export recorded with Portamon
 #'

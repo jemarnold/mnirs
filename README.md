@@ -74,7 +74,7 @@ library(mnirs)
 example_mnirs()
 #> [1] "artinis_intervals.xlsx"  "moxy_intervals.csv"     
 #> [3] "moxy_ramp.xlsx"          "pionirs_occlusion.ftn"  
-#> [5] "portamon-oxcap.xlsx"     "train.red_intervals.csv"
+#> [5] "portamon_oxcap.xlsx"     "train.red_intervals.csv"
 
 ## rename channels in the format `renamed = "original_name"`
 ## where "original_name1" should match the file column name exactly

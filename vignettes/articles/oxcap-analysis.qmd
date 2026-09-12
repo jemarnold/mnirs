@@ -7,15 +7,19 @@ format:
     html:
         embed-resources: true
         toc: true
+        fig-width: 7.09
+        fig-align: center
+        fig-dpi: 300
 bibliography: oxcap-citations.bib
 csl: ../apa.csl
+execute:
+    warning: false
 knitr:
     opts_chunk:
         collapse: false
-        comment: '#>'
-        dpi: 300
+        comment: "#>"
+        fig.asp: 0.667
         out.width: "100%"
-        fig.align: "center"
 
 ---
 
@@ -124,7 +128,7 @@ options(mnirs.verbose = FALSE) ## silence mnirs messages
 
 I received this example file from [Dr. Thomas Tripp](https://scholar.google.com/citations?user=A9JwQbYAAAAJ&hl=en){target="_blank"}, currently a postdoctoral fellow in [Dr. Martin MacInnis](https://scholar.google.com/citations?hl=en&user=tJepNIQAAAAJ){target="_blank"}' lab at the University of Calgary. They have kindly allowed me to include this file with the *{mnirs}* package for users to examine themselves.
 
-It can be accessed by calling `example_mnirs("portamon-oxcap")`.
+It can be accessed by calling `example_mnirs("portamon_oxcap")`.
 :::
 
 
@@ -141,7 +145,7 @@ Note: by default, *Artinis Oxysoft* exports an event label column without a name
 
 ## identify and rename channels, including the event label column
 df <- read_mnirs(
-    file_path     = example_mnirs("portamon-oxcap.xlsx"),
+    file_path     = example_mnirs("portamon_oxcap.xlsx"),
     nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
     event_channel = c(event = "labels")
 )
@@ -563,7 +567,7 @@ This article demonstrates how muscle oxidative capacity analysis can be performe
 #| eval: false
 
 read_mnirs(
-    file_path       = example_mnirs("portamon-oxcap.xlsx"),
+    file_path       = example_mnirs("portamon_oxcap.xlsx"),
     nirs_channels   = c(thb = 2, hhb = 3, o2hb = 4),
     event_channel   = c(event = "labels")
 ) |>

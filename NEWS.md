@@ -678,7 +678,7 @@ create_mnirs_data(df, nirs_channels = c(o2hb, hhb))
 # mnirs 0.4.1
 
 * Create article "Analysing muscle oxidative capacity with {mnirs}".
-* Add `portamon-oxcap.xlsx` example file (thanks to Dr. Thomas Tripp and Dr. Martin MacInnis).
+* Add `portamon_oxcap.xlsx` example file (thanks to Dr. Thomas Tripp and Dr. Martin MacInnis).
 * Update `train.red_intervals.csv`, delete redundant NIRS channels to reduce file size.
 * Minors updates to `monoexponential` family of functions.
     * Fix `SSmonoexp3()` to not internally look for `TD` parameter. 

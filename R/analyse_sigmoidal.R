@@ -174,6 +174,87 @@ gompertz_left <- function(t, A, B, xmid, slope) {
 }
 
 
+#' Sigmoid curve with gradient
+#'
+#' [sigmoid_core()] evaluates a 4-parameter sigmoid of the given `shape`
+#' and its partial derivatives on the canonical parameters, shared by the
+#' `selfStart` model functions of [SSlogistic()], [SSgompertz()],
+#' [SSgompertz_left()], and [SSsigmoidal_drift()]. Every shape is a
+#' function `W(u)` of `u = k * (t - xmid)` with rate `k = c * slope /
+#' (B - A)` (`c = 4` symmetric, `e` Gompertz), so with `P = dW/du` the
+#' partials share one form. [sigmoid_model()] attaches the gradient over
+#' the parameters written as bare symbols in `mCall` (see
+#' [free_params()]), so [stats::nls()] skips [stats::numericDeriv()].
+#'
+#' @param mCall A matched call to the model function.
+#' @inheritParams sigmoidal_drift
+#'
+#' @returns [sigmoid_core()]: a list of the curve `val`, the partial
+#'   derivatives by parameter name, and the rate `k`. [sigmoid_model()]: a
+#'   numeric vector of predicted values with a `"gradient"` attribute when
+#'   any parameter is free.
+#'
+#' @keywords internal
+sigmoid_core <- function(t, A, B, xmid, slope, shape) {
+    D <- B - A
+    cc <- if (shape == "symmetric") 4 else exp(1)
+    k <- cc * slope / D
+    u <- k * (t - xmid)
+    ## shape response W on [0, 1] and its rate P = dW/du
+    if (shape == "symmetric") {
+        W <- 1 / (1 + exp(-u))
+        P <- W * (1 - W)
+    } else if (shape == "gompertz") {
+        W <- exp(-exp(-u))
+        P <- W * exp(-u)
+    } else {
+        H <- exp(-exp(u))
+        W <- 1 - H
+        P <- H * exp(u)
+    }
+    uP <- u * P
+    return(list(
+        val = A + D * W,
+        A = 1 - W + uP,
+        B = W - uP,
+        xmid = -D * k * P,
+        slope = cc * (t - xmid) * P,
+        k = k
+    ))
+}
+
+
+#' @rdname sigmoid_core
+#' @keywords internal
+sigmoid_model <- function(mCall, t, A, B, xmid, slope, shape) {
+    g <- sigmoid_core(t, A, B, xmid, slope, shape)
+    val <- g$val
+    free <- free_params(mCall, c("A", "B", "xmid", "slope"))
+    if (length(free) > 0L) {
+        attr(val, "gradient") <- do.call(cbind, g[free])
+    }
+    return(val)
+}
+
+
+## `selfStart` model fns: the exported curves plus the analytic gradient.
+## the 5-parameter logistic has no gradient (numericDeriv)
+logistic_model <- function(t, A, B, xmid, slope, asym = NULL) {
+    if (!is.null(asym)) {
+        return(logistic(t, A, B, xmid, slope, asym))
+    }
+    return(sigmoid_model(match.call(), t, A, B, xmid, slope, "symmetric"))
+}
+
+gompertz_model <- function(t, A, B, xmid, slope) {
+    return(sigmoid_model(match.call(), t, A, B, xmid, slope, "gompertz"))
+}
+
+gompertz_left_model <- function(t, A, B, xmid, slope) {
+    return(sigmoid_model(match.call(), t, A, B, xmid, slope, "gompertz_left"))
+}
+
+
 #' Initiate self-starting logistic model
 #'
 #' [logistic_init()]: Returns initial values for the parameters in a
@@ -444,7 +525,7 @@ init_inflection <- function(x, t, A_init, B_init) {
 #'
 #' @export
 SSlogistic <- selfStart(
-    model = logistic,
+    model = logistic_model,
     initial = init_fixed(logistic_init, c("A", "B", "xmid", "slope", "asym")),
     parameters = c("A", "B", "xmid", "slope", "asym")
 )
@@ -515,7 +596,7 @@ SSlogistic <- selfStart(
 #'
 #' @export
 SSgompertz <- selfStart(
-    model = gompertz,
+    model = gompertz_model,
     initial = init_fixed(gompertz_init, c("A", "B", "xmid", "slope")),
     parameters = c("A", "B", "xmid", "slope")
 )
@@ -524,26 +605,9 @@ SSgompertz <- selfStart(
 #' @rdname SSgompertz
 #' @export
 SSgompertz_left <- selfStart(
-    model = gompertz_left,
+    model = gompertz_left_model,
     initial = init_fixed(gompertz_init, c("A", "B", "xmid", "slope")),
     parameters = c("A", "B", "xmid", "slope")
-)
-
-
-## shape -> (self-start model fn, amplitude-reparam fn) symbols
-shape_dispatch <- list(
-    symmetric = list(
-        model = quote(SSlogistic),
-        amp = quote(logistic)
-    ),
-    gompertz = list(
-        model = quote(SSgompertz),
-        amp = quote(gompertz)
-    ),
-    gompertz_left = list(
-        model = quote(SSgompertz_left),
-        amp = quote(gompertz_left)
-    )
 )
 
 
@@ -551,9 +615,10 @@ shape_dispatch <- list(
 #'
 #' Internal channel-level dispatch for
 #' `analyse_kinetics(method = "sigmoidal")`. Fits a 4-parameter sigmoidal
-#' curve to each `nirs_channel` within a single *"mnirs"* data frame with
-#' one of three shapes: `"symmetric"`, `"gompertz"`, or `"gompertz_left"`.
-#' See [analyse_kinetics()] for user-facing documentation.
+#' curve to each `nirs_channel` within a single *"mnirs"* data frame via
+#' [fit_sigmoidal()] with one of three shapes: `"symmetric"`, `"gompertz"`,
+#' or `"gompertz_left"`. See [analyse_kinetics()] for user-facing
+#' documentation.
 #'
 #' @param shape Character; the 4-parameter sigmoidal shape to fit. One of
 #'   `"symmetric"` (*default*; calls [SSlogistic()]), `"gompertz"`
@@ -622,101 +687,117 @@ analyse_logistic <- function(
         verbose = verbose,
         env = env
     )
-    time_channel <- setup$time_channel
-    ## NA scaffold (method columns only) for convergence failure
-    na_cols <- kinetics_coef_cols$sigmoidal
-
-    ## method-specific fit: self-starting sigmoidal via nls
-    logistic_fit <- function(.nirs, x_fit, t_fit, .a, valid) {
-        ## resolve per-channel shape and matching self-start fn
-        disp <- shape_dispatch[[.a$shape]]
-        ch_fn <- disp$model
-        ## columns carry the channel names so the model predicts on them
-        params <- c("A", "B", "xmid", "slope")
-        nm <- fit_names(.nirs, time_channel, params)
-        fit_data <- setNames(data.frame(x_fit, t_fit), nm)
-
-        ## build nls formula with any fixed params as constants
-        model <- tryCatch(
-            embed_fit_call(nls(
-                build_ss_formula(ch_fn, params, .a$fix, nm[[1L]], nm[[2L]]),
-                fit_data,
-                control = fit_control(.a$control)
-            )),
-            error = \(e) {
-                warn_fit_failed(ch_fn, e, .nirs, interval_name, env = env)
-            }
-        )
-        if (is.null(model)) {
-            return(build_na_results(na_cols))
-        }
-
-        coefs <- full_coefs(model, params, .a$fix)
-
-        ## enforce direction: bounded refit on D = B - A and slope sign.
-        ## data-scaled slope floor: slope pinned here is a degenerate
-        ## flat fit, not a genuine response
-        want <- if (.a$direction == "positive") 1 else -1
-        slope_eps <- diff(range(x_fit)) / diff(range(t_fit)) * 1e-6
-        slope_free <- !"slope" %in% names(.a$fix)
-        enforced <- enforce_direction(
-            model,
-            coefs,
-            fit_data,
-            direction = .a$direction,
-            amp_fn = disp$amp,
-            lower = if (slope_free) {
-                c(slope = if (want > 0) slope_eps else -Inf)
-            },
-            upper = if (slope_free) {
-                c(slope = if (want > 0) Inf else -slope_eps)
-            },
-            fix = .a$fix,
-            control = .a$control,
-            .nirs = .nirs,
-            interval_name = interval_name,
-            env = env
-        )
-        if (is.null(enforced)) {
-            return(build_na_results(na_cols))
-        }
-        model <- enforced$model
-        coefs <- enforced$coefs
-
-        ## predict response at the inflection point xmid, which is already
-        ## elapsed from start_time, matching the fit time base
-        xmid_fitted <- as.numeric(
-            stats::predict(
-                model,
-                setNames(data.frame(coefs[["xmid"]]), nm[[2L]])
-            )
-        )
-
-        build_fit_results(
-            data.frame(
-                A = coefs[["A"]],
-                B = coefs[["B"]],
-                xmid = coefs[["xmid"]],
-                slope = coefs[["slope"]],
-                xmid_fitted = xmid_fitted
-            ),
-            model,
-            x_fit,
-            t_fit,
-            valid,
-            env = env
-        )
-    }
 
     return(analyse_kinetics_channels(
         data,
         setup$nirs_channels,
         setup$time_channel,
         setup$per_channel,
-        logistic_fit,
+        fit_sigmoidal,
         verbose,
         interval_name,
         extra_args = args,
+        method = "sigmoidal",
         env = env
+    ))
+}
+
+
+#' Fit a sigmoidal model to one channel
+#'
+#' Channel fitter of [analyse_logistic()] (see
+#' [analyse_kinetics_channels()]), also the fallback of
+#' [fit_sigmoidal_drift()]. Self-starting [SSlogistic()], [SSgompertz()],
+#' or [SSgompertz_left()] per the channel `shape` via [stats::nls()], with
+#' the requested `direction` enforced on `B - A` and the sign of `slope`
+#' ([enforce_direction()]).
+#'
+#' @inheritParams fit_monoexponential
+#'
+#' @returns The `coefs`/`model`/`fitted_data`/`diag` list of
+#'   [build_fit_results()], or [build_na_results()] when the fit fails.
+#'
+#' @keywords internal
+fit_sigmoidal <- function(x, t, valid, .a, ctx) {
+    x_fit <- x[valid$idx]
+    t_fit <- t[valid$idx]
+    ## NA scaffold (method columns only) for convergence failure
+    na_cols <- kinetics_coef_cols$sigmoidal
+    ## the self-start fn of the channel shape
+    fn <- as.name(paste0(
+        "SS",
+        if (.a$shape == "symmetric") "logistic" else .a$shape
+    ))
+    ## columns carry the channel names so the model predicts on them
+    params <- c("A", "B", "xmid", "slope")
+    nm <- fit_names(ctx$nirs, ctx$time_channel, params)
+    fit_data <- list2DF(setNames(list(x_fit, t_fit), nm))
+
+    ## build nls formula with any fixed params as constants
+    model <- tryCatch(
+        embed_fit_call(nls(
+            build_ss_formula(fn, params, .a$fix, nm[[1L]], nm[[2L]]),
+            fit_data,
+            control = fit_control(.a$control)
+        )),
+        error = \(e) {
+            warn_fit_failed(fn, e, ctx$nirs, ctx$interval_name, env = ctx$env)
+        }
+    )
+    if (is.null(model)) {
+        return(build_na_results(na_cols))
+    }
+
+    coefs <- full_coefs(model, params, .a$fix)
+
+    ## enforce direction: bounded refit on D = B - A and slope sign.
+    ## data-scaled slope floor: slope pinned here is a degenerate
+    ## flat fit, not a genuine response
+    want <- if (.a$direction == "positive") 1 else -1
+    slope_eps <- diff(range(x_fit)) / diff(range(t_fit)) * 1e-6
+    slope_free <- !"slope" %in% names(.a$fix)
+    enforced <- enforce_direction(
+        model,
+        coefs,
+        fit_data,
+        direction = .a$direction,
+        amp_fn = fn,
+        lower = if (slope_free) {
+            c(slope = if (want > 0) slope_eps else -Inf)
+        },
+        upper = if (slope_free) {
+            c(slope = if (want > 0) Inf else -slope_eps)
+        },
+        fix = .a$fix,
+        control = .a$control,
+        .nirs = ctx$nirs,
+        interval_name = ctx$interval_name,
+        env = ctx$env
+    )
+    if (is.null(enforced)) {
+        return(build_na_results(na_cols))
+    }
+    model <- enforced$model
+    coefs <- enforced$coefs
+
+    ## predict response at the inflection point xmid, which is already
+    ## elapsed from start_time, matching the fit time base
+    xmid_fitted <- as.numeric(
+        stats::predict(model, setNames(data.frame(coefs[["xmid"]]), nm[[2L]]))
+    )
+
+    return(build_fit_results(
+        list2DF(list(
+            A = coefs[["A"]],
+            B = coefs[["B"]],
+            xmid = coefs[["xmid"]],
+            slope = coefs[["slope"]],
+            xmid_fitted = xmid_fitted
+        )),
+        model,
+        x_fit,
+        t_fit,
+        valid,
+        env = ctx$env
     ))
 }

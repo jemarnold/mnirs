@@ -262,7 +262,9 @@ analyse_response_time <- function(
         env = env
     )
     ## method-specific fit: fractional response time (no model fit)
-    response_time_fit <- function(.nirs, x_fit, t_fit, .a, valid) {
+    response_time_fit <- function(x, t, valid, .a, ctx) {
+        x_fit <- x[valid$idx]
+        t_fit <- t[valid$idx]
         ## quote = TRUE so `env` (a defused call object for condition
         ## attribution) is passed as-is, not evaluated by do.call
         ## `t_fit` is elapsed from start_time, so the baseline splits at 0.

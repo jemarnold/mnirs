@@ -319,7 +319,7 @@ occlusion_intervals |>
 #| fig-asp: 0.5
 
 read_mnirs(
-    file_path = example_mnirs("portamon-oxcap"),
+    file_path = example_mnirs("portamon_oxcap"),
     nirs_channels = c(thb = 2, hhb = 3, o2hb = 4),
     event_channel = "labels"
 ) |>
