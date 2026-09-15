@@ -12,6 +12,7 @@ navbar:
     - articles
     - reference
     - news
+    - authors
     right:
     - search
     - github

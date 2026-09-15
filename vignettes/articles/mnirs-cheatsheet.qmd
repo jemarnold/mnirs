@@ -58,7 +58,7 @@ execute:
             Muscle Near-Infrared Spectroscopy Processing and Analysis
           ]
           #h(1fr)
-          #link("https://jemarnold-mnirs-app.share.connect.posit.cloud/")[
+          #link("https://jemarnold.ca/mnirs-app/")[
             #text(size: 14pt, weight: "bold", fill: white, underline[online app])
           ]
           #linebreak()
