@@ -251,7 +251,7 @@ test_that("detect_mnirs_device works on internal example files", {
 })
 
 test_that("detect_mnirs_device works on pionirs files", {
-    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
+    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     expect_equal(
@@ -569,7 +569,7 @@ test_that("resolve_channels() detects known channels for PerfPro", {
 })
 
 test_that("resolve_channels() detects known channels for PIONIRS", {
-    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
+    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     raw <- read_file(ftn2_path)
@@ -1090,7 +1090,7 @@ test_that("read_mnirs() selects, orders, and renames columns", {
 })
 
 test_that("read_mnirs() reads pionirs .ftn2 file with auto-detection", {
-    ftn2_path <- test_path("testdata/pionirs-occlusion.ftn2")
+    ftn2_path <- test_path("testdata/pionirs_occlusion.ftn2")
     skip_if_not(file.exists(ftn2_path), "testdata not available")
 
     df <- read_mnirs(ftn2_path, verbose = TRUE)

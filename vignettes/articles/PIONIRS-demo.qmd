@@ -11,6 +11,9 @@ format:
         fig-align: center
         fig-dpi: 300
 csl: ../apa.csl
+filters:
+    - fontawesome
+    - academicons
 execute:
     warning: false
 knitr:

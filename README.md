@@ -36,18 +36,27 @@ pak::pak("jemarnold/mnirs")
 
 ## Citation
 
-[](https://cran.r-universe.dev/mnirs/citation)
-
 `<package manuscript coming soon>`
+
+Arnold J (2026). mnirs: Muscle Near-Infrared Spectroscopy Processing and
+Analysis. R package version 0.8.0, <https://jemarnold.github.io/mnirs/>.
+
+    @Manual{,
+      title = {mnirs: Muscle Near-Infrared Spectroscopy Processing and Analysis},
+      author = {Jem Arnold},
+      year = {2026},
+      note = {R package version 0.8.0},
+      url = {https://jemarnold.github.io/mnirs/},
+    }
 
 ## Online app
 
 A very basic implementation of this package is hosted at
-[](https://jemarnold-mnirs-app.share.connect.posit.cloud/) and can
-currently be used for reading and processing mNIRS data.
+<https://jemarnold.ca/mnirs-app/> and can currently be used for reading
+and processing mNIRS data.
 
 [![mnirs processing shiny
-app](https://raw.githubusercontent.com/jemarnold/mnirs/main/man/figures/README-mnirs-app.gif)](https://jemarnold-mnirs-app.share.connect.posit.cloud/)
+app](https://raw.githubusercontent.com/jemarnold/mnirs/main/man/figures/README-mnirs-app.gif)](https://jemarnold.ca/mnirs-app/)
 
 ## Usage
 
@@ -330,9 +339,9 @@ functionality.
 
 ## Future *{mnirs}* development
 
-- ~Process oxygenation kinetics~
+- ✅ Process oxygenation kinetics
 
-- ~Oxidative capacity assessment~
+- ✅ Oxidative capacity assessment
 
 - Critical oxygenation breakpoint analysis
 

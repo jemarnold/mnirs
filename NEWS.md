@@ -71,7 +71,7 @@ response_time(x, t, response_fraction = c(0.5, 0.632))
 t <- 1:100
 monoexponential(t, A = 10, B = 100, tau = 8, TD = 15)
 
-sigmoidsl(t, A = 10, B = 100, xmid = 30, slope = 4)
+sigmoidal(t, A = 10, B = 100, xmid = 30, slope = 4)
 ```
 
 * `SSmonoexponential()`, `SSexponential_drift()`, `SSbiexponential()`, `SSlogistic()`, `SSgompertz()`, `SSgompertz_left()`, and `SSsigmoidal_drift()` are the matching self-starting (`selfStart`) wrappers, which generate their own initial parameter estimates and can be fit directly with `stats::nls()`.

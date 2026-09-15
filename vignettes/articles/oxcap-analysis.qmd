@@ -12,6 +12,9 @@ format:
         fig-dpi: 300
 bibliography: oxcap-citations.bib
 csl: ../apa.csl
+filters:
+    - fontawesome
+    - academicons
 execute:
     warning: false
 knitr:

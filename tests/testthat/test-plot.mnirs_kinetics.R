@@ -184,13 +184,13 @@ kin_sigmoidal <- function(channels = "smo2", faceted = FALSE) {
     )
 }
 
-kin_expdrift <- function(channels = "smo2", faceted = FALSE) {
+kin_expdrift <- function(channels = "smo2", faceted = FALSE, verbose = TRUE) {
     analyse_kinetics(
         as_input(make_expdrift(channels), faceted),
         nirs_channels = channels,
         method = "exponential_drift",
         use_TD = FALSE,
-        verbose = TRUE
+        verbose = verbose
     )
 }
 
@@ -680,7 +680,10 @@ test_that("components draws the exponential_drift drift line from the drift onse
 test_that("components tolerates channels named after coefficients", {
     ## a channel named `slope_B` collides with an exponential_drift
     ## coefficient; overlay frame must not join coefficient columns
-    single <- kin_expdrift(channels = "slope_B")
+    expect_message(
+        single <- kin_expdrift(channels = "slope_B"),
+        "slope_B.*collides.*.slope_B"
+    )
     p1 <- plot(single, components = TRUE, markers = FALSE, labels = FALSE)
     expect_length(comp_layers(p1), 2L)
     expect_no_error(ggplot2::ggplot_build(p1))
@@ -691,7 +694,9 @@ test_that("components tolerates channels named after coefficients", {
         diff(d2$comp2), rep(single$coefficients$slope_B, nrow(d2) - 1L)
     )
 
-    faceted <- kin_expdrift(channels = "slope_B", faceted = TRUE)
+    faceted <- kin_expdrift(
+        channels = "slope_B", faceted = TRUE, verbose = FALSE
+    )
     p2 <- plot(faceted, components = TRUE, markers = FALSE, labels = FALSE)
     expect_length(comp_layers(p2), 2L)
     expect_no_error(ggplot2::ggplot_build(p2))
