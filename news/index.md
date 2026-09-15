@@ -2,6 +2,8 @@
 
 ## mnirs 0.8.0
 
+CRAN release: 2026-09-12
+
 The initial release of
 [`analyse_kinetics()`](https://jemarnold.github.io/mnirs/reference/analyse_kinetics.md)
 and family of kinetics modelling functions!
@@ -118,7 +120,7 @@ response_time(x, t, response_fraction = c(0.5, 0.632))
 t <- 1:100
 monoexponential(t, A = 10, B = 100, tau = 8, TD = 15)
 
-sigmoidsl(t, A = 10, B = 100, xmid = 30, slope = 4)
+sigmoidal(t, A = 10, B = 100, xmid = 30, slope = 4)
 ```
 
 - [`SSmonoexponential()`](https://jemarnold.github.io/mnirs/reference/SSmonoexponential.md),

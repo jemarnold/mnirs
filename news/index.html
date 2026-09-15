@@ -38,11 +38,11 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/v0.8.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/jemarnold/mnirs/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.8.0" id="mnirs-080">mnirs 0.8.0<a class="anchor" aria-label="anchor" href="#mnirs-080"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.8.0" id="mnirs-080">mnirs 0.8.0<a class="anchor" aria-label="anchor" href="#mnirs-080"></a></h2><p class="text-muted">CRAN release: 2026-09-12</p>
 <p>The initial release of <code><a href="../reference/analyse_kinetics.html">analyse_kinetics()</a></code> and family of kinetics modelling functions!</p>
 <div class="section level3">
 <h3 id="analyse_kinetics-0-8-0"><code>analyse_kinetics()</code><a class="anchor" aria-label="anchor" href="#analyse_kinetics-0-8-0"></a></h3>
@@ -107,7 +107,7 @@
 <code class="sourceCode R"><span><span class="va">t</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span></span>
 <span><span class="fu"><a href="../reference/monoexponential.html">monoexponential</a></span><span class="op">(</span><span class="va">t</span>, A <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">100</span>, tau <span class="op">=</span> <span class="fl">8</span>, TD <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">sigmoidsl</span><span class="op">(</span><span class="va">t</span>, A <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">100</span>, xmid <span class="op">=</span> <span class="fl">30</span>, slope <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">sigmoidal</span><span class="op">(</span><span class="va">t</span>, A <span class="op">=</span> <span class="fl">10</span>, B <span class="op">=</span> <span class="fl">100</span>, xmid <span class="op">=</span> <span class="fl">30</span>, slope <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <ul><li>
 <code><a href="../reference/SSmonoexponential.html">SSmonoexponential()</a></code>, <code><a href="../reference/SSexponential_drift.html">SSexponential_drift()</a></code>, <code><a href="../reference/SSbiexponential.html">SSbiexponential()</a></code>, <code><a href="../reference/SSlogistic.html">SSlogistic()</a></code>, <code><a href="../reference/SSgompertz.html">SSgompertz()</a></code>, <code><a href="../reference/SSgompertz.html">SSgompertz_left()</a></code>, and <code><a href="../reference/SSsigmoidal_drift.html">SSsigmoidal_drift()</a></code> are the matching self-starting (<code>selfStart</code>) wrappers, which generate their own initial parameter estimates and can be fit directly with <code><a href="https://rdrr.io/r/stats/nls.html" class="external-link">stats::nls()</a></code>.</li>
 </ul><div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
