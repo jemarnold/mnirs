@@ -1,3 +1,10 @@
+# mnirs 0.8.1
+
+* Internal performance boost when creating new *"mnirs"* class data frames with metadata.
+
+* Reading .csv files from *Moxy* onboard export should be faster.
+
+
 # mnirs 0.8.0
 
 The initial release of `analyse_kinetics()` and family of kinetics modelling functions!

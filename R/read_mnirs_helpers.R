@@ -32,9 +32,18 @@ read_file <- function(file_path, env = rlang::caller_env()) {
         n_seps <- max(lengths(gregexpr(sep, tail_lines, fixed = TRUE)))
 
         ## pad the first line so fread infers the correct column count
-        ## from the data table rather than narrower metadata rows
+        ## from the data table rather than narrower metadata rows;
+        ## fwrite avoids the slow writeLines() roundtrip of fread(text =)
+        tmp <- tempfile(fileext = ".txt")
+        on.exit(unlink(tmp))
+        data.table::fwrite(
+            list(c(strrep(sep, n_seps), lines)),
+            tmp,
+            quote = FALSE,
+            col.names = FALSE
+        )
         data_raw <- data.table::fread(
-            text = c(strrep(sep, n_seps), lines),
+            tmp,
             header = FALSE,
             fill = Inf,
             sep = sep,
@@ -415,10 +424,15 @@ detect_dttm_format <- function(x) {
 hms_to_seconds <- function(x) {
     ## empty strings split to nothing; keep them NA rather than 0
     x[is_empty(x)] <- NA_character_
-    parts <- strsplit(x, ":", fixed = TRUE)
-    return(suppressWarnings(vapply(parts, \(.p) {
-        sum(as.numeric(.p) * c(3600, 60, 1)[seq_along(.p)])
-    }, numeric(1L))))
+    parts <- suppressWarnings(
+        lapply(data.table::tstrsplit(x, ":", fixed = TRUE), as.numeric)
+    )
+    ## shorter H:MM values are NA-padded; weight columns then row-sum
+    m <- do.call(cbind, parts) *
+        rep(c(3600, 60, 1)[seq_along(parts)], each = length(x))
+    out <- rowSums(m, na.rm = TRUE)
+    out[is.na(m[, 1L])] <- NA
+    return(out)
 }
 
 
@@ -429,7 +443,11 @@ hms_to_seconds <- function(x) {
 #' @keywords internal
 parse_dttm <- function(x, fmt) {
     if (identical(fmt, dttm_opts[1L])) {
-        return(as.POSIXct(format(Sys.Date())) + hms_to_seconds(x))
+        ## explicit format skips as.POSIXct() format guessing
+        return(
+            as.POSIXct(as.character(Sys.Date()), format = "%Y-%m-%d") +
+                hms_to_seconds(x)
+        )
     }
     return(as.POSIXct(x, format = fmt))
 }
@@ -587,7 +605,8 @@ select_channels <- function(
     if (verbose && any(renamed)) {
         cli_warn(c(
             "!" = "Duplicate channel names detected.",
-            "i" = "Renamed: {.field {paste(new_in[renamed], new[renamed], sep = ' = ')}}",
+            "i" = "Renamed: \\
+            {.field {paste(new_in[renamed], new[renamed], sep = ' = ')}}",
             "i" = "Unique channel names can be defined explicitly."
         ), call = warn_call(env))
     }

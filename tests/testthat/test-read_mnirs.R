@@ -1051,6 +1051,22 @@ test_that("select_channels() suppresses warnings with verbose", {
     )
 })
 
+test_that("new_mnirs_data() matches create_mnirs_data() with list metadata", {
+    df <- tibble::tibble(time = 1:3, a = c(1, 2, 3))
+    meta <- list(nirs_channels = "a", time_channel = "time", sample_rate = 1)
+
+    expect_identical(new_mnirs_data(df, meta), create_mnirs_data(df, meta))
+
+    ## metadata overwrite existing attributes; grouping preserved
+    skip_if_not_installed("dplyr")
+    grouped <- dplyr::group_by(create_mnirs_data(df, meta), a)
+    out <- new_mnirs_data(grouped, list(sample_rate = 10))
+
+    expect_s3_class(out, c("mnirs", "grouped_df"))
+    expect_equal(attr(out, "sample_rate"), 10)
+    expect_equal(attr(out, "nirs_channels"), "a")
+})
+
 test_that("read_mnirs() selects, orders, and renames columns", {
     file_path <- tempfile(fileext = ".csv")
     on.exit(unlink(file_path))

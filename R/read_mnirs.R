@@ -264,7 +264,7 @@ read_mnirs <- function(
         verbose = verbose
     )
 
-    return(create_mnirs_data(data, metadata))
+    return(new_mnirs_data(data, metadata))
 }
 
 #' Metadata names  of class `"mnirs"`, retrieved with `attr()`
@@ -386,12 +386,25 @@ create_mnirs_data <- function(data, ...) {
         unname(names(name_channels(.x)))
     })
 
-    metadata <- utils::modifyList(attributes(data), incoming_metadata)
+    nirs_data <- new_mnirs_data(data, incoming_metadata)
+    tibble::validate_tibble(nirs_data)
+
+    return(nirs_data)
+}
+
+
+#' Build an `"mnirs"` tibble from data and a metadata list
+#'
+#' Internal fast path for `create_mnirs_data()`: no tidy eval, renaming, or
+#' validation. `metadata` entries overwrite existing attributes.
+#' @keywords internal
+new_mnirs_data <- function(data, metadata) {
+    metadata <- utils::modifyList(attributes(data), metadata)
 
     ## preserve grouping: `new_tibble()` resets class, so re-add `grouped_df`
     grp <- if (inherits(data, "grouped_df")) "grouped_df"
 
-    nirs_data <- tibble::new_tibble(
+    return(tibble::new_tibble(
         data,
         class = c("mnirs", grp),
         nirs_device = metadata$nirs_device,
@@ -401,12 +414,8 @@ create_mnirs_data <- function(data, ...) {
         sample_rate = metadata$sample_rate,
         start_timestamp = metadata$start_timestamp,
         interval_times = metadata$interval_times,
-        interval_span = metadata$interval_span,
-    )
-
-    tibble::validate_tibble(nirs_data)
-
-    return(nirs_data)
+        interval_span = metadata$interval_span
+    ))
 }
 
 

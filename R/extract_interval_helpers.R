@@ -624,15 +624,14 @@ extract_df_list <- function(
         interval_data <- data[time_range, , drop = FALSE]
 
         ## return interval_data with metadata
-        create_mnirs_data(
-            interval_data,
+        new_mnirs_data(interval_data, list(
             nirs_channels = group_channels[[.i]], ## overwrite for interval data
             interval_times = interval_spec$interval_times[[.i]],
             interval_span = c(
                 interval_spec$span_before[.i],
                 interval_spec$span_after[.i]
             )
-        )
+        ))
     })
 
     names(df_list) <- sprintf("interval_%d", n_vec)
@@ -692,6 +691,7 @@ ensemble_intervals <- function(
 
     ## stack interval data frames
     df_long <- do.call(rbind, lapply(interval_data, `[[`, "data"))
+
     ## resample times to nearest estimated sample rate for binned ensembling
     time_resampled <- round(df_long[[time_channel]] * sample_rate) / sample_rate
     unique_times <- sort(unique(time_resampled))
@@ -726,16 +726,18 @@ ensemble_intervals <- function(
     result[nirs_channels] <- as.data.frame(channel_sums / channel_counts)
 
     ## return with metadata
-    return(create_mnirs_data(
+    return(new_mnirs_data(
         result,
-        nirs_device = metadata$nirs_device,
-        nirs_channels = nirs_channels,
-        time_channel = time_channel,
-        event_channel = metadata$event_channel,
-        sample_rate = sample_rate,
-        start_timestamp = metadata$start_timestamp,
-        interval_times = lapply(interval_data, `[[`, "interval_times"),
-        interval_span = lapply(interval_data, `[[`, "interval_span")
+        list(
+            nirs_device = metadata$nirs_device,
+            nirs_channels = nirs_channels,
+            time_channel = time_channel,
+            event_channel = metadata$event_channel,
+            sample_rate = sample_rate,
+            start_timestamp = metadata$start_timestamp,
+            interval_times = lapply(interval_data, `[[`, "interval_times"),
+            interval_span = lapply(interval_data, `[[`, "interval_span")
+        )
     ))
 }
 
@@ -750,16 +752,18 @@ preserve_metadata <- function(data, metadata, zero_time = FALSE) {
         attr(data, "interval_times") <- interval_times - t0
     }
 
-    return(create_mnirs_data(
+    return(new_mnirs_data(
         data,
-        nirs_device = metadata$nirs_device,
-        nirs_channels = unique(attr(data, "nirs_channels")),
-        time_channel = metadata$time_channel,
-        event_channel = metadata$event_channel,
-        sample_rate = metadata$sample_rate,
-        start_timestamp = metadata$start_timestamp,
-        interval_times = attr(data, "interval_times"),
-        interval_span = attr(data, "interval_span")
+        list(
+            nirs_device = metadata$nirs_device,
+            nirs_channels = unique(attr(data, "nirs_channels")),
+            time_channel = metadata$time_channel,
+            event_channel = metadata$event_channel,
+            sample_rate = metadata$sample_rate,
+            start_timestamp = metadata$start_timestamp,
+            interval_times = attr(data, "interval_times"),
+            interval_span = attr(data, "interval_span")
+        )
     ))
 }
 
