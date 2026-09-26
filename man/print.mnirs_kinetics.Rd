@@ -2,24 +2,34 @@
 % Please edit documentation in R/mnirs_methods.R
 \name{print.mnirs_kinetics}
 \alias{print.mnirs_kinetics}
+\alias{c.mnirs_kinetics}
 \title{Methods for mnirs_kinetics objects}
 \usage{
 \method{print}{mnirs_kinetics}(x, ...)
+
+\method{c}{mnirs_kinetics}(...)
 }
 \arguments{
 \item{x}{Object of class \code{"mnirs_kinetics"} returned from
 \code{\link[=analyse_kinetics]{analyse_kinetics()}}.}
 
-\item{...}{Additional arguments.}
+\item{...}{Additional arguments. For \code{c}; \emph{"mnirs_kinetics"} objects to
+combine, e.g. separate \code{\link[=analyse_kinetics]{analyse_kinetics()}} calls fitting a different
+method to each interval.}
 }
 \value{
 \item{\code{print}}{Returns a model summary}
+\item{\code{c}}{Returns a single \emph{"mnirs_kinetics"} object with the elements of
+each result bound in order, as if returned from one
+\code{\link[=analyse_kinetics]{analyse_kinetics()}} call. \code{method} holds each unique method; where
+methods differ, \code{coefficients$model} names the method fitted to each
+row. Interval names must be unique across results.}
 }
 \description{
 Generic methods for objects returned from \code{\link[=analyse_kinetics]{analyse_kinetics()}}.
 }
 \examples{
-result <- read_mnirs(
+intervals <- read_mnirs(
     example_mnirs("train.red"),
     nirs_channels = c(smo2 = "SmO2"),
     time_channel = c(time = "Timestamp (seconds passed)"),
@@ -33,13 +43,26 @@ result <- read_mnirs(
         span = c(-20, 90),
         zero_time = TRUE,
         verbose = FALSE
-    ) |>
+    )
+
+result <- analyse_kinetics(
+    intervals,
+    method = "peak_slope",
+    span = 10,
+    verbose = FALSE
+)
+
+print(result)
+
+## combine separate calls, e.g. a different method per interval
+c(
     analyse_kinetics(
+        intervals[1],
         method = "peak_slope",
         span = 10,
         verbose = FALSE
-    )
-
-print(result)
+    ),
+    analyse_kinetics(intervals[2], method = "monoexponential", verbose = FALSE)
+)
 
 }

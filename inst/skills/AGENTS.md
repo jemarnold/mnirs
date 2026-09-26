@@ -233,6 +233,8 @@ analyse_kinetics(result, nirs_channels = slope, time_channel = peak_slope_time,
 | `warnings` | df `type` = `"warning"`/`"error"`; captured regardless of `verbose` |
 | `call` | matched call |
 
+- `c()` combines `"mnirs_kinetics"` objects (unique interval names); `method` = unique methods; mixed → `coefficients$model` per row.
+
 **Coefficients** (all prefixed `interval`, `nirs_channels`, `start_time`; times elapsed from `start_time`; `*_fitted` = predicted value at that time):
 
 | Method | Columns |
@@ -344,7 +346,7 @@ Suggests: `signal` (butterworth), `ggplot2` + `scales` (plot/theme/scales), `dpl
 | `R/analyse_sigmoidal.R` | `logistic()`, `gompertz()`, `gompertz_left()`, `sigmoid_core()`, `SS*()` |
 | `R/analyse_sigmoidal_drift.R` | `sigmoidal_drift()`, `sigdrift_onset()`, `sigdrift_texc()`, `sigdrift_start()`, `SSsigmoidal_drift()` |
 | `R/plot.mnirs.R` | `plot.mnirs()`, `plot.mnirs_kinetics()`, `theme_mnirs()`, `palette_mnirs()`, scales, `breaks_timespan()`, `format_hmmss()` |
-| `R/mnirs_methods.R` | `print.mnirs()`, `print.mnirs_kinetics()` |
+| `R/mnirs_methods.R` | `print.mnirs()`, `print.mnirs_kinetics()`, `c.mnirs_kinetics()` |
 | `R/channel_args.R` | `resolve_channel_args()`, `validate_group_channels()` |
 | `R/as_data_list.R` | `as_data_list()`, `map_mnirs_intervals()` — list/grouped dispatch |
 | `R/validate_mnirs.R` | `validate_numeric/mnirs_data/nirs_channels/time_channel/event_channel/sample_rate/width_span/x_t/start_time/fix/findInt()` |

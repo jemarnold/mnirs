@@ -144,11 +144,13 @@ ggsave(
 
 ## Post 2 — `analyse_kinetics()`
 
-2/5 `analyse_kinetics()` takes a data frame or list of dfs and analyses every NIRS channel in every interval
+2/5 `analyse_kinetics()` takes a data frame or list of dfs can analyse every NIRS channel in each interval
 
 Kinetic models include fractional response time, peak slope, and one- & two-phase exponential & sigmoidal family curves
 
 Raw file read to fitted curve in one pipeline
+
+||
 
 Read the raw file to curve fitting in one pipeline
 
@@ -173,12 +175,12 @@ read_mnirs(
 #> Biexponential Two-Phase Kinetics
 #>     Model Coefficients:
 #>     interval nirs_channels     A     B    TD   tau   MRT  texc    B2  tau2
-#> 1 interval_1          smo2 76.62 50.14 19.64 2.261 21.90 27.48 79.50 72.27
-#> 2 interval_2          smo2 86.40 55.12 16.75 8.516 25.27 34.35 82.47 36.16
-#> 3 interval_3          smo2 87.93 63.93 23.60 9.015 32.61 46.20 79.61 42.40
-#> 4 interval_4          smo2 88.27 29.80 18.81 22.88 41.69 97.28 67.94 28.04
-#> 5 interval_5          smo2 90.92 46.24 18.13 20.06 38.18 143.3 61.72 25.29
-#> 6 interval_6          smo2 91.07 54.37 18.50 16.94 35.44 98.34    NA    NA
+#> 1 interval_1          smo2 76.65 49.38 19.43 2.749 22.18 28.41 79.26 69.37
+#> 2 interval_2          smo2 86.41 55.40 16.72 8.442 25.17 34.28 82.48 36.43
+#> 3 interval_3          smo2 87.90 59.15 23.62 10.91 34.53 47.75 79.51 36.22
+#> 4 interval_4          smo2 87.83 67.71 23.25 12.59 35.84    NA    NA    NA
+#> 5 interval_5          smo2 91.10 61.60 16.94 18.87 35.81    NA    NA    NA
+#> 6 interval_6          smo2 91.16 54.25 17.92 17.58 35.51 100.9    NA    NA
 ```
 
 ```{r}
@@ -194,11 +196,27 @@ read_mnirs(
         span = c(-31, 240),
         zero_time = TRUE
     ) |>
-    analyse_kinetics(method = "biexponential") |>
+    (\(.r) {
+        c(
+            analyse_kinetics(
+                .r[1:3],
+                method = "biexp"
+            ),
+            analyse_kinetics(
+                .r[4:5],
+                method = "monoexp"
+            ),
+            analyse_kinetics(
+                .r[6],
+                method = "exp-linear"
+            )
+        )
+    })() |> 
     (\(.r) {
         .r$coefficients[c("model", "k")] <- NULL
         .r
     })() |>
+    # print() |> 
     plot()
 ```
 
@@ -384,7 +402,7 @@ plot(oxcap, time_labels = TRUE, points = TRUE, labels = FALSE) +
 
 I want new NIRS users to have access to gold-standard methodology, without reinventing from scratch
 
-https://jemarnold-mnirs-app.share.connect.posit.cloud/
+https://jemarnold.ca/mnirs-app/
 
 ![](./figures/socials-0.8.0-figure4.jpg)
 
@@ -395,12 +413,36 @@ https://jemarnold-mnirs-app.share.connect.posit.cloud/
 
 ## Post 5 — links
 
-5/5 {mnirs} 0.8.0 available now on CRAN 🧑‍💻:
+5/5 {mnirs} 0.8.0 on CRAN in RStudio/Positron 🧑‍💻:
 
 `install.packages("mnirs")`
 
-Package site & articles with much more detail: https://jemarnold.github.io/mnirs/
+Package site & vignettes: https://jemarnold.github.io/mnirs/
 
-OxCap analysis, examples from the new PIONIRS mNIRS device, microvascular responsiveness assessment, and more coming
+PS, when you find the inevitable bugs, please let me know!
 
-PS, you're bound to break things, let me know when you do!
+
+
+
+
+
+---------------------------------------------------------------------
+
+## Post 6 — mNIRS
+
+I just had the privilege of presenting some of the functionality of the {mnirs} R package & online app to the community at the 2026 mNIRS conference in Pavia, Italy
+
+Here is a longer version of that demonstration
+
+YOUTUBE VIDEO LINK
+
+
+---------------------------------------------------------------
+
+## Post 7 — mNIRS conf
+
+@chrismcmanus1 & @profchriscooper have updated www.mnirs.org/
+
+Video presentations from the first two editions of mNIRS conference will be hosted here
+
+As well as tools available for mNIRS users

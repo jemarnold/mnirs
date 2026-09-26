@@ -1,5 +1,7 @@
 # mnirs 0.8.1
 
+* New `c()` method for *"mnirs_kinetics"* objects combines results from separate `analyse_kinetics()` calls into one object, e.g. a different `method` per interval. `method` lists each method used; when methods differ, `coefficients$model` names the method fitted to each row and `print()`/`plot()` annotate rows by their own model. Interval names must be unique across results.
+
 * Internal performance boost when creating new *"mnirs"* class data frames with metadata.
 
 * Reading .csv files from *Moxy* onboard export should be faster.

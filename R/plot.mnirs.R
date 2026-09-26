@@ -288,8 +288,9 @@ plot.mnirs_kinetics <- function(
     ## fitted overlay ==========================================
     ## parametric methods only: continuous dashed fitted curve in the
     ## channel colour. response_time has no curve; its points are markers.
-    if (fitted && x$method != "response_time") {
-        curved <- x$method != "peak_slope"
+    ## `method` holds several methods for combined results
+    if (fitted && !identical(x$method, "response_time")) {
+        curved <- !"peak_slope" %in% x$method
         p <- p +
             lapply(fit_ch, \(.ch) {
             fcol <- paste0(.ch, "_fitted")
@@ -348,7 +349,7 @@ plot.mnirs_kinetics <- function(
     ## for sigmoidal_drift, comp1 is the primary sigmoid and comp2 the
     ## linear drift from the drift onset
     comp_methods <- c("exponential_drift", "biexponential", "sigmoidal_drift")
-    if (isTRUE(list(...)[["components"]]) && x$method %in% comp_methods) {
+    if (isTRUE(list(...)[["components"]]) && any(x$method %in% comp_methods)) {
         p <- p +
             lapply(fit_ch, \(.ch) {
             fcol <- paste0(.ch, "_fitted")
@@ -376,7 +377,7 @@ plot.mnirs_kinetics <- function(
             ## absent from the schema reads as NA
             model <- co$model %||% rep(x$method, nrow(co))
             g <- \(.nm) co[[.nm]] %||% NA_real_
-            if (x$method == "sigmoidal_drift") {
+            if ("sigmoidal_drift" %in% x$method) {
                 ## the sigmoid is the fit less its drift term (none on a
                 ## sigmoidal fallback row); the drift line starts from the
                 ## sigmoid height at the onset, which needs each row's
@@ -457,7 +458,7 @@ plot.mnirs_kinetics <- function(
                 colour = "grey50"
             )
 
-        if (x$method == "response_time") {
+        if (identical(x$method, "response_time")) {
             ## response and extreme (fitted values after onset) as points
             p <- p +
                 lapply(fit_ch, \(.ch) {

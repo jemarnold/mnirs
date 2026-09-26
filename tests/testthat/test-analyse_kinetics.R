@@ -2861,6 +2861,76 @@ test_that("print.mnirs_kinetics truncates when nrow > 10", {
 })
 
 
+## c.mnirs_kinetics ====================================================
+test_that("c.mnirs_kinetics matches a single call for one method", {
+    df <- create_monoexp_data()
+    fit <- \(.data) {
+        analyse_kinetics(
+            .data,
+            method = "peak_slope",
+            width = 5,
+            verbose = FALSE
+        )
+    }
+    direct <- fit(list(A = df, B = df))
+    combined <- c(fit(list(A = df)), fit(list(B = df)))
+
+    expect_s3_class(combined, "mnirs_kinetics")
+    expect_identical(combined$method, "peak_slope")
+    expect_equal(combined$coefficients, direct$coefficients)
+    expect_equal(combined$diagnostics, direct$diagnostics)
+    expect_equal(combined$interval_times, direct$interval_times)
+    expect_named(combined$data, c("A", "B"))
+    expect_named(combined$model, c("A", "B"))
+    expect_s3_class(combined$data, "mnirs")
+    expect_false("model" %in% names(combined$coefficients))
+})
+
+test_that("c.mnirs_kinetics labels rows by model when methods differ", {
+    df <- create_monoexp_data()
+    combined <- c(
+        analyse_kinetics(
+            list(A = df),
+            method = "peak_slope",
+            width = 5,
+            verbose = FALSE
+        ),
+        analyse_kinetics(list(B = df), method = "monoexponential", verbose = FALSE)
+    )
+
+    expect_equal(combined$method, c("peak_slope", "monoexponential"))
+    expect_equal(
+        combined$coefficients$model,
+        c("peak_slope", "monoexponential")
+    )
+    expect_equal(
+        names(combined$coefficients)[1:4],
+        c("interval", "nirs_channels", "start_time", "model")
+    )
+    expect_true(all(c("slope", "tau") %in% names(combined$coefficients)))
+
+    output <- capture.output(print(combined))
+    expect_true(any(grepl(
+        "Peak Linear Response Rate / Monoexponential One-Phase Kinetics",
+        output
+    )))
+
+    skip_if_not_installed("ggplot2")
+    expect_no_error(ggplot2::ggplot_build(plot(combined)))
+})
+
+test_that("c.mnirs_kinetics rejects duplicate intervals and other classes", {
+    result <- analyse_kinetics(
+        create_monoexp_data(),
+        method = "peak_slope",
+        width = 5,
+        verbose = FALSE
+    )
+    expect_error(c(result, result), "unique")
+    expect_error(c(result, 1), "mnirs_kinetics")
+})
+
+
 ## self-start helpers ==================================================
 test_that("solve_grid3() matches lm.fit at every grid point", {
     set.seed(5)

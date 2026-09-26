@@ -50,13 +50,20 @@ print.mnirs <- function(x, ...) {
 #'
 #' @param x Object of class `"mnirs_kinetics"` returned from
 #'   [analyse_kinetics()].
-#' @param ... Additional arguments.
+#' @param ... Additional arguments. For `c`; *"mnirs_kinetics"* objects to
+#'   combine, e.g. separate [analyse_kinetics()] calls fitting a different
+#'   method to each interval.
 #'
 #' @returns
 #' \item{`print`}{Returns a model summary}
+#' \item{`c`}{Returns a single *"mnirs_kinetics"* object with the elements of
+#'     each result bound in order, as if returned from one
+#'     [analyse_kinetics()] call. `method` holds each unique method; where
+#'     methods differ, `coefficients$model` names the method fitted to each
+#'     row. Interval names must be unique across results.}
 #'
 #' @examples
-#' result <- read_mnirs(
+#' intervals <- read_mnirs(
 #'     example_mnirs("train.red"),
 #'     nirs_channels = c(smo2 = "SmO2"),
 #'     time_channel = c(time = "Timestamp (seconds passed)"),
@@ -70,14 +77,27 @@ print.mnirs <- function(x, ...) {
 #'         span = c(-20, 90),
 #'         zero_time = TRUE,
 #'         verbose = FALSE
-#'     ) |>
+#'     )
+#'
+#' result <- analyse_kinetics(
+#'     intervals,
+#'     method = "peak_slope",
+#'     span = 10,
+#'     verbose = FALSE
+#' )
+#'
+#' print(result)
+#'
+#' ## combine separate calls, e.g. a different method per interval
+#' c(
 #'     analyse_kinetics(
+#'         intervals[1],
 #'         method = "peak_slope",
 #'         span = 10,
 #'         verbose = FALSE
-#'     )
-#'
-#' print(result)
+#'     ),
+#'     analyse_kinetics(intervals[2], method = "monoexponential", verbose = FALSE)
+#' )
 #'
 #' @export
 print.mnirs_kinetics <- function(x, ...) {
@@ -116,7 +136,8 @@ print.mnirs_kinetics <- function(x, ...) {
     )
 
     cat("\n")
-    cat(method_labels[[x$method]])
+    ## combined results list each method fitted
+    cat(paste(method_labels[x$method], collapse = " / "))
     cat("\n")
     cat("    Model Coefficients:")
     cat("\n")
@@ -151,4 +172,57 @@ print.mnirs_kinetics <- function(x, ...) {
     cat("\n\n")
 
     return(invisible(x))
+}
+
+
+#' @rdname print.mnirs_kinetics
+#' @export
+c.mnirs_kinetics <- function(...) {
+    results <- list(...)
+    if (!all(vapply(results, inherits, logical(1), "mnirs_kinetics"))) {
+        cli_abort(c(
+            "x" = "All objects must be of class {.cls mnirs_kinetics}.",
+            "i" = "Check the objects returned from {.fn analyse_kinetics}."
+        ))
+    }
+    ## transpose to one list per element across results
+    x <- do.call(Map, c(list, results))
+    ## duplicate interval names would collide in `data`, `model`, and plot
+    ## facets
+    data <- do.call(c, x$data)
+    dupes <- unique(names(data)[duplicated(names(data))])
+    if (length(dupes) > 0L) {
+        cli_abort(c(
+            "x" = "Interval names must be unique across results.",
+            "i" = "Duplicated: {.val {dupes}}."
+        ))
+    }
+
+    ## mixed methods label each row by its own model, so print & plot
+    ## annotate rows by the method that fitted them
+    methods <- unique(unlist(x$method))
+    if (length(methods) > 1L) {
+        x$coefficients <- Map(\(.cf, .m) {
+            .cf$model <- .cf$model %||% .m
+            .cf
+        }, x$coefficients, x$method)
+    }
+    coefs <- bind_union(x$coefficients)
+    lead <- c("interval", "nirs_channels", "start_time", "model")
+    coefs <- coefs[union(intersect(lead, names(coefs)), names(coefs))]
+
+    return(structure(
+        list(
+            method = methods,
+            model = do.call(c, x$model),
+            coefficients = coefs,
+            data = structure(data, class = c("mnirs", "list")),
+            interval_times = bind_union(x$interval_times),
+            diagnostics = bind_union(x$diagnostics),
+            channel_args = bind_union(x$channel_args),
+            warnings = bind_union(x$warnings) %||% kinetics_warnings_df(),
+            call = sys.call()
+        ),
+        class = "mnirs_kinetics"
+    ))
 }
